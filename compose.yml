@@ -1,0 +1,37 @@
+services:
+  db:
+    image: mysql:8.0
+    hostname: db
+    container_name: motorepo_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      TZ: Asia/Tokyo
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  firebase_emulator:
+    build:
+      context: ./development/firebase_emulator
+      dockerfile: Dockerfile
+    volumes:
+      - ./development/firebase_emulator:/usr/src/app
+    ports:
+      - "4000:4000"
+      - "9099:9099"
+    environment:
+      NODE_ENV: development
+    restart: always
+
+volumes:
+  db_data:
