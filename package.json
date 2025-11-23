@@ -2,8 +2,8 @@
   "name": "motorepo",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
+    "build": "dotenv -- turbo run build",
+    "dev": "dotenv -- turbo run dev",
     "dev:web": "pnpm --filter web dev",
     "dev:mobile": "pnpm --filter mobile dev",
     "dev:api": "pnpm --filter api dev",
