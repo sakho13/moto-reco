@@ -1,0 +1,23 @@
+model MAuthProvider {
+  id String @id @default(cuid(2))
+
+  userId       String @map("user_id")
+  providerType ProviderType @map("provider_type")
+  externalId   String @map("external_id")
+  metadata     Json?
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user MUser @relation(fields: [userId], references: [id])
+
+  @@unique([providerType, externalId])
+  @@index([userId, isActive])
+}
+
+enum ProviderType {
+  FIREBASE_EMAIL
+  FIREBASE_GOOGLE
+}

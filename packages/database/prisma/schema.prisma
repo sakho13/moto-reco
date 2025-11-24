@@ -1,28 +1,9 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma"
+  previewFeatures = ["prismaSchemaFolder"]
 }
 
 datasource db {
   provider = "postgresql"
-}
-
-// Models
-
-model MUser {
-  id   String @id @default(cuid(2))
-  name String
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  status MUserStatus @default(ACTIVE) @map("status")
-}
-
-// Enums
-
-enum MUserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
 }

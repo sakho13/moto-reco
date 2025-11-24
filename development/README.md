@@ -1,5 +1,16 @@
 # 開発用 README
 
+## 開発ルール
+
+本プロジェクトの開発仕様書は `development/docs/` 配下に記載されています。
+
+- `docs/00_overview/`: 開発全体の概要
+- `docs/01_domain/`: ドメイン設計
+- `docs/02_design/`: システム設計
+- `docs/03_development/`: 開発ルール
+  - `coding.md`: コーディング規約
+  - `git.md`: Git運用ルール
+
 ## コマンド
 
 ### 開発サーバーの起動

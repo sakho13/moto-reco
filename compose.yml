@@ -35,5 +35,27 @@ services:
       NODE_ENV: development
     restart: always
 
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    restart: always
+    ports:
+      - "4566:4566" # 統一ゲートウェイ (全部これでOK)
+      - "4510-4559:4510-4559"
+    environment:
+      - SERVICES=s3,ssm,secretsmanager,events,sqs,lambda,sts,iam
+      - AWS_DEFAULT_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - DEBUG=1
+      # 起動時にリソースを作るときのディレクトリ
+      - LOCALSTACK_DATA_DIR=/var/lib/localstack
+      - LS_LOG=trace
+    volumes:
+      # LocalStackの永続化
+      - "./development/localstack/data:/var/lib/localstack"
+      # 起動時スクリプトを置く場所
+      - "./development/localstack/init:/etc/localstack/init/ready.d"
+
 volumes:
   db_data:
