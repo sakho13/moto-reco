@@ -27,6 +27,9 @@ catalogs:
     next:
       specifier: 16.0.1
       version: 16.0.1
+    prettier:
+      specifier: 3.6.2
+      version: 3.6.2
     react:
       specifier: 19.2.0
       version: 19.2.0
@@ -45,7 +48,7 @@ importers:
   .:
     devDependencies:
       prettier:
-        specifier: 3.6.2
+        specifier: 'catalog:'
         version: 3.6.2
       turbo:
         specifier: 2.6.1
@@ -59,6 +62,9 @@ importers:
       '@packages/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@packages/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       fastify:
         specifier: 'catalog:'
         version: 5.6.2

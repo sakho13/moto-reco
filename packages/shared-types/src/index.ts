@@ -1,1 +1,1 @@
-import './domain/bike'
+export * from './domain/bike.js'
