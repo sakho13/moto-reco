@@ -30,6 +30,8 @@ erDiagram
     MUser ||--o{ MAuthProvider : "認証"
     MUser ||--o{ TMyBike : "所有"
 
+    MManufacturer ||--o{ MBike : "製造"
+
     MBike ||--o{ MMaintenanceType : "推奨メンテナンス"
     MBike ||--o{ TUserBike : "車種"
 
@@ -55,8 +57,19 @@ erDiagram
         string externalId
     }
 
+    MManufacturer {
+        string id PK
+        string name UK
+        string nameEn
+        string logoUrl
+        string websiteUrl
+        string country
+        boolean isActive
+    }
+
     MBike {
         string id PK
+        string manufacturerId FK
         string modelName
         float displacement
         int modelYear
@@ -133,6 +146,7 @@ erDiagram
 | ----------------- | ------------------------------------------------ | -------- |
 | MUser             | ユーザー情報を格納するマスターテーブル           | ✅       |
 | MAuthProvider     | 認証情報を格納するマスターテーブル               | ✅       |
+| MManufacturer     | バイクメーカー情報を格納するマスターテーブル     | ✅       |
 | MBike             | バイク車種マスターテーブル（同じシリーズでも年式別） | ✅       |
 | MMaintenanceType  | メンテナンス種類情報を格納するマスターテーブル   | ✅       |
 | TUserBike         | 物理的なバイクの実体（車台番号で識別）           | ✅       |

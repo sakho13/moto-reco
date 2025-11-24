@@ -22,7 +22,7 @@ model MAuthProvider {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user MUser @relation(fields: [userId], references: [id])
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerType, externalId])
   @@index([userId, isActive])
@@ -42,18 +42,38 @@ model MUser {
   myBikes       TMyBike[]
 }
 
+model MManufacturer {
+  id         String  @id @default(cuid(2))
+  name       String  @unique @map("name") // メーカー名（日本語）
+  nameEn     String? @map("name_en") // 英語名
+  logoUrl    String? @map("logo_url") // ロゴURL
+  websiteUrl String? @map("website_url") // 公式サイト
+  country    String? @map("country") // 国
+  isActive   Boolean @default(true) @map("is_active") // アクティブフラグ
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bikes MBike[]
+}
+
 model MBike {
-  id           String @id @default(cuid(2))
-  modelName    String @map("model_name")
-  displacement Float // 排気量/cc
-  modelYear    Int    @map("model_year")
+  id             String @id @default(cuid(2))
+  manufacturerId String @map("manufacturer_id")
+  modelName      String @map("model_name") // メーカー名を除いたモデル名（例: "CB400SF"）
+  displacement   Float // 排気量/cc
+  modelYear      Int    @map("model_year")
 
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
   settingStatus BikeStatus @default(INACTIVE) @map("setting_status") // 設定状態
 
+  manufacturer         MManufacturer      @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
   bikeMaintenanceTypes MMaintenanceType[]
   userBikes            TUserBike[]
+
+  @@index([manufacturerId])
+  @@index([modelName, modelYear])
 }
 
 model MMaintenanceType {
@@ -65,7 +85,7 @@ model MMaintenanceType {
   recommendedMileage Int @map("recommended_mileage") // 推奨走行距離/km
   recommendedPeriod  Int @map("recommended_period") // 推奨期間/月
 
-  bike MBike @relation(fields: [bikeId], references: [id])
+  bike MBike @relation(fields: [bikeId], references: [id], onDelete: Restrict)
 
   @@unique([bikeId, type])
 }
@@ -78,7 +98,7 @@ model TUserBike {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  bike    MBike     @relation(fields: [bikeId], references: [id])
+  bike    MBike     @relation(fields: [bikeId], references: [id], onDelete: Restrict)
   myBikes TMyBike[]
 }
 
@@ -101,12 +121,13 @@ model TMyBike {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user     MUser     @relation(fields: [userId], references: [id])
-  userBike TUserBike @relation(fields: [userBikeId], references: [id])
+  user     MUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userBike TUserBike @relation(fields: [userBikeId], references: [id], onDelete: Restrict)
 
   fuels TUserBikeFuel[]
 
   @@index([userId, ownStatus])
+  @@index([ownedAt])
 }
 
 model TUserBikeFuel {
@@ -121,7 +142,7 @@ model TUserBikeFuel {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  myBike TMyBike @relation(fields: [myBikeId], references: [id])
+  myBike TMyBike @relation(fields: [myBikeId], references: [id], onDelete: Cascade)
 
   @@index([myBikeId, refueledAt])
 }

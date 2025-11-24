@@ -6,11 +6,13 @@
   "scripts": {
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "devDependencies": {
     "@types/pg": "8.15.6",
-    "prisma": "7.0.0"
+    "prisma": "7.0.0",
+    "tsx": "4.19.2"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.0.0",
