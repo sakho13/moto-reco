@@ -66,6 +66,8 @@ model MMaintenanceType {
   recommendedPeriod  Int @map("recommended_period") // 推奨期間/月
 
   bike MBike @relation(fields: [bikeId], references: [id])
+
+  @@unique([bikeId, type])
 }
 
 model TUserBike {
@@ -92,8 +94,8 @@ model TMyBike {
   purchaseMileage Int?      @map("purchase_mileage")
 
   // 所有状態
-  ownedAt   DateTime  @map("owned_at")
-  soldAt    DateTime? @map("sold_at")
+  ownedAt   DateTime          @map("owned_at")
+  soldAt    DateTime?         @map("sold_at")
   ownStatus UserBikeOwnStatus @default(OWN) @map("own_status")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -179,8 +181,8 @@ enum MaintenanceType {
 }
 
 enum UserBikeOwnStatus {
-  OWN         // 所有中
-  SOLD        // 売却済み
+  OWN // 所有中
+  SOLD // 売却済み
   TRANSFERRED // 譲渡済み
-  SCRAPPED    // 廃車
+  SCRAPPED // 廃車
 }
