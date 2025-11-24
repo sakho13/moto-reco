@@ -1,9 +1,174 @@
 generator client {
-  provider        = "prisma-client-js"
-  output          = "../generated/prisma"
-  previewFeatures = ["prismaSchemaFolder"]
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// Models
+
+model MAuthProvider {
+  id String @id @default(cuid(2))
+
+  userId       String       @map("user_id")
+  providerType ProviderType @map("provider_type")
+  externalId   String       @map("external_id")
+  metadata     Json?
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user MUser @relation(fields: [userId], references: [id])
+
+  @@unique([providerType, externalId])
+  @@index([userId, isActive])
+}
+
+model MUser {
+  id   String @id @default(cuid(2))
+  name String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  status MUserStatus @default(ACTIVE) @map("status")
+  role   MUserRole   @default(USER) @map("role")
+
+  authProviders MAuthProvider[]
+  userBikes     TUserBikeOwner[]
+}
+
+model MBike {
+  id           String @id @default(cuid(2))
+  modelName    String @map("model_name")
+  displacement Float // 排気量/cc
+  modelYear    Int    @map("model_year")
+
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  settingStatus BikeStatus @default(INACTIVE) @map("setting_status") // 設定状態
+
+  bikeMaintenanceTypes MMaintenanceType[]
+  userBikes            TUserBike[]
+}
+
+model MMaintenanceType {
+  id String @id @default(cuid(2))
+
+  bikeId String          @map("bike_id")
+  type   MaintenanceType
+
+  recommendedMileage Int @map("recommended_mileage") // 推奨走行距離/km
+  recommendedPeriod  Int @map("recommended_period") // 推奨期間/月
+
+  bike MBike @relation(fields: [bikeId], references: [id])
+}
+
+model TUserBike {
+  id           String @id @default(cuid(2))
+  bikeId       String @map("bike_id")
+  serialNumber String @map("serial_number")
+
+  mileage               Int @map("mileage_int") // 現在総走行距離/km
+  mileageAtRegistration Int @map("mileage_at_registration") // 登録時総走行距離/km
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bike           MBike            @relation(fields: [bikeId], references: [id])
+  userBikeFuels  TUserBikeFuel[]
+  userBikeOwners TUserBikeOwner[]
+}
+
+model TUserBikeOwner {
+  id         String @id @default(cuid(2))
+  userId     String @map("user_id")
+  userBikeId String @map("user_bike_id")
+
+  owner    MUser     @relation(fields: [userId], references: [id])
+  userBike TUserBike @relation(fields: [userBikeId], references: [id])
+
+  ownedAt   DateTime @map("owned_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  ownStatus UserBikeOwnStatus @default(OWN) @map("own_status")
+}
+
+model TUserBikeFuel {
+  id         String @id @default(cuid(2))
+  userBikeId String @map("user_bike_id")
+
+  amount     Float // 給油量/L
+  price      Int // 給油価格/円
+  mileage    Int // 給油時総走行距離/km
+  refueledAt DateTime @map("refueled_at") // 給油日時
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userBike TUserBike @relation(fields: [userBikeId], references: [id])
+}
+
+// Enums
+
+enum MUserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum MUserRole {
+  USER
+  ADMIN
+}
+
+enum ProviderType {
+  FIREBASE_EMAIL
+  FIREBASE_GOOGLE
+}
+
+enum BikeStatus {
+  INACTIVE
+  ACTIVE
+}
+
+enum MaintenanceType {
+  // ブレーキ装置
+  BRAKE_FLUID
+  FRONT_BRAKE_PAD
+  REAR_BRAKE_PAD
+  MASTER_CYLINDER_CUP
+  BRAKE_CALIPER_SEAL
+  BRAKE_CABLE
+
+  // エンジン
+  SPARK_PLUG
+  COOLANT
+  ENGINE_OIL
+  OIL_CLEANER
+
+  // 動力伝達装置
+  TRANSMISSION_OIL
+  DRIVE_CHAIN
+  DRIVE_BELT
+
+  // タイヤ
+  FRONT_TIRE
+  REAR_TIRE
+
+  // 電気装置
+  BATTERY
+  LIGHT
+  TURN_SIGNAL
+  HORN
+}
+
+enum UserBikeOwnStatus {
+  OWN
+  SOLD
 }
