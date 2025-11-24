@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@packages/database": "workspace:*",
-    "fastify": "5.6.2"
+    "fastify": "catalog:"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "tsx": "4.20.6",
+    "tsx": "catalog:",
     "typescript": "catalog:"
   }
 }

@@ -12,7 +12,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
-    "prettier": "3.6.2",
+    "prettier": "catalog:",
     "turbo": "2.6.1",
     "typescript": "catalog:"
   },
