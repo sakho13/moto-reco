@@ -39,7 +39,7 @@ model MUser {
   role   MUserRole   @default(USER) @map("role")
 
   authProviders MAuthProvider[]
-  userBikes     TUserBikeOwner[]
+  myBikes       TMyBike[]
 }
 
 model MBike {
@@ -71,47 +71,57 @@ model MMaintenanceType {
 model TUserBike {
   id           String @id @default(cuid(2))
   bikeId       String @map("bike_id")
-  serialNumber String @map("serial_number")
-
-  mileage               Int @map("mileage_int") // 現在総走行距離/km
-  mileageAtRegistration Int @map("mileage_at_registration") // 登録時総走行距離/km
+  serialNumber String @unique @map("serial_number")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  bike           MBike            @relation(fields: [bikeId], references: [id])
-  userBikeFuels  TUserBikeFuel[]
-  userBikeOwners TUserBikeOwner[]
+  bike    MBike     @relation(fields: [bikeId], references: [id])
+  myBikes TMyBike[]
 }
 
-model TUserBikeOwner {
+model TMyBike {
   id         String @id @default(cuid(2))
   userId     String @map("user_id")
   userBikeId String @map("user_bike_id")
 
-  owner    MUser     @relation(fields: [userId], references: [id])
-  userBike TUserBike @relation(fields: [userBikeId], references: [id])
+  // ユーザー独自の設定
+  nickname        String?   @map("nickname") // 愛称
+  purchaseDate    DateTime? @map("purchase_date")
+  purchasePrice   Int?      @map("purchase_price")
+  purchaseMileage Int?      @map("purchase_mileage")
 
-  ownedAt   DateTime @map("owned_at")
+  // 所有状態
+  ownedAt   DateTime  @map("owned_at")
+  soldAt    DateTime? @map("sold_at")
+  ownStatus UserBikeOwnStatus @default(OWN) @map("own_status")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  ownStatus UserBikeOwnStatus @default(OWN) @map("own_status")
+  user     MUser     @relation(fields: [userId], references: [id])
+  userBike TUserBike @relation(fields: [userBikeId], references: [id])
+
+  fuels TUserBikeFuel[]
+
+  @@index([userId, ownStatus])
 }
 
 model TUserBikeFuel {
-  id         String @id @default(cuid(2))
-  userBikeId String @map("user_bike_id")
+  id       String @id @default(cuid(2))
+  myBikeId String @map("my_bike_id")
 
-  amount     Float // 給油量/L
-  price      Int // 給油価格/円
-  mileage    Int // 給油時総走行距離/km
+  amount     Float    @map("amount") // 給油量/L
+  price      Int      @map("price") // 給油価格/円
+  mileage    Int      @map("mileage") // 給油時総走行距離/km
   refueledAt DateTime @map("refueled_at") // 給油日時
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  userBike TUserBike @relation(fields: [userBikeId], references: [id])
+  myBike TMyBike @relation(fields: [myBikeId], references: [id])
+
+  @@index([myBikeId, refueledAt])
 }
 
 // Enums
@@ -169,6 +179,8 @@ enum MaintenanceType {
 }
 
 enum UserBikeOwnStatus {
-  OWN
-  SOLD
+  OWN         // 所有中
+  SOLD        // 売却済み
+  TRANSFERRED // 譲渡済み
+  SCRAPPED    // 廃車
 }
