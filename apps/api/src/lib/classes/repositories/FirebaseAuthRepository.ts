@@ -1,13 +1,13 @@
-import { IAuthRepository } from '../../interfaces/IAuthRepository'
-import { AuthProviderEntity } from '../entities/AuthProviderEntity'
-import { firebaseAuth } from '../../functions/firebaseAdmin'
+import type { DecodedIdToken } from 'firebase-admin/auth'
 import {
   AuthProvider,
   ProviderTypeMap,
   type ProviderType,
 } from '@shared-types/index'
 import { createUserId } from '@shared-types/index'
-import type { DecodedIdToken } from 'firebase-admin/auth'
+import { firebaseAuth } from '../../functions/firebaseAdmin'
+import { IAuthRepository } from '../../interfaces/IAuthRepository'
+import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 
 export class FirebaseAuthRepository implements IAuthRepository {
   async authorize(token: string): Promise<AuthProviderEntity | null> {

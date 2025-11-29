@@ -52,7 +52,6 @@ Authorization: Bearer <token>
 {
   "status": "success",
   "data": {
-    "userId": "string",
     "name": "string"
   },
   "message": "プロフィール取得成功"

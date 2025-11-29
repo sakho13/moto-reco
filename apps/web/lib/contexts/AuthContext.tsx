@@ -1,9 +1,11 @@
 'use client'
 
-import { createContext, useEffect, useState, type ReactNode } from 'react'
 import { onAuthStateChanged, type User } from 'firebase/auth'
-import { getFirebaseAuth } from '../firebase/config'
+import { createContext, useEffect, useState, type ReactNode } from 'react'
+
 import * as authService from '../firebase/auth'
+import { getFirebaseAuth } from '../firebase/config'
+
 import type { AuthContextType } from '@/types/auth'
 
 export const AuthContext = createContext<AuthContextType | undefined>(

@@ -1,11 +1,11 @@
-import { prisma } from '@packages/database'
-import { ApiV1Error } from './lib/classes/common/ApiV1Error'
-import { SuccessResponse } from '@shared-types/index'
 import { Hono } from 'hono'
-import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
-import ApiV1 from './api/v1/apiv1'
+import { logger } from 'hono/logger'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
+import { prisma } from '@packages/database'
+import { SuccessResponse } from '@shared-types/index'
+import ApiV1 from './api/v1/apiv1'
+import { ApiV1Error } from './lib/classes/common/ApiV1Error'
 import { HonoVariables } from './lib/types/hono'
 
 const app = new Hono<{ Variables: HonoVariables }>()

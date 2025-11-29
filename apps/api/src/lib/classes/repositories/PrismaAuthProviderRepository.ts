@@ -1,5 +1,5 @@
-import { PrismaRepositoryBase } from '../common/PrismaRepositoryBase'
 import { ProviderType } from '@shared-types/index'
+import { PrismaRepositoryBase } from '../common/PrismaRepositoryBase'
 
 export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
   /**

@@ -1,5 +1,5 @@
-import { getAuth } from 'firebase-admin/auth'
 import { cert, getApp, getApps, initializeApp } from 'firebase-admin/app'
+import { getAuth } from 'firebase-admin/auth'
 
 function getFirebaseApp() {
   const options = {
