@@ -4,7 +4,6 @@
   "exclude": ["node_modules", "dist", "tsconfig.tsbuildinfo"],
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
     "esModuleInterop": true,
     "paths": {
       "@shared-types/*": ["../../packages/shared-types/src/*"]

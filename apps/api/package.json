@@ -10,9 +10,13 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "hono": "catalog:",
+    "@hono/node-server": "catalog:",
+    "@fastify/cors": "catalog:",
     "@packages/database": "workspace:*",
     "@packages/shared-types": "workspace:*",
-    "fastify": "catalog:"
+    "fastify": "catalog:",
+    "firebase-admin": "catalog:"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

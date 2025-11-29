@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
+    "firebase": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
