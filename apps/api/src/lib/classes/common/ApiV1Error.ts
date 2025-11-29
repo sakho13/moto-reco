@@ -1,4 +1,8 @@
-import { ErrorCode, ErrorResponse } from '@packages/shared-types'
+import {
+  ErrorCode,
+  ErrorResponse,
+  getHttpStatusFromErrorCode,
+} from '@packages/shared-types'
 
 export class ApiV1Error extends Error {
   private _errorCode: ErrorCode
@@ -10,6 +14,14 @@ export class ApiV1Error extends Error {
     this._errorCode = errorCode
     this._message = message
     this._details = details
+
+    // Errorクラスの標準プロパティを設定
+    this.name = 'ApiV1Error'
+
+    // スタックトレースを保持
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ApiV1Error)
+    }
   }
 
   public toErrorResponse(): ErrorResponse {
@@ -21,7 +33,13 @@ export class ApiV1Error extends Error {
     }
   }
 
+  // エラーコードに基づいて適切なHTTPステータスコードを返す
   public get statusCode(): number {
-    return 500
+    return getHttpStatusFromErrorCode(this._errorCode)
+  }
+
+  // エラーコードのゲッター（デバッグ用）
+  public get errorCode(): ErrorCode {
+    return this._errorCode
   }
 }

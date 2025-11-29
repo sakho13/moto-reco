@@ -21,6 +21,23 @@ export const ErrorCodeMap = {
 
 export type ErrorCode = keyof typeof ErrorCodeMap
 
+// エラーコードとHTTPステータスコードのマッピング
+export const ErrorCodeToHttpStatus = {
+  INVALID_REQUEST: 400,
+  AUTH_FAILED: 401,
+  USER_NOT_REGISTERED: 403,
+  NOT_FOUND: 404,
+  SERVER_ERROR: 500,
+} as const satisfies Record<ErrorCode, number>
+
+// HTTPステータスコードの型
+export type HttpStatusCode = (typeof ErrorCodeToHttpStatus)[ErrorCode]
+
+// ヘルパー関数: エラーコードから対応するHTTPステータスコードを取得
+export function getHttpStatusFromErrorCode(errorCode: ErrorCode): number {
+  return ErrorCodeToHttpStatus[errorCode]
+}
+
 export type ApiResUserProfile = {
   id: string
   name: string
