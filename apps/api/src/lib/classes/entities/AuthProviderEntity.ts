@@ -1,4 +1,4 @@
-import { AuthProvider } from '@shared-types/index'
+import { AuthProvider, ProviderType, UserId } from '@shared-types/index'
 
 export class AuthProviderEntity {
   private _value: AuthProvider
@@ -7,11 +7,11 @@ export class AuthProviderEntity {
     this._value = authProvider
   }
 
-  public get userId(): string {
+  public get userId(): UserId {
     return this._value.userId
   }
 
-  public get provider(): string {
+  public get provider(): ProviderType {
     return this._value.providerType
   }
 

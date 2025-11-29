@@ -1,33 +1,14 @@
 import { prisma } from '@packages/database'
 import { ApiV1Error } from './lib/classes/common/ApiV1Error'
 import { SuccessResponse } from '@shared-types/index'
-
-// const IS_DEVELOPMENT = process.env.NODE_ENV !== 'production'
-
-// app.register(ApiV1UserProfile)
-
-// app.get('/api/health', async (_, reply) => {
-//   const databaseCheck = await checkDatabase()
-//   if (!databaseCheck) {
-//     reply.code(500)
-//     const err = new ApiV1Error('SERVER_ERROR', 'Database connection failed')
-//     return err.toErrorResponse()
-//   }
-//   return {
-//     status: 'success',
-//     message: 'API is healthy',
-//     data: {
-//       db: databaseCheck ? 'ok' : 'error',
-//     },
-//   } satisfies SuccessResponse<unknown>
-// })
-
 import { Hono } from 'hono'
 import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import ApiV1 from './api/v1/apiv1'
+import { ContentfulStatusCode } from 'hono/utils/http-status'
+import { HonoVariables } from './lib/types/hono'
 
-const app = new Hono()
+const app = new Hono<{ Variables: HonoVariables }>()
 
 // ミドルウェア
 app.use('*', logger())
@@ -55,10 +36,10 @@ app.route('/api/v1', ApiV1)
 
 app.onError((err, c) => {
   if (err instanceof ApiV1Error) {
-    return c.json(err.toErrorResponse(), 500)
+    return c.json(err.toErrorResponse(), err.statusCode as ContentfulStatusCode)
   }
 
-  const unknownError = new ApiV1Error('SERVER_ERROR', '')
+  const unknownError = new ApiV1Error('SERVER_ERROR', 'Unknown server error')
   return c.json(unknownError.toErrorResponse(), 500)
 })
 
