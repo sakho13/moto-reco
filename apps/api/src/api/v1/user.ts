@@ -3,13 +3,15 @@ import { prisma } from '@packages/database'
 import {
   ApiResponseUserProfile,
   SuccessResponse,
+  UserAuthRegisterRequestSchema,
   UserProfileUpdateRequestSchema,
 } from '@shared-types/index'
 import { ApiV1Error } from '../../lib/classes/common/ApiV1Error'
 import { PrismaUserRepository } from '../../lib/classes/repositories/PrismaUserRepository'
 import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
 import { zodValidateJson } from '../../lib/middlewares/zodValidation'
-import { UserEntity } from '../../lib/classes/entities/UserEntity'
+import { FirebaseAuthRepository } from '../../lib/classes/repositories/FirebaseAuthRepository'
+import { UserService } from '../../lib/classes/services/UserService'
 
 const user = new Hono()
 
@@ -26,6 +28,7 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
   return c.json<SuccessResponse<ApiResponseUserProfile>>({
     status: 'success',
     data: {
+      userId: user.id,
       name: user.name,
     },
     message: 'プロフィール取得成功',
@@ -56,17 +59,17 @@ user.post(
       throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
     }
 
+    if (body.name) {
+      user.name = body.name
+    }
+
     // プロフィール更新
-    const updatedUser = await userRepo.updateUser(
-      new UserEntity({
-        ...user.toJson(),
-        name: body.name,
-      })
-    )
+    const updatedUser = await userRepo.updateUser(user)
 
     return c.json<SuccessResponse<ApiResponseUserProfile>>({
       status: 'success',
       data: {
+        userId: updatedUser.id,
         name: updatedUser.name,
       },
       message: 'プロフィール更新成功',
@@ -74,10 +77,44 @@ user.post(
   }
 )
 
-user.post('/auth/register', (c) => {
-  const authHeader = c.req.header('Authorization')
+user.post(
+  '/auth/register',
+  zodValidateJson(UserAuthRegisterRequestSchema),
+  async (c) => {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new ApiV1Error('AUTH_FAILED', '認証トークンが提供されていません')
+    }
 
-  return c.json({})
-})
+    const token = authHeader.substring('Bearer '.length)
+    const firebaseAuthRepo = new FirebaseAuthRepository()
+    const authProvider = await firebaseAuthRepo.authorize(token)
+
+    if (!authProvider) {
+      throw new ApiV1Error('AUTH_FAILED', '認証トークンが無効です')
+    }
+
+    const body = c.req.valid('json')
+
+    const user = await prisma.$transaction(async (t) => {
+      const userRepo = new PrismaUserRepository(t)
+      const service = new UserService(userRepo)
+
+      const user = await service.createUser(authProvider, {
+        name: body.name,
+      })
+      return user
+    })
+
+    return c.json<SuccessResponse<ApiResponseUserProfile>>({
+      status: 'success',
+      data: {
+        userId: user.id,
+        name: user.name,
+      },
+      message: 'ユーザー登録成功',
+    })
+  }
+)
 
 export default user

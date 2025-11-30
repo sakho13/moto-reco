@@ -1,5 +1,5 @@
 {
-  "name": "motorepo",
+  "name": "motoreco",
   "private": true,
   "scripts": {
     "build": "dotenv -- turbo run build",
@@ -7,6 +7,7 @@
     "dev:web": "dotenv -- pnpm --filter web dev",
     "dev:mobile": "dotenv -- pnpm --filter mobile dev",
     "dev:api": "dotenv -- pnpm --filter api dev",
+    "test": "dotenv -- turbo run test",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

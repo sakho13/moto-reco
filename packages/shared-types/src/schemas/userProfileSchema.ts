@@ -18,8 +18,23 @@ export const UserProfileUpdateRequestSchema = z.object({
 })
 
 /**
+ * ユーザー認証登録リクエストのバリデーションスキーマ
+ *
+ * @remarks
+ * - 現在、UserProfileUpdateRequestSchemaと同一
+ */
+export const UserAuthRegisterRequestSchema = UserProfileUpdateRequestSchema
+
+/**
  * ユーザープロフィール更新リクエストの型
  */
 export type UserProfileUpdateRequest = z.infer<
   typeof UserProfileUpdateRequestSchema
+>
+
+/**
+ * ユーザー認証登録リクエストの型
+ */
+export type UserAuthRegisterRequest = z.infer<
+  typeof UserAuthRegisterRequestSchema
 >

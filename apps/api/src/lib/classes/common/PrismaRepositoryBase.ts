@@ -1,9 +1,15 @@
 import { PrismaClient } from '@packages/database'
 
+type PrismaTransactionOrClient =
+  | PrismaClient
+  | Omit<
+      PrismaClient,
+      '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'
+    >
 export abstract class PrismaRepositoryBase {
-  protected connection: PrismaClient
+  protected connection: PrismaTransactionOrClient
 
-  constructor(connection: PrismaClient) {
+  constructor(connection: PrismaTransactionOrClient) {
     this.connection = connection
   }
 }

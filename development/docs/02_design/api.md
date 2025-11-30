@@ -56,8 +56,7 @@ Authorization: Bearer <token>
   "status": "success",
   "data": {
     "userId": "string",
-    "name": "string", // バリデート: 1文字以上、50文字以下
-    "providers": ["email", "google"]
+    "name": "string" // バリデート: 1文字以上、50文字以下
   },
   "message": "ユーザー登録成功"
 }

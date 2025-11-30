@@ -1,16 +1,13 @@
 import { createUserId, type UserId } from '@shared-types/index'
 import { IUserRepository } from '../../interfaces/IUserRepository'
 import { PrismaRepositoryBase } from '../common/PrismaRepositoryBase'
-import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 import { UserEntity } from '../entities/UserEntity'
+import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 
 export class PrismaUserRepository
   extends PrismaRepositoryBase
   implements IUserRepository
 {
-  /**
-   * 内部User IDからUserを取得
-   */
   async findById(userId: UserId): Promise<UserEntity | null> {
     const user = await this.connection.mUser.findFirst({
       select: {
@@ -35,10 +32,6 @@ export class PrismaUserRepository
       : null
   }
 
-  /**
-   * AuthProviderからUserを取得（非推奨: 後方互換性のため残す）
-   * @deprecated findByIdを使用してください
-   */
   async findByAuthProvider(
     authProvider: AuthProviderEntity
   ): Promise<UserEntity | null> {
@@ -52,12 +45,14 @@ export class PrismaUserRepository
       where: {
         authProviders: {
           some: {
-            userId: authProvider.userId,
+            providerType: authProvider.provider,
+            externalId: authProvider.externalId,
           },
         },
         status: 'ACTIVE',
       },
     })
+
     return user
       ? new UserEntity({
           id: createUserId(user.id),
@@ -68,13 +63,41 @@ export class PrismaUserRepository
       : null
   }
 
-  /**
-   * ユーザー情報を更新
-   *
-   * @param userId - 更新対象のユーザーID
-   * @param data - 更新データ
-   * @returns 更新後のUserEntity
-   */
+  async createUser(
+    user: UserEntity,
+    authProvider: AuthProviderEntity
+  ): Promise<UserEntity> {
+    const createdUser = await this.connection.mUser.create({
+      data: {
+        name: user.name,
+        status: 'ACTIVE',
+        role: 'USER',
+        authProviders: {
+          create: [
+            {
+              externalId: authProvider.externalId,
+              providerType: authProvider.provider,
+              isActive: true,
+            },
+          ],
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        role: true,
+      },
+    })
+
+    return new UserEntity({
+      id: createUserId(createdUser.id),
+      name: createdUser.name,
+      role: createdUser.role,
+      status: createdUser.status,
+    })
+  }
+
   async updateUser(user: UserEntity): Promise<UserEntity> {
     const updatedUser = await this.connection.mUser.update({
       where: {

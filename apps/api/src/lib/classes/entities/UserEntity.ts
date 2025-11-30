@@ -23,6 +23,13 @@ export class UserEntity {
     return this._value.status
   }
 
+  public set name(name: string) {
+    if (!name || name.length === 0 || name.length > 50) {
+      throw new Error('ユーザ名は1文字以上50文字以下である必要があります')
+    }
+    this._value.name = name
+  }
+
   public toJson(): User {
     return this._value
   }

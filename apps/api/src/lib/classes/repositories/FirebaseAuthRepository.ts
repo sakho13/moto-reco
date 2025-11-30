@@ -5,9 +5,9 @@ import {
   type ProviderType,
 } from '@shared-types/index'
 import { createUserId } from '@shared-types/index'
-import { firebaseAuth } from '../../functions/firebaseAdmin'
 import { IAuthRepository } from '../../interfaces/IAuthRepository'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
+import { firebaseAdminAuthClient } from '@packages/firebase-auth-server'
 
 export class FirebaseAuthRepository implements IAuthRepository {
   async authorize(token: string): Promise<AuthProviderEntity | null> {
@@ -40,8 +40,7 @@ export class FirebaseAuthRepository implements IAuthRepository {
 
   public async verifyIdToken(token: string): Promise<DecodedIdToken | null> {
     try {
-      const auth = firebaseAuth()
-      return await auth.verifyIdToken(token, true)
+      return await firebaseAdminAuthClient.verifyIdToken(token, true)
     } catch (error) {
       console.error('Token verification error:', error)
       return null
