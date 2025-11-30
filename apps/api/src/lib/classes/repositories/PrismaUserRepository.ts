@@ -67,4 +67,36 @@ export class PrismaUserRepository
         })
       : null
   }
+
+  /**
+   * ユーザー情報を更新
+   *
+   * @param userId - 更新対象のユーザーID
+   * @param data - 更新データ
+   * @returns 更新後のUserEntity
+   */
+  async updateUser(user: UserEntity): Promise<UserEntity> {
+    const updatedUser = await this.connection.mUser.update({
+      where: {
+        id: user.id,
+        status: 'ACTIVE',
+      },
+      data: {
+        name: user.name,
+      },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        role: true,
+      },
+    })
+
+    return new UserEntity({
+      id: createUserId(updatedUser.id),
+      name: updatedUser.name,
+      role: updatedUser.role,
+      status: updatedUser.status,
+    })
+  }
 }

@@ -22,4 +22,8 @@ export class UserEntity {
   public get status(): string {
     return this._value.status
   }
+
+  public toJson(): User {
+    return this._value
+  }
 }

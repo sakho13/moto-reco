@@ -12,6 +12,9 @@ catalogs:
     '@hono/node-server':
       specifier: 1.19.5
       version: 1.19.5
+    '@hono/zod-validator':
+      specifier: 0.4.1
+      version: 0.4.1
     '@types/node':
       specifier: 22.15.3
       version: 22.15.3
@@ -57,6 +60,9 @@ catalogs:
     typescript:
       specifier: 5.9.2
       version: 5.9.2
+    zod:
+      specifier: 3.23.8
+      version: 3.23.8
 
 importers:
 
@@ -80,6 +86,9 @@ importers:
       '@hono/node-server':
         specifier: 'catalog:'
         version: 1.19.5(hono@4.10.3)
+      '@hono/zod-validator':
+        specifier: 'catalog:'
+        version: 0.4.1(hono@4.10.3)(zod@3.23.8)
       '@packages/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -95,6 +104,9 @@ importers:
       hono:
         specifier: 'catalog:'
         version: 4.10.3
+      zod:
+        specifier: 'catalog:'
+        version: 3.23.8
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -250,7 +262,11 @@ importers:
         specifier: 8.46.3
         version: 8.46.3(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
 
-  packages/shared-types: {}
+  packages/shared-types:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.23.8
 
   packages/shared-utils: {}
 
@@ -945,6 +961,12 @@ packages:
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
+
+  '@hono/zod-validator@0.4.1':
+    resolution: {integrity: sha512-I8LyfeJfvVmC5hPjZ2Iij7RjexlgSBT7QJudZ4JvNPLxn0JQ3sqclz2zydlwISAnw21D2n4LQ0nfZdoiv9fQQA==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.19.1
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -3325,6 +3347,9 @@ packages:
   zeptomatch@2.0.2:
     resolution: {integrity: sha512-H33jtSKf8Ijtb5BW6wua3G5DhnFjbFML36eFu+VdOoVY4HD9e7ggjqdM6639B+L87rjnR6Y+XeRzBXZdy52B/g==}
 
+  zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+
 snapshots:
 
   '@chevrotain/cst-dts-gen@10.5.0':
@@ -3991,6 +4016,11 @@ snapshots:
   '@hono/node-server@1.19.5(hono@4.10.3)':
     dependencies:
       hono: 4.10.3
+
+  '@hono/zod-validator@0.4.1(hono@4.10.3)(zod@3.23.8)':
+    dependencies:
+      hono: 4.10.3
+      zod: 3.23.8
 
   '@humanfs/core@0.19.1': {}
 
@@ -6777,3 +6807,5 @@ snapshots:
   zeptomatch@2.0.2:
     dependencies:
       grammex: 3.1.11
+
+  zod@3.23.8: {}

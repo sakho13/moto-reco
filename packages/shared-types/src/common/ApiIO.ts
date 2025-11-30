@@ -13,6 +13,7 @@ export type ErrorResponse<T = unknown> = {
 
 export const ErrorCodeMap = {
   INVALID_REQUEST: 'INVALID_REQUEST',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
   AUTH_FAILED: 'AUTH_FAILED',
   USER_NOT_REGISTERED: 'USER_NOT_REGISTERED',
   NOT_FOUND: 'NOT_FOUND',
@@ -24,6 +25,7 @@ export type ErrorCode = keyof typeof ErrorCodeMap
 // エラーコードとHTTPステータスコードのマッピング
 export const ErrorCodeToHttpStatus = {
   INVALID_REQUEST: 400,
+  VALIDATION_ERROR: 400,
   AUTH_FAILED: 401,
   USER_NOT_REGISTERED: 403,
   NOT_FOUND: 404,
@@ -38,7 +40,6 @@ export function getHttpStatusFromErrorCode(errorCode: ErrorCode): number {
   return ErrorCodeToHttpStatus[errorCode]
 }
 
-export type ApiResUserProfile = {
-  id: string
+export type ApiResponseUserProfile = {
   name: string
 }
