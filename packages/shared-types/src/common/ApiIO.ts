@@ -44,3 +44,12 @@ export type ApiResponseUserProfile = {
   userId: string
   name: string
 }
+
+export type ApiResponseManufacturer = {
+  manufacturers: {
+    manufacturerId: string
+    name: string
+    nameEn: string
+    country: string
+  }[]
+}
