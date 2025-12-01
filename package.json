@@ -3,11 +3,11 @@
   "private": true,
   "scripts": {
     "build": "dotenv -- turbo run build",
-    "dev": "dotenv -- turbo run dev",
-    "dev:web": "dotenv -- pnpm --filter web dev",
-    "dev:mobile": "dotenv -- pnpm --filter mobile dev",
-    "dev:api": "dotenv -- pnpm --filter api dev",
-    "test": "dotenv -- turbo run test",
+    "dev": "dotenv -e .env.local -- turbo run dev",
+    "dev:web": "dotenv -e .env.local -- pnpm --filter web dev",
+    "dev:mobile": "dotenv -e .env.local -- pnpm --filter mobile dev",
+    "dev:api": "dotenv -e .env.local -- pnpm --filter api dev",
+    "test": "dotenv -e .env.local -- turbo run test",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
@@ -15,7 +15,9 @@
   "devDependencies": {
     "prettier": "catalog:",
     "turbo": "2.6.1",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "dotenv": "catalog:",
+    "dotenv-cli": "catalog:"
   },
   "packageManager": "pnpm@9.15.4",
   "engines": {
