@@ -1,10 +1,10 @@
 {
-  "name": "docs",
+  "name": "@apps/docs",
   "version": "0.1.0",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev1": "next dev --port 3001",
+    "dev": "next dev --port 3001",
     "build1": "next build",
     "start1": "next start",
     "lint1": "eslint --max-warnings 0",
@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
+    "@scalar/nextjs-api-reference": "0.9.2",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"

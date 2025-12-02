@@ -1,0 +1,370 @@
+openapi: 3.0.0
+info:
+  title: MotoReco API Documentation
+  version: 0.0.1
+
+servers:
+  - url: http://localhost:3002
+    description: ローカル開発環境
+
+tags:
+  - name: user
+    description: ユーザー情報関連のAPI
+  - name: bikes
+    description: バイク情報関連のAPI
+  - name: user-bikes
+    description: ユーザー所有バイク関連のAPI
+
+paths:
+  /api/v1/user/profile:
+    get:
+      summary: ユーザプロフィールの取得
+      tags:
+        - user
+      responses:
+        '200':
+          description: プロフィール取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+                  message:
+                    type: string
+                    example: プロフィール取得成功
+    post:
+      summary: ユーザプロフィールの更新
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateProfile'
+      responses:
+        '200':
+          description: プロフィール更新成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+                  message:
+                    type: string
+                    example: プロフィール更新成功
+
+  /api/v1/bikes/manufacturers:
+    get:
+      summary: バイクメーカー一覧の取得
+      tags:
+        - bikes
+      responses:
+        '200':
+          description: メーカー一覧取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ManufacturerDetail'
+                  message:
+                    type: string
+                    example: メーカー一覧取得成功
+
+  /api/v1/bikes/search:
+    get:
+      summary: 登録可能なバイクの検索
+      tags:
+        - bikes
+      parameters:
+        - in: query
+          name: mf-op
+          schema:
+            type: string
+            enum:
+              - eq
+              - ne
+              - in
+        - in: query
+          name: mf
+          schema:
+            type: string
+            description: バイクメーカーID（複数指定可能、カンマ区切り、 `mf-op`で指定したオペレーターに従う）
+        - in: query
+          name: model-name
+          schema:
+            type: string
+            description: モデル名（部分一致検索）
+        - in: query
+          name: displacement-min
+          schema:
+            type: integer
+            description: 排気量の最小値（cc）
+        - in: query
+          name: displacement-max
+          schema:
+            type: integer
+            description: 排気量の最大値（cc）
+        - in: query
+          name: model-year-min
+          schema:
+            type: integer
+            description: モデル公開年の最小値
+        - in: query
+          name: model-year-max
+          schema:
+            type: integer
+            description: モデル公開年の最大値
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            description: ページ番号（1始まり）
+        - in: query
+          name: per-size
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+            description: 1ページあたりの件数
+        - in: query
+          name: sort-by
+          schema:
+            type: string
+            enum:
+              - model-year
+              - displacement
+              - modelYear
+            description: ソート対象のフィールド
+        - in: query
+          name: sort-order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+            description: ソート順序
+      responses:
+        '200':
+          description: バイク検索成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BikeDetail'
+                  message:
+                    type: string
+                    example: バイク検索成功
+
+  /api/v1/user-bike/bikes:
+    get:
+      summary: ユーザー所有バイクの一覧取得
+      tags:
+        - user-bikes
+      responses:
+        '200':
+          description: ユーザー所有バイク一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserBikeDetail'
+                  message:
+                    type: string
+                    example: ユーザー所有バイク一覧取得成功
+
+  /api/v1/user-bike/bike/{user-bike-id}:
+    get:
+      summary: ユーザー所有バイクの詳細取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      responses:
+        '200':
+          description: ユーザー所有バイク詳細取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserBikeDetail'
+                  message:
+                    type: string
+                    example: ユーザー所有バイク詳細取得成功
+
+components:
+  headers:
+    Authorization:
+      description: Bearerトークンを指定します。
+      example: Bearer your_token_here
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+    UserUpdateProfile:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+    ManufacturerDetail:
+      type: object
+      properties:
+        manufacturerId:
+          type: string
+        name:
+          type: string
+        nameEn:
+          type: string
+        country:
+          type: string
+    BikeDetail:
+      type: object
+      properties:
+        bikeId:
+          type: string
+        manufacturerId:
+          type: string
+        manufacturer:
+          type: string
+        modelName:
+          type: string
+        displacement:
+          type: integer
+          description: 排気量（cc）
+        modelYear:
+          type: integer
+          description: モデル公開年
+    UserBikeDetail:
+      type: object
+      properties:
+        userBikeId:
+          type: string
+        manufacturerName:
+          type: string
+        bikeId:
+          type: string
+        modelName:
+          type: string
+        nickname:
+          type: string
+        purchaseDate:
+          type: string
+          description: 購入日（ISO 8601形式）
+        totalMileage:
+          type: integer
+          description: 総走行距離（km）
+        displacement:
+          type: integer
+          description: 排気量（cc）
+        modelYear:
+          type: integer
+          description: モデル公開年
+        createdAt:
+          type: string
+          description: 登録日時（ISO 8601形式）
+        updatedAt:
+          type: string
+          description: 最終更新日時（ISO 8601形式）
+
+    ErrorCode400:
+      type: string
+      enum:
+        - INVALID_REQUEST
+        - VALIDATION_ERROR
+    ErrorCode401:
+      type: string
+      enum:
+        - AUTH_FAILED
+    ErrorCode403:
+      type: string
+      enum:
+        - USER_NOT_REGISTERED
+    ErrorCode404:
+      type: string
+      enum:
+        - NOT_FOUND
+    ErrorCode500:
+      type: string
+      enum:
+        - SERVER_ERROR
+
+    MaintenanceType:
+      type: string
+      enum:
+        # ブレーキ装置
+        - BRAKE_FLUID
+        - FRONT_BRAKE_PAD
+        - REAR_BRAKE_PAD
+        - MASTER_CYLINDER_CUP
+        - BRAKE_CALIPER_SEAL
+        - BRAKE_CABLE

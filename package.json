@@ -5,6 +5,7 @@
     "build": "dotenv -- turbo run build",
     "dev": "dotenv -e .env.local -- turbo run dev",
     "dev:web": "dotenv -e .env.local -- pnpm --filter web dev",
+    "dev:docs": "pnpm --filter docs dev",
     "dev:mobile": "dotenv -e .env.local -- pnpm --filter mobile dev",
     "dev:api": "dotenv -e .env.local -- pnpm --filter api dev",
     "test": "dotenv -e .env.local -- turbo run test",
