@@ -63,6 +63,10 @@ model MBike {
   modelName      String @map("model_name") // メーカー名を除いたモデル名（例: "CB400SF"）
   displacement   Float // 排気量/cc
   modelYear      Int    @map("model_year")
+  modelCode      String @map("model_code") // 型式指定番号
+
+  releaseYear  Int @map("release_year") // 発売年
+  releaseMonth Int @map("release_month") // 発売月
 
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
