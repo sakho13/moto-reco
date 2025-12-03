@@ -39,7 +39,7 @@ model MUser {
   role   MUserRole   @default(USER) @map("role")
 
   authProviders MAuthProvider[]
-  myBikes       TMyBike[]
+  myBikes       TUserMyBike[]
 }
 
 model MManufacturer {
@@ -98,11 +98,11 @@ model TUserBike {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  bike    MBike     @relation(fields: [bikeId], references: [id], onDelete: Restrict)
-  myBikes TMyBike[]
+  bike    MBike         @relation(fields: [bikeId], references: [id], onDelete: Restrict)
+  myBikes TUserMyBike[]
 }
 
-model TMyBike {
+model TUserMyBike {
   id         String @id @default(cuid(2))
   userId     String @map("user_id")
   userBikeId String @map("user_bike_id")
@@ -112,6 +112,7 @@ model TMyBike {
   purchaseDate    DateTime? @map("purchase_date")
   purchasePrice   Int?      @map("purchase_price")
   purchaseMileage Int?      @map("purchase_mileage")
+  totalMileage    Int       @default(0) @map("total_mileage") // 総走行距離/km
 
   // 所有状態
   ownedAt   DateTime          @map("owned_at")
@@ -124,15 +125,15 @@ model TMyBike {
   user     MUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userBike TUserBike @relation(fields: [userBikeId], references: [id], onDelete: Restrict)
 
-  fuels TUserBikeFuel[]
+  fuelLogs TUserMyBikeFuelLog[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
 }
 
-model TUserBikeFuel {
-  id       String @id @default(cuid(2))
-  myBikeId String @map("my_bike_id")
+model TUserMyBikeFuelLog {
+  id           String @id @default(cuid(2))
+  userMyBikeId String @map("my_bike_id")
 
   amount     Float    @map("amount") // 給油量/L
   price      Int      @map("price") // 給油価格/円
@@ -142,9 +143,9 @@ model TUserBikeFuel {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  myBike TMyBike @relation(fields: [myBikeId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
 
-  @@index([myBikeId, refueledAt])
+  @@index([userMyBikeId, refueledAt])
 }
 
 // Enums
