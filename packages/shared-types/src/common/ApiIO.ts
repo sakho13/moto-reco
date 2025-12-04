@@ -53,3 +53,14 @@ export type ApiResponseManufacturer = {
     country: string
   }[]
 }
+
+export type ApiResponseBikeSearch = {
+  bikes: {
+    bikeId: string
+    manufacturerId: string
+    manufacturer: string
+    modelName: string
+    displacement: number
+    modelYear: number
+  }[]
+}
