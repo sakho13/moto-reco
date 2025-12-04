@@ -106,6 +106,14 @@ export const manufacturers = [
         releaseYear: 2020,
         releaseMonth: 1,
       },
+      {
+        modelName: 'CB1300 SUPER FOUR',
+        displacement: 1284,
+        modelYear: 2021,
+        modelCode: '2BL-SC54',
+        releaseYear: 2021,
+        releaseMonth: 3,
+      },
 
       {
         modelName: 'CB250R',
@@ -161,6 +169,16 @@ export const manufacturers = [
     websiteUrl: 'https://www.kawasaki-motors.com/mc/',
     country: '日本',
     isActive: true,
+    bikes: [
+      {
+        modelName: 'Ninja 250',
+        displacement: 249,
+        modelYear: 2019,
+        modelCode: 'EX250',
+        releaseYear: 2019,
+        releaseMonth: 2,
+      },
+    ],
   },
   {
     name: 'ドゥカティ',
