@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config'
 import path from 'path'
 import dotenv from 'dotenv'
+import { defineConfig } from 'vitest/config'
 
 // .envファイルを読み込む
 dotenv.config({ path: path.resolve(__dirname, '../../.env') })

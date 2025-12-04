@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
-import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
-import { PrismaManufacturerRepository } from '../../lib/classes/repositories/PrismaManufacturerRepository'
 import { prisma } from '@packages/database'
 import { ApiResponseManufacturer, SuccessResponse } from '@shared-types/index'
+import { PrismaManufacturerRepository } from '../../lib/classes/repositories/PrismaManufacturerRepository'
+import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
 
 const bikes = new Hono()
 
