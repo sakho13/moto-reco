@@ -27,7 +27,7 @@
 ## 技術スタック
 
 - **フロントエンド**: Next.js, React
-- **バックエンド**: Hono, Fastify
+- **バックエンド**: Hono
 - **データベース**: PostgreSQL, Prisma
 - **認証**: Firebase Authentication
 - **モノレポ**: Turborepo
