@@ -40,6 +40,16 @@ paths:
                   message:
                     type: string
                     example: プロフィール取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
     post:
       summary: ユーザプロフィールの更新
       tags:
@@ -69,6 +79,57 @@ paths:
                   message:
                     type: string
                     example: プロフィール更新成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user/register:
+    post:
+      summary: ユーザー登録
+      tags:
+        - user
+      responses:
+        '201':
+          description: ユーザー登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+                  message:
+                    type: string
+                    example: ユーザー登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateProfile'
 
   /api/v1/bikes/manufacturers:
     get:
@@ -78,6 +139,9 @@ paths:
       responses:
         '200':
           description: メーカー一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
           content:
             application/json:
               schema:
@@ -93,6 +157,16 @@ paths:
                   message:
                     type: string
                     example: メーカー一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
 
   /api/v1/bikes/search:
     get:
@@ -190,6 +264,57 @@ paths:
                   message:
                     type: string
                     example: バイク検索成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bought:
+    post:
+      summary: 購入したユーザーバイクの登録
+      tags:
+        - user-bikes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserBikeRegisterDetail'
+      responses:
+        '201':
+          description: ユーザー所有バイク登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserBikeDetail'
+                  message:
+                    type: string
+                    example: ユーザー所有バイク登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
 
   /api/v1/user-bike/bikes:
     get:
@@ -217,15 +342,25 @@ paths:
                   message:
                     type: string
                     example: ユーザー所有バイク一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
 
-  /api/v1/user-bike/bike/{user-bike-id}:
+  /api/v1/user-bike/bike/{my-user-bike-id}:
     get:
       summary: ユーザー所有バイクの詳細取得
       tags:
         - user-bikes
       parameters:
         - in: path
-          name: user-bike-id
+          name: my-user-bike-id
           required: true
           schema:
             type: string
@@ -249,6 +384,247 @@ paths:
                   message:
                     type: string
                     example: ユーザー所有バイク詳細取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      summary: ユーザー所有バイクの情報更新
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserBikeUpdateDetail'
+      responses:
+        '200':
+          description: ユーザー所有バイク情報更新成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserBikeDetail'
+                  message:
+                    type: string
+                    example: ユーザー所有バイク情報更新成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/fuel-logs:
+    get:
+      summary: ユーザー所有バイクの燃料ログ一覧取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+            description: ページ番号（1始まり）
+        - in: query
+          name: per-size
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+            description: 1ページあたりの件数
+        - in: query
+          name: sort-by
+          schema:
+            type: string
+            enum:
+              - refueled-at
+              - mileage
+        - in: query
+          name: sort-order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+            description: ソート順序
+      responses:
+        '200':
+          description: 燃料ログ一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MyUserBikeFuelLogDetail'
+                  message:
+                    type: string
+                    example: 燃料ログ一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      summary: ユーザー所有バイクの燃料ログ登録
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeFuelLogRegisterDetail'
+      responses:
+        '201':
+          description: 燃料ログ登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeFuelLogDetail'
+                  message:
+                    type: string
+                    example: 燃料ログ登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      summary: ユーザー所有バイクの燃料ログ更新
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeFuelLogUpdateDetail'
+      responses:
+        '200':
+          description: 燃料ログ更新成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeFuelLogDetail'
+                  message:
+                    type: string
+                    example: 燃料ログ更新成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/health:
+    get:
+      summary: ヘルスチェック
+      responses:
+        '200':
+          description: サービス稼働中
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    example: null
 
 components:
   headers:
@@ -317,45 +693,155 @@ components:
           type: string
         nickname:
           type: string
+          nullable: true
+          default: null
+          maxLength: 50
         purchaseDate:
           type: string
           description: 購入日（ISO 8601形式）
+          nullable: true
         totalMileage:
           type: integer
           description: 総走行距離（km）
+          nullable: true
+          default: 0
         displacement:
           type: integer
           description: 排気量（cc）
         modelYear:
           type: integer
           description: モデル公開年
+          example: 2025
         createdAt:
           type: string
           description: 登録日時（ISO 8601形式）
         updatedAt:
           type: string
           description: 最終更新日時（ISO 8601形式）
+    UserBikeRegisterDetail:
+      type: object
+      required:
+        - userBikeId
+      properties:
+        userBikeId:
+          type: string
+        nickname:
+          type: string
+          nullable: true
+          default: null
+          maxLength: 50
+        purchaseDate:
+          type: string
+          description: 購入日（ISO 8601形式）
+          nullable: true
+        mileage:
+          type: integer
+          description: 購入時走行距離（km）
+          nullable: true
+          default: 0
+    UserBikeUpdateDetail:
+      type: object
+      properties:
+        nickname:
+          type: string
+          nullable: true
+          default: null
+          maxLength: 50
+        purchaseDate:
+          type: string
+          description: 購入日（ISO 8601形式）
+          nullable: true
+        mileage:
+          type: integer
+          description: 購入時走行距離（km）
+          nullable: true
+          default: 0
+    MyUserBikeFuelLogDetail:
+      type: object
+      properties:
+        fuelLogId:
+          type: string
+        refueledAt:
+          type: string
+          description: 給油日時（ISO 8601形式）
+        mileage:
+          type: integer
+          description: 給油時走行距離（km）
+        amount:
+          type: number
+          format: float
+          description: 給油量（リットル）
+        totalPrice:
+          type: number
+          format: integer
+          description: 合計価格（円）
+    MyUserBikeFuelLogRegisterDetail:
+      type: object
+      required:
+        - refueledAt
+        - mileage
+        - amount
+        - totalPrice
+      properties:
+        refueledAt:
+          type: string
+          description: 給油日時（ISO 8601形式）
+        mileage:
+          type: integer
+          description: 給油時走行距離（km）
+        amount:
+          type: number
+          format: float
+          description: 給油量（リットル）
+        totalPrice:
+          type: number
+          format: integer
+          description: 合計価格（円）
+        updateTotalMileage:
+          type: boolean
+          description: 燃料ログ登録後にユーザー所有バイクの総走行距離を更新するかどうか。更新する値が現在の総走行距離よりも小さい場合は更新されません。
+          default: false
+    MyUserBikeFuelLogUpdateDetail:
+      type: object
+      properties:
+        refueledAt:
+          type: string
+          description: 給油日時（ISO 8601形式）
+        mileage:
+          type: integer
+          description: 給油時走行距離（km）
+        amount:
+          type: number
+          format: float
+          description: 給油量（リットル）
+        totalPrice:
+          type: number
+          format: integer
+          description: 合計価格（円）
 
-    ErrorCode400:
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        errorCode:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+        detail:
+          type: object
+          nullable: true
+          description: 詳細情報（任意）
+
+    ErrorCode:
       type: string
       enum:
         - INVALID_REQUEST
         - VALIDATION_ERROR
-    ErrorCode401:
-      type: string
-      enum:
         - AUTH_FAILED
-    ErrorCode403:
-      type: string
-      enum:
         - USER_NOT_REGISTERED
-    ErrorCode404:
-      type: string
-      enum:
         - NOT_FOUND
-    ErrorCode500:
-      type: string
-      enum:
         - SERVER_ERROR
 
     MaintenanceType:
@@ -368,3 +854,35 @@ components:
         - MASTER_CYLINDER_CUP
         - BRAKE_CALIPER_SEAL
         - BRAKE_CABLE
+
+  responses:
+    Error400:
+      description: 不正なリクエスト
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Error401:
+      description: 認証失敗
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Error403:
+      description: ユーザー未登録
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Error404:
+      description: リソースが見つからない
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Error500:
+      description: サーバーエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
