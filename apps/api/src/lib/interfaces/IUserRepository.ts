@@ -1,6 +1,6 @@
 import { UserId } from '@shared-types/index'
-import { UserEntity } from '../classes/entities/UserEntity'
 import { AuthProviderEntity } from '../classes/entities/AuthProviderEntity'
+import { UserEntity } from '../classes/entities/UserEntity'
 
 export interface IUserRepository {
   /**

@@ -1,6 +1,6 @@
 import { createManufacturerId } from '@shared-types/index'
-import { PrismaRepositoryBase } from '../common/PrismaRepositoryBase'
 import { IManufactureRepository } from '../../interfaces/IManufacturerRepository'
+import { PrismaRepositoryBase } from '../common/PrismaRepositoryBase'
 import { ManufacturerEntity } from '../entities/ManufacturerEntity'
 
 export class PrismaManufacturerRepository
