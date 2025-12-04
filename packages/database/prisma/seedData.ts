@@ -178,6 +178,22 @@ export const manufacturers = [
         releaseYear: 2019,
         releaseMonth: 2,
       },
+      {
+        modelName: 'Ninja 400',
+        displacement: 398,
+        modelYear: 2026,
+        modelCode: '8BL-EX400L',
+        releaseYear: 2025,
+        releaseMonth: 11,
+      },
+      {
+        modelName: 'Ninja 400',
+        displacement: 398,
+        modelYear: 2025,
+        modelCode: '8BL-EX400L',
+        releaseYear: 2025,
+        releaseMonth: 4,
+      },
     ],
   },
   {
