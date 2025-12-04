@@ -18,13 +18,11 @@
     "hono": "catalog:",
     "@hono/node-server": "catalog:",
     "@hono/zod-validator": "catalog:",
-    "@fastify/cors": "catalog:",
     "@packages/database": "workspace:*",
     "@packages/shared-types": "workspace:*",
     "@packages/shared-utils": "workspace:*",
     "@packages/firebase-auth-server": "workspace:*",
     "dotenv": "catalog:",
-    "fastify": "catalog:",
     "firebase": "catalog:",
     "firebase-admin": "catalog:",
     "zod": "catalog:"
