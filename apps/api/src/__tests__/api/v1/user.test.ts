@@ -39,7 +39,7 @@ describe('User API Endpoints', () => {
           name: 'test_ユーザ名が空文字でエラーとなる',
         }),
       })
-      expect(registeredRes.status).toBe(200)
+      expect(registeredRes.status).toBe(201)
 
       const res = await app.request('/api/v1/user/profile', {
         method: 'POST',
@@ -81,7 +81,7 @@ describe('User API Endpoints', () => {
           name: 'test_ユーザ名が50文字を超える場合にエラーとなる',
         }),
       })
-      expect(registeredRes.status).toBe(200)
+      expect(registeredRes.status).toBe(201)
 
       const res = await app.request('/api/v1/user/profile', {
         method: 'POST',
@@ -123,7 +123,7 @@ describe('User API Endpoints', () => {
           name: 'test_ユーザ名が更新できる',
         }),
       })
-      expect(registeredRes.status).toBe(200)
+      expect(registeredRes.status).toBe(201)
 
       const res = await app.request('/api/v1/user/profile', {
         method: 'POST',
@@ -195,7 +195,46 @@ describe('User API Endpoints', () => {
         message: expect.any(String),
       })
       expect(json.data.userId).not.toBe('')
-      expect(res.status).toBe(200)
+      expect(res.status).toBe(201)
+    })
+
+    test('既存ユーザーの場合も201を返す（冪等性）', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+
+      // 1回目の登録
+      const res1 = await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'テストユーザー',
+        }),
+      })
+      expect(res1.status).toBe(201)
+      const json1 = await res1.json()
+
+      // 2回目の登録（同じトークン）
+      const res2 = await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: '別の名前',
+        }),
+      })
+      expect(res2.status).toBe(201)
+      const json2 = await res2.json()
+
+      // 同じユーザーIDが返却されることを確認（冪等性）
+      expect(json1.data.userId).toBe(json2.data.userId)
+      // 既存の名前が保持されることを確認
+      expect(json2.data.name).toBe('テストユーザー')
     })
   })
 })

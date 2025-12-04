@@ -77,6 +77,19 @@ user.post(
   }
 )
 
+/**
+ * ユーザー認証登録エンドポイント
+ *
+ * Firebase IDトークンによる認証後、ユーザー情報を登録します。
+ * 既に同じ認証プロバイダーでユーザーが存在する場合は、既存ユーザー情報を返却します（冪等性）。
+ *
+ * @route POST /api/v1/user/auth/register
+ * @param {UserAuthRegisterRequest} body.name - ユーザー名（1-50文字）
+ * @returns {201} ユーザー登録成功
+ * @throws {400} バリデーションエラー
+ * @throws {401} 認証失敗
+ * @throws {500} サーバーエラー
+ */
 user.post(
   '/auth/register',
   zodValidateJson(UserAuthRegisterRequestSchema),
@@ -106,14 +119,17 @@ user.post(
       return user
     })
 
-    return c.json<SuccessResponse<ApiResponseUserProfile>>({
-      status: 'success',
-      data: {
-        userId: user.id,
-        name: user.name,
+    return c.json<SuccessResponse<ApiResponseUserProfile>>(
+      {
+        status: 'success',
+        data: {
+          userId: user.id,
+          name: user.name,
+        },
+        message: 'ユーザー登録成功',
       },
-      message: 'ユーザー登録成功',
-    })
+      201
+    )
   }
 )
 

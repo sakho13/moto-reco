@@ -90,14 +90,21 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
-  /api/v1/user/register:
+  /api/v1/user/auth/register:
     post:
-      summary: ユーザー登録
+      summary: ユーザー登録（新規登録または既存ユーザー取得）
+      description: Firebase認証後の初回登録エンドポイント。既にMAuthProviderにレコードが存在する場合は既存ユーザー情報を返却します。
       tags:
         - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
       responses:
         '201':
-          description: ユーザー登録成功
+          description: ユーザー登録成功（新規作成または既存ユーザー）
           headers:
             Authorization:
               $ref: '#/components/headers/Authorization'
@@ -118,18 +125,8 @@ paths:
           $ref: '#/components/responses/Error400'
         '401':
           $ref: '#/components/responses/Error401'
-        '403':
-          $ref: '#/components/responses/Error403'
-        '404':
-          $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserUpdateProfile'
 
   /api/v1/bikes/manufacturers:
     get:
@@ -652,6 +649,16 @@ components:
           type: string
           minLength: 1
           maxLength: 50
+    UserRegister:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: ユーザー名（1-50文字）
     ManufacturerDetail:
       type: object
       properties:
