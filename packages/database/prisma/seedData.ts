@@ -161,6 +161,24 @@ export const manufacturers = [
     websiteUrl: 'https://www.kawasaki-motors.com/mc/',
     country: '日本',
     isActive: true,
+    bikes: [
+      {
+        modelName: 'Ninja 400',
+        displacement: 398,
+        modelYear: 2026,
+        modelCode: '8BL-EX400L',
+        releaseYear: 2025,
+        releaseMonth: 11,
+      },
+      {
+        modelName: 'Ninja 400',
+        displacement: 398,
+        modelYear: 2025,
+        modelCode: '8BL-EX400L',
+        releaseYear: 2025,
+        releaseMonth: 4,
+      },
+    ],
   },
   {
     name: 'ドゥカティ',
