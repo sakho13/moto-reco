@@ -272,9 +272,9 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
-  /api/v1/user-bike/bought:
+  /api/v1/user-bike/register:
     post:
-      summary: 購入したユーザーバイクの登録
+      summary: マイユーザーバイクの登録
       tags:
         - user-bikes
       requestBody:
