@@ -13,7 +13,11 @@ export class PrismaBikeRepository
     const where: Prisma.MBikeWhereInput = {}
 
     // メーカーIDのフィルタリング
-    if (params.manufacturerIds && params.manufacturerIds.length > 0) {
+    if (
+      params.manufacturerIds &&
+      params.manufacturerIds.length > 0 &&
+      params.manufacturerOperator
+    ) {
       switch (params.manufacturerOperator) {
         case 'eq':
           where.manufacturerId = params.manufacturerIds[0]

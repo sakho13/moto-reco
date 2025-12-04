@@ -117,7 +117,7 @@ describe('Bikes API Endpoints', () => {
     })
 
     test('モデル名で部分一致検索ができる', async () => {
-      const res = await app.request('/api/v1/bikes/search?model-name=CB', {
+      const res = await app.request('/api/v1/bikes/search?model-name=cb', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,

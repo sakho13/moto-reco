@@ -35,31 +35,7 @@ bikes.get('/search', honoAuthMiddleware, async (c) => {
   const query = c.req.query()
 
   // クエリパラメータからBikeSearchParamsを生成
-  const searchParams = new BikeSearchParams({
-    manufacturerOperator: query['mf-op'] as 'eq' | 'ne' | 'in' | undefined,
-    manufacturerIds: query['mf'] ? query['mf'].split(',') : undefined,
-    modelName: query['model-name'],
-    displacementMin: query['displacement-min']
-      ? Number(query['displacement-min'])
-      : undefined,
-    displacementMax: query['displacement-max']
-      ? Number(query['displacement-max'])
-      : undefined,
-    modelYearMin: query['model-year-min']
-      ? Number(query['model-year-min'])
-      : undefined,
-    modelYearMax: query['model-year-max']
-      ? Number(query['model-year-max'])
-      : undefined,
-    page: query['page'] ? Number(query['page']) : undefined,
-    pageSize: query['page-size'] ? Number(query['page-size']) : undefined,
-    sortBy: query['sort-by'] as
-      | 'modelName'
-      | 'displacement'
-      | 'modelYear'
-      | undefined,
-    sortOrder: query['sort-order'] as 'asc' | 'desc' | undefined,
-  })
+  const searchParams = BikeSearchParams.fromQueryParams(query)
 
   const bikeRepo = new PrismaBikeRepository(prisma)
   const bikesResult = await bikeRepo.search(searchParams)

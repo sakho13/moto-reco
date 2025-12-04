@@ -82,6 +82,28 @@ export class BikeSearchParams {
     return this._pageSize
   }
 
+  private static parseNumber(value: string | undefined): number | undefined {
+    if (!value) return undefined
+    const parsed = Number(value)
+    return Number.isNaN(parsed) ? undefined : parsed
+  }
+
+  static fromQueryParams(params: Record<string, string | undefined>): BikeSearchParams {
+    return new BikeSearchParams({
+      manufacturerOperator: params['mf-op'] as 'eq' | 'ne' | 'in' | undefined,
+      manufacturerIds: params['mf'] ? params['mf'].split(',') : undefined,
+      modelName: params['model-name'],
+      displacementMin: this.parseNumber(params['displacement-min']),
+      displacementMax: this.parseNumber(params['displacement-max']),
+      modelYearMin: this.parseNumber(params['model-year-min']),
+      modelYearMax: this.parseNumber(params['model-year-max']),
+      page: this.parseNumber(params['page']),
+      pageSize: this.parseNumber(params['page-size']),
+      sortBy: params['sort-by'] as 'modelName' | 'displacement' | 'modelYear' | undefined,
+      sortOrder: params['sort-order'] as 'asc' | 'desc' | undefined,
+    })
+  }
+
   get skip(): number {
     return (this._page - 1) * this._pageSize
   }
