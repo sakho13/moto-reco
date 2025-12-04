@@ -1,0 +1,43 @@
+name: 新規機能・改善提案
+description: 新機能や改善したい既存機能について記述します
+title: '[Feature] '
+labels: ['feature', 'triage']
+body:
+  - type: textarea
+    id: overview
+    attributes:
+      label: 概要
+      description: どんな機能を追加したいか簡潔に説明してください
+      placeholder: 例：ユーザーが○○できるようにしたい
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: 詳細
+      description: この機能が必要な背景や、具体的な要件があれば記載してください
+      placeholder: 例：ユーザーが○○できるようにしたい理由や、どのような機能が必要か
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: 該当する範囲
+      options:
+        - label: API
+        - label: UI
+        - label: 認証
+        - label: DB設計 / Prisma
+        - label: テスト
+        - label: その他
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 備考
+      description: その他補足事項があれば記載してください
+      placeholder: 関連するFigmaリンクや、参考UI、使用説明など
+    validations:
+      required: false
