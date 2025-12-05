@@ -1,0 +1,47 @@
+name: バグ報告
+description: 発生したバグについて報告します
+title: '[Bug] '
+labels: ['bug', 'triage']
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: バグの内容
+      description: 何が起こっているかを簡潔に記述してください
+      placeholder: 例：xxxボタンを押すとクラッシュする
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: バグが再現できる手順を記述してください
+      placeholder: 例：
+        1. xxxページに移動する
+        2. yyyボタンを押す
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 実行環境
+      placeholder: 例：iOS Safari / Chrome / Firebase Emulator
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待される挙動
+      description: 本来どう動くべきか記述してください
+      placeholder: 例：yyyボタンを押すとzzz画面に遷移する
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 備考
+      description: スクリーンショットやログがあれば添付してください
+    validations:
+      required: false
