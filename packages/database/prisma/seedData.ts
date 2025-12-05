@@ -106,6 +106,14 @@ export const manufacturers = [
         releaseYear: 2020,
         releaseMonth: 1,
       },
+      {
+        modelName: 'CB1300 SUPER FOUR SP Final Edition',
+        displacement: 1284,
+        modelYear: 2025,
+        modelCode: '8BL-SC54',
+        releaseYear: 2025,
+        releaseMonth: 2,
+      },
 
       {
         modelName: 'CB250R',
@@ -161,6 +169,32 @@ export const manufacturers = [
     websiteUrl: 'https://www.kawasaki-motors.com/mc/',
     country: '日本',
     isActive: true,
+    bikes: [
+      {
+        modelName: 'Ninja 250',
+        displacement: 248,
+        modelYear: 2026,
+        modelCode: '8BK-EX250Y',
+        releaseYear: 2025,
+        releaseMonth: 11,
+      },
+      {
+        modelName: 'Ninja 400',
+        displacement: 398,
+        modelYear: 2026,
+        modelCode: '8BL-EX400L',
+        releaseYear: 2025,
+        releaseMonth: 11,
+      },
+      {
+        modelName: 'Ninja 400',
+        displacement: 398,
+        modelYear: 2025,
+        modelCode: '8BL-EX400L',
+        releaseYear: 2025,
+        releaseMonth: 4,
+      },
+    ],
   },
   {
     name: 'ドゥカティ',
