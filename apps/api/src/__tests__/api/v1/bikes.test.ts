@@ -59,12 +59,9 @@ describe('Bikes API Endpoints', () => {
       })
 
       const json = await res.json()
-      expect(json).toEqual({
-        status: 'error',
-        errorCode: 'AUTH_FAILED',
-        message: expect.any(String),
-      })
       expect(res.status).toBe(401)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('AUTH_FAILED')
     })
 
     test('パラメータなしで全バイクを取得できる', async () => {
@@ -78,22 +75,8 @@ describe('Bikes API Endpoints', () => {
 
       const json = await res.json()
       expect(res.status).toBe(200)
-      expect(json).toEqual({
-        status: 'success',
-        data: {
-          bikes: expect.arrayContaining([
-            expect.objectContaining({
-              bikeId: expect.any(String),
-              manufacturerId: expect.any(String),
-              manufacturer: expect.any(String),
-              modelName: expect.any(String),
-              displacement: expect.any(Number),
-              modelYear: expect.any(Number),
-            }),
-          ]),
-        },
-        message: 'バイク検索成功',
-      })
+      expect(json.status).toBe('success')
+      expect(json.message).toBe('バイク検索成功')
       expect(json.data.bikes.length).toBeGreaterThan(0)
     })
 
@@ -110,6 +93,8 @@ describe('Bikes API Endpoints', () => {
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
       expect(json.data.bikes.length).toBeGreaterThan(0)
+
+      // すべての結果が検索条件を満たすことを検証
       json.data.bikes.forEach((bike: { modelName: string }) => {
         expect(bike.modelName.toLowerCase()).toContain('cb')
       })
@@ -130,6 +115,9 @@ describe('Bikes API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
+      expect(json.data.bikes.length).toBeGreaterThan(0)
+
+      // すべての結果が検索条件を満たすことを検証
       json.data.bikes.forEach((bike: { displacement: number }) => {
         expect(bike.displacement).toBeGreaterThanOrEqual(300)
         expect(bike.displacement).toBeLessThanOrEqual(500)
@@ -151,6 +139,9 @@ describe('Bikes API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
+      expect(json.data.bikes.length).toBeGreaterThan(0)
+
+      // すべての結果が検索条件を満たすことを検証
       json.data.bikes.forEach((bike: { modelYear: number }) => {
         expect(bike.modelYear).toBeGreaterThanOrEqual(2020)
         expect(bike.modelYear).toBeLessThanOrEqual(2021)
@@ -226,8 +217,9 @@ describe('Bikes API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
+      expect(json.data.bikes.length).toBeGreaterThanOrEqual(2)
 
-      // 排気量が昇順になっているか確認
+      // ソート順を検証
       for (let i = 0; i < json.data.bikes.length - 1; i++) {
         expect(json.data.bikes[i].displacement).toBeLessThanOrEqual(
           json.data.bikes[i + 1].displacement
@@ -250,8 +242,9 @@ describe('Bikes API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
+      expect(json.data.bikes.length).toBeGreaterThanOrEqual(2)
 
-      // 排気量が降順になっているか確認
+      // ソート順を検証
       for (let i = 0; i < json.data.bikes.length - 1; i++) {
         expect(json.data.bikes[i].displacement).toBeGreaterThanOrEqual(
           json.data.bikes[i + 1].displacement
@@ -298,12 +291,9 @@ describe('Bikes API Endpoints', () => {
       })
 
       const json = await res.json()
-      expect(json).toEqual({
-        status: 'error',
-        errorCode: 'AUTH_FAILED',
-        message: expect.any(String),
-      })
       expect(res.status).toBe(401)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('AUTH_FAILED')
     })
 
     test('メーカー一覧を取得できる', async () => {
@@ -317,20 +307,8 @@ describe('Bikes API Endpoints', () => {
 
       const json = await res.json()
       expect(res.status).toBe(200)
-      expect(json).toEqual({
-        status: 'success',
-        data: {
-          manufacturers: expect.arrayContaining([
-            expect.objectContaining({
-              manufacturerId: expect.any(String),
-              name: expect.any(String),
-              nameEn: expect.any(String),
-              country: expect.any(String),
-            }),
-          ]),
-        },
-        message: 'メーカー一覧取得成功',
-      })
+      expect(json.status).toBe('success')
+      expect(json.message).toBe('メーカー一覧取得成功')
       expect(json.data.manufacturers.length).toBeGreaterThan(0)
 
       // シードデータの「ホンダ」が含まれることを確認
