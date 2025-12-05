@@ -107,12 +107,12 @@ export const manufacturers = [
         releaseMonth: 1,
       },
       {
-        modelName: 'CB1300 SUPER FOUR',
+        modelName: 'CB1300 SUPER FOUR SP Final Edition',
         displacement: 1284,
-        modelYear: 2021,
+        modelYear: 2025,
         modelCode: '8BL-SC54',
-        releaseYear: 2021,
-        releaseMonth: 3,
+        releaseYear: 2025,
+        releaseMonth: 2,
       },
 
       {
@@ -173,10 +173,10 @@ export const manufacturers = [
       {
         modelName: 'Ninja 250',
         displacement: 248,
-        modelYear: 2019,
-        modelCode: 'EX250',
-        releaseYear: 2019,
-        releaseMonth: 2,
+        modelYear: 2026,
+        modelCode: '8BK-EX250Y',
+        releaseYear: 2025,
+        releaseMonth: 11,
       },
       {
         modelName: 'Ninja 400',
