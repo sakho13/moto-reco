@@ -110,7 +110,7 @@ export const manufacturers = [
         modelName: 'CB1300 SUPER FOUR',
         displacement: 1284,
         modelYear: 2021,
-        modelCode: '2BL-SC54',
+        modelCode: '8BL-SC54',
         releaseYear: 2021,
         releaseMonth: 3,
       },
@@ -172,7 +172,7 @@ export const manufacturers = [
     bikes: [
       {
         modelName: 'Ninja 250',
-        displacement: 249,
+        displacement: 248,
         modelYear: 2019,
         modelCode: 'EX250',
         releaseYear: 2019,
