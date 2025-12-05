@@ -8,6 +8,7 @@
     "dev:docs": "pnpm --filter docs dev",
     "dev:mobile": "dotenv -e .env.local -- pnpm --filter mobile dev",
     "dev:api": "dotenv -e .env.local -- pnpm --filter api dev",
+    "dev:admin": "dotenv -e .env.local -- pnpm --filter admin dev",
     "test": "dotenv -e .env.local -- turbo run test",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

@@ -12,6 +12,7 @@
   "devDependencies": {
     "@types/pg": "8.15.6",
     "prisma": "7.0.0",
+    "prisma-json-schema-generator": "^5.1.5",
     "tsx": "catalog:"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "pg": "8.16.3"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./json-schema": "./prisma/json-schema/json-schema.json"
   }
 }
