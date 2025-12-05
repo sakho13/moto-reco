@@ -31,7 +31,9 @@ describe('Bikes API Endpoints', () => {
       },
     })
     if (!hondaManufacturer) {
-      throw new Error('ホンダのメーカーデータが見つかりません。シードデータを実行してください。')
+      throw new Error(
+        'ホンダのメーカーデータが見つかりません。シードデータを実行してください。'
+      )
     }
     hondaManufacturerId = hondaManufacturer.id
   })
@@ -117,12 +119,10 @@ describe('Bikes API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
-      json.data.bikes.forEach(
-        (bike: { displacement: number }) => {
-          expect(bike.displacement).toBeGreaterThanOrEqual(300)
-          expect(bike.displacement).toBeLessThanOrEqual(500)
-        }
-      )
+      json.data.bikes.forEach((bike: { displacement: number }) => {
+        expect(bike.displacement).toBeGreaterThanOrEqual(300)
+        expect(bike.displacement).toBeLessThanOrEqual(500)
+      })
     })
 
     test('モデル年の範囲で検索ができる', async () => {
@@ -161,11 +161,9 @@ describe('Bikes API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
-      json.data.bikes.forEach(
-        (bike: { manufacturerId: string }) => {
-          expect(bike.manufacturerId).toBe(hondaManufacturerId)
-        }
-      )
+      json.data.bikes.forEach((bike: { manufacturerId: string }) => {
+        expect(bike.manufacturerId).toBe(hondaManufacturerId)
+      })
     })
 
     test('ページネーションが動作する', async () => {
@@ -266,12 +264,70 @@ describe('Bikes API Endpoints', () => {
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
       json.data.bikes.forEach(
-        (bike: { manufacturerId: string; displacement: number; modelYear: number }) => {
+        (bike: {
+          manufacturerId: string
+          displacement: number
+          modelYear: number
+        }) => {
           expect(bike.manufacturerId).toBe(hondaManufacturerId)
           expect(bike.displacement).toBeGreaterThanOrEqual(300)
           expect(bike.modelYear).toBeGreaterThanOrEqual(2020)
         }
       )
+    })
+  })
+
+  describe('GET /api/v1/bikes/manufacturers', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      const res = await app.request('/api/v1/bikes/manufacturers', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'error',
+        errorCode: 'AUTH_FAILED',
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(401)
+    })
+
+    test('メーカー一覧を取得できる', async () => {
+      const res = await app.request('/api/v1/bikes/manufacturers', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          manufacturers: expect.arrayContaining([
+            expect.objectContaining({
+              manufacturerId: expect.any(String),
+              name: expect.any(String),
+              nameEn: expect.any(String),
+              country: expect.any(String),
+            }),
+          ]),
+        },
+        message: 'メーカー一覧取得成功',
+      })
+      expect(json.data.manufacturers.length).toBeGreaterThan(0)
+
+      // シードデータの「ホンダ」が含まれることを確認
+      const honda = json.data.manufacturers.find(
+        (m: { name: string }) => m.name === 'ホンダ'
+      )
+      expect(honda).toBeDefined()
+      expect(honda.manufacturerId).toBe(hondaManufacturerId)
     })
   })
 })
