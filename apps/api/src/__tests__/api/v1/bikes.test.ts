@@ -6,7 +6,7 @@ import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
 
 describe('Bikes API Endpoints', () => {
   let token: string
-  let manufacturerId: string
+  let hondaManufacturerId: string
 
   beforeAll(async () => {
     // テスト用のユーザー登録とトークン取得
@@ -24,48 +24,16 @@ describe('Bikes API Endpoints', () => {
       }),
     })
 
-    // テスト用のメーカーとバイクを作成
-    const manufacturer = await prisma.mManufacturer.create({
-      data: {
-        name: 'テストメーカー',
-        nameEn: 'Test Manufacturer',
-        country: 'Japan',
+    // シードデータからホンダのメーカーIDを取得
+    const hondaManufacturer = await prisma.mManufacturer.findFirst({
+      where: {
+        name: 'ホンダ',
       },
     })
-    manufacturerId = manufacturer.id
-
-    // テスト用のバイクを複数作成
-    await prisma.mBike.createMany({
-      data: [
-        {
-          manufacturerId,
-          modelName: 'CB400SF',
-          displacement: 400,
-          modelYear: 2020,
-          modelCode: 'NC42',
-          releaseYear: 2020,
-          releaseMonth: 4,
-        },
-        {
-          manufacturerId,
-          modelName: 'CB1300SF',
-          displacement: 1300,
-          modelYear: 2021,
-          modelCode: 'SC54',
-          releaseYear: 2021,
-          releaseMonth: 3,
-        },
-        {
-          manufacturerId,
-          modelName: 'Ninja 250',
-          displacement: 250,
-          modelYear: 2019,
-          modelCode: 'EX250',
-          releaseYear: 2019,
-          releaseMonth: 2,
-        },
-      ],
-    })
+    if (!hondaManufacturer) {
+      throw new Error('ホンダのメーカーデータが見つかりません。シードデータを実行してください。')
+    }
+    hondaManufacturerId = hondaManufacturer.id
   })
 
   describe('GET /api/v1/bikes/search', () => {
@@ -180,7 +148,7 @@ describe('Bikes API Endpoints', () => {
 
     test('メーカーIDで検索ができる（eq演算子）', async () => {
       const res = await app.request(
-        `/api/v1/bikes/search?mf-op=eq&mf=${manufacturerId}`,
+        `/api/v1/bikes/search?mf-op=eq&mf=${hondaManufacturerId}`,
         {
           method: 'GET',
           headers: {
@@ -195,7 +163,7 @@ describe('Bikes API Endpoints', () => {
       expect(json.status).toBe('success')
       json.data.bikes.forEach(
         (bike: { manufacturerId: string }) => {
-          expect(bike.manufacturerId).toBe(manufacturerId)
+          expect(bike.manufacturerId).toBe(hondaManufacturerId)
         }
       )
     })
@@ -284,7 +252,7 @@ describe('Bikes API Endpoints', () => {
 
     test('複合条件で検索ができる', async () => {
       const res = await app.request(
-        `/api/v1/bikes/search?mf-op=eq&mf=${manufacturerId}&displacement-min=300&model-year-min=2020&sort-by=modelYear&sort-order=asc`,
+        `/api/v1/bikes/search?mf-op=eq&mf=${hondaManufacturerId}&displacement-min=300&model-year-min=2020&sort-by=modelYear&sort-order=asc`,
         {
           method: 'GET',
           headers: {
@@ -299,7 +267,7 @@ describe('Bikes API Endpoints', () => {
       expect(json.status).toBe('success')
       json.data.bikes.forEach(
         (bike: { manufacturerId: string; displacement: number; modelYear: number }) => {
-          expect(bike.manufacturerId).toBe(manufacturerId)
+          expect(bike.manufacturerId).toBe(hondaManufacturerId)
           expect(bike.displacement).toBeGreaterThanOrEqual(300)
           expect(bike.modelYear).toBeGreaterThanOrEqual(2020)
         }
