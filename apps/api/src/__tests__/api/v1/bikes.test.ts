@@ -1,5 +1,4 @@
 import { describe, expect, test, beforeAll } from 'vitest'
-import { prisma } from '@packages/database'
 import app from '../../../server'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
@@ -24,18 +23,30 @@ describe('Bikes API Endpoints', () => {
       }),
     })
 
-    // シードデータからホンダのメーカーIDを取得
-    const hondaManufacturer = await prisma.mManufacturer.findFirst({
-      where: {
-        name: 'ホンダ',
+    // APIからメーカー一覧を取得
+    const manufacturersRes = await app.request('/api/v1/bikes/manufacturers', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     })
+
+    const manufacturersJson = await manufacturersRes.json()
+    if (manufacturersRes.status !== 200 || manufacturersJson.status !== 'success') {
+      throw new Error('メーカー一覧の取得に失敗しました')
+    }
+
+    // ホンダのメーカーIDを取得
+    const hondaManufacturer = manufacturersJson.data.manufacturers.find(
+      (m: { name: string }) => m.name === 'ホンダ'
+    )
     if (!hondaManufacturer) {
       throw new Error(
         'ホンダのメーカーデータが見つかりません。シードデータを実行してください。'
       )
     }
-    hondaManufacturerId = hondaManufacturer.id
+    hondaManufacturerId = hondaManufacturer.manufacturerId
   })
 
   describe('GET /api/v1/bikes/search', () => {
