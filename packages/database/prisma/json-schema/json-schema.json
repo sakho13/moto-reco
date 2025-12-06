@@ -1,6 +1,415 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {},
-  "properties": {},
-  "type": "object"
+  "definitions": {
+    "MAuthProvider": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "providerType": {
+          "type": "string",
+          "enum": [
+            "FIREBASE_EMAIL",
+            "FIREBASE_GOOGLE"
+          ]
+        },
+        "externalId": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ]
+        },
+        "isActive": {
+          "type": "boolean",
+          "default": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "user": {
+          "$ref": "#/definitions/MUser"
+        }
+      }
+    },
+    "MUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "default": "ACTIVE",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "SUSPENDED"
+          ]
+        },
+        "role": {
+          "type": "string",
+          "default": "USER",
+          "enum": [
+            "USER",
+            "ADMIN"
+          ]
+        },
+        "authProviders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MAuthProvider"
+          }
+        },
+        "myBikes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TUserMyBike"
+          }
+        }
+      }
+    },
+    "MManufacturer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nameEn": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "logoUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "websiteUrl": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "country": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "isActive": {
+          "type": "boolean",
+          "default": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bikes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MBike"
+          }
+        }
+      }
+    },
+    "MBike": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "modelName": {
+          "type": "string"
+        },
+        "displacement": {
+          "type": "number"
+        },
+        "modelYear": {
+          "type": "integer"
+        },
+        "modelCode": {
+          "type": "string"
+        },
+        "releaseYear": {
+          "type": "integer"
+        },
+        "releaseMonth": {
+          "type": "integer"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "settingStatus": {
+          "type": "string",
+          "default": "INACTIVE",
+          "enum": [
+            "INACTIVE",
+            "ACTIVE"
+          ]
+        },
+        "manufacturer": {
+          "$ref": "#/definitions/MManufacturer"
+        },
+        "bikeMaintenanceTypes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MMaintenanceType"
+          }
+        },
+        "userBikes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TUserBike"
+          }
+        }
+      }
+    },
+    "MMaintenanceType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "BRAKE_FLUID",
+            "FRONT_BRAKE_PAD",
+            "REAR_BRAKE_PAD",
+            "MASTER_CYLINDER_CUP",
+            "BRAKE_CALIPER_SEAL",
+            "BRAKE_CABLE",
+            "SPARK_PLUG",
+            "COOLANT",
+            "ENGINE_OIL",
+            "OIL_CLEANER",
+            "TRANSMISSION_OIL",
+            "DRIVE_CHAIN",
+            "DRIVE_BELT",
+            "FRONT_TIRE",
+            "REAR_TIRE",
+            "BATTERY",
+            "LIGHT",
+            "TURN_SIGNAL",
+            "HORN"
+          ]
+        },
+        "recommendedMileage": {
+          "type": "integer"
+        },
+        "recommendedPeriod": {
+          "type": "integer"
+        },
+        "bike": {
+          "$ref": "#/definitions/MBike"
+        }
+      }
+    },
+    "TUserBike": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "serialNumber": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "bike": {
+          "$ref": "#/definitions/MBike"
+        },
+        "myBikes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TUserMyBike"
+          }
+        }
+      }
+    },
+    "TUserMyBike": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "purchaseDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "purchasePrice": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "purchaseMileage": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "totalMileage": {
+          "type": "integer",
+          "default": 0
+        },
+        "ownedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "soldAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "ownStatus": {
+          "type": "string",
+          "default": "OWN",
+          "enum": [
+            "OWN",
+            "SOLD",
+            "TRANSFERRED",
+            "SCRAPPED"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "user": {
+          "$ref": "#/definitions/MUser"
+        },
+        "userBike": {
+          "$ref": "#/definitions/TUserBike"
+        },
+        "fuelLogs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TUserMyBikeFuelLog"
+          }
+        }
+      }
+    },
+    "TUserMyBikeFuelLog": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "price": {
+          "type": "integer"
+        },
+        "mileage": {
+          "type": "integer"
+        },
+        "refueledAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "userMyBike": {
+          "$ref": "#/definitions/TUserMyBike"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "mAuthProvider": {
+      "$ref": "#/definitions/MAuthProvider"
+    },
+    "mUser": {
+      "$ref": "#/definitions/MUser"
+    },
+    "mManufacturer": {
+      "$ref": "#/definitions/MManufacturer"
+    },
+    "mBike": {
+      "$ref": "#/definitions/MBike"
+    },
+    "mMaintenanceType": {
+      "$ref": "#/definitions/MMaintenanceType"
+    },
+    "tUserBike": {
+      "$ref": "#/definitions/TUserBike"
+    },
+    "tUserMyBike": {
+      "$ref": "#/definitions/TUserMyBike"
+    },
+    "tUserMyBikeFuelLog": {
+      "$ref": "#/definitions/TUserMyBikeFuelLog"
+    }
+  }
 }
