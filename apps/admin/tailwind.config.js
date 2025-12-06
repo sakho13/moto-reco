@@ -1,4 +1,4 @@
-import { nextAdminPreset } from '@premieroctet/next-admin/preset'
+import nextAdminPreset from '@premieroctet/next-admin/preset'
 
 /** @type {import('tailwindcss').Config} */
 export default {
