@@ -9,8 +9,9 @@
 ### Apps
 
 - **`web`**: Next.js フロントエンドアプリケーション (http://localhost:3000)
-- **`api`**: Hono バックエンドAPI
+- **`api`**: Hono バックエンドAPI (http://localhost:3002)
 - **`docs`**: Next.js ドキュメントサイト / OpenAPI仕様書 (http://localhost:3001)
+- **`admin`**: Next.js 管理者用アプリケーション (http://localhost:3003)
 
 ### Packages
 
@@ -81,6 +82,7 @@ docker compose up -d
 ```
 
 起動されるサービス：
+
 - **PostgreSQL**: ポート 5432
 - **Firebase Emulator**: ポート 4000 (UI), 9099 (Auth)
 - **LocalStack**: ポート 4566 (S3, SSM, SecretsManager等)
