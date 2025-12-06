@@ -102,7 +102,7 @@ model MMaintenanceType {
 model TUserBike {
   id           String @id @default(cuid(2))
   bikeId       String @map("bike_id")
-  serialNumber String @unique @map("serial_number")
+  serialNumber String? @map("serial_number")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
