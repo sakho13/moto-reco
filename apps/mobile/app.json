@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile2",
-    "slug": "mobile2",
+    "name": "MotoReco Mobile",
+    "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile2",
+    "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
