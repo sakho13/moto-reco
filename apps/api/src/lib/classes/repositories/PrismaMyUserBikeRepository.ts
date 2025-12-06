@@ -1,3 +1,4 @@
+import { Prisma } from '@packages/database'
 import {
   createBikeId,
   createMyUserBikeId,
@@ -146,14 +147,21 @@ export class PrismaMyUserBikeRepository
     myUserBikeId: MyUserBikeId,
     totalMileage: number
   ): Promise<void> {
-    const updated = await this.connection.tUserMyBike.update({
-      where: { id: myUserBikeId },
-      data: { totalMileage },
-      select: { id: true },
-    })
+    try {
+      await this.connection.tUserMyBike.update({
+        where: { id: myUserBikeId },
+        data: { totalMileage },
+        select: { id: true },
+      })
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new ApiV1Error('NOT_FOUND', 'ユーザー所有バイクが見つかりません')
+      }
 
-    if (!updated) {
-      throw new ApiV1Error('NOT_FOUND', 'ユーザー所有バイクが見つかりません')
+      throw error
     }
   }
 }
