@@ -6,9 +6,12 @@ import schema from '@packages/database/json-schema'
 import '@premieroctet/next-admin/dist/styles.css'
 
 export default async function AdminPage({ params, searchParams }: PageProps) {
+  const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
+
   const props = await getNextAdminProps({
-    params: await params,
-    searchParams: await searchParams,
+    params: resolvedParams.nextadmin,
+    searchParams: resolvedSearchParams,
     basePath: '/admin',
     apiBasePath: '/api/admin',
     prisma,
