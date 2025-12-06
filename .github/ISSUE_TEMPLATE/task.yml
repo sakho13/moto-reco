@@ -1,0 +1,28 @@
+name: タスク
+description: 実装やドキュメントなどの単位作業を記述します
+title: "[Task] "
+labels: ["task"]
+body:
+  - type: textarea
+    id: content
+    attributes:
+      label: 作業内容
+      description: 実装または作業の内容を記述してください
+      placeholder: 例：ログイン画面のスタイル調整
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: チェックリスト（任意）
+      options:
+        - label: テストを記述した
+        - label: Storybookで確認済み
+        - label: レビュー依頼済み
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 備考
+      description: 補足情報などがあれば記載してください
