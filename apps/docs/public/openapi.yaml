@@ -728,9 +728,9 @@ components:
     UserBikeRegisterDetail:
       type: object
       required:
-        - userBikeId
+        - bikeId
       properties:
-        userBikeId:
+        bikeId:
           type: string
         nickname:
           type: string
