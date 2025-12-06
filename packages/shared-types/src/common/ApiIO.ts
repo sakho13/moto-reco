@@ -69,3 +69,20 @@ export type ApiResponseUserBikeRegister = {
   userBikeId: string
   myUserBikeId: string
 }
+
+export type ApiResponseUserBikeList = {
+  bikes: {
+    userBikeId: string
+    myUserBikeId: string
+    manufacturerName: string
+    bikeId: string
+    modelName: string
+    nickname: string | null
+    purchaseDate: string | null
+    totalMileage: number
+    displacement: number
+    modelYear: number
+    createdAt: string
+    updatedAt: string
+  }[]
+}

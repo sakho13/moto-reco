@@ -11,6 +11,7 @@ describe('UserBike API Endpoints', () => {
   let userId: string
   let createdSerialNumber: string
   let createdUserBikeId: string
+  let createdMyUserBikeId: string
 
   beforeAll(async () => {
     const email = createRandomEmail()
@@ -110,6 +111,7 @@ describe('UserBike API Endpoints', () => {
     })
 
     createdUserBikeId = json.data.userBikeId
+    createdMyUserBikeId = json.data.myUserBikeId
 
     const userBikeRecord = await prisma.tUserBike.findUnique({
       where: { id: json.data.userBikeId },
@@ -125,6 +127,32 @@ describe('UserBike API Endpoints', () => {
     expect(myUserBikeRecord?.purchasePrice).toBe(500000)
     expect(myUserBikeRecord?.purchaseMileage).toBe(1200)
     expect(myUserBikeRecord?.purchaseDate?.toISOString()).toBe(purchaseDate)
+
+    const listRes = await app.request('/api/v1/user-bike/bikes', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const listJson = await listRes.json()
+    expect(listRes.status).toBe(200)
+    expect(listJson.status).toBe('success')
+    expect(Array.isArray(listJson.data.bikes)).toBe(true)
+
+    const registeredBike = listJson.data.bikes.find(
+      (bike: { userBikeId: string }) => bike.userBikeId === createdUserBikeId
+    )
+
+    expect(registeredBike).toBeDefined()
+    expect(registeredBike?.myUserBikeId).toBe(createdMyUserBikeId)
+    expect(registeredBike?.manufacturerName).toEqual(expect.any(String))
+    expect(registeredBike?.modelName).toEqual(expect.any(String))
+    expect(registeredBike?.nickname).toBe('メインバイク')
+    expect(registeredBike?.purchaseDate).toBe(purchaseDate)
+    expect(registeredBike?.totalMileage).toBe(1500)
+    expect(registeredBike?.displacement).toBeGreaterThan(0)
   })
 
   test('車台番号を指定しなくても登録できる', async () => {
@@ -175,5 +203,49 @@ describe('UserBike API Endpoints', () => {
 
     expect(userBikeRecord?.serialNumber).toBe(createdSerialNumber)
     expect(userBikeRecord?.id).not.toBe(createdUserBikeId)
+  })
+
+  describe('GET /api/v1/user-bike/bikes', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      const res = await app.request('/api/v1/user-bike/bikes', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(401)
+      expect(json).toEqual({
+        status: 'error',
+        errorCode: 'AUTH_FAILED',
+        message: expect.any(String),
+      })
+    })
+
+    test('ユーザーの所有バイク一覧を取得できる', async () => {
+      const res = await app.request('/api/v1/user-bike/bikes', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.message).toBe('ユーザー所有バイク一覧取得成功')
+      expect(Array.isArray(json.data.bikes)).toBe(true)
+      expect(json.data.bikes.length).toBeGreaterThan(0)
+
+      json.data.bikes.forEach(
+        (bike: { userBikeId: string; createdAt: string; updatedAt: string }) => {
+          expect(typeof bike.userBikeId).toBe('string')
+          expect(typeof bike.createdAt).toBe('string')
+          expect(typeof bike.updatedAt).toBe('string')
+        }
+      )
+    })
   })
 })
