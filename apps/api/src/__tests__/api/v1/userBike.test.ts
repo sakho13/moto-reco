@@ -241,7 +241,11 @@ describe('UserBike API Endpoints', () => {
       expect(json.data.bikes.length).toBeGreaterThan(0)
 
       json.data.bikes.forEach(
-        (bike: { userBikeId: string; createdAt: string; updatedAt: string }) => {
+        (bike: {
+          userBikeId: string
+          createdAt: string
+          updatedAt: string
+        }) => {
           expect(typeof bike.userBikeId).toBe('string')
           expect(typeof bike.createdAt).toBe('string')
           expect(typeof bike.updatedAt).toBe('string')
@@ -252,12 +256,15 @@ describe('UserBike API Endpoints', () => {
 
   describe('GET /api/v1/user-bike/bike/:myUserBikeId', () => {
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
-      const res = await app.request(`/api/v1/user-bike/bike/${createdMyUserBikeId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${createdMyUserBikeId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(401)
@@ -269,13 +276,16 @@ describe('UserBike API Endpoints', () => {
     })
 
     test('ユーザー所有バイクの詳細を取得できる', async () => {
-      const res = await app.request(`/api/v1/user-bike/bike/${createdMyUserBikeId}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      })
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${createdMyUserBikeId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(200)
@@ -293,15 +303,18 @@ describe('UserBike API Endpoints', () => {
 
   describe('PATCH /api/v1/user-bike/bike/:myUserBikeId', () => {
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
-      const res = await app.request(`/api/v1/user-bike/bike/${createdMyUserBikeId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nickname: updatedNickname,
-        }),
-      })
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${createdMyUserBikeId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nickname: updatedNickname,
+          }),
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(401)
@@ -313,16 +326,19 @@ describe('UserBike API Endpoints', () => {
     })
 
     test('不正な入力の場合はバリデーションエラーとなる', async () => {
-      const res = await app.request(`/api/v1/user-bike/bike/${createdMyUserBikeId}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          totalMileage: -100,
-        }),
-      })
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${createdMyUserBikeId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            totalMileage: -100,
+          }),
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(400)
@@ -351,20 +367,23 @@ describe('UserBike API Endpoints', () => {
 
     test('ユーザー所有バイクの情報を更新できる', async () => {
       const purchaseDate = '2024-02-02T00:00:00.000Z'
-      const res = await app.request(`/api/v1/user-bike/bike/${createdMyUserBikeId}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nickname: updatedNickname,
-          purchaseDate,
-          purchasePrice: 450000,
-          purchaseMileage: 1300,
-          totalMileage: 2100,
-        }),
-      })
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${createdMyUserBikeId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nickname: updatedNickname,
+            purchaseDate,
+            purchasePrice: 450000,
+            purchaseMileage: 1300,
+            totalMileage: 2100,
+          }),
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(200)
@@ -384,6 +403,241 @@ describe('UserBike API Endpoints', () => {
       expect(myUserBikeRecord?.purchasePrice).toBe(450000)
       expect(myUserBikeRecord?.purchaseMileage).toBe(1300)
       expect(myUserBikeRecord?.totalMileage).toBe(2100)
+    })
+  })
+
+  describe('POST /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
+    let fuelLogTestMyUserBikeId: string
+
+    beforeAll(async () => {
+      const res = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bikeId,
+          nickname: '燃料ログテスト用バイク',
+          totalMileage: 2000,
+        }),
+      })
+
+      const json = await res.json()
+      fuelLogTestMyUserBikeId = json.data.myUserBikeId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogTestMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt: '2024-03-01T10:00:00.000Z',
+            mileage: 2500,
+            amount: 10.5,
+            totalPrice: 1800,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(401)
+      expect(json).toEqual({
+        status: 'error',
+        errorCode: 'AUTH_FAILED',
+        message: expect.any(String),
+      })
+    })
+
+    test('必須項目が欠けている場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogTestMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('VALIDATION_ERROR')
+      expect(Array.isArray(json.details)).toBe(true)
+      expect(json.details.length).toBeGreaterThan(0)
+    })
+
+    test('不正な入力の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogTestMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt: '2024-03-01T10:00:00.000Z',
+            mileage: -100,
+            amount: 0,
+            totalPrice: -500,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('VALIDATION_ERROR')
+      expect(Array.isArray(json.details)).toBe(true)
+    })
+
+    test('存在しないバイクIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${randomUUID()}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt: '2024-03-01T10:00:00.000Z',
+            mileage: 2500,
+            amount: 10.5,
+            totalPrice: 1800,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('NOT_FOUND')
+    })
+
+    test('燃料ログを登録できる', async () => {
+      const refueledAt = '2024-03-01T10:00:00.000Z'
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogTestMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt,
+            mileage: 2500,
+            amount: 10.5,
+            totalPrice: 1800,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          fuelLogId: expect.any(String),
+          refueledAt,
+          mileage: 2500,
+          amount: 10.5,
+          totalPrice: 1800,
+        },
+        message: '燃料ログ登録成功',
+      })
+
+      const fuelLogRecord = await prisma.tUserMyBikeFuelLog.findUnique({
+        where: { id: json.data.fuelLogId },
+      })
+      expect(fuelLogRecord?.userMyBikeId).toBe(fuelLogTestMyUserBikeId)
+      expect(fuelLogRecord?.mileage).toBe(2500)
+      expect(fuelLogRecord?.amount).toBe(10.5)
+      expect(fuelLogRecord?.price).toBe(1800)
+      expect(fuelLogRecord?.refueledAt.toISOString()).toBe(refueledAt)
+    })
+
+    test('updateTotalMileageがtrueの場合に総走行距離が更新される', async () => {
+      const myUserBikeBefore = await prisma.tUserMyBike.findUnique({
+        where: { id: fuelLogTestMyUserBikeId },
+      })
+      const currentMileage = myUserBikeBefore?.totalMileage ?? 0
+
+      const newMileage = currentMileage + 500
+      const refueledAt = '2024-03-15T10:00:00.000Z'
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogTestMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt,
+            mileage: newMileage,
+            amount: 12.0,
+            totalPrice: 2000,
+            updateTotalMileage: true,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.mileage).toBe(newMileage)
+
+      const myUserBikeAfter = await prisma.tUserMyBike.findUnique({
+        where: { id: fuelLogTestMyUserBikeId },
+      })
+      expect(myUserBikeAfter?.totalMileage).toBe(newMileage)
+    })
+
+    test('updateTotalMileageがtrueでも現在値より小さい場合は更新されない', async () => {
+      const myUserBikeBefore = await prisma.tUserMyBike.findUnique({
+        where: { id: fuelLogTestMyUserBikeId },
+      })
+      const currentMileage = myUserBikeBefore?.totalMileage ?? 0
+
+      const smallerMileage = currentMileage - 100
+      const refueledAt = '2024-02-01T10:00:00.000Z'
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogTestMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt,
+            mileage: smallerMileage,
+            amount: 8.0,
+            totalPrice: 1400,
+            updateTotalMileage: true,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.mileage).toBe(smallerMileage)
+
+      const myUserBikeAfter = await prisma.tUserMyBike.findUnique({
+        where: { id: fuelLogTestMyUserBikeId },
+      })
+      expect(myUserBikeAfter?.totalMileage).toBe(currentMileage)
     })
   })
 })

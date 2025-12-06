@@ -1,4 +1,9 @@
-import { BikeId, createMyUserBikeId, createUserBikeId, UserId } from '@shared-types/index'
+import {
+  BikeId,
+  createMyUserBikeId,
+  createUserBikeId,
+  UserId,
+} from '@shared-types/index'
 import { IBikeRepository } from '../../interfaces/IBikeRepository'
 import { IMyUserBikeRepository } from '../../interfaces/IMyUserBikeRepository'
 import { IUserBikeRepository } from '../../interfaces/IUserBikeRepository'
@@ -97,17 +102,24 @@ export class UserBikeService {
 
     const updatedEntity = new MyUserBikeEntity({
       ...current,
-      nickname: params.nickname !== undefined ? params.nickname : current.nickname,
+      nickname:
+        params.nickname !== undefined ? params.nickname : current.nickname,
       purchaseDate:
-        params.purchaseDate !== undefined ? params.purchaseDate : current.purchaseDate,
+        params.purchaseDate !== undefined
+          ? params.purchaseDate
+          : current.purchaseDate,
       purchasePrice:
-        params.purchasePrice !== undefined ? params.purchasePrice : current.purchasePrice,
+        params.purchasePrice !== undefined
+          ? params.purchasePrice
+          : current.purchasePrice,
       purchaseMileage:
         params.purchaseMileage !== undefined
           ? params.purchaseMileage
           : current.purchaseMileage,
       totalMileage:
-        params.totalMileage !== undefined ? params.totalMileage : current.totalMileage,
+        params.totalMileage !== undefined && params.totalMileage !== null
+          ? params.totalMileage
+          : current.totalMileage,
     })
 
     await this.myUserBikeRepository.updateMyUserBike(updatedEntity)

@@ -1,6 +1,7 @@
 export * from './common/ApiIO.js'
 export * from './domain/authprovider.js'
 export * from './domain/bike.js'
+export * from './domain/fuelLog.js'
 export * from './domain/manufacturer.js'
 export * from './domain/user.js'
 export * from './schemas/index.js'

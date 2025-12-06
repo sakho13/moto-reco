@@ -3,6 +3,7 @@ import {
   createMyUserBikeId,
   createUserBikeId,
   createUserId,
+  MyUserBikeId,
   UserId,
 } from '@shared-types/index'
 import {
@@ -16,7 +17,9 @@ export class PrismaMyUserBikeRepository
   extends PrismaRepositoryBase
   implements IMyUserBikeRepository
 {
-  async createMyUserBike(myUserBike: MyUserBikeEntity): Promise<MyUserBikeEntity> {
+  async createMyUserBike(
+    myUserBike: MyUserBikeEntity
+  ): Promise<MyUserBikeEntity> {
     const created = await this.connection.tUserMyBike.create({
       data: {
         userId: myUserBike.userId,
@@ -149,7 +152,9 @@ export class PrismaMyUserBikeRepository
     })
   }
 
-  async updateMyUserBike(myUserBike: MyUserBikeEntity): Promise<MyUserBikeEntity> {
+  async updateMyUserBike(
+    myUserBike: MyUserBikeEntity
+  ): Promise<MyUserBikeEntity> {
     const updated = await this.connection.tUserMyBike.update({
       where: {
         id: myUserBike.id,

@@ -49,6 +49,10 @@
       "cache": false,
       "env": ["DATABASE_URL", "NODE_ENV"]
     },
+    "db:seed": {
+      "cache": false,
+      "env": ["DATABASE_URL", "NODE_ENV"]
+    },
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"],
