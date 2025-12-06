@@ -692,6 +692,8 @@ components:
       properties:
         userBikeId:
           type: string
+        myUserBikeId:
+          type: string
         manufacturerName:
           type: string
         bikeId:
