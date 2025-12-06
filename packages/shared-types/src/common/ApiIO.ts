@@ -66,15 +66,15 @@ export type ApiResponseBikeSearch = {
 }
 
 export type ApiResponseUserBikeRegister = {
-  myUserBikeId: string
   userBikeId: string
+  manufacturerName: string
   bikeId: string
-  serialNumber: string
+  modelName: string
   nickname: string | null
-  bike: {
-    modelName: string
-    manufacturer: string
-    displacement: number
-    modelYear: number
-  }
+  purchaseDate: string | null
+  totalMileage: number
+  displacement: number
+  modelYear: number
+  createdAt: string
+  updatedAt: string
 }
