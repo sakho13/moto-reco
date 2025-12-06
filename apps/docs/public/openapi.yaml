@@ -692,6 +692,8 @@ components:
       properties:
         userBikeId:
           type: string
+        myUserBikeId:
+          type: string
         manufacturerName:
           type: string
         bikeId:
@@ -728,9 +730,9 @@ components:
     UserBikeRegisterDetail:
       type: object
       required:
-        - userBikeId
+        - bikeId
       properties:
-        userBikeId:
+        bikeId:
           type: string
         nickname:
           type: string
