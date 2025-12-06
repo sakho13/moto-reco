@@ -14,6 +14,14 @@ export class MyUserBikeEntity {
       throw new Error('総走行距離は0以上である必要があります')
     }
 
+    if (myUserBike.purchaseMileage !== null && myUserBike.purchaseMileage < 0) {
+      throw new Error('購入時走行距離は0以上である必要があります')
+    }
+
+    if (myUserBike.purchasePrice !== null && myUserBike.purchasePrice < 0) {
+      throw new Error('購入価格は0以上である必要があります')
+    }
+
     this._value = myUserBike
   }
 

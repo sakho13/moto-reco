@@ -93,11 +93,151 @@ export class PrismaMyUserBikeRepository
       modelName: myUserBike.userBike.bike.modelName,
       nickname: myUserBike.nickname,
       purchaseDate: myUserBike.purchaseDate,
+      purchasePrice: myUserBike.purchasePrice,
+      purchaseMileage: myUserBike.purchaseMileage,
       totalMileage: myUserBike.totalMileage,
       displacement: myUserBike.userBike.bike.displacement,
       modelYear: myUserBike.userBike.bike.modelYear,
       createdAt: myUserBike.createdAt,
       updatedAt: myUserBike.updatedAt,
     }))
+  }
+
+  async findMyUserBikeById(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<MyUserBikeEntity | null> {
+    const myUserBike = await this.connection.tUserMyBike.findFirst({
+      where: { id: myUserBikeId, userId, ownStatus: 'OWN' },
+      select: {
+        id: true,
+        userBikeId: true,
+        userId: true,
+        nickname: true,
+        purchaseDate: true,
+        purchasePrice: true,
+        purchaseMileage: true,
+        totalMileage: true,
+        ownedAt: true,
+        soldAt: true,
+        ownStatus: true,
+        userBike: {
+          select: {
+            bikeId: true,
+          },
+        },
+      },
+    })
+
+    if (!myUserBike) {
+      return null
+    }
+
+    return new MyUserBikeEntity({
+      bikeId: createBikeId(myUserBike.userBike.bikeId),
+      userBikeId: createUserBikeId(myUserBike.userBikeId),
+      myUserBikeId: createMyUserBikeId(myUserBike.id),
+      userId: createUserId(myUserBike.userId),
+      nickname: myUserBike.nickname,
+      purchaseDate: myUserBike.purchaseDate,
+      purchasePrice: myUserBike.purchasePrice,
+      purchaseMileage: myUserBike.purchaseMileage,
+      totalMileage: myUserBike.totalMileage,
+      ownedAt: myUserBike.ownedAt,
+      soldAt: myUserBike.soldAt,
+      ownStatus: myUserBike.ownStatus,
+    })
+  }
+
+  async updateMyUserBike(myUserBike: MyUserBikeEntity): Promise<MyUserBikeEntity> {
+    const updated = await this.connection.tUserMyBike.update({
+      where: {
+        id: myUserBike.id,
+      },
+      data: {
+        nickname: myUserBike.nickname,
+        purchaseDate: myUserBike.purchaseDate,
+        purchasePrice: myUserBike.purchasePrice,
+        purchaseMileage: myUserBike.purchaseMileage,
+        totalMileage: myUserBike.totalMileage,
+        ownedAt: myUserBike.ownedAt,
+        soldAt: myUserBike.soldAt,
+        ownStatus: myUserBike.ownStatus,
+      },
+      select: {
+        id: true,
+        userId: true,
+        userBikeId: true,
+        nickname: true,
+        purchaseDate: true,
+        purchasePrice: true,
+        purchaseMileage: true,
+        totalMileage: true,
+        ownedAt: true,
+        soldAt: true,
+        ownStatus: true,
+        userBike: {
+          select: {
+            bikeId: true,
+          },
+        },
+      },
+    })
+
+    return new MyUserBikeEntity({
+      bikeId: createBikeId(updated.userBike.bikeId),
+      userBikeId: createUserBikeId(updated.userBikeId),
+      myUserBikeId: createMyUserBikeId(updated.id),
+      userId: createUserId(updated.userId),
+      nickname: updated.nickname,
+      purchaseDate: updated.purchaseDate,
+      purchasePrice: updated.purchasePrice,
+      purchaseMileage: updated.purchaseMileage,
+      totalMileage: updated.totalMileage,
+      ownedAt: updated.ownedAt,
+      soldAt: updated.soldAt,
+      ownStatus: updated.ownStatus,
+    })
+  }
+
+  async findMyUserBikeDetail(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<MyUserBikeDetail | null> {
+    const myUserBike = await this.connection.tUserMyBike.findFirst({
+      where: { id: myUserBikeId, userId, ownStatus: 'OWN' },
+      include: {
+        userBike: {
+          include: {
+            bike: {
+              include: {
+                manufacturer: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!myUserBike) {
+      return null
+    }
+
+    return {
+      myUserBikeId: createMyUserBikeId(myUserBike.id),
+      userBikeId: createUserBikeId(myUserBike.userBikeId),
+      bikeId: createBikeId(myUserBike.userBike.bikeId),
+      manufacturerName: myUserBike.userBike.bike.manufacturer.name,
+      modelName: myUserBike.userBike.bike.modelName,
+      nickname: myUserBike.nickname,
+      purchaseDate: myUserBike.purchaseDate,
+      purchasePrice: myUserBike.purchasePrice,
+      purchaseMileage: myUserBike.purchaseMileage,
+      totalMileage: myUserBike.totalMileage,
+      displacement: myUserBike.userBike.bike.displacement,
+      modelYear: myUserBike.userBike.bike.modelYear,
+      createdAt: myUserBike.createdAt,
+      updatedAt: myUserBike.updatedAt,
+    }
   }
 }

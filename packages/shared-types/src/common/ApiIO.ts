@@ -79,10 +79,29 @@ export type ApiResponseUserBikeList = {
     modelName: string
     nickname: string | null
     purchaseDate: string | null
+    purchasePrice: number | null
+    purchaseMileage: number | null
     totalMileage: number
     displacement: number
     modelYear: number
     createdAt: string
     updatedAt: string
   }[]
+}
+
+export type ApiResponseUserBikeDetail = {
+  userBikeId: string
+  myUserBikeId: string
+  manufacturerName: string
+  bikeId: string
+  modelName: string
+  nickname: string | null
+  purchaseDate: string | null
+  purchasePrice: number | null
+  purchaseMileage: number | null
+  totalMileage: number
+  displacement: number
+  modelYear: number
+  createdAt: string
+  updatedAt: string
 }
