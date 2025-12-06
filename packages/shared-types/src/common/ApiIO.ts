@@ -64,3 +64,8 @@ export type ApiResponseBikeSearch = {
     modelYear: number
   }[]
 }
+
+export type ApiResponseUserBikeRegister = {
+  userBikeId: string
+  myUserBikeId: string
+}
