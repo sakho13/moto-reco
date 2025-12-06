@@ -1,21 +1,36 @@
 import { Hono } from 'hono'
 import { prisma } from '@packages/database'
 import {
+  ApiResponseMyUserBikeFuelLogDetail,
   ApiResponseUserBikeRegister,
   ApiResponseUserBikeList,
+  createMyUserBikeId,
   createBikeId,
   createUserId,
   SuccessResponse,
+  MyUserBikeFuelLogRegisterRequestSchema,
   UserBikeRegisterRequestSchema,
 } from '@shared-types/index'
+import { z } from 'zod'
 import { PrismaBikeRepository } from '../../lib/classes/repositories/PrismaBikeRepository'
+import { PrismaMyUserBikeFuelLogRepository } from '../../lib/classes/repositories/PrismaMyUserBikeFuelLogRepository'
 import { PrismaMyUserBikeRepository } from '../../lib/classes/repositories/PrismaMyUserBikeRepository'
 import { PrismaUserBikeRepository } from '../../lib/classes/repositories/PrismaUserBikeRepository'
+import { MyUserBikeFuelLogService } from '../../lib/classes/services/MyUserBikeFuelLogService'
 import { UserBikeService } from '../../lib/classes/services/UserBikeService'
 import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
-import { zodValidateJson } from '../../lib/middlewares/zodValidation'
+import { zodValidateJson, zodValidateParam } from '../../lib/middlewares/zodValidation'
 
 const userBike = new Hono()
+
+const myUserBikeIdParamSchema = z.object({
+  myUserBikeId: z
+    .string({
+      required_error: 'ユーザー所有バイクIDは必須です',
+      invalid_type_error: 'ユーザー所有バイクIDは文字列で指定してください',
+    })
+    .min(1, 'ユーザー所有バイクIDは1文字以上で指定してください'),
+})
 
 userBike.post(
   '/register',
@@ -88,5 +103,48 @@ userBike.get('/bikes', honoAuthMiddleware, async (c) => {
 userBike.get('/bike/:userBikeId', honoAuthMiddleware, async (c) => {
   return c.json({})
 })
+
+userBike.post(
+  '/bike/:myUserBikeId/fuel-logs',
+  honoAuthMiddleware,
+  zodValidateParam(myUserBikeIdParamSchema),
+  zodValidateJson(MyUserBikeFuelLogRegisterRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const { myUserBikeId } = c.req.valid('param')
+    const body = c.req.valid('json')
+
+    const fuelLog = await prisma.$transaction((t) => {
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const fuelLogRepo = new PrismaMyUserBikeFuelLogRepository(t)
+      const service = new MyUserBikeFuelLogService(myUserBikeRepo, fuelLogRepo)
+
+      return service.registerFuelLog({
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId,
+        refueledAt: body.refueledAt,
+        mileage: body.mileage,
+        amount: body.amount,
+        totalPrice: body.totalPrice,
+        updateTotalMileage: body.updateTotalMileage,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseMyUserBikeFuelLogDetail>>(
+      {
+        status: 'success',
+        data: {
+          fuelLogId: fuelLog.id,
+          refueledAt: fuelLog.refueledAt.toISOString(),
+          mileage: fuelLog.mileage,
+          amount: fuelLog.amount,
+          totalPrice: fuelLog.totalPrice,
+        },
+        message: '燃料ログ登録成功',
+      },
+      201
+    )
+  }
+)
 
 export default userBike

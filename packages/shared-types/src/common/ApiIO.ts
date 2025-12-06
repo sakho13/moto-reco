@@ -86,3 +86,11 @@ export type ApiResponseUserBikeList = {
     updatedAt: string
   }[]
 }
+
+export type ApiResponseMyUserBikeFuelLogDetail = {
+  fuelLogId: string
+  refueledAt: string
+  mileage: number
+  amount: number
+  totalPrice: number
+}

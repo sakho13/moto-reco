@@ -24,4 +24,9 @@ export type MyUserBikeDetail = {
 export interface IMyUserBikeRepository {
   createMyUserBike(myUserBike: MyUserBikeEntity): Promise<MyUserBikeEntity>
   findMyUserBikes(userId: UserId): Promise<MyUserBikeDetail[]>
+  findMyUserBikeById(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<MyUserBikeDetail | null>
+  updateTotalMileage(myUserBikeId: MyUserBikeId, totalMileage: number): Promise<void>
 }

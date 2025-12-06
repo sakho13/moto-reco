@@ -248,4 +248,156 @@ describe('UserBike API Endpoints', () => {
       )
     })
   })
+
+  describe('POST /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
+    let fuelLogMyUserBikeId: string
+
+    beforeAll(async () => {
+      const registerRes = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bikeId,
+          totalMileage: 800,
+        }),
+      })
+
+      const registerJson = await registerRes.json()
+      expect(registerRes.status).toBe(201)
+      expect(registerJson.status).toBe('success')
+      fuelLogMyUserBikeId = registerJson.data.myUserBikeId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt: '2024-01-01T00:00:00.000Z',
+            mileage: 1000,
+            amount: 10,
+            totalPrice: 1500,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(401)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('AUTH_FAILED')
+    })
+
+    test('必須項目が欠けている場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('VALIDATION_ERROR')
+      expect(Array.isArray(json.details)).toBe(true)
+      expect(json.details.length).toBeGreaterThan(0)
+    })
+
+    test('燃料ログを登録し総走行距離を更新できる', async () => {
+      const refueledAt = '2024-04-01T12:00:00.000Z'
+      const mileage = 1500
+      const amount = 12.5
+      const totalPrice = 2300
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt,
+            mileage,
+            amount,
+            totalPrice,
+            updateTotalMileage: true,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.status).toBe('success')
+      expect(json.data).toEqual({
+        fuelLogId: expect.any(String),
+        refueledAt,
+        mileage,
+        amount,
+        totalPrice,
+      })
+
+      const fuelLogRecord = await prisma.tUserMyBikeFuelLog.findUnique({
+        where: { id: json.data.fuelLogId },
+      })
+
+      expect(fuelLogRecord?.userMyBikeId).toBe(fuelLogMyUserBikeId)
+      expect(fuelLogRecord?.mileage).toBe(mileage)
+      expect(fuelLogRecord?.price).toBe(totalPrice)
+      expect(fuelLogRecord?.amount).toBeCloseTo(amount)
+      expect(fuelLogRecord?.refueledAt.toISOString()).toBe(refueledAt)
+
+      const myUserBikeRecord = await prisma.tUserMyBike.findUnique({
+        where: { id: fuelLogMyUserBikeId },
+      })
+
+      expect(myUserBikeRecord?.totalMileage).toBe(mileage)
+    })
+
+    test('総走行距離が小さい値の場合は更新されない', async () => {
+      const refueledAt = '2024-05-01T08:00:00.000Z'
+      const mileage = 1200
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${fuelLogMyUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt,
+            mileage,
+            amount: 8,
+            totalPrice: 1600,
+            updateTotalMileage: true,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.status).toBe('success')
+
+      const myUserBikeRecord = await prisma.tUserMyBike.findUnique({
+        where: { id: fuelLogMyUserBikeId },
+      })
+
+      expect(myUserBikeRecord?.totalMileage).toBe(1500)
+    })
+  })
 })

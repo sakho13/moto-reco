@@ -3,6 +3,7 @@ import {
   createMyUserBikeId,
   createUserBikeId,
   createUserId,
+  MyUserBikeId,
   UserId,
 } from '@shared-types/index'
 import {
@@ -11,6 +12,7 @@ import {
 } from '../../interfaces/IMyUserBikeRepository'
 import { PrismaRepositoryBase } from '../common/PrismaRepositoryBase'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
+import { ApiV1Error } from '../common/ApiV1Error'
 
 export class PrismaMyUserBikeRepository
   extends PrismaRepositoryBase
@@ -99,5 +101,59 @@ export class PrismaMyUserBikeRepository
       createdAt: myUserBike.createdAt,
       updatedAt: myUserBike.updatedAt,
     }))
+  }
+
+  async findMyUserBikeById(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<MyUserBikeDetail | null> {
+    const myUserBike = await this.connection.tUserMyBike.findFirst({
+      where: { id: myUserBikeId, userId, ownStatus: 'OWN' },
+      include: {
+        userBike: {
+          include: {
+            bike: {
+              include: {
+                manufacturer: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!myUserBike) {
+      return null
+    }
+
+    return {
+      myUserBikeId: createMyUserBikeId(myUserBike.id),
+      userBikeId: createUserBikeId(myUserBike.userBikeId),
+      bikeId: createBikeId(myUserBike.userBike.bikeId),
+      manufacturerName: myUserBike.userBike.bike.manufacturer.name,
+      modelName: myUserBike.userBike.bike.modelName,
+      nickname: myUserBike.nickname,
+      purchaseDate: myUserBike.purchaseDate,
+      totalMileage: myUserBike.totalMileage,
+      displacement: myUserBike.userBike.bike.displacement,
+      modelYear: myUserBike.userBike.bike.modelYear,
+      createdAt: myUserBike.createdAt,
+      updatedAt: myUserBike.updatedAt,
+    }
+  }
+
+  async updateTotalMileage(
+    myUserBikeId: MyUserBikeId,
+    totalMileage: number
+  ): Promise<void> {
+    const updated = await this.connection.tUserMyBike.update({
+      where: { id: myUserBikeId },
+      data: { totalMileage },
+      select: { id: true },
+    })
+
+    if (!updated) {
+      throw new ApiV1Error('NOT_FOUND', 'ユーザー所有バイクが見つかりません')
+    }
   }
 }
