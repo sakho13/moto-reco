@@ -21,7 +21,9 @@ export class FuelLogService {
     private myUserBikeRepository: IMyUserBikeRepository
   ) {}
 
-  public async registerFuelLog(params: RegisterFuelLogParams): Promise<FuelLogEntity> {
+  public async registerFuelLog(
+    params: RegisterFuelLogParams
+  ): Promise<FuelLogEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
       params.userId
