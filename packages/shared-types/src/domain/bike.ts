@@ -17,17 +17,20 @@ export type UserBike = {
   bikeId: BikeId
   userBikeId: UserBikeId
 
-  serialNumber: string
+  serialNumber: string | null
 }
 
 export type MyUserBikeId = string & { readonly __brand: unique symbol }
 export const createMyUserBikeId = (id: string): MyUserBikeId =>
   id as MyUserBikeId
 
+import { UserId } from './user.js'
+
 export type MyUserBike = {
   bikeId: BikeId
   userBikeId: UserBikeId
   myUserBikeId: MyUserBikeId
+  userId: UserId
 
   nickname: string | null
   purchaseDate: Date | null

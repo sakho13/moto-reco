@@ -1,5 +1,5 @@
 import { Prisma } from '@packages/database'
-import { createBikeId } from '@shared-types/index'
+import { BikeId, createBikeId } from '@shared-types/index'
 import { IBikeRepository } from '../../interfaces/IBikeRepository'
 import { PrismaRepositoryBase } from '../common/PrismaRepositoryBase'
 import { BikeEntity } from '../entities/BikeEntity'
@@ -9,6 +9,26 @@ export class PrismaBikeRepository
   extends PrismaRepositoryBase
   implements IBikeRepository
 {
+  async findById(bikeId: BikeId): Promise<BikeEntity | null> {
+    const bike = await this.connection.mBike.findUnique({
+      where: { id: bikeId },
+      include: {
+        manufacturer: true,
+      },
+    })
+
+    return bike
+      ? new BikeEntity({
+          id: createBikeId(bike.id),
+          manufacturerId: bike.manufacturerId,
+          manufacturer: bike.manufacturer.name,
+          modelName: bike.modelName,
+          displacement: bike.displacement,
+          modelYear: bike.modelYear,
+        })
+      : null
+  }
+
   async search(params: BikeSearchParams): Promise<BikeEntity[]> {
     const where: Prisma.MBikeWhereInput = {}
 
