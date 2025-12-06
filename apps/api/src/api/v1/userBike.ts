@@ -4,16 +4,20 @@ import {
   ApiResponseUserBikeRegister,
   ApiResponseUserBikeList,
   ApiResponseUserBikeDetail,
+  ApiResponseFuelLogDetail,
   createBikeId,
   createMyUserBikeId,
   createUserId,
   SuccessResponse,
   UserBikeRegisterRequestSchema,
   UserBikeUpdateRequestSchema,
+  FuelLogRegisterRequestSchema,
 } from '@shared-types/index'
 import { PrismaBikeRepository } from '../../lib/classes/repositories/PrismaBikeRepository'
+import { PrismaFuelLogRepository } from '../../lib/classes/repositories/PrismaFuelLogRepository'
 import { PrismaMyUserBikeRepository } from '../../lib/classes/repositories/PrismaMyUserBikeRepository'
 import { PrismaUserBikeRepository } from '../../lib/classes/repositories/PrismaUserBikeRepository'
+import { FuelLogService } from '../../lib/classes/services/FuelLogService'
 import { UserBikeService } from '../../lib/classes/services/UserBikeService'
 import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
 import { zodValidateJson } from '../../lib/middlewares/zodValidation'
@@ -169,6 +173,48 @@ userBike.patch(
       },
       message: 'ユーザー所有バイク情報更新成功',
     })
+  }
+)
+
+userBike.post(
+  '/bike/:myUserBikeId/fuel-logs',
+  honoAuthMiddleware,
+  zodValidateJson(FuelLogRegisterRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+
+      return service.registerFuelLog({
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        refueledAt: body.refueledAt,
+        mileage: body.mileage,
+        amount: body.amount,
+        totalPrice: body.totalPrice,
+        updateTotalMileage: body.updateTotalMileage,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseFuelLogDetail>>(
+      {
+        status: 'success',
+        data: {
+          fuelLogId: result.id,
+          refueledAt: result.refueledAt.toISOString(),
+          mileage: result.mileage,
+          amount: result.amount,
+          totalPrice: result.totalPrice,
+        },
+        message: '燃料ログ登録成功',
+      },
+      201
+    )
   }
 )
 
