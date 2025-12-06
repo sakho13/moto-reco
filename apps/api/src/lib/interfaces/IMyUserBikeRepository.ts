@@ -14,6 +14,8 @@ export type MyUserBikeDetail = {
   modelName: string
   nickname: string | null
   purchaseDate: Date | null
+  purchasePrice: number | null
+  purchaseMileage: number | null
   totalMileage: number
   displacement: number
   modelYear: number
@@ -24,4 +26,13 @@ export type MyUserBikeDetail = {
 export interface IMyUserBikeRepository {
   createMyUserBike(myUserBike: MyUserBikeEntity): Promise<MyUserBikeEntity>
   findMyUserBikes(userId: UserId): Promise<MyUserBikeDetail[]>
+  findMyUserBikeById(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<MyUserBikeEntity | null>
+  updateMyUserBike(myUserBike: MyUserBikeEntity): Promise<MyUserBikeEntity>
+  findMyUserBikeDetail(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<MyUserBikeDetail | null>
 }

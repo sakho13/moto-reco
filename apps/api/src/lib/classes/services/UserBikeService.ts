@@ -17,6 +17,16 @@ type RegisterUserBikeParams = {
   totalMileage?: number
 }
 
+type UpdateMyUserBikeParams = {
+  myUserBikeId: ReturnType<typeof createMyUserBikeId>
+  userId: UserId
+  nickname?: string | null
+  purchaseDate?: Date | null
+  purchasePrice?: number | null
+  purchaseMileage?: number | null
+  totalMileage?: number | null
+}
+
 export class UserBikeService {
   constructor(
     private userBikeRepository: IUserBikeRepository,
@@ -58,5 +68,50 @@ export class UserBikeService {
     )
 
     return { userBike, myUserBike }
+  }
+
+  public async getMyUserBikeDetail(myUserBikeId: string, userId: UserId) {
+    const detail = await this.myUserBikeRepository.findMyUserBikeDetail(
+      createMyUserBikeId(myUserBikeId),
+      userId
+    )
+
+    if (!detail) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    return detail
+  }
+
+  public async updateMyUserBike(params: UpdateMyUserBikeParams) {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      params.myUserBikeId,
+      params.userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const current = myUserBike.toJson()
+
+    const updatedEntity = new MyUserBikeEntity({
+      ...current,
+      nickname: params.nickname !== undefined ? params.nickname : current.nickname,
+      purchaseDate:
+        params.purchaseDate !== undefined ? params.purchaseDate : current.purchaseDate,
+      purchasePrice:
+        params.purchasePrice !== undefined ? params.purchasePrice : current.purchasePrice,
+      purchaseMileage:
+        params.purchaseMileage !== undefined
+          ? params.purchaseMileage
+          : current.purchaseMileage,
+      totalMileage:
+        params.totalMileage !== undefined ? params.totalMileage : current.totalMileage,
+    })
+
+    await this.myUserBikeRepository.updateMyUserBike(updatedEntity)
+
+    return this.getMyUserBikeDetail(params.myUserBikeId, params.userId)
   }
 }
