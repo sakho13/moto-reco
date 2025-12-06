@@ -2,7 +2,9 @@ import { Hono } from 'hono'
 import { prisma } from '@packages/database'
 import {
   ApiResponseUserBikeRegister,
+  ApiResponseUserBikeList,
   createBikeId,
+  createUserId,
   SuccessResponse,
   UserBikeRegisterRequestSchema,
 } from '@shared-types/index'
@@ -56,7 +58,31 @@ userBike.post(
 )
 
 userBike.get('/bikes', honoAuthMiddleware, async (c) => {
-  return c.json({})
+  const { userId } = c.var.user!
+  const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+
+  const bikes = await myUserBikeRepo.findMyUserBikes(createUserId(userId))
+
+  return c.json<SuccessResponse<ApiResponseUserBikeList>>({
+    status: 'success',
+    data: {
+      bikes: bikes.map((bike) => ({
+        userBikeId: bike.userBikeId,
+        myUserBikeId: bike.myUserBikeId,
+        manufacturerName: bike.manufacturerName,
+        bikeId: bike.bikeId,
+        modelName: bike.modelName,
+        nickname: bike.nickname,
+        purchaseDate: bike.purchaseDate?.toISOString() ?? null,
+        totalMileage: bike.totalMileage,
+        displacement: bike.displacement,
+        modelYear: bike.modelYear,
+        createdAt: bike.createdAt.toISOString(),
+        updatedAt: bike.updatedAt.toISOString(),
+      })),
+    },
+    message: 'ユーザー所有バイク一覧取得成功',
+  })
 })
 
 userBike.get('/bike/:userBikeId', honoAuthMiddleware, async (c) => {
