@@ -1,7 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@packages/database'
 import {
-  ApiResponseUserBikeRegister,
   ApiResponseUserBikeList,
   ApiResponseUserBikeDetail,
   ApiResponseFuelLogDetail,
@@ -24,6 +23,7 @@ import { PrismaUserBikeRepository } from '../../lib/classes/repositories/PrismaU
 import { FuelLogService } from '../../lib/classes/services/FuelLogService'
 import { UserBikeService } from '../../lib/classes/services/UserBikeService'
 import { FuelLogSearchParams } from '../../lib/classes/valueObjects/FuelLogSearchParams'
+import { MyUserBikeDetail } from '../../lib/interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
 import {
   zodValidateJson,
@@ -31,6 +31,25 @@ import {
 } from '../../lib/middlewares/zodValidation'
 
 const userBike = new Hono()
+
+const toApiResponseUserBikeDetail = (
+  detail: MyUserBikeDetail
+): ApiResponseUserBikeDetail => ({
+  userBikeId: detail.userBikeId,
+  myUserBikeId: detail.myUserBikeId,
+  manufacturerName: detail.manufacturerName,
+  bikeId: detail.bikeId,
+  modelName: detail.modelName,
+  nickname: detail.nickname,
+  purchaseDate: detail.purchaseDate?.toISOString() ?? null,
+  purchasePrice: detail.purchasePrice,
+  purchaseMileage: detail.purchaseMileage,
+  totalMileage: detail.totalMileage,
+  displacement: detail.displacement,
+  modelYear: detail.modelYear,
+  createdAt: detail.createdAt.toISOString(),
+  updatedAt: detail.updatedAt.toISOString(),
+})
 
 userBike.post(
   '/register',
@@ -40,7 +59,7 @@ userBike.post(
     const { userId } = c.var.user!
     const body = c.req.valid('json')
 
-    const result = await prisma.$transaction((t) => {
+    const detail = await prisma.$transaction(async (t) => {
       const userBikeRepo = new PrismaUserBikeRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const bikeRepo = new PrismaBikeRepository(t)
@@ -50,7 +69,7 @@ userBike.post(
         bikeRepo
       )
 
-      return service.registerUserBike({
+      const { myUserBike } = await service.registerUserBike({
         bikeId: createBikeId(body.bikeId),
         serialNumber: body.serialNumber,
         userId,
@@ -60,15 +79,17 @@ userBike.post(
         purchaseMileage: body.purchaseMileage,
         totalMileage: body.totalMileage,
       })
+
+      return service.getMyUserBikeDetail(
+        myUserBike.id,
+        createUserId(userId)
+      )
     })
 
-    return c.json<SuccessResponse<ApiResponseUserBikeRegister>>(
+    return c.json<SuccessResponse<ApiResponseUserBikeDetail>>(
       {
         status: 'success',
-        data: {
-          userBikeId: result.userBike.id,
-          myUserBikeId: result.myUserBike.id,
-        },
+        data: toApiResponseUserBikeDetail(detail),
         message: 'ユーザーバイク登録成功',
       },
       201
@@ -85,22 +106,7 @@ userBike.get('/bikes', honoAuthMiddleware, async (c) => {
   return c.json<SuccessResponse<ApiResponseUserBikeList>>({
     status: 'success',
     data: {
-      bikes: bikes.map((bike) => ({
-        userBikeId: bike.userBikeId,
-        myUserBikeId: bike.myUserBikeId,
-        manufacturerName: bike.manufacturerName,
-        bikeId: bike.bikeId,
-        modelName: bike.modelName,
-        nickname: bike.nickname,
-        purchaseDate: bike.purchaseDate?.toISOString() ?? null,
-        purchasePrice: bike.purchasePrice,
-        purchaseMileage: bike.purchaseMileage,
-        totalMileage: bike.totalMileage,
-        displacement: bike.displacement,
-        modelYear: bike.modelYear,
-        createdAt: bike.createdAt.toISOString(),
-        updatedAt: bike.updatedAt.toISOString(),
-      })),
+      bikes: bikes.map(toApiResponseUserBikeDetail),
     },
     message: 'ユーザー所有バイク一覧取得成功',
   })
@@ -123,22 +129,7 @@ userBike.get('/bike/:myUserBikeId', honoAuthMiddleware, async (c) => {
 
   return c.json<SuccessResponse<ApiResponseUserBikeDetail>>({
     status: 'success',
-    data: {
-      userBikeId: detail.userBikeId,
-      myUserBikeId: detail.myUserBikeId,
-      manufacturerName: detail.manufacturerName,
-      bikeId: detail.bikeId,
-      modelName: detail.modelName,
-      nickname: detail.nickname,
-      purchaseDate: detail.purchaseDate?.toISOString() ?? null,
-      purchasePrice: detail.purchasePrice,
-      purchaseMileage: detail.purchaseMileage,
-      totalMileage: detail.totalMileage,
-      displacement: detail.displacement,
-      modelYear: detail.modelYear,
-      createdAt: detail.createdAt.toISOString(),
-      updatedAt: detail.updatedAt.toISOString(),
-    },
+    data: toApiResponseUserBikeDetail(detail),
     message: 'ユーザー所有バイク詳細取得成功',
   })
 })
@@ -174,22 +165,7 @@ userBike.patch(
 
     return c.json<SuccessResponse<ApiResponseUserBikeDetail>>({
       status: 'success',
-      data: {
-        userBikeId: detail.userBikeId,
-        myUserBikeId: detail.myUserBikeId,
-        manufacturerName: detail.manufacturerName,
-        bikeId: detail.bikeId,
-        modelName: detail.modelName,
-        nickname: detail.nickname,
-        purchaseDate: detail.purchaseDate?.toISOString() ?? null,
-        purchasePrice: detail.purchasePrice,
-        purchaseMileage: detail.purchaseMileage,
-        totalMileage: detail.totalMileage,
-        displacement: detail.displacement,
-        modelYear: detail.modelYear,
-        createdAt: detail.createdAt.toISOString(),
-        updatedAt: detail.updatedAt.toISOString(),
-      },
+      data: toApiResponseUserBikeDetail(detail),
       message: 'ユーザー所有バイク情報更新成功',
     })
   }

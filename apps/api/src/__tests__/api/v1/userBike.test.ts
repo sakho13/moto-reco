@@ -102,14 +102,20 @@ describe('UserBike API Endpoints', () => {
 
     const json = await res.json()
     expect(res.status).toBe(201)
-    expect(json).toEqual({
-      status: 'success',
-      data: {
-        userBikeId: expect.any(String),
-        myUserBikeId: expect.any(String),
-      },
-      message: expect.any(String),
-    })
+    expect(json.status).toBe('success')
+    expect(json.message).toBe('ユーザーバイク登録成功')
+    expect(json.data.userBikeId).toEqual(expect.any(String))
+    expect(json.data.myUserBikeId).toEqual(expect.any(String))
+    expect(json.data.bikeId).toBe(bikeId)
+    expect(json.data.nickname).toBe('メインバイク')
+    expect(json.data.purchaseDate).toBe(purchaseDate)
+    expect(json.data.purchasePrice).toBe(500000)
+    expect(json.data.purchaseMileage).toBe(1200)
+    expect(json.data.totalMileage).toBe(1500)
+    expect(json.data.manufacturerName).toEqual(expect.any(String))
+    expect(json.data.modelName).toEqual(expect.any(String))
+    expect(typeof json.data.createdAt).toBe('string')
+    expect(typeof json.data.updatedAt).toBe('string')
 
     createdUserBikeId = json.data.userBikeId
     createdMyUserBikeId = json.data.myUserBikeId
@@ -172,6 +178,9 @@ describe('UserBike API Endpoints', () => {
     const json = await res.json()
     expect(res.status).toBe(201)
     expect(json.status).toBe('success')
+    expect(json.data.userBikeId).toEqual(expect.any(String))
+    expect(json.data.myUserBikeId).toEqual(expect.any(String))
+    expect(json.data.nickname).toBe('セカンドバイク')
 
     const userBikeRecord = await prisma.tUserBike.findUnique({
       where: { id: json.data.userBikeId },
@@ -197,6 +206,8 @@ describe('UserBike API Endpoints', () => {
     const json = await res.json()
     expect(res.status).toBe(201)
     expect(json.status).toBe('success')
+    expect(json.data.userBikeId).toEqual(expect.any(String))
+    expect(json.data.myUserBikeId).toEqual(expect.any(String))
 
     const userBikeRecord = await prisma.tUserBike.findUnique({
       where: { id: json.data.userBikeId },
