@@ -27,7 +27,7 @@ import { convertZodErrorToApiError } from '../functions/zodErrorHandler'
  * ```
  */
 export function zodValidateJson<T extends ZodSchema>(schema: T) {
-  return zValidator('json', schema, (result, c) => {
+  return zValidator('json', schema, (result) => {
     if (!result.success) {
       throw convertZodErrorToApiError(result.error)
     }
@@ -41,7 +41,7 @@ export function zodValidateJson<T extends ZodSchema>(schema: T) {
  * @returns Honoミドルウェア
  */
 export function zodValidateQuery<T extends ZodSchema>(schema: T) {
-  return zValidator('query', schema, (result, c) => {
+  return zValidator('query', schema, (result) => {
     if (!result.success) {
       throw convertZodErrorToApiError(result.error)
     }
@@ -55,7 +55,7 @@ export function zodValidateQuery<T extends ZodSchema>(schema: T) {
  * @returns Honoミドルウェア
  */
 export function zodValidateParam<T extends ZodSchema>(schema: T) {
-  return zValidator('param', schema, (result, c) => {
+  return zValidator('param', schema, (result) => {
     if (!result.success) {
       throw convertZodErrorToApiError(result.error)
     }

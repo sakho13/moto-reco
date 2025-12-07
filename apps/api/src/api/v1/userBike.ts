@@ -5,6 +5,7 @@ import {
   ApiResponseUserBikeList,
   ApiResponseUserBikeDetail,
   ApiResponseFuelLogDetail,
+  ApiResponseFuelLogList,
   createBikeId,
   createMyUserBikeId,
   createUserId,
@@ -12,6 +13,7 @@ import {
   UserBikeRegisterRequestSchema,
   UserBikeUpdateRequestSchema,
   FuelLogRegisterRequestSchema,
+  FuelLogListQuerySchema,
 } from '@shared-types/index'
 import { PrismaBikeRepository } from '../../lib/classes/repositories/PrismaBikeRepository'
 import { PrismaFuelLogRepository } from '../../lib/classes/repositories/PrismaFuelLogRepository'
@@ -19,8 +21,9 @@ import { PrismaMyUserBikeRepository } from '../../lib/classes/repositories/Prism
 import { PrismaUserBikeRepository } from '../../lib/classes/repositories/PrismaUserBikeRepository'
 import { FuelLogService } from '../../lib/classes/services/FuelLogService'
 import { UserBikeService } from '../../lib/classes/services/UserBikeService'
+import { FuelLogSearchParams } from '../../lib/classes/valueObjects/FuelLogSearchParams'
 import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
-import { zodValidateJson } from '../../lib/middlewares/zodValidation'
+import { zodValidateJson, zodValidateQuery } from '../../lib/middlewares/zodValidation'
 
 const userBike = new Hono()
 
@@ -173,6 +176,49 @@ userBike.patch(
       },
       message: 'ユーザー所有バイク情報更新成功',
     })
+  }
+)
+
+userBike.get(
+  '/bike/:myUserBikeId/fuel-logs',
+  honoAuthMiddleware,
+  zodValidateQuery(FuelLogListQuerySchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const query = c.req.valid('query')
+
+    const searchParams = new FuelLogSearchParams({
+      page: query.page,
+      pageSize: query['per-size'],
+      sortBy: query['sort-by'] === 'mileage' ? 'mileage' : 'refueledAt',
+      sortOrder: query['sort-order'],
+    })
+
+    const fuelLogRepo = new PrismaFuelLogRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const fuelLogService = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+
+    const fuelLogs = await fuelLogService.getFuelLogs(
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId),
+      searchParams
+    )
+
+    return c.json<SuccessResponse<ApiResponseFuelLogList>>(
+      {
+        status: 'success',
+        data: fuelLogs.map((log) => ({
+          fuelLogId: log.id,
+          refueledAt: log.refueledAt.toISOString(),
+          mileage: log.mileage,
+          amount: log.amount,
+          totalPrice: log.totalPrice,
+        })),
+        message: '燃料ログ一覧取得成功',
+      },
+      200
+    )
   }
 )
 
