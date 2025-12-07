@@ -81,6 +81,7 @@ docker compose up -d
 ```
 
 起動されるサービス：
+
 - **PostgreSQL**: ポート 5432
 - **Firebase Emulator**: ポート 4000 (UI), 9099 (Auth)
 - **LocalStack**: ポート 4566 (S3, SSM, SecretsManager等)

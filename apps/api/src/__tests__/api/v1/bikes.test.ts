@@ -33,7 +33,10 @@ describe('Bikes API Endpoints', () => {
     })
 
     const manufacturersJson = await manufacturersRes.json()
-    if (manufacturersRes.status !== 200 || manufacturersJson.status !== 'success') {
+    if (
+      manufacturersRes.status !== 200 ||
+      manufacturersJson.status !== 'success'
+    ) {
       throw new Error('メーカー一覧の取得に失敗しました')
     }
 

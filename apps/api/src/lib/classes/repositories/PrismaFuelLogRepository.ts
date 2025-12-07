@@ -1,10 +1,17 @@
-import { createFuelLogId, createMyUserBikeId, MyUserBikeId } from '@shared-types/index'
+import {
+  createFuelLogId,
+  createMyUserBikeId,
+  MyUserBikeId,
+} from '@shared-types/index'
 import { IFuelLogRepository } from '../../interfaces/IFuelLogRepository'
 import { PrismaRepositoryBase } from '../common/PrismaRepositoryBase'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
-export class PrismaFuelLogRepository extends PrismaRepositoryBase implements IFuelLogRepository {
+export class PrismaFuelLogRepository
+  extends PrismaRepositoryBase
+  implements IFuelLogRepository
+{
   async createFuelLog(fuelLog: FuelLogEntity): Promise<FuelLogEntity> {
     const created = await this.connection.tUserMyBikeFuelLog.create({
       data: {
@@ -62,13 +69,16 @@ export class PrismaFuelLogRepository extends PrismaRepositoryBase implements IFu
       take: searchParams.take,
     })
 
-    return fuelLogs.map((log) => new FuelLogEntity({
-      fuelLogId: createFuelLogId(log.id),
-      myUserBikeId: createMyUserBikeId(log.userMyBikeId),
-      amount: log.amount,
-      totalPrice: log.price,
-      mileage: log.mileage,
-      refueledAt: log.refueledAt,
-    }))
+    return fuelLogs.map(
+      (log) =>
+        new FuelLogEntity({
+          fuelLogId: createFuelLogId(log.id),
+          myUserBikeId: createMyUserBikeId(log.userMyBikeId),
+          amount: log.amount,
+          totalPrice: log.price,
+          mileage: log.mileage,
+          refueledAt: log.refueledAt,
+        })
+    )
   }
 }

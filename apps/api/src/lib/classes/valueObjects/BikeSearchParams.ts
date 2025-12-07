@@ -88,7 +88,9 @@ export class BikeSearchParams {
     return Number.isNaN(parsed) ? undefined : parsed
   }
 
-  static fromQueryParams(params: Record<string, string | undefined>): BikeSearchParams {
+  static fromQueryParams(
+    params: Record<string, string | undefined>
+  ): BikeSearchParams {
     return new BikeSearchParams({
       manufacturerOperator: params['mf-op'] as 'eq' | 'ne' | 'in' | undefined,
       manufacturerIds: params['mf'] ? params['mf'].split(',') : undefined,
@@ -99,7 +101,11 @@ export class BikeSearchParams {
       modelYearMax: this.parseNumber(params['model-year-max']),
       page: this.parseNumber(params['page']),
       pageSize: this.parseNumber(params['page-size']),
-      sortBy: params['sort-by'] as 'modelName' | 'displacement' | 'modelYear' | undefined,
+      sortBy: params['sort-by'] as
+        | 'modelName'
+        | 'displacement'
+        | 'modelYear'
+        | undefined,
       sortOrder: params['sort-order'] as 'asc' | 'desc' | undefined,
     })
   }

@@ -57,7 +57,10 @@ export class PrismaBikeRepository
     }
 
     // 排気量の範囲検索
-    if (params.displacementMin !== undefined || params.displacementMax !== undefined) {
+    if (
+      params.displacementMin !== undefined ||
+      params.displacementMax !== undefined
+    ) {
       where.displacement = {}
       if (params.displacementMin !== undefined) {
         where.displacement.gte = params.displacementMin
@@ -68,7 +71,10 @@ export class PrismaBikeRepository
     }
 
     // モデル年の範囲検索
-    if (params.modelYearMin !== undefined || params.modelYearMax !== undefined) {
+    if (
+      params.modelYearMin !== undefined ||
+      params.modelYearMax !== undefined
+    ) {
       where.modelYear = {}
       if (params.modelYearMin !== undefined) {
         where.modelYear.gte = params.modelYearMin

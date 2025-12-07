@@ -31,7 +31,9 @@ export const FuelLogRegisterRequestSchema = z.object({
   updateTotalMileage: z.boolean().default(false),
 })
 
-export type FuelLogRegisterRequest = z.infer<typeof FuelLogRegisterRequestSchema>
+export type FuelLogRegisterRequest = z.infer<
+  typeof FuelLogRegisterRequestSchema
+>
 
 /**
  * 燃料ログ一覧取得クエリパラメータのバリデーションスキーマ

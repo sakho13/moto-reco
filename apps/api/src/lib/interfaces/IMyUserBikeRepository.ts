@@ -1,9 +1,4 @@
-import {
-  BikeId,
-  MyUserBikeId,
-  UserBikeId,
-  UserId,
-} from '@shared-types/index'
+import { BikeId, MyUserBikeId, UserBikeId, UserId } from '@shared-types/index'
 import { MyUserBikeEntity } from '../classes/entities/MyUserBikeEntity'
 
 export type MyUserBikeDetail = {

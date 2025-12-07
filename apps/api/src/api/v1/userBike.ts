@@ -23,7 +23,10 @@ import { FuelLogService } from '../../lib/classes/services/FuelLogService'
 import { UserBikeService } from '../../lib/classes/services/UserBikeService'
 import { FuelLogSearchParams } from '../../lib/classes/valueObjects/FuelLogSearchParams'
 import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
-import { zodValidateJson, zodValidateQuery } from '../../lib/middlewares/zodValidation'
+import {
+  zodValidateJson,
+  zodValidateQuery,
+} from '../../lib/middlewares/zodValidation'
 
 const userBike = new Hono()
 
@@ -39,7 +42,11 @@ userBike.post(
       const userBikeRepo = new PrismaUserBikeRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const bikeRepo = new PrismaBikeRepository(t)
-      const service = new UserBikeService(userBikeRepo, myUserBikeRepo, bikeRepo)
+      const service = new UserBikeService(
+        userBikeRepo,
+        myUserBikeRepo,
+        bikeRepo
+      )
 
       return service.registerUserBike({
         bikeId: createBikeId(body.bikeId),
@@ -106,7 +113,10 @@ userBike.get('/bike/:myUserBikeId', honoAuthMiddleware, async (c) => {
     const bikeRepo = new PrismaBikeRepository(t)
     const service = new UserBikeService(userBikeRepo, myUserBikeRepo, bikeRepo)
 
-    return service.getMyUserBikeDetail(c.req.param('myUserBikeId'), createUserId(userId))
+    return service.getMyUserBikeDetail(
+      c.req.param('myUserBikeId'),
+      createUserId(userId)
+    )
   })
 
   return c.json<SuccessResponse<ApiResponseUserBikeDetail>>({
@@ -143,7 +153,11 @@ userBike.patch(
       const userBikeRepo = new PrismaUserBikeRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const bikeRepo = new PrismaBikeRepository(t)
-      const service = new UserBikeService(userBikeRepo, myUserBikeRepo, bikeRepo)
+      const service = new UserBikeService(
+        userBikeRepo,
+        myUserBikeRepo,
+        bikeRepo
+      )
 
       return service.updateMyUserBike({
         myUserBikeId: createMyUserBikeId(c.req.param('myUserBikeId')),

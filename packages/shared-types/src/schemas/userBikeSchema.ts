@@ -22,8 +22,8 @@ export const UserBikeRegisterRequestSchema = z.object({
     .min(1, 'ニックネームは1文字以上で指定してください')
     .max(50, 'ニックネームは50文字以内で指定してください')
     .optional(),
-  purchaseDate: z
-    .coerce.date({
+  purchaseDate: z.coerce
+    .date({
       invalid_type_error: '購入日は日付形式で指定してください',
     })
     .optional(),
@@ -44,7 +44,9 @@ export const UserBikeRegisterRequestSchema = z.object({
     .optional(),
 })
 
-export type UserBikeRegisterRequest = z.infer<typeof UserBikeRegisterRequestSchema>
+export type UserBikeRegisterRequest = z.infer<
+  typeof UserBikeRegisterRequestSchema
+>
 
 /**
  * ユーザーバイク更新リクエストのバリデーションスキーマ
@@ -58,8 +60,8 @@ export const UserBikeUpdateRequestSchema = z
       .max(50, 'ニックネームは50文字以内で指定してください')
       .nullable()
       .optional(),
-    purchaseDate: z
-      .coerce.date({
+    purchaseDate: z.coerce
+      .date({
         invalid_type_error: '購入日は日付形式で指定してください',
       })
       .nullable()

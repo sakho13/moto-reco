@@ -662,11 +662,36 @@ describe('UserBike API Endpoints', () => {
       getFuelLogsTestMyUserBikeId = bikeJson.data.myUserBikeId
 
       const fuelLogsData = [
-        { refueledAt: '2024-01-01T10:00:00.000Z', mileage: 1000, amount: 10.0, totalPrice: 1500 },
-        { refueledAt: '2024-02-01T10:00:00.000Z', mileage: 1500, amount: 12.0, totalPrice: 1800 },
-        { refueledAt: '2024-03-01T10:00:00.000Z', mileage: 2000, amount: 11.5, totalPrice: 1700 },
-        { refueledAt: '2024-04-01T10:00:00.000Z', mileage: 2500, amount: 13.0, totalPrice: 2000 },
-        { refueledAt: '2024-05-01T10:00:00.000Z', mileage: 3000, amount: 10.5, totalPrice: 1600 },
+        {
+          refueledAt: '2024-01-01T10:00:00.000Z',
+          mileage: 1000,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+        {
+          refueledAt: '2024-02-01T10:00:00.000Z',
+          mileage: 1500,
+          amount: 12.0,
+          totalPrice: 1800,
+        },
+        {
+          refueledAt: '2024-03-01T10:00:00.000Z',
+          mileage: 2000,
+          amount: 11.5,
+          totalPrice: 1700,
+        },
+        {
+          refueledAt: '2024-04-01T10:00:00.000Z',
+          mileage: 2500,
+          amount: 13.0,
+          totalPrice: 2000,
+        },
+        {
+          refueledAt: '2024-05-01T10:00:00.000Z',
+          mileage: 3000,
+          amount: 10.5,
+          totalPrice: 1600,
+        },
       ]
 
       for (const data of fuelLogsData) {
@@ -704,12 +729,15 @@ describe('UserBike API Endpoints', () => {
     })
 
     test('存在しないバイクIDの場合は404となる', async () => {
-      const res = await app.request(`/api/v1/user-bike/bike/${randomUUID()}/fuel-logs`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${randomUUID()}/fuel-logs`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(404)
@@ -811,12 +839,15 @@ describe('UserBike API Endpoints', () => {
       const bikeJson = await bikeRes.json()
       const emptyBikeId = bikeJson.data.myUserBikeId
 
-      const res = await app.request(`/api/v1/user-bike/bike/${emptyBikeId}/fuel-logs`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${emptyBikeId}/fuel-logs`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(200)
