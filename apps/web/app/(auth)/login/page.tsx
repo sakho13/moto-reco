@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
-
 import { useAuth } from '@/lib/hooks/useAuth'
 
 export default function LoginPage() {
