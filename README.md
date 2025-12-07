@@ -12,6 +12,12 @@
 - **`api`**: Hono バックエンドAPI
 - **`docs`**: Next.js ドキュメントサイト / OpenAPI仕様書 (http://localhost:3001)
 
+#### ポート番号
+
+- Webアプリ: `WEB_PORT` (デフォルト: 3000)
+- ドキュメントサイト: `DOCS_PORT` (デフォルト: 3001)
+- APIサーバー: `API_PORT` (デフォルト: 3002)
+
 ### Packages
 
 - **`@repo/ui`**: React コンポーネントライブラリ
