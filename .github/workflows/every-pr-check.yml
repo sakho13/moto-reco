@@ -1,0 +1,115 @@
+name: Every PR Check
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+
+jobs:
+  lint-build:
+    name: Lint and Build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ./package.json
+          cache: "pnpm"
+          cache-dependency-path: "./package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./
+        run: pnpm install
+
+      - name: Run lint
+        working-directory: ./
+        run: npm run lint
+
+      - name: Run builds
+        working-directory: ./
+        run: npm run build
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    environment:
+      name: test
+
+    services:
+      db:
+        image: postgres:17
+        env:
+          POSTGRES_USER: motoreco_user
+          POSTGRES_PASSWORD: motoreco_password
+          POSTGRES_DB: motoreco_db
+          TZ: Asia/Tokyo
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      localstack:
+        image: localstack/localstack:latest
+        ports:
+          - "4566:4566"
+          - "4510-4559:4510-4559"
+        env:
+          SERVICES: s3,ssm,secretsmanager,events,sqs,lambda,sts,iam
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          DEBUG: "1"
+          LOCALSTACK_DATA_DIR: /var/lib/localstack
+          LS_LOG: trace
+        volumes:
+          - "./development/localstack/init:/etc/localstack/init/ready.d"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Copy test .env
+        run: cp .env.local .env
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ./package.json
+          cache: "pnpm"
+          cache-dependency-path: "./package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./
+        run: pnpm install
+
+      - name: install firebase-tools
+        run: |
+          npm install -g firebase-tools@14.7.0
+
+      - name: Set up database
+        run: |
+          pnpm turbo db:generate
+          pnpm turbo db:migrate
+          pnpm turbo db:seed
+
+      - name: Start Firebase Emulator (バックグラウンド)
+        working-directory: ./development/firebase_emulator
+        run: |
+          npx firebase emulators:start \
+            --only auth &
+          npx wait-on tcp:9099 tcp:8080 tcp:4000
+
+      - name: Run tests
+        working-directory: ./
+        run: pnpm test
