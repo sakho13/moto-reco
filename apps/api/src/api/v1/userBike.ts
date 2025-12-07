@@ -7,12 +7,14 @@ import {
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
   createBikeId,
+  createFuelLogId,
   createMyUserBikeId,
   createUserId,
   SuccessResponse,
   UserBikeRegisterRequestSchema,
   UserBikeUpdateRequestSchema,
   FuelLogRegisterRequestSchema,
+  FuelLogUpdateRequestSchema,
   FuelLogListQuerySchema,
 } from '@shared-types/index'
 import { PrismaBikeRepository } from '../../lib/classes/repositories/PrismaBikeRepository'
@@ -274,6 +276,48 @@ userBike.post(
         message: '燃料ログ登録成功',
       },
       201
+    )
+  }
+)
+
+userBike.patch(
+  '/bike/:myUserBikeId/fuel-logs',
+  honoAuthMiddleware,
+  zodValidateJson(FuelLogUpdateRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+
+      return service.updateFuelLog({
+        fuelLogId: createFuelLogId(body.fuelLogId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        refueledAt: body.refueledAt,
+        mileage: body.mileage,
+        amount: body.amount,
+        totalPrice: body.totalPrice,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseFuelLogDetail>>(
+      {
+        status: 'success',
+        data: {
+          fuelLogId: result.id,
+          refueledAt: result.refueledAt.toISOString(),
+          mileage: result.mileage,
+          amount: result.amount,
+          totalPrice: result.totalPrice,
+        },
+        message: '燃料ログ更新成功',
+      },
+      200
     )
   }
 )

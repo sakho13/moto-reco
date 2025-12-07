@@ -812,7 +812,12 @@ components:
           default: false
     MyUserBikeFuelLogUpdateDetail:
       type: object
+      required:
+        - fuelLogId
       properties:
+        fuelLogId:
+          type: string
+          description: 燃料ログID
         refueledAt:
           type: string
           description: 給油日時（ISO 8601形式）

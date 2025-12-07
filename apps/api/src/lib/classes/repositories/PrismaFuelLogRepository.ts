@@ -1,6 +1,7 @@
 import {
   createFuelLogId,
   createMyUserBikeId,
+  FuelLogId,
   MyUserBikeId,
 } from '@shared-types/index'
 import { IFuelLogRepository } from '../../interfaces/IFuelLogRepository'
@@ -80,5 +81,69 @@ export class PrismaFuelLogRepository
           refueledAt: log.refueledAt,
         })
     )
+  }
+
+  async findFuelLogById(
+    fuelLogId: FuelLogId,
+    myUserBikeId: MyUserBikeId
+  ): Promise<FuelLogEntity | null> {
+    const fuelLog = await this.connection.tUserMyBikeFuelLog.findFirst({
+      where: {
+        id: fuelLogId,
+        userMyBikeId: myUserBikeId,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        amount: true,
+        price: true,
+        mileage: true,
+        refueledAt: true,
+      },
+    })
+
+    if (!fuelLog) {
+      return null
+    }
+
+    return new FuelLogEntity({
+      fuelLogId: createFuelLogId(fuelLog.id),
+      myUserBikeId: createMyUserBikeId(fuelLog.userMyBikeId),
+      amount: fuelLog.amount,
+      totalPrice: fuelLog.price,
+      mileage: fuelLog.mileage,
+      refueledAt: fuelLog.refueledAt,
+    })
+  }
+
+  async updateFuelLog(fuelLog: FuelLogEntity): Promise<FuelLogEntity> {
+    const updated = await this.connection.tUserMyBikeFuelLog.update({
+      where: {
+        id: fuelLog.id,
+      },
+      data: {
+        amount: fuelLog.amount,
+        price: fuelLog.totalPrice,
+        mileage: fuelLog.mileage,
+        refueledAt: fuelLog.refueledAt,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        amount: true,
+        price: true,
+        mileage: true,
+        refueledAt: true,
+      },
+    })
+
+    return new FuelLogEntity({
+      fuelLogId: createFuelLogId(updated.id),
+      myUserBikeId: createMyUserBikeId(updated.userMyBikeId),
+      amount: updated.amount,
+      totalPrice: updated.price,
+      mileage: updated.mileage,
+      refueledAt: updated.refueledAt,
+    })
   }
 }
