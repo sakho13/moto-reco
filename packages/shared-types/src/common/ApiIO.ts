@@ -53,3 +53,65 @@ export type ApiResponseManufacturer = {
     country: string
   }[]
 }
+
+export type ApiResponseBikeSearch = {
+  bikes: {
+    bikeId: string
+    manufacturerId: string
+    manufacturer: string
+    modelName: string
+    displacement: number
+    modelYear: number
+  }[]
+}
+
+export type ApiResponseUserBikeRegister = {
+  userBikeId: string
+  myUserBikeId: string
+}
+
+export type ApiResponseUserBikeList = {
+  bikes: {
+    userBikeId: string
+    myUserBikeId: string
+    manufacturerName: string
+    bikeId: string
+    modelName: string
+    nickname: string | null
+    purchaseDate: string | null
+    purchasePrice: number | null
+    purchaseMileage: number | null
+    totalMileage: number
+    displacement: number
+    modelYear: number
+    createdAt: string
+    updatedAt: string
+  }[]
+}
+
+export type ApiResponseUserBikeDetail = {
+  userBikeId: string
+  myUserBikeId: string
+  manufacturerName: string
+  bikeId: string
+  modelName: string
+  nickname: string | null
+  purchaseDate: string | null
+  purchasePrice: number | null
+  purchaseMileage: number | null
+  totalMileage: number
+  displacement: number
+  modelYear: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type ApiResponseFuelLogDetail = {
+  fuelLogId: string
+  refueledAt: string
+  mileage: number
+  amount: number
+  totalPrice: number
+}
+
+export type ApiResponseFuelLogList = ApiResponseFuelLogDetail[]

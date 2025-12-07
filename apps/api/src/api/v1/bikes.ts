@@ -1,7 +1,13 @@
 import { Hono } from 'hono'
 import { prisma } from '@packages/database'
-import { ApiResponseManufacturer, SuccessResponse } from '@shared-types/index'
+import {
+  ApiResponseManufacturer,
+  ApiResponseBikeSearch,
+  SuccessResponse,
+} from '@shared-types/index'
+import { PrismaBikeRepository } from '../../lib/classes/repositories/PrismaBikeRepository'
 import { PrismaManufacturerRepository } from '../../lib/classes/repositories/PrismaManufacturerRepository'
+import { BikeSearchParams } from '../../lib/classes/valueObjects/BikeSearchParams'
 import { honoAuthMiddleware } from '../../lib/middlewares/honoAuth'
 
 const bikes = new Hono()
@@ -26,9 +32,28 @@ bikes.get('/manufacturers', honoAuthMiddleware, async (c) => {
 })
 
 bikes.get('/search', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const query = c.req.query()
 
-  return c.json({})
+  // クエリパラメータからBikeSearchParamsを生成
+  const searchParams = BikeSearchParams.fromQueryParams(query)
+
+  const bikeRepo = new PrismaBikeRepository(prisma)
+  const bikesResult = await bikeRepo.search(searchParams)
+
+  return c.json<SuccessResponse<ApiResponseBikeSearch>>({
+    status: 'success',
+    data: {
+      bikes: bikesResult.map((bike) => ({
+        bikeId: bike.id,
+        manufacturerId: bike.manufacturerId,
+        manufacturer: bike.manufacturer,
+        modelName: bike.modelName,
+        displacement: bike.displacement,
+        modelYear: bike.modelYear,
+      })),
+    },
+    message: 'バイク検索成功',
+  })
 })
 
 export default bikes

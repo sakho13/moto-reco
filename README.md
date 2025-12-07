@@ -1,135 +1,216 @@
-# Turborepo starter
+# moto-reco
 
-This Turborepo starter is maintained by the Turborepo core team.
+バイクユーザー向けの記録・管理アプリケーション
 
-## Using this example
+## プロジェクト構成
 
-Run the following command:
+このプロジェクトは [Turborepo](https://turborepo.com/) を使用したモノレポ構成です。
 
-```sh
-npx create-turbo@latest
+### Apps
+
+- **`web`**: Next.js フロントエンドアプリケーション (http://localhost:3000)
+- **`api`**: Hono バックエンドAPI
+- **`docs`**: Next.js ドキュメントサイト / OpenAPI仕様書 (http://localhost:3001)
+
+### Packages
+
+- **`@repo/ui`**: React コンポーネントライブラリ
+- **`@packages/database`**: Prisma データベースパッケージ
+- **`@packages/shared-types`**: 共有型定義
+- **`@packages/shared-utils`**: 共有ユーティリティ
+- **`@packages/firebase-auth-server`**: Firebase 認証サーバー
+- **`@repo/eslint-config`**: ESLint 設定
+- **`@repo/typescript-config`**: TypeScript 設定
+
+すべてのパッケージとアプリは [TypeScript](https://www.typescriptlang.org/) で書かれています。
+
+## 技術スタック
+
+- **フロントエンド**: Next.js, React
+- **バックエンド**: Hono
+- **データベース**: PostgreSQL, Prisma
+- **認証**: Firebase Authentication
+- **モノレポ**: Turborepo
+- **パッケージマネージャー**: pnpm
+- **開発ツール**: TypeScript, ESLint, Prettier, Vitest
+
+## 開発環境のセットアップ
+
+### 必要要件
+
+- Node.js >= 18
+- pnpm 9.15.4
+- Docker & Docker Compose
+
+### 環境変数の設定
+
+`.env.local` ファイルをプロジェクトルートに作成し、必要な環境変数を設定してください。
+
+```bash
+# データベース
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+DATABASE_USER=user
+DATABASE_PASSWORD=password
+DATABASE_NAME=dbname
+
+# Firebase
+USE_FIREBASE_EMULATOR=true
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=your-client-email
+FIREBASE_PRIVATE_KEY=your-private-key
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your-measurement-id
+
+# AWS (LocalStack)
+AWS_REGION=ap-northeast-1
+AWS_ACCESS_KEY_ID=test
+AWS_SECRET_ACCESS_KEY=test
 ```
 
-## What's inside?
+### インフラの起動
 
-This Turborepo includes the following packages/apps:
+Docker Compose でローカル開発環境を起動します：
 
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+```bash
+docker compose up -d
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+起動されるサービス：
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+- **PostgreSQL**: ポート 5432
+- **Firebase Emulator**: ポート 4000 (UI), 9099 (Auth)
+- **LocalStack**: ポート 4566 (S3, SSM, SecretsManager等)
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+### データベースのセットアップ
 
-### Develop
+```bash
+# スキーマをデータベースに適用
+pnpm turbo db:deploy
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+# Prisma Client の型生成
+pnpm turbo db:generate
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### 依存関係のインストール
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```bash
+pnpm install
 ```
 
-### Remote Caching
+## 開発サーバーの起動
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+### すべてのアプリを起動
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```bash
+pnpm dev
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### 特定のアプリを起動
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+```bash
+# Webアプリのみ
+pnpm dev:web
 
+# APIサーバーのみ
+pnpm dev:api
+
+# ドキュメントサイトのみ
+pnpm dev:docs
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+## データベース操作
+
+```bash
+# マイグレーションファイルの生成
+pnpm turbo db:migrate
+
+# Prisma Client の型生成
+pnpm turbo db:generate
+
+# スキーマをデータベースに適用
+pnpm turbo db:deploy
+
+# Prisma Studio の起動 (packages/database 内で実行)
+cd packages/database
+pnpm prisma studio
 ```
 
-## Useful Links
+## ビルド
 
-Learn more about the power of Turborepo:
+```bash
+# すべてのアプリとパッケージをビルド
+pnpm build
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+# 特定のアプリをビルド
+pnpm turbo build --filter=web
+pnpm turbo build --filter=api
+```
+
+## テスト
+
+```bash
+# すべてのテストを実行
+pnpm test
+
+# テストをウォッチモードで実行
+pnpm turbo test:watch
+
+# カバレッジレポート付きでテスト
+pnpm turbo test:coverage
+```
+
+## リント・フォーマット
+
+```bash
+# リント実行
+pnpm lint
+
+# コードフォーマット
+pnpm format
+
+# 型チェック
+pnpm check-types
+```
+
+## 開発ドキュメント
+
+詳細な開発ルールと設計ドキュメントは `development/` ディレクトリを参照してください：
+
+- `development/docs/00_overview/`: 開発全体の概要
+- `development/docs/01_domain/`: ドメイン設計
+- `development/docs/02_design/`: システム設計
+- `development/docs/03_development/`: 開発ルール
+  - `coding.md`: コーディング規約
+  - `git.md`: Git運用ルール
+
+## Turborepo について
+
+このプロジェクトでは Turborepo を使用してモノレポを管理しています。
+
+### 便利なコマンド
+
+```bash
+# 特定のパッケージのみビルド
+pnpm turbo build --filter=web
+
+# 特定のパッケージと依存関係をビルド
+pnpm turbo build --filter=web...
+
+# 並列実行の制御
+pnpm turbo build --concurrency=2
+
+# キャッシュをクリア
+pnpm turbo clean
+```
+
+### 参考リンク
+
+- [Turborepo Documentation](https://turborepo.com/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Hono Documentation](https://hono.dev/)
+- [Prisma Documentation](https://www.prisma.io/docs)
