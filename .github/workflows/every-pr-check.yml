@@ -75,8 +75,6 @@ jobs:
           DEBUG: "1"
           LOCALSTACK_DATA_DIR: /var/lib/localstack
           LS_LOG: trace
-        volumes:
-          - "./development/localstack/init:/etc/localstack/init/ready.d"
 
     steps:
       - name: Checkout repository
