@@ -7,7 +7,6 @@ import {
   type UserCredential,
   type User,
 } from 'firebase/auth'
-
 import { getFirebaseAuth } from './config'
 
 /**
