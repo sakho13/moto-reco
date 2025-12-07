@@ -113,3 +113,5 @@ export type ApiResponseFuelLogDetail = {
   amount: number
   totalPrice: number
 }
+
+export type ApiResponseFuelLogList = ApiResponseFuelLogDetail[]

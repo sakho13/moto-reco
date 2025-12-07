@@ -32,3 +32,15 @@ export const FuelLogRegisterRequestSchema = z.object({
 })
 
 export type FuelLogRegisterRequest = z.infer<typeof FuelLogRegisterRequestSchema>
+
+/**
+ * 燃料ログ一覧取得クエリパラメータのバリデーションスキーマ
+ */
+export const FuelLogListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  'per-size': z.coerce.number().int().min(1).max(100).default(20).optional(),
+  'sort-by': z.enum(['refueled-at', 'mileage']).optional(),
+  'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+})
+
+export type FuelLogListQuery = z.infer<typeof FuelLogListQuerySchema>

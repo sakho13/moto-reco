@@ -4,6 +4,7 @@ import { IMyUserBikeRepository } from '../../interfaces/IMyUserBikeRepository'
 import { ApiV1Error } from '../common/ApiV1Error'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
+import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
 type RegisterFuelLogParams = {
   myUserBikeId: MyUserBikeId
@@ -54,5 +55,22 @@ export class FuelLogService {
     }
 
     return createdFuelLog
+  }
+
+  public async getFuelLogs(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId,
+    searchParams: FuelLogSearchParams
+  ): Promise<FuelLogEntity[]> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      myUserBikeId,
+      userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    return await this.fuelLogRepository.findFuelLogs(myUserBikeId, searchParams)
   }
 }
