@@ -148,9 +148,12 @@ paths:
                     type: string
                     example: success
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ManufacturerDetail'
+                    type: object
+                    properties:
+                      manufacturers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ManufacturerDetail'
                   message:
                     type: string
                     example: メーカー一覧取得成功
@@ -255,9 +258,12 @@ paths:
                     type: string
                     example: success
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/BikeDetail'
+                    type: object
+                    properties:
+                      bikes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BikeDetail'
                   message:
                     type: string
                     example: バイク検索成功
@@ -333,9 +339,12 @@ paths:
                     type: string
                     example: success
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/UserBikeDetail'
+                    type: object
+                    properties:
+                      bikes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserBikeDetail'
                   message:
                     type: string
                     example: ユーザー所有バイク一覧取得成功
