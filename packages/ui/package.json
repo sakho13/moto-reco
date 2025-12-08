@@ -3,7 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": "./src/*.tsx"
+    "./button": {
+      "react-native": "./src/button.native.tsx",
+      "default": "./src/button.web.tsx"
+    },
+    "./card": {
+      "react-native": "./src/card.native.tsx",
+      "default": "./src/card.web.tsx"
+    },
+    "./code": {
+      "react-native": "./src/code.native.tsx",
+      "default": "./src/code.web.tsx"
+    }
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -22,5 +33,13 @@
   "dependencies": {
     "react": "catalog:",
     "react-dom": "catalog:"
+  },
+  "peerDependencies": {
+    "react-native": "*"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    }
   }
 }
