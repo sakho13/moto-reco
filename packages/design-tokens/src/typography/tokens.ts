@@ -1,4 +1,4 @@
-import type { TypographyTokens } from './types';
+import type { TypographyTokens } from './types'
 
 /**
  * タイポグラフィデザイントークン
@@ -68,4 +68,4 @@ export const typography: TypographyTokens = {
     wide: '0.025em',
     wider: '0.05em',
   },
-} as const;
+} as const

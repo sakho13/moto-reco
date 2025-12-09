@@ -1,4 +1,4 @@
-import type { BreakpointTokens } from './types';
+import type { BreakpointTokens } from './types'
 
 /**
  * レスポンシブブレークポイント
@@ -10,4 +10,4 @@ export const breakpoints: BreakpointTokens = {
   lg: '1024px',
   xl: '1280px',
   '2xl': '1536px',
-} as const;
+} as const

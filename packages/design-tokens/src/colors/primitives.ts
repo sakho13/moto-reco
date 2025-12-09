@@ -1,4 +1,4 @@
-import type { PrimitiveColors } from './types';
+import type { PrimitiveColors } from './types'
 
 /**
  * プリミティブカラーパレット
@@ -70,4 +70,4 @@ export const primitiveColors: PrimitiveColors = {
     900: 'oklch(20.34% 0.034 258.28)',
     950: 'oklch(17.21% 0.026 259.12)',
   },
-} as const;
+} as const

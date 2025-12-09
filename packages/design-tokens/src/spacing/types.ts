@@ -31,9 +31,9 @@ export type SpacingScale =
   | 64
   | 72
   | 80
-  | 96;
+  | 96
 
 /**
  * スペーシングトークン (rem単位)
  */
-export type SpacingTokens = Record<SpacingScale, string>;
+export type SpacingTokens = Record<SpacingScale, string>

@@ -5,7 +5,7 @@
  * - C (Chroma): 0-0.4+
  * - H (Hue): 0-360度
  */
-export type OklchColor = `oklch(${string}% ${string} ${string})`;
+export type OklchColor = `oklch(${string}% ${string} ${string})`
 
 /**
  * カラースケールの階調
@@ -21,12 +21,12 @@ export type ColorScale =
   | 700
   | 800
   | 900
-  | 950;
+  | 950
 
 /**
  * カラーパレットオブジェクト
  */
-export type ColorPalette = Record<ColorScale, OklchColor>;
+export type ColorPalette = Record<ColorScale, OklchColor>
 
 /**
  * プリミティブカラー名
@@ -36,9 +36,9 @@ export type PrimitiveColorName =
   | 'brickEmber'
   | 'honeydew'
   | 'frostedBlue'
-  | 'oxfordNavy';
+  | 'oxfordNavy'
 
 /**
  * すべてのプリミティブカラー
  */
-export type PrimitiveColors = Record<PrimitiveColorName, ColorPalette>;
+export type PrimitiveColors = Record<PrimitiveColorName, ColorPalette>
