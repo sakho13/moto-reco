@@ -1018,7 +1018,12 @@ describe('UserBike API Endpoints', () => {
       expect(json.status).toBe('error')
       expect(json.errorCode).toBe('VALIDATION_ERROR')
       expect(Array.isArray(json.details)).toBe(true)
-      expect(json.details.some((d: { message: string }) => d.message === 'いずれかの更新項目を指定してください')).toBe(true)
+      expect(
+        json.details.some(
+          (d: { message: string }) =>
+            d.message === 'いずれかの更新項目を指定してください'
+        )
+      ).toBe(true)
     })
 
     test('不正な入力の場合はバリデーションエラーとなる', async () => {
