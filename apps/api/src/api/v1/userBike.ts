@@ -80,10 +80,7 @@ userBike.post(
         totalMileage: body.totalMileage,
       })
 
-      return service.getMyUserBikeDetail(
-        myUserBike.id,
-        createUserId(userId)
-      )
+      return service.getMyUserBikeDetail(myUserBike.id, createUserId(userId))
     })
 
     return c.json<SuccessResponse<ApiResponseUserBikeDetail>>(
