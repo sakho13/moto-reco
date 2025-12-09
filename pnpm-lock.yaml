@@ -184,6 +184,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@repo/design-tokens':
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -246,6 +249,18 @@ importers:
       tsx:
         specifier: 'catalog:'
         version: 4.20.6
+
+  packages/design-tokens:
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.2
 
   packages/eslint-config:
     devDependencies:
