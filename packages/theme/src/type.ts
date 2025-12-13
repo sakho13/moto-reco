@@ -3,6 +3,7 @@ export type ThemeTokens = {
     background: string
     cloud: string
     cloudHover: string
+    cloudActive: string
     // cloudActive: string
 
     // ブランドカラー
@@ -10,15 +11,43 @@ export type ThemeTokens = {
     productHover: string
     productActive: string
 
+    // 成功カラー
     success: string
+    successHover: string
+    successActive: string
+
+    // 警告・エラーカラー
     danger: string
+    dangerHover: string
+    dangerActive: string
+
+    // 注意カラー
     warning: string
+    warningHover: string
+    warningActive: string
+
+    // 外部サービス連携カラー
     social: string
+    socialHover: string
+    socialActive: string
 
     // テキスト文字色
     ink: string
     inkLight: string
     inkDark: string
+  }
+  spacing: {
+    0: string
+    1: string
+    2: string
+    3: string
+    4: string
+    5: string
+    6: string
+    8: string
+    10: string
+    12: string
+    16: string
   }
   fontSizes: {
     xs: string
@@ -26,15 +55,35 @@ export type ThemeTokens = {
     md: string
     lg: string
     xl: string
+    '2xl': string
+    '3xl': string
+  }
+  fontWeights: {
+    thin: number
+    normal: number
+    medium: number
+    bold: number
+  }
+  lintHeight: {
+    tight: number
+    normal: number
+    relaxed: number
   }
   radius: {
+    none: string
     sm: string
     md: string
     lg: string
+    full: string
   }
   shadows: {
     sm: string
     md: string
     lg: string
+  }
+  transitions: {
+    fast: string
+    base: string
+    slow: string
   }
 }

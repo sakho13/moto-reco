@@ -1,0 +1,19 @@
+/**
+ * Label Component Styles
+ * デザイントークンを使用したラベルスタイル
+ */
+
+.label {
+  display: inline-block;
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ink);
+  line-height: var(--line-height-normal);
+}
+
+.required {
+  margin-left: var(--spacing-1);
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}

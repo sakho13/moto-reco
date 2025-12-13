@@ -1,0 +1,150 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  font-family: inherit;
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  outline: none;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-product);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== Variants ===== */
+
+/* Primary */
+.button.primary {
+  background-color: var(--color-product);
+  color: white;
+}
+
+.button.primary:hover:not(:disabled) {
+  background-color: var(--color-productHover);
+}
+
+.button.primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Danger */
+.button.danger {
+  background-color: var(--color-danger);
+  color: white;
+}
+
+.button.danger:hover:not(:disabled) {
+  background-color: var(--color-dangerHover);
+}
+
+.button.danger:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Social */
+.button.social {
+  background-color: var(--color-social);
+  color: white;
+}
+
+.button.social:hover:not(:disabled) {
+  background-color: var(--color-socialHover);
+}
+
+.button.social:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* ===== Sizes ===== */
+
+/* Small */
+.button.sm {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-sm);
+  min-height: 2rem;
+}
+
+/* Medium (default) */
+.button.md {
+  padding: var(--spacing-3) var(--spacing-4);
+  font-size: var(--font-size-md);
+  min-height: 2.5rem;
+}
+
+/* Large */
+.button.lg {
+  padding: var(--spacing-4) var(--spacing-6);
+  font-size: var(--font-size-lg);
+  min-height: 3rem;
+}
+
+/* ===== Full Width ===== */
+
+.button.fullWidth {
+  width: 100%;
+}
+
+/* ===== Loading State ===== */
+
+.button.loading {
+  pointer-events: none;
+}
+
+.hiddenText {
+  opacity: 0;
+}
+
+/* Spinner */
+.spinner {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinnerSvg {
+  width: 1.25rem;
+  height: 1.25rem;
+  animation: spin 1s linear infinite;
+}
+
+.button.sm .spinnerSvg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.button.lg .spinnerSvg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.spinnerCircle {
+  opacity: 0.25;
+}
+
+.spinnerPath {
+  opacity: 0.75;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

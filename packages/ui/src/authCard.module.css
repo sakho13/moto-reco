@@ -1,0 +1,60 @@
+.authCard {
+  width: 100%;
+  max-width: 28rem;
+  padding: var(--spacing-8);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.header {
+  margin-bottom: var(--spacing-6);
+  text-align: center;
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  line-height: var(--line-height-tight);
+  margin: 0;
+  user-select: none;
+}
+
+.content {
+  margin-bottom: var(--spacing-6);
+}
+
+.footer {
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-cloud);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.footer a {
+  color: var(--color-product);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  margin-left: var(--spacing-1);
+  transition: color var(--transition-base);
+}
+
+.footer a:hover {
+  color: var(--color-productHover);
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .authCard {
+    max-width: 100%;
+    padding: var(--spacing-6);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
+  }
+}
