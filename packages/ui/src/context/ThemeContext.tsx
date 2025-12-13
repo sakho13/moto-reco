@@ -35,35 +35,35 @@ export const ThemeProvider = ({
 
     // colors
     Object.entries(theme.colors).forEach(([key, value]) => {
-      root.style.setProperty(`--color-${key}`, value as string)
+      root.style.setProperty(`--color-${key}`, String(value))
     })
     // spacing
     Object.entries(theme.spacing).forEach(([key, value]) => {
-      root.style.setProperty(`--spacing-${key}`, value as string)
+      root.style.setProperty(`--spacing-${key}`, String(value))
     })
     // fontWeights
     Object.entries(theme.fontWeights).forEach(([key, value]) => {
-      root.style.setProperty(`--font-weight-${key}`, value as string)
+      root.style.setProperty(`--font-weight-${key}`, String(value))
     })
     // fontSize
     Object.entries(theme.fontSizes).forEach(([key, value]) => {
-      root.style.setProperty(`--font-size-${key}`, value as string)
+      root.style.setProperty(`--font-size-${key}`, String(value))
     })
     // lineHeight
     Object.entries(theme.lintHeight).forEach(([key, value]) => {
-      root.style.setProperty(`--line-height-${key}`, value as string)
+      root.style.setProperty(`--line-height-${key}`, String(value))
     })
     // radius
     Object.entries(theme.radius).forEach(([key, value]) => {
-      root.style.setProperty(`--radius-${key}`, value as string)
+      root.style.setProperty(`--radius-${key}`, String(value))
     })
     // shadows
     Object.entries(theme.shadows).forEach(([key, value]) => {
-      root.style.setProperty(`--shadow-${key}`, value as string)
+      root.style.setProperty(`--shadow-${key}`, String(value))
     })
     // transitions
     Object.entries(theme.transitions).forEach(([key, value]) => {
-      root.style.setProperty(`--transition-${key}`, value as string)
+      root.style.setProperty(`--transition-${key}`, String(value))
     })
   }, [themeName])
 
