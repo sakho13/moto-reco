@@ -11,7 +11,7 @@
     "check-types1": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
+    "@packages/ui": "workspace:*",
     "@scalar/nextjs-api-reference": "0.9.2",
     "next": "catalog:",
     "react": "catalog:",

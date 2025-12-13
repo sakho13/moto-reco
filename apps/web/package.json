@@ -11,8 +11,8 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
-    "@repo/design-tokens": "workspace:*",
+    "@packages/shared-types": "workspace:*",
+    "@packages/ui": "workspace:*",
     "firebase": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
