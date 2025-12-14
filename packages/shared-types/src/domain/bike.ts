@@ -24,7 +24,7 @@ export type MyUserBikeId = string & { readonly __brand: unique symbol }
 export const createMyUserBikeId = (id: string): MyUserBikeId =>
   id as MyUserBikeId
 
-import { UserId } from './user.js'
+import { UserId } from './user'
 
 export type MyUserBike = {
   bikeId: BikeId

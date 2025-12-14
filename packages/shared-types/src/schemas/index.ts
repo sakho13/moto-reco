@@ -1,3 +1,3 @@
-export * from './userProfileSchema.js'
-export * from './userBikeSchema.js'
-export * from './fuelLogSchema.js'
+export * from './userProfileSchema'
+export * from './userBikeSchema'
+export * from './fuelLogSchema'

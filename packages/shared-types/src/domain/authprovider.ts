@@ -1,4 +1,4 @@
-import { UserId } from './user.js'
+import { UserId } from './user'
 
 export const ProviderTypeMap = {
   FIREBASE_EMAIL: 'FIREBASE_EMAIL',

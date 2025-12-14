@@ -11,7 +11,7 @@ function getFirebaseApp() {
     throw new Error('🐛 API Firebase設定パラメータが未設定')
   }
 
-  const useEmulator = process.env.USE_FIREBASE_EMULATOR === 'true'
+  const useEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true'
   if (useEmulator) {
     console.warn('⚠️ Firebase Auth Emulatorを使用しています')
     process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099'
@@ -45,6 +45,6 @@ function getFirebaseApp() {
  * - FIREBASE_PROJECT_ID
  * - FIREBASE_CLIENT_EMAIL
  * - FIREBASE_PRIVATE_KEY
- * - USE_FIREBASE_EMULATOR (エミュレータ使用時に'true'に設定)
+ * - NEXT_PUBLIC_USE_FIREBASE_EMULATOR (エミュレータ使用時に'true'に設定)
  */
 export const firebaseAdminAuthClient = getAuth(getFirebaseApp())
