@@ -6,6 +6,6 @@ export interface AuthContextType {
   signInWithEmail: (email: string, password: string) => Promise<void>
   registerWithEmail: (email: string, password: string) => Promise<void>
   signInWithGoogle: () => Promise<void>
-  signOut: () => Promise<void>
+  signOut: () => Promise<boolean>
   getIdToken: () => Promise<string | null>
 }

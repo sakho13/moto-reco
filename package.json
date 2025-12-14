@@ -14,11 +14,13 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
-    "prettier": "catalog:",
-    "turbo": "2.6.1",
-    "typescript": "catalog:",
+    "@tailwindcss/postcss": "4.1.18",
     "dotenv": "catalog:",
-    "dotenv-cli": "catalog:"
+    "dotenv-cli": "catalog:",
+    "prettier": "catalog:",
+    "tailwindcss": "4.1.18",
+    "turbo": "2.6.1",
+    "typescript": "catalog:"
   },
   "packageManager": "pnpm@9.15.4",
   "engines": {

@@ -41,7 +41,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }
 
   const handleSignOut = async () => {
-    await authService.signOut()
+    try {
+      await authService.signOut()
+      return true
+    } catch {
+      return false
+    }
   }
 
   const handleGetIdToken = async (): Promise<string | null> => {

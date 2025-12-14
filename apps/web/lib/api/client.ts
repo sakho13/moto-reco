@@ -36,11 +36,6 @@ export const apiGet = async <T>(url: string): Promise<T> => {
   const response = await authenticatedFetch(url, {
     method: 'GET',
   })
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`)
-  }
-
   return response.json()
 }
 
@@ -52,11 +47,6 @@ export const apiPost = async <T>(url: string, data: unknown): Promise<T> => {
     method: 'POST',
     body: JSON.stringify(data),
   })
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`)
-  }
-
   return response.json()
 }
 
@@ -68,11 +58,6 @@ export const apiPut = async <T>(url: string, data: unknown): Promise<T> => {
     method: 'PUT',
     body: JSON.stringify(data),
   })
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`)
-  }
-
   return response.json()
 }
 
@@ -83,10 +68,5 @@ export const apiDelete = async <T>(url: string): Promise<T> => {
   const response = await authenticatedFetch(url, {
     method: 'DELETE',
   })
-
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.statusText}`)
-  }
-
   return response.json()
 }
