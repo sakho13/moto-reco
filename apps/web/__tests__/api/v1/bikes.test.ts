@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeAll } from 'vitest'
-import { app } from '@/lib/api/server/app'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
+import { app } from '@/lib/api/server/app'
 
 describe('Bikes API Endpoints', () => {
   let token: string

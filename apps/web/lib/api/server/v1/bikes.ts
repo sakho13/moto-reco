@@ -5,10 +5,10 @@ import {
   ApiResponseBikeSearch,
   SuccessResponse,
 } from '@packages/shared-types'
+import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaManufacturerRepository } from '../repositories/PrismaManufacturerRepository'
 import { BikeSearchParams } from '../valueObjects/BikeSearchParams'
-import { honoAuthMiddleware } from '../middlewares/honoAuth'
 
 const bikes = new Hono()
 

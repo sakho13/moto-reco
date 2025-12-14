@@ -4,12 +4,12 @@ import {
   createUserBikeId,
   UserId,
 } from '@packages/shared-types'
+import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
+import { UserBikeEntity } from '../entities/UserBikeEntity'
+import { ApiV1Error } from '../errors/ApiV1Error'
 import { IBikeRepository } from '../interfaces/IBikeRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
-import { UserBikeEntity } from '../entities/UserBikeEntity'
 
 type RegisterUserBikeParams = {
   bikeId: BikeId

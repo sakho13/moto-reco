@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
-import { app } from '@/lib/api/server/app'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
+import { app } from '@/lib/api/server/app'
 
 describe('User API Endpoints', () => {
   describe('POST /api/v1/user/profile', () => {

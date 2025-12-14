@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto'
 import { beforeAll, describe, expect, test } from 'vitest'
 import { prisma } from '@packages/database'
-import { app } from '@/lib/api/server/app'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
+import { app } from '@/lib/api/server/app'
 
 describe('UserBike API Endpoints', () => {
   let token: string

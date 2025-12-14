@@ -4,11 +4,11 @@ import {
   MyUserBikeId,
   UserId,
 } from '@packages/shared-types'
-import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { ApiV1Error } from '../errors/ApiV1Error'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
+import { ApiV1Error } from '../errors/ApiV1Error'
+import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
+import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
 type RegisterFuelLogParams = {

@@ -21,7 +21,7 @@ import {
 
 export function RegisterCard() {
   const router = useRouter()
-  const { registerWithEmail, getIdToken } = useAuth()
+  const { registerWithEmail } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

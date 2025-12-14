@@ -7,11 +7,11 @@ import {
   UserProfileUpdateRequestSchema,
 } from '@packages/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
+import { honoAuthMiddleware } from '../middlewares/honoAuth'
+import { zodValidateJson } from '../middlewares/zodValidation'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
 import { UserService } from '../services/UserService'
-import { honoAuthMiddleware } from '../middlewares/honoAuth'
-import { zodValidateJson } from '../middlewares/zodValidation'
 
 const user = new Hono()
 

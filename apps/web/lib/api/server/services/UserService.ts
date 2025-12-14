@@ -1,7 +1,7 @@
 import { createUserId } from '@packages/shared-types'
-import { IUserRepository } from '../interfaces/IUserRepository'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 import { UserEntity } from '../entities/UserEntity'
+import { IUserRepository } from '../interfaces/IUserRepository'
 
 export class UserService {
   private _userRepository: IUserRepository
