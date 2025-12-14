@@ -21,7 +21,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // 認証状態の監視
     const unsubscribe = onIdTokenChanged(auth, (firebaseUser) => {
-      console.log('Auth state changed. Current user:', firebaseUser)
       setUser(firebaseUser)
       setLoading(false)
     })
@@ -54,7 +53,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }
 
   const handleGetIdToken = async (): Promise<string | null> => {
-    console.log('Getting ID token for user:', user)
     if (!user) return null
     return await authService.getIdToken(user)
   }
