@@ -1,8 +1,8 @@
 import { createUserId, type UserId } from '@packages/shared-types'
-import { IUserRepository } from '../interfaces/IUserRepository'
-import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 import { UserEntity } from '../entities/UserEntity'
+import { IUserRepository } from '../interfaces/IUserRepository'
+import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaUserRepository
   extends PrismaRepositoryBase

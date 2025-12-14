@@ -1,9 +1,9 @@
 import { Prisma } from '@packages/database'
 import { BikeId, createBikeId } from '@packages/shared-types'
-import { IBikeRepository } from '../interfaces/IBikeRepository'
-import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 import { BikeEntity } from '../entities/BikeEntity'
+import { IBikeRepository } from '../interfaces/IBikeRepository'
 import { BikeSearchParams } from '../valueObjects/BikeSearchParams'
+import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaBikeRepository
   extends PrismaRepositoryBase

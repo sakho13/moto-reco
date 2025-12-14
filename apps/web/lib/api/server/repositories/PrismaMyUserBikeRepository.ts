@@ -6,12 +6,12 @@ import {
   MyUserBikeId,
   UserId,
 } from '@packages/shared-types'
+import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import {
   IMyUserBikeRepository,
   MyUserBikeDetail,
 } from '../interfaces/IMyUserBikeRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
-import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 
 export class PrismaMyUserBikeRepository
   extends PrismaRepositoryBase

@@ -1,7 +1,7 @@
 import { createBikeId, createUserBikeId } from '@packages/shared-types'
+import { UserBikeEntity } from '../entities/UserBikeEntity'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
-import { UserBikeEntity } from '../entities/UserBikeEntity'
 
 export class PrismaUserBikeRepository
   extends PrismaRepositoryBase

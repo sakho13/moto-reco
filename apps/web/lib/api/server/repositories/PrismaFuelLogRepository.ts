@@ -4,10 +4,10 @@ import {
   FuelLogId,
   MyUserBikeId,
 } from '@packages/shared-types'
-import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
-import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
+import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
+import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaFuelLogRepository
   extends PrismaRepositoryBase

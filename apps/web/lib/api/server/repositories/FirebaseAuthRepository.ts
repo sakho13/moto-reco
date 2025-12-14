@@ -6,8 +6,8 @@ import {
   type ProviderType,
 } from '@packages/shared-types'
 import { createUserId } from '@packages/shared-types'
-import { IAuthRepository } from '../interfaces/IAuthRepository'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
+import { IAuthRepository } from '../interfaces/IAuthRepository'
 
 export class FirebaseAuthRepository implements IAuthRepository {
   async authorize(token: string): Promise<AuthProviderEntity | null> {
