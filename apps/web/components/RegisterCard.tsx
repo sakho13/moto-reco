@@ -88,10 +88,9 @@ export function RegisterCard() {
 
     try {
       // 1. Firebase Authenticationでアカウント作成
-      await registerWithEmail(email, password)
+      const token = await registerWithEmail(email, password)
 
       // 2. IDトークン取得
-      const token = await getIdToken()
       if (!token) {
         throw new Error('IDトークンの取得に失敗しました')
       }

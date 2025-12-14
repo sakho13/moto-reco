@@ -15,7 +15,6 @@ export const authenticatedFetch = async (
   }
 
   const token = await user.getIdToken()
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
 
   const headers = {
     ...options.headers,
@@ -23,7 +22,7 @@ export const authenticatedFetch = async (
     'Content-Type': 'application/json',
   }
 
-  return fetch(`${apiUrl}${url}`, {
+  return fetch(`${url}`, {
     ...options,
     headers,
   })

@@ -10,7 +10,7 @@
     "dev:api": "dotenv -e .env.local -- pnpm --filter api dev",
     "test": "dotenv -e .env.local -- turbo run test",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,md}\" \"packages/**/*.{ts,tsx,md}\" \"*.md\" --ignore-path .prettierignore",
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
