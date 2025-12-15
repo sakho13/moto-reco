@@ -33,11 +33,11 @@ jobs:
 
       - name: Run lint
         working-directory: ./
-        run: npm run lint
+        run: pnpm lint
 
       - name: Run builds
         working-directory: ./
-        run: npm run build
+        run: pnpm build
 
   test:
     name: Test
