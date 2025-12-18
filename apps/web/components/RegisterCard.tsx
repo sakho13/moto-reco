@@ -3,13 +3,13 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
-import { ApiResponseUserProfile, SuccessResponse } from '@packages/shared-types'
 import { AuthCard } from '@packages/ui/authCard'
 import { Button } from '@packages/ui/button'
 import { ErrorMessage } from '@packages/ui/errorMessage'
 import { FormField } from '@packages/ui/formField'
 import { Input } from '@packages/ui/input'
 import { apiPost } from '@/lib/api/client'
+import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
 import { useAuth } from '@/lib/hooks/useAuth'
 import {
@@ -96,16 +96,11 @@ export function RegisterCard() {
       }
 
       // 3. API呼び出し: ユーザー情報登録
-      await apiPost<SuccessResponse<ApiResponseUserProfile>>(
-        '/api/v1/user/auth/register',
-        { name: name.trim() }
-      )
+      await apiPost('/api/v1/user/auth/register', { name: name.trim() })
 
       // 4. ホームページへリダイレクト
       router.push('/home')
     } catch (err: unknown) {
-      console.error('Registration error:', err)
-
       // Firebaseエラーの場合
       if (
         err &&
@@ -116,12 +111,15 @@ export function RegisterCard() {
       ) {
         const firebaseError = getFirebaseErrorMessage(err.code)
         setGlobalError(firebaseError)
-      } else {
-        // API呼び出しエラーまたはその他のエラー
-        setGlobalError(
-          'アカウントの作成に失敗しました。もう一度お試しください。'
-        )
+        return
       }
+
+      if (err instanceof ApiV1Error) {
+        setGlobalError(err.message)
+        return
+      }
+
+      setGlobalError(`アカウントの作成に失敗しました。もう一度お試しください。`)
     } finally {
       setLoading(false)
     }

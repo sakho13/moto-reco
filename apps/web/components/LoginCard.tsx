@@ -3,13 +3,13 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
-import { ApiResponseUserProfile, SuccessResponse } from '@packages/shared-types'
 import { AuthCard } from '@packages/ui/authCard'
 import { Button } from '@packages/ui/button'
 import { ErrorMessage } from '@packages/ui/errorMessage'
 import { FormField } from '@packages/ui/formField'
 import { Input } from '@packages/ui/input'
 import { apiGet, apiPost } from '@/lib/api/client'
+import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseAuth } from '@/lib/firebase/config'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -62,9 +62,7 @@ export function LoginCard() {
 
       // 2. ユーザー登録状態を確認
       try {
-        await apiGet<SuccessResponse<ApiResponseUserProfile>>(
-          '/api/v1/user/profile'
-        )
+        await apiGet('/api/v1/user/profile')
 
         // 成功 = 既に登録済み
         router.push('/')
@@ -72,10 +70,10 @@ export function LoginCard() {
       } catch (profileError: unknown) {
         // profile APIのエラーをハンドリング
 
-        // エラーがErrorオブジェクトで、messageに'USER_NOT_REGISTERED'が含まれるかチェック
+        // エラーがApiV1Errorで、errorCodeが'USER_NOT_REGISTERED'かチェック
         const isUserNotRegistered =
-          profileError instanceof Error &&
-          profileError.message.includes('USER_NOT_REGISTERED')
+          profileError instanceof ApiV1Error &&
+          profileError.errorCode === 'USER_NOT_REGISTERED'
 
         if (isUserNotRegistered) {
           // 3. 未登録 → displayNameを使って自動登録
@@ -93,10 +91,7 @@ export function LoginCard() {
             'ユーザー'
 
           // register API呼び出し
-          await apiPost<SuccessResponse<ApiResponseUserProfile>>(
-            '/api/v1/user/auth/register',
-            { name: userName }
-          )
+          await apiPost('/api/v1/user/auth/register', { name: userName })
 
           // 4. 登録成功 → ホームへ
           router.push('/')
