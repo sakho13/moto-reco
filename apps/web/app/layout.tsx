@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
-import { Providers } from './providers'
+import { Providers } from '../components/Providers'
 import './globals.css'
+
+// Firebase認証を使用しているため、動的レンダリングを強制
+export const dynamic = 'force-dynamic'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -13,8 +16,8 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'Motorepo Web App',
-  description: 'Motorepo Web Application',
+  title: 'MotoReco Web App',
+  description: 'MotoReco Web Application',
 }
 
 export default function RootLayout({

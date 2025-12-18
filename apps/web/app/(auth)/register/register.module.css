@@ -1,0 +1,10 @@
+/**
+ * Register Page Styles
+ * 新規登録ページのスタイル
+ */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}

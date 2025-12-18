@@ -1,0 +1,10 @@
+.formField {
+  margin-bottom: var(--spacing-4);
+}
+
+.helperText {
+  margin-top: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+  line-height: var(--line-height-normal);
+}

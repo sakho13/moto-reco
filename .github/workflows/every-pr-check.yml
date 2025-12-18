@@ -20,6 +20,27 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
+      - name: Create .env file
+        run: |
+          cat > .env << 'EOF'
+          NODE_ENV=production
+          # Firebase Admin SDK用の環境変数（テスト用ダミー値）
+          FIREBASE_PROJECT_ID=motoreco
+          FIREBASE_CLIENT_EMAIL=motoreco@example.com
+          FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
+          NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true
+          NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true
+          NEXT_PUBLIC_FIREBASE_API_KEY=12345678TPeQdHphdbGQ7oXXlP9_XXXXX_X_XXX
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=motoreco.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID=motoreco
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=motoreco.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123111918999
+          NEXT_PUBLIC_FIREBASE_APP_ID=1:111111111100:web:5635de580675ece78a5bb0
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
+          # Database用の環境変数
+          DATABASE_URL="postgres://motoreco_user:motoreco_password@localhost:5432/motoreco_db"
+          EOF
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -33,11 +54,11 @@ jobs:
 
       - name: Run lint
         working-directory: ./
-        run: npm run lint
+        run: pnpm lint
 
       - name: Run builds
         working-directory: ./
-        run: npm run build
+        run: pnpm build
 
   test:
     name: Test

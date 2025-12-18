@@ -8,15 +8,25 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint --max-warnings 0",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
-    "@repo/design-tokens": "workspace:*",
+    "@hono/zod-validator": "catalog:",
+    "@packages/database": "workspace:*",
+    "@packages/firebase-auth-server": "workspace:*",
+    "@packages/shared-types": "workspace:*",
+    "@packages/shared-utils": "workspace:*",
+    "@packages/ui": "workspace:*",
     "firebase": "catalog:",
+    "firebase-admin": "catalog:",
+    "hono": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -24,7 +34,9 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitest/ui": "catalog:",
     "eslint": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

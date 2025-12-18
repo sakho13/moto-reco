@@ -1,13 +1,8 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import 'tailwindcss';
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --background: var(--color-background);
+  --foreground: var(--color-ink);
 }
 
 html,
@@ -17,14 +12,14 @@ body {
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--color-ink);
+  background: var(--color-background);
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+footer {
+  color: var(--color-inkLight);
+  border-top: 1px solid var(--color-cloud);
+  box-shadow: var(--shadow-sm);
 }
 
 a {
@@ -32,19 +27,45 @@ a {
   text-decoration: none;
 }
 
-.imgDark {
-  display: none;
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--color-background) inset !important;
+  -webkit-text-fill-color: var(--color-inkDark) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+input:valid {
+  background-color: var(--color-background);
+}
+
+.divider {
+  position: relative;
+  margin: var(--spacing-6) 0;
+  text-align: center;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--color-inkLight);
+}
+
+.divider > span {
+  position: relative;
+  padding: 0 var(--spacing-3);
+  background-color: var(--color-background);
+  color: var(--color-inkLight);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
-  }
-
-  .imgLight {
-    display: none;
-  }
-  .imgDark {
-    display: unset;
   }
 }

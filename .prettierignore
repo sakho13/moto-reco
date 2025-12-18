@@ -1,0 +1,22 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.next
+build
+out
+
+# Generated files
+*.generated.*
+generated
+
+# Firebase Emulator
+development/firebase_emulator/**
+**/firebase_emulator/**
+
+# Misc
+.turbo
+coverage
+*.log

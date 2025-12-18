@@ -1,1 +1,1 @@
-export { generateRandNumberStr } from './generateRandomLenNumber.js'
+export { generateRandNumberStr } from './generateRandomLenNumber'
