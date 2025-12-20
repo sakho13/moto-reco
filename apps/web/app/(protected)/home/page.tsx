@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Button } from '@packages/ui/button'
+import { ProfileCard } from '@/components/ProfileCard'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -20,8 +21,17 @@ function Page() {
 
   return (
     <div>
-      ホームページ
-      <Button onClick={handleLogout}>ログアウト</Button>
+      <div>
+        <h1>ホームページ</h1>
+      </div>
+
+      <div>
+        <ProfileCard />
+      </div>
+
+      <div>
+        <Button onClick={handleLogout}>ログアウト</Button>
+      </div>
     </div>
   )
 }

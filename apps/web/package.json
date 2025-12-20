@@ -26,6 +26,7 @@
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "swr": "2.3.8",
     "zod": "catalog:"
   },
   "devDependencies": {

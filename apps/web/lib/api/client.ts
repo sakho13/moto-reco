@@ -140,6 +140,7 @@ export const apiDelete = async <U extends keyof API_EP>(
 type API_EP = {
   '/api/v1/user/profile': {
     GET: SuccessResponse<ApiResponseUserProfile>
+    POST: SuccessResponse<ApiResponseUserProfile>
   }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
