@@ -4,6 +4,9 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import { BaseCard } from '@packages/ui/baseCard'
 import { Button } from '@packages/ui/button'
+import { ErrorMessage } from '@packages/ui/errorMessage'
+import { FormField } from '@packages/ui/formField'
+import { Input } from '@packages/ui/input'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
@@ -86,10 +89,8 @@ export function ProfileCard() {
 
     return (
       <BaseCard title="プロフィール">
-        <div style={{ color: 'red' }}>
-          <p>エラー: {errorMessage}</p>
-          <Button onClick={() => mutate()}>再試行</Button>
-        </div>
+        <ErrorMessage>{errorMessage}</ErrorMessage>
+        <Button onClick={() => mutate()}>再試行</Button>
       </BaseCard>
     )
   }
@@ -98,32 +99,46 @@ export function ProfileCard() {
   if (isEditing) {
     return (
       <BaseCard title="プロフィール編集">
-        <div>
-          <div>
-            <label htmlFor="name">名前:</label>
-            <input
-              id="name"
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSave()
+          }}
+          className="flex flex-col"
+        >
+          <FormField
+            label="ユーザー名"
+            htmlFor="profile-name"
+            required
+            error={updateError || undefined}
+          >
+            <Input
+              id="profile-name"
               type="text"
+              placeholder="名前を入力"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
+              error={!!updateError}
+              disabled={isSaving}
+              autoComplete="name"
               maxLength={50}
-              style={{ marginLeft: '8px' }}
             />
-          </div>
-
-          {updateError && (
-            <div style={{ color: 'red', marginTop: '8px' }}>{updateError}</div>
-          )}
+          </FormField>
 
           <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button type="submit" disabled={isSaving}>
               {isSaving ? '保存中...' : '保存'}
             </Button>
-            <Button onClick={handleCancel} variant="danger" disabled={isSaving}>
+            <Button
+              type="button"
+              onClick={handleCancel}
+              variant="danger"
+              disabled={isSaving}
+            >
               キャンセル
             </Button>
           </div>
-        </div>
+        </form>
       </BaseCard>
     )
   }
