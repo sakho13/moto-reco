@@ -333,7 +333,14 @@ interface BaseCardProps {
 **使用例:**
 
 ```tsx
-<BaseCard title="ログイン" footer={<p>アカウントをお持ちでない方は<Link href="/register">新規登録</Link></p>}>
+<BaseCard
+  title="ログイン"
+  footer={
+    <p>
+      アカウントをお持ちでない方は<Link href="/register">新規登録</Link>
+    </p>
+  }
+>
   <LoginForm />
 </BaseCard>
 ```
