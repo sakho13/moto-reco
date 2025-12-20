@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
-import { AuthCard } from '@packages/ui/authCard'
+import { BaseCard } from '@packages/ui/baseCard'
 import { Button } from '@packages/ui/button'
 import { ErrorMessage } from '@packages/ui/errorMessage'
 import { FormField } from '@packages/ui/formField'
@@ -126,7 +126,7 @@ export function RegisterCard() {
   }
 
   return (
-    <AuthCard
+    <BaseCard
       title="新規登録"
       footer={
         <p>
@@ -225,6 +225,6 @@ export function RegisterCard() {
           登録する
         </Button>
       </form>
-    </AuthCard>
+    </BaseCard>
   )
 }

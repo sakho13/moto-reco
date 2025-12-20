@@ -20,8 +20,8 @@ export type { ErrorMessageProps } from './errorMessage'
 export { FormField } from './formField'
 export type { FormFieldProps } from './formField'
 
-export { AuthCard } from './authCard'
-export type { AuthCardProps } from './authCard'
+export { BaseCard } from './baseCard'
+export type { BaseCardProps } from './baseCard'
 
 // Legacy components (for backwards compatibility)
 export { Card } from './card'
