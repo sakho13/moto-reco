@@ -23,9 +23,6 @@ export type { FormFieldProps } from './formField'
 export { BaseCard } from './baseCard'
 export type { BaseCardProps } from './baseCard'
 
-export { NavigationCard } from './navigationCard'
-export type { NavigationCardProps } from './navigationCard'
-
 // Legacy components (for backwards compatibility)
 export { Card } from './card'
 export { Code } from './code'

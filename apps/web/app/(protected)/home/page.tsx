@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Button } from '@packages/ui/button'
-import { NavigationCard } from '@packages/ui/navigationCard'
+import { NavigationCard } from '@/components/NavigationCard'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
 

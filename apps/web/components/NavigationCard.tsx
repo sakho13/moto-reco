@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import styles from './navigationCard.module.css'
+import styles from './NavigationCard.module.css'
 
 export interface NavigationCardProps {
   /**
@@ -15,23 +15,23 @@ export interface NavigationCardProps {
   title: string
 
   /**
-   * カードの説明文（オプション）
+   * カードの説明文(オプション)
    */
   description?: string
 
   /**
-   * アイコンコンポーネント（オプション）
+   * アイコンコンポーネント(オプション)
    */
   icon?: React.ReactNode
 
   /**
-   * アニメーションを無効にするフラグ（アクセシビリティ対応）
+   * アニメーションを無効にするフラグ(アクセシビリティ対応)
    * @default false
    */
   disableAnimation?: boolean
 
   /**
-   * カスタムクラス名（オプション）
+   * カスタムクラス名(オプション)
    */
   className?: string
 }
