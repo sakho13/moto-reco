@@ -1,7 +1,6 @@
 'use client'
 
-import { useTheme } from '@packages/ui'
-import { Button } from '@packages/ui/button'
+import { useTheme, Button } from '@packages/ui'
 
 export function ThemeToggleButton() {
   const { themeMode, setThemeMode } = useTheme()
