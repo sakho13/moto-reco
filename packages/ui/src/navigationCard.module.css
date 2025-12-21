@@ -44,6 +44,7 @@
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
   animation-play-state: paused;
+  border-width: 1px;
 }
 
 /* active状態 */
