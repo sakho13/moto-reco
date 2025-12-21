@@ -176,6 +176,28 @@ Authorization: Bearer <token>
 }
 ```
 
+#### `POST /api/v1/user-bike/register`
+
+ユーザーバイクを登録する。`bikeId`を指定してカタログに登録されているバイクと紐づけるか、`bikeId`を省略して排気量（`displacement`）のみを指定することもできる。
+
+**リクエスト例（排気量のみを指定する場合）**
+
+```json
+{
+  "displacement": 400,
+  "nickname": "排気量のみ登録バイク"
+}
+```
+
+**リクエスト例（bikeIdを指定する場合）**
+
+```json
+{
+  "bikeId": "string",
+  "totalMileage": 0
+}
+```
+
 ### ロール`ADMIN`
 
 - `GET /api/v1/admin/users` - 全ユーザーの一覧取得

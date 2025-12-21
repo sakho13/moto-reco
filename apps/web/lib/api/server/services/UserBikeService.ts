@@ -4,6 +4,7 @@ import {
   createUserBikeId,
   UserId,
 } from '@packages/shared-types'
+import { BikeEntity } from '../entities/BikeEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeEntity } from '../entities/UserBikeEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
@@ -12,7 +13,8 @@ import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 
 type RegisterUserBikeParams = {
-  bikeId: BikeId
+  bikeId?: BikeId | null
+  displacement?: number
   serialNumber?: string
   userId: UserId
   nickname?: string
@@ -40,15 +42,24 @@ export class UserBikeService {
   ) {}
 
   public async registerUserBike(params: RegisterUserBikeParams) {
-    const bike = await this.bikeRepository.findById(params.bikeId)
-    if (!bike) {
-      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    let bike: BikeEntity | null = null
+    if (params.bikeId) {
+      bike = await this.bikeRepository.findById(params.bikeId)
+      if (!bike) {
+        throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+      }
+    }
+
+    const displacement = bike?.displacement ?? params.displacement
+    if (displacement === undefined) {
+      throw new ApiV1Error('INVALID_REQUEST', '排気量を指定してください')
     }
 
     const userBike = await this.userBikeRepository.createUserBike(
       new UserBikeEntity({
-        bikeId: bike.id,
+        bikeId: bike?.id ?? null,
         userBikeId: createUserBikeId(''),
+        displacement,
         serialNumber: params.serialNumber ?? null,
       })
     )

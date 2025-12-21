@@ -22,14 +22,17 @@ export class MyUserBikeEntity {
       throw new Error('購入価格は0以上である必要があります')
     }
 
-    this._value = myUserBike
+    this._value = {
+      ...myUserBike,
+      bikeId: myUserBike.bikeId ?? null,
+    }
   }
 
   public get id(): MyUserBikeId {
     return this._value.myUserBikeId
   }
 
-  public get bikeId(): BikeId {
+  public get bikeId(): BikeId | null {
     return this._value.bikeId
   }
 
