@@ -4,7 +4,6 @@ export type ThemeTokens = {
     cloud: string
     cloudHover: string
     cloudActive: string
-    // cloudActive: string
 
     // ブランドカラー
     product: string
