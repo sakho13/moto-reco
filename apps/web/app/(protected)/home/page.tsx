@@ -20,7 +20,7 @@ function Page() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 gap-8">
+    <>
       {/* ナビゲーションカードセクション */}
       <div className="w-full max-w-md flex flex-col gap-4">
         <NavigationCard
@@ -51,7 +51,7 @@ function Page() {
           ログアウト
         </Button>
       </div>
-    </div>
+    </>
   )
 }
 
