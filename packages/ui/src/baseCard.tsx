@@ -1,12 +1,12 @@
 'use client'
 
 import { type HTMLAttributes, forwardRef } from 'react'
-import styles from './authCard.module.css'
+import styles from './baseCard.module.css'
 
 /**
- * AuthCardコンポーネントのプロパティ
+ * BaseCardコンポーネントのプロパティ
  */
-export interface AuthCardProps extends HTMLAttributes<HTMLDivElement> {
+export interface BaseCardProps extends HTMLAttributes<HTMLDivElement> {
   /**
    * カードのタイトル
    */
@@ -22,15 +22,15 @@ export interface AuthCardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * AuthCardコンポーネント
+ * BaseCardコンポーネント
  *
  * @remarks
- * 認証ページ（ログイン、新規登録等）用のカードレイアウトコンポーネント。
+ * 汎用的なカードレイアウトコンポーネント。
  * タイトル、フッター、レスポンシブデザインをサポート。
  *
  * @example
  * ```tsx
- * <AuthCard
+ * <BaseCard
  *   title="ログイン"
  *   footer={
  *     <p>
@@ -40,12 +40,12 @@ export interface AuthCardProps extends HTMLAttributes<HTMLDivElement> {
  *   }
  * >
  *   <form>...</form>
- * </AuthCard>
+ * </BaseCard>
  * ```
  */
-export const AuthCard = forwardRef<HTMLDivElement, AuthCardProps>(
+export const BaseCard = forwardRef<HTMLDivElement, BaseCardProps>(
   ({ title, footer, className, children, ...props }, ref) => {
-    const cardClasses = [styles.authCard, className].filter(Boolean).join(' ')
+    const cardClasses = [styles.baseCard, className].filter(Boolean).join(' ')
 
     return (
       <div ref={ref} className={cardClasses} {...props}>
@@ -59,4 +59,4 @@ export const AuthCard = forwardRef<HTMLDivElement, AuthCardProps>(
   }
 )
 
-AuthCard.displayName = 'AuthCard'
+BaseCard.displayName = 'BaseCard'

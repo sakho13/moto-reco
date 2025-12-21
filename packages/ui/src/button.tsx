@@ -11,7 +11,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
    * ボタンのバリアント
    * @default 'primary'
    */
-  variant?: 'primary' | 'danger' | 'social'
+  variant?: 'primary' | 'danger' | 'social' | 'cloud'
   /**
    * ボタンのサイズ
    * @default 'md'

@@ -318,14 +318,14 @@ interface FormFieldProps {
 </FormField>
 ```
 
-### AuthCard
+### BaseCard
 
-認証ページ用のカードレイアウトコンポーネント。
+汎用的なカードレイアウトコンポーネント。
 
 ```tsx
-interface AuthCardProps {
+interface BaseCardProps {
   title: string
-  description?: string
+  footer?: React.ReactNode
   children: React.ReactNode
 }
 ```
@@ -333,9 +333,16 @@ interface AuthCardProps {
 **使用例:**
 
 ```tsx
-<AuthCard title="ログイン" description="アカウントにログインしてください">
+<BaseCard
+  title="ログイン"
+  footer={
+    <p>
+      アカウントをお持ちでない方は<Link href="/register">新規登録</Link>
+    </p>
+  }
+>
   <LoginForm />
-</AuthCard>
+</BaseCard>
 ```
 
 ## スタイリング方法
