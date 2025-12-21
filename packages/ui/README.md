@@ -33,7 +33,7 @@
 import { ThemeProvider } from '@packages/ui'
 
 export default function App({ children }) {
-  return <ThemeProvider initialThemeName="light">{children}</ThemeProvider>
+  return <ThemeProvider initialThemeName="default">{children}</ThemeProvider>
 }
 ```
 
@@ -63,11 +63,11 @@ export function LoginForm() {
 import { useTheme } from '@packages/ui'
 
 export function ThemeToggle() {
-  const { themeName, setThemeName } = useTheme()
+  const { themeMode, setThemeMode } = useTheme()
 
   return (
-    <button onClick={() => setThemeName('light')}>
-      現在のテーマ: {themeName}
+    <button onClick={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}>
+      現在のモード: {themeMode}
     </button>
   )
 }
@@ -431,7 +431,7 @@ export default function LoginPage() {
   }
 
   return (
-    <ThemeProvider initialThemeName="light">
+    <ThemeProvider initialThemeName="default">
       <AuthCard title="ログイン" description="アカウント情報を入力してください">
         <form onSubmit={handleSubmit}>
           <FormField
@@ -491,15 +491,15 @@ function App() {
 // ✅ 正しい使い方
 function App() {
   return (
-    <ThemeProvider initialThemeName="light">
+    <ThemeProvider initialThemeName="default">
       <MyComponent />
     </ThemeProvider>
   )
 }
 
 function MyComponent() {
-  const { themeName } = useTheme() // ThemeProviderの内側で使用
-  return <div>Current theme: {themeName}</div>
+  const { themeMode } = useTheme() // ThemeProviderの内側で使用
+  return <div>Current theme mode: {themeMode}</div>
 }
 ```
 

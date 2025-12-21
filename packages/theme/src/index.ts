@@ -1,4 +1,4 @@
-export { lightThemes, darkThemes, themes } from './themes'
-export type { ThemeName } from './themes'
+export { themeNames, themeModes, themes } from './themes'
+export type { ThemeName, ThemeMode } from './themes'
 
 export type { ThemeTokens } from './type'
