@@ -69,3 +69,58 @@ input:valid {
     color-scheme: dark;
   }
 }
+
+/* ================================================
+   ページ遷移トランジション
+   ================================================ */
+
+/* フェードアウト/フェードインのキーフレーム定義 */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* View Transitions API サポート（Chrome/Edge等） */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root) {
+    animation: fadeOut var(--transition-base) ease-out;
+  }
+
+  ::view-transition-new(root) {
+    animation: fadeIn var(--transition-base) ease-in;
+  }
+}
+
+/* prefers-reduced-motionへの対応 */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+/* フォールバック: View Transitions API非対応ブラウザ用 */
+@supports not (view-transition-name: none) {
+  html {
+    transition: opacity var(--transition-base) ease-in-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      transition: none !important;
+    }
+  }
+}
