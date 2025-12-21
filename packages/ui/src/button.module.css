@@ -68,6 +68,20 @@
   transform: scale(0.98);
 }
 
+/* Cloud */
+.button.cloud {
+  background-color: var(--color-cloud);
+  color: var(--color-ink);
+}
+
+.button.cloud:hover:not(:disabled) {
+  background-color: var(--color-cloudHover);
+}
+
+.button.cloud:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
 /* ===== Sizes ===== */
 
 /* Small */
