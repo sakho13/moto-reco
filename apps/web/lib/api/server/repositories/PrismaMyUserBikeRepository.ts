@@ -48,13 +48,16 @@ export class PrismaMyUserBikeRepository
         userBike: {
           select: {
             bikeId: true,
+            displacement: true,
           },
         },
       },
     })
 
     return new MyUserBikeEntity({
-      bikeId: createBikeId(created.userBike.bikeId),
+      bikeId: created.userBike.bikeId
+        ? createBikeId(created.userBike.bikeId)
+        : null,
       userBikeId: createUserBikeId(created.userBikeId),
       myUserBikeId: createMyUserBikeId(created.id),
       userId: createUserId(created.userId),
@@ -74,7 +77,9 @@ export class PrismaMyUserBikeRepository
       where: { userId, ownStatus: 'OWN' },
       include: {
         userBike: {
-          include: {
+          select: {
+            bikeId: true,
+            displacement: true,
             bike: {
               include: {
                 manufacturer: true,
@@ -91,16 +96,20 @@ export class PrismaMyUserBikeRepository
     return myUserBikes.map((myUserBike) => ({
       myUserBikeId: createMyUserBikeId(myUserBike.id),
       userBikeId: createUserBikeId(myUserBike.userBikeId),
-      bikeId: createBikeId(myUserBike.userBike.bikeId),
-      manufacturerName: myUserBike.userBike.bike.manufacturer.name,
-      modelName: myUserBike.userBike.bike.modelName,
+      bikeId: myUserBike.userBike.bikeId
+        ? createBikeId(myUserBike.userBike.bikeId)
+        : null,
+      manufacturerName: myUserBike.userBike.bike?.manufacturer.name ?? null,
+      modelName: myUserBike.userBike.bike?.modelName ?? null,
       nickname: myUserBike.nickname,
       purchaseDate: myUserBike.purchaseDate,
       purchasePrice: myUserBike.purchasePrice,
       purchaseMileage: myUserBike.purchaseMileage,
       totalMileage: myUserBike.totalMileage,
-      displacement: myUserBike.userBike.bike.displacement,
-      modelYear: myUserBike.userBike.bike.modelYear,
+      displacement:
+        myUserBike.userBike.bike?.displacement ??
+        myUserBike.userBike.displacement,
+      modelYear: myUserBike.userBike.bike?.modelYear ?? null,
       createdAt: myUserBike.createdAt,
       updatedAt: myUserBike.updatedAt,
     }))
@@ -127,6 +136,7 @@ export class PrismaMyUserBikeRepository
         userBike: {
           select: {
             bikeId: true,
+            displacement: true,
           },
         },
       },
@@ -137,7 +147,9 @@ export class PrismaMyUserBikeRepository
     }
 
     return new MyUserBikeEntity({
-      bikeId: createBikeId(myUserBike.userBike.bikeId),
+      bikeId: myUserBike.userBike.bikeId
+        ? createBikeId(myUserBike.userBike.bikeId)
+        : null,
       userBikeId: createUserBikeId(myUserBike.userBikeId),
       myUserBikeId: createMyUserBikeId(myUserBike.id),
       userId: createUserId(myUserBike.userId),
@@ -184,13 +196,16 @@ export class PrismaMyUserBikeRepository
         userBike: {
           select: {
             bikeId: true,
+            displacement: true,
           },
         },
       },
     })
 
     return new MyUserBikeEntity({
-      bikeId: createBikeId(updated.userBike.bikeId),
+      bikeId: updated.userBike.bikeId
+        ? createBikeId(updated.userBike.bikeId)
+        : null,
       userBikeId: createUserBikeId(updated.userBikeId),
       myUserBikeId: createMyUserBikeId(updated.id),
       userId: createUserId(updated.userId),
@@ -213,7 +228,9 @@ export class PrismaMyUserBikeRepository
       where: { id: myUserBikeId, userId, ownStatus: 'OWN' },
       include: {
         userBike: {
-          include: {
+          select: {
+            bikeId: true,
+            displacement: true,
             bike: {
               include: {
                 manufacturer: true,
@@ -231,16 +248,20 @@ export class PrismaMyUserBikeRepository
     return {
       myUserBikeId: createMyUserBikeId(myUserBike.id),
       userBikeId: createUserBikeId(myUserBike.userBikeId),
-      bikeId: createBikeId(myUserBike.userBike.bikeId),
-      manufacturerName: myUserBike.userBike.bike.manufacturer.name,
-      modelName: myUserBike.userBike.bike.modelName,
+      bikeId: myUserBike.userBike.bikeId
+        ? createBikeId(myUserBike.userBike.bikeId)
+        : null,
+      manufacturerName: myUserBike.userBike.bike?.manufacturer.name ?? null,
+      modelName: myUserBike.userBike.bike?.modelName ?? null,
       nickname: myUserBike.nickname,
       purchaseDate: myUserBike.purchaseDate,
       purchasePrice: myUserBike.purchasePrice,
       purchaseMileage: myUserBike.purchaseMileage,
       totalMileage: myUserBike.totalMileage,
-      displacement: myUserBike.userBike.bike.displacement,
-      modelYear: myUserBike.userBike.bike.modelYear,
+      displacement:
+        myUserBike.userBike.bike?.displacement ??
+        myUserBike.userBike.displacement,
+      modelYear: myUserBike.userBike.bike?.modelYear ?? null,
       createdAt: myUserBike.createdAt,
       updatedAt: myUserBike.updatedAt,
     }

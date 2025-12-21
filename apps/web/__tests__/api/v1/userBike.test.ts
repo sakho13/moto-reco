@@ -190,6 +190,37 @@ describe('UserBike API Endpoints', () => {
     expect(userBikeRecord?.bikeId).toBe(bikeId)
   })
 
+  test('bikeIdを指定せず排気量のみで登録できる', async () => {
+    const displacement = 400
+    const res = await app.request('/api/v1/user-bike/register', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        displacement,
+        nickname: '排気量のみ登録',
+      }),
+    })
+
+    const json = await res.json()
+    expect(res.status).toBe(201)
+    expect(json.status).toBe('success')
+    expect(json.data.bikeId).toBeNull()
+    expect(json.data.manufacturerName).toBeNull()
+    expect(json.data.modelName).toBeNull()
+    expect(json.data.modelYear).toBeNull()
+    expect(json.data.displacement).toBe(displacement)
+
+    const userBikeRecord = await prisma.tUserBike.findUnique({
+      where: { id: json.data.userBikeId },
+    })
+
+    expect(userBikeRecord?.bikeId).toBeNull()
+    expect(userBikeRecord?.displacement).toBe(displacement)
+  })
+
   test('同じ車台番号でも登録できる', async () => {
     const res = await app.request('/api/v1/user-bike/register', {
       method: 'POST',

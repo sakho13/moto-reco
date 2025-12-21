@@ -691,7 +691,8 @@ components:
         modelName:
           type: string
         displacement:
-          type: integer
+          type: number
+          format: float
           description: 排気量（cc）
         modelYear:
           type: integer
@@ -705,10 +706,13 @@ components:
           type: string
         manufacturerName:
           type: string
+          nullable: true
         bikeId:
           type: string
+          nullable: true
         modelName:
           type: string
+          nullable: true
         nickname:
           type: string
           nullable: true
@@ -718,17 +722,27 @@ components:
           type: string
           description: 購入日（ISO 8601形式）
           nullable: true
+        purchasePrice:
+          type: integer
+          description: 購入価格（円）
+          nullable: true
+        purchaseMileage:
+          type: integer
+          description: 購入時走行距離（km）
+          nullable: true
         totalMileage:
           type: integer
           description: 総走行距離（km）
           nullable: true
           default: 0
         displacement:
-          type: integer
+          type: number
+          format: float
           description: 排気量（cc）
         modelYear:
           type: integer
           description: モデル公開年
+          nullable: true
           example: 2025
         createdAt:
           type: string
@@ -738,11 +752,23 @@ components:
           description: 最終更新日時（ISO 8601形式）
     UserBikeRegisterDetail:
       type: object
-      required:
-        - bikeId
+      anyOf:
+        - required:
+            - bikeId
+        - required:
+            - displacement
       properties:
         bikeId:
           type: string
+          nullable: true
+        displacement:
+          type: number
+          format: float
+          description: 排気量（cc）。bikeId未指定の場合は必須。
+        serialNumber:
+          type: string
+          nullable: true
+          maxLength: 100
         nickname:
           type: string
           nullable: true
@@ -750,11 +776,20 @@ components:
           maxLength: 50
         purchaseDate:
           type: string
+          format: date-time
           description: 購入日（ISO 8601形式）
           nullable: true
-        mileage:
+        purchasePrice:
+          type: integer
+          description: 購入価格（円）
+          nullable: true
+        purchaseMileage:
           type: integer
           description: 購入時走行距離（km）
+          nullable: true
+        totalMileage:
+          type: integer
+          description: 総走行距離（km）
           nullable: true
           default: 0
     UserBikeUpdateDetail:
@@ -769,9 +804,17 @@ components:
           type: string
           description: 購入日（ISO 8601形式）
           nullable: true
-        mileage:
+        purchaseMileage:
           type: integer
           description: 購入時走行距離（km）
+          nullable: true
+        purchasePrice:
+          type: integer
+          description: 購入価格（円）
+          nullable: true
+        totalMileage:
+          type: integer
+          description: 総走行距離（km）
           nullable: true
           default: 0
     MyUserBikeFuelLogDetail:

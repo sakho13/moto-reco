@@ -35,7 +35,7 @@ const toApiResponseUserBikeDetail = (
   userBikeId: detail.userBikeId,
   myUserBikeId: detail.myUserBikeId,
   manufacturerName: detail.manufacturerName,
-  bikeId: detail.bikeId,
+  bikeId: detail.bikeId ?? null,
   modelName: detail.modelName,
   nickname: detail.nickname,
   purchaseDate: detail.purchaseDate?.toISOString() ?? null,
@@ -67,7 +67,8 @@ userBike.post(
       )
 
       const { myUserBike } = await service.registerUserBike({
-        bikeId: createBikeId(body.bikeId),
+        bikeId: body.bikeId ? createBikeId(body.bikeId) : null,
+        displacement: body.displacement,
         serialNumber: body.serialNumber,
         userId,
         nickname: body.nickname,

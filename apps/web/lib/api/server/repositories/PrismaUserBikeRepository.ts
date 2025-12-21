@@ -11,18 +11,21 @@ export class PrismaUserBikeRepository
     const created = await this.connection.tUserBike.create({
       data: {
         bikeId: userBike.bikeId,
+        displacement: userBike.displacement,
         serialNumber: userBike.serialNumber,
       },
       select: {
         id: true,
         bikeId: true,
+        displacement: true,
         serialNumber: true,
       },
     })
 
     return new UserBikeEntity({
-      bikeId: createBikeId(created.bikeId),
+      bikeId: created.bikeId ? createBikeId(created.bikeId) : null,
       userBikeId: createUserBikeId(created.id),
+      displacement: created.displacement,
       serialNumber: created.serialNumber,
     })
   }

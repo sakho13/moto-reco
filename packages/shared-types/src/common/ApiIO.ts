@@ -74,16 +74,16 @@ export type ApiResponseUserBikeList = {
   bikes: {
     userBikeId: string
     myUserBikeId: string
-    manufacturerName: string
-    bikeId: string
-    modelName: string
+    manufacturerName: string | null
+    bikeId: string | null
+    modelName: string | null
     nickname: string | null
     purchaseDate: string | null
     purchasePrice: number | null
     purchaseMileage: number | null
     totalMileage: number
     displacement: number
-    modelYear: number
+    modelYear: number | null
     createdAt: string
     updatedAt: string
   }[]
@@ -92,16 +92,16 @@ export type ApiResponseUserBikeList = {
 export type ApiResponseUserBikeDetail = {
   userBikeId: string
   myUserBikeId: string
-  manufacturerName: string
-  bikeId: string
-  modelName: string
+  manufacturerName: string | null
+  bikeId: string | null
+  modelName: string | null
   nickname: string | null
   purchaseDate: string | null
   purchasePrice: number | null
   purchaseMileage: number | null
   totalMileage: number
   displacement: number
-  modelYear: number
+  modelYear: number | null
   createdAt: string
   updatedAt: string
 }

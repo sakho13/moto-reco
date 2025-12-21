@@ -9,16 +9,16 @@ import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 export type MyUserBikeDetail = {
   userBikeId: UserBikeId
   myUserBikeId: MyUserBikeId
-  bikeId: BikeId
-  manufacturerName: string
-  modelName: string
+  bikeId: BikeId | null
+  manufacturerName: string | null
+  modelName: string | null
   nickname: string | null
   purchaseDate: Date | null
   purchasePrice: number | null
   purchaseMileage: number | null
   totalMileage: number
   displacement: number
-  modelYear: number
+  modelYear: number | null
   createdAt: Date
   updatedAt: Date
 }
