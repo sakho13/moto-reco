@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
+import { useSWRConfig } from 'swr'
 import { BaseCard } from '@packages/ui/baseCard'
 import { Button } from '@packages/ui/button'
 import { ErrorMessage } from '@packages/ui/errorMessage'
@@ -22,6 +23,7 @@ import {
 export function RegisterCard() {
   const router = useRouter()
   const { registerWithEmail } = useAuth()
+  const { mutate } = useSWRConfig()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -96,9 +98,14 @@ export function RegisterCard() {
       }
 
       // 3. API呼び出し: ユーザー情報登録
-      await apiPost('/api/v1/user/auth/register', { name: name.trim() })
+      const response = await apiPost('/api/v1/user/auth/register', {
+        name: name.trim(),
+      })
 
-      // 4. ホームページへリダイレクト
+      // 4. プロフィールキャッシュを事前設定(レースコンディション回避)
+      mutate('/api/v1/user/profile', response)
+
+      // 5. ホームページへリダイレクト
       router.push('/home')
     } catch (err: unknown) {
       // Firebaseエラーの場合
