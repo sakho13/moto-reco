@@ -103,7 +103,7 @@ export function RegisterCard() {
       })
 
       // 4. プロフィールキャッシュを事前設定(レースコンディション回避)
-      mutate('/api/v1/user/profile', response)
+      mutate('/api/v1/user/profile', response.data)
 
       // 5. ホームページへリダイレクト
       router.push('/home')
