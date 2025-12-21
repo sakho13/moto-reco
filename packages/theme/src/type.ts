@@ -64,7 +64,7 @@ export type ThemeTokens = {
     medium: number
     bold: number
   }
-  lintHeight: {
+  lineHeight: {
     tight: number
     normal: number
     relaxed: number

@@ -81,7 +81,7 @@ export const ThemeProvider = ({
       root.style.setProperty(`--font-size-${key}`, String(value))
     })
     // lineHeight
-    Object.entries(theme.lintHeight).forEach(([key, value]) => {
+    Object.entries(theme.lineHeight).forEach(([key, value]) => {
       root.style.setProperty(`--line-height-${key}`, String(value))
     })
     // radius

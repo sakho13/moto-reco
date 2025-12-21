@@ -67,7 +67,7 @@ const defaultLightTheme: ThemeTokens = {
     medium: 500,
     bold: 700,
   },
-  lintHeight: {
+  lineHeight: {
     tight: 1.25,
     normal: 1.5,
     relaxed: 1.75,
@@ -150,7 +150,7 @@ const defaultDarkTheme: ThemeTokens = {
     medium: 500,
     bold: 700,
   },
-  lintHeight: {
+  lineHeight: {
     tight: 1.25,
     normal: 1.5,
     relaxed: 1.75,
