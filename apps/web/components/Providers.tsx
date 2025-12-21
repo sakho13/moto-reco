@@ -14,7 +14,7 @@ export function Providers({ children }: { children: ReactNode }) {
           errorRetryCount: 3,
         }}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider initialThemeName="default">{children}</ThemeProvider>
       </SWRConfig>
     </AuthProvider>
   )

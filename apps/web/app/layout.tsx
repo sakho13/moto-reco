@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import { Providers } from '../components/Providers'
+import { ThemeToggleButton } from '../components/ThemeToggleButton'
 import './globals.css'
 
 // Firebase認証を使用しているため、動的レンダリングを強制
@@ -28,7 +29,12 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeToggleButton />
+          </div>
+          {children}
+        </Providers>
       </body>
     </html>
   )

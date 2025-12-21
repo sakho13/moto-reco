@@ -65,10 +65,12 @@ input:valid {
   font-weight: var(--font-weight-medium);
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+html[data-theme-mode='dark'] {
+  color-scheme: dark;
+}
+
+html[data-theme-mode='light'] {
+  color-scheme: light;
 }
 
 /* ================================================
@@ -124,4 +126,8 @@ input:valid {
       transition: none !important;
     }
   }
+}
+
+* {
+  transition: background-color 0.3s ease;
 }

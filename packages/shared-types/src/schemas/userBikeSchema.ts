@@ -52,10 +52,13 @@ export const UserBikeRegisterRequestSchema = z
       .nonnegative('総走行距離は0以上で指定してください')
       .optional(),
   })
-  .refine((data) => data.bikeId !== undefined || data.displacement !== undefined, {
-    message: 'bikeIdまたは排気量を指定してください',
-    path: ['bikeId'],
-  })
+  .refine(
+    (data) => data.bikeId !== undefined || data.displacement !== undefined,
+    {
+      message: 'bikeIdまたは排気量を指定してください',
+      path: ['bikeId'],
+    }
+  )
 
 export type UserBikeRegisterRequest = z.infer<
   typeof UserBikeRegisterRequestSchema

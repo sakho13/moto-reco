@@ -4,7 +4,6 @@ export type ThemeTokens = {
     cloud: string
     cloudHover: string
     cloudActive: string
-    // cloudActive: string
 
     // ブランドカラー
     product: string
@@ -64,7 +63,7 @@ export type ThemeTokens = {
     medium: number
     bold: number
   }
-  lintHeight: {
+  lineHeight: {
     tight: number
     normal: number
     relaxed: number

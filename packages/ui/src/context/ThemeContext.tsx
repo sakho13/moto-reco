@@ -1,16 +1,25 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { ThemeName, themes, ThemeTokens } from '@packages/theme'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  ThemeMode,
+  ThemeName,
+  themeModes,
+  themes,
+  ThemeTokens,
+} from '@packages/theme'
 
 type ThemeContextValue = {
   themeName: ThemeName
+  themeMode: ThemeMode
   setThemeName: (themeName: ThemeName) => void
+  setThemeMode: (themeMode: ThemeMode) => void
 }
 
 type ThemeProviderProps = {
   children: React.ReactNode
   initialThemeName?: ThemeName
+  initialThemeMode?: ThemeMode
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
@@ -25,12 +34,34 @@ export function useTheme() {
 
 export const ThemeProvider = ({
   children,
-  initialThemeName = 'light',
+  initialThemeName = 'default',
+  initialThemeMode = 'light',
 }: ThemeProviderProps) => {
   const [themeName, setThemeName] = useState<ThemeName>(initialThemeName)
+  const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode)
+
+  const theme: ThemeTokens = useMemo(() => {
+    const selectedTheme = themes[themeName]?.[themeMode]
+    if (selectedTheme) return selectedTheme
+    return themes.default.light
+  }, [themeMode, themeName])
 
   useEffect(() => {
-    const theme: ThemeTokens = themes[themeName]
+    if (typeof window === 'undefined') return
+
+    const storedMode = window.localStorage.getItem('theme-mode')
+    if (storedMode && themeModes.includes(storedMode as ThemeMode)) {
+      setThemeMode(storedMode as ThemeMode)
+      return
+    }
+
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches
+    setThemeMode(prefersDark ? 'dark' : 'light')
+  }, [])
+
+  useEffect(() => {
     const root = document.documentElement
 
     // colors
@@ -50,7 +81,7 @@ export const ThemeProvider = ({
       root.style.setProperty(`--font-size-${key}`, String(value))
     })
     // lineHeight
-    Object.entries(theme.lintHeight).forEach(([key, value]) => {
+    Object.entries(theme.lineHeight).forEach(([key, value]) => {
       root.style.setProperty(`--line-height-${key}`, String(value))
     })
     // radius
@@ -65,10 +96,20 @@ export const ThemeProvider = ({
     Object.entries(theme.transitions).forEach(([key, value]) => {
       root.style.setProperty(`--transition-${key}`, String(value))
     })
-  }, [themeName])
+
+    root.dataset.themeName = themeName
+    root.dataset.themeMode = themeMode
+    root.style.colorScheme = themeMode
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('theme-mode', themeMode)
+    }
+  }, [themeMode, themeName, theme])
 
   return (
-    <ThemeContext.Provider value={{ themeName, setThemeName }}>
+    <ThemeContext.Provider
+      value={{ themeName, themeMode, setThemeName, setThemeMode }}
+    >
       {children}
     </ThemeContext.Provider>
   )
