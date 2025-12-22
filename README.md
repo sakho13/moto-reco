@@ -30,6 +30,10 @@
 
 すべてのパッケージとアプリは [TypeScript](https://www.typescriptlang.org/) で書かれています。
 
+### インフラ (AWS CDK)
+
+- **`infra`**: AWS CDK v2 を用いた IaC 環境。詳細なセットアップやコマンドは [`infra/README.md`](infra/README.md) を参照してください。
+
 ## 技術スタック
 
 - **フロントエンド**: Next.js, React
