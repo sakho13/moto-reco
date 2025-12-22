@@ -23,7 +23,7 @@ function Page() {
   return (
     <>
       {/* マイバイク一覧セクション */}
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-lg">
         <MyBikeListSection />
       </div>
 
