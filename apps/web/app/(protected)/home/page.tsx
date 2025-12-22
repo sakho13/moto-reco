@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Button } from '@packages/ui/button'
+import { MyBikeListSection } from '@/components/MyBikeListSection'
 import { NavigationCard } from '@/components/NavigationCard'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -21,6 +22,11 @@ function Page() {
 
   return (
     <>
+      {/* マイバイク一覧セクション */}
+      <div className="w-full max-w-lg">
+        <MyBikeListSection />
+      </div>
+
       {/* ナビゲーションカードセクション */}
       <div className="w-full max-w-md flex flex-col gap-4">
         <NavigationCard

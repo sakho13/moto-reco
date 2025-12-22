@@ -1,5 +1,8 @@
 import {
   ApiResponseUserProfile,
+  ApiResponseManufacturer,
+  ApiResponseUserBikeList,
+  ApiResponseUserBikeRegister,
   ErrorResponse,
   SuccessResponse,
 } from '@packages/shared-types'
@@ -144,5 +147,14 @@ type API_EP = {
   }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
+  }
+  '/api/v1/bikes/manufacturers': {
+    GET: SuccessResponse<ApiResponseManufacturer>
+  }
+  '/api/v1/user-bike/bikes': {
+    GET: SuccessResponse<ApiResponseUserBikeList>
+  }
+  '/api/v1/user-bike/register': {
+    POST: SuccessResponse<ApiResponseUserBikeRegister>
   }
 }

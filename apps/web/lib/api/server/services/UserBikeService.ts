@@ -15,7 +15,7 @@ import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 type RegisterUserBikeParams = {
   bikeId?: BikeId | null
   displacement?: number
-  serialNumber?: string
+  serialNumber?: string | null
   userId: UserId
   nickname?: string
   purchaseDate?: Date

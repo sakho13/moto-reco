@@ -1,0 +1,57 @@
+.container {
+  width: 100%;
+  padding: var(--spacing-4);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-4);
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-secondary);
+}
+
+.emptyState p {
+  margin-bottom: var(--spacing-4);
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-secondary);
+}
+
+.errorContainer {
+  text-align: center;
+  padding: var(--spacing-6);
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-sm);
+}

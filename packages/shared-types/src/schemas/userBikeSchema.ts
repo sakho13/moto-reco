@@ -10,7 +10,7 @@ export const UserBikeRegisterRequestSchema = z
         invalid_type_error: 'bikeIdは文字列で指定してください',
       })
       .min(1, 'bikeIdは1文字以上で指定してください')
-      .optional(),
+      .nullish(),
     displacement: z
       .number({
         invalid_type_error: '排気量は数値で指定してください',
@@ -22,7 +22,7 @@ export const UserBikeRegisterRequestSchema = z
       .trim()
       .min(1, '車台番号は1文字以上で指定してください')
       .max(100, '車台番号は100文字以内で指定してください')
-      .optional(),
+      .nullish(),
     nickname: z
       .string({
         invalid_type_error: 'ニックネームは文字列で指定してください',
