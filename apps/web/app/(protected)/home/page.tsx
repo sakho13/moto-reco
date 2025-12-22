@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Button } from '@packages/ui/button'
+import { ProfileIcon } from '@/components/icons/ProfileIcon'
 import { MyBikeListSection } from '@/components/MyBikeListSection'
 import { NavigationCard } from '@/components/NavigationCard'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -33,21 +34,7 @@ function Page() {
           href="/profile"
           title="プロフィール編集"
           description="あなたのプロフィール情報を更新できます"
-          icon={
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          }
+          icon={<ProfileIcon />}
         />
       </div>
 
