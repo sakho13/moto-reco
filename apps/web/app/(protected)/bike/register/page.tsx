@@ -2,13 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import useSWR, { mutate } from 'swr'
-import type {
-  ApiResponseBikeSearch,
-  SuccessResponse,
-} from '@packages/shared-types'
+import { mutate } from 'swr'
 import { Button } from '@packages/ui/button'
-import { apiGet, apiPost, authenticatedFetch } from '@/lib/api/client'
+import { apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -17,14 +13,11 @@ type Step = 1 | 2 | 3
 function BikeRegisterPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
-  const [selectedManufacturerId, setSelectedManufacturerId] = useState('')
-  const [selectedBikeId, setSelectedBikeId] = useState('')
   const [selectedBike, setSelectedBike] = useState<{
     modelName: string
     displacement: number
     modelYear: number
   } | null>(null)
-  const [modelNameSearch, setModelNameSearch] = useState('')
   const [formData, setFormData] = useState({
     nickname: '',
     purchaseDate: '',
@@ -36,46 +29,7 @@ function BikeRegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  // メーカー一覧を取得
-  const { data: manufacturersData, error: manufacturersError } = useSWR(
-    '/api/v1/bikes/manufacturers',
-    apiGet
-  )
-
-  // バイク検索
-  const { data: bikesData, isLoading: isBikesLoading } = useSWR(
-    selectedManufacturerId && modelNameSearch
-      ? `/api/v1/bikes/search?mf-op=eq&mf=${selectedManufacturerId}&model-name=${modelNameSearch}`
-      : null,
-    async (url) => {
-      const response = await authenticatedFetch(url, { method: 'GET' })
-      const json =
-        (await response.json()) as SuccessResponse<ApiResponseBikeSearch>
-      return json.data
-    }
-  )
-
-  const handleManufacturerSelect = (manufacturerId: string) => {
-    setSelectedManufacturerId(manufacturerId)
-    if (manufacturerId) {
-      setStep(2)
-    }
-  }
-
-  const handleBikeSelect = (bike: {
-    bikeId: string
-    modelName: string
-    displacement: number
-    modelYear: number
-  }) => {
-    setSelectedBikeId(bike.bikeId)
-    setSelectedBike({
-      modelName: bike.modelName,
-      displacement: bike.displacement,
-      modelYear: bike.modelYear,
-    })
-    setStep(3)
-  }
+  // メーカー一覧とバイク検索のAPI呼び出しは無効化されているため削除
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,7 +43,7 @@ function BikeRegisterPage() {
         : Number(formData.displacement)
 
       await apiPost('/api/v1/user-bike/register', {
-        bikeId: selectedBikeId || null,
+        bikeId: null,
         displacement: displacement,
         serialNumber: null,
         nickname: formData.nickname || null,
@@ -113,18 +67,6 @@ function BikeRegisterPage() {
     }
   }
 
-  if (manufacturersError) {
-    return (
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">メーカー情報の取得に失敗しました</p>
-          <Button onClick={() => router.push('/home')}>ホームに戻る</Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="w-full max-w-md">
       <div className="mb-4">
@@ -134,7 +76,6 @@ function BikeRegisterPage() {
               router.push('/home')
             } else if (step === 2) {
               setStep(1)
-              setModelNameSearch('')
             } else {
               setStep(2)
             }
@@ -172,99 +113,77 @@ function BikeRegisterPage() {
           ))}
         </div>
 
-        {/* ステップ1: メーカー選択 */}
+        {/* ステップ1: メーカー選択（無効化） */}
         {step === 1 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">
               ステップ1: メーカーを選択
             </h2>
+
+            {/* 無効化の理由を説明 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-700">
+                バイクデータベースの準備中のため、現在メーカー選択は利用できません。
+                排気量を直接入力する方式でご登録いただけます。
+              </p>
+            </div>
+
+            {/* 無効化されたselect */}
             <select
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={selectedManufacturerId}
-              onChange={(e) => handleManufacturerSelect(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed opacity-60 mb-4"
+              disabled
+              value=""
             >
-              <option value="">メーカーを選択してください</option>
-              {manufacturersData?.data.manufacturers.map(
-                (m: {
-                  manufacturerId: string
-                  name: string
-                  nameEn: string
-                  country: string
-                }) => (
-                  <option key={m.manufacturerId} value={m.manufacturerId}>
-                    {m.name}
-                  </option>
-                )
-              )}
+              <option value="">
+                メーカーを選択してください（現在利用不可）
+              </option>
             </select>
+
+            {/* 次へボタン */}
+            <Button onClick={() => setStep(2)} variant="cloud" fullWidth>
+              次へ
+            </Button>
           </div>
         )}
 
-        {/* ステップ2: バイク検索・選択 */}
+        {/* ステップ2: バイク検索（無効化） */}
         {step === 2 && (
           <div>
             <h2 className="text-lg font-semibold mb-4">
-              ステップ2: バイクを検索 (オプション)
+              ステップ2: バイクを検索 (現在準備中)
             </h2>
+
+            {/* 無効化の理由を説明 */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-700">
+                バイクデータベースの準備中です。排気量を直接入力してご登録ください。
+              </p>
+            </div>
+
+            {/* 無効化された検索フィールド */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 モデル名で検索
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="例: CB400SF"
-                value={modelNameSearch}
-                onChange={(e) => setModelNameSearch(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed opacity-60"
+                placeholder="例: CB400SF（現在利用不可）"
+                disabled
               />
             </div>
 
-            {isBikesLoading && (
-              <p className="text-center text-gray-600 py-4">検索中...</p>
-            )}
-
-            {bikesData && bikesData.bikes.length > 0 && (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {bikesData.bikes.map((bike) => (
-                  <button
-                    key={bike.bikeId}
-                    onClick={() => handleBikeSelect(bike)}
-                    className="w-full text-left px-4 py-3 border border-gray-300 rounded-lg hover:bg-blue-50 hover:border-blue-500 transition-colors"
-                  >
-                    <div className="font-semibold text-gray-900">
-                      {bike.modelName}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {bike.displacement}cc / {bike.modelYear}年式
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {bikesData && bikesData.bikes.length === 0 && modelNameSearch && (
-              <p className="text-center text-gray-600 py-4">
-                該当するバイクが見つかりませんでした
-              </p>
-            )}
-
-            {/* スキップボタン */}
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600 mb-4">
-                該当するバイクが見つからない場合は、モデルを選択せずに登録できます
-              </p>
-              <Button
-                onClick={() => {
-                  setSelectedBikeId('')
-                  setSelectedBike(null)
-                  setStep(3)
-                }}
-                variant="cloud"
-                fullWidth
-              >
-                モデルを選択せずに登録
-              </Button>
-            </div>
+            {/* 次へボタン */}
+            <Button
+              onClick={() => {
+                setSelectedBike(null)
+                setStep(3)
+              }}
+              variant="cloud"
+              fullWidth
+            >
+              次へ
+            </Button>
           </div>
         )}
 
