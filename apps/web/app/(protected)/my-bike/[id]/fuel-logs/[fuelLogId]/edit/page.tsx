@@ -59,6 +59,7 @@ function FuelLogEditPage() {
             mileage: fuelLog.mileage.toString(),
             amount: fuelLog.amount.toString(),
             totalPrice: fuelLog.totalPrice.toString(),
+            updateTotalMileage: false,
           })
         }
       }

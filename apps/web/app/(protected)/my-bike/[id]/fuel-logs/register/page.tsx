@@ -2,14 +2,18 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { mutate } from 'swr'
+import useSWR, { mutate } from 'swr'
+import type {
+  ApiResponseUserBikeDetail,
+  SuccessResponse,
+} from '@packages/shared-types'
 import { BaseCard } from '@packages/ui/baseCard'
 import { Button } from '@packages/ui/button'
 import {
   FuelLogForm,
   type FuelLogFormData,
 } from '@/components/fuel-log/FuelLogForm'
-import { apiPost } from '@/lib/api/client'
+import { apiPost, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -21,6 +25,23 @@ function FuelLogRegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
+  const { data: bike } = useSWR(
+    bikeId ? `/api/v1/user-bike/bike/${bikeId}` : null,
+    async (url) => {
+      const response = await authenticatedFetch(url, { method: 'GET' })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new ApiV1Error(
+          errorData.errorCode || 'SERVER_ERROR',
+          errorData.message || 'バイク情報の取得に失敗しました'
+        )
+      }
+      const json =
+        (await response.json()) as SuccessResponse<ApiResponseUserBikeDetail>
+      return json.data
+    }
+  )
+
   const handleFormSubmit = async (formData: FuelLogFormData) => {
     setError('')
     setIsSubmitting(true)
@@ -31,7 +52,7 @@ function FuelLogRegisterPage() {
         mileage: Number(formData.mileage),
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
-        updateTotalMileage: false,
+        updateTotalMileage: formData.updateTotalMileage,
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
@@ -59,6 +80,7 @@ function FuelLogRegisterPage() {
           onSubmit={handleFormSubmit}
           isSubmitting={isSubmitting}
           error={error}
+          totalMileage={bike?.totalMileage}
         />
       </BaseCard>
     </>

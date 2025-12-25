@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@packages/ui/button'
+import { Checkbox } from '@packages/ui/checkbox'
 import { ErrorMessage } from '@packages/ui/errorMessage'
 import { FormField } from '@packages/ui/formField'
 import { Input } from '@packages/ui/input'
@@ -11,6 +12,7 @@ export interface FuelLogFormData {
   mileage: string
   amount: string
   totalPrice: string
+  updateTotalMileage: boolean
 }
 
 export interface FuelLogFormProps {
@@ -19,6 +21,7 @@ export interface FuelLogFormProps {
   isSubmitting: boolean
   error: string
   isEdit?: boolean
+  totalMileage?: number
 }
 
 export const FuelLogForm = ({
@@ -27,12 +30,14 @@ export const FuelLogForm = ({
   isSubmitting,
   error,
   isEdit = false,
+  totalMileage,
 }: FuelLogFormProps) => {
   const [formData, setFormData] = useState<FuelLogFormData>({
     refueledAt: '',
     mileage: '',
     amount: '',
     totalPrice: '',
+    updateTotalMileage: true,
   })
 
   useEffect(() => {
@@ -79,12 +84,18 @@ export const FuelLogForm = ({
           id="mileage"
           type="number"
           value={formData.mileage}
-          onChange={(e) =>
+          onChange={(e) => {
+            const newMileage = e.target.value
             setFormData((prev) => ({
               ...prev,
-              mileage: e.target.value,
+              mileage: newMileage,
+              // 総走行距離以下になったら自動的にチェックを外す
+              updateTotalMileage:
+                totalMileage !== undefined && Number(newMileage) <= totalMileage
+                  ? false
+                  : prev.updateTotalMileage,
             }))
-          }
+          }}
           min="0"
           step="1"
           required
@@ -130,6 +141,27 @@ export const FuelLogForm = ({
           placeholder="例: 2000"
         />
       </FormField>
+
+      {!isEdit && totalMileage !== undefined && (
+        <FormField label="" htmlFor="updateTotalMileage">
+          <Checkbox
+            id="updateTotalMileage"
+            label="総走行距離を更新する"
+            checked={formData.updateTotalMileage}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                updateTotalMileage: e.target.checked,
+              }))
+            }
+            disabled={
+              isSubmitting ||
+              (formData.mileage !== '' &&
+                Number(formData.mileage) <= totalMileage)
+            }
+          />
+        </FormField>
+      )}
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
