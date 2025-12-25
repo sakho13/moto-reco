@@ -2,9 +2,10 @@
 
 import { useRouter } from 'next/navigation'
 import { Button } from '@packages/ui/button'
+import { BikeIcon } from '@/components/icons/BikeIcon'
 import { ProfileIcon } from '@/components/icons/ProfileIcon'
-import { MyBikeListSection } from '@/components/MyBikeListSection'
 import { NavigationCard } from '@/components/NavigationCard'
+import { QuickFuelSection } from '@/components/QuickFuelSection'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -23,13 +24,20 @@ function Page() {
 
   return (
     <>
-      {/* マイバイク一覧セクション */}
+      {/* 給油登録セクション */}
       <div className="w-full max-w-lg">
-        <MyBikeListSection />
+        <QuickFuelSection />
       </div>
 
       {/* ナビゲーションカードセクション */}
       <div className="w-full max-w-md flex flex-col gap-4">
+        <NavigationCard
+          href="/my-bike"
+          title="マイバイク"
+          description="あなたのバイク一覧を表示します"
+          icon={<BikeIcon />}
+        />
+
         <NavigationCard
           href="/profile"
           title="プロフィール編集"

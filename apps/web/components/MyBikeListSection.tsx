@@ -39,9 +39,6 @@ export const MyBikeListSection = () => {
               ? error.message
               : 'バイク情報の取得に失敗しました'}
           </p>
-          <Button onClick={() => router.push('/bike/register')} size="sm">
-            バイクを登録
-          </Button>
         </div>
       </div>
     )
@@ -64,18 +61,12 @@ export const MyBikeListSection = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h2 className={styles.title}>マイバイク</h2>
-        <Button
-          onClick={() => router.push('/bike/register')}
-          variant="cloud"
-          size="sm"
-        >
-          バイクを登録
-        </Button>
       </div>
 
       {sortedBikes.length === 0 ? (
         <div className={styles.emptyState}>
           <p>まだバイクが登録されていません</p>
+
           <Button onClick={() => router.push('/bike/register')} size="sm">
             最初のバイクを登録
           </Button>
