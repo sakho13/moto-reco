@@ -66,7 +66,9 @@ export function ThemeToggle() {
   const { themeMode, setThemeMode } = useTheme()
 
   return (
-    <button onClick={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}>
+    <button
+      onClick={() => setThemeMode(themeMode === 'light' ? 'dark' : 'light')}
+    >
       現在のモード: {themeMode}
     </button>
   )
