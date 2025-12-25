@@ -1,0 +1,68 @@
+'use client'
+
+import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { mutate } from 'swr'
+import { BaseCard } from '@packages/ui/baseCard'
+import { Button } from '@packages/ui/button'
+import {
+  FuelLogForm,
+  type FuelLogFormData,
+} from '@/components/fuel-log/FuelLogForm'
+import { apiPost } from '@/lib/api/client'
+import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { withAuth } from '@/lib/hoc/withAuth'
+
+function FuelLogRegisterPage() {
+  const router = useRouter()
+  const params = useParams()
+  const bikeId = params.id as string
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleFormSubmit = async (formData: FuelLogFormData) => {
+    setError('')
+    setIsSubmitting(true)
+
+    try {
+      await apiPost(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
+        refueledAt: new Date(formData.refueledAt),
+        mileage: Number(formData.mileage),
+        amount: Number(formData.amount),
+        totalPrice: Number(formData.totalPrice),
+        updateTotalMileage: false,
+      })
+
+      await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      router.push(`/my-bike/${bikeId}/fuel-logs`)
+    } catch (err) {
+      setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <>
+      <div className="w-full max-w-md flex flex-row gap-2">
+        <Button
+          onClick={() => router.push(`/my-bike/${bikeId}/fuel-logs`)}
+          variant="cloud"
+        >
+          ← 戻る
+        </Button>
+      </div>
+
+      <BaseCard title="給油履歴を登録">
+        <FuelLogForm
+          onSubmit={handleFormSubmit}
+          isSubmitting={isSubmitting}
+          error={error}
+        />
+      </BaseCard>
+    </>
+  )
+}
+
+export default withAuth(FuelLogRegisterPage)

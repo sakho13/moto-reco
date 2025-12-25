@@ -6,6 +6,7 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@packages/shared-types'
+import { BaseCard } from '@packages/ui/baseCard'
 import { Button } from '@packages/ui/button'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
@@ -81,114 +82,65 @@ function BikeDetailPage() {
     bike.nickname ||
     `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return '未設定'
-    try {
-      return new Date(dateString).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    } catch {
-      return '未設定'
-    }
-  }
-
   return (
-    <div className="w-full max-w-2xl">
-      <div className="mb-4">
-        <Button onClick={() => router.push('/home')} variant="cloud">
+    <>
+      <div className="w-full max-w-md">
+        <Button variant="cloud" onClick={() => router.push('/home')}>
           ← 戻る
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">
-          {displayTitle}
-        </h1>
-
-        {/* 基本情報セクション */}
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
-            基本情報
-          </h2>
-          <dl className="grid grid-cols-1 gap-4">
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">メーカー</dt>
-              <dd className="text-gray-900">
-                {bike.manufacturerName || '不明'}
-              </dd>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">モデル名</dt>
-              <dd className="text-gray-900">{bike.modelName || '不明'}</dd>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">排気量</dt>
-              <dd className="text-gray-900">{bike.displacement}cc</dd>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">年式</dt>
-              <dd className="text-gray-900">
-                {bike.modelYear ? `${bike.modelYear}年` : '不明'}
-              </dd>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">
-                ニックネーム
-              </dt>
-              <dd className="text-gray-900">{bike.nickname || '未設定'}</dd>
-            </div>
-          </dl>
-        </section>
-
-        {/* 購入情報セクション */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
-            購入情報
-          </h2>
-          <dl className="grid grid-cols-1 gap-4">
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">購入日</dt>
-              <dd className="text-gray-900">{formatDate(bike.purchaseDate)}</dd>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">購入価格</dt>
-              <dd className="text-gray-900">
-                {bike.purchasePrice
-                  ? `¥${bike.purchasePrice.toLocaleString()}`
-                  : '未設定'}
-              </dd>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">
-                購入時走行距離
-              </dt>
-              <dd className="text-gray-900">
-                {bike.purchaseMileage
-                  ? `${bike.purchaseMileage.toLocaleString()}km`
-                  : '未設定'}
-              </dd>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:gap-4">
-              <dt className="font-medium text-gray-600 sm:w-40">
-                現在の走行距離
-              </dt>
-              <dd className="text-gray-900">
-                {bike.totalMileage.toLocaleString()}km
-              </dd>
-            </div>
-          </dl>
-        </section>
+      <div className="w-full max-w-md flex flex-col gap-4">
+        <BaseCard title={displayTitle}>
+          <div className="flex flex-row gap-2 select-none">
+            <span>総走行距離: {bike.totalMileage.toLocaleString()}km</span>
+            <span>モデル: {bike.modelName || '不明'}</span>
+            <span>
+              排気量: {bike.displacement ? `${bike.displacement}cc` : '不明'}
+            </span>
+          </div>
+        </BaseCard>
       </div>
-    </div>
+
+      {/* 給油履歴カード */}
+      <div className="w-full max-w-md flex flex-col gap-4">
+        <BaseCard title="履歴管理">
+          <div>
+            <p
+              style={{
+                color: 'var(--color-ink)',
+                opacity: 0.7,
+                fontSize: 'var(--font-size-sm)',
+              }}
+            >
+              給油履歴を確認・管理できます
+            </p>
+
+            <Button
+              onClick={() => router.push(`/my-bike/${id}/fuel-logs`)}
+              variant="primary"
+            >
+              給油履歴を表示
+            </Button>
+          </div>
+
+          <div className="mt-5">
+            <p
+              style={{
+                color: 'var(--color-ink)',
+                opacity: 0.7,
+                fontSize: 'var(--font-size-sm)',
+              }}
+            >
+              準備中です
+            </p>
+            <Button disabled variant="primary">
+              メンテナンス履歴を表示
+            </Button>
+          </div>
+        </BaseCard>
+      </div>
+    </>
   )
 }
 
