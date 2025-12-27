@@ -85,7 +85,10 @@ function FuelLogsPage() {
   return (
     <>
       <div className="w-full max-w-md flex flex-row gap-2">
-        <Button onClick={() => router.back()} variant="cloud">
+        <Button
+          onClick={() => router.push(`/my-bike/${bikeId}`)}
+          variant="cloud"
+        >
           ← 戻る
         </Button>
 
