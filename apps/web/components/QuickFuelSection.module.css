@@ -27,13 +27,6 @@
   margin-bottom: var(--spacing-4);
 }
 
-.sectionTitle {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-3);
-}
-
 /* バイクカードグリッドレイアウト */
 .bikeGrid {
   display: grid;

@@ -91,8 +91,6 @@ export const QuickFuelSection = () => {
       </div>
 
       <div className={styles.bikeSelectionSection}>
-        <h3 className={styles.sectionTitle}>バイクを選択</h3>
-
         <div className={styles.bikeGrid}>
           {sortedBikes.map((bike) => {
             const title =
