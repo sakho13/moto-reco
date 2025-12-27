@@ -13,7 +13,7 @@ import {
   FuelLogForm,
   type FuelLogFormData,
 } from '@/components/fuel-log/FuelLogForm'
-import { authenticatedFetch, apiPost } from '@/lib/api/client'
+import { authenticatedFetch, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -76,7 +76,7 @@ function FuelLogEditPage() {
     setIsSubmitting(true)
 
     try {
-      await apiPost(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
+      await apiPatch(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
         fuelLogId: fuelLogId,
         refueledAt: new Date(formData.refueledAt),
         mileage: Number(formData.mileage),

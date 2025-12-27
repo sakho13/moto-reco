@@ -129,6 +129,24 @@ export const apiPut = async <U extends keyof API_EP>(
 }
 
 /**
+ * 認証付きPATCHリクエスト
+ *
+ * @throws {ApiV1Error} APIエラーが発生した場合
+ */
+export const apiPatch = async <U extends keyof API_EP>(
+  url: U,
+  data: unknown
+): Promise<
+  API_EP[U] extends { PATCH: unknown } ? API_EP[U]['PATCH'] : never
+> => {
+  const response = await authenticatedFetch(url, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+  return handleApiResponse(response)
+}
+
+/**
  * 認証付きDELETEリクエスト
  *
  * @throws {ApiV1Error} APIエラーが発生した場合

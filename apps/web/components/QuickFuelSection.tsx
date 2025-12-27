@@ -22,14 +22,13 @@ export const QuickFuelSection = () => {
   )
 
   // 更新日時の降順でソート
-  const sortedBikes = useMemo(
-    () =>
-      data?.bikes.sort(
-        (a, b) =>
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-      ) ?? [],
-    [data?.bikes]
-  )
+  const sortedBikes = useMemo(() => {
+    if (!data?.bikes) return []
+    return [...data.bikes].sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )
+  }, [data?.bikes])
 
   const handleBikeClick = (bikeId: string) => {
     router.push(`/my-bike/${bikeId}/fuel-logs/register`)
