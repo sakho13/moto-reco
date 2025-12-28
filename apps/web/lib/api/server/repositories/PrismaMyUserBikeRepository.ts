@@ -11,6 +11,7 @@ import {
   IMyUserBikeRepository,
   MyUserBikeDetail,
 } from '../interfaces/IMyUserBikeRepository'
+import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaMyUserBikeRepository
@@ -72,7 +73,15 @@ export class PrismaMyUserBikeRepository
     })
   }
 
-  async findMyUserBikes(userId: UserId): Promise<MyUserBikeDetail[]> {
+  async findMyUserBikes(
+    userId: UserId,
+    searchParams: UserBikeSearchParams
+  ): Promise<MyUserBikeDetail[]> {
+    const sortByMap = {
+      createdAt: 'createdAt',
+      updatedAt: 'updatedAt',
+    } as const
+
     const myUserBikes = await this.connection.tUserMyBike.findMany({
       where: { userId, ownStatus: 'OWN' },
       include: {
@@ -89,7 +98,7 @@ export class PrismaMyUserBikeRepository
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        [sortByMap[searchParams.sortBy]]: searchParams.sortOrder,
       },
     })
 

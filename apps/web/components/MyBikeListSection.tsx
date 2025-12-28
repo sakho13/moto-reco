@@ -20,12 +20,7 @@ export const MyBikeListSection = () => {
     }
   )
 
-  // 更新日時の降順でソート
-  const sortedBikes =
-    data?.bikes.sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    ) ?? []
+  const bikes = data?.bikes ?? []
 
   if (error) {
     return (
@@ -63,7 +58,7 @@ export const MyBikeListSection = () => {
         <h2 className={styles.title}>マイバイク</h2>
       </div>
 
-      {sortedBikes.length === 0 ? (
+      {bikes.length === 0 ? (
         <div className={styles.emptyState}>
           <p>まだバイクが登録されていません</p>
 
@@ -73,7 +68,7 @@ export const MyBikeListSection = () => {
         </div>
       ) : (
         <div className={styles.grid}>
-          {sortedBikes.map((bike) => {
+          {bikes.map((bike) => {
             const title =
               bike.nickname ||
               `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()

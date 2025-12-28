@@ -5,6 +5,7 @@ import {
   UserId,
 } from '@packages/shared-types'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
+import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 
 export type MyUserBikeDetail = {
   userBikeId: UserBikeId
@@ -25,7 +26,10 @@ export type MyUserBikeDetail = {
 
 export interface IMyUserBikeRepository {
   createMyUserBike(myUserBike: MyUserBikeEntity): Promise<MyUserBikeEntity>
-  findMyUserBikes(userId: UserId): Promise<MyUserBikeDetail[]>
+  findMyUserBikes(
+    userId: UserId,
+    searchParams: UserBikeSearchParams
+  ): Promise<MyUserBikeDetail[]>
   findMyUserBikeById(
     myUserBikeId: MyUserBikeId,
     userId: UserId

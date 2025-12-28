@@ -294,6 +294,104 @@ describe('UserBike API Endpoints', () => {
         }
       )
     })
+
+    test('デフォルトでupdatedAtの降順でソートされる（パラメータなし）', async () => {
+      const res = await app.request('/api/v1/user-bike/bikes', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.data.bikes.length).toBeGreaterThan(0)
+
+      // updatedAtの降順であることを検証
+      for (let i = 0; i < json.data.bikes.length - 1; i++) {
+        const current = new Date(json.data.bikes[i].updatedAt).getTime()
+        const next = new Date(json.data.bikes[i + 1].updatedAt).getTime()
+        expect(current).toBeGreaterThanOrEqual(next)
+      }
+    })
+
+    test('created-atで昇順ソートできる', async () => {
+      const res = await app.request(
+        '/api/v1/user-bike/bikes?sort-by=created-at&sort-order=asc',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+
+      // createdAtの昇順であることを検証
+      for (let i = 0; i < json.data.bikes.length - 1; i++) {
+        const current = new Date(json.data.bikes[i].createdAt).getTime()
+        const next = new Date(json.data.bikes[i + 1].createdAt).getTime()
+        expect(current).toBeLessThanOrEqual(next)
+      }
+    })
+
+    test('updated-atで降順ソートできる', async () => {
+      const res = await app.request(
+        '/api/v1/user-bike/bikes?sort-by=updated-at&sort-order=desc',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+
+      // updatedAtの降順であることを検証
+      for (let i = 0; i < json.data.bikes.length - 1; i++) {
+        const current = new Date(json.data.bikes[i].updatedAt).getTime()
+        const next = new Date(json.data.bikes[i + 1].updatedAt).getTime()
+        expect(current).toBeGreaterThanOrEqual(next)
+      }
+    })
+
+    test('無効なsort-byパラメータはバリデーションエラーになる', async () => {
+      const res = await app.request('/api/v1/user-bike/bikes?sort-by=invalid', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('VALIDATION_ERROR')
+    })
+
+    test('無効なsort-orderパラメータはバリデーションエラーになる', async () => {
+      const res = await app.request(
+        '/api/v1/user-bike/bikes?sort-order=invalid',
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('VALIDATION_ERROR')
+    })
   })
 
   describe('GET /api/v1/user-bike/bike/:myUserBikeId', () => {

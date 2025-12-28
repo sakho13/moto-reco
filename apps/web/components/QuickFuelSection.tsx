@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo } from 'react'
 import useSWR from 'swr'
 import { Button } from '@packages/ui/button'
 import { BikeIcon } from './icons/BikeIcon'
@@ -21,14 +20,7 @@ export const QuickFuelSection = () => {
     }
   )
 
-  // 更新日時の降順でソート
-  const sortedBikes = useMemo(() => {
-    if (!data?.bikes) return []
-    return [...data.bikes].sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    )
-  }, [data?.bikes])
+  const bikes = data?.bikes ?? []
 
   const handleBikeClick = (bikeId: string) => {
     router.push(`/my-bike/${bikeId}/fuel-logs/register`)
@@ -64,7 +56,7 @@ export const QuickFuelSection = () => {
     )
   }
 
-  if (sortedBikes.length === 0) {
+  if (bikes.length === 0) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -91,7 +83,7 @@ export const QuickFuelSection = () => {
 
       <div className={styles.bikeSelectionSection}>
         <div className={styles.bikeGrid}>
-          {sortedBikes.map((bike) => {
+          {bikes.map((bike) => {
             const title =
               bike.nickname ||
               `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()

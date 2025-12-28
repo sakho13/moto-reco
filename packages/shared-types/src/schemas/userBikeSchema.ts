@@ -114,3 +114,16 @@ export const UserBikeUpdateRequestSchema = z
   )
 
 export type UserBikeUpdateRequest = z.infer<typeof UserBikeUpdateRequestSchema>
+
+/**
+ * ユーザーバイク一覧取得クエリパラメータのバリデーションスキーマ
+ */
+export const UserBikeListQuerySchema = z.object({
+  'sort-by': z
+    .enum(['created-at', 'updated-at'])
+    .default('updated-at')
+    .optional(),
+  'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+})
+
+export type UserBikeListQuery = z.infer<typeof UserBikeListQuerySchema>
