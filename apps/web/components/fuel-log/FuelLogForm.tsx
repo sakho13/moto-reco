@@ -46,6 +46,16 @@ export const FuelLogForm = ({
     }
   }, [initialData])
 
+  // 登録モード: totalMileageを初期値として設定
+  useEffect(() => {
+    if (!isEdit && totalMileage !== undefined) {
+      setFormData((prev) => ({
+        ...prev,
+        mileage: totalMileage.toString(),
+      }))
+    }
+  }, [isEdit, totalMileage])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     await onSubmit(formData)
