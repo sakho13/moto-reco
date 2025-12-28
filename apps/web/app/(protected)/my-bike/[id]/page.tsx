@@ -8,6 +8,9 @@ import type {
 } from '@packages/shared-types'
 import { BaseCard } from '@packages/ui/baseCard'
 import { Button } from '@packages/ui/button'
+import { FuelIcon } from '@/components/icons/FuelIcon'
+import { WrenchIcon } from '@/components/icons/WrenchIcon'
+import { NavigationCard } from '@/components/NavigationCard'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -102,43 +105,31 @@ function BikeDetailPage() {
         </BaseCard>
       </div>
 
-      {/* 給油履歴カード */}
+      {/* 履歴管理セクション */}
       <div className="w-full max-w-md flex flex-col gap-4">
-        <BaseCard title="履歴管理">
-          <div>
-            <p
-              style={{
-                color: 'var(--color-ink)',
-                opacity: 0.7,
-                fontSize: 'var(--font-size-sm)',
-              }}
-            >
-              給油履歴を確認・管理できます
-            </p>
+        <NavigationCard
+          href={`/my-bike/${id}/fuel-logs`}
+          title="給油履歴"
+          description="給油履歴を確認・管理できます"
+          icon={<FuelIcon />}
+        />
 
-            <Button
-              onClick={() => router.push(`/my-bike/${id}/fuel-logs`)}
-              variant="primary"
-            >
-              給油履歴を表示
-            </Button>
-          </div>
-
-          <div className="mt-5">
-            <p
-              style={{
-                color: 'var(--color-ink)',
-                opacity: 0.7,
-                fontSize: 'var(--font-size-sm)',
-              }}
-            >
-              準備中です
-            </p>
-            <Button disabled variant="primary">
-              メンテナンス履歴を表示
-            </Button>
-          </div>
-        </BaseCard>
+        {/* メンテナンス履歴 - disabled 状態 */}
+        <div
+          style={{
+            opacity: 0.5,
+            pointerEvents: 'none',
+            cursor: 'not-allowed',
+          }}
+          aria-disabled="true"
+        >
+          <NavigationCard
+            href="#"
+            title="メンテナンス履歴"
+            description="準備中です"
+            icon={<WrenchIcon />}
+          />
+        </div>
       </div>
     </>
   )
