@@ -3,6 +3,8 @@ import {
   ApiResponseManufacturer,
   ApiResponseUserBikeList,
   ApiResponseUserBikeRegister,
+  ApiResponseFuelLogDetail,
+  ApiResponseFuelLogList,
   ErrorResponse,
   SuccessResponse,
 } from '@packages/shared-types'
@@ -127,6 +129,24 @@ export const apiPut = async <U extends keyof API_EP>(
 }
 
 /**
+ * 認証付きPATCHリクエスト
+ *
+ * @throws {ApiV1Error} APIエラーが発生した場合
+ */
+export const apiPatch = async <U extends keyof API_EP>(
+  url: U,
+  data: unknown
+): Promise<
+  API_EP[U] extends { PATCH: unknown } ? API_EP[U]['PATCH'] : never
+> => {
+  const response = await authenticatedFetch(url, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+  return handleApiResponse(response)
+}
+
+/**
  * 認証付きDELETEリクエスト
  *
  * @throws {ApiV1Error} APIエラーが発生した場合
@@ -156,5 +176,10 @@ type API_EP = {
   }
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
+  }
+  [key: `/api/v1/user-bike/bike/${string}/fuel-logs`]: {
+    GET: SuccessResponse<ApiResponseFuelLogList>
+    POST: SuccessResponse<ApiResponseFuelLogDetail>
+    PATCH: SuccessResponse<ApiResponseFuelLogDetail>
   }
 }

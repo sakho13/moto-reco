@@ -12,6 +12,7 @@ import {
   SuccessResponse,
   UserBikeRegisterRequestSchema,
   UserBikeUpdateRequestSchema,
+  UserBikeListQuerySchema,
   FuelLogRegisterRequestSchema,
   FuelLogUpdateRequestSchema,
   FuelLogListQuerySchema,
@@ -26,6 +27,7 @@ import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeReposito
 import { FuelLogService } from '../services/FuelLogService'
 import { UserBikeService } from '../services/UserBikeService'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
+import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 
 const userBike = new Hono()
 
@@ -92,20 +94,34 @@ userBike.post(
   }
 )
 
-userBike.get('/bikes', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
-  const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+userBike.get(
+  '/bikes',
+  honoAuthMiddleware,
+  zodValidateQuery(UserBikeListQuerySchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const query = c.req.valid('query')
 
-  const bikes = await myUserBikeRepo.findMyUserBikes(createUserId(userId))
+    const searchParams = new UserBikeSearchParams({
+      sortBy: query['sort-by'] === 'created-at' ? 'createdAt' : 'updatedAt',
+      sortOrder: query['sort-order'],
+    })
 
-  return c.json<SuccessResponse<ApiResponseUserBikeList>>({
-    status: 'success',
-    data: {
-      bikes: bikes.map(toApiResponseUserBikeDetail),
-    },
-    message: 'ユーザー所有バイク一覧取得成功',
-  })
-})
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const bikes = await myUserBikeRepo.findMyUserBikes(
+      createUserId(userId),
+      searchParams
+    )
+
+    return c.json<SuccessResponse<ApiResponseUserBikeList>>({
+      status: 'success',
+      data: {
+        bikes: bikes.map(toApiResponseUserBikeDetail),
+      },
+      message: 'ユーザー所有バイク一覧取得成功',
+    })
+  }
+)
 
 userBike.get('/bike/:myUserBikeId', honoAuthMiddleware, async (c) => {
   const { userId } = c.var.user!

@@ -324,6 +324,25 @@ paths:
       summary: ユーザー所有バイクの一覧取得
       tags:
         - user-bikes
+      parameters:
+        - in: query
+          name: sort-by
+          schema:
+            type: string
+            enum:
+              - created-at
+              - updated-at
+            default: updated-at
+            description: ソート対象のフィールド
+        - in: query
+          name: sort-order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+            description: ソート順序
       responses:
         '200':
           description: ユーザー所有バイク一覧取得成功
