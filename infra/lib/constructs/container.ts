@@ -195,16 +195,6 @@ export class ContainerConstruct extends Construct {
           props.ssmParameters.firebaseMeasurementId
         ),
       },
-      healthCheck: {
-        command: [
-          'CMD-SHELL',
-          'curl -f http://localhost:3000/api/v1/health || exit 1',
-        ],
-        interval: Duration.seconds(30),
-        timeout: Duration.seconds(5),
-        retries: 3,
-        startPeriod: Duration.seconds(60),
-      },
     })
 
     container.addPortMappings({
