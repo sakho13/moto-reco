@@ -24,6 +24,7 @@ export interface ContainerConstructProps {
     firebaseStorageBucket: ssm.IStringParameter
     firebaseMessagingSenderId: ssm.IStringParameter
     firebaseAppId: ssm.IStringParameter
+    firebaseMeasurementId: ssm.IStringParameter
     databaseUrl: ssm.IStringParameter
   }
   databaseEndpoint: string
@@ -158,7 +159,9 @@ export class ContainerConstruct extends Construct {
       },
       secrets: {
         // SSM Parameter Store経由 - データベース接続
-        DATABASE_URL: ecs.Secret.fromSsmParameter(props.ssmParameters.databaseUrl),
+        DATABASE_URL: ecs.Secret.fromSsmParameter(
+          props.ssmParameters.databaseUrl
+        ),
         // Secrets Manager経由 - Firebase
         FIREBASE_PRIVATE_KEY: ecs.Secret.fromSecretsManager(
           props.firebasePrivateKeySecret
@@ -187,6 +190,9 @@ export class ContainerConstruct extends Construct {
         ),
         NEXT_PUBLIC_FIREBASE_APP_ID: ecs.Secret.fromSsmParameter(
           props.ssmParameters.firebaseAppId
+        ),
+        NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ecs.Secret.fromSsmParameter(
+          props.ssmParameters.firebaseMeasurementId
         ),
       },
       healthCheck: {

@@ -18,6 +18,7 @@ export class SecretsConstruct extends Construct {
     firebaseStorageBucket: ssm.StringParameter
     firebaseMessagingSenderId: ssm.StringParameter
     firebaseAppId: ssm.StringParameter
+    firebaseMeasurementId: ssm.StringParameter
     databaseUrl: ssm.StringParameter
   }
 
@@ -57,6 +58,7 @@ export class SecretsConstruct extends Construct {
       firebaseStorageBucket: `${parameterPrefix}/firebase/storage-bucket`,
       firebaseMessagingSenderId: `${parameterPrefix}/firebase/messaging-sender-id`,
       firebaseAppId: `${parameterPrefix}/firebase/app-id`,
+      firebaseMeasurementId: `${parameterPrefix}/firebase/measurement-id`,
       databaseUrl: `${parameterPrefix}/database-url`,
     }
 
@@ -110,6 +112,14 @@ export class SecretsConstruct extends Construct {
         parameterName: ssmParameterPaths.firebaseAppId,
         stringValue: 'PLACEHOLDER',
       }),
+      firebaseMeasurementId: new ssm.StringParameter(
+        this,
+        'FirebaseMeasurementIdParameter',
+        {
+          parameterName: ssmParameterPaths.firebaseMeasurementId,
+          stringValue: 'PLACEHOLDER',
+        }
+      ),
       databaseUrl: new ssm.StringParameter(this, 'DatabaseUrlParameter', {
         parameterName: ssmParameterPaths.databaseUrl,
         stringValue: 'PLACEHOLDER',
