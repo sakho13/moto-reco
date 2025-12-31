@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
-
+import { Providers } from '../components/Providers'
+import { ThemeToggleButton } from '../components/ThemeToggleButton'
 import './globals.css'
-import { Providers } from './providers'
+
+// Firebase認証を使用しているため、動的レンダリングを強制
+export const dynamic = 'force-dynamic'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -14,8 +17,8 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'Motorepo Web App',
-  description: 'Motorepo Web Application',
+  title: 'MotoReco Web App',
+  description: 'MotoReco Web Application',
 }
 
 export default function RootLayout({
@@ -26,7 +29,12 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeToggleButton />
+          </div>
+          {children}
+        </Providers>
       </body>
     </html>
   )

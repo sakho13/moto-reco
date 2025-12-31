@@ -1,6 +1,6 @@
 'use client'
 
-import { onAuthStateChanged, type User } from 'firebase/auth'
+import { onIdTokenChanged, type User } from 'firebase/auth'
 import { createContext, useEffect, useState, type ReactNode } from 'react'
 import * as authService from '../firebase/auth'
 import { getFirebaseAuth } from '../firebase/config'
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const auth = getFirebaseAuth()
 
     // 認証状態の監視
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onIdTokenChanged(auth, (firebaseUser) => {
       setUser(firebaseUser)
       setLoading(false)
     })
@@ -29,19 +29,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [])
 
   const handleSignInWithEmail = async (email: string, password: string) => {
-    await authService.signInWithEmail(email, password)
+    const result = await authService.signInWithEmail(email, password)
+    return result.user.getIdToken()
   }
 
   const handleRegisterWithEmail = async (email: string, password: string) => {
-    await authService.registerWithEmail(email, password)
+    const result = await authService.registerWithEmail(email, password)
+    return result.user.getIdToken()
   }
 
   const handleSignInWithGoogle = async () => {
-    await authService.signInWithGoogle()
+    const result = await authService.signInWithGoogle()
+    return result.user.getIdToken()
   }
 
   const handleSignOut = async () => {
-    await authService.signOut()
+    try {
+      await authService.signOut()
+      return true
+    } catch {
+      return false
+    }
   }
 
   const handleGetIdToken = async (): Promise<string | null> => {

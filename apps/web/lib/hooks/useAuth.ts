@@ -1,9 +1,7 @@
 'use client'
 
 import { useContext } from 'react'
-
 import { AuthContext } from '../contexts/AuthContext'
-
 import type { AuthContextType } from '@/types/auth'
 
 /**

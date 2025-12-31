@@ -4,18 +4,31 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3000",
+    "dev": "next dev --port ${WEB_PORT:-3000}",
     "build": "next build",
     "start": "next start",
     "lint": "eslint --max-warnings 0",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@hono/zod-validator": "catalog:",
+    "@repo/database": "workspace:*",
+    "@repo/firebase-auth-server": "workspace:*",
+    "@repo/shared-types": "workspace:*",
+    "@repo/shared-utils": "workspace:*",
     "@repo/ui": "workspace:*",
     "firebase": "catalog:",
+    "firebase-admin": "catalog:",
+    "hono": "catalog:",
+    "lucide-react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "swr": "2.3.8",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -23,7 +36,9 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitest/ui": "catalog:",
     "eslint": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

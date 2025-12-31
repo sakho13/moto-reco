@@ -7,7 +7,6 @@ import {
   type UserCredential,
   type User,
 } from 'firebase/auth'
-
 import { getFirebaseAuth } from './config'
 
 /**
@@ -38,6 +37,7 @@ export const registerWithEmail = async (
 export const signInWithGoogle = async (): Promise<UserCredential> => {
   const auth = getFirebaseAuth()
   const provider = new GoogleAuthProvider()
+  provider.addScope('https://www.googleapis.com/auth/userinfo.profile')
   return await signInWithPopup(auth, provider)
 }
 
@@ -46,7 +46,7 @@ export const signInWithGoogle = async (): Promise<UserCredential> => {
  */
 export const signOut = async (): Promise<void> => {
   const auth = getFirebaseAuth()
-  await firebaseSignOut(auth)
+  return await firebaseSignOut(auth)
 }
 
 /**

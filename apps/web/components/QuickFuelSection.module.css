@@ -1,0 +1,178 @@
+.container {
+  width: 100%;
+  padding: var(--spacing-4);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* バイク選択セクション */
+.bikeSelectionSection {
+  margin-bottom: var(--spacing-4);
+}
+
+/* バイクカードグリッドレイアウト */
+.bikeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .bikeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* バイク選択カード */
+.bikeCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  min-height: 68px;
+  padding: var(--spacing-4);
+  background-color: var(--color-background);
+  border: 2px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--transition-base);
+  text-align: left;
+}
+
+/* アイドルアニメーション */
+@keyframes gentleFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.bikeCard {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+/* モーション削減対応 */
+@media (prefers-reduced-motion: reduce) {
+  .bikeCard {
+    animation: none !important;
+  }
+}
+
+/* hover状態 */
+.bikeCard:hover {
+  border-color: var(--color-product);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  animation-play-state: paused;
+}
+
+/* active状態 */
+.bikeCard:active {
+  transform: translateY(0) scale(0.98);
+  animation-play-state: paused;
+}
+
+/* フォーカススタイル */
+.bikeCard:focus-visible {
+  outline: 2px solid var(--color-product);
+  outline-offset: 2px;
+}
+
+/* アイコンコンテナ */
+.bikeIconContainer {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-md);
+  color: var(--color-product);
+  transition: all var(--transition-base);
+}
+
+/* テキストコンテナ */
+.bikeTextContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.bikeTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  line-height: var(--line-height-tight);
+  margin: 0;
+  word-break: break-word;
+}
+
+/* レスポンシブ: モバイル */
+@media (max-width: 640px) {
+  .bikeCard {
+    padding: var(--spacing-3);
+    min-height: 60px;
+  }
+
+  .bikeIconContainer {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .bikeTitle {
+    font-size: var(--font-size-sm);
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-secondary);
+}
+
+.emptyState p {
+  margin-bottom: var(--spacing-4);
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-secondary);
+}
+
+.errorContainer {
+  text-align: center;
+  padding: var(--spacing-6);
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-sm);
+}

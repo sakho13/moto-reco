@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3001",
+    "dev": "next dev --port ${DOCS_PORT:-3001}",
     "build1": "next build",
     "start1": "next start",
     "lint1": "eslint --max-warnings 0",

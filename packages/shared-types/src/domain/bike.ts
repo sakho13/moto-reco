@@ -14,8 +14,9 @@ export type UserBikeId = string & { readonly __brand: unique symbol }
 export const createUserBikeId = (id: string): UserBikeId => id as UserBikeId
 
 export type UserBike = {
-  bikeId: BikeId
+  bikeId: BikeId | null
   userBikeId: UserBikeId
+  displacement: number
 
   serialNumber: string | null
 }
@@ -24,10 +25,10 @@ export type MyUserBikeId = string & { readonly __brand: unique symbol }
 export const createMyUserBikeId = (id: string): MyUserBikeId =>
   id as MyUserBikeId
 
-import { UserId } from './user.js'
+import { UserId } from './user'
 
 export type MyUserBike = {
-  bikeId: BikeId
+  bikeId: BikeId | null
   userBikeId: UserBikeId
   myUserBikeId: MyUserBikeId
   userId: UserId

@@ -1,0 +1,103 @@
+/* 基本スタイル */
+.navigationCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  width: 100%;
+  max-width: 28rem;
+  padding: var(--spacing-6);
+  background-color: var(--color-background);
+  border: 2px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: all var(--transition-base);
+}
+
+/* アイドルアニメーション（微細な揺れ） */
+@keyframes gentleFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.navigationCard:not([data-disable-animation='true']) {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+/* アクセシビリティ: モーション削減 */
+@media (prefers-reduced-motion: reduce) {
+  .navigationCard {
+    animation: none !important;
+  }
+}
+
+/* hover状態 */
+.navigationCard:hover {
+  border-color: var(--color-product);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  animation-play-state: paused;
+  border-width: 1px;
+}
+
+/* active状態 */
+.navigationCard:active {
+  transform: translateY(0) scale(0.98);
+  animation-play-state: paused;
+}
+
+/* アイコンコンテナ */
+.iconContainer {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-md);
+  color: var(--color-product);
+}
+
+/* テキストコンテナ */
+.textContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  line-height: var(--line-height-tight);
+  margin: 0;
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+  line-height: var(--line-height-normal);
+  margin: 0;
+}
+
+/* レスポンシブ */
+@media (max-width: 640px) {
+  .navigationCard {
+    max-width: 100%;
+    padding: var(--spacing-4);
+  }
+
+  .iconContainer {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}

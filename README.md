@@ -12,17 +12,27 @@
 - **`api`**: Hono バックエンドAPI
 - **`docs`**: Next.js ドキュメントサイト / OpenAPI仕様書 (http://localhost:3001)
 
+#### ポート番号
+
+- Webアプリ: `WEB_PORT` (デフォルト: 3000)
+- ドキュメントサイト: `DOCS_PORT` (デフォルト: 3001)
+- APIサーバー: `API_PORT` (デフォルト: 3002)
+
 ### Packages
 
 - **`@repo/ui`**: React コンポーネントライブラリ
-- **`@packages/database`**: Prisma データベースパッケージ
-- **`@packages/shared-types`**: 共有型定義
-- **`@packages/shared-utils`**: 共有ユーティリティ
-- **`@packages/firebase-auth-server`**: Firebase 認証サーバー
+- **`@repo/database`**: Prisma データベースパッケージ
+- **`@repo/shared-types`**: 共有型定義
+- **`@repo/shared-utils`**: 共有ユーティリティ
+- **`@repo/firebase-auth-server`**: Firebase 認証サーバー
 - **`@repo/eslint-config`**: ESLint 設定
 - **`@repo/typescript-config`**: TypeScript 設定
 
 すべてのパッケージとアプリは [TypeScript](https://www.typescriptlang.org/) で書かれています。
+
+### インフラ (AWS CDK)
+
+- **`infra`**: AWS CDK v2 を用いた IaC 環境。詳細なセットアップやコマンドは [`infra/README.md`](infra/README.md) を参照してください。
 
 ## 技術スタック
 
@@ -54,7 +64,7 @@ DATABASE_PASSWORD=password
 DATABASE_NAME=dbname
 
 # Firebase
-USE_FIREBASE_EMULATOR=true
+NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true
 FIREBASE_PROJECT_ID=your-project-id
 FIREBASE_CLIENT_EMAIL=your-client-email
 FIREBASE_PRIVATE_KEY=your-private-key

@@ -14,4 +14,4 @@ COPY . .
 # エミュレータ起動ポートを開ける
 EXPOSE 4000 8080 9000 9099 5001 5000 9199 8085
 
-CMD ["firebase", "emulators:start", "--only", "auth"]
+CMD ["firebase", "emulators:start", "--only", "auth", "--project", "motoreco", "--import", "./init-data", "--export-on-exit"]

@@ -46,3 +46,53 @@ export const FuelLogListQuerySchema = z.object({
 })
 
 export type FuelLogListQuery = z.infer<typeof FuelLogListQuerySchema>
+
+/**
+ * 燃料ログ更新リクエストのバリデーションスキーマ
+ */
+export const FuelLogUpdateRequestSchema = z
+  .object({
+    fuelLogId: z
+      .string({
+        required_error: '燃料ログIDは必須です',
+        invalid_type_error: '燃料ログIDは文字列で指定してください',
+      })
+      .min(1, '燃料ログIDは1文字以上で指定してください'),
+    refueledAt: z.coerce
+      .date({
+        invalid_type_error: '給油日時は日付形式で指定してください',
+      })
+      .optional(),
+    mileage: z
+      .number({
+        invalid_type_error: '走行距離は数値で指定してください',
+      })
+      .int('走行距離は整数で指定してください')
+      .nonnegative('走行距離は0以上で指定してください')
+      .optional(),
+    amount: z
+      .number({
+        invalid_type_error: '給油量は数値で指定してください',
+      })
+      .positive('給油量は0より大きい値で指定してください')
+      .optional(),
+    totalPrice: z
+      .number({
+        invalid_type_error: '合計価格は数値で指定してください',
+      })
+      .int('合計価格は整数で指定してください')
+      .nonnegative('合計価格は0以上で指定してください')
+      .optional(),
+  })
+  .refine(
+    (data) =>
+      data.refueledAt !== undefined ||
+      data.mileage !== undefined ||
+      data.amount !== undefined ||
+      data.totalPrice !== undefined,
+    {
+      message: 'いずれかの更新項目を指定してください',
+    }
+  )
+
+export type FuelLogUpdateRequest = z.infer<typeof FuelLogUpdateRequestSchema>

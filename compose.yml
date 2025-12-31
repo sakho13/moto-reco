@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:17
     hostname: db
-    container_name: motorepo_db
+    container_name: motorepo_db_${DATABASE_PORT:-5432}
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -11,7 +11,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DATABASE_PORT:-5432}:5432"
     deploy:
       resources:
         limits:
@@ -26,22 +26,23 @@ services:
     build:
       context: ./development/firebase_emulator
       dockerfile: Dockerfile
+    container_name: motorepo_firebase_${DOCKER_FIREBASE_UI_PORT:-4000}
     volumes:
       - ./development/firebase_emulator:/usr/src/app
     ports:
-      - "4000:4000"
-      - "9099:9099"
+      - "${DOCKER_FIREBASE_UI_PORT:-4000}:4000"
+      - "${DOCKER_FIREBASE_AUTH_PORT:-9099}:9099"
     environment:
       NODE_ENV: development
     restart: always
 
   localstack:
     image: localstack/localstack:latest
-    container_name: localstack
+    container_name: motorepo_localstack_${DOCKER_LOCALSTACK_PORT:-4566}
     restart: always
     ports:
-      - "4566:4566" # 統一ゲートウェイ (全部これでOK)
-      - "4510-4559:4510-4559"
+      - "${DOCKER_LOCALSTACK_PORT:-4566}:4566" # 統一ゲートウェイ (全部これでOK)
+      - "${DOCKER_LOCALSTACK_SERVICES_START:-4510}-${DOCKER_LOCALSTACK_SERVICES_END:-4559}:4510-4559"
     environment:
       - SERVICES=s3,ssm,secretsmanager,events,sqs,lambda,sts,iam
       - AWS_DEFAULT_REGION=${AWS_REGION}

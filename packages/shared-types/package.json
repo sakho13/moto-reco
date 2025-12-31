@@ -1,5 +1,5 @@
 {
-  "name": "@packages/shared-types",
+  "name": "@repo/shared-types",
   "version": "0.0.0",
   "private": true,
   "type": "module",

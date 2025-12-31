@@ -148,9 +148,12 @@ paths:
                     type: string
                     example: success
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ManufacturerDetail'
+                    type: object
+                    properties:
+                      manufacturers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ManufacturerDetail'
                   message:
                     type: string
                     example: メーカー一覧取得成功
@@ -255,9 +258,12 @@ paths:
                     type: string
                     example: success
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/BikeDetail'
+                    type: object
+                    properties:
+                      bikes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BikeDetail'
                   message:
                     type: string
                     example: バイク検索成功
@@ -318,6 +324,25 @@ paths:
       summary: ユーザー所有バイクの一覧取得
       tags:
         - user-bikes
+      parameters:
+        - in: query
+          name: sort-by
+          schema:
+            type: string
+            enum:
+              - created-at
+              - updated-at
+            default: updated-at
+            description: ソート対象のフィールド
+        - in: query
+          name: sort-order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+            description: ソート順序
       responses:
         '200':
           description: ユーザー所有バイク一覧取得成功
@@ -333,9 +358,12 @@ paths:
                     type: string
                     example: success
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/UserBikeDetail'
+                    type: object
+                    properties:
+                      bikes:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserBikeDetail'
                   message:
                     type: string
                     example: ユーザー所有バイク一覧取得成功
@@ -682,7 +710,8 @@ components:
         modelName:
           type: string
         displacement:
-          type: integer
+          type: number
+          format: float
           description: 排気量（cc）
         modelYear:
           type: integer
@@ -696,10 +725,13 @@ components:
           type: string
         manufacturerName:
           type: string
+          nullable: true
         bikeId:
           type: string
+          nullable: true
         modelName:
           type: string
+          nullable: true
         nickname:
           type: string
           nullable: true
@@ -709,17 +741,27 @@ components:
           type: string
           description: 購入日（ISO 8601形式）
           nullable: true
+        purchasePrice:
+          type: integer
+          description: 購入価格（円）
+          nullable: true
+        purchaseMileage:
+          type: integer
+          description: 購入時走行距離（km）
+          nullable: true
         totalMileage:
           type: integer
           description: 総走行距離（km）
           nullable: true
           default: 0
         displacement:
-          type: integer
+          type: number
+          format: float
           description: 排気量（cc）
         modelYear:
           type: integer
           description: モデル公開年
+          nullable: true
           example: 2025
         createdAt:
           type: string
@@ -729,11 +771,23 @@ components:
           description: 最終更新日時（ISO 8601形式）
     UserBikeRegisterDetail:
       type: object
-      required:
-        - bikeId
+      anyOf:
+        - required:
+            - bikeId
+        - required:
+            - displacement
       properties:
         bikeId:
           type: string
+          nullable: true
+        displacement:
+          type: number
+          format: float
+          description: 排気量（cc）。bikeId未指定の場合は必須。
+        serialNumber:
+          type: string
+          nullable: true
+          maxLength: 100
         nickname:
           type: string
           nullable: true
@@ -741,11 +795,20 @@ components:
           maxLength: 50
         purchaseDate:
           type: string
+          format: date-time
           description: 購入日（ISO 8601形式）
           nullable: true
-        mileage:
+        purchasePrice:
+          type: integer
+          description: 購入価格（円）
+          nullable: true
+        purchaseMileage:
           type: integer
           description: 購入時走行距離（km）
+          nullable: true
+        totalMileage:
+          type: integer
+          description: 総走行距離（km）
           nullable: true
           default: 0
     UserBikeUpdateDetail:
@@ -760,9 +823,17 @@ components:
           type: string
           description: 購入日（ISO 8601形式）
           nullable: true
-        mileage:
+        purchaseMileage:
           type: integer
           description: 購入時走行距離（km）
+          nullable: true
+        purchasePrice:
+          type: integer
+          description: 購入価格（円）
+          nullable: true
+        totalMileage:
+          type: integer
+          description: 総走行距離（km）
           nullable: true
           default: 0
     MyUserBikeFuelLogDetail:
@@ -812,7 +883,12 @@ components:
           default: false
     MyUserBikeFuelLogUpdateDetail:
       type: object
+      required:
+        - fuelLogId
       properties:
+        fuelLogId:
+          type: string
+          description: 燃料ログID
         refueledAt:
           type: string
           description: 給油日時（ISO 8601形式）

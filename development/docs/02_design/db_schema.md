@@ -85,8 +85,9 @@ erDiagram
 
     TUserBike {
         string id PK
-        string bikeId FK
-        string serialNumber UK
+        string? bikeId FK
+        float displacement
+        string? serialNumber
     }
 
     TMyBike {

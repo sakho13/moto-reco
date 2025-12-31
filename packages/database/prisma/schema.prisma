@@ -96,13 +96,14 @@ model MMaintenanceType {
 
 model TUserBike {
   id           String @id @default(cuid(2))
-  bikeId       String @map("bike_id")
+  bikeId       String? @map("bike_id")
   serialNumber String? @map("serial_number")
+  displacement Float   @map("displacement")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  bike    MBike         @relation(fields: [bikeId], references: [id], onDelete: Restrict)
+  bike    MBike?        @relation(fields: [bikeId], references: [id], onDelete: Restrict)
   myBikes TUserMyBike[]
 }
 
