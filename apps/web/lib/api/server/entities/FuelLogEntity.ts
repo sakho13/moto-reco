@@ -1,4 +1,4 @@
-import { FuelLog, FuelLogId, MyUserBikeId } from '@packages/shared-types'
+import { FuelLog, FuelLogId, MyUserBikeId } from '@repo/shared-types'
 
 export class FuelLogEntity {
   private _value: FuelLog

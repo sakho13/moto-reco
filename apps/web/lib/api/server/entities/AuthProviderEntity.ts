@@ -1,4 +1,4 @@
-import { AuthProvider, ProviderType, UserId } from '@packages/shared-types'
+import { AuthProvider, ProviderType, UserId } from '@repo/shared-types'
 
 export class AuthProviderEntity {
   private _value: AuthProvider

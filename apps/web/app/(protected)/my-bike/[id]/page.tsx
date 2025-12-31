@@ -5,9 +5,9 @@ import useSWR from 'swr'
 import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
-} from '@packages/shared-types'
-import { BaseCard } from '@packages/ui/baseCard'
-import { Button } from '@packages/ui/button'
+} from '@repo/shared-types'
+import { BaseCard } from '@repo/ui/baseCard'
+import { Button } from '@repo/ui/button'
 import { FuelIcon } from '@/components/icons/FuelIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'

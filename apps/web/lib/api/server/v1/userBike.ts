@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { prisma } from '@packages/database'
+import { prisma } from '@repo/database'
 import {
   ApiResponseUserBikeList,
   ApiResponseUserBikeDetail,
@@ -16,7 +16,7 @@ import {
   FuelLogRegisterRequestSchema,
   FuelLogUpdateRequestSchema,
   FuelLogListQuerySchema,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson, zodValidateQuery } from '../middlewares/zodValidation'

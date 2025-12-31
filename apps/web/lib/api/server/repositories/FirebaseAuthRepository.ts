@@ -1,11 +1,11 @@
 import type { DecodedIdToken } from 'firebase-admin/auth'
-import { firebaseAdminAuthClient } from '@packages/firebase-auth-server'
+import { firebaseAdminAuthClient } from '@repo/firebase-auth-server'
 import {
   AuthProvider,
   ProviderTypeMap,
   type ProviderType,
-} from '@packages/shared-types'
-import { createUserId } from '@packages/shared-types'
+} from '@repo/shared-types'
+import { createUserId } from '@repo/shared-types'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 import { IAuthRepository } from '../interfaces/IAuthRepository'
 

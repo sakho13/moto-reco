@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
-import { prisma } from '@packages/database'
+import { prisma } from '@repo/database'
 import {
   ApiResponseUserProfile,
   SuccessResponse,
   UserAuthRegisterRequestSchema,
   UserProfileUpdateRequestSchema,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'

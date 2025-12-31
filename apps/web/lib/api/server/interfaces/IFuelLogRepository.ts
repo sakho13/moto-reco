@@ -1,4 +1,4 @@
-import { FuelLogId, MyUserBikeId } from '@packages/shared-types'
+import { FuelLogId, MyUserBikeId } from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 

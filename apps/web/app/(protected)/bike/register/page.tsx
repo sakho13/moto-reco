@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { mutate } from 'swr'
-import { Button } from '@packages/ui/button'
-import { Input } from '@packages/ui/input'
+import { Button } from '@repo/ui/button'
+import { Input } from '@repo/ui/input'
 import {
   BikeRegisterForm,
   type BikeFormData,

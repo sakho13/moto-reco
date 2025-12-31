@@ -1,4 +1,4 @@
-import { createManufacturerId } from '@packages/shared-types'
+import { createManufacturerId } from '@repo/shared-types'
 import { ManufacturerEntity } from '../entities/ManufacturerEntity'
 import { IManufactureRepository } from '../interfaces/IManufacturerRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'

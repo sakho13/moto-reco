@@ -1,4 +1,4 @@
-import { UserId } from '@packages/shared-types'
+import { UserId } from '@repo/shared-types'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 import { UserEntity } from '../entities/UserEntity'
 

@@ -1,4 +1,4 @@
-import { ProviderType } from '@packages/shared-types'
+import { ProviderType } from '@repo/shared-types'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaAuthProviderRepository extends PrismaRepositoryBase {

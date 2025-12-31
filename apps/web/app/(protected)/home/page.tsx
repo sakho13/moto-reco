@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Button } from '@packages/ui/button'
+import { Button } from '@repo/ui/button'
 import { BikeIcon } from '@/components/icons/BikeIcon'
 import { ProfileIcon } from '@/components/icons/ProfileIcon'
 import { NavigationCard } from '@/components/NavigationCard'

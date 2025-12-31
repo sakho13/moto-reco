@@ -3,7 +3,7 @@ import {
   createMyUserBikeId,
   FuelLogId,
   MyUserBikeId,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
