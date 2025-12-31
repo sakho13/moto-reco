@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { Button } from '@packages/ui/button'
+import { Button } from '@repo/ui/button'
 import { BikeIcon } from './icons/BikeIcon'
 import styles from './MyBikeListSection.module.css'
 import { NavigationCard } from './NavigationCard'

@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { BaseCard } from '@packages/ui/baseCard'
-import { Button } from '@packages/ui/button'
-import { ErrorMessage } from '@packages/ui/errorMessage'
-import { FormField } from '@packages/ui/formField'
-import { Input } from '@packages/ui/input'
+import { BaseCard } from '@repo/ui/baseCard'
+import { Button } from '@repo/ui/button'
+import { ErrorMessage } from '@repo/ui/errorMessage'
+import { FormField } from '@repo/ui/formField'
+import { Input } from '@repo/ui/input'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
