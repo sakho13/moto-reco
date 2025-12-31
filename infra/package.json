@@ -13,6 +13,7 @@
     "bootstrap": "cdk bootstrap"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "aws-cdk": "2.1100.1",
     "aws-cdk-lib": "2.233.0",
     "constructs": "10.4.2",

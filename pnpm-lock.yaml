@@ -211,6 +211,9 @@ importers:
 
   infra:
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.15.3
       aws-cdk:
         specifier: 2.1100.1
         version: 2.1100.1
