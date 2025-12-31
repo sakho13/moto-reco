@@ -33,6 +33,7 @@ export class DatabaseConstruct extends Construct {
       vpcSubnets: {
         subnets: props.subnets,
       },
+      removalPolicy: RemovalPolicy.DESTROY,
     })
 
     // Parameter Group
