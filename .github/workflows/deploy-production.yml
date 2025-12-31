@@ -41,8 +41,10 @@ jobs:
       - name: Build and push Docker image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.ref_name }}
         run: |
+          # タグ名から/を-に置換してDockerタグとして有効な形式に変換
+          IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+
           docker build -f apps/web/Dockerfile \
             --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.PROD_FIREBASE_API_KEY }} \
             --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.PROD_FIREBASE_AUTH_DOMAIN }} \
