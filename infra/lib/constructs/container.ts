@@ -56,7 +56,7 @@ export class ContainerConstruct extends Construct {
           maxImageCount: 10,
         },
       ],
-      removalPolicy: RemovalPolicy.RETAIN,
+      removalPolicy: RemovalPolicy.DESTROY,
     })
 
     // ECS Cluster
