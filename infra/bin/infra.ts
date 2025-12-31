@@ -1,15 +1,17 @@
-import { App } from 'aws-cdk-lib';
-import { MotoRecoStack } from '../lib/moto-reco-stack';
+import { App } from 'aws-cdk-lib'
+import { MotoRecoStack } from '../lib/moto-reco-stack'
+import { ProductionConfig } from '../lib/config/production'
 
-const app = new App();
+const app = new App()
 
-new MotoRecoStack(app, 'MotoRecoStack', {
-  /* 環境指定が必要な場合は以下を設定
-   * env: {
-   *   account: process.env.CDK_DEFAULT_ACCOUNT,
-   *   region: process.env.CDK_DEFAULT_REGION,
-   * },
-   */
-});
+new MotoRecoStack(app, 'MotoRecoProductionStack', {
+  env: ProductionConfig.env,
+  description: 'MotoReco Production Infrastructure',
+  tags: {
+    Environment: 'production',
+    Project: 'motoreco',
+    ManagedBy: 'CDK',
+  },
+})
 
-app.synth();
+app.synth()
