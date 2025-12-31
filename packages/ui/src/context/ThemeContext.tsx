@@ -7,7 +7,7 @@ import {
   themeModes,
   themes,
   ThemeTokens,
-} from '@packages/theme'
+} from '@repo/theme'
 
 type ThemeContextValue = {
   themeName: ThemeName

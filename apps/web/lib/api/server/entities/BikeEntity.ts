@@ -1,4 +1,4 @@
-import { Bike, BikeId } from '@packages/shared-types'
+import { Bike, BikeId } from '@repo/shared-types'
 
 export class BikeEntity {
   private _value: Bike

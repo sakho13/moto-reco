@@ -1,11 +1,11 @@
 import type { DecodedIdToken } from 'firebase-admin/auth'
-import { firebaseAdminAuthClient } from '@packages/firebase-auth-server'
+import { getFirebaseAdminAuthClient } from '@repo/firebase-auth-server'
 import {
   AuthProvider,
   ProviderTypeMap,
   type ProviderType,
-} from '@packages/shared-types'
-import { createUserId } from '@packages/shared-types'
+} from '@repo/shared-types'
+import { createUserId } from '@repo/shared-types'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 import { IAuthRepository } from '../interfaces/IAuthRepository'
 
@@ -40,7 +40,8 @@ export class FirebaseAuthRepository implements IAuthRepository {
 
   public async verifyIdToken(token: string): Promise<DecodedIdToken | null> {
     try {
-      return await firebaseAdminAuthClient.verifyIdToken(token, true)
+      const authClient = getFirebaseAdminAuthClient()
+      return await authClient.verifyIdToken(token, true)
     } catch (error) {
       console.error('Token verification error:', error)
       return null

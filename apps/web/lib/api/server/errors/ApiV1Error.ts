@@ -2,7 +2,7 @@ import {
   ErrorCode,
   ErrorResponse,
   getHttpStatusFromErrorCode,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 
 export class ApiV1Error extends Error {
   private _errorCode: ErrorCode

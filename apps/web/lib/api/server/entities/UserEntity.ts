@@ -1,4 +1,4 @@
-import { User, UserId } from '@packages/shared-types'
+import { User, UserId } from '@repo/shared-types'
 
 export class UserEntity {
   private _value: User

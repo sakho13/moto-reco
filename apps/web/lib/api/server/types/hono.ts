@@ -1,4 +1,4 @@
-import { UserId } from '@packages/shared-types'
+import { UserId } from '@repo/shared-types'
 
 // Honoアプリケーション全体で使用する変数の型定義
 export type HonoVariables = {

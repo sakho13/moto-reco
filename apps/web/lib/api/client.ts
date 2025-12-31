@@ -7,7 +7,7 @@ import {
   ApiResponseFuelLogList,
   ErrorResponse,
   SuccessResponse,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 import { getFirebaseAuth } from '../firebase/config'
 import { ApiV1Error } from './server/errors/ApiV1Error'
 

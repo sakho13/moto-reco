@@ -10,6 +10,7 @@
 - `docs/03_development/`: 開発ルール
   - `coding.md`: コーディング規約
   - `git.md`: Git運用ルール
+  - `monorepo.md`: monorepo参照規約
 
 ## コマンド
 

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { SWRConfig } from 'swr'
-import { ThemeProvider } from '@packages/ui'
+import { ThemeProvider } from '@repo/ui/context/ThemeContext'
 import { AuthProvider } from '@/lib/contexts/AuthContext'
 
 export function Providers({ children }: { children: ReactNode }) {

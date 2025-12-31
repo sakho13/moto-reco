@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { beforeAll, describe, expect, test } from 'vitest'
-import { prisma } from '@packages/database'
+import { prisma } from '@repo/database'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
 import { app } from '@/lib/api/server/app'

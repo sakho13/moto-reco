@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Button } from '@packages/ui/button'
+import { Button } from '@repo/ui/button'
 import { ProfileCard } from '@/components/ProfileCard'
 import { withAuth } from '@/lib/hoc/withAuth'
 

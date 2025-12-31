@@ -6,9 +6,9 @@ import useSWR, { mutate } from 'swr'
 import type {
   ApiResponseFuelLogList,
   SuccessResponse,
-} from '@packages/shared-types'
-import { BaseCard } from '@packages/ui/baseCard'
-import { Button } from '@packages/ui/button'
+} from '@repo/shared-types'
+import { BaseCard } from '@repo/ui/baseCard'
+import { Button } from '@repo/ui/button'
 import {
   FuelLogForm,
   type FuelLogFormData,

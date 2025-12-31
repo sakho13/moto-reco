@@ -3,7 +3,7 @@ import {
   createMyUserBikeId,
   createUserBikeId,
   UserId,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 import { BikeEntity } from '../entities/BikeEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeEntity } from '../entities/UserBikeEntity'

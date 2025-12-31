@@ -1,5 +1,5 @@
-import { Prisma } from '@packages/database'
-import { BikeId, createBikeId } from '@packages/shared-types'
+import { Prisma } from '@repo/database'
+import { BikeId, createBikeId } from '@repo/shared-types'
 import { BikeEntity } from '../entities/BikeEntity'
 import { IBikeRepository } from '../interfaces/IBikeRepository'
 import { BikeSearchParams } from '../valueObjects/BikeSearchParams'

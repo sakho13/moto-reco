@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  transpilePackages: ['@packages/shared-types', '@packages/database'],
+  transpilePackages: ['@repo/shared-types', '@repo/database'],
 }
 
 export default nextConfig

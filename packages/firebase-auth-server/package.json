@@ -1,5 +1,5 @@
 {
-  "name": "@packages/firebase-auth-server",
+  "name": "@repo/firebase-auth-server",
   "version": "0.0.0",
   "private": true,
   "type": "module",

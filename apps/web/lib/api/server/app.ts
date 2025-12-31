@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { logger } from 'hono/logger'
 import { ContentfulStatusCode } from 'hono/utils/http-status'
-import { SuccessResponse } from '@packages/shared-types'
+import { SuccessResponse } from '@repo/shared-types'
 import { ApiV1Error } from './errors/ApiV1Error'
 import { HonoVariables } from './types/hono'
 import ApiV1 from './v1'

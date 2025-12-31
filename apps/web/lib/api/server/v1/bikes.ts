@@ -1,10 +1,10 @@
 import { Hono } from 'hono'
-import { prisma } from '@packages/database'
+import { prisma } from '@repo/database'
 import {
   ApiResponseManufacturer,
   ApiResponseBikeSearch,
   SuccessResponse,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaManufacturerRepository } from '../repositories/PrismaManufacturerRepository'
