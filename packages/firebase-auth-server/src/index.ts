@@ -1,1 +1,1 @@
-export { firebaseAdminAuthClient } from './client'
+export { getFirebaseAdminAuthClient } from './client'
