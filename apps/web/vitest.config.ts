@@ -34,19 +34,16 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
-      '@packages/shared-types': path.resolve(
+      '@repo/shared-types': path.resolve(
         __dirname,
         '../../packages/shared-types/src'
       ),
-      '@packages/shared-utils': path.resolve(
+      '@repo/shared-utils': path.resolve(
         __dirname,
         '../../packages/shared-utils/src'
       ),
-      '@packages/database': path.resolve(
-        __dirname,
-        '../../packages/database/src'
-      ),
-      '@packages/firebase-auth-server': path.resolve(
+      '@repo/database': path.resolve(__dirname, '../../packages/database/src'),
+      '@repo/firebase-auth-server': path.resolve(
         __dirname,
         '../../packages/firebase-auth-server/src'
       ),

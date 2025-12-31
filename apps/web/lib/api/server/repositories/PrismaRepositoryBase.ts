@@ -1,4 +1,4 @@
-import { PrismaClient } from '@packages/database'
+import { PrismaClient } from '@repo/database'
 
 type PrismaTransactionOrClient =
   | PrismaClient

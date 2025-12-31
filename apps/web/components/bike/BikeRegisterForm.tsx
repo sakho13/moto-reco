@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@packages/ui/button'
-import { ErrorMessage } from '@packages/ui/errorMessage'
-import { FormField } from '@packages/ui/formField'
-import { Input } from '@packages/ui/input'
+import { Button } from '@repo/ui/button'
+import { ErrorMessage } from '@repo/ui/errorMessage'
+import { FormField } from '@repo/ui/formField'
+import { Input } from '@repo/ui/input'
 import { InfoBox } from './InfoBox'
 
 export interface BikeFormData {

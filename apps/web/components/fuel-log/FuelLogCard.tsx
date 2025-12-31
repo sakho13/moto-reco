@@ -1,7 +1,7 @@
 'use client'
 
-import type { ApiResponseFuelLogDetail } from '@packages/shared-types'
-import { Button } from '@packages/ui/button'
+import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 
 export interface FuelLogCardProps {
   fuelLog: ApiResponseFuelLogDetail

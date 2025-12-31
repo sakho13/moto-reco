@@ -95,7 +95,7 @@ importers:
 
   apps/docs:
     dependencies:
-      '@packages/ui':
+      '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@scalar/nextjs-api-reference':
@@ -138,19 +138,19 @@ importers:
       '@hono/zod-validator':
         specifier: 'catalog:'
         version: 0.4.1(hono@4.10.3)(zod@3.23.8)
-      '@packages/database':
+      '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
-      '@packages/firebase-auth-server':
+      '@repo/firebase-auth-server':
         specifier: workspace:*
         version: link:../../packages/firebase-auth-server
-      '@packages/shared-types':
+      '@repo/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
-      '@packages/shared-utils':
+      '@repo/shared-utils':
         specifier: workspace:*
         version: link:../../packages/shared-utils
-      '@packages/ui':
+      '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       firebase:
@@ -344,12 +344,12 @@ importers:
         specifier: 'catalog:'
         version: 19.2.1(react@19.2.1)
     devDependencies:
-      '@packages/theme':
-        specifier: workspace:*
-        version: link:../theme
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@repo/theme':
+        specifier: workspace:*
+        version: link:../theme
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

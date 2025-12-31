@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
-import { Button } from '@packages/ui/button'
+import { Button } from '@repo/ui/button'
 import { BikeIcon } from './icons/BikeIcon'
 import { FuelIcon } from './icons/FuelIcon'
 import styles from './QuickFuelSection.module.css'

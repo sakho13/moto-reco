@@ -1,6 +1,6 @@
 import { Context, Next } from 'hono'
-import { prisma } from '@packages/database'
-import { createUserId } from '@packages/shared-types'
+import { prisma } from '@repo/database'
+import { createUserId } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'

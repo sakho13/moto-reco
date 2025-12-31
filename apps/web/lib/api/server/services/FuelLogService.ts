@@ -3,7 +3,7 @@ import {
   FuelLogId,
   MyUserBikeId,
   UserId,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'

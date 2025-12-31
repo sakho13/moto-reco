@@ -1,9 +1,4 @@
-import {
-  BikeId,
-  MyUserBikeId,
-  UserBikeId,
-  UserId,
-} from '@packages/shared-types'
+import { BikeId, MyUserBikeId, UserBikeId, UserId } from '@repo/shared-types'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 

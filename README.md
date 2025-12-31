@@ -21,10 +21,10 @@
 ### Packages
 
 - **`@repo/ui`**: React コンポーネントライブラリ
-- **`@packages/database`**: Prisma データベースパッケージ
-- **`@packages/shared-types`**: 共有型定義
-- **`@packages/shared-utils`**: 共有ユーティリティ
-- **`@packages/firebase-auth-server`**: Firebase 認証サーバー
+- **`@repo/database`**: Prisma データベースパッケージ
+- **`@repo/shared-types`**: 共有型定義
+- **`@repo/shared-utils`**: 共有ユーティリティ
+- **`@repo/firebase-auth-server`**: Firebase 認証サーバー
 - **`@repo/eslint-config`**: ESLint 設定
 - **`@repo/typescript-config`**: TypeScript 設定
 

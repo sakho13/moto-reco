@@ -1,4 +1,4 @@
-import { Manufacturer, ManufacturerId } from '@packages/shared-types'
+import { Manufacturer, ManufacturerId } from '@repo/shared-types'
 
 export class ManufacturerEntity {
   private _value: Manufacturer

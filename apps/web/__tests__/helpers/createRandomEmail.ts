@@ -1,4 +1,4 @@
-import { generateRandNumberStr } from '@packages/shared-utils'
+import { generateRandNumberStr } from '@repo/shared-utils'
 
 export function createRandomEmail() {
   const now = _generateDateStringNow()

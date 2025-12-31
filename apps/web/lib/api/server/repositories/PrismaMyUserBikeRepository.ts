@@ -5,7 +5,7 @@ import {
   createUserId,
   MyUserBikeId,
   UserId,
-} from '@packages/shared-types'
+} from '@repo/shared-types'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import {
   IMyUserBikeRepository,

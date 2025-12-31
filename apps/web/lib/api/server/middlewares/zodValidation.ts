@@ -14,7 +14,7 @@ import { convertZodErrorToApiError } from '../utils/zodErrorHandler'
  *
  * @example
  * ```typescript
- * import { UserProfileUpdateRequestSchema } from '@packages/shared-types'
+ * import { UserProfileUpdateRequestSchema } from '@repo/shared-types'
  *
  * user.post('/profile',
  *   honoAuthMiddleware,
