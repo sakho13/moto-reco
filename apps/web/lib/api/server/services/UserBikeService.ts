@@ -31,6 +31,7 @@ type UpdateMyUserBikeParams = {
   purchaseDate?: Date | null
   purchasePrice?: number | null
   purchaseMileage?: number | null
+  displacement?: number
   totalMileage?: number | null
 }
 
@@ -110,6 +111,19 @@ export class UserBikeService {
     }
 
     const current = myUserBike.toJson()
+
+    if (params.displacement !== undefined) {
+      if (current.bikeId) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          '登録済みバイクの排気量は変更できません'
+        )
+      }
+      await this.userBikeRepository.updateUserBikeDisplacement(
+        current.userBikeId,
+        params.displacement
+      )
+    }
 
     const updatedEntity = new MyUserBikeEntity({
       ...current,

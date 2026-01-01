@@ -544,6 +544,68 @@ describe('UserBike API Endpoints', () => {
       expect(myUserBikeRecord?.purchaseMileage).toBe(1300)
       expect(myUserBikeRecord?.totalMileage).toBe(2100)
     })
+
+    test('排気量のみで登録したバイクの排気量を更新できる', async () => {
+      const registerRes = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          displacement: 250,
+          nickname: '排気量更新テスト',
+        }),
+      })
+
+      const registerJson = await registerRes.json()
+      const myUserBikeId = registerJson.data.myUserBikeId as string
+      const userBikeId = registerJson.data.userBikeId as string
+
+      const updatedDisplacement = 300
+      const res = await app.request(`/api/v1/user-bike/bike/${myUserBikeId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          displacement: updatedDisplacement,
+        }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.data.displacement).toBe(updatedDisplacement)
+
+      const userBikeRecord = await prisma.tUserBike.findUnique({
+        where: { id: userBikeId },
+      })
+
+      expect(userBikeRecord?.displacement).toBe(updatedDisplacement)
+    })
+
+    test('モデル登録済みバイクの排気量更新はエラーになる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${createdMyUserBikeId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            displacement: 500,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('INVALID_REQUEST')
+    })
   })
 
   describe('POST /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {

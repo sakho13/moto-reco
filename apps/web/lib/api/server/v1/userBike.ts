@@ -170,6 +170,7 @@ userBike.patch(
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,
         purchaseMileage: body.purchaseMileage,
+        displacement: body.displacement,
         totalMileage: body.totalMileage,
       })
     })

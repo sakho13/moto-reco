@@ -87,9 +87,12 @@ function BikeDetailPage() {
 
   return (
     <>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md flex items-center justify-between gap-2">
         <Button variant="cloud" onClick={() => router.push('/home')}>
           ← 戻る
+        </Button>
+        <Button onClick={() => router.push(`/my-bike/${id}/edit`)}>
+          編集する
         </Button>
       </div>
 

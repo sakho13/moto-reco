@@ -29,4 +29,29 @@ export class PrismaUserBikeRepository
       serialNumber: created.serialNumber,
     })
   }
+
+  async updateUserBikeDisplacement(
+    userBikeId: UserBikeEntity['id'],
+    displacement: number
+  ): Promise<UserBikeEntity> {
+    const updated = await this.connection.tUserBike.update({
+      where: { id: userBikeId },
+      data: {
+        displacement,
+      },
+      select: {
+        id: true,
+        bikeId: true,
+        displacement: true,
+        serialNumber: true,
+      },
+    })
+
+    return new UserBikeEntity({
+      bikeId: updated.bikeId ? createBikeId(updated.bikeId) : null,
+      userBikeId: createUserBikeId(updated.id),
+      displacement: updated.displacement,
+      serialNumber: updated.serialNumber,
+    })
+  }
 }
