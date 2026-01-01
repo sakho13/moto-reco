@@ -2,6 +2,7 @@ import {
   ApiResponseUserProfile,
   ApiResponseManufacturer,
   ApiResponseUserBikeList,
+  ApiResponseUserBikeDetail,
   ApiResponseUserBikeRegister,
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
@@ -177,13 +178,15 @@ type API_EP = {
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
   }
-  [key: `/api/v1/user-bike/bike/${string}`]: {
-    GET: SuccessResponse<ApiResponseUserBikeDetail>
-    PATCH: SuccessResponse<ApiResponseUserBikeDetail>
-  }
+} & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-logs`]: {
     GET: SuccessResponse<ApiResponseFuelLogList>
     POST: SuccessResponse<ApiResponseFuelLogDetail>
     PATCH: SuccessResponse<ApiResponseFuelLogDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}`]: {
+    GET: SuccessResponse<ApiResponseUserBikeDetail>
+    PATCH: SuccessResponse<ApiResponseUserBikeDetail>
   }
 }
