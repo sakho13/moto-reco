@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import type {
   ApiResponseUserBikeDetail,
@@ -29,7 +29,11 @@ function MyBikeEditPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const { data, error: fetchError, isLoading } = useSWR(
+  const {
+    data,
+    error: fetchError,
+    isLoading,
+  } = useSWR(
     bikeId ? `/api/v1/user-bike/bike/${bikeId}` : null,
     async (url) => {
       const response = await authenticatedFetch(url, { method: 'GET' })
@@ -87,7 +91,7 @@ function MyBikeEditPage() {
   if (isLoading) {
     return (
       <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <p className="text-lg">読み込み中...</p>
         </div>
       </div>
@@ -124,7 +128,10 @@ function MyBikeEditPage() {
   return (
     <>
       <div className="w-full max-w-md">
-        <Button onClick={() => router.push(`/my-bike/${bikeId}`)} variant="cloud">
+        <Button
+          onClick={() => router.push(`/my-bike/${bikeId}`)}
+          variant="cloud"
+        >
           ← 戻る
         </Button>
       </div>
