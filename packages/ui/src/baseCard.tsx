@@ -19,6 +19,10 @@ export interface BaseCardProps extends HTMLAttributes<HTMLDivElement> {
    * カードの内容
    */
   children: React.ReactNode
+  /**
+   * ヘッダー右上のアクション（例: 編集ボタン）
+   */
+  headerAction?: React.ReactNode
 }
 
 /**
@@ -44,13 +48,16 @@ export interface BaseCardProps extends HTMLAttributes<HTMLDivElement> {
  * ```
  */
 export const BaseCard = forwardRef<HTMLDivElement, BaseCardProps>(
-  ({ title, footer, className, children, ...props }, ref) => {
+  ({ title, footer, headerAction, className, children, ...props }, ref) => {
     const cardClasses = [styles.baseCard, className].filter(Boolean).join(' ')
 
     return (
       <div ref={ref} className={cardClasses} {...props}>
         <div className={styles.header}>
           <h1 className={styles.title}>{title}</h1>
+          {headerAction && (
+            <div className={styles.headerAction}>{headerAction}</div>
+          )}
         </div>
         <div className={styles.content}>{children}</div>
         {footer && <div className={styles.footer}>{footer}</div>}

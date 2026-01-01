@@ -8,6 +8,7 @@ import type {
 } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
+import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
@@ -40,7 +41,7 @@ function BikeDetailPage() {
   if (isLoading) {
     return (
       <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <p className="text-lg">読み込み中...</p>
         </div>
       </div>
@@ -87,17 +88,26 @@ function BikeDetailPage() {
 
   return (
     <>
-      <div className="w-full max-w-md flex items-center justify-between gap-2">
-        <Button variant="cloud" onClick={() => router.push('/home')}>
+      <div className="w-full max-w-md mb-4">
+        <Button variant="cloud" onClick={() => router.push('/my-bike')}>
           ← 戻る
-        </Button>
-        <Button onClick={() => router.push(`/my-bike/${id}/edit`)}>
-          編集する
         </Button>
       </div>
 
       <div className="w-full max-w-md flex flex-col gap-4">
-        <BaseCard title={displayTitle}>
+        <BaseCard
+          title={displayTitle}
+          headerAction={
+            <Button
+              onClick={() => router.push(`/my-bike/${id}/edit`)}
+              variant="cloud"
+              size="sm"
+              aria-label="バイク情報を編集"
+            >
+              <EditIcon />
+            </Button>
+          }
+        >
           <div className="flex flex-row gap-2 select-none">
             <span>総走行距離: {bike.totalMileage.toLocaleString()}km</span>
             <span>モデル: {bike.modelName || '不明'}</span>
