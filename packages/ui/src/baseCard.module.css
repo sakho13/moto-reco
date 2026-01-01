@@ -6,11 +6,15 @@
   border: 1px solid var(--color-cloud);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
 .header {
   margin-bottom: var(--spacing-6);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
 }
 
 .title {
@@ -20,6 +24,16 @@
   line-height: var(--line-height-tight);
   margin: 0;
   user-select: none;
+  flex: 1;
+  text-align: center;
+}
+
+.headerAction {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  display: flex;
+  align-items: center;
 }
 
 .content {
@@ -56,5 +70,10 @@
     border-left: none;
     border-right: none;
     box-shadow: none;
+  }
+
+  .headerAction {
+    top: var(--spacing-2);
+    right: var(--spacing-2);
   }
 }
