@@ -76,6 +76,10 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
 NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your-measurement-id
 
+# Webアプリケーション
+NEXT_PUBLIC_WEB_URL=http://localhost:3000  # docsサイトからのログインリンク先（本番環境では本番URLを設定）
+NEXT_PUBLIC_APP_VERSION=dev  # アプリのバージョン表示用
+
 # AWS (LocalStack)
 AWS_REGION=ap-northeast-1
 AWS_ACCESS_KEY_ID=test
