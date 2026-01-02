@@ -275,4 +275,13 @@ export class PrismaMyUserBikeRepository
       updatedAt: myUserBike.updatedAt,
     }
   }
+
+  async countOwnedBikes(userId: UserId): Promise<number> {
+    return this.connection.tUserMyBike.count({
+      where: {
+        userId,
+        ownStatus: 'OWN',
+      },
+    })
+  }
 }

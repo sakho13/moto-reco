@@ -12,6 +12,9 @@ import { IBikeRepository } from '../interfaces/IBikeRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 
+// 無料プランのバイク登録上限
+const FREE_PLAN_BIKE_LIMIT = 2
+
 type RegisterUserBikeParams = {
   bikeId?: BikeId | null
   displacement?: number
@@ -42,7 +45,25 @@ export class UserBikeService {
     private bikeRepository: IBikeRepository
   ) {}
 
+  /**
+   * バイク登録数の制限をチェック
+   * 無料プランでは2台まで登録可能
+   */
+  private async validateBikeRegistrationLimit(userId: UserId): Promise<void> {
+    const currentCount = await this.myUserBikeRepository.countOwnedBikes(userId)
+
+    if (currentCount >= FREE_PLAN_BIKE_LIMIT) {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        '無料プランでは2台まで登録可能です'
+      )
+    }
+  }
+
   public async registerUserBike(params: RegisterUserBikeParams) {
+    // バイク登録数制限チェック
+    await this.validateBikeRegistrationLimit(params.userId)
+
     let bike: BikeEntity | null = null
     if (params.bikeId) {
       bike = await this.bikeRepository.findById(params.bikeId)
