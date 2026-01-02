@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
+import { Footer } from '../components/Footer'
 import { Providers } from '../components/Providers'
 import { ThemeToggleButton } from '../components/ThemeToggleButton'
 import './globals.css'
@@ -33,7 +34,16 @@ export default function RootLayout({
           <div className="fixed top-4 right-4 z-50">
             <ThemeToggleButton />
           </div>
-          {children}
+          <div
+            style={{
+              minHeight: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <div style={{ flex: 1 }}>{children}</div>
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>

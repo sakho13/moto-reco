@@ -11,6 +11,13 @@ const app = new Hono<{ Variables: HonoVariables }>()
 // ミドルウェア
 app.use('*', logger())
 
+// バージョンヘッダーミドルウェア
+app.use('*', async (c, next) => {
+  await next()
+  const version = process.env.NEXT_PUBLIC_APP_VERSION || 'dev'
+  c.header('X-API-Version', version)
+})
+
 // Health check
 app.get('/api/v1/health', async (c) => {
   return c.json({

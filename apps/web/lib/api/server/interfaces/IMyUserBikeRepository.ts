@@ -34,4 +34,5 @@ export interface IMyUserBikeRepository {
     myUserBikeId: MyUserBikeId,
     userId: UserId
   ): Promise<MyUserBikeDetail | null>
+  countOwnedBikes(userId: UserId): Promise<number>
 }
