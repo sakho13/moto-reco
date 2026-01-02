@@ -3,10 +3,7 @@ import { expect } from 'vitest'
 /**
  * バリデーションエラーのアサーション
  */
-export function expectValidationError(
-  json: unknown,
-  expectedStatus: number = 400
-): void {
+export function expectValidationError(json: unknown): void {
   const response = json as {
     status: string
     errorCode: string

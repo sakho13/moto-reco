@@ -88,6 +88,10 @@ export const BikeRegisterForm = ({
         </InfoBox>
       )}
 
+      <InfoBox variant="info" style={{ marginTop: 'var(--spacing-4)' }}>
+        無料プランでは2台まで登録できます
+      </InfoBox>
+
       <form
         onSubmit={handleSubmit}
         style={{
