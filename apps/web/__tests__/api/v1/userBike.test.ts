@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import { beforeEach, describe, expect, test } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, test } from 'vitest'
 import { prisma } from '@repo/database'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createTestUserBike, getTestBikeId } from '../../helpers/bikeHelper'
@@ -222,22 +222,22 @@ describe('UserBike API Endpoints', () => {
 
   describe('GET /api/v1/user-bike/bikes', () => {
     let token: string
-    let bikeId: string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       const user = await createTestUser()
       token = user.token
-      bikeId = await getTestBikeId()
 
       // ソートテスト用に複数バイクを作成
-      for (let i = 0; i < 3; i++) {
-        await createTestUserBike(token, {
-          bikeId,
-          nickname: `テストバイク${i}`,
-        })
-        // updatedAtに差をつけるため少し待つ
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      }
+      await createTestUserBike(token, {
+        displacement: 250,
+        nickname: `テストバイク1`,
+        totalMileage: 1000,
+      })
+      await createTestUserBike(token, {
+        displacement: 250,
+        nickname: `テストバイク2`,
+        totalMileage: 2,
+      })
     })
 
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
@@ -578,10 +578,9 @@ describe('UserBike API Endpoints', () => {
     beforeEach(async () => {
       const user = await createTestUser()
       token = user.token
-      const bikeId = await getTestBikeId()
 
       const bike = await createTestUserBike(token, {
-        bikeId,
+        displacement: 400,
         nickname: '燃料ログテスト用バイク',
         totalMileage: 2000,
       })
@@ -791,10 +790,9 @@ describe('UserBike API Endpoints', () => {
     beforeEach(async () => {
       const user = await createTestUser()
       token = user.token
-      const bikeId = await getTestBikeId()
 
       const bike = await createTestUserBike(token, {
-        bikeId,
+        displacement: 500,
         nickname: '燃料ログ一覧テスト用バイク',
         totalMileage: 1000,
       })
@@ -937,9 +935,8 @@ describe('UserBike API Endpoints', () => {
     })
 
     test('燃料ログが0件の場合は空配列を返す', async () => {
-      const bikeId = await getTestBikeId()
       const bike = await createTestUserBike(token, {
-        bikeId,
+        displacement: 125,
         nickname: '燃料ログなしバイク',
         totalMileage: 100,
       })
@@ -1011,11 +1008,10 @@ describe('UserBike API Endpoints', () => {
     beforeEach(async () => {
       const user = await createTestUser()
       token = user.token
-      const bikeId = await getTestBikeId()
 
       // テスト用バイク作成
       const bike = await createTestUserBike(token, {
-        bikeId,
+        displacement: 400,
         nickname: '燃料ログ更新テスト用バイク',
         totalMileage: 1000,
       })
@@ -1270,9 +1266,8 @@ describe('UserBike API Endpoints', () => {
 
     test('異なるバイクの燃料ログIDを指定すると404となる', async () => {
       // 別のバイクと燃料ログを作成
-      const bikeId = await getTestBikeId()
       const otherBike = await createTestUserBike(token, {
-        bikeId,
+        displacement: 400,
         nickname: '別のバイク',
         totalMileage: 500,
       })
