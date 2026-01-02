@@ -218,6 +218,58 @@ describe('UserBike API Endpoints', () => {
 
       expect(userBikeRecord?.serialNumber).toBe(serialNumber)
     })
+
+    test('登録台数制限でエラーになる 1台目→2台目→3台目(エラー)', async () => {
+      // 1台目
+      const res1 = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          displacement: 250,
+          nickname: 'バイク1',
+        }),
+      })
+
+      expect(res1.status).toBe(201)
+
+      // 2台目
+      const res2 = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          displacement: 250,
+          nickname: 'バイク2',
+        }),
+      })
+      expect(res2.status).toBe(201)
+
+      // 3台目（エラーになる）
+      const res3 = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          displacement: 250,
+          nickname: 'バイク3',
+        }),
+      })
+      const json3 = await res3.json()
+      expect(res3.status).toBe(400)
+      expect(json3.status).toBe('error')
+      expect(json3).toEqual({
+        status: 'error',
+        errorCode: 'INVALID_REQUEST',
+        message: '無料プランでは2台まで登録可能です',
+      })
+    })
   })
 
   describe('GET /api/v1/user-bike/bikes', () => {
