@@ -1,4 +1,5 @@
-import { HomeButton } from '@/components/HomeButton'
+import { DesktopSidebar } from '@/components/Navigation/DesktopSidebar'
+import { MobileNavigation } from '@/components/Navigation/MobileNavigation'
 
 type Props = {
   children: React.ReactNode
@@ -7,9 +8,8 @@ type Props = {
 export default function Layout({ children }: Props) {
   return (
     <>
-      <div className="fixed top-4 left-4 z-50">
-        <HomeButton />
-      </div>
+      <DesktopSidebar />
+      <MobileNavigation />
 
       <div className="min-h-screen flex flex-col items-center justify-center p-4 gap-8">
         {children}
