@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Button } from '@repo/ui/button'
+import { LogoutButton } from '@/components/Navigation/LogoutButton'
 import { ProfileCard } from '@/components/ProfileCard'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -18,6 +19,7 @@ function ProfileEditPage() {
 
       <div className="w-full max-w-md flex flex-col gap-4">
         <ProfileCard />
+        <LogoutButton />
       </div>
     </>
   )
