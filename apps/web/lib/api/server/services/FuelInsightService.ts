@@ -24,9 +24,6 @@ export class FuelInsightService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    return await this.fuelInsightRepository.getFuelInsight(
-      myUserBikeId,
-      period
-    )
+    return await this.fuelInsightRepository.getFuelInsight(myUserBikeId, period)
   }
 }
