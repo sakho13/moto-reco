@@ -40,6 +40,7 @@ model MUser {
 
   authProviders MAuthProvider[]
   myBikes       TUserMyBike[]
+  userQuit      TUserQuit?
 }
 
 model MManufacturer {
@@ -153,6 +154,23 @@ model TUserMyBikeFuelLog {
   @@index([userMyBikeId, refueledAt])
 }
 
+model TUserQuit {
+  id           String @id @default(cuid(2))
+  userId       String @map("user_id")
+  quitAt       DateTime @map("quit_at")
+  quitReason   String @map("quit_reason")
+  recoveryCode String @map("recovery_code")
+  status       UserQuitStatus @default(QUIT) @map("status")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@index([status])
+}
+
 // Enums
 
 enum MUserStatus {
@@ -212,4 +230,9 @@ enum UserBikeOwnStatus {
   SOLD // 売却済み
   TRANSFERRED // 譲渡済み
   SCRAPPED // 廃車
+}
+
+enum UserQuitStatus {
+  QUIT
+  RECOVERED
 }

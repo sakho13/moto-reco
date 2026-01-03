@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest'
+import { prisma } from '@repo/database'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
+import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
 import { app } from '@/lib/api/server/app'
 
@@ -235,6 +237,91 @@ describe('User API Endpoints', () => {
       expect(json1.data.userId).toBe(json2.data.userId)
       // 既存の名前が保持されることを確認
       expect(json2.data.name).toBe('テストユーザー')
+    })
+  })
+
+  describe('POST /api/v1/user/auth/quit', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/auth/quit', 'POST', {
+        quitReason: 'テスト退会理由',
+      })
+    })
+
+    test('退会理由が空文字でエラーとなる', async () => {
+      const { token } = await createTestUser()
+      const res = await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quitReason: '',
+        }),
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'error',
+        errorCode: 'VALIDATION_ERROR',
+        message: expect.any(String),
+        details: [
+          {
+            field: 'quitReason',
+            message: expect.any(String),
+          },
+        ],
+      })
+      expect(res.status).toBe(400)
+    })
+
+    test('退会処理が完了し復帰コードが返却される', async () => {
+      const { token, userId } = await createTestUser()
+      const quitReason = 'テスト退会理由'
+      const res = await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quitReason,
+        }),
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          recoveryCode: expect.any(String),
+        },
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(200)
+      expect(json.data.recoveryCode).toHaveLength(5)
+
+      const quitRecord = await prisma.tUserQuit.findUnique({
+        where: { userId },
+      })
+      expect(quitRecord).not.toBeNull()
+      expect(quitRecord?.quitReason).toBe(quitReason)
+      expect(quitRecord?.recoveryCode).toBe(json.data.recoveryCode)
+      expect(quitRecord?.status).toBe('QUIT')
+
+      const userRecord = await prisma.mUser.findUnique({
+        where: { id: userId },
+        select: { status: true },
+      })
+      expect(userRecord?.status).toBe('INACTIVE')
+
+      const authProviders = await prisma.mAuthProvider.findMany({
+        where: { userId },
+        select: { isActive: true },
+      })
+      expect(authProviders.length).toBeGreaterThan(0)
+      expect(authProviders.every((provider) => provider.isActive === false)).toBe(
+        true
+      )
     })
   })
 })

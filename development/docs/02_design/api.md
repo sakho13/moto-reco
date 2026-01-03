@@ -62,6 +62,28 @@ Authorization: Bearer <token>
 }
 ```
 
+#### `POST /api/v1/user/auth/quit`
+
+**リクエスト**
+
+```json
+{
+  "quitReason": "string" // バリデート: 1文字以上、200文字以下
+}
+```
+
+**レスポンス**
+
+```json
+{
+  "status": "success",
+  "data": {
+    "recoveryCode": "string" // 5桁数字
+  },
+  "message": "退会処理が完了しました"
+}
+```
+
 ### ロール`USER`
 
 - `GET /api/v1/user/profile` - ユーザープロフィールの取得

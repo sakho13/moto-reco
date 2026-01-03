@@ -6,6 +6,7 @@ import {
   ApiResponseUserBikeRegister,
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
+  ApiResponseUserQuit,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -168,6 +169,9 @@ type API_EP = {
   }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
+  }
+  '/api/v1/user/auth/quit': {
+    POST: SuccessResponse<ApiResponseUserQuit>
   }
   '/api/v1/bikes/manufacturers': {
     GET: SuccessResponse<ApiResponseManufacturer>
