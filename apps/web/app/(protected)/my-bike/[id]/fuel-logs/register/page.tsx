@@ -50,6 +50,7 @@ function FuelLogRegisterPage() {
       await apiPost(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
         refueledAt: new Date(formData.refueledAt),
         mileage: Number(formData.mileage),
+        previousMileage: Number(formData.previousMileage),
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
         updateTotalMileage: formData.updateTotalMileage,

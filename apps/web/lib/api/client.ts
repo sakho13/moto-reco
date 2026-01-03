@@ -7,6 +7,7 @@ import {
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
   ApiResponseUserQuit,
+  ApiResponseFuelInsight,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -187,6 +188,10 @@ type API_EP = {
     GET: SuccessResponse<ApiResponseFuelLogList>
     POST: SuccessResponse<ApiResponseFuelLogDetail>
     PATCH: SuccessResponse<ApiResponseFuelLogDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/fuel-insights`]: {
+    GET: SuccessResponse<ApiResponseFuelInsight>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}`]: {
