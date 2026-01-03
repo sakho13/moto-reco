@@ -6,8 +6,8 @@ import {
 import { generateRandNumberStr } from '@repo/shared-utils'
 import { UserQuitEntity } from '../entities/UserQuitEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
-import { IUserRepository } from '../interfaces/IUserRepository'
 import { IUserQuitRepository } from '../interfaces/IUserQuitRepository'
+import { IUserRepository } from '../interfaces/IUserRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
 
 type QuitUserParams = {

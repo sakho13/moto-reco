@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { prisma } from '@repo/database'
-import { createRandomEmail } from '../../helpers/createRandomEmail'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
+import { createRandomEmail } from '../../helpers/createRandomEmail'
 import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
 import { app } from '@/lib/api/server/app'
 
