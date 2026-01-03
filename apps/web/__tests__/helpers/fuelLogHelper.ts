@@ -9,11 +9,16 @@ export async function createTestFuelLog(
   data: {
     refueledAt: string
     mileage: number
+    previousMileage?: number
     amount: number
     totalPrice: number
     updateTotalMileage?: boolean
   }
 ): Promise<string> {
+  const payload = {
+    previousMileage: data.previousMileage ?? data.mileage,
+    ...data,
+  }
   const res = await app.request(
     `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
     {
@@ -22,7 +27,7 @@ export async function createTestFuelLog(
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     }
   )
 
@@ -39,6 +44,7 @@ export async function createMultipleFuelLogs(
   logsData: Array<{
     refueledAt: string
     mileage: number
+    previousMileage?: number
     amount: number
     totalPrice: number
   }>

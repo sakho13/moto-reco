@@ -646,6 +646,7 @@ describe('UserBike API Endpoints', () => {
         {
           refueledAt: '2024-03-01T10:00:00.000Z',
           mileage: 2500,
+          previousMileage: 2400,
           amount: 10.5,
           totalPrice: 1800,
         }
@@ -683,6 +684,7 @@ describe('UserBike API Endpoints', () => {
           body: JSON.stringify({
             refueledAt: '2024-03-01T10:00:00.000Z',
             mileage: -100,
+            previousMileage: -200,
             amount: 0,
             totalPrice: -500,
           }),
@@ -706,6 +708,7 @@ describe('UserBike API Endpoints', () => {
           body: JSON.stringify({
             refueledAt: '2024-03-01T10:00:00.000Z',
             mileage: 2500,
+            previousMileage: 2400,
             amount: 10.5,
             totalPrice: 1800,
           }),
@@ -730,6 +733,7 @@ describe('UserBike API Endpoints', () => {
           body: JSON.stringify({
             refueledAt,
             mileage: 2500,
+            previousMileage: 2400,
             amount: 10.5,
             totalPrice: 1800,
           }),
@@ -744,6 +748,7 @@ describe('UserBike API Endpoints', () => {
           fuelLogId: expect.any(String),
           refueledAt,
           mileage: 2500,
+          previousMileage: 2400,
           amount: 10.5,
           totalPrice: 1800,
         },
@@ -755,6 +760,7 @@ describe('UserBike API Endpoints', () => {
       })
       expect(fuelLogRecord?.userMyBikeId).toBe(myUserBikeId)
       expect(fuelLogRecord?.mileage).toBe(2500)
+      expect(fuelLogRecord?.previousMileage).toBe(2400)
       expect(fuelLogRecord?.amount).toBe(10.5)
       expect(fuelLogRecord?.price).toBe(1800)
       expect(fuelLogRecord?.refueledAt.toISOString()).toBe(refueledAt)
@@ -780,6 +786,7 @@ describe('UserBike API Endpoints', () => {
           body: JSON.stringify({
             refueledAt,
             mileage: newMileage,
+            previousMileage: currentMileage,
             amount: 12.0,
             totalPrice: 2000,
             updateTotalMileage: true,
@@ -817,6 +824,7 @@ describe('UserBike API Endpoints', () => {
           body: JSON.stringify({
             refueledAt,
             mileage: smallerMileage,
+            previousMileage: smallerMileage - 100,
             amount: 8.0,
             totalPrice: 1400,
             updateTotalMileage: true,
@@ -1044,11 +1052,99 @@ describe('UserBike API Endpoints', () => {
         expect(typeof log.fuelLogId).toBe('string')
         expect(typeof log.refueledAt).toBe('string')
         expect(typeof log.mileage).toBe('number')
+        expect(typeof log.previousMileage).toBe('number')
         expect(typeof log.amount).toBe('number')
         expect(typeof log.totalPrice).toBe('number')
 
         expect(new Date(log.refueledAt).toISOString()).toBe(log.refueledAt)
       })
+    })
+  })
+
+  describe('GET /api/v1/user-bike/bike/:myUserBikeId/fuel-insights', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 250,
+        nickname: '燃費インサイトテスト用バイク',
+        totalMileage: 900,
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      await createMultipleFuelLogs(token, myUserBikeId, [
+        {
+          refueledAt: '2024-01-01T10:00:00.000Z',
+          mileage: 1000,
+          previousMileage: 900,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+        {
+          refueledAt: '2024-02-01T10:00:00.000Z',
+          mileage: 1300,
+          previousMileage: 1000,
+          amount: 12.0,
+          totalPrice: 1800,
+        },
+        {
+          refueledAt: '2024-03-01T10:00:00.000Z',
+          mileage: 1600,
+          previousMileage: 1300,
+          amount: 11.0,
+          totalPrice: 2200,
+        },
+      ])
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-insights`,
+        'GET'
+      )
+    })
+
+    test('存在しないバイクIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${randomUUID()}/fuel-insights`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('燃費インサイトを取得できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-insights`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.message).toBe('燃費インサイト取得成功')
+      expect(json.data.averageFuelEfficiency).toBeCloseTo(700 / 33, 5)
+      expect(json.data.averageAmount).toBeCloseTo(11, 5)
+      expect(json.data.averageTotalPrice).toBeCloseTo(1833.3333, 3)
+      expect(json.data.averagePricePerLiter).toBeCloseTo(166.6666, 3)
+      expect(json.data.minPricePerLiter).toBeCloseTo(150, 5)
+      expect(json.data.maxPricePerLiter).toBeCloseTo(200, 5)
     })
   })
 
@@ -1214,6 +1310,7 @@ describe('UserBike API Endpoints', () => {
             fuelLogId: fuelLogId,
             refueledAt,
             mileage: 2000,
+            previousMileage: 1800,
             amount: 12.5,
             totalPrice: 2000,
           }),
@@ -1228,6 +1325,7 @@ describe('UserBike API Endpoints', () => {
           fuelLogId: fuelLogId,
           refueledAt,
           mileage: 2000,
+          previousMileage: 1800,
           amount: 12.5,
           totalPrice: 2000,
         },
@@ -1239,6 +1337,7 @@ describe('UserBike API Endpoints', () => {
         where: { id: fuelLogId },
       })
       expect(fuelLogRecord?.mileage).toBe(2000)
+      expect(fuelLogRecord?.previousMileage).toBe(1800)
       expect(fuelLogRecord?.amount).toBe(12.5)
       expect(fuelLogRecord?.price).toBe(2000)
       expect(fuelLogRecord?.refueledAt.toISOString()).toBe(refueledAt)
@@ -1354,6 +1453,71 @@ describe('UserBike API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(404)
       expect404Error(json)
+    })
+
+    test('previousMileageのみを不正な値(既存mileageより大きい値)で更新するとエラーとなる', async () => {
+      // 既存の燃料ログのmileageは1500
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId,
+            previousMileage: 2000, // 既存のmileage(1500)より大きい不正な値
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('INVALID_REQUEST')
+      expect(json.message).toBe(
+        '前回走行距離は給油時走行距離以下である必要があります'
+      )
+    })
+
+    test('mileageのみを不正な値(既存previousMileageより小さい値)で更新するとエラーとなる', async () => {
+      // 先にpreviousMileageを1400に更新
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fuelLogId,
+          previousMileage: 1400,
+        }),
+      })
+
+      // mileageを1400より小さい1200に更新しようとする
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId,
+            mileage: 1200, // previousMileage(1400)より小さい不正な値
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('INVALID_REQUEST')
+      expect(json.message).toBe(
+        '前回走行距離は給油時走行距離以下である必要があります'
+      )
     })
   })
 })

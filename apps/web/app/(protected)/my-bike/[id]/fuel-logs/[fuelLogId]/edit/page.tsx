@@ -57,6 +57,7 @@ function FuelLogEditPage() {
           setInitialData({
             refueledAt: dateStr,
             mileage: fuelLog.mileage.toString(),
+            previousMileage: fuelLog.previousMileage.toString(),
             amount: fuelLog.amount.toString(),
             totalPrice: fuelLog.totalPrice.toString(),
             updateTotalMileage: false,
@@ -80,6 +81,7 @@ function FuelLogEditPage() {
         fuelLogId: fuelLogId,
         refueledAt: new Date(formData.refueledAt),
         mileage: Number(formData.mileage),
+        previousMileage: Number(formData.previousMileage),
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
       })

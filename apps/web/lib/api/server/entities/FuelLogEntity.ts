@@ -16,6 +16,14 @@ export class FuelLogEntity {
       throw new Error('走行距離は0以上である必要があります')
     }
 
+    if (fuelLog.previousMileage < 0) {
+      throw new Error('前回走行距離は0以上である必要があります')
+    }
+
+    if (fuelLog.previousMileage > fuelLog.mileage) {
+      throw new Error('前回走行距離は給油時走行距離以下である必要があります')
+    }
+
     this._value = fuelLog
   }
 
@@ -33,6 +41,10 @@ export class FuelLogEntity {
 
   public get mileage(): number {
     return this._value.mileage
+  }
+
+  public get previousMileage(): number {
+    return this._value.previousMileage
   }
 
   public get amount(): number {
