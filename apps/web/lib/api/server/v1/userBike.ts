@@ -5,14 +5,17 @@ import {
   ApiResponseUserBikeDetail,
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
+  ApiResponseFuelInsight,
   createBikeId,
   createFuelLogId,
   createMyUserBikeId,
   createUserId,
+  FuelInsightPeriod,
   SuccessResponse,
   UserBikeRegisterRequestSchema,
   UserBikeUpdateRequestSchema,
   UserBikeListQuerySchema,
+  FuelInsightQuerySchema,
   FuelLogRegisterRequestSchema,
   FuelLogUpdateRequestSchema,
   FuelLogListQuerySchema,
@@ -22,10 +25,13 @@ import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson, zodValidateQuery } from '../middlewares/zodValidation'
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository'
+import { PrismaFuelInsightRepository } from '../repositories/PrismaFuelInsightRepository'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeRepository'
+import { FuelInsightService } from '../services/FuelInsightService'
 import { FuelLogService } from '../services/FuelLogService'
 import { UserBikeService } from '../services/UserBikeService'
+import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 
@@ -216,6 +222,7 @@ userBike.get(
           fuelLogId: log.id,
           refueledAt: log.refueledAt.toISOString(),
           mileage: log.mileage,
+          previousMileage: log.previousMileage,
           amount: log.amount,
           totalPrice: log.totalPrice,
         })),
@@ -245,6 +252,7 @@ userBike.post(
         userId: createUserId(userId),
         refueledAt: body.refueledAt,
         mileage: body.mileage,
+        previousMileage: body.previousMileage,
         amount: body.amount,
         totalPrice: body.totalPrice,
         updateTotalMileage: body.updateTotalMileage,
@@ -258,6 +266,7 @@ userBike.post(
           fuelLogId: result.id,
           refueledAt: result.refueledAt.toISOString(),
           mileage: result.mileage,
+          previousMileage: result.previousMileage,
           amount: result.amount,
           totalPrice: result.totalPrice,
         },
@@ -288,6 +297,7 @@ userBike.patch(
         userId: createUserId(userId),
         refueledAt: body.refueledAt,
         mileage: body.mileage,
+        previousMileage: body.previousMileage,
         amount: body.amount,
         totalPrice: body.totalPrice,
       })
@@ -300,6 +310,7 @@ userBike.patch(
           fuelLogId: result.id,
           refueledAt: result.refueledAt.toISOString(),
           mileage: result.mileage,
+          previousMileage: result.previousMileage,
           amount: result.amount,
           totalPrice: result.totalPrice,
         },
@@ -307,6 +318,47 @@ userBike.patch(
       },
       200
     )
+  }
+)
+
+userBike.get(
+  '/bike/:myUserBikeId/fuel-insights',
+  honoAuthMiddleware,
+  zodValidateQuery(FuelInsightQuerySchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const query = c.req.valid('query')
+
+    const searchParams = new FuelInsightSearchParams({
+      period: query.period as FuelInsightPeriod | undefined,
+    })
+
+    const fuelInsightRepo = new PrismaFuelInsightRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const fuelInsightService = new FuelInsightService(
+      fuelInsightRepo,
+      myUserBikeRepo
+    )
+
+    const insight = await fuelInsightService.getFuelInsight(
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId),
+      searchParams.period
+    )
+
+    return c.json<SuccessResponse<ApiResponseFuelInsight>>({
+      status: 'success',
+      data: {
+        averageFuelEfficiency: insight.averageFuelEfficiency,
+        averageAmount: insight.averageAmount,
+        averageTotalPrice: insight.averageTotalPrice,
+        averagePricePerLiter: insight.averagePricePerLiter,
+        minPricePerLiter: insight.minPricePerLiter,
+        maxPricePerLiter: insight.maxPricePerLiter,
+      },
+      message: '燃費インサイト取得成功',
+    })
   }
 )
 

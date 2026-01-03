@@ -10,6 +10,7 @@ import { Input } from '@repo/ui/input'
 export interface FuelLogFormData {
   refueledAt: string
   mileage: string
+  previousMileage: string
   amount: string
   totalPrice: string
   updateTotalMileage: boolean
@@ -35,6 +36,7 @@ export const FuelLogForm = ({
   const [formData, setFormData] = useState<FuelLogFormData>({
     refueledAt: '',
     mileage: '',
+    previousMileage: '',
     amount: '',
     totalPrice: '',
     updateTotalMileage: true,
@@ -52,6 +54,7 @@ export const FuelLogForm = ({
       setFormData((prev) => ({
         ...prev,
         mileage: totalMileage.toString(),
+        previousMileage: totalMileage.toString(),
       }))
     }
   }, [isEdit, totalMileage])
@@ -99,6 +102,12 @@ export const FuelLogForm = ({
             setFormData((prev) => ({
               ...prev,
               mileage: newMileage,
+              previousMileage:
+                !isEdit &&
+                (prev.previousMileage === '' ||
+                  prev.previousMileage === prev.mileage)
+                  ? newMileage
+                  : prev.previousMileage,
               // 総走行距離以下になったら自動的にチェックを外す
               updateTotalMileage:
                 totalMileage !== undefined && Number(newMileage) <= totalMileage
@@ -111,6 +120,29 @@ export const FuelLogForm = ({
           required
           disabled={isSubmitting}
           placeholder="例: 5000"
+        />
+      </FormField>
+
+      <FormField
+        label="前回給油時走行距離 (km)"
+        htmlFor="previousMileage"
+        required
+      >
+        <Input
+          id="previousMileage"
+          type="number"
+          value={formData.previousMileage}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              previousMileage: e.target.value,
+            }))
+          }
+          min="0"
+          step="1"
+          required
+          disabled={isSubmitting}
+          placeholder="例: 4800"
         />
       </FormField>
 

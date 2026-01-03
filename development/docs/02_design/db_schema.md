@@ -105,6 +105,7 @@ erDiagram
         float amount
         int price
         int mileage
+        int previousMileage
         datetime refueledAt
     }
 

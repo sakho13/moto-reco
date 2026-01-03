@@ -16,6 +16,7 @@ type RegisterFuelLogParams = {
   userId: UserId
   refueledAt: Date
   mileage: number
+  previousMileage: number
   amount: number
   totalPrice: number
   updateTotalMileage: boolean
@@ -27,6 +28,7 @@ type UpdateFuelLogParams = {
   userId: UserId
   refueledAt?: Date
   mileage?: number
+  previousMileage?: number
   amount?: number
   totalPrice?: number
 }
@@ -54,6 +56,7 @@ export class FuelLogService {
       myUserBikeId: params.myUserBikeId,
       refueledAt: params.refueledAt,
       mileage: params.mileage,
+      previousMileage: params.previousMileage,
       amount: params.amount,
       totalPrice: params.totalPrice,
     })
@@ -118,6 +121,8 @@ export class FuelLogService {
       myUserBikeId: existingFuelLog.myUserBikeId,
       refueledAt: params.refueledAt ?? existingFuelLog.refueledAt,
       mileage: params.mileage ?? existingFuelLog.mileage,
+      previousMileage:
+        params.previousMileage ?? existingFuelLog.previousMileage,
       amount: params.amount ?? existingFuelLog.amount,
       totalPrice: params.totalPrice ?? existingFuelLog.totalPrice,
     })
