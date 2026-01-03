@@ -1454,5 +1454,70 @@ describe('UserBike API Endpoints', () => {
       expect(res.status).toBe(404)
       expect404Error(json)
     })
+
+    test('previousMileageのみを不正な値(既存mileageより大きい値)で更新するとエラーとなる', async () => {
+      // 既存の燃料ログのmileageは1500
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId,
+            previousMileage: 2000, // 既存のmileage(1500)より大きい不正な値
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('INVALID_REQUEST')
+      expect(json.message).toBe(
+        '前回走行距離は給油時走行距離以下である必要があります'
+      )
+    })
+
+    test('mileageのみを不正な値(既存previousMileageより小さい値)で更新するとエラーとなる', async () => {
+      // 先にpreviousMileageを1400に更新
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fuelLogId,
+          previousMileage: 1400,
+        }),
+      })
+
+      // mileageを1400より小さい1200に更新しようとする
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId,
+            mileage: 1200, // previousMileage(1400)より小さい不正な値
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('INVALID_REQUEST')
+      expect(json.message).toBe(
+        '前回走行距離は給油時走行距離以下である必要があります'
+      )
+    })
   })
 })
