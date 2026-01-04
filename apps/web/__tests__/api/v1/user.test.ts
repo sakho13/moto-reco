@@ -319,9 +319,9 @@ describe('User API Endpoints', () => {
         select: { isActive: true },
       })
       expect(authProviders.length).toBeGreaterThan(0)
-      expect(authProviders.every((provider) => provider.isActive === false)).toBe(
-        true
-      )
+      expect(
+        authProviders.every((provider) => provider.isActive === false)
+      ).toBe(true)
     })
   })
 })
