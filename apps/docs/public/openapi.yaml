@@ -128,6 +128,46 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/user/auth/quit:
+    post:
+      summary: ユーザー退会
+      description: 退会理由を受け取り、退会処理後に復帰コードを返却します。
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserQuit'
+      responses:
+        '200':
+          description: 退会処理成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserQuitResponse'
+                  message:
+                    type: string
+                    example: 退会処理が完了しました
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/bikes/manufacturers:
     get:
       summary: バイクメーカー一覧の取得
@@ -741,6 +781,22 @@ components:
           minLength: 1
           maxLength: 50
           description: ユーザー名（1-50文字）
+    UserQuit:
+      type: object
+      required:
+        - quitReason
+      properties:
+        quitReason:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: 退会理由（1-200文字）
+    UserQuitResponse:
+      type: object
+      properties:
+        recoveryCode:
+          type: string
+          example: '12345'
     ManufacturerDetail:
       type: object
       properties:
