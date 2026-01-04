@@ -5,6 +5,7 @@ import { SecretsConstruct } from './constructs/secrets'
 import { DatabaseConstruct } from './constructs/database'
 import { ContainerConstruct } from './constructs/container'
 import { MonitoringConstruct } from './constructs/monitoring'
+import { MigrationConstruct } from './constructs/migration'
 import { ProductionConfig } from './config/production'
 
 /**
@@ -68,7 +69,18 @@ export class MotoRecoStack extends Stack {
       environment: config.environment,
     })
 
-    // 5. Monitoring
+    // 5. Migration
+    const migration = new MigrationConstruct(this, 'Migration', {
+      cluster: container.cluster,
+      vpc: network.vpc,
+      subnets: network.publicSubnets,
+      securityGroup: network.fargateSecurityGroup,
+      migrationDatabaseUrlParameter: secrets.ssmParameters.migrationDatabaseUrl,
+      prefix: config.prefix,
+      environment: config.environment,
+    })
+
+    // 6. Monitoring
     new MonitoringConstruct(this, 'Monitoring', {
       service: container.service,
       loadBalancer: container.loadBalancer,
@@ -112,6 +124,16 @@ export class MotoRecoStack extends Stack {
     new CfnOutput(this, 'EcsServiceName', {
       value: container.service.serviceName,
       description: 'ECS Service name',
+    })
+
+    new CfnOutput(this, 'MigrationRepositoryUri', {
+      value: migration.repository.repositoryUri,
+      description: 'Migration ECR repository URI',
+    })
+
+    new CfnOutput(this, 'MigrationTaskDefinitionArn', {
+      value: migration.taskDefinition.taskDefinitionArn,
+      description: 'Migration Task Definition ARN',
     })
   }
 }

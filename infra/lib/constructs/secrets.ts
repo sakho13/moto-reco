@@ -20,6 +20,7 @@ export class SecretsConstruct extends Construct {
     firebaseAppId: ssm.StringParameter
     firebaseMeasurementId: ssm.StringParameter
     databaseUrl: ssm.StringParameter
+    migrationDatabaseUrl: ssm.StringParameter
   }
 
   constructor(scope: Construct, id: string, props: SecretsConstructProps) {
@@ -60,6 +61,7 @@ export class SecretsConstruct extends Construct {
       firebaseAppId: `${parameterPrefix}/firebase/app-id`,
       firebaseMeasurementId: `${parameterPrefix}/firebase/measurement-id`,
       databaseUrl: `${parameterPrefix}/database-url`,
+      migrationDatabaseUrl: `${parameterPrefix}/migration-database-url`,
     }
 
     // SSMパラメータの定義 (値は手動で設定)
@@ -124,6 +126,15 @@ export class SecretsConstruct extends Construct {
         parameterName: ssmParameterPaths.databaseUrl,
         stringValue: 'PLACEHOLDER',
       }),
+      migrationDatabaseUrl: new ssm.StringParameter(
+        this,
+        'MigrationDatabaseUrlParameter',
+        {
+          parameterName: ssmParameterPaths.migrationDatabaseUrl,
+          stringValue: 'PLACEHOLDER',
+          description: 'Database URL for migrations with DDL permissions',
+        }
+      ),
     }
   }
 }
