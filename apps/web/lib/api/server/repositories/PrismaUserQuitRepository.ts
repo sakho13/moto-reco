@@ -1,4 +1,4 @@
-import { createUserQuitId } from '@repo/shared-types'
+import { createUserId, createUserQuitId } from '@repo/shared-types'
 import { UserQuitEntity } from '../entities/UserQuitEntity'
 import { IUserQuitRepository } from '../interfaces/IUserQuitRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
@@ -28,7 +28,7 @@ export class PrismaUserQuitRepository
 
     return new UserQuitEntity({
       id: createUserQuitId(created.id),
-      userId: created.userId,
+      userId: createUserId(created.userId),
       quitAt: created.quitAt,
       quitReason: created.quitReason,
       recoveryCode: created.recoveryCode,
