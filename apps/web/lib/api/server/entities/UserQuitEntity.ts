@@ -1,4 +1,9 @@
-import { UserQuit, UserQuitId, UserQuitStatus, UserId } from '@repo/shared-types'
+import {
+  UserQuit,
+  UserQuitId,
+  UserQuitStatus,
+  UserId,
+} from '@repo/shared-types'
 
 export class UserQuitEntity {
   private _value: UserQuit

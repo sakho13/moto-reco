@@ -13,8 +13,10 @@ permissions:
 env:
   AWS_REGION: ap-northeast-1
   ECR_REPOSITORY: motoreco-ecr-web-prod
+  ECR_MIGRATION_REPOSITORY: motoreco-ecr-migration-prod
   ECS_CLUSTER: motoreco-ecs-cluster-prod
   ECS_SERVICE: motoreco-web-service-prod
+  MIGRATION_TASK_DEFINITION: motoreco-migration-prod
 
 jobs:
   deploy:
@@ -61,6 +63,87 @@ jobs:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Build and push migration image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+
+          docker build -f packages/database/Dockerfile.migration \
+            -t $ECR_REGISTRY/$ECR_MIGRATION_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_MIGRATION_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_MIGRATION_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_MIGRATION_REPOSITORY:latest
+
+      - name: Run database migration
+        run: |
+          # Task Definition ARNの取得
+          TASK_DEF_ARN=$(aws ecs describe-task-definition \
+            --task-definition ${{ env.MIGRATION_TASK_DEFINITION }} \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          # Public SubnetとSecurity Groupの取得
+          # CDKが自動生成するNameタグ (例: MotoRecoProductionStack/Network/PublicSubnetAz1) にマッチ
+          PUBLIC_SUBNETS=$(aws ec2 describe-subnets \
+            --filters "Name=tag:Name,Values=*PublicSubnet*" \
+            --query 'Subnets[*].SubnetId' \
+            --output text | tr '\t' ',')
+
+          FARGATE_SG=$(aws ec2 describe-security-groups \
+            --filters "Name=group-name,Values=motoreco-sg-fargate-prod" \
+            --query 'SecurityGroups[0].GroupId' \
+            --output text)
+
+          # マイグレーションTaskの実行
+          TASK_ARN=$(aws ecs run-task \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --task-definition $TASK_DEF_ARN \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$PUBLIC_SUBNETS],securityGroups=[$FARGATE_SG],assignPublicIp=ENABLED}" \
+            --query 'tasks[0].taskArn' \
+            --output text)
+
+          echo "Migration task started: $TASK_ARN"
+
+          # Taskの完了待機
+          aws ecs wait tasks-stopped \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --tasks $TASK_ARN
+
+          # 実行結果の確認
+          EXIT_CODE=$(aws ecs describe-tasks \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --tasks $TASK_ARN \
+            --query 'tasks[0].containers[0].exitCode' \
+            --output text)
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "Migration failed with exit code: $EXIT_CODE"
+
+            # CloudWatch Logsからエラーログを取得
+            LOG_STREAM=$(aws logs describe-log-streams \
+              --log-group-name /ecs/motoreco-migration-prod \
+              --order-by LastEventTime \
+              --descending \
+              --max-items 1 \
+              --query 'logStreams[0].logStreamName' \
+              --output text)
+
+            if [ "$LOG_STREAM" != "None" ] && [ -n "$LOG_STREAM" ]; then
+              echo "Migration logs:"
+              aws logs get-log-events \
+                --log-group-name /ecs/motoreco-migration-prod \
+                --log-stream-name "$LOG_STREAM" \
+                --query 'events[*].message' \
+                --output text
+            fi
+
+            exit 1
+          fi
+
+          echo "Migration completed successfully"
 
       - name: Deploy to ECS
         run: |
