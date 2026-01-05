@@ -15,6 +15,8 @@ const NAV_LINKS: NavLink[] = [
   { href: '/pricing', label: '料金プラン' },
 ]
 
+const webUrl = process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000'
+
 export function Navigation() {
   const pathname = usePathname()
 
@@ -25,22 +27,33 @@ export function Navigation() {
 
   return (
     <nav className={styles.nav} aria-label="メインナビゲーション">
-      <ul className={styles.navList}>
-        {NAV_LINKS.map((link) => {
-          const isActive = pathname === link.href
-          return (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className={`${styles.navLink} ${isActive ? styles.active : ''}`}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {link.label}
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
+      <div className={styles.navContainer}>
+        <ul className={styles.navList}>
+          {NAV_LINKS.map((link) => {
+            const isActive = pathname === link.href
+            return (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className={`${styles.navLink} ${isActive ? styles.active : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+        <Link
+          href={`${webUrl}/login`}
+          target="_blank"
+          rel="noreferrer"
+          className={styles.loginButton}
+          aria-label="ログインページを新しいタブで開く"
+        >
+          ログイン
+        </Link>
+      </div>
     </nav>
   )
 }
