@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { mutate } from 'swr'
 import { Button } from '@repo/ui/button'
 import { Input } from '@repo/ui/input'
+import { toast } from '@repo/ui/useToast'
 import {
   BikeRegisterForm,
   type BikeFormData,
@@ -53,6 +54,11 @@ function BikeRegisterPage() {
       })
 
       await mutate('/api/v1/user-bike/bikes')
+      toast({
+        title: 'バイクを登録しました',
+        description: 'マイページへ移動します。',
+        variant: 'success',
+      })
       router.push('/home')
     } catch (err) {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')

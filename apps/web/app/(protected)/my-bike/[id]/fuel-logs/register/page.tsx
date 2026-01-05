@@ -9,6 +9,7 @@ import type {
 } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
+import { toast } from '@repo/ui/useToast'
 import {
   FuelLogForm,
   type FuelLogFormData,
@@ -57,6 +58,11 @@ function FuelLogRegisterPage() {
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      toast({
+        title: '給油履歴を登録しました',
+        description: '給油履歴一覧へ移動します。',
+        variant: 'success',
+      })
       router.push(`/my-bike/${bikeId}/fuel-logs`)
     } catch (err) {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
