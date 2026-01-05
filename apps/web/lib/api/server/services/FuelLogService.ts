@@ -16,6 +16,7 @@ type RegisterFuelLogParams = {
   userId: UserId
   refueledAt: Date
   mileage: number
+  previousMileage: number
   amount: number
   totalPrice: number
   updateTotalMileage: boolean
@@ -27,6 +28,7 @@ type UpdateFuelLogParams = {
   userId: UserId
   refueledAt?: Date
   mileage?: number
+  previousMileage?: number
   amount?: number
   totalPrice?: number
 }
@@ -54,6 +56,7 @@ export class FuelLogService {
       myUserBikeId: params.myUserBikeId,
       refueledAt: params.refueledAt,
       mileage: params.mileage,
+      previousMileage: params.previousMileage,
       amount: params.amount,
       totalPrice: params.totalPrice,
     })
@@ -113,16 +116,25 @@ export class FuelLogService {
     }
 
     // 3. 部分更新のためのマージ処理
-    const updatedFuelLog = new FuelLogEntity({
-      fuelLogId: existingFuelLog.id,
-      myUserBikeId: existingFuelLog.myUserBikeId,
-      refueledAt: params.refueledAt ?? existingFuelLog.refueledAt,
-      mileage: params.mileage ?? existingFuelLog.mileage,
-      amount: params.amount ?? existingFuelLog.amount,
-      totalPrice: params.totalPrice ?? existingFuelLog.totalPrice,
-    })
+    try {
+      const updatedFuelLog = new FuelLogEntity({
+        fuelLogId: existingFuelLog.id,
+        myUserBikeId: existingFuelLog.myUserBikeId,
+        refueledAt: params.refueledAt ?? existingFuelLog.refueledAt,
+        mileage: params.mileage ?? existingFuelLog.mileage,
+        previousMileage:
+          params.previousMileage ?? existingFuelLog.previousMileage,
+        amount: params.amount ?? existingFuelLog.amount,
+        totalPrice: params.totalPrice ?? existingFuelLog.totalPrice,
+      })
 
-    // 4. 更新実行
-    return await this.fuelLogRepository.updateFuelLog(updatedFuelLog)
+      // 4. 更新実行
+      return await this.fuelLogRepository.updateFuelLog(updatedFuelLog)
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ApiV1Error('INVALID_REQUEST', error.message)
+      }
+      throw error
+    }
   }
 }

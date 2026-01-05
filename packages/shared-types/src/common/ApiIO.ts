@@ -45,6 +45,10 @@ export type ApiResponseUserProfile = {
   name: string
 }
 
+export type ApiResponseUserQuit = {
+  recoveryCode: string
+}
+
 export type ApiResponseManufacturer = {
   manufacturers: {
     manufacturerId: string
@@ -110,8 +114,18 @@ export type ApiResponseFuelLogDetail = {
   fuelLogId: string
   refueledAt: string
   mileage: number
+  previousMileage: number
   amount: number
   totalPrice: number
 }
 
 export type ApiResponseFuelLogList = ApiResponseFuelLogDetail[]
+
+export type ApiResponseFuelInsight = {
+  averageFuelEfficiency: number | null
+  averageAmount: number | null
+  averageTotalPrice: number | null
+  averagePricePerLiter: number | null
+  minPricePerLiter: number | null
+  maxPricePerLiter: number | null
+}

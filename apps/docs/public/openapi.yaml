@@ -128,6 +128,46 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/user/auth/quit:
+    post:
+      summary: ユーザー退会
+      description: 退会理由を受け取り、退会処理後に復帰コードを返却します。
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserQuit'
+      responses:
+        '200':
+          description: 退会処理成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserQuitResponse'
+                  message:
+                    type: string
+                    example: 退会処理が完了しました
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/bikes/manufacturers:
     get:
       summary: バイクメーカー一覧の取得
@@ -631,6 +671,60 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/user-bike/bike/{my-user-bike-id}/fuel-insights:
+    get:
+      summary: ユーザー所有バイクの燃費インサイト取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum:
+              - last-5
+              - past-month
+              - past-half-year
+              - past-year
+              - all
+            default: all
+          description: 集計期間
+      responses:
+        '200':
+          description: 燃費インサイト取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeFuelInsightDetail'
+                  message:
+                    type: string
+                    example: 燃費インサイト取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/health:
     get:
       summary: ヘルスチェック
@@ -687,6 +781,22 @@ components:
           minLength: 1
           maxLength: 50
           description: ユーザー名（1-50文字）
+    UserQuit:
+      type: object
+      required:
+        - quitReason
+      properties:
+        quitReason:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: 退会理由（1-200文字）
+    UserQuitResponse:
+      type: object
+      properties:
+        recoveryCode:
+          type: string
+          example: '12345'
     ManufacturerDetail:
       type: object
       properties:
@@ -847,6 +957,9 @@ components:
         mileage:
           type: integer
           description: 給油時走行距離（km）
+        previousMileage:
+          type: integer
+          description: 前回給油時走行距離（km）
         amount:
           type: number
           format: float
@@ -860,6 +973,7 @@ components:
       required:
         - refueledAt
         - mileage
+        - previousMileage
         - amount
         - totalPrice
       properties:
@@ -869,6 +983,9 @@ components:
         mileage:
           type: integer
           description: 給油時走行距離（km）
+        previousMileage:
+          type: integer
+          description: 前回給油時走行距離（km）
         amount:
           type: number
           format: float
@@ -895,6 +1012,9 @@ components:
         mileage:
           type: integer
           description: 給油時走行距離（km）
+        previousMileage:
+          type: integer
+          description: 前回給油時走行距離（km）
         amount:
           type: number
           format: float
@@ -903,6 +1023,40 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+
+    MyUserBikeFuelInsightDetail:
+      type: object
+      properties:
+        averageFuelEfficiency:
+          type: number
+          format: float
+          nullable: true
+          description: 平均燃費（km/L）
+        averageAmount:
+          type: number
+          format: float
+          nullable: true
+          description: 1回あたりの平均給油量（L）
+        averageTotalPrice:
+          type: number
+          format: float
+          nullable: true
+          description: 1回あたりの平均給油価格（円）
+        averagePricePerLiter:
+          type: number
+          format: float
+          nullable: true
+          description: 1回あたりの平均リッター価格（円/L）
+        minPricePerLiter:
+          type: number
+          format: float
+          nullable: true
+          description: 最安リッター価格（円/L）
+        maxPricePerLiter:
+          type: number
+          format: float
+          nullable: true
+          description: 最高リッター価格（円/L）
 
     ErrorResponse:
       type: object

@@ -94,9 +94,9 @@ const defaultLightTheme: ThemeTokens = {
 const defaultDarkTheme: ThemeTokens = {
   colors: {
     background: '#0F172A',
-    cloud: '#1E293B',
-    cloudHover: '#334155',
-    cloudActive: '#475569',
+    cloud: '#676767',
+    cloudHover: '#818181',
+    cloudActive: '#4b4b4b',
 
     product: '#38BDF8',
     productHover: '#0EA5E9',

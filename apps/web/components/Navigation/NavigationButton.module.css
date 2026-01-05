@@ -1,0 +1,40 @@
+.navButton {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.navButton:hover {
+  transform: scale(1.05);
+  background-color: var(--color-cloudHover);
+}
+
+.navButton:active {
+  transform: scale(0.98);
+}
+
+.navButton.active {
+  background-color: var(--color-product);
+  color: white;
+}
+
+/* アクセシビリティ: モーション削減 */
+@media (prefers-reduced-motion: reduce) {
+  .navButton {
+    transition: none !important;
+  }
+
+  .navButton:hover,
+  .navButton:active {
+    transform: none !important;
+  }
+}

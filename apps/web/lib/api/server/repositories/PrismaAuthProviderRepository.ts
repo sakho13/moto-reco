@@ -1,4 +1,4 @@
-import { ProviderType } from '@repo/shared-types'
+import { ProviderType, UserId } from '@repo/shared-types'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
@@ -26,5 +26,20 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
     })
 
     return authProvider?.user?.id ?? null
+  }
+
+  /**
+   * 指定ユーザーの認証プロバイダを無効化
+   */
+  async deactivateByUserId(userId: UserId): Promise<void> {
+    await this.connection.mAuthProvider.updateMany({
+      where: {
+        userId,
+        isActive: true,
+      },
+      data: {
+        isActive: false,
+      },
+    })
   }
 }

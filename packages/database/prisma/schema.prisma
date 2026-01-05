@@ -40,6 +40,7 @@ model MUser {
 
   authProviders MAuthProvider[]
   myBikes       TUserMyBike[]
+  userQuit      TUserQuit?
 }
 
 model MManufacturer {
@@ -143,6 +144,7 @@ model TUserMyBikeFuelLog {
   amount     Float    @map("amount") // 給油量/L
   price      Int      @map("price") // 給油価格/円
   mileage    Int      @map("mileage") // 給油時総走行距離/km
+  previousMileage Int @map("previous_mileage") // 前回給油時総走行距離/km
   refueledAt DateTime @map("refueled_at") // 給油日時
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -151,6 +153,23 @@ model TUserMyBikeFuelLog {
   userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
 
   @@index([userMyBikeId, refueledAt])
+}
+
+model TUserQuit {
+  id           String @id @default(cuid(2))
+  userId       String @map("user_id")
+  quitAt       DateTime @map("quit_at")
+  quitReason   String @map("quit_reason")
+  recoveryCode String @map("recovery_code")
+  status       UserQuitStatus @default(QUIT) @map("status")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@index([status])
 }
 
 // Enums
@@ -212,4 +231,9 @@ enum UserBikeOwnStatus {
   SOLD // 売却済み
   TRANSFERRED // 譲渡済み
   SCRAPPED // 廃車
+}
+
+enum UserQuitStatus {
+  QUIT
+  RECOVERED
 }

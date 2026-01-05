@@ -122,4 +122,16 @@ export class PrismaUserRepository
       status: updatedUser.status,
     })
   }
+
+  async deactivateUser(userId: UserId): Promise<void> {
+    await this.connection.mUser.update({
+      where: {
+        id: userId,
+        status: 'ACTIVE',
+      },
+      data: {
+        status: 'INACTIVE',
+      },
+    })
+  }
 }

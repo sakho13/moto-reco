@@ -2,9 +2,12 @@ import {
   ApiResponseUserProfile,
   ApiResponseManufacturer,
   ApiResponseUserBikeList,
+  ApiResponseUserBikeDetail,
   ApiResponseUserBikeRegister,
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
+  ApiResponseUserQuit,
+  ApiResponseFuelInsight,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -168,6 +171,9 @@ type API_EP = {
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
   }
+  '/api/v1/user/auth/quit': {
+    POST: SuccessResponse<ApiResponseUserQuit>
+  }
   '/api/v1/bikes/manufacturers': {
     GET: SuccessResponse<ApiResponseManufacturer>
   }
@@ -177,9 +183,19 @@ type API_EP = {
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
   }
+} & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-logs`]: {
     GET: SuccessResponse<ApiResponseFuelLogList>
     POST: SuccessResponse<ApiResponseFuelLogDetail>
     PATCH: SuccessResponse<ApiResponseFuelLogDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/fuel-insights`]: {
+    GET: SuccessResponse<ApiResponseFuelInsight>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}`]: {
+    GET: SuccessResponse<ApiResponseUserBikeDetail>
+    PATCH: SuccessResponse<ApiResponseUserBikeDetail>
   }
 }

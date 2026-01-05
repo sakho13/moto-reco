@@ -20,6 +20,7 @@ export class PrismaFuelLogRepository
         amount: fuelLog.amount,
         price: fuelLog.totalPrice,
         mileage: fuelLog.mileage,
+        previousMileage: fuelLog.previousMileage,
         refueledAt: fuelLog.refueledAt,
       },
       select: {
@@ -28,6 +29,7 @@ export class PrismaFuelLogRepository
         amount: true,
         price: true,
         mileage: true,
+        previousMileage: true,
         refueledAt: true,
       },
     })
@@ -38,6 +40,7 @@ export class PrismaFuelLogRepository
       amount: created.amount,
       totalPrice: created.price,
       mileage: created.mileage,
+      previousMileage: created.previousMileage,
       refueledAt: created.refueledAt,
     })
   }
@@ -61,6 +64,7 @@ export class PrismaFuelLogRepository
         amount: true,
         price: true,
         mileage: true,
+        previousMileage: true,
         refueledAt: true,
       },
       orderBy: {
@@ -78,6 +82,7 @@ export class PrismaFuelLogRepository
           amount: log.amount,
           totalPrice: log.price,
           mileage: log.mileage,
+          previousMileage: log.previousMileage,
           refueledAt: log.refueledAt,
         })
     )
@@ -98,6 +103,7 @@ export class PrismaFuelLogRepository
         amount: true,
         price: true,
         mileage: true,
+        previousMileage: true,
         refueledAt: true,
       },
     })
@@ -112,6 +118,7 @@ export class PrismaFuelLogRepository
       amount: fuelLog.amount,
       totalPrice: fuelLog.price,
       mileage: fuelLog.mileage,
+      previousMileage: fuelLog.previousMileage,
       refueledAt: fuelLog.refueledAt,
     })
   }
@@ -125,6 +132,7 @@ export class PrismaFuelLogRepository
         amount: fuelLog.amount,
         price: fuelLog.totalPrice,
         mileage: fuelLog.mileage,
+        previousMileage: fuelLog.previousMileage,
         refueledAt: fuelLog.refueledAt,
       },
       select: {
@@ -133,6 +141,7 @@ export class PrismaFuelLogRepository
         amount: true,
         price: true,
         mileage: true,
+        previousMileage: true,
         refueledAt: true,
       },
     })
@@ -143,6 +152,7 @@ export class PrismaFuelLogRepository
       amount: updated.amount,
       totalPrice: updated.price,
       mileage: updated.mileage,
+      previousMileage: updated.previousMileage,
       refueledAt: updated.refueledAt,
     })
   }

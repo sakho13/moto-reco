@@ -30,4 +30,9 @@ export interface IUserRepository {
    * @returns 更新後のUserEntity
    */
   updateUser(user: UserEntity): Promise<UserEntity>
+
+  /**
+   * ユーザーを退会状態にする
+   */
+  deactivateUser(userId: UserId): Promise<void>
 }

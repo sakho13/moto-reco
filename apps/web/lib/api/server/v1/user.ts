@@ -2,7 +2,9 @@ import { Hono } from 'hono'
 import { prisma } from '@repo/database'
 import {
   ApiResponseUserProfile,
+  ApiResponseUserQuit,
   SuccessResponse,
+  UserAuthQuitRequestSchema,
   UserAuthRegisterRequestSchema,
   UserProfileUpdateRequestSchema,
 } from '@repo/shared-types'
@@ -10,7 +12,10 @@ import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
+import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
+import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
+import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
 
 const user = new Hono()
@@ -130,6 +135,48 @@ user.post(
       },
       201
     )
+  }
+)
+
+/**
+ * ユーザー退会エンドポイント
+ *
+ * @remarks
+ * - 認証必須（honoAuthMiddleware）
+ * - 退会理由の入力が必須
+ * - 退会後に復帰コードを返却
+ */
+user.post(
+  '/auth/quit',
+  honoAuthMiddleware,
+  zodValidateJson(UserAuthQuitRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction(async (t) => {
+      const userRepo = new PrismaUserRepository(t)
+      const authProviderRepo = new PrismaAuthProviderRepository(t)
+      const userQuitRepo = new PrismaUserQuitRepository(t)
+      const service = new UserQuitService(
+        userRepo,
+        authProviderRepo,
+        userQuitRepo
+      )
+
+      return service.quitUser({
+        userId,
+        quitReason: body.quitReason,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseUserQuit>>({
+      status: 'success',
+      data: {
+        recoveryCode: result.recoveryCode,
+      },
+      message: '退会処理が完了しました',
+    })
   }
 )
 

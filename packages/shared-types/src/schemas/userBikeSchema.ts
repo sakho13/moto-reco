@@ -94,6 +94,10 @@ export const UserBikeUpdateRequestSchema = z
       .nonnegative('購入時走行距離は0以上で指定してください')
       .nullable()
       .optional(),
+    displacement: z
+      .number({ invalid_type_error: '排気量は数値で指定してください' })
+      .positive('排気量は0より大きい値で指定してください')
+      .optional(),
     totalMileage: z
       .number({ invalid_type_error: '総走行距離は数値で指定してください' })
       .int('総走行距離は整数で指定してください')
@@ -107,7 +111,8 @@ export const UserBikeUpdateRequestSchema = z
       data.purchaseDate !== undefined ||
       data.purchasePrice !== undefined ||
       data.purchaseMileage !== undefined ||
-      data.totalMileage !== undefined,
+      data.totalMileage !== undefined ||
+      data.displacement !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }
