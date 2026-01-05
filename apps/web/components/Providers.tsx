@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react'
 import { SWRConfig } from 'swr'
 import { ThemeProvider } from '@repo/ui/context/ThemeContext'
-import { Toaster } from '@repo/ui/toaster'
+import { Toaster } from '@repo/ui/sonner'
 import { AuthProvider } from '@/lib/contexts/AuthContext'
 
 export function Providers({ children }: { children: ReactNode }) {

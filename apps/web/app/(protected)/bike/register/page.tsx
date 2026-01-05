@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { mutate } from 'swr'
 import { Button } from '@repo/ui/button'
 import { Input } from '@repo/ui/input'
-import { toast } from '@repo/ui/useToast'
+import { toast } from '@repo/ui/sonner'
 import {
   BikeRegisterForm,
   type BikeFormData,
@@ -54,10 +54,8 @@ function BikeRegisterPage() {
       })
 
       await mutate('/api/v1/user-bike/bikes')
-      toast({
-        title: 'バイクを登録しました',
+      toast.success('バイクを登録しました', {
         description: 'マイページへ移動します。',
-        variant: 'success',
       })
       router.push('/home')
     } catch (err) {
