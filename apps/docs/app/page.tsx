@@ -109,13 +109,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <footer className={styles.footer}>
-        <div>
-          <p>moto-reco Documentation</p>
-          <span>プロダクトの詳細は随時更新されます。</span>
-        </div>
-      </footer>
     </div>
   )
 }
