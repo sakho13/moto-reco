@@ -32,15 +32,6 @@ export default function FaqPage() {
           )
         })}
       </div>
-
-      <footer className={styles.footer}>
-        <div className={styles.footerCard}>
-          <h2 className={styles.footerTitle}>解決しない問題がありますか?</h2>
-          <p className={styles.footerText}>
-            ドキュメントに記載されていない質問や問題がある場合は、お気軽にお問い合わせください。
-          </p>
-        </div>
-      </footer>
     </div>
   )
 }
