@@ -10,7 +10,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "eslint --max-warnings 0",
+    "lint": "eslint App.tsx index.ts eslint.config.js --max-warnings 0",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
     "@types/node": "catalog:",
     "@types/react": "~19.1.0",
     "eslint": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "typescript-eslint": "8.46.3"
   }
 }

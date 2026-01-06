@@ -1,3 +1,16 @@
-import baseConfig from '@repo/eslint-config/base.js';
+import tseslint from 'typescript-eslint'
 
-export default [...baseConfig];
+export default tseslint.config({
+  ignores: ['**/node_modules/**', 'node_modules/**', 'metro.config.js', '.expo/**'],
+  files: ['**/*.ts', '**/*.tsx'],
+  extends: [tseslint.configs.recommended],
+  rules: {
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
+  },
+})
