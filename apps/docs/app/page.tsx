@@ -26,7 +26,7 @@ const features = [
   },
 ]
 
-export default function Home() {
+export default function Home(): React.ReactElement {
   return (
     <div className={styles.page}>
       <header className={styles.header}>

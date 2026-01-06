@@ -69,7 +69,10 @@ export interface ButtonProps {
  * </Button>
  * ```
  */
-export const Button = forwardRef<React.ElementRef<typeof TouchableOpacity>, ButtonProps>(
+export const Button = forwardRef<
+  React.ElementRef<typeof TouchableOpacity>,
+  ButtonProps
+>(
   (
     {
       variant = 'primary',
