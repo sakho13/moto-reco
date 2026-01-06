@@ -17,7 +17,7 @@ export function Providers({ children }: { children: ReactNode }) {
       >
         <ThemeProvider initialThemeName="default">
           {children}
-          <Toaster />
+          <Toaster richColors />
         </ThemeProvider>
       </SWRConfig>
     </AuthProvider>
