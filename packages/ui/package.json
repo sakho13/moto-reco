@@ -18,11 +18,20 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/react-native": "0.73.0",
     "eslint": "catalog:",
     "typescript": "catalog:"
   },
   "dependencies": {
     "react": "catalog:",
     "react-dom": "catalog:"
+  },
+  "peerDependencies": {
+    "react-native": "*"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    }
   }
 }
