@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar'
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { Button } from '@repo/ui/button'
-import { Card } from '@repo/ui/card'
-import { Code } from '@repo/ui/code'
+import { Button } from '@repo/ui/button.native'
+import { Card } from '@repo/ui/card.native'
+import { Code } from '@repo/ui/code.native'
 
 export default function App() {
   const handlePress = () => {
