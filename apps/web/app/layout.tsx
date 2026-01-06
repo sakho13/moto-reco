@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
-import 'sonner/dist/sonner.css'
+import 'sonner/dist/styles.css'
 import { Footer } from '../components/Footer'
 import { Providers } from '../components/Providers'
 import { ThemeToggleButton } from '../components/ThemeToggleButton'
