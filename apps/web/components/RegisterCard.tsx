@@ -9,6 +9,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { toast } from '@repo/ui/sonner'
 import { apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
@@ -106,6 +107,9 @@ export function RegisterCard() {
       mutate('/api/v1/user/profile', response.data)
 
       // 5. ホームページへリダイレクト
+      toast.success('アカウントを作成しました', {
+        description: 'ホーム画面へ移動します。',
+      })
       router.push('/home')
     } catch (err: unknown) {
       // Firebaseエラーの場合
