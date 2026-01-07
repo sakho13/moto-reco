@@ -221,7 +221,7 @@ export class ContainerConstruct extends Construct {
       protocol: elbv2.ApplicationProtocol.HTTP,
       targetType: elbv2.TargetType.IP,
       healthCheck: {
-        path: '/api/v1/health',
+        path: '/app/api/v1/health',
         interval: Duration.seconds(30),
         timeout: Duration.seconds(5),
         healthyThresholdCount: 2,
