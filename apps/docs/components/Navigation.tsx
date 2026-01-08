@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { WEB_URL } from '../lib/statics'
 import styles from './Navigation.module.css'
 
 interface NavLink {
@@ -14,8 +15,6 @@ const NAV_LINKS: NavLink[] = [
   { href: '/faq', label: 'FAQ' },
   { href: '/pricing', label: '料金プラン' },
 ]
-
-const webUrl = process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000'
 
 export function Navigation() {
   const pathname = usePathname()
@@ -45,7 +44,7 @@ export function Navigation() {
           })}
         </ul>
         <Link
-          href={`${webUrl}/login`}
+          href={`${WEB_URL}/login`}
           target="_blank"
           rel="noreferrer"
           className={styles.loginButton}
