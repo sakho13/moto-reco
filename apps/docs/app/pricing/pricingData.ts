@@ -1,3 +1,5 @@
+import { WEB_URL } from '../../lib/statics'
+
 export interface PricingPlan {
   id: string
   name: string
@@ -11,8 +13,6 @@ export interface PricingPlan {
   badge?: string
   isPopular?: boolean
 }
-
-const webUrl = process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000'
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
@@ -32,7 +32,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     ],
     isComingSoon: false,
     ctaLabel: '無料で始める',
-    ctaHref: `${webUrl}/login`,
+    ctaHref: `${WEB_URL}/login`,
     badge: '現在利用可能',
   },
   {
