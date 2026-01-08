@@ -1,6 +1,6 @@
 import { ApiReference } from '@scalar/nextjs-api-reference'
 
 export const GET = ApiReference({
-  url: '/c/openapi.yaml',
+  url: '/openapi.yaml',
   theme: 'laserwave',
 })

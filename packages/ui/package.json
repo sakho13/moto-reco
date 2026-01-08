@@ -22,6 +22,7 @@
     "typescript": "catalog:"
   },
   "dependencies": {
+    "sonner": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
   }

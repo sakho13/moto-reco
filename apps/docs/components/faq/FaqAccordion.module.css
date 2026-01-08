@@ -1,0 +1,36 @@
+.accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.categoryTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #171717;
+  padding-left: 8px;
+  border-left: 4px solid #171717;
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .categoryTitle {
+    font-size: 18px;
+  }
+
+  .itemList {
+    gap: 10px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .categoryTitle {
+    color: #ededed;
+    border-left-color: #ededed;
+  }
+}

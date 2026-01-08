@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { SWRConfig } from 'swr'
 import { ThemeProvider } from '@repo/ui/context/ThemeContext'
+import { Toaster } from '@repo/ui/sonner'
 import { AuthProvider } from '@/lib/contexts/AuthContext'
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -14,7 +15,10 @@ export function Providers({ children }: { children: ReactNode }) {
           errorRetryCount: 3,
         }}
       >
-        <ThemeProvider initialThemeName="default">{children}</ThemeProvider>
+        <ThemeProvider initialThemeName="default">
+          {children}
+          <Toaster richColors />
+        </ThemeProvider>
       </SWRConfig>
     </AuthProvider>
   )

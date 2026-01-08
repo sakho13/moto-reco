@@ -31,3 +31,4 @@ export { Card } from './card'
 export { Code } from './code'
 
 export { ThemeProvider, useTheme } from './context/ThemeContext'
+export { Toaster, toast } from './sonner'
