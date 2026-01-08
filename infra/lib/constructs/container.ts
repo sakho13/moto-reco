@@ -231,10 +231,20 @@ export class ContainerConstruct extends Construct {
     })
 
     // Listener
-    this.loadBalancer.addListener('HttpListener', {
+    const listener = this.loadBalancer.addListener('HttpListener', {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
       defaultAction: elbv2.ListenerAction.forward([this.targetGroup]),
+    })
+
+    // ルートパス(/)を/appにリダイレクト
+    listener.addAction('RootRedirect', {
+      priority: 1,
+      conditions: [elbv2.ListenerCondition.pathPatterns(['/'])],
+      action: elbv2.ListenerAction.redirect({
+        path: '/app',
+        permanent: true,
+      }),
     })
 
     // Fargate Service
