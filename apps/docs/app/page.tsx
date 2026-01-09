@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { APP_VERSION } from '../lib/statics'
 import styles from './home.module.css'
 
-
 const features = [
   {
     title: 'バイク登録とガレージ管理',
