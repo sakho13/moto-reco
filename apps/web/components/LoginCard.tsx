@@ -176,7 +176,7 @@ export function LoginCard() {
         variant="social"
         size="lg"
         fullWidth
-        disabled={loading}
+        disabled={true}
       >
         Googleでログイン
       </Button>
