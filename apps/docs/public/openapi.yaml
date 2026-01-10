@@ -670,6 +670,50 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
+    delete:
+      summary: ユーザー所有バイクの燃料ログ削除
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeFuelLogDeleteDetail'
+      responses:
+        '200':
+          description: 燃料ログ削除成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: 燃料ログ削除成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
 
   /api/v1/user-bike/bike/{my-user-bike-id}/fuel-insights:
     get:
@@ -1023,6 +1067,14 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+    MyUserBikeFuelLogDeleteDetail:
+      type: object
+      required:
+        - fuelLogId
+      properties:
+        fuelLogId:
+          type: string
+          description: 燃料ログID
 
     MyUserBikeFuelInsightDetail:
       type: object

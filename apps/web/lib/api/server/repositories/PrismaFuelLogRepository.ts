@@ -156,4 +156,16 @@ export class PrismaFuelLogRepository
       refueledAt: updated.refueledAt,
     })
   }
+
+  async deleteFuelLog(
+    fuelLogId: FuelLogId,
+    myUserBikeId: MyUserBikeId
+  ): Promise<void> {
+    await this.connection.tUserMyBikeFuelLog.delete({
+      where: {
+        id: fuelLogId,
+        userMyBikeId: myUserBikeId,
+      },
+    })
+  }
 }

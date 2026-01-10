@@ -18,6 +18,7 @@ import {
   FuelInsightQuerySchema,
   FuelLogRegisterRequestSchema,
   FuelLogUpdateRequestSchema,
+  FuelLogDeleteRequestSchema,
   FuelLogListQuerySchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
@@ -315,6 +316,37 @@ userBike.patch(
           totalPrice: result.totalPrice,
         },
         message: '燃料ログ更新成功',
+      },
+      200
+    )
+  }
+)
+
+userBike.delete(
+  '/bike/:myUserBikeId/fuel-logs',
+  honoAuthMiddleware,
+  zodValidateJson(FuelLogDeleteRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    await prisma.$transaction((t) => {
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+
+      return service.deleteFuelLog({
+        fuelLogId: createFuelLogId(body.fuelLogId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+      })
+    })
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        message: '燃料ログ削除成功',
       },
       200
     )

@@ -1520,4 +1520,220 @@ describe('UserBike API Endpoints', () => {
       )
     })
   })
+
+  describe('DELETE /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
+    let token: string
+    let myUserBikeId: string
+    let fuelLogId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      // テスト用バイク作成
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '燃料ログ削除テスト用バイク',
+        totalMileage: 1000,
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      // テスト用燃料ログ作成
+      fuelLogId = await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-03-01T10:00:00.000Z',
+        mileage: 1500,
+        amount: 10.0,
+        totalPrice: 1500,
+      })
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        'DELETE',
+        {
+          fuelLogId,
+        }
+      )
+    })
+
+    test('fuelLogIdが未指定の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('存在しないバイクIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${randomUUID()}/fuel-logs`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId: fuelLogId,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('存在しない燃料ログIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId: randomUUID(),
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('燃料ログを物理削除できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json).toEqual({
+        status: 'success',
+        message: '燃料ログ削除成功',
+      })
+
+      // DBから物理削除されていることを確認
+      const fuelLogRecord = await prisma.tUserMyBikeFuelLog.findUnique({
+        where: { id: fuelLogId },
+      })
+      expect(fuelLogRecord).toBeNull()
+    })
+
+    test('削除後に総走行距離が更新されないことを確認', async () => {
+      // 削除前のバイクの総走行距離を取得
+      const bikeBefore = await prisma.tUserMyBike.findUnique({
+        where: { id: myUserBikeId },
+      })
+      const totalMileageBefore = bikeBefore?.totalMileage
+
+      // 燃料ログを削除
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fuelLogId,
+        }),
+      })
+
+      // 削除後のバイクの総走行距離を取得
+      const bikeAfter = await prisma.tUserMyBike.findUnique({
+        where: { id: myUserBikeId },
+      })
+      const totalMileageAfter = bikeAfter?.totalMileage
+
+      // 総走行距離が変更されていないことを確認
+      expect(totalMileageAfter).toBe(totalMileageBefore)
+    })
+
+    test('他のユーザーのバイクの燃料ログを削除しようとすると404となる', async () => {
+      // 別のユーザーを作成
+      const otherUser = await createTestUser()
+
+      // 他のユーザーのトークンで削除を試みる
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${otherUser.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('異なるバイクの燃料ログIDを指定すると404となる', async () => {
+      // 別のバイクと燃料ログを作成
+      const otherBike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '別のバイク',
+        totalMileage: 500,
+      })
+
+      const otherFuelLogId = await createTestFuelLog(
+        token,
+        otherBike.myUserBikeId,
+        {
+          refueledAt: '2024-04-01T10:00:00.000Z',
+          mileage: 600,
+          amount: 8.0,
+          totalPrice: 1200,
+        }
+      )
+
+      // バイクAの燃料ログをバイクBのエンドポイントで削除しようとする
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId: otherFuelLogId,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
 })
