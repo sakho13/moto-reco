@@ -347,6 +347,7 @@ userBike.delete(
       {
         status: 'success',
         message: '燃料ログ削除成功',
+        data: undefined,
       },
       200
     )
