@@ -221,7 +221,7 @@ export class ContainerConstruct extends Construct {
       protocol: elbv2.ApplicationProtocol.HTTP,
       targetType: elbv2.TargetType.IP,
       healthCheck: {
-        path: '/app/api/v1/health',
+        path: '/api/v1/health',
         interval: Duration.seconds(30),
         timeout: Duration.seconds(5),
         healthyThresholdCount: 2,
@@ -235,16 +235,6 @@ export class ContainerConstruct extends Construct {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
       defaultAction: elbv2.ListenerAction.forward([this.targetGroup]),
-    })
-
-    // ルートパス(/)を/appにリダイレクト
-    listener.addAction('RootRedirect', {
-      priority: 1,
-      conditions: [elbv2.ListenerCondition.pathPatterns(['/'])],
-      action: elbv2.ListenerAction.redirect({
-        path: '/app',
-        permanent: true,
-      }),
     })
 
     // Fargate Service

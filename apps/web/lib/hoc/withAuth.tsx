@@ -44,7 +44,7 @@ export function withAuth<P extends object>(
     useEffect(() => {
       // ローディングが完了し、ユーザーが未認証の場合、ログインページへリダイレクト
       if (!loading && !user) {
-        router.push('/login')
+        router.push('/app/login')
       }
     }, [user, loading, router])
 

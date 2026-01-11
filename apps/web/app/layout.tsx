@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './sonner-custom.css'
-import { Footer } from '../components/Footer'
-import { Providers } from '../components/Providers'
-import { ThemeToggleButton } from '../components/ThemeToggleButton'
 import './globals.css'
 
 // Firebase認証を使用しているため、動的レンダリングを強制
@@ -31,21 +28,7 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning={true}>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Providers>
-          <div className="fixed top-4 right-4 z-50">
-            <ThemeToggleButton />
-          </div>
-          <div
-            style={{
-              minHeight: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <div style={{ flex: 1 }}>{children}</div>
-            <Footer />
-          </div>
-        </Providers>
+        {children}
       </body>
     </html>
   )
