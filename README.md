@@ -132,9 +132,6 @@ pnpm dev:web
 
 # APIサーバーのみ
 pnpm dev:api
-
-# ドキュメントサイトのみ
-pnpm dev:docs
 ```
 
 ## データベース操作
@@ -162,7 +159,6 @@ pnpm build
 
 # 特定のアプリをビルド
 pnpm turbo build --filter=web
-pnpm turbo build --filter=api
 ```
 
 ## テスト
