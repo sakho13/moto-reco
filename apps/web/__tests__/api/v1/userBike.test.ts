@@ -1637,11 +1637,21 @@ describe('UserBike API Endpoints', () => {
         message: '燃料ログ削除成功',
       })
 
-      // DBから物理削除されていることを確認
-      const fuelLogRecord = await prisma.tUserMyBikeFuelLog.findUnique({
-        where: { id: fuelLogId },
-      })
-      expect(fuelLogRecord).toBeNull()
+      const getResult = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      const getJson = await getResult.json()
+      expect(
+        getJson.data.some(
+          (log: { fuelLogId: string }) => log.fuelLogId === fuelLogId
+        )
+      ).toBe(false)
     })
 
     test('削除後に総走行距離が更新されないことを確認', async () => {
@@ -1663,14 +1673,17 @@ describe('UserBike API Endpoints', () => {
         }),
       })
 
-      // 削除後のバイクの総走行距離を取得
-      const bikeAfter = await prisma.tUserMyBike.findUnique({
-        where: { id: myUserBikeId },
-      })
-      const totalMileageAfter = bikeAfter?.totalMileage
-
-      // 総走行距離が変更されていないことを確認
-      expect(totalMileageAfter).toBe(totalMileageBefore)
+      const userBikeResult = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      const userBikeJson = await userBikeResult.json()
+      expect(userBikeJson.data.totalMileage).toBe(totalMileageBefore)
     })
 
     test('他のユーザーのバイクの燃料ログを削除しようとすると404となる', async () => {
