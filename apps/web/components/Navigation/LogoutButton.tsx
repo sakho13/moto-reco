@@ -15,7 +15,7 @@ export function LogoutButton() {
     setIsLoading(true)
     try {
       await signOut()
-      router.push('/')
+      router.push('/app/login')
     } catch (error) {
       console.error('Logout error:', error)
       setIsLoading(false)

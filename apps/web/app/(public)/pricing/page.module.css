@@ -1,0 +1,129 @@
+.page {
+  color: var(--foreground);
+  background: var(--background);
+  min-height: 100vh;
+  padding: 80px 96px 64px;
+  font-family: var(--font-geist-sans);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 64px;
+}
+
+.title {
+  font-size: clamp(32px, 4vw, 48px);
+  letter-spacing: -0.02em;
+}
+
+.description {
+  font-size: 18px;
+  line-height: 1.7;
+  color: rgba(23, 23, 23, 0.7);
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto 96px;
+}
+
+.faqSection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 48px;
+  border-top: 1px solid rgba(23, 23, 23, 0.1);
+}
+
+.faqTitle {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.faqGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.faqItem {
+  background: rgba(23, 23, 23, 0.04);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faqItem h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.faqItem p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(23, 23, 23, 0.7);
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: 64px 24px 48px;
+  }
+
+  .header {
+    margin-bottom: 48px;
+  }
+
+  .pricingGrid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 72px;
+  }
+
+  .faqTitle {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .faqGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .faqItem {
+    padding: 20px;
+  }
+
+  .faqItem h3 {
+    font-size: 16px;
+  }
+
+  .faqItem p {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .description,
+  .faqItem p {
+    color: rgba(237, 237, 237, 0.7);
+  }
+
+  .faqSection {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .faqItem {
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
