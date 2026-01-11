@@ -102,12 +102,6 @@ export const FuelLogForm = ({
             setFormData((prev) => ({
               ...prev,
               mileage: newMileage,
-              previousMileage:
-                !isEdit &&
-                (prev.previousMileage === '' ||
-                  prev.previousMileage === prev.mileage)
-                  ? newMileage
-                  : prev.previousMileage,
               // 総走行距離以下になったら自動的にチェックを外す
               updateTotalMileage:
                 totalMileage !== undefined && Number(newMileage) <= totalMileage
