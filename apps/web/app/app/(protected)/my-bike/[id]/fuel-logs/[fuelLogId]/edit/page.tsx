@@ -102,7 +102,7 @@ function FuelLogEditPage() {
   if (isLoading) {
     return (
       <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <p className="text-lg">読み込み中...</p>
         </div>
       </div>
