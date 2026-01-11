@@ -110,7 +110,7 @@ export function RegisterCard() {
       toast.success('アカウントを作成しました', {
         description: 'ホーム画面へ移動します。',
       })
-      router.push('/home')
+      router.push('/app/home')
     } catch (err: unknown) {
       // Firebaseエラーの場合
       if (
@@ -142,7 +142,7 @@ export function RegisterCard() {
       footer={
         <p>
           すでにアカウントをお持ちの方は
-          <Link href="/login">ログイン</Link>
+          <Link href="/app/login">ログイン</Link>
         </p>
       }
     >

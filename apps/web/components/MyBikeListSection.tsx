@@ -62,7 +62,7 @@ export const MyBikeListSection = () => {
         <div className={styles.emptyState}>
           <p>まだバイクが登録されていません</p>
 
-          <Button onClick={() => router.push('/bike/register')} size="sm">
+          <Button onClick={() => router.push('/app/bike/register')} size="sm">
             最初のバイクを登録
           </Button>
         </div>
@@ -77,7 +77,7 @@ export const MyBikeListSection = () => {
             return (
               <NavigationCard
                 key={bike.myUserBikeId}
-                href={`/my-bike/${bike.myUserBikeId}`}
+                href={`/app/my-bike/${bike.myUserBikeId}`}
                 title={title}
                 description={description}
                 icon={<BikeIcon />}

@@ -23,7 +23,7 @@ export const QuickFuelSection = () => {
   const bikes = data?.bikes ?? []
 
   const handleBikeClick = (bikeId: string) => {
-    router.push(`/my-bike/${bikeId}/fuel-logs/register`)
+    router.push(`/app/my-bike/${bikeId}/fuel-logs/register`)
   }
 
   if (error) {
@@ -64,7 +64,7 @@ export const QuickFuelSection = () => {
         </div>
         <div className={styles.emptyState}>
           <p>バイクを登録してください</p>
-          <Button onClick={() => router.push('/bike/register')} size="sm">
+          <Button onClick={() => router.push('/app/bike/register')} size="sm">
             バイクを登録
           </Button>
         </div>
