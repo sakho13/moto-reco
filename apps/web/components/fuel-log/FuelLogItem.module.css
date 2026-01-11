@@ -13,34 +13,66 @@
   margin-bottom: var(--spacing-3);
 }
 
-.date {
+/* 燃費表示エリア */
+.fuelEfficiencyArea {
+  flex: 1;
+}
+
+.fuelEfficiency {
+  font-size: var(--font-size-2xl); /* 24px相当 */
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.fuelEfficiency .unit {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.pricePerLiter {
+  font-size: var(--font-size-md);
+  color: var(--color-ink);
+  opacity: 0.8;
+  margin-top: var(--spacing-1);
+}
+
+.initialRefuel {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-ink);
-  margin: 0 0 var(--spacing-1) 0;
+  opacity: 0.5;
+  font-style: italic;
 }
 
-.mileage {
+/* 詳細情報エリア */
+.details {
+  margin-top: var(--spacing-2);
+}
+
+.date {
   font-size: var(--font-size-sm);
   color: var(--color-ink);
   opacity: 0.7;
-  margin: 0;
+  margin: 0 0 var(--spacing-2) 0;
 }
 
 .dataGrid {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--spacing-2);
+  gap: var(--spacing-1) var(--spacing-3);
   font-size: var(--font-size-sm);
   margin: 0;
 }
 
 .label {
   color: var(--color-ink);
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .value {
   color: var(--color-ink);
+  opacity: 0.7;
   margin: 0;
 }

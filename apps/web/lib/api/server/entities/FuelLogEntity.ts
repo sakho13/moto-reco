@@ -55,6 +55,34 @@ export class FuelLogEntity {
     return this._value.totalPrice
   }
 
+  /**
+   * 今回給油での走行距離
+   */
+  public get distance(): number {
+    return this.mileage - this.previousMileage
+  }
+
+  /**
+   * 燃費（km/L）。初回給油など計算不可の場合はnull
+   */
+  public get fuelEfficiency(): number | null {
+    const distance = this.distance
+    if (distance <= 0) {
+      return null
+    }
+    return distance / this.amount
+  }
+
+  /**
+   * リットル単価（円/L）。給油量が0の場合はnull
+   */
+  public get pricePerLiter(): number | null {
+    if (this.amount <= 0) {
+      return null
+    }
+    return this.totalPrice / this.amount
+  }
+
   public toJson(): FuelLog {
     return this._value
   }
