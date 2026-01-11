@@ -26,7 +26,7 @@ export default function AuthLayout({
   useEffect(() => {
     // 認証済みユーザーはホームへリダイレクト
     if (!loading && user) {
-      router.push('/home')
+      router.push('/app/home')
     }
   }, [user, loading, router])
 

@@ -32,7 +32,7 @@ export function LoginCard() {
 
     try {
       await signInWithEmail(email, password)
-      router.push('/home')
+      router.push('/app/home')
     } catch (err) {
       console.error('Login error:', err)
       setError(
@@ -65,7 +65,7 @@ export function LoginCard() {
         await apiGet('/api/v1/user/profile')
 
         // 成功 = 既に登録済み
-        router.push('/')
+        router.push('/app/home')
         return
       } catch (profileError: unknown) {
         // profile APIのエラーをハンドリング
@@ -94,7 +94,7 @@ export function LoginCard() {
           await apiPost('/api/v1/user/auth/register', { name: userName })
 
           // 4. 登録成功 → ホームへ
-          router.push('/')
+          router.push('/app/home')
           return
         }
 
@@ -119,7 +119,7 @@ export function LoginCard() {
       footer={
         <p>
           アカウントをお持ちでない方は
-          <Link href="/register">新規登録</Link>
+          <Link href="/app/register">新規登録</Link>
         </p>
       }
     >

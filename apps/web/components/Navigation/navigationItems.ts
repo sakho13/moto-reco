@@ -10,7 +10,12 @@ export type NavigationItem = {
 }
 
 export const navigationItems: NavigationItem[] = [
-  { id: 'home', label: 'ホーム', href: '/home', icon: HomeIcon },
-  { id: 'my-bike', label: 'マイバイク', href: '/my-bike', icon: BikeIcon },
-  { id: 'profile', label: 'プロフィール', href: '/profile', icon: ProfileIcon },
+  { id: 'home', label: 'ホーム', href: '/app/home', icon: HomeIcon },
+  { id: 'my-bike', label: 'マイバイク', href: '/app/my-bike', icon: BikeIcon },
+  {
+    id: 'profile',
+    label: 'プロフィール',
+    href: '/app/profile',
+    icon: ProfileIcon,
+  },
 ]
