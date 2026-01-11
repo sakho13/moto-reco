@@ -33,6 +33,12 @@ type UpdateFuelLogParams = {
   totalPrice?: number
 }
 
+type DeleteFuelLogParams = {
+  fuelLogId: FuelLogId
+  myUserBikeId: MyUserBikeId
+  userId: UserId
+}
+
 export class FuelLogService {
   constructor(
     private fuelLogRepository: IFuelLogRepository,
@@ -136,5 +142,33 @@ export class FuelLogService {
       }
       throw error
     }
+  }
+
+  public async deleteFuelLog(params: DeleteFuelLogParams): Promise<void> {
+    // 1. バイクの所有権確認
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      params.myUserBikeId,
+      params.userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    // 2. 燃料ログの存在確認と所有権確認
+    const existingFuelLog = await this.fuelLogRepository.findFuelLogById(
+      params.fuelLogId,
+      params.myUserBikeId
+    )
+
+    if (!existingFuelLog) {
+      throw new ApiV1Error('NOT_FOUND', '指定された燃料ログが見つかりません')
+    }
+
+    // 3. 物理削除を実行（総走行距離の更新は行わない）
+    await this.fuelLogRepository.deleteFuelLog(
+      params.fuelLogId,
+      params.myUserBikeId
+    )
   }
 }
