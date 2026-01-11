@@ -1,78 +1,96 @@
 .item {
-  padding: var(--spacing-4) 0;
+  padding: var(--spacing-2) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
 }
 
 .item:not(:last-child) {
   border-bottom: 1px solid var(--color-cloud);
 }
 
-.header {
+/* 行1: メイン情報 */
+.mainRow {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-3);
-}
-
-/* 燃費表示エリア */
-.fuelEfficiencyArea {
-  flex: 1;
+  align-items: center;
+  gap: var(--spacing-3);
 }
 
 .fuelEfficiency {
-  font-size: var(--font-size-2xl); /* 24px相当 */
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
-  margin: 0;
+  flex-shrink: 0;
+  min-width: 6rem;
   line-height: 1.2;
 }
 
 .fuelEfficiency .unit {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
 }
 
-.pricePerLiter {
-  font-size: var(--font-size-md);
-  color: var(--color-ink);
-  opacity: 0.8;
-  margin-top: var(--spacing-1);
-}
-
 .initialRefuel {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   color: var(--color-ink);
   opacity: 0.5;
   font-style: italic;
 }
 
-/* 詳細情報エリア */
-.details {
-  margin-top: var(--spacing-2);
+.metaInfo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-sm);
+}
+
+.totalMileage {
+  color: var(--color-ink);
+  opacity: 0.8;
+  font-weight: var(--font-weight-semibold);
 }
 
 .date {
-  font-size: var(--font-size-sm);
   color: var(--color-ink);
   opacity: 0.7;
-  margin: 0 0 var(--spacing-2) 0;
 }
 
-.dataGrid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--spacing-1) var(--spacing-3);
-  font-size: var(--font-size-sm);
-  margin: 0;
-}
-
-.label {
+/* 行2: 詳細情報（控えめ） */
+.detailsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
   color: var(--color-ink);
-  opacity: 0.6;
+  opacity: 0.5;
+  padding-left: 6rem;
 }
 
-.value {
-  color: var(--color-ink);
-  opacity: 0.7;
-  margin: 0;
+.separator {
+  opacity: 0.3;
+}
+
+/* レスポンシブ対応: モバイル */
+@media (max-width: 640px) {
+  .mainRow {
+    gap: var(--spacing-2);
+  }
+
+  .fuelEfficiency {
+    font-size: var(--font-size-lg);
+    min-width: 5rem;
+  }
+
+  .metaInfo {
+    font-size: var(--font-size-xs);
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
+  }
+
+  .detailsRow {
+    font-size: 0.625rem;
+    padding-left: 5rem;
+  }
 }

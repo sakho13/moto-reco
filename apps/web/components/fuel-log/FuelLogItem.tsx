@@ -24,24 +24,25 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
 
   return (
     <div className={styles.item}>
-      <div className={styles.header}>
-        {/* 燃費表示エリア */}
-        <div className={styles.fuelEfficiencyArea}>
+      {/* 行1: メイン情報（燃費・総走行距離・日付・編集） */}
+      <div className={styles.mainRow}>
+        <div className={styles.fuelEfficiency}>
           {fuelLog.fuelEfficiency !== null ? (
             <>
-              <div className={styles.fuelEfficiency}>
-                {fuelLog.fuelEfficiency.toFixed(1)}{' '}
-                <span className={styles.unit}>km/L</span>
-              </div>
-              {fuelLog.pricePerLiter !== null && (
-                <div className={styles.pricePerLiter}>
-                  ¥{Math.round(fuelLog.pricePerLiter)}/L
-                </div>
-              )}
+              {fuelLog.fuelEfficiency.toFixed(1)}{' '}
+              <span className={styles.unit}>km/L</span>
             </>
           ) : (
-            <div className={styles.initialRefuel}>初回給油</div>
+            <span className={styles.initialRefuel}>初回給油</span>
           )}
+        </div>
+
+        <div className={styles.metaInfo}>
+          <span className={styles.totalMileage}>
+            {fuelLog.mileage.toLocaleString()}km
+          </span>
+
+          <span className={styles.date}>{formatDate(fuelLog.refueledAt)}</span>
         </div>
 
         <Button
@@ -53,23 +54,17 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
         </Button>
       </div>
 
-      {/* 詳細情報 */}
-      <div className={styles.details}>
-        <p className={styles.date}>{formatDate(fuelLog.refueledAt)}</p>
-        <dl className={styles.dataGrid}>
-          <dt className={styles.label}>走行距離:</dt>
-          <dd className={styles.value}>
-            {fuelLog.mileage.toLocaleString()} km
-          </dd>
-
-          <dt className={styles.label}>給油量:</dt>
-          <dd className={styles.value}>{fuelLog.amount.toFixed(2)} L</dd>
-
-          <dt className={styles.label}>給油価格:</dt>
-          <dd className={styles.value}>
-            ¥{fuelLog.totalPrice.toLocaleString()}
-          </dd>
-        </dl>
+      {/* 行2: 詳細情報（給油量・価格・単価） */}
+      <div className={styles.detailsRow}>
+        <span>{fuelLog.amount.toFixed(1)}L</span>
+        <span className={styles.separator}>|</span>
+        <span>¥{fuelLog.totalPrice.toLocaleString()}</span>
+        {fuelLog.pricePerLiter !== null && (
+          <>
+            <span className={styles.separator}>|</span>
+            <span>¥{Math.round(fuelLog.pricePerLiter)}/L</span>
+          </>
+        )}
       </div>
     </div>
   )
