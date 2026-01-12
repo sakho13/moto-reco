@@ -234,8 +234,14 @@ export class ContainerConstruct extends Construct {
     const listener = this.loadBalancer.addListener('HttpListener', {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
-      defaultAction: elbv2.ListenerAction.forward([this.targetGroup]),
+      defaultAction: elbv2.ListenerAction.redirect({
+        protocol: 'HTTPS',
+        port: '443',
+        permanent: true,
+      }),
     })
+
+    // HTTPSは手動で設定済み
 
     // Fargate Service
     this.service = new ecs.FargateService(this, 'Service', {
