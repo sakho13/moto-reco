@@ -55,10 +55,7 @@ export class PrismaFuelLogRepository
             { refueledAt: searchParams.sortOrder },
             { mileage: searchParams.sortOrder },
           ]
-        : [
-            { mileage: searchParams.sortOrder },
-            { refueledAt: searchParams.sortOrder },
-          ]
+        : [{ [searchParams.sortBy]: searchParams.sortOrder }]
 
     const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
       where: {
