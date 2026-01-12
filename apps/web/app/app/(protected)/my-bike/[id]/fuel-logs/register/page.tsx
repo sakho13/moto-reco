@@ -117,39 +117,39 @@ function FuelLogRegisterPage() {
         <div style={{ marginBottom: 'var(--spacing-4)' }}>
           {previousFuelLog && (
             <ToggleSection title="前回の給油履歴">
-                <dl
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr',
-                    gap: 'var(--spacing-2)',
-                    fontSize: 'var(--font-size-sm)',
-                  }}
-                >
-                  <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                    給油日:
-                  </dt>
-                  <dd style={{ color: 'var(--color-ink)' }}>
-                    {formatDate(previousFuelLog.refueledAt)}
-                  </dd>
-                  <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                    走行距離:
-                  </dt>
-                  <dd style={{ color: 'var(--color-ink)' }}>
-                    {previousFuelLog.mileage.toLocaleString()} km
-                  </dd>
-                  <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                    給油量:
-                  </dt>
-                  <dd style={{ color: 'var(--color-ink)' }}>
-                    {previousFuelLog.amount.toFixed(2)} L
-                  </dd>
-                  <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                    給油価格:
-                  </dt>
-                  <dd style={{ color: 'var(--color-ink)' }}>
-                    ¥{previousFuelLog.totalPrice.toLocaleString()}
-                  </dd>
-                </dl>
+              <dl
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'auto 1fr',
+                  gap: 'var(--spacing-2)',
+                  fontSize: 'var(--font-size-sm)',
+                }}
+              >
+                <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                  給油日:
+                </dt>
+                <dd style={{ color: 'var(--color-ink)' }}>
+                  {formatDate(previousFuelLog.refueledAt)}
+                </dd>
+                <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                  走行距離:
+                </dt>
+                <dd style={{ color: 'var(--color-ink)' }}>
+                  {previousFuelLog.mileage.toLocaleString()} km
+                </dd>
+                <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                  給油量:
+                </dt>
+                <dd style={{ color: 'var(--color-ink)' }}>
+                  {previousFuelLog.amount.toFixed(2)} L
+                </dd>
+                <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                  給油価格:
+                </dt>
+                <dd style={{ color: 'var(--color-ink)' }}>
+                  ¥{previousFuelLog.totalPrice.toLocaleString()}
+                </dd>
+              </dl>
             </ToggleSection>
           )}
         </div>

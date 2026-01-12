@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { ToggleSection } from '@repo/ui/toggleSection'
 
 export interface FuelLogFormData {
   refueledAt: string
@@ -23,6 +25,7 @@ export interface FuelLogFormProps {
   error: string
   isEdit?: boolean
   totalMileage?: number
+  previousFuelLog?: ApiResponseFuelLogDetail | null
 }
 
 export const FuelLogForm = ({
@@ -32,6 +35,7 @@ export const FuelLogForm = ({
   error,
   isEdit = false,
   totalMileage,
+  previousFuelLog,
 }: FuelLogFormProps) => {
   const [formData, setFormData] = useState<FuelLogFormData>({
     refueledAt: '',
@@ -62,6 +66,16 @@ export const FuelLogForm = ({
       setIsUpdateTotalMileageManual(false)
     }
   }, [isEdit, totalMileage])
+
+  // 登録モード: previousFuelLogから自動設定
+  // useEffect(() => {
+  //   if (!isEdit && previousFuelLog && !isPreviousMileageManual) {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       previousMileage: previousFuelLog.mileage.toString(),
+  //     }))
+  //   }
+  // }, [isEdit, previousFuelLog, isPreviousMileageManual])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -132,28 +146,30 @@ export const FuelLogForm = ({
         />
       </FormField>
 
-      <FormField
-        label="前回給油時走行距離 (km)"
-        htmlFor="previousMileage"
-        required
-      >
-        <Input
-          id="previousMileage"
-          type="number"
-          value={formData.previousMileage}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              previousMileage: e.target.value,
-            }))
-          }
-          min="0"
-          step="1"
+      <ToggleSection title={`前回の走行距離: ${formData.previousMileage.toLocaleString()} km（自動設定）`} defaultOpen={true}>
+        <FormField
+          label="前回の給油時走行距離 (km)"
+          htmlFor="previousMileage"
           required
-          disabled={isSubmitting}
-          placeholder="例: 4800"
-        />
-      </FormField>
+        >
+          <Input
+            id="previousMileage"
+            type="number"
+            value={formData.previousMileage}
+            onChange={(e) => {
+              setFormData((prev) => ({
+                ...prev,
+                previousMileage: e.target.value,
+              }))
+            }}
+            min="0"
+            step="1"
+            required
+            disabled={isSubmitting}
+            placeholder="例: 4800"
+          />
+        </FormField>
+      </ToggleSection>
 
       <FormField label="給油量 (L)" htmlFor="amount" required>
         <Input
