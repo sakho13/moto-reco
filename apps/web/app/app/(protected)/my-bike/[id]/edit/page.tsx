@@ -103,7 +103,7 @@ function MyBikeEditPage() {
       <div className="w-full max-w-2xl">
         <div className="mb-4">
           <Button
-            onClick={() => router.push(`/my-bike/${bikeId}`)}
+            onClick={() => router.push(`/app/my-bike/${bikeId}`)}
             variant="cloud"
           >
             ← 戻る
@@ -117,7 +117,7 @@ function MyBikeEditPage() {
               ? fetchError.message
               : 'バイク情報の取得に失敗しました'}
           </p>
-          <Button onClick={() => router.push(`/my-bike/${bikeId}`)}>
+          <Button onClick={() => router.push(`/app/my-bike/${bikeId}`)}>
             マイバイクに戻る
           </Button>
         </div>
@@ -129,7 +129,7 @@ function MyBikeEditPage() {
     <>
       <div className="w-full max-w-md">
         <Button
-          onClick={() => router.push(`/my-bike/${bikeId}`)}
+          onClick={() => router.push(`/app/my-bike/${bikeId}`)}
           variant="cloud"
         >
           ← 戻る

@@ -751,6 +751,8 @@ describe('UserBike API Endpoints', () => {
           previousMileage: 2400,
           amount: 10.5,
           totalPrice: 1800,
+          fuelEfficiency: 9.5, // 小数点以下1桁で四捨五入
+          pricePerLiter: 171.4, // 小数点以下1桁で四捨五入
         },
         message: '燃料ログ登録成功',
       })
@@ -1328,6 +1330,8 @@ describe('UserBike API Endpoints', () => {
           previousMileage: 1800,
           amount: 12.5,
           totalPrice: 2000,
+          fuelEfficiency: 16, // (2000 - 1800) / 12.5
+          pricePerLiter: 160, // 2000 / 12.5
         },
         message: '燃料ログ更新成功',
       })

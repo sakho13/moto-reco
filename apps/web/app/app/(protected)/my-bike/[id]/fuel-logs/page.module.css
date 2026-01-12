@@ -1,0 +1,58 @@
+/* ページ全体のレイアウト */
+.pageLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-6);
+  width: 100%;
+  max-width: 80rem; /* 1280px - 2カラム分 */
+}
+
+/* グラフセクション */
+.chartSection {
+  min-width: 0; /* グリッドのオーバーフロー防止 */
+}
+
+/* リストセクション */
+.listSection {
+  min-width: 0;
+}
+
+/* グラフプレースホルダー */
+.chartPlaceholder {
+  padding: var(--spacing-8);
+  text-align: center;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  color: var(--color-ink);
+  opacity: 0.7;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chartPlaceholder > p {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* モバイル: 上下配置 */
+@media (max-width: 640px) {
+  .pageLayout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+
+  .chartPlaceholder {
+    padding: var(--spacing-6) var(--spacing-4);
+    min-height: 150px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .chartPlaceholder > p {
+    font-size: var(--font-size-sm);
+  }
+}

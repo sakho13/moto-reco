@@ -1012,6 +1012,16 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        fuelEfficiency:
+          type: number
+          format: float
+          nullable: true
+          description: 燃費（km/L）。初回給油など計算不可の場合はnull
+        pricePerLiter:
+          type: number
+          format: float
+          nullable: true
+          description: リットル単価（円/L）。給油量が0の場合はnull
     MyUserBikeFuelLogRegisterDetail:
       type: object
       required:

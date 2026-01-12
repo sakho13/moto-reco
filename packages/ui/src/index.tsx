@@ -26,9 +26,13 @@ export type { FormFieldProps } from './formField'
 export { BaseCard } from './baseCard'
 export type { BaseCardProps } from './baseCard'
 
-// Legacy components (for backwards compatibility)
-export { Card } from './card'
-export { Code } from './code'
+// Fuel Efficiency Chart
+export { FuelEfficiencyChart } from './fuelEfficiencyChart'
+export type {
+  FuelEfficiencyChartProps,
+  FuelChartDataPoint,
+  FuelEfficiencyStats,
+} from './fuelEfficiencyChart'
 
 export { ThemeProvider, useTheme } from './context/ThemeContext'
 export { Toaster, toast } from './sonner'
