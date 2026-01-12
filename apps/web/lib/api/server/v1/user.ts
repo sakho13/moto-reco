@@ -3,7 +3,9 @@ import { prisma } from '@repo/database'
 import {
   ApiResponseUserProfile,
   ApiResponseUserQuit,
+  ApiResponseUserRecover,
   SuccessResponse,
+  UserAuthRecoverRequestSchema,
   UserAuthQuitRequestSchema,
   UserAuthRegisterRequestSchema,
   UserProfileUpdateRequestSchema,
@@ -176,6 +178,59 @@ user.post(
         recoveryCode: result.recoveryCode,
       },
       message: '退会処理が完了しました',
+    })
+  }
+)
+
+/**
+ * ユーザー復帰エンドポイント
+ *
+ * @remarks
+ * - Firebase認証トークン必須
+ * - 復帰コードの入力が必須
+ */
+user.post(
+  '/auth/recover',
+  zodValidateJson(UserAuthRecoverRequestSchema),
+  async (c) => {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new ApiV1Error('AUTH_FAILED', '認証トークンが提供されていません')
+    }
+
+    const token = authHeader.substring('Bearer '.length)
+    const firebaseAuthRepo = new FirebaseAuthRepository()
+    const authProvider = await firebaseAuthRepo.authorize(token)
+
+    if (!authProvider) {
+      throw new ApiV1Error('AUTH_FAILED', '認証トークンが無効です')
+    }
+
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction(async (t) => {
+      const userRepo = new PrismaUserRepository(t)
+      const authProviderRepo = new PrismaAuthProviderRepository(t)
+      const userQuitRepo = new PrismaUserQuitRepository(t)
+      const service = new UserQuitService(
+        userRepo,
+        authProviderRepo,
+        userQuitRepo
+      )
+
+      return service.recoverUser({
+        externalId: authProvider.externalId,
+        providerType: authProvider.provider,
+        recoveryCode: body.recoveryCode,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseUserRecover>>({
+      status: 'success',
+      data: {
+        userId: result.userId,
+      },
+      message: '復帰処理が完了しました',
     })
   }
 )

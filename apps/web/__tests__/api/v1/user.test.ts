@@ -324,4 +324,98 @@ describe('User API Endpoints', () => {
       ).toBe(true)
     })
   })
+
+  describe('POST /api/v1/user/auth/recover', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/auth/recover', 'POST', {
+        recoveryCode: '12345',
+      })
+    })
+
+    test('復帰コードが空文字でエラーとなる', async () => {
+      const { token } = await createTestUser()
+      const res = await app.request('/api/v1/user/auth/recover', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recoveryCode: '',
+        }),
+      })
+
+      const json = await res.json()
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('VALIDATION_ERROR')
+      expect(json.message).toBeDefined()
+      expect(json.details).toEqual(
+        expect.arrayContaining([
+          {
+            field: 'recoveryCode',
+            message: expect.any(String),
+          },
+        ])
+      )
+      expect(res.status).toBe(400)
+    })
+
+    test('復帰処理が完了しユーザーが有効化される', async () => {
+      const { token, userId } = await createTestUser()
+      const quitReason = 'テスト退会理由'
+      const quitRes = await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quitReason,
+        }),
+      })
+      const quitJson = await quitRes.json()
+
+      const res = await app.request('/api/v1/user/auth/recover', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recoveryCode: quitJson.data.recoveryCode,
+        }),
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          userId,
+        },
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(200)
+
+      const quitRecord = await prisma.tUserQuit.findUnique({
+        where: { userId },
+      })
+      expect(quitRecord).not.toBeNull()
+      expect(quitRecord?.status).toBe('RECOVERED')
+
+      const userRecord = await prisma.mUser.findUnique({
+        where: { id: userId },
+        select: { status: true },
+      })
+      expect(userRecord?.status).toBe('ACTIVE')
+
+      const authProviders = await prisma.mAuthProvider.findMany({
+        where: { userId },
+        select: { isActive: true },
+      })
+      expect(authProviders.length).toBeGreaterThan(0)
+      expect(
+        authProviders.every((provider) => provider.isActive === true)
+      ).toBe(true)
+    })
+  })
 })

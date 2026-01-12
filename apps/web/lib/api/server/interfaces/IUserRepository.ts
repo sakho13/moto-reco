@@ -8,6 +8,11 @@ export interface IUserRepository {
    */
   findById(userId: UserId): Promise<UserEntity | null>
 
+  /**
+   * 内部User IDからUserを取得（ステータス不問）
+   */
+  findByIdIncludingInactive(userId: UserId): Promise<UserEntity | null>
+
   findByAuthProvider(
     authProvider: AuthProviderEntity
   ): Promise<UserEntity | null>
@@ -35,4 +40,9 @@ export interface IUserRepository {
    * ユーザーを退会状態にする
    */
   deactivateUser(userId: UserId): Promise<void>
+
+  /**
+   * ユーザーを有効状態にする
+   */
+  activateUser(userId: UserId): Promise<void>
 }

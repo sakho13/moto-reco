@@ -1,5 +1,7 @@
 import {
+  createUserId,
   createUserQuitId,
+  type ProviderType,
   type UserId,
   type UserQuitStatus,
 } from '@repo/shared-types'
@@ -13,6 +15,12 @@ import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProvider
 type QuitUserParams = {
   userId: UserId
   quitReason: string
+}
+
+type RecoverUserParams = {
+  externalId: string
+  providerType: ProviderType
+  recoveryCode: string
 }
 
 export class UserQuitService {
@@ -49,5 +57,54 @@ export class UserQuitService {
     await this.authProviderRepository.deactivateByUserId(params.userId)
 
     return { recoveryCode }
+  }
+
+  public async recoverUser(params: RecoverUserParams): Promise<{
+    userId: UserId
+  }> {
+    const userIdValue = await this.authProviderRepository.findUserIdByExternalId(
+      params.externalId,
+      params.providerType
+    )
+
+    if (!userIdValue) {
+      throw new ApiV1Error(
+        'USER_NOT_REGISTERED',
+        'ユーザー登録が完了していません'
+      )
+    }
+
+    const userId = createUserId(userIdValue)
+    const user = await this.userRepository.findByIdIncludingInactive(userId)
+    if (!user) {
+      throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
+    }
+
+    if (user.status === 'ACTIVE') {
+      throw new ApiV1Error('INVALID_REQUEST', 'ユーザーは既に有効です')
+    }
+
+    if (user.status !== 'INACTIVE') {
+      throw new ApiV1Error('INVALID_REQUEST', '復帰できない状態です')
+    }
+
+    const userQuit = await this.userQuitRepository.findByUserId(userId)
+    if (!userQuit) {
+      throw new ApiV1Error('NOT_FOUND', '退会情報が見つかりません')
+    }
+
+    if (userQuit.status === 'RECOVERED') {
+      throw new ApiV1Error('INVALID_REQUEST', '既に復帰済みです')
+    }
+
+    if (userQuit.recoveryCode !== params.recoveryCode) {
+      throw new ApiV1Error('INVALID_REQUEST', '復帰コードが一致しません')
+    }
+
+    await this.userRepository.activateUser(userId)
+    await this.authProviderRepository.activateByUserId(userId)
+    await this.userQuitRepository.updateStatus(userId, 'RECOVERED')
+
+    return { userId }
   }
 }
