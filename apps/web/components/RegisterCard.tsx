@@ -110,7 +110,6 @@ export function RegisterCard() {
       mutate('/api/v1/user/profile', response.data)
       analyticsEvent('webSignUp', {
         method: 'email',
-        userId: response.data.userId,
       })
 
       // 5. ホームページへリダイレクト
