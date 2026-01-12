@@ -219,14 +219,18 @@ userBike.get(
     return c.json<SuccessResponse<ApiResponseFuelLogList>>(
       {
         status: 'success',
-        data: fuelLogs.map((log) => ({
-          fuelLogId: log.id,
-          refueledAt: log.refueledAt.toISOString(),
-          mileage: log.mileage,
-          previousMileage: log.previousMileage,
-          amount: log.amount,
-          totalPrice: log.totalPrice,
-        })),
+        data: fuelLogs.map((log) => {
+          return {
+            fuelLogId: log.id,
+            refueledAt: log.refueledAt.toISOString(),
+            mileage: log.mileage,
+            previousMileage: log.previousMileage,
+            amount: log.amount,
+            totalPrice: log.totalPrice,
+            fuelEfficiency: log.fuelEfficiency,
+            pricePerLiter: log.pricePerLiter,
+          }
+        }),
         message: '燃料ログ一覧取得成功',
       },
       200
@@ -270,6 +274,8 @@ userBike.post(
           previousMileage: result.previousMileage,
           amount: result.amount,
           totalPrice: result.totalPrice,
+          fuelEfficiency: result.fuelEfficiency,
+          pricePerLiter: result.pricePerLiter,
         },
         message: '燃料ログ登録成功',
       },
@@ -314,6 +320,8 @@ userBike.patch(
           previousMileage: result.previousMileage,
           amount: result.amount,
           totalPrice: result.totalPrice,
+          fuelEfficiency: result.fuelEfficiency,
+          pricePerLiter: result.pricePerLiter,
         },
         message: '燃料ログ更新成功',
       },

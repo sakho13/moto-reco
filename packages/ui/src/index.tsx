@@ -29,9 +29,13 @@ export type { BaseCardProps } from './baseCard'
 export { ToggleSection } from './toggleSection'
 export type { ToggleSectionProps } from './toggleSection'
 
-// Legacy components (for backwards compatibility)
-export { Card } from './card'
-export { Code } from './code'
+// Fuel Efficiency Chart
+export { FuelEfficiencyChart } from './fuelEfficiencyChart'
+export type {
+  FuelEfficiencyChartProps,
+  FuelChartDataPoint,
+  FuelEfficiencyStats,
+} from './fuelEfficiencyChart'
 
 export { ThemeProvider, useTheme } from './context/ThemeContext'
 export { Toaster, toast } from './sonner'

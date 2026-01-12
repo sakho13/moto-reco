@@ -12,18 +12,21 @@
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
-    "@repo/theme": "workspace:*",
     "@repo/eslint-config": "workspace:*",
+    "@repo/theme": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/recharts": "2.0.1",
     "eslint": "catalog:",
     "typescript": "catalog:"
   },
   "dependencies": {
-    "sonner": "catalog:",
+    "@repo/shared-types": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "recharts": "3.6.0",
+    "sonner": "catalog:"
   }
 }

@@ -6,9 +6,10 @@ import type {
   ApiResponseFuelLogList,
   SuccessResponse,
 } from '@repo/shared-types'
-import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
-import { FuelLogCard } from '@/components/fuel-log/FuelLogCard'
+import { FuelEfficiencyChart } from '@repo/ui/fuelEfficiencyChart'
+import styles from './page.module.css'
+import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -39,10 +40,14 @@ function FuelLogsPage() {
     router.push(`/app/my-bike/${bikeId}/fuel-logs/${fuelLogId}/edit`)
   }
 
+  const handleRegister = () => {
+    router.push(`/app/my-bike/${bikeId}/fuel-logs/register`)
+  }
+
   if (isLoading) {
     return (
       <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex items-center justify-center min-h-100">
           <p className="text-lg">読み込み中...</p>
         </div>
       </div>
@@ -82,6 +87,11 @@ function FuelLogsPage() {
       new Date(b.refueledAt).getTime() - new Date(a.refueledAt).getTime()
   )
 
+  // 有効な燃費データが2件以上あるかチェック
+  const validFuelLogs = sortedFuelLogs.filter(
+    (log) => log.fuelEfficiency !== null
+  )
+
   return (
     <>
       <div className="w-full max-w-md flex flex-row gap-2">
@@ -92,56 +102,32 @@ function FuelLogsPage() {
           ← 戻る
         </Button>
 
-        <Button
-          onClick={() =>
-            router.push(`/app/my-bike/${bikeId}/fuel-logs/register`)
-          }
-          variant="primary"
-        >
+        <Button onClick={handleRegister} variant="primary">
           給油履歴を登録
         </Button>
       </div>
 
-      <BaseCard title="給油履歴">
-        {sortedFuelLogs.length === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: 'var(--spacing-8)',
-              color: 'var(--color-ink)',
-              opacity: 0.7,
-            }}
-          >
-            <p style={{ marginBottom: 'var(--spacing-4)' }}>
-              給油履歴がまだありません
-            </p>
-            <Button
-              onClick={() =>
-                router.push(`/app/my-bike/${bikeId}/fuel-logs/register`)
-              }
-              variant="primary"
-            >
-              最初の給油履歴を登録
-            </Button>
-          </div>
-        ) : (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 'var(--spacing-3)',
-            }}
-          >
-            {sortedFuelLogs.map((fuelLog) => (
-              <FuelLogCard
-                key={fuelLog.fuelLogId}
-                fuelLog={fuelLog}
-                onEdit={handleEdit}
-              />
-            ))}
-          </div>
-        )}
-      </BaseCard>
+      <div className={styles.pageLayout}>
+        {/* 左カラム（モバイルでは上）: グラフ */}
+        <div className={styles.chartSection}>
+          {validFuelLogs.length >= 2 ? (
+            <FuelEfficiencyChart fuelLogs={sortedFuelLogs} />
+          ) : (
+            <div className={styles.chartPlaceholder}>
+              <p>グラフ表示には2回以上の給油履歴が必要です</p>
+            </div>
+          )}
+        </div>
+
+        {/* 右カラム（モバイルでは下）: リスト */}
+        <div className={styles.listSection}>
+          <FuelLogListSection
+            fuelLogs={sortedFuelLogs}
+            onEdit={handleEdit}
+            onRegister={handleRegister}
+          />
+        </div>
+      </div>
     </>
   )
 }

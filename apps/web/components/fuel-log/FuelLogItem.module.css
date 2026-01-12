@@ -1,0 +1,96 @@
+.item {
+  padding: var(--spacing-2) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.item:not(:last-child) {
+  border-bottom: 1px solid var(--color-cloud);
+}
+
+/* 行1: メイン情報 */
+.mainRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.fuelEfficiency {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  flex-shrink: 0;
+  min-width: 6rem;
+  line-height: 1.2;
+}
+
+.fuelEfficiency .unit {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.initialRefuel {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.metaInfo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-sm);
+}
+
+.totalMileage {
+  color: var(--color-ink);
+  opacity: 0.8;
+  font-weight: var(--font-weight-semibold);
+}
+
+.date {
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+
+/* 行2: 詳細情報（控えめ） */
+.detailsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+  opacity: 0.5;
+  padding-left: 6rem;
+}
+
+.separator {
+  opacity: 0.3;
+}
+
+/* レスポンシブ対応: モバイル */
+@media (max-width: 640px) {
+  .mainRow {
+    gap: var(--spacing-2);
+  }
+
+  .fuelEfficiency {
+    font-size: var(--font-size-lg);
+    min-width: 5rem;
+  }
+
+  .metaInfo {
+    font-size: var(--font-size-xs);
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
+  }
+
+  .detailsRow {
+    font-size: 0.625rem;
+    padding-left: 5rem;
+  }
+}
