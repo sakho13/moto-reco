@@ -114,7 +114,7 @@ function FuelLogEditPage() {
       <div className="w-full max-w-2xl">
         <div className="mb-4">
           <Button
-            onClick={() => router.push(`/my-bike/${bikeId}/fuel-logs`)}
+            onClick={() => router.push(`/app/my-bike/${bikeId}/fuel-logs`)}
             variant="cloud"
           >
             ← 戻る
@@ -128,7 +128,7 @@ function FuelLogEditPage() {
               ? fetchError.message
               : '給油履歴が見つかりません'}
           </p>
-          <Button onClick={() => router.push(`/my-bike/${bikeId}/fuel-logs`)}>
+          <Button onClick={() => router.push(`/app/my-bike/${bikeId}/fuel-logs`)}>
             給油履歴一覧に戻る
           </Button>
         </div>
@@ -140,7 +140,7 @@ function FuelLogEditPage() {
     <>
       <div className="w-full max-w-md">
         <Button
-          onClick={() => router.push(`/my-bike/${bikeId}/fuel-logs`)}
+          onClick={() => router.push(`/app/my-bike/${bikeId}/fuel-logs`)}
           variant="cloud"
         >
           ← 戻る
