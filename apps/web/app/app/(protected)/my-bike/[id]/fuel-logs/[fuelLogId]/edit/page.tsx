@@ -128,7 +128,9 @@ function FuelLogEditPage() {
               ? fetchError.message
               : '給油履歴が見つかりません'}
           </p>
-          <Button onClick={() => router.push(`/app/my-bike/${bikeId}/fuel-logs`)}>
+          <Button
+            onClick={() => router.push(`/app/my-bike/${bikeId}/fuel-logs`)}
+          >
             給油履歴一覧に戻る
           </Button>
         </div>

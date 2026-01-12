@@ -28,12 +28,11 @@ export type { BaseCardProps } from './baseCard'
 
 // Fuel Efficiency Chart
 export { FuelEfficiencyChart } from './fuelEfficiencyChart'
-export type { FuelEfficiencyChartProps } from './fuelEfficiencyChart'
-export type { FuelChartDataPoint, FuelEfficiencyStats } from './fuelChartTypes'
-
-// Legacy components (for backwards compatibility)
-export { Card } from './card'
-export { Code } from './code'
+export type {
+  FuelEfficiencyChartProps,
+  FuelChartDataPoint,
+  FuelEfficiencyStats,
+} from './fuelEfficiencyChart'
 
 export { ThemeProvider, useTheme } from './context/ThemeContext'
 export { Toaster, toast } from './sonner'
