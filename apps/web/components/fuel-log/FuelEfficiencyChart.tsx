@@ -128,6 +128,14 @@ export const FuelEfficiencyChart = ({ fuelLogs }: FuelEfficiencyChartProps) => {
               tick={{ fontSize: 12, fill: 'var(--color-ink)', opacity: 0.7 }}
               stroke="var(--color-ink)"
               strokeOpacity={0.3}
+              label={
+                {
+                  value: '日付',
+                  position: 'insideBottom',
+                  offset: -5,
+                  style: { fontSize: 12, fill: 'var(--color-ink)', opacity: 0.7 },
+                }
+              }
             />
 
             {/* Y軸: 燃費 (km/L) */}
@@ -137,7 +145,7 @@ export const FuelEfficiencyChart = ({ fuelLogs }: FuelEfficiencyChartProps) => {
               stroke="var(--color-ink)"
               strokeOpacity={0.3}
               label={{
-                value: 'km/L',
+                value: '燃費 / (km/L)',
                 angle: -90,
                 position: 'insideLeft',
                 style: { fontSize: 12, fill: 'var(--color-ink)', opacity: 0.7 },
