@@ -1,10 +1,12 @@
 'use client'
 
-import { firebaseAnalytics } from '@/lib/firebase/config'
+import { useEffect } from 'react'
+import { getFirebaseAnalytics } from '@/lib/firebase/config'
 
 export const FirebaseAnalytics = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  firebaseAnalytics
+  useEffect(() => {
+    getFirebaseAnalytics()
+  }, [])
 
   return <div id="firebase-analytics"></div>
 }
