@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@hono/zod-validator": "catalog:",
+    "@next/third-parties": "^16.1.1",
     "@repo/database": "workspace:*",
     "@repo/firebase-auth-server": "workspace:*",
     "@repo/shared-types": "workspace:*",
