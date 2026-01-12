@@ -155,11 +155,15 @@ export const apiPatch = async <U extends keyof API_EP>(
  * @throws {ApiV1Error} APIエラーが発生した場合
  */
 export const apiDelete = async <U extends keyof API_EP>(
-  url: U
+  url: U,
+  data?: unknown
 ): Promise<
   API_EP[U] extends { DELETE: unknown } ? API_EP[U]['DELETE'] : never
 > => {
-  const response = await authenticatedFetch(url, { method: 'DELETE' })
+  const response = await authenticatedFetch(url, {
+    method: 'DELETE',
+    body: data ? JSON.stringify(data) : undefined,
+  })
   return handleApiResponse(response)
 }
 
@@ -188,6 +192,7 @@ type API_EP = {
     GET: SuccessResponse<ApiResponseFuelLogList>
     POST: SuccessResponse<ApiResponseFuelLogDetail>
     PATCH: SuccessResponse<ApiResponseFuelLogDetail>
+    DELETE: SuccessResponse<undefined>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-insights`]: {
