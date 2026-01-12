@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import { Footer } from '@/components/Footer'
 import { Providers } from '@/components/Providers'
 import { ThemeToggleButton } from '@/components/ThemeToggleButton'
+import { APP_NAME } from '@/lib/statics'
 
 // Firebase認証を使用しているため、動的レンダリングを強制
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'MotoReco Web App',
-  description: 'MotoReco Web Application',
+  title: `${APP_NAME} Web App`,
+  description: `${APP_NAME} Web Application`,
 }
 
 export default function RootLayout({
