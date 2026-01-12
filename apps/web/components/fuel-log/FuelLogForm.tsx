@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
@@ -25,7 +24,6 @@ export interface FuelLogFormProps {
   error: string
   isEdit?: boolean
   totalMileage?: number
-  previousFuelLog?: ApiResponseFuelLogDetail | null
 }
 
 export const FuelLogForm = ({
@@ -35,7 +33,6 @@ export const FuelLogForm = ({
   error,
   isEdit = false,
   totalMileage,
-  previousFuelLog,
 }: FuelLogFormProps) => {
   const [formData, setFormData] = useState<FuelLogFormData>({
     refueledAt: '',
@@ -66,16 +63,6 @@ export const FuelLogForm = ({
       setIsUpdateTotalMileageManual(false)
     }
   }, [isEdit, totalMileage])
-
-  // 登録モード: previousFuelLogから自動設定
-  // useEffect(() => {
-  //   if (!isEdit && previousFuelLog && !isPreviousMileageManual) {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       previousMileage: previousFuelLog.mileage.toString(),
-  //     }))
-  //   }
-  // }, [isEdit, previousFuelLog, isPreviousMileageManual])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
