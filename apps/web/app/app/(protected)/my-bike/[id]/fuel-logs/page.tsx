@@ -20,7 +20,9 @@ function FuelLogsPage() {
   const bikeId = params.id as string
 
   const { data, error, isLoading } = useSWR(
-    bikeId ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc` : null,
+    bikeId
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc`
+      : null,
     async (url) => {
       const response = await authenticatedFetch(url, { method: 'GET' })
       if (!response.ok) {
