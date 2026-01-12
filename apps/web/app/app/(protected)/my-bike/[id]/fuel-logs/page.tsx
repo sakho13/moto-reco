@@ -7,8 +7,8 @@ import type {
   SuccessResponse,
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import { FuelEfficiencyChart } from '@repo/ui/fuelEfficiencyChart'
 import styles from './page.module.css'
-import { FuelEfficiencyChart } from '@/components/fuel-log/FuelEfficiencyChart'
 import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
