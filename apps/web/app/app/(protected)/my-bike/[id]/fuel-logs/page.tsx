@@ -82,9 +82,25 @@ function FuelLogsPage() {
   }
 
   const fuelLogs = data || []
+  const getDateKey = (dateString: string) => {
+    const parsed = new Date(dateString)
+    if (Number.isNaN(parsed.getTime())) {
+      return dateString
+    }
+    return parsed.toISOString().split('T')[0]
+  }
   const sortedFuelLogs = [...fuelLogs].sort(
-    (a, b) =>
-      new Date(b.refueledAt).getTime() - new Date(a.refueledAt).getTime()
+    (a, b) => {
+      const dateA = new Date(a.refueledAt)
+      const dateB = new Date(b.refueledAt)
+      if (Number.isNaN(dateA.getTime()) || Number.isNaN(dateB.getTime())) {
+        return 0
+      }
+      if (getDateKey(a.refueledAt) === getDateKey(b.refueledAt)) {
+        return b.mileage - a.mileage
+      }
+      return dateB.getTime() - dateA.getTime()
+    }
   )
 
   // 有効な燃費データが2件以上あるかチェック
