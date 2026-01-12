@@ -1,5 +1,8 @@
+import { getAnalytics, type Analytics } from 'firebase/analytics'
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth'
+
+const isProduction = process.env.NODE_ENV === 'production'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,6 +15,7 @@ const firebaseConfig = {
 
 let firebaseApp: FirebaseApp
 let firebaseAuth: Auth
+export let firebaseAnalytics: Analytics | null
 
 /**
  * Firebase アプリケーションの初期化
@@ -42,4 +46,16 @@ export const getFirebaseAuth = (): Auth => {
     }
   }
   return firebaseAuth
+}
+
+export const getFirebaseAnalytics = (): Analytics | null => {
+  if (!isProduction) return null
+
+  if (!firebaseAnalytics) {
+    const app = getFirebaseApp()
+    if (typeof window !== 'undefined') {
+      firebaseAnalytics = getAnalytics(app)
+    }
+  }
+  return firebaseAnalytics
 }

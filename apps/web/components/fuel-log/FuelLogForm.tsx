@@ -133,7 +133,10 @@ export const FuelLogForm = ({
         />
       </FormField>
 
-      <ToggleSection title={`前回の走行距離: ${formData.previousMileage.toLocaleString()} km（自動設定）`} defaultOpen={true}>
+      <ToggleSection
+        title={`前回の走行距離: ${formData.previousMileage.toLocaleString()} km（自動設定）`}
+        defaultOpen={true}
+      >
         <FormField
           label="前回の給油時走行距離 (km)"
           htmlFor="previousMileage"

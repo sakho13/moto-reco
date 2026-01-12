@@ -13,6 +13,7 @@ import { toast } from '@repo/ui/sonner'
 import { apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
+import { useAnalytics } from '@/lib/firebase/analytics'
 import { useAuth } from '@/lib/hooks/useAuth'
 import {
   validateEmail,
@@ -22,6 +23,8 @@ import {
 } from '@/lib/utils/validation'
 
 export function RegisterCard() {
+  const analyticsEvent = useAnalytics()
+
   const router = useRouter()
   const { registerWithEmail } = useAuth()
   const { mutate } = useSWRConfig()
@@ -105,6 +108,10 @@ export function RegisterCard() {
 
       // 4. プロフィールキャッシュを事前設定(レースコンディション回避)
       mutate('/api/v1/user/profile', response.data)
+      analyticsEvent('webSignUp', {
+        method: 'email',
+        userId: response.data.userId,
+      })
 
       // 5. ホームページへリダイレクト
       toast.success('アカウントを作成しました', {
