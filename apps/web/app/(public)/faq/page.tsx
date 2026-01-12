@@ -5,8 +5,7 @@ import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
   title: `よくある質問 | ${APP_NAME}`,
-  description:
-    `${APP_NAME} の使い方や機能に関するよくある質問と回答をまとめています。`,
+  description: `${APP_NAME} の使い方や機能に関するよくある質問と回答をまとめています。`,
 }
 
 export default function FaqPage() {

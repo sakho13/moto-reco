@@ -5,8 +5,7 @@ import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
   title: `料金プラン | ${APP_NAME}`,
-  description:
-    `${APP_NAME} の料金プランをご確認いただけます。無料プランですべての基本機能をご利用いただけます。`,
+  description: `${APP_NAME} の料金プランをご確認いただけます。無料プランですべての基本機能をご利用いただけます。`,
 }
 
 export default function PricingPage() {
