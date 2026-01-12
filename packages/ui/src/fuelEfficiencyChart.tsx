@@ -64,9 +64,7 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
       <p className={styles.tooltipDetail}>
         走行距離: {data.mileage.toLocaleString()} km
       </p>
-      <p className={styles.tooltipDetail}>
-        給油量: {data.amount.toFixed(1)} L
-      </p>
+      <p className={styles.tooltipDetail}>給油量: {data.amount.toFixed(1)} L</p>
     </div>
   )
 }
@@ -88,9 +86,7 @@ export const FuelEfficiencyChart = ({ fuelLogs }: FuelEfficiencyChartProps) => {
       <div className={styles.chartContainer}>
         <div className={styles.emptyState}>
           <p>燃費データがありません</p>
-          <p className={styles.emptySubtext}>
-            2回以上の給油履歴が必要です
-          </p>
+          <p className={styles.emptySubtext}>2回以上の給油履歴が必要です</p>
         </div>
       </div>
     )
@@ -121,21 +117,22 @@ export const FuelEfficiencyChart = ({ fuelLogs }: FuelEfficiencyChartProps) => {
 
       <div className={styles.chartWrapper}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+          <LineChart
+            data={chartData}
+            margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+          >
             {/* X軸: 日付 */}
             <XAxis
               dataKey="date"
               tick={{ fontSize: 12, fill: 'var(--color-ink)', opacity: 0.7 }}
               stroke="var(--color-ink)"
               strokeOpacity={0.3}
-              label={
-                {
-                  value: '日付',
-                  position: 'insideBottom',
-                  offset: -5,
-                  style: { fontSize: 12, fill: 'var(--color-ink)', opacity: 0.7 },
-                }
-              }
+              label={{
+                value: '日付',
+                position: 'insideBottom',
+                offset: -5,
+                style: { fontSize: 12, fill: 'var(--color-ink)', opacity: 0.7 },
+              }}
             />
 
             {/* Y軸: 燃費 (km/L) */}
@@ -153,7 +150,11 @@ export const FuelEfficiencyChart = ({ fuelLogs }: FuelEfficiencyChartProps) => {
             />
 
             {/* グリッド線 */}
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-cloud)" opacity={0.5} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="var(--color-cloud)"
+              opacity={0.5}
+            />
 
             {/* ツールチップ */}
             <Tooltip content={<CustomTooltip />} />

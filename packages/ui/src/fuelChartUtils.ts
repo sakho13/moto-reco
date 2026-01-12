@@ -58,7 +58,9 @@ export function prepareChartData(
     }))
     // 日付の昇順にソート（グラフ表示用）
     .sort((a, b) => {
-      return new Date(a.originalDate).getTime() - new Date(b.originalDate).getTime()
+      return (
+        new Date(a.originalDate).getTime() - new Date(b.originalDate).getTime()
+      )
     })
 
   return chartData

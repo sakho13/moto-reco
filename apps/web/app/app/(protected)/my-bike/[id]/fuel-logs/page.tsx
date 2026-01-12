@@ -88,7 +88,9 @@ function FuelLogsPage() {
   )
 
   // 有効な燃費データが2件以上あるかチェック
-  const validFuelLogs = sortedFuelLogs.filter((log) => log.fuelEfficiency !== null)
+  const validFuelLogs = sortedFuelLogs.filter(
+    (log) => log.fuelEfficiency !== null
+  )
 
   return (
     <>
