@@ -13,4 +13,5 @@ export interface IFuelLogRepository {
     myUserBikeId: MyUserBikeId
   ): Promise<FuelLogEntity | null>
   updateFuelLog(fuelLog: FuelLogEntity): Promise<FuelLogEntity>
+  deleteFuelLog(fuelLogId: FuelLogId, myUserBikeId: MyUserBikeId): Promise<void>
 }

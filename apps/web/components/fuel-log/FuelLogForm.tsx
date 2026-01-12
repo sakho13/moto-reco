@@ -6,6 +6,7 @@ import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { ToggleSection } from '@repo/ui/toggleSection'
 
 export interface FuelLogFormData {
   refueledAt: string
@@ -41,6 +42,8 @@ export const FuelLogForm = ({
     totalPrice: '',
     updateTotalMileage: true,
   })
+  const [isUpdateTotalMileageManual, setIsUpdateTotalMileageManual] =
+    useState(false)
 
   useEffect(() => {
     if (initialData) {
@@ -55,7 +58,9 @@ export const FuelLogForm = ({
         ...prev,
         mileage: totalMileage.toString(),
         previousMileage: totalMileage.toString(),
+        updateTotalMileage: false,
       }))
+      setIsUpdateTotalMileageManual(false)
     }
   }, [isEdit, totalMileage])
 
@@ -65,6 +70,10 @@ export const FuelLogForm = ({
   }
 
   const today = new Date().toISOString().split('T')[0]
+  const isUpdateTotalMileageDisabled =
+    totalMileage !== undefined &&
+    formData.mileage !== '' &&
+    Number(formData.mileage) <= totalMileage
 
   return (
     <form
@@ -99,15 +108,22 @@ export const FuelLogForm = ({
           value={formData.mileage}
           onChange={(e) => {
             const newMileage = e.target.value
+            const isDisabled =
+              totalMileage !== undefined &&
+              newMileage !== '' &&
+              Number(newMileage) <= totalMileage
             setFormData((prev) => ({
               ...prev,
               mileage: newMileage,
-              // 総走行距離以下になったら自動的にチェックを外す
-              updateTotalMileage:
-                totalMileage !== undefined && Number(newMileage) <= totalMileage
-                  ? false
-                  : prev.updateTotalMileage,
+              updateTotalMileage: isDisabled
+                ? false
+                : isUpdateTotalMileageManual
+                  ? prev.updateTotalMileage
+                  : true,
             }))
+            if (isDisabled) {
+              setIsUpdateTotalMileageManual(false)
+            }
           }}
           min="0"
           step="1"
@@ -117,28 +133,33 @@ export const FuelLogForm = ({
         />
       </FormField>
 
-      <FormField
-        label="前回給油時走行距離 (km)"
-        htmlFor="previousMileage"
-        required
+      <ToggleSection
+        title={`前回の走行距離: ${formData.previousMileage.toLocaleString()} km（自動設定）`}
+        defaultOpen={true}
       >
-        <Input
-          id="previousMileage"
-          type="number"
-          value={formData.previousMileage}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              previousMileage: e.target.value,
-            }))
-          }
-          min="0"
-          step="1"
+        <FormField
+          label="前回の給油時走行距離 (km)"
+          htmlFor="previousMileage"
           required
-          disabled={isSubmitting}
-          placeholder="例: 4800"
-        />
-      </FormField>
+        >
+          <Input
+            id="previousMileage"
+            type="number"
+            value={formData.previousMileage}
+            onChange={(e) => {
+              setFormData((prev) => ({
+                ...prev,
+                previousMileage: e.target.value,
+              }))
+            }}
+            min="0"
+            step="1"
+            required
+            disabled={isSubmitting}
+            placeholder="例: 4800"
+          />
+        </FormField>
+      </ToggleSection>
 
       <FormField label="給油量 (L)" htmlFor="amount" required>
         <Input
@@ -184,17 +205,14 @@ export const FuelLogForm = ({
             id="updateTotalMileage"
             label="総走行距離を更新する"
             checked={formData.updateTotalMileage}
-            onChange={(e) =>
+            onChange={(e) => {
               setFormData((prev) => ({
                 ...prev,
                 updateTotalMileage: e.target.checked,
               }))
-            }
-            disabled={
-              isSubmitting ||
-              (formData.mileage !== '' &&
-                Number(formData.mileage) <= totalMileage)
-            }
+              setIsUpdateTotalMileageManual(true)
+            }}
+            disabled={isSubmitting || isUpdateTotalMileageDisabled}
           />
         </FormField>
       )}

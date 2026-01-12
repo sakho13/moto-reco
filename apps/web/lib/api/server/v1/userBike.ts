@@ -18,6 +18,7 @@ import {
   FuelInsightQuerySchema,
   FuelLogRegisterRequestSchema,
   FuelLogUpdateRequestSchema,
+  FuelLogDeleteRequestSchema,
   FuelLogListQuerySchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
@@ -218,14 +219,18 @@ userBike.get(
     return c.json<SuccessResponse<ApiResponseFuelLogList>>(
       {
         status: 'success',
-        data: fuelLogs.map((log) => ({
-          fuelLogId: log.id,
-          refueledAt: log.refueledAt.toISOString(),
-          mileage: log.mileage,
-          previousMileage: log.previousMileage,
-          amount: log.amount,
-          totalPrice: log.totalPrice,
-        })),
+        data: fuelLogs.map((log) => {
+          return {
+            fuelLogId: log.id,
+            refueledAt: log.refueledAt.toISOString(),
+            mileage: log.mileage,
+            previousMileage: log.previousMileage,
+            amount: log.amount,
+            totalPrice: log.totalPrice,
+            fuelEfficiency: log.fuelEfficiency,
+            pricePerLiter: log.pricePerLiter,
+          }
+        }),
         message: '燃料ログ一覧取得成功',
       },
       200
@@ -269,6 +274,8 @@ userBike.post(
           previousMileage: result.previousMileage,
           amount: result.amount,
           totalPrice: result.totalPrice,
+          fuelEfficiency: result.fuelEfficiency,
+          pricePerLiter: result.pricePerLiter,
         },
         message: '燃料ログ登録成功',
       },
@@ -313,8 +320,42 @@ userBike.patch(
           previousMileage: result.previousMileage,
           amount: result.amount,
           totalPrice: result.totalPrice,
+          fuelEfficiency: result.fuelEfficiency,
+          pricePerLiter: result.pricePerLiter,
         },
         message: '燃料ログ更新成功',
+      },
+      200
+    )
+  }
+)
+
+userBike.delete(
+  '/bike/:myUserBikeId/fuel-logs',
+  honoAuthMiddleware,
+  zodValidateJson(FuelLogDeleteRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    await prisma.$transaction((t) => {
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+
+      return service.deleteFuelLog({
+        fuelLogId: createFuelLogId(body.fuelLogId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+      })
+    })
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        message: '燃料ログ削除成功',
+        data: undefined,
       },
       200
     )

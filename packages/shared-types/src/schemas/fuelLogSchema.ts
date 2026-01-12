@@ -126,3 +126,17 @@ export const FuelLogUpdateRequestSchema = z
   )
 
 export type FuelLogUpdateRequest = z.infer<typeof FuelLogUpdateRequestSchema>
+
+/**
+ * 燃料ログ削除リクエストのバリデーションスキーマ
+ */
+export const FuelLogDeleteRequestSchema = z.object({
+  fuelLogId: z
+    .string({
+      required_error: '燃料ログIDは必須です',
+      invalid_type_error: '燃料ログIDは文字列で指定してください',
+    })
+    .min(1, '燃料ログIDは1文字以上で指定してください'),
+})
+
+export type FuelLogDeleteRequest = z.infer<typeof FuelLogDeleteRequestSchema>
