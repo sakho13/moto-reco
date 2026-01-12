@@ -26,6 +26,9 @@ export type { FormFieldProps } from './formField'
 export { BaseCard } from './baseCard'
 export type { BaseCardProps } from './baseCard'
 
+export { ToggleSection } from './toggleSection'
+export type { ToggleSectionProps } from './toggleSection'
+
 // Fuel Efficiency Chart
 export { FuelEfficiencyChart } from './fuelEfficiencyChart'
 export type {
