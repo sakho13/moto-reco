@@ -55,6 +55,10 @@ export class FuelLogEntity {
     return this._value.totalPrice
   }
 
+  public get memo(): string | null {
+    return this._value.memo
+  }
+
   /**
    * 今回給油での走行距離
    */

@@ -69,12 +69,14 @@ function FuelLogRegisterPage() {
     setIsSubmitting(true)
 
     try {
+      const memo = formData.memo.trim()
       await apiPost(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
         refueledAt: new Date(formData.refueledAt),
         mileage: Number(formData.mileage),
         previousMileage: Number(formData.previousMileage),
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
+        memo: memo.length > 0 ? memo : null,
         updateTotalMileage: formData.updateTotalMileage,
       })
 
@@ -149,6 +151,18 @@ function FuelLogRegisterPage() {
                 <dd style={{ color: 'var(--color-ink)' }}>
                   ¥{previousFuelLog.totalPrice.toLocaleString()}
                 </dd>
+                {previousFuelLog.memo && (
+                  <>
+                    <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                      メモ:
+                    </dt>
+                    <dd
+                      style={{ color: 'var(--color-ink)', whiteSpace: 'pre-wrap' }}
+                    >
+                      {previousFuelLog.memo}
+                    </dd>
+                  </>
+                )}
               </dl>
             </ToggleSection>
           )}

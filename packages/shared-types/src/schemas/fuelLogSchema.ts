@@ -36,6 +36,12 @@ export const FuelLogRegisterRequestSchema = z
       })
       .int('合計価格は整数で指定してください')
       .nonnegative('合計価格は0以上で指定してください'),
+    memo: z
+      .string({
+        invalid_type_error: 'メモは文字列で指定してください',
+      })
+      .max(500, 'メモは500文字以内で指定してください')
+      .optional(),
     updateTotalMileage: z.boolean().default(false),
   })
   .refine((data) => data.previousMileage <= data.mileage, {
@@ -102,6 +108,12 @@ export const FuelLogUpdateRequestSchema = z
       .int('合計価格は整数で指定してください')
       .nonnegative('合計価格は0以上で指定してください')
       .optional(),
+    memo: z
+      .string({
+        invalid_type_error: 'メモは文字列で指定してください',
+      })
+      .max(500, 'メモは500文字以内で指定してください')
+      .optional(),
   })
   .refine(
     (data) =>
@@ -109,7 +121,8 @@ export const FuelLogUpdateRequestSchema = z
       data.mileage !== undefined ||
       data.previousMileage !== undefined ||
       data.amount !== undefined ||
-      data.totalPrice !== undefined,
+      data.totalPrice !== undefined ||
+      data.memo !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }
