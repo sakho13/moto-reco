@@ -15,7 +15,7 @@ const firebaseConfig = {
 
 let firebaseApp: FirebaseApp
 let firebaseAuth: Auth
-export let firebaseAnalytics: Analytics | null
+export let firebaseAnalytics: Analytics | null = null
 
 /**
  * Firebase アプリケーションの初期化
