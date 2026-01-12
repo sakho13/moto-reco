@@ -2,10 +2,11 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Footer } from '@/components/docs/Footer'
 import { Navigation } from '@/components/docs/Navigation'
+import { APP_NAME } from '@/lib/statics'
 
 export const metadata: Metadata = {
-  title: 'moto-reco Docs',
-  description: 'バイクメンテナンス管理アプリ moto-reco のドキュメントサイト',
+  title: `${APP_NAME}`,
+  description: `バイクメンテナンス管理アプリ ${APP_NAME} のトップページです。`,
 }
 
 export default function RootLayout({

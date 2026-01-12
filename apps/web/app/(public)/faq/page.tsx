@@ -1,11 +1,12 @@
 import { FAQ_DATA, FAQ_CATEGORIES } from './faqData'
 import styles from './page.module.css'
 import { FaqAccordion } from '@/components/docs/faq/FaqAccordion'
+import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
-  title: 'よくある質問 | moto-reco Docs',
+  title: `よくある質問 | ${APP_NAME}`,
   description:
-    'moto-recoの使い方や機能に関するよくある質問と回答をまとめています。',
+    `${APP_NAME} の使い方や機能に関するよくある質問と回答をまとめています。`,
 }
 
 export default function FaqPage() {

@@ -1,11 +1,12 @@
 import styles from './page.module.css'
 import { PRICING_PLANS } from './pricingData'
 import { PricingCard } from '@/components/docs/pricing/PricingCard'
+import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
-  title: '料金プラン | moto-reco Docs',
+  title: `料金プラン | ${APP_NAME}`,
   description:
-    'moto-recoの料金プランをご確認いただけます。無料プランですべての基本機能をご利用いただけます。',
+    `${APP_NAME} の料金プランをご確認いただけます。無料プランですべての基本機能をご利用いただけます。`,
 }
 
 export default function PricingPage() {
