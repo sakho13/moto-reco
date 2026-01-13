@@ -20,7 +20,9 @@ function FuelLogsPage() {
   const bikeId = params.id as string
 
   const { data, error, isLoading } = useSWR(
-    bikeId ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs` : null,
+    bikeId
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc`
+      : null,
     async (url) => {
       const response = await authenticatedFetch(url, { method: 'GET' })
       if (!response.ok) {
@@ -82,15 +84,9 @@ function FuelLogsPage() {
   }
 
   const fuelLogs = data || []
-  const sortedFuelLogs = [...fuelLogs].sort(
-    (a, b) =>
-      new Date(b.refueledAt).getTime() - new Date(a.refueledAt).getTime()
-  )
 
   // 有効な燃費データが2件以上あるかチェック
-  const validFuelLogs = sortedFuelLogs.filter(
-    (log) => log.fuelEfficiency !== null
-  )
+  const validFuelLogs = fuelLogs.filter((log) => log.fuelEfficiency !== null)
 
   return (
     <>
@@ -111,7 +107,7 @@ function FuelLogsPage() {
         {/* 左カラム（モバイルでは上）: グラフ */}
         <div className={styles.chartSection}>
           {validFuelLogs.length >= 2 ? (
-            <FuelEfficiencyChart fuelLogs={sortedFuelLogs} />
+            <FuelEfficiencyChart fuelLogs={fuelLogs} />
           ) : (
             <div className={styles.chartPlaceholder}>
               <p>グラフ表示には2回以上の給油履歴が必要です</p>
@@ -122,7 +118,7 @@ function FuelLogsPage() {
         {/* 右カラム（モバイルでは下）: リスト */}
         <div className={styles.listSection}>
           <FuelLogListSection
-            fuelLogs={sortedFuelLogs}
+            fuelLogs={fuelLogs}
             onEdit={handleEdit}
             onRegister={handleRegister}
           />

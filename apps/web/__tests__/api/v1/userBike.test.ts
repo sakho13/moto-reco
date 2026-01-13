@@ -940,6 +940,44 @@ describe('UserBike API Endpoints', () => {
       expect(json.data[4].refueledAt).toBe('2024-01-01T10:00:00.000Z')
     })
 
+    test('同日の燃料ログは走行距離順で並ぶ', async () => {
+      await createMultipleFuelLogs(token, myUserBikeId, [
+        {
+          refueledAt: '2024-03-01T10:00:00.000Z',
+          mileage: 2100,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+        {
+          refueledAt: '2024-03-01T10:00:00.000Z',
+          mileage: 1900,
+          amount: 9.5,
+          totalPrice: 1400,
+        },
+      ])
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      const marchLogs = json.data.filter(
+        (log: { refueledAt: string; mileage: number }) =>
+          log.refueledAt.startsWith('2024-03-01')
+      )
+
+      expect(marchLogs.length).toBe(3)
+      expect(marchLogs[0].mileage).toBe(2100)
+      expect(marchLogs[1].mileage).toBe(2000)
+      expect(marchLogs[2].mileage).toBe(1900)
+    })
+
     test('ページネーションが機能する', async () => {
       const res = await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?page=2&per-size=2`,
