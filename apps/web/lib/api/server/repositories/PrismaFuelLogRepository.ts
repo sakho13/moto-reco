@@ -22,6 +22,7 @@ export class PrismaFuelLogRepository
         mileage: fuelLog.mileage,
         previousMileage: fuelLog.previousMileage,
         refueledAt: fuelLog.refueledAt,
+        memo: fuelLog.memo,
       },
       select: {
         id: true,
@@ -31,6 +32,7 @@ export class PrismaFuelLogRepository
         mileage: true,
         previousMileage: true,
         refueledAt: true,
+        memo: true,
       },
     })
 
@@ -42,6 +44,7 @@ export class PrismaFuelLogRepository
       mileage: created.mileage,
       previousMileage: created.previousMileage,
       refueledAt: created.refueledAt,
+      memo: created.memo,
     })
   }
 
@@ -69,6 +72,7 @@ export class PrismaFuelLogRepository
         mileage: true,
         previousMileage: true,
         refueledAt: true,
+        memo: true,
       },
       orderBy,
       skip: searchParams.skip,
@@ -85,6 +89,7 @@ export class PrismaFuelLogRepository
           mileage: log.mileage,
           previousMileage: log.previousMileage,
           refueledAt: log.refueledAt,
+          memo: log.memo,
         })
     )
   }
@@ -106,6 +111,7 @@ export class PrismaFuelLogRepository
         mileage: true,
         previousMileage: true,
         refueledAt: true,
+        memo: true,
       },
     })
 
@@ -121,6 +127,7 @@ export class PrismaFuelLogRepository
       mileage: fuelLog.mileage,
       previousMileage: fuelLog.previousMileage,
       refueledAt: fuelLog.refueledAt,
+      memo: fuelLog.memo,
     })
   }
 
@@ -135,6 +142,7 @@ export class PrismaFuelLogRepository
         mileage: fuelLog.mileage,
         previousMileage: fuelLog.previousMileage,
         refueledAt: fuelLog.refueledAt,
+        memo: fuelLog.memo,
       },
       select: {
         id: true,
@@ -144,6 +152,7 @@ export class PrismaFuelLogRepository
         mileage: true,
         previousMileage: true,
         refueledAt: true,
+        memo: true,
       },
     })
 
@@ -155,6 +164,7 @@ export class PrismaFuelLogRepository
       mileage: updated.mileage,
       previousMileage: updated.previousMileage,
       refueledAt: updated.refueledAt,
+      memo: updated.memo,
     })
   }
 

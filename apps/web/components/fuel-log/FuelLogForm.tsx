@@ -14,6 +14,7 @@ export interface FuelLogFormData {
   previousMileage: string
   amount: string
   totalPrice: string
+  memo: string
   updateTotalMileage: boolean
 }
 
@@ -40,6 +41,7 @@ export const FuelLogForm = ({
     previousMileage: '',
     amount: '',
     totalPrice: '',
+    memo: '',
     updateTotalMileage: true,
   })
   const [isUpdateTotalMileageManual, setIsUpdateTotalMileageManual] =
@@ -196,6 +198,23 @@ export const FuelLogForm = ({
           required
           disabled={isSubmitting}
           placeholder="例: 2000"
+        />
+      </FormField>
+
+      <FormField label="メモ" htmlFor="memo" helperText="最大500文字">
+        <Input
+          id="memo"
+          type="text"
+          value={formData.memo}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              memo: e.target.value,
+            }))
+          }
+          maxLength={500}
+          disabled={isSubmitting}
+          placeholder="例: ハイオク満タン"
         />
       </FormField>
 

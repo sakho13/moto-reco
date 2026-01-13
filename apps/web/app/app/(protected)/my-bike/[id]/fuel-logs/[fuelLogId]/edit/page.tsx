@@ -63,6 +63,7 @@ function FuelLogEditPage() {
             previousMileage: fuelLog.previousMileage.toString(),
             amount: fuelLog.amount.toString(),
             totalPrice: fuelLog.totalPrice.toString(),
+            memo: fuelLog.memo ?? '',
             updateTotalMileage: false,
           })
         }
@@ -80,6 +81,7 @@ function FuelLogEditPage() {
     setIsSubmitting(true)
 
     try {
+      const memo = formData.memo.trim()
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
         fuelLogId: fuelLogId,
         refueledAt: new Date(formData.refueledAt),
@@ -87,6 +89,7 @@ function FuelLogEditPage() {
         previousMileage: Number(formData.previousMileage),
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
+        memo: memo.length > 0 ? memo : null,
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)

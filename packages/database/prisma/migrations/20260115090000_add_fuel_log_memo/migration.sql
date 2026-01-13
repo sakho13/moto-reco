@@ -1,0 +1,1 @@
+ALTER TABLE "TUserMyBikeFuelLog" ADD COLUMN "memo" TEXT;

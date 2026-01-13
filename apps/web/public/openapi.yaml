@@ -1070,6 +1070,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
         fuelEfficiency:
           type: number
           format: float
@@ -1106,6 +1111,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
         updateTotalMileage:
           type: boolean
           description: 燃料ログ登録後にユーザー所有バイクの総走行距離を更新するかどうか。更新する値が現在の総走行距離よりも小さい場合は更新されません。
@@ -1135,6 +1145,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
     MyUserBikeFuelLogDeleteDetail:
       type: object
       required:

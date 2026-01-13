@@ -722,6 +722,7 @@ describe('UserBike API Endpoints', () => {
 
     test('燃料ログを登録できる', async () => {
       const refueledAt = '2024-03-01T10:00:00.000Z'
+      const memo = 'ハイオク満タン'
       const res = await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
         {
@@ -736,6 +737,7 @@ describe('UserBike API Endpoints', () => {
             previousMileage: 2400,
             amount: 10.5,
             totalPrice: 1800,
+            memo,
           }),
         }
       )
@@ -751,6 +753,7 @@ describe('UserBike API Endpoints', () => {
           previousMileage: 2400,
           amount: 10.5,
           totalPrice: 1800,
+          memo,
           fuelEfficiency: 9.5, // 小数点以下1桁で四捨五入
           pricePerLiter: 171.4, // 小数点以下1桁で四捨五入
         },
@@ -766,6 +769,7 @@ describe('UserBike API Endpoints', () => {
       expect(fuelLogRecord?.amount).toBe(10.5)
       expect(fuelLogRecord?.price).toBe(1800)
       expect(fuelLogRecord?.refueledAt.toISOString()).toBe(refueledAt)
+      expect(fuelLogRecord?.memo).toBe(memo)
     })
 
     test('updateTotalMileageがtrueの場合に総走行距離が更新される', async () => {
@@ -1095,6 +1099,7 @@ describe('UserBike API Endpoints', () => {
         expect(typeof log.previousMileage).toBe('number')
         expect(typeof log.amount).toBe('number')
         expect(typeof log.totalPrice).toBe('number')
+        expect(log.memo === null || typeof log.memo === 'string').toBe(true)
 
         expect(new Date(log.refueledAt).toISOString()).toBe(log.refueledAt)
       })
@@ -1338,6 +1343,7 @@ describe('UserBike API Endpoints', () => {
 
     test('燃料ログのすべてのフィールドを更新できる', async () => {
       const refueledAt = '2024-03-15T15:30:00.000Z'
+      const memo = '給油後に空気圧チェック'
       const res = await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
         {
@@ -1353,6 +1359,7 @@ describe('UserBike API Endpoints', () => {
             previousMileage: 1800,
             amount: 12.5,
             totalPrice: 2000,
+            memo,
           }),
         }
       )
@@ -1368,6 +1375,7 @@ describe('UserBike API Endpoints', () => {
           previousMileage: 1800,
           amount: 12.5,
           totalPrice: 2000,
+          memo,
           fuelEfficiency: 16, // (2000 - 1800) / 12.5
           pricePerLiter: 160, // 2000 / 12.5
         },
@@ -1383,6 +1391,7 @@ describe('UserBike API Endpoints', () => {
       expect(fuelLogRecord?.amount).toBe(12.5)
       expect(fuelLogRecord?.price).toBe(2000)
       expect(fuelLogRecord?.refueledAt.toISOString()).toBe(refueledAt)
+      expect(fuelLogRecord?.memo).toBe(memo)
     })
 
     test('部分更新: 走行距離のみを更新できる', async () => {
