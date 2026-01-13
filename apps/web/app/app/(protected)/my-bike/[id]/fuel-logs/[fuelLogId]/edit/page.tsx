@@ -14,6 +14,7 @@ import {
   FuelLogForm,
   type FuelLogFormData,
 } from '@/components/fuel-log/FuelLogForm'
+import { TrashIcon } from '@/components/icons/TrashIcon'
 import { apiDelete, authenticatedFetch, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -182,7 +183,20 @@ function FuelLogEditPage() {
         </Button>
       </div>
 
-      <BaseCard title="給油履歴を編集">
+      <BaseCard
+        title="給油履歴を編集"
+        headerAction={
+          <Button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting || isSubmitting}
+            variant='danger'
+            aria-label="削除する"
+          >
+            <TrashIcon />
+          </Button>
+        }
+      >
         <FuelLogForm
           initialData={initialData}
           onSubmit={handleFormSubmit}
@@ -190,17 +204,6 @@ function FuelLogEditPage() {
           error={error}
           isEdit={true}
         />
-        <div className="mt-6 flex justify-end">
-          <Button
-            type="button"
-            variant="danger"
-            onClick={handleDelete}
-            disabled={isDeleting || isSubmitting}
-            loading={isDeleting}
-          >
-            削除する
-          </Button>
-        </div>
       </BaseCard>
     </>
   )
