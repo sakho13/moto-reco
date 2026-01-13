@@ -70,10 +70,7 @@ export class PrismaUserQuitRepository
     })
   }
 
-  async updateStatus(
-    userId: UserId,
-    status: UserQuitStatus
-  ): Promise<void> {
+  async updateStatus(userId: UserId, status: UserQuitStatus): Promise<void> {
     await this.connection.tUserQuit.update({
       where: {
         userId,
