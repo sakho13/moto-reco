@@ -40,6 +40,19 @@ pnpm turbo db:deploy
 pnpm prisma studio
 ```
 
+### Storybook
+
+UIコンポーネントの開発・確認にはStorybookを使用します。
+
+```bash
+# Storybookの起動
+pnpm storybook
+```
+
+起動後、http://localhost:6006 でアクセスできます。
+
+詳細な使い方は [`packages/ui/README.md`](../packages/ui/README.md#storybookでのコンポーネント開発) を参照してください。
+
 ## Git Worktree開発
 
 複数のworktreeで並行開発する場合、Dockerコンテナのポート競合を避けるため、各worktreeで異なるポートを設定する必要があります。

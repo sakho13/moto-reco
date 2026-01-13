@@ -29,6 +29,28 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
   }
 
   /**
+   * 外部ID（Firebase UIDなど）から内部User IDを取得（アクティブ判定なし）
+   */
+  async findUserIdByExternalId(
+    externalId: string,
+    providerType: ProviderType
+  ): Promise<string | null> {
+    const authProvider = await this.connection.mAuthProvider.findFirst({
+      select: {
+        user: {
+          select: { id: true },
+        },
+      },
+      where: {
+        externalId: externalId,
+        providerType: providerType,
+      },
+    })
+
+    return authProvider?.user?.id ?? null
+  }
+
+  /**
    * 指定ユーザーの認証プロバイダを無効化
    */
   async deactivateByUserId(userId: UserId): Promise<void> {
@@ -39,6 +61,21 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
       },
       data: {
         isActive: false,
+      },
+    })
+  }
+
+  /**
+   * 指定ユーザーの認証プロバイダを有効化
+   */
+  async activateByUserId(userId: UserId): Promise<void> {
+    await this.connection.mAuthProvider.updateMany({
+      where: {
+        userId,
+        isActive: false,
+      },
+      data: {
+        isActive: true,
       },
     })
   }

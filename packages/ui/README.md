@@ -472,6 +472,78 @@ export default function LoginPage() {
 }
 ```
 
+## Storybookでのコンポーネント開発
+
+このパッケージではStorybookを使用したコンポーネント開発をサポートしています。
+
+### Storybookの起動
+
+プロジェクトルートから起動:
+
+```bash
+pnpm storybook
+```
+
+または、`packages/ui`内から直接起動:
+
+```bash
+cd packages/ui
+pnpm storybook
+```
+
+起動後、http://localhost:6006 でStorybookにアクセスできます。
+
+### ストーリーファイルの作成
+
+コンポーネントのストーリーは、コンポーネントと同じディレクトリに`*.stories.tsx`ファイルとして作成します。
+
+**ファイル配置例**:
+
+```
+src/
+  └── MyComponent/
+      ├── myComponent.tsx          # コンポーネント本体
+      ├── myComponent.module.css   # スタイル
+      └── myComponent.stories.tsx  # Storybookストーリー
+```
+
+**ストーリーファイルの基本構造**:
+
+```tsx
+import type { Meta, StoryObj } from '@storybook/react'
+import { MyComponent } from './myComponent'
+
+const meta: Meta<typeof MyComponent> = {
+  title: 'ui/MyComponent',
+  component: MyComponent,
+}
+
+export default meta
+type Story = StoryObj<typeof MyComponent>
+
+export const Default: Story = {
+  args: {
+    // propsの値
+  },
+}
+
+export const Variant: Story = {
+  args: {
+    // 別のpropsの値
+  },
+}
+```
+
+### テーマとの統合
+
+StorybookのプレビューはThemeProviderでラップされているため、すべてのストーリーで自動的にテーマが適用されます。CSS変数も利用可能です。
+
+### 既存のストーリー
+
+参考として、以下のストーリーが実装済みです:
+
+- `src/FuelEfficiencyChart/fuelEfficiencyChart.stories.tsx`
+
 ## 関連パッケージ
 
 - **@packages/theme**: デザイントークンとテーマ定義を提供
