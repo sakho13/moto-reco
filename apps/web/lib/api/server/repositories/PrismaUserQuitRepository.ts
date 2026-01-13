@@ -1,4 +1,9 @@
-import { createUserId, createUserQuitId } from '@repo/shared-types'
+import {
+  createUserId,
+  createUserQuitId,
+  type UserId,
+  type UserQuitStatus,
+} from '@repo/shared-types'
 import { UserQuitEntity } from '../entities/UserQuitEntity'
 import { IUserQuitRepository } from '../interfaces/IUserQuitRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
@@ -33,6 +38,46 @@ export class PrismaUserQuitRepository
       quitReason: created.quitReason,
       recoveryCode: created.recoveryCode,
       status: created.status,
+    })
+  }
+
+  async findByUserId(userId: UserId): Promise<UserQuitEntity | null> {
+    const userQuit = await this.connection.tUserQuit.findUnique({
+      where: {
+        userId,
+      },
+      select: {
+        id: true,
+        userId: true,
+        quitAt: true,
+        quitReason: true,
+        recoveryCode: true,
+        status: true,
+      },
+    })
+
+    if (!userQuit) {
+      return null
+    }
+
+    return new UserQuitEntity({
+      id: createUserQuitId(userQuit.id),
+      userId: createUserId(userQuit.userId),
+      quitAt: userQuit.quitAt,
+      quitReason: userQuit.quitReason,
+      recoveryCode: userQuit.recoveryCode,
+      status: userQuit.status,
+    })
+  }
+
+  async updateStatus(userId: UserId, status: UserQuitStatus): Promise<void> {
+    await this.connection.tUserQuit.update({
+      where: {
+        userId,
+      },
+      data: {
+        status,
+      },
     })
   }
 }

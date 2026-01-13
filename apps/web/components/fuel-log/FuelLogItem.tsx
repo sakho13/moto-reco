@@ -66,6 +66,13 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
           </>
         )}
       </div>
+
+      {fuelLog.memo && (
+        <div className={styles.memoRow}>
+          <span className={styles.memoLabel}>メモ:</span>
+          <span className={styles.memoText}>{fuelLog.memo}</span>
+        </div>
+      )}
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
 
 export interface FuelLogFormData {
@@ -14,6 +15,7 @@ export interface FuelLogFormData {
   previousMileage: string
   amount: string
   totalPrice: string
+  memo: string
   updateTotalMileage: boolean
 }
 
@@ -40,6 +42,7 @@ export const FuelLogForm = ({
     previousMileage: '',
     amount: '',
     totalPrice: '',
+    memo: '',
     updateTotalMileage: true,
   })
   const [isUpdateTotalMileageManual, setIsUpdateTotalMileageManual] =
@@ -196,6 +199,23 @@ export const FuelLogForm = ({
           required
           disabled={isSubmitting}
           placeholder="例: 2000"
+        />
+      </FormField>
+
+      <FormField label="メモ" htmlFor="memo" helperText="最大500文字">
+        <Textarea
+          id="memo"
+          value={formData.memo}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              memo: e.target.value,
+            }))
+          }
+          maxLength={500}
+          disabled={isSubmitting}
+          placeholder="例: ハイオク満タン"
+          rows={3}
         />
       </FormField>
 

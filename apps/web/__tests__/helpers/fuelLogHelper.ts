@@ -12,6 +12,7 @@ export async function createTestFuelLog(
     previousMileage?: number
     amount: number
     totalPrice: number
+    memo?: string | null
     updateTotalMileage?: boolean
   }
 ): Promise<string> {
@@ -47,6 +48,7 @@ export async function createMultipleFuelLogs(
     previousMileage?: number
     amount: number
     totalPrice: number
+    memo?: string | null
   }>
 ): Promise<string[]> {
   const fuelLogIds: string[] = []

@@ -49,6 +49,10 @@ export type ApiResponseUserQuit = {
   recoveryCode: string
 }
 
+export type ApiResponseUserRecover = {
+  userId: string
+}
+
 export type ApiResponseManufacturer = {
   manufacturers: {
     manufacturerId: string
@@ -117,6 +121,7 @@ export type ApiResponseFuelLogDetail = {
   previousMileage: number
   amount: number
   totalPrice: number
+  memo: string | null
   fuelEfficiency: number | null // km/L (計算不可の場合はnull)
   pricePerLiter: number | null // 円/L (給油量0の場合はnull)
 }
