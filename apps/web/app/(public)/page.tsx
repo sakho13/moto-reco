@@ -1,9 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { APP_VERSION } from '../lib/statics'
-import styles from './home.module.css'
-import { Footer } from '@/components/docs/Footer'
-import { Navigation } from '@/components/docs/Navigation'
+import styles from './page.module.css'
+import { APP_VERSION } from '@/lib/statics'
 
 const features = [
   {
@@ -29,7 +27,6 @@ const features = [
 export default function Home() {
   return (
     <>
-      <Navigation />
       <div className={styles.page}>
         <header className={styles.header}>
           <div className={styles.brand}>
@@ -112,8 +109,6 @@ export default function Home() {
           </div>
         </section>
       </div>
-
-      <Footer />
     </>
   )
 }
