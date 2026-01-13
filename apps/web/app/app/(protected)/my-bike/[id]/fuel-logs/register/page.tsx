@@ -157,7 +157,10 @@ function FuelLogRegisterPage() {
                       メモ:
                     </dt>
                     <dd
-                      style={{ color: 'var(--color-ink)', whiteSpace: 'pre-wrap' }}
+                      style={{
+                        color: 'var(--color-ink)',
+                        whiteSpace: 'pre-wrap',
+                      }}
                     >
                       {previousFuelLog.memo}
                     </dd>
