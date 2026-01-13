@@ -190,7 +190,7 @@ function FuelLogEditPage() {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting || isSubmitting}
-            variant='danger'
+            variant="danger"
             aria-label="削除する"
           >
             <TrashIcon />

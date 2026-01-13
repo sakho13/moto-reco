@@ -2,18 +2,16 @@ import type { Meta, StoryObj } from '@storybook/react'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import { FuelEfficiencyChart } from './fuelEfficiencyChart'
 
-const buildFuelLog = (
-  {
-    fuelLogId,
-    refueledAt,
-    mileage,
-    previousMileage,
-    amount,
-    totalPrice,
-    fuelEfficiency,
-    pricePerLiter,
-  }: ApiResponseFuelLogDetail
-): ApiResponseFuelLogDetail => ({
+const buildFuelLog = ({
+  fuelLogId,
+  refueledAt,
+  mileage,
+  previousMileage,
+  amount,
+  totalPrice,
+  fuelEfficiency,
+  pricePerLiter,
+}: ApiResponseFuelLogDetail): ApiResponseFuelLogDetail => ({
   fuelLogId,
   refueledAt,
   mileage,
@@ -28,7 +26,11 @@ const now = new Date()
 const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
   buildFuelLog({
     fuelLogId: 'fuel-log-1',
-    refueledAt: new Date(now.getFullYear(), now.getMonth() - 4, 3).toISOString(),
+    refueledAt: new Date(
+      now.getFullYear(),
+      now.getMonth() - 4,
+      3
+    ).toISOString(),
     mileage: 12500,
     previousMileage: 11980,
     amount: 12.4,
@@ -38,7 +40,11 @@ const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
   }),
   buildFuelLog({
     fuelLogId: 'fuel-log-2',
-    refueledAt: new Date(now.getFullYear(), now.getMonth() - 3, 6).toISOString(),
+    refueledAt: new Date(
+      now.getFullYear(),
+      now.getMonth() - 3,
+      6
+    ).toISOString(),
     mileage: 13080,
     previousMileage: 12500,
     amount: 13.1,
@@ -48,7 +54,11 @@ const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
   }),
   buildFuelLog({
     fuelLogId: 'fuel-log-3',
-    refueledAt: new Date(now.getFullYear(), now.getMonth() - 2, 8).toISOString(),
+    refueledAt: new Date(
+      now.getFullYear(),
+      now.getMonth() - 2,
+      8
+    ).toISOString(),
     mileage: 13640,
     previousMileage: 13080,
     amount: 11.7,
@@ -58,7 +68,11 @@ const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
   }),
   buildFuelLog({
     fuelLogId: 'fuel-log-4',
-    refueledAt: new Date(now.getFullYear(), now.getMonth() - 1, 12).toISOString(),
+    refueledAt: new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      12
+    ).toISOString(),
     mileage: 14220,
     previousMileage: 13640,
     amount: 12.9,

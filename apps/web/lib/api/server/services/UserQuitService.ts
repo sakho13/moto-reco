@@ -62,10 +62,11 @@ export class UserQuitService {
   public async recoverUser(params: RecoverUserParams): Promise<{
     userId: UserId
   }> {
-    const userIdValue = await this.authProviderRepository.findUserIdByExternalId(
-      params.externalId,
-      params.providerType
-    )
+    const userIdValue =
+      await this.authProviderRepository.findUserIdByExternalId(
+        params.externalId,
+        params.providerType
+      )
 
     if (!userIdValue) {
       throw new ApiV1Error(
