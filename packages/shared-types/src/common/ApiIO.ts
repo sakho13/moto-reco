@@ -49,6 +49,10 @@ export type ApiResponseUserQuit = {
   recoveryCode: string
 }
 
+export type ApiResponseUserRecover = {
+  userId: string
+}
+
 export type ApiResponseManufacturer = {
   manufacturers: {
     manufacturerId: string

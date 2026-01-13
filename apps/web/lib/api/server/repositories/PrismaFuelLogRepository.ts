@@ -49,10 +49,13 @@ export class PrismaFuelLogRepository
     myUserBikeId: MyUserBikeId,
     searchParams: FuelLogSearchParams
   ): Promise<FuelLogEntity[]> {
-    const sortByMap = {
-      refueledAt: 'refueledAt',
-      mileage: 'mileage',
-    } as const
+    const orderBy =
+      searchParams.sortBy === 'refueledAt'
+        ? [
+            { refueledAt: searchParams.sortOrder },
+            { mileage: searchParams.sortOrder },
+          ]
+        : [{ [searchParams.sortBy]: searchParams.sortOrder }]
 
     const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
       where: {
@@ -67,9 +70,7 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
       },
-      orderBy: {
-        [sortByMap[searchParams.sortBy]]: searchParams.sortOrder,
-      },
+      orderBy,
       skip: searchParams.skip,
       take: searchParams.take,
     })
