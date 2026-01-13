@@ -6,6 +6,7 @@ import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
 
 export interface FuelLogFormData {
@@ -202,9 +203,8 @@ export const FuelLogForm = ({
       </FormField>
 
       <FormField label="メモ" htmlFor="memo" helperText="最大500文字">
-        <Input
+        <Textarea
           id="memo"
-          type="text"
           value={formData.memo}
           onChange={(e) =>
             setFormData((prev) => ({
@@ -215,6 +215,7 @@ export const FuelLogForm = ({
           maxLength={500}
           disabled={isSubmitting}
           placeholder="例: ハイオク満タン"
+          rows={3}
         />
       </FormField>
 
