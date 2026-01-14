@@ -8,6 +8,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseAuth } from '@/lib/firebase/config'
@@ -32,6 +33,7 @@ export function LoginCard() {
 
     try {
       await signInWithEmail(email, password)
+      trackEvent('web_login', { method: 'email' })
       router.push('/app/home')
     } catch (err) {
       console.error('Login error:', err)
@@ -65,6 +67,7 @@ export function LoginCard() {
         await apiGet('/api/v1/user/profile')
 
         // 成功 = 既に登録済み
+        trackEvent('web_login', { method: 'google' })
         router.push('/app/home')
         return
       } catch (profileError: unknown) {
@@ -94,6 +97,8 @@ export function LoginCard() {
           await apiPost('/api/v1/user/auth/register', { name: userName })
 
           // 4. 登録成功 → ホームへ
+          trackEvent('web_sign_up', { method: 'google' })
+          trackEvent('web_login', { method: 'google' })
           router.push('/app/home')
           return
         }

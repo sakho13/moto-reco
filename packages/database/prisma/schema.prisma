@@ -146,6 +146,7 @@ model TUserMyBikeFuelLog {
   mileage    Int      @map("mileage") // 給油時総走行距離/km
   previousMileage Int @map("previous_mileage") // 前回給油時総走行距離/km
   refueledAt DateTime @map("refueled_at") // 給油日時
+  memo       String?  @map("memo") // メモ
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -168,6 +168,48 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/user/auth/recover:
+    post:
+      summary: ユーザー復帰
+      description: 復帰コードを受け取り、退会状態のユーザーを復帰させます。
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRecover'
+      responses:
+        '200':
+          description: 復帰処理成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserRecoverResponse'
+                  message:
+                    type: string
+                    example: 復帰処理が完了しました
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/bikes/manufacturers:
     get:
       summary: バイクメーカー一覧の取得
@@ -841,6 +883,22 @@ components:
         recoveryCode:
           type: string
           example: '12345'
+    UserRecover:
+      type: object
+      required:
+        - recoveryCode
+      properties:
+        recoveryCode:
+          type: string
+          minLength: 5
+          maxLength: 5
+          description: 復帰コード（5桁）
+          example: '12345'
+    UserRecoverResponse:
+      type: object
+      properties:
+        userId:
+          type: string
     ManufacturerDetail:
       type: object
       properties:
@@ -1012,6 +1070,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
         fuelEfficiency:
           type: number
           format: float
@@ -1048,6 +1111,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
         updateTotalMileage:
           type: boolean
           description: 燃料ログ登録後にユーザー所有バイクの総走行距離を更新するかどうか。更新する値が現在の総走行距離よりも小さい場合は更新されません。
@@ -1077,6 +1145,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
     MyUserBikeFuelLogDeleteDetail:
       type: object
       required:

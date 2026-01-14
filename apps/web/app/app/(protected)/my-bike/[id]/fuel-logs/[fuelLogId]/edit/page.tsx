@@ -14,7 +14,8 @@ import {
   FuelLogForm,
   type FuelLogFormData,
 } from '@/components/fuel-log/FuelLogForm'
-import { authenticatedFetch, apiPatch } from '@/lib/api/client'
+import { TrashIcon } from '@/components/icons/TrashIcon'
+import { apiDelete, authenticatedFetch, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -25,6 +26,7 @@ function FuelLogEditPage() {
   const fuelLogId = params.fuelLogId as string | undefined
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState('')
   const [initialData, setInitialData] = useState<FuelLogFormData | undefined>()
 
@@ -61,6 +63,7 @@ function FuelLogEditPage() {
             previousMileage: fuelLog.previousMileage.toString(),
             amount: fuelLog.amount.toString(),
             totalPrice: fuelLog.totalPrice.toString(),
+            memo: fuelLog.memo ?? '',
             updateTotalMileage: false,
           })
         }
@@ -78,6 +81,7 @@ function FuelLogEditPage() {
     setIsSubmitting(true)
 
     try {
+      const memo = formData.memo.trim()
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
         fuelLogId: fuelLogId,
         refueledAt: new Date(formData.refueledAt),
@@ -85,6 +89,7 @@ function FuelLogEditPage() {
         previousMileage: Number(formData.previousMileage),
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
+        memo: memo.length > 0 ? memo : null,
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
@@ -96,6 +101,38 @@ function FuelLogEditPage() {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!fuelLogId) {
+      setError('給油履歴IDが不正です')
+      return
+    }
+
+    const isConfirmed = window.confirm(
+      'この給油履歴を削除しますか？この操作は取り消せません。'
+    )
+    if (!isConfirmed) {
+      return
+    }
+
+    setError('')
+    setIsDeleting(true)
+
+    try {
+      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
+        fuelLogId,
+      })
+      await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      toast.success('給油履歴を削除しました', {
+        description: '給油履歴一覧へ移動します。',
+      })
+      router.push(`/app/my-bike/${bikeId}/fuel-logs`)
+    } catch (err) {
+      setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -149,7 +186,20 @@ function FuelLogEditPage() {
         </Button>
       </div>
 
-      <BaseCard title="給油履歴を編集">
+      <BaseCard
+        title="給油履歴を編集"
+        headerAction={
+          <Button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting || isSubmitting}
+            variant="danger"
+            aria-label="削除する"
+          >
+            <TrashIcon />
+          </Button>
+        }
+      >
         <FuelLogForm
           initialData={initialData}
           onSubmit={handleFormSubmit}

@@ -227,6 +227,7 @@ userBike.get(
             previousMileage: log.previousMileage,
             amount: log.amount,
             totalPrice: log.totalPrice,
+            memo: log.memo,
             fuelEfficiency: log.fuelEfficiency,
             pricePerLiter: log.pricePerLiter,
           }
@@ -260,6 +261,7 @@ userBike.post(
         previousMileage: body.previousMileage,
         amount: body.amount,
         totalPrice: body.totalPrice,
+        memo: body.memo,
         updateTotalMileage: body.updateTotalMileage,
       })
     })
@@ -274,6 +276,7 @@ userBike.post(
           previousMileage: result.previousMileage,
           amount: result.amount,
           totalPrice: result.totalPrice,
+          memo: result.memo,
           fuelEfficiency: result.fuelEfficiency,
           pricePerLiter: result.pricePerLiter,
         },
@@ -307,6 +310,7 @@ userBike.patch(
         previousMileage: body.previousMileage,
         amount: body.amount,
         totalPrice: body.totalPrice,
+        memo: body.memo,
       })
     })
 
@@ -320,6 +324,7 @@ userBike.patch(
           previousMileage: result.previousMileage,
           amount: result.amount,
           totalPrice: result.totalPrice,
+          memo: result.memo,
           fuelEfficiency: result.fuelEfficiency,
           pricePerLiter: result.pricePerLiter,
         },

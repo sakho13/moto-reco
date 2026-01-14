@@ -29,8 +29,8 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning={true}>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <FirebaseAnalytics />
         {children}
+        <FirebaseAnalytics />
       </body>
     </html>
   )

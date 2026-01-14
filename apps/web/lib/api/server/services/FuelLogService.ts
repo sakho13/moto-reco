@@ -19,6 +19,7 @@ type RegisterFuelLogParams = {
   previousMileage: number
   amount: number
   totalPrice: number
+  memo?: string | null
   updateTotalMileage: boolean
 }
 
@@ -31,6 +32,7 @@ type UpdateFuelLogParams = {
   previousMileage?: number
   amount?: number
   totalPrice?: number
+  memo?: string | null
 }
 
 type DeleteFuelLogParams = {
@@ -65,6 +67,7 @@ export class FuelLogService {
       previousMileage: params.previousMileage,
       amount: params.amount,
       totalPrice: params.totalPrice,
+      memo: params.memo ?? null,
     })
 
     const createdFuelLog = await this.fuelLogRepository.createFuelLog(fuelLog)
@@ -132,6 +135,7 @@ export class FuelLogService {
           params.previousMileage ?? existingFuelLog.previousMileage,
         amount: params.amount ?? existingFuelLog.amount,
         totalPrice: params.totalPrice ?? existingFuelLog.totalPrice,
+        memo: params.memo ?? existingFuelLog.memo,
       })
 
       // 4. 更新実行

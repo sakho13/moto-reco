@@ -16,6 +16,7 @@ catalog:
   firebase: 12.6.0
   'firebase-admin': 13.6.0
   next: 16.0.7
+  '@next/third-parties': 16.1.1
   react: 19.2.1
   react-dom: 19.2.1
   lucide-react: 0.561.0
