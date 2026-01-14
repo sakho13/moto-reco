@@ -1,12 +1,18 @@
 'use client'
 
-import { useEffect } from 'react'
-import { getFirebaseAnalytics } from '@/lib/firebase/config'
+import { GoogleAnalytics } from '@next/third-parties/google'
 
-export const FirebaseAnalytics = () => {
-  useEffect(() => {
-    getFirebaseAnalytics()
-  }, [])
+/**
+ * Google Analytics統合コンポーネント
+ * 環境変数の参照と条件分岐をコンポーネント内に隠蔽
+ */
+export function FirebaseAnalytics() {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const gaId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 
-  return <div id="firebase-analytics"></div>
+  if (!isProduction || !gaId) {
+    return null
+  }
+
+  return <GoogleAnalytics gaId={gaId} />
 }
