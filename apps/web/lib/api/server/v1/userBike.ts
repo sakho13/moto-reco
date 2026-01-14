@@ -6,6 +6,7 @@ import {
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
   ApiResponseFuelInsight,
+  ApiResponseTouringDetail,
   createBikeId,
   createFuelLogId,
   createMyUserBikeId,
@@ -20,6 +21,7 @@ import {
   FuelLogUpdateRequestSchema,
   FuelLogDeleteRequestSchema,
   FuelLogListQuerySchema,
+  TouringRegisterRequestSchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -28,9 +30,11 @@ import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaFuelInsightRepository } from '../repositories/PrismaFuelInsightRepository'
 import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
+import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeRepository'
 import { FuelInsightService } from '../services/FuelInsightService'
 import { FuelLogService } from '../services/FuelLogService'
+import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
 import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
@@ -405,6 +409,49 @@ userBike.get(
       },
       message: '燃費インサイト取得成功',
     })
+  }
+)
+
+userBike.post(
+  '/bike/:myUserBikeId/tourings',
+  honoAuthMiddleware,
+  zodValidateJson(TouringRegisterRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const touringRepo = new PrismaTouringRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new TouringService(touringRepo, myUserBikeRepo)
+
+      return service.registerTouring({
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        title: body.title,
+        startDate: body.startDate,
+        endDate: body.endDate,
+        startMileage: body.startMileage,
+        endMileage: body.endMileage,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseTouringDetail>>(
+      {
+        status: 'success',
+        data: {
+          touringId: result.id,
+          title: result.title,
+          startDate: result.startDate.toISOString(),
+          endDate: result.endDate.toISOString(),
+          startMileage: result.startMileage,
+          endMileage: result.endMileage,
+        },
+        message: 'ツーリング登録成功',
+      },
+      201
+    )
   }
 )
 
