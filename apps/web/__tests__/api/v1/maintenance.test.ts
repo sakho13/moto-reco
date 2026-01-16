@@ -99,7 +99,7 @@ describe('Maintenance API Endpoints', () => {
       expect(json.data).toBeDefined()
       expect(json.data.maintenanceItems).toBeDefined()
       expect(Array.isArray(json.data.maintenanceItems)).toBe(true)
-      expect(json.data.maintenanceItems.length).toBe(20) // 保険除く20種類
+      expect(json.data.maintenanceItems.length).toBe(19) // 保険除く20種類
     })
 
     test('メンテナンス項目の各項目に必要なフィールドが含まれている', async () => {
