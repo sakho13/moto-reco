@@ -128,6 +128,15 @@ export type ApiResponseFuelLogDetail = {
 
 export type ApiResponseFuelLogList = ApiResponseFuelLogDetail[]
 
+export type ApiResponseTouringDetail = {
+  touringId: string
+  title: string
+  startDate: string
+  endDate: string
+  startMileage: number | null
+  endMileage: number | null
+}
+
 export type ApiResponseFuelInsight = {
   averageFuelEfficiency: number | null
   averageAmount: number | null

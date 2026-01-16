@@ -1193,6 +1193,147 @@ describe('UserBike API Endpoints', () => {
     })
   })
 
+  describe('POST /api/v1/user-bike/bike/:myUserBikeId/tourings', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'ツーリングテスト用バイク',
+        totalMileage: 2000,
+      })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+        'POST',
+        {
+          title: '春のツーリング',
+          startDate: '2024-05-01T00:00:00.000Z',
+          endDate: '2024-05-03T00:00:00.000Z',
+        }
+      )
+    })
+
+    test('必須項目が欠けている場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+      expect(json.details.length).toBeGreaterThan(0)
+    })
+
+    test('不正な入力の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '',
+            startDate: '2024-05-05T00:00:00.000Z',
+            endDate: '2024-05-01T00:00:00.000Z',
+            startMileage: 1000,
+            endMileage: 900,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('存在しないバイクIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${randomUUID()}/tourings`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '夏のツーリング',
+            startDate: '2024-06-01T00:00:00.000Z',
+            endDate: '2024-06-02T00:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('ツーリングを登録できる', async () => {
+      const startDate = '2024-05-01T00:00:00.000Z'
+      const endDate = '2024-05-03T00:00:00.000Z'
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '春のツーリング',
+            startDate,
+            endDate,
+            startMileage: 2000,
+            endMileage: 2300,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          touringId: expect.any(String),
+          title: '春のツーリング',
+          startDate,
+          endDate,
+          startMileage: 2000,
+          endMileage: 2300,
+        },
+        message: 'ツーリング登録成功',
+      })
+
+      const touringRecord = await prisma.tUserMyBikeTouring.findUnique({
+        where: { id: json.data.touringId },
+      })
+      expect(touringRecord?.title).toBe('春のツーリング')
+      expect(touringRecord?.startDate.toISOString()).toBe(startDate)
+      expect(touringRecord?.endDate.toISOString()).toBe(endDate)
+      expect(touringRecord?.startMileage).toBe(2000)
+      expect(touringRecord?.endMileage).toBe(2300)
+      expect(touringRecord?.userMyBikeId).toBe(myUserBikeId)
+    })
+  })
+
   describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
     let token: string
     let myUserBikeId: string

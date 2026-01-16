@@ -132,6 +132,7 @@ model TUserMyBike {
   userBike TUserBike @relation(fields: [userBikeId], references: [id], onDelete: Restrict)
 
   fuelLogs TUserMyBikeFuelLog[]
+  tourings TUserMyBikeTouring[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
@@ -154,6 +155,24 @@ model TUserMyBikeFuelLog {
   userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
 
   @@index([userMyBikeId, refueledAt])
+}
+
+model TUserMyBikeTouring {
+  id           String @id @default(cuid(2))
+  userMyBikeId String @map("my_bike_id")
+
+  title        String   @map("title")
+  startDate    DateTime @map("start_date")
+  endDate      DateTime @map("end_date")
+  startMileage Int?     @map("start_mileage")
+  endMileage   Int?     @map("end_mileage")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+
+  @@index([userMyBikeId, startDate])
 }
 
 model TUserQuit {
