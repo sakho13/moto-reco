@@ -1,0 +1,46 @@
+name: Test Branch Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source branch to merge from'
+        required: true
+        default: 'main'
+      target_branch:
+        description: 'Target branch to merge to'
+        required: true
+        default: 'develop'
+
+permissions:
+  contents: write
+
+jobs:
+  test-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Test branch sync
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin ${{ inputs.source_branch }}
+          git fetch origin ${{ inputs.target_branch }}
+
+          git checkout ${{ inputs.target_branch }}
+
+          if git merge origin/${{ inputs.source_branch }} --ff-only --no-edit; then
+            echo "✅ Merge successful (fast-forward)"
+            echo "⚠️  DRY-RUN: Would push to ${{ inputs.target_branch }}"
+            # テスト完了後にコメント解除
+            # git push origin ${{ inputs.target_branch }}
+          else
+            echo "❌ Merge failed - conflict detected"
+            exit 1
+          fi

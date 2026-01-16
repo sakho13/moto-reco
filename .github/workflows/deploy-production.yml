@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 env:
@@ -24,7 +24,7 @@ jobs:
     environment: production
     permissions:
       id-token: write
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
@@ -159,3 +159,47 @@ jobs:
             --cluster ${{ env.ECS_CLUSTER }} \
             --services ${{ env.ECS_SERVICE }} \
             --region ${{ env.AWS_REGION }}
+
+      - name: Sync develop to main
+        if: success()
+        run: |
+          # Git設定
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          # リモートブランチの最新情報を取得
+          git fetch origin main
+          git fetch origin develop
+
+          # mainブランチにチェックアウト
+          git checkout main
+
+          # developブランチの内容をマージ（Fast-forward）
+          if git merge origin/develop --ff-only --no-edit; then
+            echo "✅ Successfully merged develop into main (fast-forward)"
+
+            # マージコミットメッセージを更新
+            TAG_NAME="${{ github.ref_name }}"
+            git commit --amend -m "🔀 Sync develop to main after deployment
+
+            Deployed version: ${TAG_NAME}
+            Deployment workflow: ${{ github.run_id }}
+
+            Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+            # mainブランチにプッシュ
+            git push origin main
+
+            echo "✅ Successfully pushed to main branch"
+          else
+            echo "❌ Failed to merge develop into main"
+            echo "⚠️  Conflict detected or fast-forward merge not possible"
+            echo ""
+            echo "📋 Manual merge required:"
+            echo "  1. git fetch origin"
+            echo "  2. git checkout main"
+            echo "  3. git merge origin/develop"
+            echo "  4. Resolve conflicts"
+            echo "  5. git push origin main"
+            exit 1
+          fi
