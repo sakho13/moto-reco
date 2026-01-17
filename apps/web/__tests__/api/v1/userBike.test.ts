@@ -1095,6 +1095,8 @@ describe('UserBike API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
 
+      expect(Array.isArray(json.data)).toBe(true)
+      expect(json.data.length).toBeGreaterThan(0)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       json.data.forEach((log: any) => {
         expect(typeof log.fuelLogId).toBe('string')
@@ -1326,15 +1328,26 @@ describe('UserBike API Endpoints', () => {
         message: 'ツーリング登録成功',
       })
 
-      const touringRecord = await prisma.tUserMyBikeTouring.findUnique({
-        where: { id: json.data.touringId },
-      })
-      expect(touringRecord?.title).toBe('春のツーリング')
-      expect(touringRecord?.startDate.toISOString()).toBe(startDate)
-      expect(touringRecord?.endDate.toISOString()).toBe(endDate)
-      expect(touringRecord?.startMileage).toBe(2000)
-      expect(touringRecord?.endMileage).toBe(2300)
-      expect(touringRecord?.userMyBikeId).toBe(myUserBikeId)
+      const touringId = json.data.touringId
+
+      const getTouringResult = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const getTouringJson = await getTouringResult.json()
+      expect(getTouringResult.status).toBe(200)
+      expect(getTouringJson.data.touringId).toBe(touringId)
+      expect(getTouringJson.data.title).toBe('春のツーリング')
+      expect(getTouringJson.data.startDate).toBe(startDate)
+      expect(getTouringJson.data.endDate).toBe(endDate)
+      expect(getTouringJson.data.startMileage).toBe(2000)
+      expect(getTouringJson.data.endMileage).toBe(2300)
     })
   })
 
