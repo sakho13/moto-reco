@@ -41,6 +41,7 @@ export const FuelLogRegisterRequestSchema = z
         invalid_type_error: 'メモは文字列で指定してください',
       })
       .max(500, 'メモは500文字以内で指定してください')
+      .nullable()
       .optional(),
     updateTotalMileage: z.boolean().default(false),
   })
@@ -113,6 +114,7 @@ export const FuelLogUpdateRequestSchema = z
         invalid_type_error: 'メモは文字列で指定してください',
       })
       .max(500, 'メモは500文字以内で指定してください')
+      .nullable()
       .optional(),
   })
   .refine(
