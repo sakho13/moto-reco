@@ -8,3 +8,9 @@
 .emptyState p {
   margin-bottom: var(--spacing-4);
 }
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--spacing-4);
+}

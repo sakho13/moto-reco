@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import useSWR from 'swr'
+import useSWRInfinite from 'swr/infinite'
 import type {
   ApiResponseFuelLogList,
   SuccessResponse,
@@ -19,23 +19,35 @@ function FuelLogsPage() {
   const router = useRouter()
   const bikeId = params.id as string
 
-  const { data, error, isLoading } = useSWR(
-    bikeId
-      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc`
-      : null,
-    async (url) => {
-      const response = await authenticatedFetch(url, { method: 'GET' })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new ApiV1Error(
-          errorData.errorCode || 'SERVER_ERROR',
-          errorData.message || 'エラーが発生しました'
-        )
-      }
-      const json =
-        (await response.json()) as SuccessResponse<ApiResponseFuelLogList>
-      return json.data
+  const fetchFuelLogs = async (url: string) => {
+    const response = await authenticatedFetch(url, { method: 'GET' })
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new ApiV1Error(
+        errorData.errorCode || 'SERVER_ERROR',
+        errorData.message || 'エラーが発生しました'
+      )
     }
+    const json =
+      (await response.json()) as SuccessResponse<ApiResponseFuelLogList>
+    return json.data
+  }
+
+  const {
+    data,
+    error,
+    isLoading,
+    size,
+    setSize,
+    isValidating,
+  } = useSWRInfinite(
+    (pageIndex) =>
+      bikeId
+        ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=10&page=${
+            pageIndex + 1
+          }`
+        : null,
+    fetchFuelLogs
   )
 
   const handleEdit = (fuelLogId: string) => {
@@ -44,6 +56,10 @@ function FuelLogsPage() {
 
   const handleRegister = () => {
     router.push(`/app/my-bike/${bikeId}/fuel-logs/register`)
+  }
+
+  const handleLoadMore = () => {
+    setSize(size + 1)
   }
 
   if (isLoading) {
@@ -83,7 +99,10 @@ function FuelLogsPage() {
     )
   }
 
-  const fuelLogs = data || []
+  const fuelLogs = data ? data.flat() : []
+  const lastPageCount = data?.[data.length - 1]?.length ?? 0
+  const canLoadMore = lastPageCount === 10
+  const isLoadingMore = isValidating && !isLoading && size > 0
 
   // 有効な燃費データが2件以上あるかチェック
   const validFuelLogs = fuelLogs.filter((log) => log.fuelEfficiency !== null)
@@ -121,6 +140,9 @@ function FuelLogsPage() {
             fuelLogs={fuelLogs}
             onEdit={handleEdit}
             onRegister={handleRegister}
+            onLoadMore={handleLoadMore}
+            canLoadMore={canLoadMore}
+            isLoadingMore={isLoadingMore}
           />
         </div>
       </div>
