@@ -1,8 +1,4 @@
-import {
-  createTouringId,
-  MyUserBikeId,
-  UserId,
-} from '@repo/shared-types'
+import { createTouringId, MyUserBikeId, UserId } from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
