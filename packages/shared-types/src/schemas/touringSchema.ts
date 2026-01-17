@@ -54,3 +54,13 @@ export const TouringRegisterRequestSchema = z
 export type TouringRegisterRequest = z.infer<
   typeof TouringRegisterRequestSchema
 >
+
+/**
+ * ツーリング一覧取得クエリパラメータのバリデーションスキーマ
+ */
+export const TouringListQuerySchema = z.object({
+  'sort-by': z.enum(['start-date', 'end-date']).optional(),
+  'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+})
+
+export type TouringListQuery = z.infer<typeof TouringListQuerySchema>

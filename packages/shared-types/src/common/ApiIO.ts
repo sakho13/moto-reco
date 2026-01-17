@@ -137,6 +137,8 @@ export type ApiResponseTouringDetail = {
   endMileage: number | null
 }
 
+export type ApiResponseTouringList = ApiResponseTouringDetail[]
+
 export type ApiResponseFuelInsight = {
   averageFuelEfficiency: number | null
   averageAmount: number | null
