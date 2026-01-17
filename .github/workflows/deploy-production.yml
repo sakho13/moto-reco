@@ -26,6 +26,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
 
