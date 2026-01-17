@@ -72,10 +72,7 @@ export class TouringService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    return await this.touringRepository.findTourings(
-      myUserBikeId,
-      searchParams
-    )
+    return await this.touringRepository.findTourings(myUserBikeId, searchParams)
   }
 
   public async getTouringById(

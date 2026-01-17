@@ -36,8 +36,16 @@ export const FuelLogForm = ({
   isEdit = false,
   totalMileage,
 }: FuelLogFormProps) => {
+  const getTodayDateString = () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  const today = getTodayDateString()
   const [formData, setFormData] = useState<FuelLogFormData>({
-    refueledAt: '',
+    refueledAt: today ?? '',
     mileage: '',
     previousMileage: '',
     amount: '',
@@ -72,7 +80,6 @@ export const FuelLogForm = ({
     await onSubmit(formData)
   }
 
-  const today = new Date().toISOString().split('T')[0]
   const isUpdateTotalMileageDisabled =
     totalMileage !== undefined &&
     formData.mileage !== '' &&

@@ -46,8 +46,7 @@ export const TouringRegisterRequestSchema = z
       data.endMileage === undefined ||
       data.startMileage <= data.endMileage,
     {
-      message:
-        '開始時の総走行距離は終了時の総走行距離以下で指定してください',
+      message: '開始時の総走行距離は終了時の総走行距離以下で指定してください',
       path: ['startMileage'],
     }
   )
