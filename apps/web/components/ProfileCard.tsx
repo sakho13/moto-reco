@@ -7,6 +7,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { EditIcon } from '@/components/icons/EditIcon'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
@@ -145,12 +146,21 @@ export function ProfileCard() {
 
   // 表示モード
   return (
-    <BaseCard title="プロフィール">
+    <BaseCard
+      title="プロフィール"
+      headerAction={
+        <Button
+          onClick={handleEdit}
+          variant="cloud"
+          size="sm"
+          aria-label="プロフィールを編集"
+        >
+          <EditIcon />
+        </Button>
+      }
+    >
       <div>
         <p>名前: {data?.name || '未設定'}</p>
-        <Button onClick={handleEdit} style={{ marginTop: '8px' }}>
-          編集
-        </Button>
       </div>
     </BaseCard>
   )
