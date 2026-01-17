@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { LogoutButton } from '@/components/Navigation/LogoutButton'
 import { ProfileCard } from '@/components/ProfileCard'
@@ -19,7 +20,9 @@ function ProfileEditPage() {
 
       <div className="w-full max-w-md flex flex-col gap-4">
         <ProfileCard />
-        <LogoutButton />
+        <BaseCard title="アカウント">
+          <LogoutButton />
+        </BaseCard>
       </div>
     </>
   )
