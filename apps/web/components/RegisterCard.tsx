@@ -243,7 +243,7 @@ export function RegisterCard() {
           登録することで
           <Link
             style={{
-              textDecoration: "underline"
+              textDecoration: 'underline',
             }}
             href="/privacy-policy"
             target="_blank"
