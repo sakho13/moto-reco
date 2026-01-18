@@ -8,8 +8,15 @@ import { APP_NAME } from '@/lib/statics'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} Web App`,
-  description: `${APP_NAME} Web Application`,
+  title: {
+    default: APP_NAME,
+    template: `%s | ${APP_NAME}`,
+  },
+  description: 'バイクメンテナンス・給油記録管理アプリ',
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default function RootLayout({
