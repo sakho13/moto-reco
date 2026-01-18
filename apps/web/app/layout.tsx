@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import './sonner-custom.css'
 import './globals.css'
 import { FirebaseAnalytics } from '@/components/FirebaseAnalytics'
+import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 // Firebase認証を使用しているため、動的レンダリングを強制
 export const dynamic = 'force-dynamic'
@@ -17,8 +18,20 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'MotoReco Web App',
-  description: 'MotoReco Web Application',
+  title: APP_NAME,
+  description: 'バイクメンテナンス・給油記録管理アプリ',
+  metadataBase: new URL(SITE_URL),
+  keywords: [
+    'バイク',
+    'モーターサイクル',
+    'メンテナンス',
+    '給油記録',
+    '燃費管理',
+    '整備履歴',
+    'バイク管理アプリ',
+    'ツーリング',
+    'ツーリング記録',
+  ],
 }
 
 export default function RootLayout({
