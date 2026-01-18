@@ -46,8 +46,7 @@ export const TouringRegisterRequestSchema = z
       data.endMileage === undefined ||
       data.startMileage <= data.endMileage,
     {
-      message:
-        '開始時の総走行距離は終了時の総走行距離以下で指定してください',
+      message: '開始時の総走行距離は終了時の総走行距離以下で指定してください',
       path: ['startMileage'],
     }
   )
@@ -117,3 +116,13 @@ export const TouringStartEndRequestSchema = z.discriminatedUnion('action', [
 export type TouringStartEndRequest = z.infer<
   typeof TouringStartEndRequestSchema
 >
+
+/**
+ * ツーリング一覧取得クエリパラメータのバリデーションスキーマ
+ */
+export const TouringListQuerySchema = z.object({
+  'sort-by': z.enum(['start-date', 'end-date']).optional(),
+  'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+})
+
+export type TouringListQuery = z.infer<typeof TouringListQuerySchema>

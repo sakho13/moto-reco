@@ -812,6 +812,64 @@ paths:
           $ref: '#/components/responses/Error500'
 
   /api/v1/user-bike/bike/{my-user-bike-id}/tourings:
+    get:
+      summary: ユーザー所有バイクのツーリング一覧取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: query
+          name: sort-by
+          schema:
+            type: string
+            enum:
+              - start-date
+              - end-date
+        - in: query
+          name: sort-order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+            description: ソート順序
+      responses:
+        '200':
+          description: ツーリング一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
     post:
       summary: ユーザー所有バイクのツーリング登録
       tags:
@@ -914,6 +972,54 @@ paths:
                   message:
                     type: string
                     example: ツーリング開始成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/tourings/{touring-id}:
+    get:
+      summary: ユーザー所有バイクのツーリング詳細取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      responses:
+        '200':
+          description: ツーリング取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング取得成功
         '400':
           $ref: '#/components/responses/Error400'
         '401':

@@ -7,9 +7,11 @@ import {
   ApiResponseFuelLogList,
   ApiResponseFuelInsight,
   ApiResponseTouringDetail,
+  ApiResponseTouringList,
   createBikeId,
   createFuelLogId,
   createMyUserBikeId,
+  createTouringId,
   createUserId,
   FuelInsightPeriod,
   SuccessResponse,
@@ -23,6 +25,7 @@ import {
   FuelLogListQuerySchema,
   TouringRegisterRequestSchema,
   TouringStartEndRequestSchema,
+  TouringListQuerySchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -39,6 +42,7 @@ import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
 import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
+import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 
 const userBike = new Hono()
@@ -509,6 +513,86 @@ userBike.post(
         message: 'ツーリング登録成功',
       },
       201
+    )
+  }
+)
+
+userBike.get(
+  '/bike/:myUserBikeId/tourings',
+  honoAuthMiddleware,
+  zodValidateQuery(TouringListQuerySchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const query = c.req.valid('query')
+
+    const searchParams = new TouringSearchParams({
+      sortBy: query['sort-by'] === 'end-date' ? 'endDate' : 'startDate',
+      sortOrder: query['sort-order'],
+    })
+
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new TouringService(touringRepo, myUserBikeRepo)
+
+    const tourings = await service.getTourings(
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId),
+      searchParams
+    )
+
+    return c.json<SuccessResponse<ApiResponseTouringList>>(
+      {
+        status: 'success',
+        data: tourings.map((touring) => {
+          return {
+            touringId: touring.id,
+            title: touring.title,
+            startDate: touring.startDate.toISOString(),
+            endDate: touring.endDate.toISOString(),
+            startMileage: touring.startMileage,
+            endMileage: touring.endMileage,
+          }
+        }),
+        message: 'ツーリング一覧取得成功',
+      },
+      200
+    )
+  }
+)
+
+userBike.get(
+  '/bike/:myUserBikeId/tourings/:touringId',
+  honoAuthMiddleware,
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new TouringService(touringRepo, myUserBikeRepo)
+
+    const touring = await service.getTouringById(
+      createTouringId(touringId),
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<ApiResponseTouringDetail>>(
+      {
+        status: 'success',
+        data: {
+          touringId: touring.id,
+          title: touring.title,
+          startDate: touring.startDate.toISOString(),
+          endDate: touring.endDate.toISOString(),
+          startMileage: touring.startMileage,
+          endMileage: touring.endMileage,
+        },
+        message: 'ツーリング取得成功',
+      },
+      200
     )
   }
 )

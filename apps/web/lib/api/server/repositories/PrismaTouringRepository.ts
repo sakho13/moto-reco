@@ -6,6 +6,7 @@ import {
 } from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
+import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaTouringRepository
@@ -76,6 +77,51 @@ export class PrismaTouringRepository
       startMileage: updated.startMileage,
       endMileage: updated.endMileage,
     })
+  }
+
+  async findTourings(
+    myUserBikeId: MyUserBikeId,
+    searchParams: TouringSearchParams
+  ): Promise<TouringEntity[]> {
+    const orderBy =
+      searchParams.sortBy === 'startDate'
+        ? [
+            { startDate: searchParams.sortOrder },
+            { endDate: searchParams.sortOrder },
+          ]
+        : [
+            { endDate: searchParams.sortOrder },
+            { startDate: searchParams.sortOrder },
+          ]
+
+    const tourings = await this.connection.tUserMyBikeTouring.findMany({
+      where: {
+        userMyBikeId: myUserBikeId,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        title: true,
+        startDate: true,
+        endDate: true,
+        startMileage: true,
+        endMileage: true,
+      },
+      orderBy,
+    })
+
+    return tourings.map(
+      (touring) =>
+        new TouringEntity({
+          touringId: createTouringId(touring.id),
+          myUserBikeId: createMyUserBikeId(touring.userMyBikeId),
+          title: touring.title,
+          startDate: touring.startDate,
+          endDate: touring.endDate,
+          startMileage: touring.startMileage,
+          endMileage: touring.endMileage,
+        })
+    )
   }
 
   async findTouringById(

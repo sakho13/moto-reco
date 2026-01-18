@@ -1,12 +1,14 @@
 import {
   createTouringId,
   MyUserBikeId,
+  TouringId,
   UserId,
 } from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
+import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 
 type RegisterTouringParams = {
   myUserBikeId: MyUserBikeId
@@ -135,5 +137,48 @@ export class TouringService {
       }
       throw error
     }
+  }
+
+  public async getTourings(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId,
+    searchParams: TouringSearchParams
+  ): Promise<TouringEntity[]> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      myUserBikeId,
+      userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    return await this.touringRepository.findTourings(myUserBikeId, searchParams)
+  }
+
+  public async getTouringById(
+    touringId: TouringId,
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<TouringEntity> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      myUserBikeId,
+      userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const touring = await this.touringRepository.findTouringById(
+      touringId,
+      myUserBikeId
+    )
+
+    if (!touring) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
+    }
+
+    return touring
   }
 }
