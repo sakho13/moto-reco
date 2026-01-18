@@ -239,6 +239,13 @@ export function RegisterCard() {
         >
           登録する
         </Button>
+        <p className="mt-4 text-xs leading-relaxed text-gray-500">
+          登録することで
+          <Link className="underline" href="/privacy-policy">
+            プライバシーポリシー
+          </Link>
+          に同意したものとみなします。
+        </p>
       </form>
     </BaseCard>
   )
