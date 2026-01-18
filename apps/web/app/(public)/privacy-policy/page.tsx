@@ -24,7 +24,8 @@ export default function PrivacyPolicyPage() {
       <header className={styles.header}>
         <h1 className={styles.title}>プライバシーポリシー</h1>
         <p className={styles.description}>
-          {APP_NAME}（以下「本サービス」）は、ユーザーの個人情報を適切に取り扱うことを重要な責務と考え、
+          {APP_NAME}
+          （以下「本サービス」）は、ユーザーの個人情報を適切に取り扱うことを重要な責務と考え、
           本プライバシーポリシーを定めます。
         </p>
         <p className={styles.note}>最終更新日: 2026年1月</p>
@@ -38,8 +39,12 @@ export default function PrivacyPolicyPage() {
               本サービスでは、アカウント作成や利用状況の把握のために以下の情報を取得する場合があります。
             </p>
             <ul className={styles.list}>
-              <li>氏名、ニックネーム、メールアドレスなど登録時に入力した情報</li>
-              <li>バイクの登録情報、給油記録、メンテナンス履歴などサービス利用に伴う情報</li>
+              <li>
+                氏名、ニックネーム、メールアドレスなど登録時に入力した情報
+              </li>
+              <li>
+                バイクの登録情報、給油記録、メンテナンス履歴などサービス利用に伴う情報
+              </li>
               <li>アクセスログ、端末情報、Cookie等の識別子などの技術情報</li>
               <li>お問い合わせ時に提供される情報</li>
             </ul>

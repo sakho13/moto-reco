@@ -241,7 +241,15 @@ export function RegisterCard() {
         </Button>
         <p className="mt-4 text-xs leading-relaxed text-gray-500">
           登録することで
-          <Link className="underline" href="/privacy-policy">
+          <Link
+            style={{
+              textDecoration: "underline"
+            }}
+            href="/privacy-policy"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="プライバシーポリシーを新しいタブで開く"
+          >
             プライバシーポリシー
           </Link>
           に同意したものとみなします。
