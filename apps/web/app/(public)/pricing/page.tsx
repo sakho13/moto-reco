@@ -1,12 +1,23 @@
+import type { Metadata } from 'next'
 import styles from './page.module.css'
 import { PRICING_PLANS } from './pricingData'
 import { PricingCard } from '@/components/docs/pricing/PricingCard'
-import { APP_NAME } from '@/lib/statics'
+import { APP_NAME, SITE_URL } from '@/lib/statics'
 
-export const metadata = {
-  title: `料金プラン | ${APP_NAME}`,
-  description:
-    `${APP_NAME} の料金プランをご確認いただけます。無料プランですべての基本機能をご利用いただけます。`,
+export const metadata: Metadata = {
+  title: '料金プラン',
+  description: `${APP_NAME}の料金プランをご確認いただけます。無料プランですべての基本機能(バイク登録2台まで、メンテナンス記録、給油記録)をご利用いただけます。`,
+  openGraph: {
+    url: `${SITE_URL}/pricing`,
+    title: `料金プラン | ${APP_NAME}`,
+    description: `${APP_NAME}の料金プラン。無料プランですべての基本機能をご利用いただけます。`,
+    images: ['/top_image_1.png'],
+  },
+  twitter: {
+    title: `料金プラン | ${APP_NAME}`,
+    description: `${APP_NAME}の料金プラン。無料プランですべての基本機能をご利用いただけます。`,
+    images: ['/top_image_1.png'],
+  },
 }
 
 export default function PricingPage() {
