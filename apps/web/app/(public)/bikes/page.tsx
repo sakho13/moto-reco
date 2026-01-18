@@ -1,5 +1,5 @@
-import styles from './page.module.css'
 import { prisma } from '@repo/database'
+import styles from './page.module.css'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
 
 export const metadata = {
