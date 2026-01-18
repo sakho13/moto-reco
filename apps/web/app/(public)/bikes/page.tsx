@@ -45,7 +45,9 @@ export default async function PublicBikesPage() {
                   <p className={styles.cardSubtitle}>{subtitle}</p>
                 </div>
                 <div className={styles.cardBody}>
-                  <div className={styles.metric}>総走行距離: {bike.totalMileage.toLocaleString()} km</div>
+                  <div className={styles.metric}>
+                    総走行距離: {bike.totalMileage.toLocaleString()} km
+                  </div>
                   <div className={styles.updatedAt}>
                     更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
                   </div>
