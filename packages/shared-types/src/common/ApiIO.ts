@@ -92,6 +92,7 @@ export type ApiResponseUserBikeList = {
     totalMileage: number
     displacement: number
     modelYear: number | null
+    isPublic: boolean
     createdAt: string
     updatedAt: string
   }[]
@@ -110,8 +111,22 @@ export type ApiResponseUserBikeDetail = {
   totalMileage: number
   displacement: number
   modelYear: number | null
+  isPublic: boolean
   createdAt: string
   updatedAt: string
+}
+
+export type ApiResponsePublicBikeList = {
+  bikes: {
+    myUserBikeId: string
+    manufacturerName: string | null
+    modelName: string | null
+    nickname: string | null
+    displacement: number
+    modelYear: number | null
+    totalMileage: number
+    updatedAt: string
+  }[]
 }
 
 export type ApiResponseFuelLogDetail = {

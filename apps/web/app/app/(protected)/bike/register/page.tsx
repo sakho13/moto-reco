@@ -51,6 +51,7 @@ function BikeRegisterPage() {
           ? Number(formData.purchaseMileage)
           : null,
         totalMileage: Number(formData.totalMileage) || 0,
+        isPublic: formData.isPublic,
       })
 
       await mutate('/api/v1/user-bike/bikes')

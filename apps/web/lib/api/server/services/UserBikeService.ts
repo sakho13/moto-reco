@@ -25,6 +25,7 @@ type RegisterUserBikeParams = {
   purchasePrice?: number
   purchaseMileage?: number
   totalMileage?: number
+  isPublic?: boolean
 }
 
 type UpdateMyUserBikeParams = {
@@ -36,6 +37,7 @@ type UpdateMyUserBikeParams = {
   purchaseMileage?: number | null
   displacement?: number
   totalMileage?: number | null
+  isPublic?: boolean
 }
 
 export class UserBikeService {
@@ -99,6 +101,7 @@ export class UserBikeService {
         purchasePrice: params.purchasePrice ?? null,
         purchaseMileage: params.purchaseMileage ?? null,
         totalMileage,
+        isPublic: params.isPublic ?? false,
         ownedAt: params.purchaseDate ?? new Date(),
         soldAt: null,
         ownStatus: 'OWN',
@@ -166,6 +169,8 @@ export class UserBikeService {
         params.totalMileage !== undefined && params.totalMileage !== null
           ? params.totalMileage
           : current.totalMileage,
+      isPublic:
+        params.isPublic !== undefined ? params.isPublic : current.isPublic,
     })
 
     await this.myUserBikeRepository.updateMyUserBike(updatedEntity)

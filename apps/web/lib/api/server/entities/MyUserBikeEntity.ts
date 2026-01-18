@@ -64,6 +64,10 @@ export class MyUserBikeEntity {
     return this._value.totalMileage
   }
 
+  public get isPublic(): boolean {
+    return this._value.isPublic
+  }
+
   public get ownedAt(): Date {
     return this._value.ownedAt
   }
