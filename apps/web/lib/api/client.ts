@@ -8,6 +8,8 @@ import {
   ApiResponseFuelLogList,
   ApiResponseUserQuit,
   ApiResponseFuelInsight,
+  ApiResponseTouringDetail,
+  ApiResponseTouringList,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -197,6 +199,13 @@ type API_EP = {
 } & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-insights`]: {
     GET: SuccessResponse<ApiResponseFuelInsight>
+  }
+  [key: `/api/v1/user-bike/bike/${string}/tourings`]: {
+    GET: SuccessResponse<ApiResponseTouringList>
+    POST: SuccessResponse<ApiResponseTouringDetail>
+  }
+  [key: `/api/v1/user-bike/bike/${string}/tourings/${string}`]: {
+    GET: SuccessResponse<ApiResponseTouringDetail>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}`]: {
