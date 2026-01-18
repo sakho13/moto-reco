@@ -8,7 +8,7 @@ export function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.content}>
-         <Link
+        <Link
           href={GOOGLE_QA_FORM_URL}
           target="_blank"
           rel="noreferrer"
@@ -22,7 +22,6 @@ export function Footer() {
           <p className={styles.text}>@2025 MotoReco</p>
           <p className={styles.version}>ver {APP_VERSION}</p>
         </div>
-
       </div>
     </footer>
   )
