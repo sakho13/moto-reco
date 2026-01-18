@@ -16,41 +16,17 @@
   transition: all var(--transition-base);
 }
 
-/* アイドルアニメーション（微細な揺れ） */
-@keyframes gentleFloat {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-.navigationCard:not([data-disable-animation='true']) {
-  animation: gentleFloat 3s ease-in-out infinite;
-}
-
-/* アクセシビリティ: モーション削減 */
-@media (prefers-reduced-motion: reduce) {
-  .navigationCard {
-    animation: none !important;
-  }
-}
-
 /* hover状態 */
 .navigationCard:hover {
   border-color: var(--color-product);
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
-  animation-play-state: paused;
   border-width: 1px;
 }
 
 /* active状態 */
 .navigationCard:active {
   transform: translateY(0) scale(0.98);
-  animation-play-state: paused;
 }
 
 /* アイコンコンテナ */
