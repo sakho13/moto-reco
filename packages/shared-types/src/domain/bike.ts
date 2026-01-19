@@ -38,6 +38,7 @@ export type MyUserBike = {
   purchasePrice: number | null
   purchaseMileage: number | null
   totalMileage: number
+  isPublic: boolean
 
   ownedAt: Date
   soldAt: Date | null
