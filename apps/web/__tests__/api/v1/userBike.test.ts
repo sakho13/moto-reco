@@ -1279,15 +1279,24 @@ describe('UserBike API Endpoints', () => {
         message: 'ツーリング開始成功',
       })
 
-      const touringRecord = await prisma.tUserMyBikeTouring.findUnique({
-        where: { id: json.data.touringId },
-      })
-      expect(touringRecord?.title).toBe('朝ツーリング')
-      expect(touringRecord?.startDate.toISOString()).toBe(startDate)
-      expect(touringRecord?.endDate.toISOString()).toBe(startDate)
-      expect(touringRecord?.startMileage).toBe(2000)
-      expect(touringRecord?.endMileage).toBeNull()
-      expect(touringRecord?.userMyBikeId).toBe(myUserBikeId)
+      const getTouringResult = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${json.data.touringId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const getTouringJson = await getTouringResult.json()
+      expect(getTouringResult.status).toBe(200)
+      expect(getTouringJson.data.touringId).toBe(json.data.touringId)
+      expect(getTouringJson.data.title).toBe('朝ツーリング')
+      expect(getTouringJson.data.startDate).toBe(startDate)
+      expect(getTouringJson.data.endDate).toBe(startDate)
+      expect(getTouringJson.data.startMileage).toBe(2000)
+      expect(getTouringJson.data.endMileage).toBeNull()
     })
 
     test('ツーリングを終了できる', async () => {
@@ -1344,11 +1353,24 @@ describe('UserBike API Endpoints', () => {
         message: 'ツーリング終了成功',
       })
 
-      const touringRecord = await prisma.tUserMyBikeTouring.findUnique({
-        where: { id: startJson.data.touringId },
-      })
-      expect(touringRecord?.endDate.toISOString()).toBe(endDate)
-      expect(touringRecord?.endMileage).toBe(2100)
+      const getTouringResult = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${startJson.data.touringId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const getTouringJson = await getTouringResult.json()
+      expect(getTouringResult.status).toBe(200)
+      expect(getTouringJson.data.touringId).toBe(startJson.data.touringId)
+      expect(getTouringJson.data.title).toBe('夜ツーリング')
+      expect(getTouringJson.data.startDate).toBe(startDate)
+      expect(getTouringJson.data.endDate).toBe(endDate)
+      expect(getTouringJson.data.startMileage).toBe(2000)
+      expect(getTouringJson.data.endMileage).toBe(2100)
     })
   })
 
