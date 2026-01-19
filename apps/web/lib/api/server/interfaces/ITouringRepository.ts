@@ -4,6 +4,7 @@ import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 
 export interface ITouringRepository {
   createTouring(touring: TouringEntity): Promise<TouringEntity>
+  updateTouring(touring: TouringEntity): Promise<TouringEntity>
   findTourings(
     myUserBikeId: MyUserBikeId,
     searchParams: TouringSearchParams
