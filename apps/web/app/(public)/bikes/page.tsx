@@ -1,10 +1,11 @@
 import { prisma } from '@repo/database'
 import styles from './page.module.css'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
+import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
-  title: '公開バイク一覧 | moto-reco',
-  description: 'moto-recoで公開されているバイク情報の一覧です。',
+  title: '公開ユーザバイク一覧',
+  description: `${APP_NAME}で公開されているバイク情報の一覧です。`,
 }
 
 export const revalidate = 300
@@ -49,7 +50,7 @@ export default async function PublicBikesPage() {
                     総走行距離: {bike.totalMileage.toLocaleString()} km
                   </div>
                   <div className={styles.updatedAt}>
-                    更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
+                    最終更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
                   </div>
                 </div>
               </article>
