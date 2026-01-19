@@ -137,6 +137,7 @@ model TUserMyBike {
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
+  @@index([isPublic, ownStatus, updatedAt(sort: Desc)], name: "idx_public_bikes")
 }
 
 model TUserMyBikeFuelLog {
