@@ -1199,6 +1199,181 @@ describe('UserBike API Endpoints', () => {
     })
   })
 
+  describe('POST /api/v1/user-bike/bike/:myUserBikeId/tourings/start-end', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'ツーリング開始終了テスト用バイク',
+        totalMileage: 2000,
+      })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+        'POST',
+        {
+          action: 'start',
+        }
+      )
+    })
+
+    test('終了時にツーリングIDがない場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'end',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('ツーリングを開始できる', async () => {
+      const startDate = '2024-05-01T00:00:00.000Z'
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'start',
+            title: '朝ツーリング',
+            startDate,
+            startMileage: 2000,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          touringId: expect.any(String),
+          title: '朝ツーリング',
+          startDate,
+          endDate: startDate,
+          startMileage: 2000,
+          endMileage: null,
+        },
+        message: 'ツーリング開始成功',
+      })
+
+      const getTouringResult = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${json.data.touringId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const getTouringJson = await getTouringResult.json()
+      expect(getTouringResult.status).toBe(200)
+      expect(getTouringJson.data.touringId).toBe(json.data.touringId)
+      expect(getTouringJson.data.title).toBe('朝ツーリング')
+      expect(getTouringJson.data.startDate).toBe(startDate)
+      expect(getTouringJson.data.endDate).toBe(startDate)
+      expect(getTouringJson.data.startMileage).toBe(2000)
+      expect(getTouringJson.data.endMileage).toBeNull()
+    })
+
+    test('ツーリングを終了できる', async () => {
+      const startDate = '2024-05-01T00:00:00.000Z'
+      const endDate = '2024-05-02T00:00:00.000Z'
+
+      const startRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'start',
+            title: '夜ツーリング',
+            startDate,
+            startMileage: 2000,
+          }),
+        }
+      )
+      const startJson = await startRes.json()
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'end',
+            touringId: startJson.data.touringId,
+            endDate,
+            endMileage: 2100,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          touringId: startJson.data.touringId,
+          title: '夜ツーリング',
+          startDate,
+          endDate,
+          startMileage: 2000,
+          endMileage: 2100,
+        },
+        message: 'ツーリング終了成功',
+      })
+
+      const getTouringResult = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${startJson.data.touringId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const getTouringJson = await getTouringResult.json()
+      expect(getTouringResult.status).toBe(200)
+      expect(getTouringJson.data.touringId).toBe(startJson.data.touringId)
+      expect(getTouringJson.data.title).toBe('夜ツーリング')
+      expect(getTouringJson.data.startDate).toBe(startDate)
+      expect(getTouringJson.data.endDate).toBe(endDate)
+      expect(getTouringJson.data.startMileage).toBe(2000)
+      expect(getTouringJson.data.endMileage).toBe(2100)
+    })
+  })
+
   describe('POST /api/v1/user-bike/bike/:myUserBikeId/tourings', () => {
     let token: string
     let myUserBikeId: string

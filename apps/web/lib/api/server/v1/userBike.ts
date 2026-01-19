@@ -24,6 +24,7 @@ import {
   FuelLogDeleteRequestSchema,
   FuelLogListQuerySchema,
   TouringRegisterRequestSchema,
+  TouringStartEndRequestSchema,
   TouringListQuerySchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
@@ -61,6 +62,7 @@ const toApiResponseUserBikeDetail = (
   totalMileage: detail.totalMileage,
   displacement: detail.displacement,
   modelYear: detail.modelYear,
+  isPublic: detail.isPublic,
   createdAt: detail.createdAt.toISOString(),
   updatedAt: detail.updatedAt.toISOString(),
 })
@@ -93,6 +95,7 @@ userBike.post(
         purchasePrice: body.purchasePrice,
         purchaseMileage: body.purchaseMileage,
         totalMileage: body.totalMileage,
+        isPublic: body.isPublic,
       })
 
       return service.getMyUserBikeDetail(myUserBike.id, createUserId(userId))
@@ -187,6 +190,7 @@ userBike.patch(
         purchaseMileage: body.purchaseMileage,
         displacement: body.displacement,
         totalMileage: body.totalMileage,
+        isPublic: body.isPublic,
       })
     })
 
@@ -413,6 +417,63 @@ userBike.get(
       },
       message: '燃費インサイト取得成功',
     })
+  }
+)
+
+userBike.post(
+  '/bike/:myUserBikeId/tourings/start-end',
+  honoAuthMiddleware,
+  zodValidateJson(TouringStartEndRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const touringRepo = new PrismaTouringRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new TouringService(touringRepo, myUserBikeRepo)
+
+      if (body.action === 'start') {
+        return service.handleTouringAction({
+          action: 'start',
+          myUserBikeId: createMyUserBikeId(myUserBikeId),
+          userId: createUserId(userId),
+          title: body.title,
+          startDate: body.startDate,
+          startMileage: body.startMileage,
+        })
+      }
+
+      return service.handleTouringAction({
+        action: 'end',
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        touringId: body.touringId,
+        endDate: body.endDate,
+        endMileage: body.endMileage,
+      })
+    })
+
+    const status = body.action === 'start' ? 201 : 200
+    const message =
+      body.action === 'start' ? 'ツーリング開始成功' : 'ツーリング終了成功'
+
+    return c.json<SuccessResponse<ApiResponseTouringDetail>>(
+      {
+        status: 'success',
+        data: {
+          touringId: result.id,
+          title: result.title,
+          startDate: result.startDate.toISOString(),
+          endDate: result.endDate.toISOString(),
+          startMileage: result.startMileage,
+          endMileage: result.endMileage,
+        },
+        message,
+      },
+      status
+    )
   }
 )
 

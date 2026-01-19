@@ -45,6 +45,40 @@ export class PrismaTouringRepository
     })
   }
 
+  async updateTouring(touring: TouringEntity): Promise<TouringEntity> {
+    const updated = await this.connection.tUserMyBikeTouring.update({
+      where: {
+        id: touring.id,
+      },
+      data: {
+        title: touring.title,
+        startDate: touring.startDate,
+        endDate: touring.endDate,
+        startMileage: touring.startMileage,
+        endMileage: touring.endMileage,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        title: true,
+        startDate: true,
+        endDate: true,
+        startMileage: true,
+        endMileage: true,
+      },
+    })
+
+    return new TouringEntity({
+      touringId: createTouringId(updated.id),
+      myUserBikeId: createMyUserBikeId(updated.userMyBikeId),
+      title: updated.title,
+      startDate: updated.startDate,
+      endDate: updated.endDate,
+      startMileage: updated.startMileage,
+      endMileage: updated.endMileage,
+    })
+  }
+
   async findTourings(
     myUserBikeId: MyUserBikeId,
     searchParams: TouringSearchParams

@@ -60,40 +60,16 @@
   text-align: left;
 }
 
-/* アイドルアニメーション */
-@keyframes gentleFloat {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-.bikeCard {
-  animation: gentleFloat 3s ease-in-out infinite;
-}
-
-/* モーション削減対応 */
-@media (prefers-reduced-motion: reduce) {
-  .bikeCard {
-    animation: none !important;
-  }
-}
-
 /* hover状態 */
 .bikeCard:hover {
   border-color: var(--color-product);
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
-  animation-play-state: paused;
 }
 
 /* active状態 */
 .bikeCard:active {
   transform: translateY(0) scale(0.98);
-  animation-play-state: paused;
 }
 
 /* フォーカススタイル */

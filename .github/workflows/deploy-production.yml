@@ -254,7 +254,7 @@ jobs:
             --head develop \
             --title "$PR_TITLE" \
             --body "$PR_BODY" \
-            --label "deployment,automated" \
+            --label "Release" \
             2>&1)
 
           if [ $? -eq 0 ]; then
