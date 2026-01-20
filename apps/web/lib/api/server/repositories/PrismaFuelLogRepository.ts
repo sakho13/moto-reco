@@ -13,6 +13,56 @@ export class PrismaFuelLogRepository
   extends PrismaRepositoryBase
   implements IFuelLogRepository
 {
+  private calculatePeriodStartDate(
+    baseDate: Date,
+    period: FuelLogSearchParams['period']
+  ): Date | null {
+    if (!period) return null
+
+    const startDate = new Date(baseDate)
+
+    if (period === 'latest-year' || period === 'past-year') {
+      startDate.setFullYear(startDate.getFullYear() - 1)
+      return startDate
+    }
+
+    if (period === 'latest-month' || period === 'past-month') {
+      startDate.setMonth(startDate.getMonth() - 1)
+      return startDate
+    }
+
+    return null
+  }
+
+  private async resolvePeriodStartDate(
+    myUserBikeId: MyUserBikeId,
+    period: FuelLogSearchParams['period']
+  ): Promise<Date | null> {
+    if (!period) return null
+
+    if (period === 'latest-year' || period === 'latest-month') {
+      const latestLog = await this.connection.tUserMyBikeFuelLog.findFirst({
+        where: {
+          userMyBikeId: myUserBikeId,
+        },
+        select: {
+          refueledAt: true,
+        },
+        orderBy: {
+          refueledAt: 'desc',
+        },
+      })
+
+      if (!latestLog) {
+        return null
+      }
+
+      return this.calculatePeriodStartDate(latestLog.refueledAt, period)
+    }
+
+    return this.calculatePeriodStartDate(new Date(), period)
+  }
+
   async createFuelLog(fuelLog: FuelLogEntity): Promise<FuelLogEntity> {
     const created = await this.connection.tUserMyBikeFuelLog.create({
       data: {
@@ -52,6 +102,10 @@ export class PrismaFuelLogRepository
     myUserBikeId: MyUserBikeId,
     searchParams: FuelLogSearchParams
   ): Promise<FuelLogEntity[]> {
+    const periodStartDate = await this.resolvePeriodStartDate(
+      myUserBikeId,
+      searchParams.period
+    )
     const orderBy =
       searchParams.sortBy === 'refueledAt'
         ? [
@@ -60,9 +114,20 @@ export class PrismaFuelLogRepository
           ]
         : [{ [searchParams.sortBy]: searchParams.sortOrder }]
 
+    if (searchParams.period && !periodStartDate) {
+      return []
+    }
+
     const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
       where: {
         userMyBikeId: myUserBikeId,
+        ...(periodStartDate
+          ? {
+              refueledAt: {
+                gte: periodStartDate,
+              },
+            }
+          : {}),
       },
       select: {
         id: true,

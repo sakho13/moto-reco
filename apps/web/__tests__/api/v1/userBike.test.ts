@@ -903,6 +903,10 @@ describe('UserBike API Endpoints', () => {
       ])
     })
 
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
       await testAuthRequired(
         `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
@@ -946,6 +950,43 @@ describe('UserBike API Endpoints', () => {
 
       expect(json.data[0].refueledAt).toBe('2024-05-01T10:00:00.000Z')
       expect(json.data[4].refueledAt).toBe('2024-01-01T10:00:00.000Z')
+    })
+
+    test('period=latest-monthで最新給油日から1ヶ月分を取得できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?period=latest-month`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.length).toBe(2)
+      expect(json.data[0].refueledAt).toBe('2024-05-01T10:00:00.000Z')
+      expect(json.data[1].refueledAt).toBe('2024-04-01T10:00:00.000Z')
+    })
+
+    test('period=past-monthで現在日時から直近1ヶ月分を取得できる', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2024-05-10T00:00:00.000Z'))
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?period=past-month`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.length).toBe(1)
+      expect(json.data[0].refueledAt).toBe('2024-05-01T10:00:00.000Z')
     })
 
     test('同日の燃料ログは走行距離順で並ぶ', async () => {

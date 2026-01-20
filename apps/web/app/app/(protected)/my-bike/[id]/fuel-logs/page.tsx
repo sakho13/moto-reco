@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import type {
   ApiResponseFuelLogList,
+  FuelLogPeriod,
   SuccessResponse,
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
@@ -18,24 +20,46 @@ function FuelLogsPage() {
   const params = useParams()
   const router = useRouter()
   const bikeId = params.id as string
+  const [chartPeriod, setChartPeriod] =
+    useState<FuelLogPeriod>('latest-year')
+
+  const chartPeriodOptions: { value: FuelLogPeriod; label: string }[] = [
+    { value: 'latest-year', label: '最新の履歴から1年' },
+    { value: 'latest-month', label: '最新の履歴から1ヶ月' },
+    { value: 'past-year', label: '現在日時から直近1年' },
+    { value: 'past-month', label: '現在日時から直近1ヶ月' },
+  ]
+
+  const fetchFuelLogs = async (url: string) => {
+    const response = await authenticatedFetch(url, { method: 'GET' })
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new ApiV1Error(
+        errorData.errorCode || 'SERVER_ERROR',
+        errorData.message || 'エラーが発生しました'
+      )
+    }
+    const json =
+      (await response.json()) as SuccessResponse<ApiResponseFuelLogList>
+    return json.data
+  }
 
   const { data, error, isLoading } = useSWR(
     bikeId
       ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc`
       : null,
-    async (url) => {
-      const response = await authenticatedFetch(url, { method: 'GET' })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new ApiV1Error(
-          errorData.errorCode || 'SERVER_ERROR',
-          errorData.message || 'エラーが発生しました'
-        )
-      }
-      const json =
-        (await response.json()) as SuccessResponse<ApiResponseFuelLogList>
-      return json.data
-    }
+    fetchFuelLogs
+  )
+
+  const {
+    data: chartData,
+    error: chartError,
+    isLoading: isChartLoading,
+  } = useSWR(
+    bikeId
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=100&period=${chartPeriod}`
+      : null,
+    fetchFuelLogs
   )
 
   const handleEdit = (fuelLogId: string) => {
@@ -84,9 +108,12 @@ function FuelLogsPage() {
   }
 
   const fuelLogs = data || []
+  const chartFuelLogs = chartData || []
 
   // 有効な燃費データが2件以上あるかチェック
-  const validFuelLogs = fuelLogs.filter((log) => log.fuelEfficiency !== null)
+  const validChartFuelLogs = chartFuelLogs.filter(
+    (log) => log.fuelEfficiency !== null
+  )
 
   return (
     <>
@@ -106,8 +133,35 @@ function FuelLogsPage() {
       <div className={styles.pageLayout}>
         {/* 左カラム（モバイルでは上）: グラフ */}
         <div className={styles.chartSection}>
-          {validFuelLogs.length >= 2 ? (
-            <FuelEfficiencyChart fuelLogs={fuelLogs} />
+          <div className={styles.chartControls}>
+            <label className={styles.chartLabel} htmlFor="chart-period">
+              表示範囲
+            </label>
+            <select
+              id="chart-period"
+              className={styles.chartSelect}
+              value={chartPeriod}
+              onChange={(event) =>
+                setChartPeriod(event.target.value as FuelLogPeriod)
+              }
+            >
+              {chartPeriodOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          {isChartLoading ? (
+            <div className={styles.chartPlaceholder}>
+              <p>燃費グラフを読み込み中...</p>
+            </div>
+          ) : chartError ? (
+            <div className={styles.chartPlaceholder}>
+              <p>燃費グラフの取得に失敗しました</p>
+            </div>
+          ) : validChartFuelLogs.length >= 2 ? (
+            <FuelEfficiencyChart fuelLogs={chartFuelLogs} />
           ) : (
             <div className={styles.chartPlaceholder}>
               <p>グラフ表示には2回以上の給油履歴が必要です</p>
