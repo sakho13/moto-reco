@@ -58,7 +58,7 @@ function FuelLogsPage() {
     isLoading: isChartLoading,
   } = useSWR(
     bikeId
-      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=100&period=${chartPeriod}`
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=asc&per-size=100&period=${chartPeriod}`
       : null,
     fetchFuelLogs
   )
