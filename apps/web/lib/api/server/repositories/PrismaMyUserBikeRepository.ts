@@ -163,6 +163,43 @@ export class PrismaMyUserBikeRepository
     }))
   }
 
+  async findPublicBikeById(
+    myUserBikeId: MyUserBikeId
+  ): Promise<PublicMyUserBikeDetail | null> {
+    const myUserBike = await this.connection.tUserMyBike.findFirst({
+      where: { id: myUserBikeId, isPublic: true, ownStatus: 'OWN' },
+      include: {
+        userBike: {
+          select: {
+            displacement: true,
+            bike: {
+              include: {
+                manufacturer: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!myUserBike) {
+      return null
+    }
+
+    return {
+      myUserBikeId: createMyUserBikeId(myUserBike.id),
+      manufacturerName: myUserBike.userBike.bike?.manufacturer.name ?? null,
+      modelName: myUserBike.userBike.bike?.modelName ?? null,
+      nickname: myUserBike.nickname,
+      displacement:
+        myUserBike.userBike.bike?.displacement ??
+        myUserBike.userBike.displacement,
+      modelYear: myUserBike.userBike.bike?.modelYear ?? null,
+      totalMileage: myUserBike.totalMileage,
+      updatedAt: myUserBike.updatedAt,
+    }
+  }
+
   async findMyUserBikeById(
     myUserBikeId: MyUserBikeId,
     userId: UserId
