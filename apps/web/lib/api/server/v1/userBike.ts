@@ -23,13 +23,19 @@ import {
   FuelLogUpdateRequestSchema,
   FuelLogDeleteRequestSchema,
   FuelLogListQuerySchema,
+  FuelLogDetailParamSchema,
   TouringRegisterRequestSchema,
   TouringStartEndRequestSchema,
   TouringListQuerySchema,
+  TouringUpdateRequestSchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
-import { zodValidateJson, zodValidateQuery } from '../middlewares/zodValidation'
+import {
+  zodValidateJson,
+  zodValidateParam,
+  zodValidateQuery,
+} from '../middlewares/zodValidation'
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaFuelInsightRepository } from '../repositories/PrismaFuelInsightRepository'
 import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository'
@@ -216,6 +222,7 @@ userBike.get(
       pageSize: query['per-size'],
       sortBy: query['sort-by'] === 'mileage' ? 'mileage' : 'refueledAt',
       sortOrder: query['sort-order'],
+      period: query.period,
     })
 
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)
@@ -248,6 +255,42 @@ userBike.get(
       },
       200
     )
+  }
+)
+
+userBike.get(
+  '/bike/:myUserBikeId/fuel-logs/:fuelLogId',
+  honoAuthMiddleware,
+  zodValidateParam(FuelLogDetailParamSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const params = c.req.valid('param')
+
+    const fuelLogRepo = new PrismaFuelLogRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const fuelLogService = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+
+    const fuelLog = await fuelLogService.getFuelLogDetail(
+      createFuelLogId(params.fuelLogId),
+      createMyUserBikeId(params.myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<ApiResponseFuelLogDetail>>({
+      status: 'success',
+      data: {
+        fuelLogId: fuelLog.id,
+        refueledAt: fuelLog.refueledAt.toISOString(),
+        mileage: fuelLog.mileage,
+        previousMileage: fuelLog.previousMileage,
+        amount: fuelLog.amount,
+        totalPrice: fuelLog.totalPrice,
+        memo: fuelLog.memo,
+        fuelEfficiency: fuelLog.fuelEfficiency,
+        pricePerLiter: fuelLog.pricePerLiter,
+      },
+      message: '燃料ログ詳細取得成功',
+    })
   }
 )
 
@@ -594,6 +637,51 @@ userBike.get(
           endMileage: touring.endMileage,
         },
         message: 'ツーリング取得成功',
+      },
+      200
+    )
+  }
+)
+
+userBike.patch(
+  '/bike/:myUserBikeId/tourings/:touringId',
+  honoAuthMiddleware,
+  zodValidateJson(TouringUpdateRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const touringRepo = new PrismaTouringRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new TouringService(touringRepo, myUserBikeRepo)
+
+      return service.updateTouring({
+        touringId: createTouringId(touringId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        title: body.title,
+        startDate: body.startDate,
+        endDate: body.endDate,
+        startMileage: body.startMileage,
+        endMileage: body.endMileage,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseTouringDetail>>(
+      {
+        status: 'success',
+        data: {
+          touringId: result.id,
+          title: result.title,
+          startDate: result.startDate.toISOString(),
+          endDate: result.endDate.toISOString(),
+          startMileage: result.startMileage,
+          endMileage: result.endMileage,
+        },
+        message: 'ツーリング更新成功',
       },
       200
     )

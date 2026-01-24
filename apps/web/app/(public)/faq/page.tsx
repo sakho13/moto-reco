@@ -5,7 +5,7 @@ import { FaqAccordion } from '@/components/docs/faq/FaqAccordion'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
-  title: 'よくある質問',
+  title: `${APP_NAME} | よくある質問`,
   description: `${APP_NAME}の使い方や機能に関するよくある質問と回答。バイク登録、給油記録、メンテナンス履歴の管理方法、料金プラン、データの扱いなどについて解説しています。`,
   openGraph: {
     url: `${SITE_URL}/faq`,

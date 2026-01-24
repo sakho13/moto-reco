@@ -1,10 +1,11 @@
+import Link from 'next/link'
 import { prisma } from '@repo/database'
 import styles from './page.module.css'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
 import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
-  title: '公開ユーザバイク一覧',
+  title: `${APP_NAME} | 公開バイク一覧`,
   description: `${APP_NAME}で公開されているバイク情報の一覧です。`,
 }
 
@@ -32,7 +33,7 @@ export default async function PublicBikesPage() {
           <p>現在公開されているバイク情報はありません。</p>
         </div>
       ) : (
-        <div className={styles.grid}>
+        <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3`}>
           {bikes.map((bike) => {
             const title =
               bike.nickname ||
@@ -40,7 +41,11 @@ export default async function PublicBikesPage() {
             const subtitle = `${bike.displacement}cc${bike.modelYear ? ` / ${bike.modelYear}年式` : ''}`
 
             return (
-              <article key={bike.myUserBikeId} className={styles.card}>
+              <Link
+                key={bike.myUserBikeId}
+                href={`/bikes/${bike.myUserBikeId}`}
+                className={styles.card}
+              >
                 <div className={styles.cardHeader}>
                   <h2 className={styles.cardTitle}>{title}</h2>
                   <p className={styles.cardSubtitle}>{subtitle}</p>
@@ -53,7 +58,7 @@ export default async function PublicBikesPage() {
                     最終更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
                   </div>
                 </div>
-              </article>
+              </Link>
             )
           })}
         </div>

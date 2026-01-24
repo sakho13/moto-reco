@@ -34,19 +34,10 @@ export function prepareChartData(
     return []
   }
 
-  // 現在日時を取得
-  const now = new Date()
-  const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
-
   // フィルタリングと変換
   const chartData = fuelLogs
     // fuelEfficiencyがnullでないもののみ
     .filter((log) => log.fuelEfficiency !== null)
-    // 直近1年分のみ
-    .filter((log) => {
-      const logDate = new Date(log.refueledAt)
-      return logDate >= oneYearAgo
-    })
     // FuelChartDataPoint型に変換
     .map((log) => ({
       date: formatChartDate(log.refueledAt),
@@ -56,12 +47,6 @@ export function prepareChartData(
       amount: log.amount,
       totalPrice: log.totalPrice,
     }))
-    // 日付の昇順にソート（グラフ表示用）
-    .sort((a, b) => {
-      return (
-        new Date(a.originalDate).getTime() - new Date(b.originalDate).getTime()
-      )
-    })
 
   return chartData
 }

@@ -1,3 +1,4 @@
+import { subMonths, subYears } from 'date-fns'
 import {
   createFuelLogId,
   createMyUserBikeId,
@@ -13,6 +14,66 @@ export class PrismaFuelLogRepository
   extends PrismaRepositoryBase
   implements IFuelLogRepository
 {
+  private calculatePeriodStartDate(
+    baseDate: Date,
+    period: FuelLogSearchParams['period']
+  ): Date | null {
+    if (!period) return null
+
+    if (period === 'latest-year' || period === 'past-year') {
+      return subYears(baseDate, 1)
+    }
+
+    if (period === 'latest-month' || period === 'past-month') {
+      return subMonths(baseDate, 1)
+    }
+
+    return null
+  }
+
+  private async resolvePeriodDateRange(
+    myUserBikeId: MyUserBikeId,
+    period: FuelLogSearchParams['period']
+  ): Promise<{ startDate: Date; endDate: Date } | null> {
+    if (!period) return null
+
+    if (period === 'latest-year' || period === 'latest-month') {
+      const latestLog = await this.connection.tUserMyBikeFuelLog.findFirst({
+        where: {
+          userMyBikeId: myUserBikeId,
+        },
+        select: {
+          refueledAt: true,
+        },
+        orderBy: {
+          refueledAt: 'desc',
+        },
+      })
+
+      if (!latestLog) {
+        return null
+      }
+
+      const endDate = latestLog.refueledAt
+      const startDate = this.calculatePeriodStartDate(endDate, period)
+
+      if (!startDate) {
+        return null
+      }
+
+      return { startDate, endDate }
+    }
+
+    const endDate = new Date()
+    const startDate = this.calculatePeriodStartDate(endDate, period)
+
+    if (!startDate) {
+      return null
+    }
+
+    return { startDate, endDate }
+  }
+
   async createFuelLog(fuelLog: FuelLogEntity): Promise<FuelLogEntity> {
     const created = await this.connection.tUserMyBikeFuelLog.create({
       data: {
@@ -52,6 +113,10 @@ export class PrismaFuelLogRepository
     myUserBikeId: MyUserBikeId,
     searchParams: FuelLogSearchParams
   ): Promise<FuelLogEntity[]> {
+    const periodDateRange = await this.resolvePeriodDateRange(
+      myUserBikeId,
+      searchParams.period
+    )
     const orderBy =
       searchParams.sortBy === 'refueledAt'
         ? [
@@ -60,9 +125,21 @@ export class PrismaFuelLogRepository
           ]
         : [{ [searchParams.sortBy]: searchParams.sortOrder }]
 
+    if (searchParams.period && !periodDateRange) {
+      return []
+    }
+
     const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
       where: {
         userMyBikeId: myUserBikeId,
+        ...(periodDateRange
+          ? {
+              refueledAt: {
+                gte: periodDateRange.startDate,
+                lte: periodDateRange.endDate,
+              },
+            }
+          : {}),
       },
       select: {
         id: true,
