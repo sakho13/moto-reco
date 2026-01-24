@@ -57,7 +57,6 @@ export default async function PublicBikesPage() {
                   <div className={styles.updatedAt}>
                     最終更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
                   </div>
-                  {/* <Link href={`/bikes/${bike.myUserBikeId}`}>詳細を見る</Link> */}
                 </div>
               </Link>
             )
