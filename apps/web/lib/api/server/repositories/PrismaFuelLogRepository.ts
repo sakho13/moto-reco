@@ -1,3 +1,4 @@
+import { subMonths, subYears } from 'date-fns'
 import {
   createFuelLogId,
   createMyUserBikeId,
@@ -19,16 +20,12 @@ export class PrismaFuelLogRepository
   ): Date | null {
     if (!period) return null
 
-    const startDate = new Date(baseDate)
-
     if (period === 'latest-year' || period === 'past-year') {
-      startDate.setFullYear(startDate.getFullYear() - 1)
-      return startDate
+      return subYears(baseDate, 1)
     }
 
     if (period === 'latest-month' || period === 'past-month') {
-      startDate.setMonth(startDate.getMonth() - 1)
-      return startDate
+      return subMonths(baseDate, 1)
     }
 
     return null
