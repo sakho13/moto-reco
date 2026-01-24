@@ -1796,6 +1796,172 @@ describe('UserBike API Endpoints', () => {
     })
   })
 
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/tourings/:touringId', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 500,
+        nickname: 'ツーリング更新テスト用バイク',
+        totalMileage: 4000,
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      touringId = await createTestTouring(token, myUserBikeId, {
+        title: '更新前ツーリング',
+        startDate: '2024-10-10T00:00:00.000Z',
+        endDate: '2024-10-12T00:00:00.000Z',
+        startMileage: 4000,
+        endMileage: 4200,
+      })
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        'PATCH',
+        {
+          title: '更新後ツーリング',
+        }
+      )
+    })
+
+    test('更新項目が指定されていない場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('不正な入力の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startDate: '2024-10-13T00:00:00.000Z',
+            endDate: '2024-10-11T00:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('存在しないバイクIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${randomUUID()}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '更新後ツーリング',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('存在しないツーリングIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${randomUUID()}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '更新後ツーリング',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('ツーリングを更新できる', async () => {
+      const endDate = '2024-10-13T00:00:00.000Z'
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '更新後ツーリング',
+            endDate,
+            endMileage: 4300,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          touringId,
+          title: '更新後ツーリング',
+          startDate: '2024-10-10T00:00:00.000Z',
+          endDate,
+          startMileage: 4000,
+          endMileage: 4300,
+        },
+        message: 'ツーリング更新成功',
+      })
+
+      const getTouringResult = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const getTouringJson = await getTouringResult.json()
+      expect(getTouringResult.status).toBe(200)
+      expect(getTouringJson.data.touringId).toBe(touringId)
+      expect(getTouringJson.data.title).toBe('更新後ツーリング')
+      expect(getTouringJson.data.endDate).toBe(endDate)
+      expect(getTouringJson.data.endMileage).toBe(4300)
+    })
+  })
+
   describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
     let token: string
     let myUserBikeId: string

@@ -1030,6 +1030,58 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
+    patch:
+      summary: ユーザー所有バイクのツーリング更新
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeTouringUpdateDetail'
+      responses:
+        '200':
+          description: ツーリング更新成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング更新成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
 
   /api/v1/health:
     get:
@@ -1408,6 +1460,28 @@ components:
         - title
         - startDate
         - endDate
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        startDate:
+          type: string
+          description: 開始日（ISO 8601形式）
+        endDate:
+          type: string
+          description: 終了日（ISO 8601形式）
+        startMileage:
+          type: integer
+          nullable: true
+          description: 開始時の総走行距離（km）
+        endMileage:
+          type: integer
+          nullable: true
+          description: 終了時の総走行距離（km）
+
+    MyUserBikeTouringUpdateDetail:
+      type: object
       properties:
         title:
           type: string

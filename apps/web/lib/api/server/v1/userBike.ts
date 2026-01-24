@@ -26,6 +26,7 @@ import {
   TouringRegisterRequestSchema,
   TouringStartEndRequestSchema,
   TouringListQuerySchema,
+  TouringUpdateRequestSchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -594,6 +595,51 @@ userBike.get(
           endMileage: touring.endMileage,
         },
         message: 'ツーリング取得成功',
+      },
+      200
+    )
+  }
+)
+
+userBike.patch(
+  '/bike/:myUserBikeId/tourings/:touringId',
+  honoAuthMiddleware,
+  zodValidateJson(TouringUpdateRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const touringRepo = new PrismaTouringRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new TouringService(touringRepo, myUserBikeRepo)
+
+      return service.updateTouring({
+        touringId: createTouringId(touringId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        title: body.title,
+        startDate: body.startDate,
+        endDate: body.endDate,
+        startMileage: body.startMileage,
+        endMileage: body.endMileage,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseTouringDetail>>(
+      {
+        status: 'success',
+        data: {
+          touringId: result.id,
+          title: result.title,
+          startDate: result.startDate.toISOString(),
+          endDate: result.endDate.toISOString(),
+          startMileage: result.startMileage,
+          endMileage: result.endMileage,
+        },
+        message: 'ツーリング更新成功',
       },
       200
     )

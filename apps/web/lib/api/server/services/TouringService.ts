@@ -40,6 +40,17 @@ type EndTouringParams = {
 
 type TouringActionParams = StartTouringParams | EndTouringParams
 
+type UpdateTouringParams = {
+  touringId: TouringId
+  myUserBikeId: MyUserBikeId
+  userId: UserId
+  title?: string
+  startDate?: Date
+  endDate?: Date
+  startMileage?: number
+  endMileage?: number
+}
+
 export class TouringService {
   constructor(
     private touringRepository: ITouringRepository,
@@ -180,5 +191,46 @@ export class TouringService {
     }
 
     return touring
+  }
+
+  public async updateTouring(
+    params: UpdateTouringParams
+  ): Promise<TouringEntity> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      params.myUserBikeId,
+      params.userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const existingTouring = await this.touringRepository.findTouringById(
+      params.touringId,
+      params.myUserBikeId
+    )
+
+    if (!existingTouring) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
+    }
+
+    try {
+      const updatedTouring = new TouringEntity({
+        touringId: existingTouring.id,
+        myUserBikeId: existingTouring.myUserBikeId,
+        title: params.title ?? existingTouring.title,
+        startDate: params.startDate ?? existingTouring.startDate,
+        endDate: params.endDate ?? existingTouring.endDate,
+        startMileage: params.startMileage ?? existingTouring.startMileage,
+        endMileage: params.endMileage ?? existingTouring.endMileage,
+      })
+
+      return await this.touringRepository.updateTouring(updatedTouring)
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ApiV1Error('INVALID_REQUEST', error.message)
+      }
+      throw error
+    }
   }
 }
