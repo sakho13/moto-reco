@@ -34,10 +34,10 @@ export class PrismaFuelLogRepository
     return null
   }
 
-  private async resolvePeriodStartDate(
+  private async resolvePeriodDateRange(
     myUserBikeId: MyUserBikeId,
     period: FuelLogSearchParams['period']
-  ): Promise<Date | null> {
+  ): Promise<{ startDate: Date; endDate: Date } | null> {
     if (!period) return null
 
     if (period === 'latest-year' || period === 'latest-month') {
@@ -57,10 +57,24 @@ export class PrismaFuelLogRepository
         return null
       }
 
-      return this.calculatePeriodStartDate(latestLog.refueledAt, period)
+      const endDate = latestLog.refueledAt
+      const startDate = this.calculatePeriodStartDate(endDate, period)
+
+      if (!startDate) {
+        return null
+      }
+
+      return { startDate, endDate }
     }
 
-    return this.calculatePeriodStartDate(new Date(), period)
+    const endDate = new Date()
+    const startDate = this.calculatePeriodStartDate(endDate, period)
+
+    if (!startDate) {
+      return null
+    }
+
+    return { startDate, endDate }
   }
 
   async createFuelLog(fuelLog: FuelLogEntity): Promise<FuelLogEntity> {
@@ -102,7 +116,7 @@ export class PrismaFuelLogRepository
     myUserBikeId: MyUserBikeId,
     searchParams: FuelLogSearchParams
   ): Promise<FuelLogEntity[]> {
-    const periodStartDate = await this.resolvePeriodStartDate(
+    const periodDateRange = await this.resolvePeriodDateRange(
       myUserBikeId,
       searchParams.period
     )
@@ -114,17 +128,18 @@ export class PrismaFuelLogRepository
           ]
         : [{ [searchParams.sortBy]: searchParams.sortOrder }]
 
-    if (searchParams.period && !periodStartDate) {
+    if (searchParams.period && !periodDateRange) {
       return []
     }
 
     const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
       where: {
         userMyBikeId: myUserBikeId,
-        ...(periodStartDate
+        ...(periodDateRange
           ? {
               refueledAt: {
-                gte: periodStartDate,
+                gte: periodDateRange.startDate,
+                lte: periodDateRange.endDate,
               },
             }
           : {}),
