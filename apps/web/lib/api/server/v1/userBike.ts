@@ -23,6 +23,7 @@ import {
   FuelLogUpdateRequestSchema,
   FuelLogDeleteRequestSchema,
   FuelLogListQuerySchema,
+  FuelLogDetailParamSchema,
   TouringRegisterRequestSchema,
   TouringStartEndRequestSchema,
   TouringListQuerySchema,
@@ -30,7 +31,11 @@ import {
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
-import { zodValidateJson, zodValidateQuery } from '../middlewares/zodValidation'
+import {
+  zodValidateJson,
+  zodValidateParam,
+  zodValidateQuery,
+} from '../middlewares/zodValidation'
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaFuelInsightRepository } from '../repositories/PrismaFuelInsightRepository'
 import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository'
@@ -250,6 +255,42 @@ userBike.get(
       },
       200
     )
+  }
+)
+
+userBike.get(
+  '/bike/:myUserBikeId/fuel-logs/:fuelLogId',
+  honoAuthMiddleware,
+  zodValidateParam(FuelLogDetailParamSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const params = c.req.valid('param')
+
+    const fuelLogRepo = new PrismaFuelLogRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const fuelLogService = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+
+    const fuelLog = await fuelLogService.getFuelLogDetail(
+      createFuelLogId(params.fuelLogId),
+      createMyUserBikeId(params.myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<ApiResponseFuelLogDetail>>({
+      status: 'success',
+      data: {
+        fuelLogId: fuelLog.id,
+        refueledAt: fuelLog.refueledAt.toISOString(),
+        mileage: fuelLog.mileage,
+        previousMileage: fuelLog.previousMileage,
+        amount: fuelLog.amount,
+        totalPrice: fuelLog.totalPrice,
+        memo: fuelLog.memo,
+        fuelEfficiency: fuelLog.fuelEfficiency,
+        pricePerLiter: fuelLog.pricePerLiter,
+      },
+      message: '燃料ログ詳細取得成功',
+    })
   }
 )
 

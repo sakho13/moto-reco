@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import type {
-  ApiResponseFuelLogList,
+  ApiResponseFuelLogDetail,
   SuccessResponse,
 } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
@@ -30,46 +30,45 @@ function FuelLogEditPage() {
   const [error, setError] = useState('')
   const [initialData, setInitialData] = useState<FuelLogFormData | undefined>()
 
+  const detailUrl =
+    bikeId && fuelLogId
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs/${fuelLogId}`
+      : null
+
   const {
     data,
     error: fetchError,
     isLoading,
-  } = useSWR(
-    bikeId ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs` : null,
-    async (url) => {
-      const response = await authenticatedFetch(url, { method: 'GET' })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new ApiV1Error(
-          errorData.errorCode || 'SERVER_ERROR',
-          errorData.message || 'エラーが発生しました'
-        )
-      }
-      const json =
-        (await response.json()) as SuccessResponse<ApiResponseFuelLogList>
-      return json.data
+  } = useSWR(detailUrl, async (url) => {
+    const response = await authenticatedFetch(url, { method: 'GET' })
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new ApiV1Error(
+        errorData.errorCode || 'SERVER_ERROR',
+        errorData.message || 'エラーが発生しました'
+      )
     }
-  )
+    const json =
+      (await response.json()) as SuccessResponse<ApiResponseFuelLogDetail>
+    return json.data
+  })
 
   useEffect(() => {
-    if (data && fuelLogId) {
-      const fuelLog = data.find((log) => log.fuelLogId === fuelLogId)
-      if (fuelLog) {
-        const dateStr = new Date(fuelLog.refueledAt).toISOString().split('T')[0]
-        if (dateStr) {
-          setInitialData({
-            refueledAt: dateStr,
-            mileage: fuelLog.mileage.toString(),
-            previousMileage: fuelLog.previousMileage.toString(),
-            amount: fuelLog.amount.toString(),
-            totalPrice: fuelLog.totalPrice.toString(),
-            memo: fuelLog.memo ?? '',
-            updateTotalMileage: false,
-          })
-        }
+    if (data) {
+      const dateStr = new Date(data.refueledAt).toISOString().split('T')[0]
+      if (dateStr) {
+        setInitialData({
+          refueledAt: dateStr,
+          mileage: data.mileage.toString(),
+          previousMileage: data.previousMileage.toString(),
+          amount: data.amount.toString(),
+          totalPrice: data.totalPrice.toString(),
+          memo: data.memo ?? '',
+          updateTotalMileage: false,
+        })
       }
     }
-  }, [data, fuelLogId])
+  }, [data])
 
   const handleFormSubmit = async (formData: FuelLogFormData) => {
     if (!fuelLogId) {
@@ -93,6 +92,9 @@ function FuelLogEditPage() {
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      if (detailUrl) {
+        await mutate(detailUrl)
+      }
       toast.success('給油履歴を更新しました', {
         description: '給油履歴一覧へ移動します。',
       })
@@ -125,6 +127,9 @@ function FuelLogEditPage() {
         fuelLogId,
       })
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      if (detailUrl) {
+        await mutate(detailUrl)
+      }
       toast.success('給油履歴を削除しました', {
         description: '給油履歴一覧へ移動します。',
       })

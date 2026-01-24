@@ -101,6 +101,32 @@ export class FuelLogService {
     return await this.fuelLogRepository.findFuelLogs(myUserBikeId, searchParams)
   }
 
+  public async getFuelLogDetail(
+    fuelLogId: FuelLogId,
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<FuelLogEntity> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      myUserBikeId,
+      userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const fuelLog = await this.fuelLogRepository.findFuelLogById(
+      fuelLogId,
+      myUserBikeId
+    )
+
+    if (!fuelLog) {
+      throw new ApiV1Error('NOT_FOUND', '指定された燃料ログが見つかりません')
+    }
+
+    return fuelLog
+  }
+
   public async updateFuelLog(
     params: UpdateFuelLogParams
   ): Promise<FuelLogEntity> {
