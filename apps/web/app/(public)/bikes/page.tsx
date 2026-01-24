@@ -32,7 +32,7 @@ export default async function PublicBikesPage() {
           <p>現在公開されているバイク情報はありません。</p>
         </div>
       ) : (
-        <div className={styles.grid}>
+        <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3`}>
           {bikes.map((bike) => {
             const title =
               bike.nickname ||
