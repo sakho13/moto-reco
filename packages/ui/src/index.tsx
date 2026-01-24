@@ -40,5 +40,8 @@ export type {
   FuelEfficiencyStats,
 } from './fuelEfficiencyChart'
 
+export { Select } from './select'
+export type { SelectProps, SelectOption } from './select'
+
 export { ThemeProvider, useTheme } from './context/ThemeContext'
 export { Toaster, toast } from './sonner'

@@ -57,11 +57,21 @@ export type FuelLogRegisterRequest = z.infer<
 /**
  * 燃料ログ一覧取得クエリパラメータのバリデーションスキーマ
  */
+export const FuelLogPeriodSchema = z.enum([
+  'latest-year',
+  'latest-month',
+  'past-year',
+  'past-month',
+])
+
+export type FuelLogPeriod = z.infer<typeof FuelLogPeriodSchema>
+
 export const FuelLogListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1).optional(),
   'per-size': z.coerce.number().int().min(1).max(100).default(20).optional(),
   'sort-by': z.enum(['refueled-at', 'mileage']).optional(),
   'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+  period: FuelLogPeriodSchema.optional(),
 })
 
 export type FuelLogListQuery = z.infer<typeof FuelLogListQuerySchema>
