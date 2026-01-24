@@ -51,8 +51,7 @@ export default async function PublicBikesPage() {
                     総走行距離: {bike.totalMileage.toLocaleString()} km
                   </div>
                   <div className={styles.updatedAt}>
-                    最終更新日:{' '}
-                    {bike.updatedAt.toLocaleDateString('ja-JP')}
+                    最終更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
                   </div>
                   <Link href={`/bikes/${bike.myUserBikeId}`}>詳細を見る</Link>
                 </div>
