@@ -4,7 +4,7 @@ import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/Prisma
 import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
-  title: '公開ユーザバイク一覧',
+  title: `${APP_NAME} | 公開バイク一覧`,
   description: `${APP_NAME}で公開されているバイク情報の一覧です。`,
 }
 
