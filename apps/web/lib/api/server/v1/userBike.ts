@@ -217,6 +217,7 @@ userBike.get(
       pageSize: query['per-size'],
       sortBy: query['sort-by'] === 'mileage' ? 'mileage' : 'refueledAt',
       sortOrder: query['sort-order'],
+      period: query.period,
     })
 
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)

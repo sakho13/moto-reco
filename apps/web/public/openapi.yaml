@@ -589,6 +589,16 @@ paths:
               - desc
             default: desc
             description: ソート順序
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum:
+              - latest-year
+              - latest-month
+              - past-year
+              - past-month
+          description: 燃費グラフなどの表示範囲を指定する期間
       responses:
         '200':
           description: 燃料ログ一覧取得成功

@@ -1,5 +1,13 @@
 import { randomUUID } from 'crypto'
-import { beforeAll, beforeEach, describe, expect, test } from 'vitest'
+import {
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+  afterEach,
+} from 'vitest'
 import { prisma } from '@repo/database'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createTestUserBike, getTestBikeId } from '../../helpers/bikeHelper'
@@ -903,6 +911,10 @@ describe('UserBike API Endpoints', () => {
       ])
     })
 
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
       await testAuthRequired(
         `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
@@ -946,6 +958,176 @@ describe('UserBike API Endpoints', () => {
 
       expect(json.data[0].refueledAt).toBe('2024-05-01T10:00:00.000Z')
       expect(json.data[4].refueledAt).toBe('2024-01-01T10:00:00.000Z')
+    })
+
+    test('period=latest-monthで最新給油日から1ヶ月分を取得できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?period=latest-month`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.length).toBe(2)
+      expect(json.data[0].refueledAt).toBe('2024-05-01T10:00:00.000Z')
+      expect(json.data[1].refueledAt).toBe('2024-04-01T10:00:00.000Z')
+    })
+
+    test('period=past-monthで現在日時から直近1ヶ月分を取得できる', async () => {
+      vi.useFakeTimers().setSystemTime(new Date('2024-05-10T00:00:00.000Z'))
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?period=past-month`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.length).toBe(1)
+      expect(json.data[0].refueledAt).toBe('2024-05-01T10:00:00.000Z')
+    })
+
+    test('period=latest-yearで最新給油日から1年分を取得できる', async () => {
+      // 2年分のデータを作成
+      await createMultipleFuelLogs(token, myUserBikeId, [
+        {
+          refueledAt: '2023-01-01T10:00:00.000Z',
+          mileage: 500,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+        {
+          refueledAt: '2023-06-01T10:00:00.000Z',
+          mileage: 1000,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+        {
+          refueledAt: '2024-06-01T10:00:00.000Z',
+          mileage: 3500,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+      ])
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?period=latest-year`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      // 最新ログ: 2024-06-01、1年前: 2023-06-01
+      // 取得されるべきデータ: 2023-06-01以降2024-06-01まで
+      // 該当データ: 2023-06-01, 2024-01-01, 2024-02-01, 2024-03-01, 2024-04-01, 2024-05-01, 2024-06-01
+      expect(json.data.length).toBe(7)
+      expect(json.data[0].refueledAt).toBe('2024-06-01T10:00:00.000Z')
+      expect(json.data[6].refueledAt).toBe('2023-06-01T10:00:00.000Z')
+    })
+
+    test('period=latest-yearで古いデータのみの場合も正しく期間を取得できる', async () => {
+      // 新しいバイクを作成して古いデータのみを登録
+      const oldDataBike = await createTestUserBike(token, {
+        displacement: 250,
+        nickname: '古いデータバイク',
+      })
+      const oldBikeId = oldDataBike.myUserBikeId
+
+      await createMultipleFuelLogs(token, oldBikeId, [
+        {
+          refueledAt: '2021-03-01T10:00:00.000Z',
+          mileage: 500,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+        {
+          refueledAt: '2021-05-01T10:00:00.000Z',
+          mileage: 1000,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+        {
+          refueledAt: '2022-06-01T10:00:00.000Z',
+          mileage: 2000,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+      ])
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${oldBikeId}/fuel-logs?period=latest-year`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      // 最新ログ: 2022-06-01、1年前: 2021-06-01
+      // 取得されるべきデータ: 2021-06-01以降2022-06-01まで
+      // 該当データ: 2022-06-01のみ（2021-05-01は1年前より前なので含まれない）
+      expect(json.data.length).toBe(1)
+      expect(json.data[0].refueledAt).toBe('2022-06-01T10:00:00.000Z')
+    })
+
+    test('period=latest-yearで期間内にデータがない場合は空配列を返す', async () => {
+      // 新しいバイクを作成して期間外のデータのみを登録
+      const sparseDataBike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '疎なデータバイク',
+      })
+      const sparseBikeId = sparseDataBike.myUserBikeId
+
+      await createMultipleFuelLogs(token, sparseBikeId, [
+        {
+          refueledAt: '2020-01-01T10:00:00.000Z',
+          mileage: 500,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+        {
+          refueledAt: '2022-06-01T10:00:00.000Z',
+          mileage: 1000,
+          amount: 10.0,
+          totalPrice: 1500,
+        },
+      ])
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${sparseBikeId}/fuel-logs?period=latest-year`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      // 最新ログ: 2022-06-01、1年前: 2021-06-01
+      // 取得されるべきデータ: 2021-06-01以降2022-06-01まで
+      // 該当データ: 2022-06-01のみ
+      expect(json.data.length).toBe(1)
+      expect(json.data[0].refueledAt).toBe('2022-06-01T10:00:00.000Z')
     })
 
     test('同日の燃料ログは走行距離順で並ぶ', async () => {
