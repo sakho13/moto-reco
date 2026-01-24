@@ -77,6 +77,26 @@ export const FuelLogListQuerySchema = z.object({
 export type FuelLogListQuery = z.infer<typeof FuelLogListQuerySchema>
 
 /**
+ * 燃料ログ詳細取得パスパラメータのバリデーションスキーマ
+ */
+export const FuelLogDetailParamSchema = z.object({
+  myUserBikeId: z
+    .string({
+      required_error: 'バイクIDは必須です',
+      invalid_type_error: 'バイクIDは文字列で指定してください',
+    })
+    .min(1, 'バイクIDは1文字以上で指定してください'),
+  fuelLogId: z
+    .string({
+      required_error: '燃料ログIDは必須です',
+      invalid_type_error: '燃料ログIDは文字列で指定してください',
+    })
+    .min(1, '燃料ログIDは1文字以上で指定してください'),
+})
+
+export type FuelLogDetailParam = z.infer<typeof FuelLogDetailParamSchema>
+
+/**
  * 燃料ログ更新リクエストのバリデーションスキーマ
  */
 export const FuelLogUpdateRequestSchema = z

@@ -676,6 +676,54 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/fuel-logs/{fuel-log-id}:
+    get:
+      summary: ユーザー所有バイクの燃料ログ詳細取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: fuel-log-id
+          required: true
+          schema:
+            type: string
+          description: 燃料ログID
+      responses:
+        '200':
+          description: 燃料ログ詳細取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeFuelLogDetail'
+                  message:
+                    type: string
+                    example: 燃料ログ詳細取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
     patch:
       summary: ユーザー所有バイクの燃料ログ更新
       tags:
