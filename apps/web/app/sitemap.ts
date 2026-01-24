@@ -1,6 +1,18 @@
 import type { MetadataRoute } from 'next'
+import { prisma } from '@repo/database'
+import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const repo = new PrismaMyUserBikeRepository(prisma)
+  const bikes = await repo.findPublicBikes()
+
+  const bikesPages: MetadataRoute.Sitemap = bikes.map((bike) => ({
+    url: `https://moto-reco.com/bikes/${bike.myUserBikeId}`,
+    lastModified: bike.updatedAt,
+    changeFrequency: 'weekly',
+    priority: 0.6,
+  }))
+
   return [
     {
       url: 'https://moto-reco.com',
@@ -32,5 +44,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'yearly',
       priority: 0.5,
     },
+    ...bikesPages,
   ]
 }

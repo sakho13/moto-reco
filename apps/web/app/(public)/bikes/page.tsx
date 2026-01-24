@@ -41,7 +41,11 @@ export default async function PublicBikesPage() {
             const subtitle = `${bike.displacement}cc${bike.modelYear ? ` / ${bike.modelYear}年式` : ''}`
 
             return (
-              <article key={bike.myUserBikeId} className={styles.card}>
+              <Link
+                key={bike.myUserBikeId}
+                href={`/bikes/${bike.myUserBikeId}`}
+                className={styles.card}
+              >
                 <div className={styles.cardHeader}>
                   <h2 className={styles.cardTitle}>{title}</h2>
                   <p className={styles.cardSubtitle}>{subtitle}</p>
@@ -53,9 +57,9 @@ export default async function PublicBikesPage() {
                   <div className={styles.updatedAt}>
                     最終更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
                   </div>
-                  <Link href={`/bikes/${bike.myUserBikeId}`}>詳細を見る</Link>
+                  {/* <Link href={`/bikes/${bike.myUserBikeId}`}>詳細を見る</Link> */}
                 </div>
-              </article>
+              </Link>
             )
           })}
         </div>

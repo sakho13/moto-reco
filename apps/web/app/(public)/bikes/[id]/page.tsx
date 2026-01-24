@@ -45,7 +45,13 @@ export default async function PublicBikeDetailPage({
   const title =
     bike.nickname ||
     `${bike.manufacturerName ?? ''} ${bike.modelName ?? '不明なバイク'}`.trim()
-  const subtitle = `${bike.displacement}cc${bike.modelYear ? ` / ${bike.modelYear}年式` : ''}`
+
+  const displacement = `${bike.displacement}cc`
+  const modelYear = bike.modelYear ? `${bike.modelYear}年式` : null
+  const updatedAt = bike.updatedAt.toLocaleDateString('ja-JP')
+  const subtitle = [displacement, modelYear, `最終更新日: ${updatedAt}`]
+    .filter(Boolean)
+    .join(' / ')
 
   return (
     <div className={styles.page}>
@@ -61,11 +67,9 @@ export default async function PublicBikeDetailPage({
             {bike.totalMileage.toLocaleString()} km
           </span>
         </div>
-        <div className={styles.pair}>
-          <span className={styles.label}>最終更新日</span>
-          <span>{bike.updatedAt.toLocaleDateString('ja-JP')}</span>
-        </div>
       </section>
+
+      <div className="h-4" />
 
       <section className={styles.emptyState}>
         <p>詳細情報は順次拡充予定です。</p>
