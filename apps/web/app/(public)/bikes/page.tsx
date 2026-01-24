@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { prisma } from '@repo/database'
 import styles from './page.module.css'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
@@ -40,7 +41,11 @@ export default async function PublicBikesPage() {
             const subtitle = `${bike.displacement}cc${bike.modelYear ? ` / ${bike.modelYear}年式` : ''}`
 
             return (
-              <article key={bike.myUserBikeId} className={styles.card}>
+              <Link
+                key={bike.myUserBikeId}
+                href={`/bikes/${bike.myUserBikeId}`}
+                className={styles.card}
+              >
                 <div className={styles.cardHeader}>
                   <h2 className={styles.cardTitle}>{title}</h2>
                   <p className={styles.cardSubtitle}>{subtitle}</p>
@@ -53,7 +58,7 @@ export default async function PublicBikesPage() {
                     最終更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
                   </div>
                 </div>
-              </article>
+              </Link>
             )
           })}
         </div>
