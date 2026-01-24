@@ -3,6 +3,10 @@ generator client {
   output   = "../generated/prisma"
 }
 
+generator nextAdmin {
+  provider = "next-admin-generator-prisma"
+}
+
 datasource db {
   provider = "postgresql"
 }
@@ -96,7 +100,7 @@ model MMaintenanceType {
 }
 
 model TUserBike {
-  id           String @id @default(cuid(2))
+  id           String  @id @default(cuid(2))
   bikeId       String? @map("bike_id")
   serialNumber String? @map("serial_number")
   displacement Float   @map("displacement")
@@ -144,12 +148,12 @@ model TUserMyBikeFuelLog {
   id           String @id @default(cuid(2))
   userMyBikeId String @map("my_bike_id")
 
-  amount     Float    @map("amount") // 給油量/L
-  price      Int      @map("price") // 給油価格/円
-  mileage    Int      @map("mileage") // 給油時総走行距離/km
-  previousMileage Int @map("previous_mileage") // 前回給油時総走行距離/km
-  refueledAt DateTime @map("refueled_at") // 給油日時
-  memo       String?  @map("memo") // メモ
+  amount          Float    @map("amount") // 給油量/L
+  price           Int      @map("price") // 給油価格/円
+  mileage         Int      @map("mileage") // 給油時総走行距離/km
+  previousMileage Int      @map("previous_mileage") // 前回給油時総走行距離/km
+  refueledAt      DateTime @map("refueled_at") // 給油日時
+  memo            String?  @map("memo") // メモ
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -178,11 +182,11 @@ model TUserMyBikeTouring {
 }
 
 model TUserQuit {
-  id           String @id @default(cuid(2))
-  userId       String @map("user_id")
-  quitAt       DateTime @map("quit_at")
-  quitReason   String @map("quit_reason")
-  recoveryCode String @map("recovery_code")
+  id           String         @id @default(cuid(2))
+  userId       String         @map("user_id")
+  quitAt       DateTime       @map("quit_at")
+  quitReason   String         @map("quit_reason")
+  recoveryCode String         @map("recovery_code")
   status       UserQuitStatus @default(QUIT) @map("status")
 
   createdAt DateTime @default(now()) @map("created_at")

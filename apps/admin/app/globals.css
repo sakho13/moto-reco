@@ -1,0 +1,3 @@
+@import 'tailwindcss';
+@import "@premieroctet/next-admin/theme";
+@source "../../../node_modules/@premieroctet/next-admin/dist";

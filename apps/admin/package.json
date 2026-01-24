@@ -11,10 +11,17 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "4.1.18",
+    "@premieroctet/next-admin": "8.4.2",
+    "@premieroctet/next-admin-generator-prisma": "1.1.0",
+    "@repo/database": "workspace:*",
+    "@repo/shared-types": "workspace:*",
+    "@repo/shared-utils": "workspace:*",
     "next": "catalog:",
     "next-admin": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "tailwindcss": "4.1.18"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
