@@ -10,6 +10,8 @@ import type {
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { FuelEfficiencyChart } from '@repo/ui/fuelEfficiencyChart'
+import { Select } from '@repo/ui/select'
+import type { SelectOption } from '@repo/ui/select'
 import styles from './page.module.css'
 import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
 import { authenticatedFetch } from '@/lib/api/client'
@@ -20,10 +22,9 @@ function FuelLogsPage() {
   const params = useParams()
   const router = useRouter()
   const bikeId = params.id as string
-  const [chartPeriod, setChartPeriod] =
-    useState<FuelLogPeriod>('latest-year')
+  const [chartPeriod, setChartPeriod] = useState<FuelLogPeriod>('latest-year')
 
-  const chartPeriodOptions: { value: FuelLogPeriod; label: string }[] = [
+  const chartPeriodOptions: SelectOption[] = [
     { value: 'latest-year', label: '最新の履歴から1年' },
     { value: 'latest-month', label: '最新の履歴から1ヶ月' },
     { value: 'past-year', label: '現在日時から直近1年' },
@@ -134,23 +135,14 @@ function FuelLogsPage() {
         {/* 左カラム（モバイルでは上）: グラフ */}
         <div className={styles.chartSection}>
           <div className={styles.chartControls}>
-            <label className={styles.chartLabel} htmlFor="chart-period">
-              表示範囲
-            </label>
-            <select
+            <Select
               id="chart-period"
-              className={styles.chartSelect}
+              options={chartPeriodOptions}
               value={chartPeriod}
               onChange={(event) =>
                 setChartPeriod(event.target.value as FuelLogPeriod)
               }
-            >
-              {chartPeriodOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           {isChartLoading ? (
             <div className={styles.chartPlaceholder}>
