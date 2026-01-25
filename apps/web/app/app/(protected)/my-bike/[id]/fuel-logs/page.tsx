@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR from 'swr'
+import useSWRInfinite from 'swr/infinite'
 import type {
   ApiResponseFuelLogList,
   FuelLogPeriod,
@@ -45,12 +46,16 @@ function FuelLogsPage() {
     return json.data
   }
 
-  const { data, error, isLoading } = useSWR(
-    bikeId
-      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc`
-      : null,
-    fetchFuelLogs
-  )
+  const { data, error, isLoading, size, setSize, isValidating } =
+    useSWRInfinite(
+      (pageIndex) =>
+        bikeId
+          ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=10&page=${
+              pageIndex + 1
+            }`
+          : null,
+      fetchFuelLogs
+    )
 
   const {
     data: chartData,
@@ -69,6 +74,10 @@ function FuelLogsPage() {
 
   const handleRegister = () => {
     router.push(`/app/my-bike/${bikeId}/fuel-logs/register`)
+  }
+
+  const handleLoadMore = () => {
+    setSize(size + 1)
   }
 
   if (isLoading) {
@@ -108,7 +117,11 @@ function FuelLogsPage() {
     )
   }
 
-  const fuelLogs = data || []
+  const fuelLogs = data ? data.filter(Boolean).flat() : []
+  const lastPageCount = data?.[data.length - 1]?.length ?? 0
+  const canLoadMore = lastPageCount === 10
+  const isLoadingMore = isValidating && !isLoading && size > 0
+
   const chartFuelLogs = chartData || []
 
   // 有効な燃費データが2件以上あるかチェック
@@ -167,6 +180,9 @@ function FuelLogsPage() {
             fuelLogs={fuelLogs}
             onEdit={handleEdit}
             onRegister={handleRegister}
+            onLoadMore={handleLoadMore}
+            canLoadMore={canLoadMore}
+            isLoadingMore={isLoadingMore}
           />
         </div>
       </div>
