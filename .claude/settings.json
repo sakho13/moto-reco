@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker exec:*)",
+      "Bash(wc:*)",
+      "Bash(gh issue view:*)",
+      "Bash(pnpm format:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm format"
+          }
+        ]
+      }
+    ]
+  }
+}
