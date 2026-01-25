@@ -119,6 +119,7 @@ model TUserMyBike {
   purchasePrice   Int?      @map("purchase_price")
   purchaseMileage Int?      @map("purchase_mileage")
   totalMileage    Int       @default(0) @map("total_mileage") // 総走行距離/km
+  isPublic        Boolean   @default(false) @map("is_public")
 
   // 所有状態
   ownedAt   DateTime          @map("owned_at")
@@ -136,6 +137,7 @@ model TUserMyBike {
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
+  @@index([isPublic, ownStatus, updatedAt(sort: Desc)], name: "idx_public_bikes")
 }
 
 model TUserMyBikeFuelLog {

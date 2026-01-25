@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@repo/ui/button'
+import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -11,6 +12,7 @@ export interface MyBikeEditFormData {
   nickname: string
   totalMileage: string
   displacement: string
+  isPublic: boolean
 }
 
 export interface MyBikeEditFormProps {
@@ -97,6 +99,19 @@ export const MyBikeEditForm = ({
           required
           disabled={isSubmitting || !isDisplacementEditable}
           placeholder="例: 400"
+        />
+      </FormField>
+
+      <FormField label="公開設定" htmlFor="isPublic">
+        <Checkbox
+          id="isPublic"
+          checked={formData.isPublic}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, isPublic: e.target.checked }))
+          }
+          disabled={isSubmitting}
+          label="このバイクを公開する"
+          helperText="公開したバイクは、公開ページに情報が掲載されます。"
         />
       </FormField>
 

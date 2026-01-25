@@ -12,6 +12,14 @@
   min-width: 0; /* グリッドのオーバーフロー防止 */
 }
 
+.chartControls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
 /* リストセクション */
 .listSection {
   min-width: 0;
@@ -42,6 +50,10 @@
   .pageLayout {
     grid-template-columns: 1fr;
     gap: var(--spacing-4);
+  }
+
+  .chartControls {
+    justify-content: space-between;
   }
 
   .chartPlaceholder {

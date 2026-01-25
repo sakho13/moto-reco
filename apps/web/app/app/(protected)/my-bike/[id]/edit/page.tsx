@@ -59,6 +59,7 @@ function MyBikeEditPage() {
       nickname: data.nickname ?? '',
       totalMileage: data.totalMileage.toString(),
       displacement: data.displacement.toString(),
+      isPublic: data.isPublic,
     })
     setIsDisplacementEditable(data.bikeId === null)
   }, [data])
@@ -74,6 +75,7 @@ function MyBikeEditPage() {
         ...(isDisplacementEditable
           ? { displacement: Number(formData.displacement) }
           : {}),
+        isPublic: formData.isPublic,
       })
 
       await Promise.all([

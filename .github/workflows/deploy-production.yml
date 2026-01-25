@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   id-token: write
+  pull-requests: write
 
 env:
   AWS_REGION: ap-northeast-1
@@ -25,6 +26,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
 
     steps:
       - name: Checkout
@@ -159,3 +163,123 @@ jobs:
             --cluster ${{ env.ECS_CLUSTER }} \
             --services ${{ env.ECS_SERVICE }} \
             --region ${{ env.AWS_REGION }}
+
+      - name: Create PR to sync main with develop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # PR作成失敗時もJobを成功させる（デプロイは成功しているため）
+          set +e
+
+          echo "=========================================="
+          echo "Creating PR: develop → main"
+          echo "=========================================="
+
+          # リリースバージョンの抽出 (release/1.0.0 → 1.0.0)
+          VERSION=$(echo "${{ github.ref_name }}" | sed 's/release\///')
+          echo "Release version: $VERSION"
+
+          # 既存のPRをチェック
+          EXISTING_PR=$(gh pr list --base main --head develop --state open --json number --jq '.[0].number' 2>&1)
+
+          if [ $? -ne 0 ]; then
+            echo ""
+            echo "⚠️  Warning: Failed to check existing PRs"
+            echo "$EXISTING_PR"
+            echo "Attempting to create PR anyway..."
+          elif [ -n "$EXISTING_PR" ]; then
+            echo ""
+            echo "ℹ️  PR already exists: #$EXISTING_PR"
+            echo "Skipping PR creation"
+            echo ""
+            echo "PR URL: https://github.com/${{ github.repository }}/pull/$EXISTING_PR"
+            exit 0
+          fi
+
+          # develop と main の差分をチェック
+          git fetch origin main develop
+
+          MAIN_COMMIT=$(git rev-parse origin/main 2>&1)
+          DEVELOP_COMMIT=$(git rev-parse origin/develop 2>&1)
+
+          if [ $? -ne 0 ]; then
+            echo ""
+            echo "⚠️  Warning: Failed to fetch branch information"
+            echo "Please create the sync PR manually:"
+            echo "  gh pr create --base main --head develop"
+            exit 0
+          fi
+
+          echo ""
+          echo "Current state:"
+          echo "  main:    $MAIN_COMMIT"
+          echo "  develop: $DEVELOP_COMMIT"
+
+          # 既に同期済みかチェック
+          if [ "$MAIN_COMMIT" = "$DEVELOP_COMMIT" ]; then
+            echo ""
+            echo "✓ main and develop are already in sync"
+            echo "No PR needed"
+            exit 0
+          fi
+
+          # PRの作成
+          echo ""
+          echo "Creating pull request..."
+
+          PR_TITLE="🚀 Sync main with develop (release/$VERSION)"
+          PR_BODY="## デプロイ完了後の同期PR
+
+          このPRは、\`release/$VERSION\` のデプロイ成功後に自動作成されました。
+
+          ### 変更内容
+          - develop ブランチの内容を main ブランチに同期します
+          - リリースバージョン: \`$VERSION\`
+          - デプロイ完了: ✅
+
+          ### マージ方法
+          1. 差分を確認してください
+          2. 問題がなければ、このPRをマージしてください
+          3. Fast-forward mergeが推奨されます
+
+          ### 関連情報
+          - デプロイワークフロー: [\`${{ github.run_id }}\`](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - リリースタグ: \`${{ github.ref_name }}\`
+
+          ---
+          🤖 このPRは GitHub Actions により自動生成されました"
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head develop \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --label "Release" \
+            2>&1)
+
+          if [ $? -eq 0 ]; then
+            echo ""
+            echo "=========================================="
+            echo "✓ PR created successfully"
+            echo "=========================================="
+            echo ""
+            echo "$PR_URL"
+            echo ""
+            echo "Please review and merge the PR to complete the sync."
+          else
+            echo ""
+            echo "=========================================="
+            echo "⚠️  Warning: Failed to create PR"
+            echo "=========================================="
+            echo ""
+            echo "$PR_URL"
+            echo ""
+            echo "Deployment was successful, but PR creation failed."
+            echo "Please create the sync PR manually:"
+            echo "  gh pr create --base main --head develop --title \"🚀 Sync main with develop (release/$VERSION)\""
+            echo ""
+            echo "Job will continue as successful since deployment completed."
+          fi
+
+          # PR作成失敗でもJobは成功させる
+          exit 0

@@ -204,8 +204,13 @@ type API_EP = {
     GET: SuccessResponse<ApiResponseTouringList>
     POST: SuccessResponse<ApiResponseTouringDetail>
   }
+  [key: `/api/v1/user-bike/bike/${string}/tourings/start-end`]: {
+    POST: SuccessResponse<ApiResponseTouringDetail>
+  }
+} & {
   [key: `/api/v1/user-bike/bike/${string}/tourings/${string}`]: {
     GET: SuccessResponse<ApiResponseTouringDetail>
+    PATCH: SuccessResponse<ApiResponseTouringDetail>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}`]: {

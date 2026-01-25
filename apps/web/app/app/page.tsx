@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { LoginCard } from '@/components/LoginCard'
+import { APP_NAME } from '@/lib/statics'
 import TopImage1 from '@/public/top_image_1.png'
 
 export default function Home() {
@@ -32,7 +33,7 @@ export default function Home() {
               fontSize: 'var(--font-size-3xl)',
             }}
           >
-            MotoReco
+            {APP_NAME}
           </h1>
         </div>
 
