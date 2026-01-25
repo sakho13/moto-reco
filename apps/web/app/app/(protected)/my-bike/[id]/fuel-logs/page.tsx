@@ -46,29 +46,16 @@ function FuelLogsPage() {
     return json.data
   }
 
-  const {
-    data,
-    error,
-    isLoading,
-    size,
-    setSize,
-    isValidating,
-  } = useSWRInfinite(
-    (pageIndex) =>
-      bikeId
-        ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=10&page=${
-            pageIndex + 1
-          }`
-        : null,
-        fetchFuelLogs
-  )
-
-  // const { data, error, isLoading } = useSWR(
-  //   bikeId
-  //     ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc`
-  //     : null,
-  //   fetchFuelLogs
-  // )
+  const { data, error, isLoading, size, setSize, isValidating } =
+    useSWRInfinite(
+      (pageIndex) =>
+        bikeId
+          ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=10&page=${
+              pageIndex + 1
+            }`
+          : null,
+      fetchFuelLogs
+    )
 
   const {
     data: chartData,
