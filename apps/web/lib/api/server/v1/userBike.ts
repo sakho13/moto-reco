@@ -6,14 +6,18 @@ import {
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
   ApiResponseFuelInsight,
+  ApiResponseMaintenanceLogDetail,
   ApiResponseTouringDetail,
   ApiResponseTouringList,
   createBikeId,
   createFuelLogId,
+  createMaintenanceLogId,
   createMyUserBikeId,
   createTouringId,
   createUserId,
   FuelInsightPeriod,
+  MaintenanceLogRegisterRequestSchema,
+  MaintenanceLogUpdateRequestSchema,
   SuccessResponse,
   UserBikeRegisterRequestSchema,
   UserBikeUpdateRequestSchema,
@@ -39,11 +43,13 @@ import {
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaFuelInsightRepository } from '../repositories/PrismaFuelInsightRepository'
 import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository'
+import { PrismaMaintenanceLogRepository } from '../repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeRepository'
 import { FuelInsightService } from '../services/FuelInsightService'
 import { FuelLogService } from '../services/FuelLogService'
+import { MaintenanceLogService } from '../services/MaintenanceLogService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
 import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
@@ -71,6 +77,19 @@ const toApiResponseUserBikeDetail = (
   isPublic: detail.isPublic,
   createdAt: detail.createdAt.toISOString(),
   updatedAt: detail.updatedAt.toISOString(),
+})
+
+const toApiResponseMaintenanceLogDetail = (
+  log: Awaited<ReturnType<MaintenanceLogService['registerMaintenanceLog']>>
+): ApiResponseMaintenanceLogDetail => ({
+  maintenanceLogId: log.id,
+  performedAt: log.performedAt.toISOString(),
+  mileage: log.mileage,
+  memo: log.memo,
+  items: log.items.map((item) => ({
+    type: item.type,
+    value: item.value,
+  })),
 })
 
 userBike.post(
@@ -204,6 +223,80 @@ userBike.patch(
       status: 'success',
       data: toApiResponseUserBikeDetail(detail),
       message: 'ユーザー所有バイク情報更新成功',
+    })
+  }
+)
+
+userBike.post(
+  '/bike/:myUserBikeId/maintenance-logs',
+  honoAuthMiddleware,
+  zodValidateJson(MaintenanceLogRegisterRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const maintenanceLogRepo = new PrismaMaintenanceLogRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new MaintenanceLogService(
+        maintenanceLogRepo,
+        myUserBikeRepo
+      )
+
+      return service.registerMaintenanceLog({
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        performedAt: body.performedAt,
+        mileage: body.mileage,
+        memo: body.memo,
+        items: body.items,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseMaintenanceLogDetail>>(
+      {
+        status: 'success',
+        data: toApiResponseMaintenanceLogDetail(result),
+        message: 'メンテナンス履歴登録成功',
+      },
+      201
+    )
+  }
+)
+
+userBike.patch(
+  '/bike/:myUserBikeId/maintenance-logs',
+  honoAuthMiddleware,
+  zodValidateJson(MaintenanceLogUpdateRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const maintenanceLogRepo = new PrismaMaintenanceLogRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new MaintenanceLogService(
+        maintenanceLogRepo,
+        myUserBikeRepo
+      )
+
+      return service.updateMaintenanceLog({
+        maintenanceLogId: createMaintenanceLogId(body.maintenanceLogId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        performedAt: body.performedAt,
+        mileage: body.mileage,
+        memo: body.memo,
+        items: body.items,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseMaintenanceLogDetail>>({
+      status: 'success',
+      data: toApiResponseMaintenanceLogDetail(result),
+      message: 'メンテナンス履歴更新成功',
     })
   }
 )

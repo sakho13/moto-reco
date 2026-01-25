@@ -154,12 +154,13 @@ erDiagram
 | TUserBike        | 物理的なバイクの実体（車台番号で識別）                   | ✅       |
 | TMyBike          | ユーザー視点の「マイバイク」（所有履歴・ニックネーム等） | ✅       |
 | TUserBikeFuel    | マイバイクの燃料履歴情報を格納するテーブル               | ✅       |
+| TUserMyBikeMaintenanceLog | マイバイクのメンテナンス履歴マスタを格納するテーブル | ✅       |
+| TUserMyBikeMaintenanceLogItem | メンテナンス履歴の項目値を格納するテーブル | ✅       |
 
 ### 未定義テーブル（実装予定）
 
 | テーブル名           | 説明                                               | 優先度 |
 | -------------------- | -------------------------------------------------- | ------ |
-| TUserBikeMaintenance | マイバイクのメンテナンス履歴情報を格納するテーブル | 🔴 高  |
 | TUserBikeLiability   | マイバイクの自賠責履歴情報を格納するテーブル       | 🟡 中  |
 | TUserBikeInsurance   | マイバイクの任意保険履歴情報を格納するテーブル     | 🟡 中  |
 | TUserBikeInspection  | マイバイクの車検履歴情報を格納するテーブル         | 🟡 中  |

@@ -133,6 +133,7 @@ model TUserMyBike {
   userBike TUserBike @relation(fields: [userBikeId], references: [id], onDelete: Restrict)
 
   fuelLogs TUserMyBikeFuelLog[]
+  maintenanceLogs TUserMyBikeMaintenanceLog[]
   tourings TUserMyBikeTouring[]
 
   @@index([userId, ownStatus])
@@ -157,6 +158,38 @@ model TUserMyBikeFuelLog {
   userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
 
   @@index([userMyBikeId, refueledAt])
+}
+
+model TUserMyBikeMaintenanceLog {
+  id           String @id @default(cuid(2))
+  userMyBikeId String @map("my_bike_id")
+
+  performedAt DateTime @map("performed_at") // メンテナンス日時
+  mileage     Int      @map("mileage") // メンテナンス時走行距離/km
+  memo        String?  @map("memo") // メモ
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  items      TUserMyBikeMaintenanceLogItem[]
+
+  @@index([userMyBikeId, performedAt])
+}
+
+model TUserMyBikeMaintenanceLogItem {
+  id               String          @id @default(cuid(2))
+  maintenanceLogId String          @map("maintenance_log_id")
+  maintenanceType  MaintenanceType @map("maintenance_type")
+  value            String          @map("value")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  maintenanceLog TUserMyBikeMaintenanceLog @relation(fields: [maintenanceLogId], references: [id], onDelete: Cascade)
+
+  @@unique([maintenanceLogId, maintenanceType])
+  @@index([maintenanceLogId])
 }
 
 model TUserMyBikeTouring {
