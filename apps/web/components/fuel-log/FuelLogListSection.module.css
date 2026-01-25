@@ -14,3 +14,9 @@
   justify-content: center;
   padding-top: var(--spacing-4);
 }
+
+.listContainer {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: var(--spacing-2);
+}

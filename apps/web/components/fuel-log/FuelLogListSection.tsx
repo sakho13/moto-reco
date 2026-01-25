@@ -56,7 +56,7 @@ export const FuelLogListSection = ({
           </Button>
         </div>
       ) : (
-        <div>
+        <div className={styles.listContainer}>
           {fuelLogs.map((fuelLog) => (
             <FuelLogItem
               key={fuelLog.fuelLogId}
