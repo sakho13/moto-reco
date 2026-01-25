@@ -117,7 +117,7 @@ function FuelLogsPage() {
     )
   }
 
-  const fuelLogs = data ? data.flat() : []
+  const fuelLogs = data ? data.filter(Boolean).flat() : []
   const lastPageCount = data?.[data.length - 1]?.length ?? 0
   const canLoadMore = lastPageCount === 10
   const isLoadingMore = isValidating && !isLoading && size > 0
