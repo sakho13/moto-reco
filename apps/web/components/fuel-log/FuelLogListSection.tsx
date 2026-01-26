@@ -47,7 +47,14 @@ export const FuelLogListSection = ({
   isLoadingMore = false,
 }: FuelLogListSectionProps) => {
   return (
-    <BaseCard title="給油履歴">
+    <BaseCard
+      title="給油履歴"
+      headerAction={
+        <Button onClick={onRegister} variant="primary" size="sm">
+          登録
+        </Button>
+      }
+    >
       {fuelLogs.length === 0 ? (
         <div className={styles.emptyState}>
           <p>給油履歴がまだありません</p>

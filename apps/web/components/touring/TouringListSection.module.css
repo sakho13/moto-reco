@@ -1,0 +1,16 @@
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+
+.emptyState p {
+  margin-bottom: var(--spacing-4);
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
