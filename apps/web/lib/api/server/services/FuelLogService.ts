@@ -5,10 +5,10 @@ import {
   UserId,
 } from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
-import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
+import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
 type RegisterFuelLogParams = {
@@ -44,7 +44,8 @@ type DeleteFuelLogParams = {
 export class FuelLogService {
   constructor(
     private fuelLogRepository: IFuelLogRepository,
-    private myUserBikeRepository: IMyUserBikeRepository
+    private myUserBikeRepository: IMyUserBikeRepository,
+    private userBikeRepository: IUserBikeRepository
   ) {}
 
   public async registerFuelLog(
@@ -72,13 +73,11 @@ export class FuelLogService {
 
     const createdFuelLog = await this.fuelLogRepository.createFuelLog(fuelLog)
 
-    if (params.updateTotalMileage && params.mileage > myUserBike.totalMileage) {
-      const current = myUserBike.toJson()
-      const updatedEntity = new MyUserBikeEntity({
-        ...current,
-        totalMileage: params.mileage,
-      })
-      await this.myUserBikeRepository.updateMyUserBike(updatedEntity)
+    if (params.updateTotalMileage) {
+      await this.userBikeRepository.updateTotalMileageIfGreater(
+        myUserBike.userBikeId,
+        params.mileage
+      )
     }
 
     return createdFuelLog

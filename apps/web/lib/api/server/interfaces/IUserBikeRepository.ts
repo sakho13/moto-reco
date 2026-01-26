@@ -6,4 +6,12 @@ export interface IUserBikeRepository {
     userBikeId: UserBikeEntity['id'],
     displacement: number
   ): Promise<UserBikeEntity>
+  updateTotalMileage(
+    userBikeId: UserBikeEntity['id'],
+    totalMileage: number
+  ): Promise<UserBikeEntity>
+  updateTotalMileageIfGreater(
+    userBikeId: UserBikeEntity['id'],
+    totalMileage: number
+  ): Promise<boolean>
 }

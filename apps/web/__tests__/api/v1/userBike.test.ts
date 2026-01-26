@@ -104,12 +104,12 @@ describe('UserBike API Endpoints', () => {
       })
       expect(userBikeRecord?.serialNumber).toBe(serialNumber)
       expect(userBikeRecord?.bikeId).toBe(bikeId)
+      expect(userBikeRecord?.totalMileage).toBe(1500)
 
       const myUserBikeRecord = await prisma.tUserMyBike.findUnique({
         where: { id: json.data.myUserBikeId },
       })
       expect(myUserBikeRecord?.userId).toBe(userId)
-      expect(myUserBikeRecord?.totalMileage).toBe(1500)
       expect(myUserBikeRecord?.purchasePrice).toBe(500000)
       expect(myUserBikeRecord?.purchaseMileage).toBe(1200)
       expect(myUserBikeRecord?.purchaseDate?.toISOString()).toBe(purchaseDate)
@@ -574,12 +574,17 @@ describe('UserBike API Endpoints', () => {
       const myUserBikeRecord = await prisma.tUserMyBike.findUnique({
         where: { id: myUserBikeId },
       })
+      const userBikeRecord = myUserBikeRecord
+        ? await prisma.tUserBike.findUnique({
+            where: { id: myUserBikeRecord.userBikeId },
+          })
+        : null
 
       expect(myUserBikeRecord?.nickname).toBe(updatedNickname)
       expect(myUserBikeRecord?.purchaseDate?.toISOString()).toBe(purchaseDate)
       expect(myUserBikeRecord?.purchasePrice).toBe(450000)
       expect(myUserBikeRecord?.purchaseMileage).toBe(1300)
-      expect(myUserBikeRecord?.totalMileage).toBe(2100)
+      expect(userBikeRecord?.totalMileage).toBe(2100)
     })
 
     test('排気量のみで登録したバイクの排気量を更新できる', async () => {
@@ -788,7 +793,14 @@ describe('UserBike API Endpoints', () => {
       const myUserBikeBefore = await prisma.tUserMyBike.findUnique({
         where: { id: myUserBikeId },
       })
-      const currentMileage = myUserBikeBefore?.totalMileage ?? 0
+      if (!myUserBikeBefore) {
+        throw new Error('テストバイクが見つかりません')
+      }
+
+      const userBikeBefore = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
+      })
+      const currentMileage = userBikeBefore?.totalMileage ?? 0
 
       const newMileage = currentMileage + 500
       const refueledAt = '2024-03-15T10:00:00.000Z'
@@ -816,17 +828,24 @@ describe('UserBike API Endpoints', () => {
       expect(res.status).toBe(201)
       expect(json.data.mileage).toBe(newMileage)
 
-      const myUserBikeAfter = await prisma.tUserMyBike.findUnique({
-        where: { id: myUserBikeId },
+      const userBikeAfter = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
       })
-      expect(myUserBikeAfter?.totalMileage).toBe(newMileage)
+      expect(userBikeAfter?.totalMileage).toBe(newMileage)
     })
 
     test('updateTotalMileageがtrueでも現在値より小さい場合は更新されない', async () => {
       const myUserBikeBefore = await prisma.tUserMyBike.findUnique({
         where: { id: myUserBikeId },
       })
-      const currentMileage = myUserBikeBefore?.totalMileage ?? 0
+      if (!myUserBikeBefore) {
+        throw new Error('テストバイクが見つかりません')
+      }
+
+      const userBikeBefore = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
+      })
+      const currentMileage = userBikeBefore?.totalMileage ?? 0
 
       const smallerMileage = currentMileage - 100
       const refueledAt = '2024-02-01T10:00:00.000Z'
@@ -854,10 +873,10 @@ describe('UserBike API Endpoints', () => {
       expect(res.status).toBe(201)
       expect(json.data.mileage).toBe(smallerMileage)
 
-      const myUserBikeAfter = await prisma.tUserMyBike.findUnique({
-        where: { id: myUserBikeId },
+      const userBikeAfter = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
       })
-      expect(myUserBikeAfter?.totalMileage).toBe(currentMileage)
+      expect(userBikeAfter?.totalMileage).toBe(currentMileage)
     })
   })
 
@@ -2658,8 +2677,14 @@ describe('UserBike API Endpoints', () => {
 
     test('削除後に総走行距離が更新されないことを確認', async () => {
       // 削除前のバイクの総走行距離を取得
-      const bikeBefore = await prisma.tUserMyBike.findUnique({
+      const myUserBikeBefore = await prisma.tUserMyBike.findUnique({
         where: { id: myUserBikeId },
+      })
+      if (!myUserBikeBefore) {
+        throw new Error('テストバイクが見つかりません')
+      }
+      const bikeBefore = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
       })
       const totalMileageBefore = bikeBefore?.totalMileage
 

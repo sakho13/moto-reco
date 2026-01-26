@@ -17,6 +17,7 @@ export type UserBike = {
   bikeId: BikeId | null
   userBikeId: UserBikeId
   displacement: number
+  totalMileage: number
 
   serialNumber: string | null
 }
@@ -37,7 +38,6 @@ export type MyUserBike = {
   purchaseDate: Date | null
   purchasePrice: number | null
   purchaseMileage: number | null
-  totalMileage: number
   isPublic: boolean
 
   ownedAt: Date

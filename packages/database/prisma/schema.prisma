@@ -100,6 +100,7 @@ model TUserBike {
   bikeId       String? @map("bike_id")
   serialNumber String? @map("serial_number")
   displacement Float   @map("displacement")
+  totalMileage Int     @default(0) @map("total_mileage") // 総走行距離/km
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -118,7 +119,6 @@ model TUserMyBike {
   purchaseDate    DateTime? @map("purchase_date")
   purchasePrice   Int?      @map("purchase_price")
   purchaseMileage Int?      @map("purchase_mileage")
-  totalMileage    Int       @default(0) @map("total_mileage") // 総走行距離/km
   isPublic        Boolean   @default(false) @map("is_public")
 
   // 所有状態
