@@ -8,6 +8,10 @@ export class UserBikeEntity {
       throw new Error('排気量は0より大きい必要があります')
     }
 
+    if (userBike.totalMileage < 0) {
+      throw new Error('総走行距離は0以上である必要があります')
+    }
+
     this._value = {
       ...userBike,
       bikeId: userBike.bikeId ?? null,
@@ -26,6 +30,10 @@ export class UserBikeEntity {
 
   public get displacement(): number {
     return this._value.displacement
+  }
+
+  public get totalMileage(): number {
+    return this._value.totalMileage
   }
 
   public get serialNumber(): string | null {

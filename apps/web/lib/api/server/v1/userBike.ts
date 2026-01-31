@@ -227,7 +227,12 @@ userBike.get(
 
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)
     const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
-    const fuelLogService = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+    const userBikeRepo = new PrismaUserBikeRepository(prisma)
+    const fuelLogService = new FuelLogService(
+      fuelLogRepo,
+      myUserBikeRepo,
+      userBikeRepo
+    )
 
     const fuelLogs = await fuelLogService.getFuelLogs(
       createMyUserBikeId(myUserBikeId),
@@ -268,7 +273,12 @@ userBike.get(
 
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)
     const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
-    const fuelLogService = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+    const userBikeRepo = new PrismaUserBikeRepository(prisma)
+    const fuelLogService = new FuelLogService(
+      fuelLogRepo,
+      myUserBikeRepo,
+      userBikeRepo
+    )
 
     const fuelLog = await fuelLogService.getFuelLogDetail(
       createFuelLogId(params.fuelLogId),
@@ -306,7 +316,12 @@ userBike.post(
     const result = await prisma.$transaction((t) => {
       const fuelLogRepo = new PrismaFuelLogRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
-      const service = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+      const userBikeRepo = new PrismaUserBikeRepository(t)
+      const service = new FuelLogService(
+        fuelLogRepo,
+        myUserBikeRepo,
+        userBikeRepo
+      )
 
       return service.registerFuelLog({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
@@ -354,7 +369,12 @@ userBike.patch(
     const result = await prisma.$transaction((t) => {
       const fuelLogRepo = new PrismaFuelLogRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
-      const service = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+      const userBikeRepo = new PrismaUserBikeRepository(t)
+      const service = new FuelLogService(
+        fuelLogRepo,
+        myUserBikeRepo,
+        userBikeRepo
+      )
 
       return service.updateFuelLog({
         fuelLogId: createFuelLogId(body.fuelLogId),
@@ -402,7 +422,12 @@ userBike.delete(
     await prisma.$transaction((t) => {
       const fuelLogRepo = new PrismaFuelLogRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
-      const service = new FuelLogService(fuelLogRepo, myUserBikeRepo)
+      const userBikeRepo = new PrismaUserBikeRepository(t)
+      const service = new FuelLogService(
+        fuelLogRepo,
+        myUserBikeRepo,
+        userBikeRepo
+      )
 
       return service.deleteFuelLog({
         fuelLogId: createFuelLogId(body.fuelLogId),
