@@ -59,14 +59,10 @@ export class MaintenanceLogService {
       items: params.items,
     })
 
-    const created = await this.maintenanceLogRepository.createMaintenanceLog(
-      maintenanceLog
-    )
+    const created =
+      await this.maintenanceLogRepository.createMaintenanceLog(maintenanceLog)
 
-    if (
-      params.updateTotalMileage &&
-      params.mileage > myUserBike.totalMileage
-    ) {
+    if (params.updateTotalMileage && params.mileage > myUserBike.totalMileage) {
       const current = myUserBike.toJson()
       const updatedEntity = new MyUserBikeEntity({
         ...current,
@@ -90,10 +86,11 @@ export class MaintenanceLogService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    const existingLog = await this.maintenanceLogRepository.findMaintenanceLogById(
-      params.maintenanceLogId,
-      params.myUserBikeId
-    )
+    const existingLog =
+      await this.maintenanceLogRepository.findMaintenanceLogById(
+        params.maintenanceLogId,
+        params.myUserBikeId
+      )
 
     if (!existingLog) {
       throw new ApiV1Error(
@@ -112,9 +109,8 @@ export class MaintenanceLogService {
         items: params.items ?? existingLog.items,
       })
 
-      const result = await this.maintenanceLogRepository.updateMaintenanceLog(
-        updatedLog
-      )
+      const result =
+        await this.maintenanceLogRepository.updateMaintenanceLog(updatedLog)
 
       if (
         params.updateTotalMileage &&
@@ -130,6 +126,9 @@ export class MaintenanceLogService {
 
       return result
     } catch (error) {
+      if (error instanceof ApiV1Error) {
+        throw error
+      }
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
       }

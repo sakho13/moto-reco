@@ -4,26 +4,39 @@ import {
   MaintenanceLogItem,
   MyUserBikeId,
 } from '@repo/shared-types'
+import { ApiV1Error } from '../errors/ApiV1Error'
 
 export class MaintenanceLogEntity {
   private _value: MaintenanceLog
 
   constructor(maintenanceLog: MaintenanceLog) {
     if (maintenanceLog.mileage < 0) {
-      throw new Error('走行距離は0以上である必要があります')
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        '走行距離は0以上である必要があります'
+      )
     }
 
     if (maintenanceLog.items.length === 0) {
-      throw new Error('メンテナンス項目は1件以上指定してください')
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        'メンテナンス項目は1件以上指定してください'
+      )
     }
 
     const types = new Set<string>()
     for (const item of maintenanceLog.items) {
       if (item.value !== null && item.value < 0) {
-        throw new Error('メンテナンス値は0以上である必要があります')
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          'メンテナンス値は0以上である必要があります'
+        )
       }
       if (types.has(item.maintenanceType)) {
-        throw new Error('メンテナンス項目は重複して指定できません')
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          'メンテナンス項目は重複して指定できません'
+        )
       }
       types.add(item.maintenanceType)
     }

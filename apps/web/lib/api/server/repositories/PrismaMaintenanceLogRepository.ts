@@ -77,8 +77,8 @@ export class PrismaMaintenanceLogRepository
     maintenanceLogId: MaintenanceLogId,
     myUserBikeId: MyUserBikeId
   ): Promise<MaintenanceLogEntity | null> {
-    const maintenanceLog = await this.connection.tUserMyBikeMaintenance.findFirst(
-      {
+    const maintenanceLog =
+      await this.connection.tUserMyBikeMaintenance.findFirst({
         where: {
           id: maintenanceLogId,
           userMyBikeId: myUserBikeId,
@@ -96,8 +96,7 @@ export class PrismaMaintenanceLogRepository
             },
           },
         },
-      }
-    )
+      })
 
     if (!maintenanceLog) {
       return null
