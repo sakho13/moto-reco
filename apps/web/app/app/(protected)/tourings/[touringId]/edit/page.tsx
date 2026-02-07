@@ -56,8 +56,8 @@ function TouringEditPage() {
     if (!data) {
       return
     }
-    const startDate = new Date(data.startDate).toISOString().split('T')[0]
-    const endDate = new Date(data.endDate).toISOString().split('T')[0]
+    const startDate = new Date(data.startDate).toISOString().split('T')[0] ?? ''
+    const endDate = new Date(data.endDate).toISOString().split('T')[0] ?? ''
     setInitialData({
       title: data.title,
       startDate,
@@ -102,7 +102,7 @@ function TouringEditPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-xl">
         <div className="flex items-center justify-center min-h-100">
           <p className="text-lg">読み込み中...</p>
         </div>
@@ -112,7 +112,7 @@ function TouringEditPage() {
 
   if (fetchError || !initialData) {
     return (
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-xl">
         <div className="mb-4">
           <Button
             onClick={() =>

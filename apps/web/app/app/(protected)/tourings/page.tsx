@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import type {
   ApiResponseTouringList,
@@ -41,7 +41,7 @@ function TouringsPage() {
       setSelectedBikeId(selectedFromQuery)
       return
     }
-    if (selectedBikeId === '') {
+    if (selectedBikeId === '' && bikeList.bikes[0]) {
       setSelectedBikeId(bikeList.bikes[0].myUserBikeId)
     }
   }, [bikeList, selectedBikeId, selectedFromQuery])
@@ -102,69 +102,78 @@ function TouringsPage() {
 
   if (isBikeLoading || (selectedBikeId !== '' && isTouringLoading)) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-100">
+      <>
+        <div className="w-full max-w-md mb-4">
+          <Button onClick={() => router.push('/app/home')} variant="cloud">
+            ← 戻る
+          </Button>
+        </div>
+        <div className="w-full max-w-md flex items-center justify-center min-h-100">
           <p className="text-lg">読み込み中...</p>
         </div>
-      </div>
+      </>
     )
   }
 
   if (displayError) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="mb-4">
+      <>
+        <div className="w-full max-w-md mb-4">
           <Button onClick={() => router.push('/app/home')} variant="cloud">
             ← 戻る
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">
-            {displayError instanceof ApiV1Error
-              ? displayError.message
-              : 'ツーリング記録の取得に失敗しました'}
-          </p>
-          <Button onClick={() => router.push('/app/home')}>ホームに戻る</Button>
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
+            <p className="text-gray-700 mb-4">
+              {displayError instanceof ApiV1Error
+                ? displayError.message
+                : 'ツーリング記録の取得に失敗しました'}
+            </p>
+            <Button onClick={() => router.push('/app/home')}>
+              ホームに戻る
+            </Button>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
   if (!bikeList || bikeList.bikes.length === 0) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="mb-4">
+      <>
+        <div className="w-full max-w-md mb-4">
           <Button onClick={() => router.push('/app/home')} variant="cloud">
             ← 戻る
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div className="w-full max-w-md">
           <h1 className="text-2xl font-bold mb-4">ツーリング記録</h1>
-          <p className="text-gray-700 mb-4">
+          <p className="mb-4">
             ツーリング記録を登録するために、まずバイクを登録してください。
           </p>
           <Button onClick={() => router.push('/app/bike/register')}>
             バイクを登録する
           </Button>
         </div>
-      </div>
+      </>
     )
   }
 
   const touringList = tourings ?? []
 
   return (
-    <div className="w-full max-w-2xl flex flex-col gap-4">
-      <div className="w-full flex flex-row gap-2">
+    <>
+      <div className="w-full max-w-md">
         <Button onClick={() => router.push('/app/home')} variant="cloud">
           ← 戻る
         </Button>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 w-full max-w-md">
         <label htmlFor="bike-select" className="text-sm font-medium">
           表示するバイク
         </label>
@@ -181,7 +190,7 @@ function TouringsPage() {
         onEdit={handleDetail}
         onRegister={handleRegister}
       />
-    </div>
+    </>
   )
 }
 

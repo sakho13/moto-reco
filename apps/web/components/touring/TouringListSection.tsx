@@ -32,7 +32,7 @@ export const TouringListSection = ({
     <BaseCard
       title="ツーリング記録"
       headerAction={
-        <Button onClick={onRegister} variant="primary" size="sm">
+        <Button onClick={onRegister} variant="cloud" size="md">
           登録
         </Button>
       }

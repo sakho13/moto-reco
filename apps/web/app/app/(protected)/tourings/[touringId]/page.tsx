@@ -1,7 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import type {
   ApiResponseTouringDetail,
@@ -65,7 +64,7 @@ function TouringDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-xl">
         <div className="flex items-center justify-center min-h-100">
           <p className="text-lg">読み込み中...</p>
         </div>
@@ -75,7 +74,7 @@ function TouringDetailPage() {
 
   if (error || !touring) {
     return (
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-xl">
         <div className="mb-4">
           <Button
             onClick={() => router.push(`/app/tourings?bikeId=${bikeId}`)}
