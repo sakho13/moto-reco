@@ -12,5 +12,6 @@
     "editor.defaultFormatter": "Prisma.prisma",
     "editor.formatOnSave": true
   },
-  "cSpell.words": ["moto", "motoreco", "reco"]
+  "cSpell.words": ["moto", "motoreco", "reco"],
+  "explorer.compactFolders": false
 }

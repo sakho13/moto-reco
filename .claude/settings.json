@@ -1,10 +1,32 @@
 {
+  "plansDirectory": "plans",
   "permissions": {
     "allow": [
+      "Bash(git show:*)",
       "Bash(docker exec:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker inspect:*)",
+      "Bash(docker logs:*)",
       "Bash(wc:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)",
       "Bash(gh issue view:*)",
-      "Bash(pnpm format:*)"
+      "Bash(gh issue comment:*)",
+      "Bash(pnpm check-types:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm format:*)",
+      "Read(.env.local)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.production)"
+    ],
+    "ask": [
+      "Bash(gh issue close:*)",
+      "Bash(curl:*)",
+      "Bash(ssh:*)"
     ]
   },
   "hooks": {
