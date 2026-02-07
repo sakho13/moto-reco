@@ -92,9 +92,7 @@ function TouringDetailPage() {
               ? error.message
               : 'ツーリング記録が見つかりません'}
           </p>
-          <Button
-            onClick={() => router.push(`/app/tourings?bikeId=${bikeId}`)}
-          >
+          <Button onClick={() => router.push(`/app/tourings?bikeId=${bikeId}`)}>
             ツーリング記録一覧に戻る
           </Button>
         </div>

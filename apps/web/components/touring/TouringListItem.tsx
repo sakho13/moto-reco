@@ -9,10 +9,7 @@ export interface TouringListItemProps {
   onEdit: (touringId: string) => void
 }
 
-export const TouringListItem = ({
-  touring,
-  onEdit,
-}: TouringListItemProps) => {
+export const TouringListItem = ({ touring, onEdit }: TouringListItemProps) => {
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('ja-JP', {

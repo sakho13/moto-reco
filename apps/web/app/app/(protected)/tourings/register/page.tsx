@@ -5,7 +5,10 @@ import { useState } from 'react'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
-import { TouringForm, type TouringFormData } from '@/components/touring/TouringForm'
+import {
+  TouringForm,
+  type TouringFormData,
+} from '@/components/touring/TouringForm'
 import { apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
