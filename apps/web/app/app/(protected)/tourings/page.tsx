@@ -165,6 +165,9 @@ function TouringsPage() {
 
   const touringList = tourings ?? []
 
+  const shouldHideSelect =
+    selectedFromQuery !== '' && selectedBikeId === selectedFromQuery
+
   return (
     <>
       <div className="w-full max-w-md">
@@ -173,17 +176,19 @@ function TouringsPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-2 w-full max-w-md">
-        <label htmlFor="bike-select" className="text-sm font-medium">
-          表示するバイク
-        </label>
-        <Select
-          id="bike-select"
-          options={bikeOptions}
-          value={selectedBikeId}
-          onChange={(event) => setSelectedBikeId(event.target.value)}
-        />
-      </div>
+      {!shouldHideSelect && (
+        <div className="flex flex-col gap-2 w-full max-w-md">
+          <label htmlFor="bike-select" className="text-sm font-medium">
+            表示するバイク
+          </label>
+          <Select
+            id="bike-select"
+            options={bikeOptions}
+            value={selectedBikeId}
+            onChange={(event) => setSelectedBikeId(event.target.value)}
+          />
+        </div>
+      )}
 
       <TouringListSection
         tourings={touringList}
