@@ -84,17 +84,15 @@ function TouringDetailPage() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">
-            {error instanceof ApiV1Error
-              ? error.message
-              : 'ツーリング記録が見つかりません'}
-          </p>
-          <Button onClick={() => router.push(`/app/tourings?bikeId=${bikeId}`)}>
-            ツーリング記録一覧に戻る
-          </Button>
-        </div>
+        <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
+        <p className="text-gray-700 mb-4">
+          {error instanceof ApiV1Error
+            ? error.message
+            : 'ツーリング記録が見つかりません'}
+        </p>
+        <Button onClick={() => router.push(`/app/tourings?bikeId=${bikeId}`)}>
+          ツーリング記録一覧に戻る
+        </Button>
       </div>
     )
   }

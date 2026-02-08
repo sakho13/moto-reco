@@ -125,17 +125,13 @@ function TouringsPage() {
         </div>
 
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-            <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-            <p className="text-gray-700 mb-4">
-              {displayError instanceof ApiV1Error
-                ? displayError.message
-                : 'ツーリング記録の取得に失敗しました'}
-            </p>
-            <Button onClick={() => router.push('/app/home')}>
-              ホームに戻る
-            </Button>
-          </div>
+          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
+          <p className="text-gray-700 mb-4">
+            {displayError instanceof ApiV1Error
+              ? displayError.message
+              : 'ツーリング記録の取得に失敗しました'}
+          </p>
+          <Button onClick={() => router.push('/app/home')}>ホームに戻る</Button>
         </div>
       </>
     )

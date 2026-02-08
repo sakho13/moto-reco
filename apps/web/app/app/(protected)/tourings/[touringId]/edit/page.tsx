@@ -124,21 +124,19 @@ function TouringEditPage() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">
-            {fetchError instanceof ApiV1Error
-              ? fetchError.message
-              : 'ツーリング記録が見つかりません'}
-          </p>
-          <Button
-            onClick={() =>
-              router.push(`/app/tourings/${touringId}?bikeId=${bikeId}`)
-            }
-          >
-            ツーリング記録詳細に戻る
-          </Button>
-        </div>
+        <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
+        <p className="text-gray-700 mb-4">
+          {fetchError instanceof ApiV1Error
+            ? fetchError.message
+            : 'ツーリング記録が見つかりません'}
+        </p>
+        <Button
+          onClick={() =>
+            router.push(`/app/tourings/${touringId}?bikeId=${bikeId}`)
+          }
+        >
+          ツーリング記録詳細に戻る
+        </Button>
       </div>
     )
   }
