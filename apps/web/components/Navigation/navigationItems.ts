@@ -12,13 +12,13 @@ export type NavigationItem = {
 
 export const navigationItems: NavigationItem[] = [
   { id: 'home', label: 'ホーム', href: '/app/home', icon: HomeIcon },
+  { id: 'my-bike', label: 'マイバイク', href: '/app/my-bike', icon: BikeIcon },
   {
     id: 'tourings',
     label: 'ツーリング記録',
     href: '/app/tourings',
     icon: TouringIcon,
   },
-  { id: 'my-bike', label: 'マイバイク', href: '/app/my-bike', icon: BikeIcon },
   {
     id: 'profile',
     label: 'プロフィール',
