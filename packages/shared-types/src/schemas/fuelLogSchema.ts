@@ -185,3 +185,46 @@ export const FuelLogDeleteRequestSchema = z.object({
 })
 
 export type FuelLogDeleteRequest = z.infer<typeof FuelLogDeleteRequestSchema>
+
+/**
+ * 給油履歴のツーリング紐づけ更新リクエストのバリデーションスキーマ
+ */
+export const FuelLogTouringUpdateRequestSchema = z.object({
+  touringId: z
+    .string({
+      invalid_type_error: 'ツーリングIDは文字列で指定してください',
+    })
+    .min(1, 'ツーリングIDは1文字以上で指定してください')
+    .nullable(),
+})
+
+export type FuelLogTouringUpdateRequest = z.infer<
+  typeof FuelLogTouringUpdateRequestSchema
+>
+
+/**
+ * 給油履歴の期間検索クエリパラメータのバリデーションスキーマ
+ */
+export const FuelLogDateRangeQuerySchema = z
+  .object({
+    myUserBikeId: z
+      .string({
+        required_error: 'バイクIDは必須です',
+        invalid_type_error: 'バイクIDは文字列で指定してください',
+      })
+      .min(1, 'バイクIDは1文字以上で指定してください'),
+    startDate: z.coerce.date({
+      required_error: '開始日は必須です',
+      invalid_type_error: '開始日は日付形式で指定してください',
+    }),
+    endDate: z.coerce.date({
+      required_error: '終了日は必須です',
+      invalid_type_error: '終了日は日付形式で指定してください',
+    }),
+  })
+  .refine((data) => data.startDate <= data.endDate, {
+    message: '開始日は終了日以前の日付で指定してください',
+    path: ['startDate'],
+  })
+
+export type FuelLogDateRangeQuery = z.infer<typeof FuelLogDateRangeQuerySchema>
