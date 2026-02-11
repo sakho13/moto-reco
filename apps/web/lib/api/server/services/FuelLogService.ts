@@ -69,6 +69,8 @@ export class FuelLogService {
       amount: params.amount,
       totalPrice: params.totalPrice,
       memo: params.memo ?? null,
+      touringId: null,
+      touringTitle: null,
     })
 
     const createdFuelLog = await this.fuelLogRepository.createFuelLog(fuelLog)
@@ -161,6 +163,8 @@ export class FuelLogService {
         amount: params.amount ?? existingFuelLog.amount,
         totalPrice: params.totalPrice ?? existingFuelLog.totalPrice,
         memo: params.memo ?? existingFuelLog.memo,
+        touringId: existingFuelLog.touringId,
+        touringTitle: existingFuelLog.touringTitle,
       })
 
       // 4. 更新実行

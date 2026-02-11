@@ -24,11 +24,13 @@ import {
   FuelLogDeleteRequestSchema,
   FuelLogListQuerySchema,
   FuelLogDetailParamSchema,
+  FuelLogDateRangeQuerySchema,
   TouringRegisterRequestSchema,
   TouringStartEndRequestSchema,
   TouringListQuerySchema,
   TouringUpdateRequestSchema,
 } from '@repo/shared-types'
+import { ApiV1Error } from '../errors/ApiV1Error'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import {
@@ -448,6 +450,56 @@ userBike.delete(
 )
 
 userBike.get(
+  '/bike/:myUserBikeId/fuel-logs/date-range',
+  honoAuthMiddleware,
+  zodValidateQuery(FuelLogDateRangeQuerySchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const query = c.req.valid('query')
+
+    const fuelLogRepo = new PrismaFuelLogRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+
+    const myUserBike = await myUserBikeRepo.findMyUserBikeById(
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const fuelLogs = await fuelLogRepo.findFuelLogsByDateRange(
+      createMyUserBikeId(myUserBikeId),
+      new Date(query.startDate),
+      new Date(query.endDate)
+    )
+
+    return c.json<SuccessResponse<ApiResponseFuelLogList>>(
+      {
+        status: 'success',
+        data: fuelLogs.map((log) => ({
+          fuelLogId: log.id,
+          refueledAt: log.refueledAt.toISOString(),
+          amount: log.amount,
+          totalPrice: log.totalPrice,
+          mileage: log.mileage,
+          previousMileage: log.previousMileage,
+          fuelEfficiency: log.fuelEfficiency,
+          pricePerLiter: log.pricePerLiter,
+          memo: log.memo,
+          touringId: log.touringId,
+          touringTitle: log.touringTitle,
+        })),
+        message: '期間内の給油履歴取得成功',
+      },
+      200
+    )
+  }
+)
+
+userBike.get(
   '/bike/:myUserBikeId/fuel-insights',
   honoAuthMiddleware,
   zodValidateQuery(FuelInsightQuerySchema),
@@ -713,6 +765,8 @@ userBike.patch(
         endDate: body.endDate,
         startMileage: body.startMileage,
         endMileage: body.endMileage,
+        status: body.status,
+        fuelLogIds: body.fuelLogIds?.map(createFuelLogId),
       })
     })
 

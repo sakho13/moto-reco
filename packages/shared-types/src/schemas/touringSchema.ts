@@ -105,6 +105,15 @@ export const TouringUpdateRequestSchema = z
           'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
       })
       .optional(),
+    fuelLogIds: z
+      .array(
+        z
+          .string({
+            invalid_type_error: '給油履歴IDは文字列で指定してください',
+          })
+          .min(1, '給油履歴IDは1文字以上で指定してください')
+      )
+      .optional(),
   })
   .refine(
     (data) =>
@@ -113,7 +122,8 @@ export const TouringUpdateRequestSchema = z
       data.endDate !== undefined ||
       data.startMileage !== undefined ||
       data.endMileage !== undefined ||
-      data.status !== undefined,
+      data.status !== undefined ||
+      data.fuelLogIds !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }
