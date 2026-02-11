@@ -22,6 +22,7 @@ export class PrismaTouringRepository
         endDate: touring.endDate,
         startMileage: touring.startMileage,
         endMileage: touring.endMileage,
+        status: touring.status,
       },
       select: {
         id: true,
@@ -31,6 +32,7 @@ export class PrismaTouringRepository
         endDate: true,
         startMileage: true,
         endMileage: true,
+        status: true,
       },
     })
 
@@ -42,6 +44,7 @@ export class PrismaTouringRepository
       endDate: created.endDate,
       startMileage: created.startMileage,
       endMileage: created.endMileage,
+      status: created.status,
     })
   }
 
@@ -56,6 +59,7 @@ export class PrismaTouringRepository
         endDate: touring.endDate,
         startMileage: touring.startMileage,
         endMileage: touring.endMileage,
+        status: touring.status,
       },
       select: {
         id: true,
@@ -65,6 +69,7 @@ export class PrismaTouringRepository
         endDate: true,
         startMileage: true,
         endMileage: true,
+        status: true,
       },
     })
 
@@ -76,6 +81,7 @@ export class PrismaTouringRepository
       endDate: updated.endDate,
       startMileage: updated.startMileage,
       endMileage: updated.endMileage,
+      status: updated.status,
     })
   }
 
@@ -106,6 +112,7 @@ export class PrismaTouringRepository
         endDate: true,
         startMileage: true,
         endMileage: true,
+        status: true,
       },
       orderBy,
     })
@@ -120,6 +127,7 @@ export class PrismaTouringRepository
           endDate: touring.endDate,
           startMileage: touring.startMileage,
           endMileage: touring.endMileage,
+          status: touring.status,
         })
     )
   }
@@ -141,6 +149,7 @@ export class PrismaTouringRepository
         endDate: true,
         startMileage: true,
         endMileage: true,
+        status: true,
       },
     })
 
@@ -156,6 +165,80 @@ export class PrismaTouringRepository
       endDate: touring.endDate,
       startMileage: touring.startMileage,
       endMileage: touring.endMileage,
+      status: touring.status,
+    })
+  }
+
+  async findOngoingTouring(
+    myUserBikeId: MyUserBikeId
+  ): Promise<TouringEntity | null> {
+    const touring = await this.connection.tUserMyBikeTouring.findFirst({
+      where: {
+        userMyBikeId: myUserBikeId,
+        status: 'STARTED',
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        title: true,
+        startDate: true,
+        endDate: true,
+        startMileage: true,
+        endMileage: true,
+        status: true,
+      },
+    })
+
+    if (!touring) {
+      return null
+    }
+
+    return new TouringEntity({
+      touringId: createTouringId(touring.id),
+      myUserBikeId: createMyUserBikeId(touring.userMyBikeId),
+      title: touring.title,
+      startDate: touring.startDate,
+      endDate: touring.endDate,
+      startMileage: touring.startMileage,
+      endMileage: touring.endMileage,
+      status: touring.status,
+    })
+  }
+
+  async updateTouringStatus(
+    touringId: TouringId,
+    myUserBikeId: MyUserBikeId,
+    status: 'STARTED' | 'COMPLETED'
+  ): Promise<TouringEntity> {
+    const updated = await this.connection.tUserMyBikeTouring.update({
+      where: {
+        id: touringId,
+        userMyBikeId: myUserBikeId,
+      },
+      data: {
+        status,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        title: true,
+        startDate: true,
+        endDate: true,
+        startMileage: true,
+        endMileage: true,
+        status: true,
+      },
+    })
+
+    return new TouringEntity({
+      touringId: createTouringId(updated.id),
+      myUserBikeId: createMyUserBikeId(updated.userMyBikeId),
+      title: updated.title,
+      startDate: updated.startDate,
+      endDate: updated.endDate,
+      startMileage: updated.startMileage,
+      endMileage: updated.endMileage,
+      status: updated.status,
     })
   }
 }

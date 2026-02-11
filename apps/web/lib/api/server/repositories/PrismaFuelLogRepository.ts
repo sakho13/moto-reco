@@ -2,8 +2,10 @@ import { subMonths, subYears } from 'date-fns'
 import {
   createFuelLogId,
   createMyUserBikeId,
+  createTouringId,
   FuelLogId,
   MyUserBikeId,
+  TouringId,
 } from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
@@ -84,6 +86,7 @@ export class PrismaFuelLogRepository
         previousMileage: fuelLog.previousMileage,
         refueledAt: fuelLog.refueledAt,
         memo: fuelLog.memo,
+        touringId: fuelLog.touringId,
       },
       select: {
         id: true,
@@ -94,6 +97,12 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
         memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
       },
     })
 
@@ -106,6 +115,8 @@ export class PrismaFuelLogRepository
       previousMileage: created.previousMileage,
       refueledAt: created.refueledAt,
       memo: created.memo,
+      touringId: created.touringId ? createTouringId(created.touringId) : null,
+      touringTitle: created.touring?.title ?? null,
     })
   }
 
@@ -150,6 +161,12 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
         memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
       },
       orderBy,
       skip: searchParams.skip,
@@ -167,6 +184,8 @@ export class PrismaFuelLogRepository
           previousMileage: log.previousMileage,
           refueledAt: log.refueledAt,
           memo: log.memo,
+          touringId: log.touringId ? createTouringId(log.touringId) : null,
+          touringTitle: log.touring?.title ?? null,
         })
     )
   }
@@ -189,6 +208,12 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
         memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
       },
     })
 
@@ -205,6 +230,8 @@ export class PrismaFuelLogRepository
       previousMileage: fuelLog.previousMileage,
       refueledAt: fuelLog.refueledAt,
       memo: fuelLog.memo,
+      touringId: fuelLog.touringId ? createTouringId(fuelLog.touringId) : null,
+      touringTitle: fuelLog.touring?.title ?? null,
     })
   }
 
@@ -220,6 +247,7 @@ export class PrismaFuelLogRepository
         previousMileage: fuelLog.previousMileage,
         refueledAt: fuelLog.refueledAt,
         memo: fuelLog.memo,
+        touringId: fuelLog.touringId,
       },
       select: {
         id: true,
@@ -230,6 +258,12 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
         memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
       },
     })
 
@@ -242,6 +276,8 @@ export class PrismaFuelLogRepository
       previousMileage: updated.previousMileage,
       refueledAt: updated.refueledAt,
       memo: updated.memo,
+      touringId: updated.touringId ? createTouringId(updated.touringId) : null,
+      touringTitle: updated.touring?.title ?? null,
     })
   }
 
@@ -253,6 +289,120 @@ export class PrismaFuelLogRepository
       where: {
         id: fuelLogId,
         userMyBikeId: myUserBikeId,
+      },
+    })
+  }
+
+  async findFuelLogsByDateRange(
+    myUserBikeId: MyUserBikeId,
+    startDate: Date,
+    endDate: Date
+  ): Promise<FuelLogEntity[]> {
+    const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
+      where: {
+        userMyBikeId: myUserBikeId,
+        refueledAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        amount: true,
+        price: true,
+        mileage: true,
+        previousMileage: true,
+        refueledAt: true,
+        memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
+      },
+      orderBy: {
+        refueledAt: 'asc',
+      },
+    })
+
+    return fuelLogs.map(
+      (log) =>
+        new FuelLogEntity({
+          fuelLogId: createFuelLogId(log.id),
+          myUserBikeId: createMyUserBikeId(log.userMyBikeId),
+          amount: log.amount,
+          totalPrice: log.price,
+          mileage: log.mileage,
+          previousMileage: log.previousMileage,
+          refueledAt: log.refueledAt,
+          memo: log.memo,
+          touringId: log.touringId ? createTouringId(log.touringId) : null,
+          touringTitle: log.touring?.title ?? null,
+        })
+    )
+  }
+
+  async updateFuelLogTouringId(
+    fuelLogId: FuelLogId,
+    myUserBikeId: MyUserBikeId,
+    touringId: TouringId | null
+  ): Promise<FuelLogEntity> {
+    const updated = await this.connection.tUserMyBikeFuelLog.update({
+      where: {
+        id: fuelLogId,
+        userMyBikeId: myUserBikeId,
+      },
+      data: {
+        touringId: touringId,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        amount: true,
+        price: true,
+        mileage: true,
+        previousMileage: true,
+        refueledAt: true,
+        memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    })
+
+    return new FuelLogEntity({
+      fuelLogId: createFuelLogId(updated.id),
+      myUserBikeId: createMyUserBikeId(updated.userMyBikeId),
+      amount: updated.amount,
+      totalPrice: updated.price,
+      mileage: updated.mileage,
+      previousMileage: updated.previousMileage,
+      refueledAt: updated.refueledAt,
+      memo: updated.memo,
+      touringId: updated.touringId ? createTouringId(updated.touringId) : null,
+      touringTitle: updated.touring?.title ?? null,
+    })
+  }
+
+  async updateMultipleFuelLogsTouringId(
+    fuelLogIds: FuelLogId[],
+    myUserBikeId: MyUserBikeId,
+    touringId: TouringId | null
+  ): Promise<void> {
+    await this.connection.tUserMyBikeFuelLog.updateMany({
+      where: {
+        id: {
+          in: fuelLogIds,
+        },
+        userMyBikeId: myUserBikeId,
+      },
+      data: {
+        touringId: touringId,
       },
     })
   }
