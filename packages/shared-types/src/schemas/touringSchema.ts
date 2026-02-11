@@ -219,8 +219,7 @@ export type TouringListQuery = z.infer<typeof TouringListQuerySchema>
 export const TouringStatusUpdateRequestSchema = z.object({
   status: z.enum(['STARTED', 'COMPLETED'], {
     required_error: 'ステータスは必須です',
-    invalid_type_error:
-      'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
+    invalid_type_error: 'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
   }),
 })
 

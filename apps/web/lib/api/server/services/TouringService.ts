@@ -80,8 +80,9 @@ export class TouringService {
 
     // STARTEDで登録する場合は、既に進行中のツーリングがないかチェック
     if (status === 'STARTED') {
-      const ongoingTouring =
-        await this.touringRepository.findOngoingTouring(params.myUserBikeId)
+      const ongoingTouring = await this.touringRepository.findOngoingTouring(
+        params.myUserBikeId
+      )
       if (ongoingTouring) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
@@ -251,10 +252,7 @@ export class TouringService {
 
     // ステータスをSTARTEDに変更する場合、既に進行中のツーリングがないかチェック
     const newStatus = params.status ?? existingTouring.status
-    if (
-      newStatus === 'STARTED' &&
-      existingTouring.status !== 'STARTED'
-    ) {
+    if (newStatus === 'STARTED' && existingTouring.status !== 'STARTED') {
       const ongoingTouring = await this.touringRepository.findOngoingTouring(
         params.myUserBikeId
       )
@@ -278,8 +276,7 @@ export class TouringService {
         status: newStatus,
       })
 
-      const result =
-        await this.touringRepository.updateTouring(updatedTouring)
+      const result = await this.touringRepository.updateTouring(updatedTouring)
 
       // 給油履歴の紐づけ更新
       if (params.fuelLogIds !== undefined) {

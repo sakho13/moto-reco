@@ -501,7 +501,11 @@ userBike.post(
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const fuelLogRepo = new PrismaFuelLogRepository(t)
-      const service = new TouringService(touringRepo, myUserBikeRepo, fuelLogRepo)
+      const service = new TouringService(
+        touringRepo,
+        myUserBikeRepo,
+        fuelLogRepo
+      )
 
       if (body.action === 'start') {
         return service.handleTouringAction({
@@ -560,7 +564,11 @@ userBike.post(
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const fuelLogRepo = new PrismaFuelLogRepository(t)
-      const service = new TouringService(touringRepo, myUserBikeRepo, fuelLogRepo)
+      const service = new TouringService(
+        touringRepo,
+        myUserBikeRepo,
+        fuelLogRepo
+      )
 
       return service.registerTouring({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
@@ -690,7 +698,11 @@ userBike.patch(
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const fuelLogRepo = new PrismaFuelLogRepository(t)
-      const service = new TouringService(touringRepo, myUserBikeRepo, fuelLogRepo)
+      const service = new TouringService(
+        touringRepo,
+        myUserBikeRepo,
+        fuelLogRepo
+      )
 
       return service.updateTouring({
         touringId: createTouringId(touringId),
