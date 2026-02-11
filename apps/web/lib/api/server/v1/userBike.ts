@@ -500,7 +500,8 @@ userBike.post(
     const result = await prisma.$transaction((t) => {
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
-      const service = new TouringService(touringRepo, myUserBikeRepo)
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const service = new TouringService(touringRepo, myUserBikeRepo, fuelLogRepo)
 
       if (body.action === 'start') {
         return service.handleTouringAction({
@@ -537,6 +538,7 @@ userBike.post(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          status: result.status,
         },
         message,
       },
@@ -557,7 +559,8 @@ userBike.post(
     const result = await prisma.$transaction((t) => {
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
-      const service = new TouringService(touringRepo, myUserBikeRepo)
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const service = new TouringService(touringRepo, myUserBikeRepo, fuelLogRepo)
 
       return service.registerTouring({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
@@ -580,6 +583,7 @@ userBike.post(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          status: result.status,
         },
         message: 'ツーリング登録成功',
       },
@@ -604,7 +608,8 @@ userBike.get(
 
     const touringRepo = new PrismaTouringRepository(prisma)
     const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
-    const service = new TouringService(touringRepo, myUserBikeRepo)
+    const fuelLogRepo = new PrismaFuelLogRepository(prisma)
+    const service = new TouringService(touringRepo, myUserBikeRepo, fuelLogRepo)
 
     const tourings = await service.getTourings(
       createMyUserBikeId(myUserBikeId),
@@ -623,6 +628,7 @@ userBike.get(
             endDate: touring.endDate.toISOString(),
             startMileage: touring.startMileage,
             endMileage: touring.endMileage,
+            status: touring.status,
           }
         }),
         message: 'ツーリング一覧取得成功',
@@ -642,7 +648,8 @@ userBike.get(
 
     const touringRepo = new PrismaTouringRepository(prisma)
     const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
-    const service = new TouringService(touringRepo, myUserBikeRepo)
+    const fuelLogRepo = new PrismaFuelLogRepository(prisma)
+    const service = new TouringService(touringRepo, myUserBikeRepo, fuelLogRepo)
 
     const touring = await service.getTouringById(
       createTouringId(touringId),
@@ -660,6 +667,7 @@ userBike.get(
           endDate: touring.endDate.toISOString(),
           startMileage: touring.startMileage,
           endMileage: touring.endMileage,
+          status: touring.status,
         },
         message: 'ツーリング取得成功',
       },
@@ -681,7 +689,8 @@ userBike.patch(
     const result = await prisma.$transaction((t) => {
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
-      const service = new TouringService(touringRepo, myUserBikeRepo)
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const service = new TouringService(touringRepo, myUserBikeRepo, fuelLogRepo)
 
       return service.updateTouring({
         touringId: createTouringId(touringId),
@@ -705,6 +714,7 @@ userBike.patch(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          status: result.status,
         },
         message: 'ツーリング更新成功',
       },

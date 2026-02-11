@@ -150,6 +150,7 @@ export type ApiResponseTouringDetail = {
   endDate: string
   startMileage: number | null
   endMileage: number | null
+  status: 'STARTED' | 'COMPLETED'
 }
 
 export type ApiResponseTouringList = ApiResponseTouringDetail[]
