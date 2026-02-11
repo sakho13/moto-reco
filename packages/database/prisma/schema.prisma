@@ -144,37 +144,43 @@ model TUserMyBikeFuelLog {
   id           String @id @default(cuid(2))
   userMyBikeId String @map("my_bike_id")
 
-  amount     Float    @map("amount") // 給油量/L
-  price      Int      @map("price") // 給油価格/円
-  mileage    Int      @map("mileage") // 給油時総走行距離/km
-  previousMileage Int @map("previous_mileage") // 前回給油時総走行距離/km
-  refueledAt DateTime @map("refueled_at") // 給油日時
-  memo       String?  @map("memo") // メモ
+  amount          Float    @map("amount") // 給油量/L
+  price           Int      @map("price") // 給油価格/円
+  mileage         Int      @map("mileage") // 給油時総走行距離/km
+  previousMileage Int      @map("previous_mileage") // 前回給油時総走行距離/km
+  refueledAt      DateTime @map("refueled_at") // 給油日時
+  memo            String?  @map("memo") // メモ
+  touringId       String?  @map("touring_id") // ツーリングID
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike         @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  touring    TUserMyBikeTouring? @relation(fields: [touringId], references: [id], onDelete: SetNull)
 
   @@index([userMyBikeId, refueledAt])
+  @@index([touringId])
 }
 
 model TUserMyBikeTouring {
-  id           String @id @default(cuid(2))
-  userMyBikeId String @map("my_bike_id")
+  id           String        @id @default(cuid(2))
+  userMyBikeId String        @map("my_bike_id")
 
-  title        String   @map("title")
-  startDate    DateTime @map("start_date")
-  endDate      DateTime @map("end_date")
-  startMileage Int?     @map("start_mileage")
-  endMileage   Int?     @map("end_mileage")
+  title        String        @map("title")
+  startDate    DateTime      @map("start_date")
+  endDate      DateTime      @map("end_date")
+  startMileage Int?          @map("start_mileage")
+  endMileage   Int?          @map("end_mileage")
+  status       TouringStatus @default(COMPLETED) @map("status")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike          @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  fuelLogs   TUserMyBikeFuelLog[]
 
   @@index([userMyBikeId, startDate])
+  @@index([userMyBikeId, status])
 }
 
 model TUserQuit {
@@ -258,4 +264,9 @@ enum UserBikeOwnStatus {
 enum UserQuitStatus {
   QUIT
   RECOVERED
+}
+
+enum TouringStatus {
+  STARTED
+  COMPLETED
 }
