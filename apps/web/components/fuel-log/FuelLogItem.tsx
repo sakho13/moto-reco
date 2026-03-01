@@ -1,5 +1,6 @@
 'use client'
 
+import { Map } from 'lucide-react'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './FuelLogItem.module.css'
@@ -71,6 +72,13 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
         <div className={styles.memoRow}>
           <span className={styles.memoLabel}>メモ:</span>
           <span className={styles.memoText}>{fuelLog.memo}</span>
+        </div>
+      )}
+
+      {fuelLog.touringTitle && (
+        <div className={styles.touringRow}>
+          <Map size={14} strokeWidth={2} />
+          <span className={styles.touringName}>{fuelLog.touringTitle}</span>
         </div>
       )}
     </div>
