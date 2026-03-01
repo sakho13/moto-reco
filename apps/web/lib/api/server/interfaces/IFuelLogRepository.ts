@@ -14,11 +14,6 @@ export interface IFuelLogRepository {
   ): Promise<FuelLogEntity | null>
   updateFuelLog(fuelLog: FuelLogEntity): Promise<FuelLogEntity>
   deleteFuelLog(fuelLogId: FuelLogId, myUserBikeId: MyUserBikeId): Promise<void>
-  findFuelLogsByDateRange(
-    myUserBikeId: MyUserBikeId,
-    startDate: Date,
-    endDate: Date
-  ): Promise<FuelLogEntity[]>
   updateFuelLogTouringId(
     fuelLogId: FuelLogId,
     myUserBikeId: MyUserBikeId,

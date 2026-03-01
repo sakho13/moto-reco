@@ -24,13 +24,11 @@ import {
   FuelLogDeleteRequestSchema,
   FuelLogListQuerySchema,
   FuelLogDetailParamSchema,
-  FuelLogDateRangeQuerySchema,
   TouringRegisterRequestSchema,
   TouringStartEndRequestSchema,
   TouringListQuerySchema,
   TouringUpdateRequestSchema,
 } from '@repo/shared-types'
-import { ApiV1Error } from '../errors/ApiV1Error'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import {
@@ -225,6 +223,8 @@ userBike.get(
       sortBy: query['sort-by'] === 'mileage' ? 'mileage' : 'refueledAt',
       sortOrder: query['sort-order'],
       period: query.period,
+      startDate: query.startDate,
+      endDate: query.endDate,
     })
 
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)
@@ -256,6 +256,8 @@ userBike.get(
             memo: log.memo,
             fuelEfficiency: log.fuelEfficiency,
             pricePerLiter: log.pricePerLiter,
+            touringId: log.touringId,
+            touringTitle: log.touringTitle,
           }
         }),
         message: '燃料ログ一覧取得成功',
@@ -300,6 +302,8 @@ userBike.get(
         memo: fuelLog.memo,
         fuelEfficiency: fuelLog.fuelEfficiency,
         pricePerLiter: fuelLog.pricePerLiter,
+        touringId: fuelLog.touringId,
+        touringTitle: fuelLog.touringTitle,
       },
       message: '燃料ログ詳細取得成功',
     })
@@ -351,6 +355,8 @@ userBike.post(
           memo: result.memo,
           fuelEfficiency: result.fuelEfficiency,
           pricePerLiter: result.pricePerLiter,
+          touringId: result.touringId,
+          touringTitle: result.touringTitle,
         },
         message: '燃料ログ登録成功',
       },
@@ -404,6 +410,8 @@ userBike.patch(
           memo: result.memo,
           fuelEfficiency: result.fuelEfficiency,
           pricePerLiter: result.pricePerLiter,
+          touringId: result.touringId,
+          touringTitle: result.touringTitle,
         },
         message: '燃料ログ更新成功',
       },
@@ -443,56 +451,6 @@ userBike.delete(
         status: 'success',
         message: '燃料ログ削除成功',
         data: undefined,
-      },
-      200
-    )
-  }
-)
-
-userBike.get(
-  '/bike/:myUserBikeId/fuel-logs/date-range',
-  honoAuthMiddleware,
-  zodValidateQuery(FuelLogDateRangeQuerySchema),
-  async (c) => {
-    const { userId } = c.var.user!
-    const myUserBikeId = c.req.param('myUserBikeId')
-    const query = c.req.valid('query')
-
-    const fuelLogRepo = new PrismaFuelLogRepository(prisma)
-    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
-
-    const myUserBike = await myUserBikeRepo.findMyUserBikeById(
-      createMyUserBikeId(myUserBikeId),
-      createUserId(userId)
-    )
-
-    if (!myUserBike) {
-      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
-    }
-
-    const fuelLogs = await fuelLogRepo.findFuelLogsByDateRange(
-      createMyUserBikeId(myUserBikeId),
-      new Date(query.startDate),
-      new Date(query.endDate)
-    )
-
-    return c.json<SuccessResponse<ApiResponseFuelLogList>>(
-      {
-        status: 'success',
-        data: fuelLogs.map((log) => ({
-          fuelLogId: log.id,
-          refueledAt: log.refueledAt.toISOString(),
-          amount: log.amount,
-          totalPrice: log.totalPrice,
-          mileage: log.mileage,
-          previousMileage: log.previousMileage,
-          fuelEfficiency: log.fuelEfficiency,
-          pricePerLiter: log.pricePerLiter,
-          memo: log.memo,
-          touringId: log.touringId,
-          touringTitle: log.touringTitle,
-        })),
-        message: '期間内の給油履歴取得成功',
       },
       200
     )
@@ -584,6 +542,20 @@ userBike.post(
     const message =
       body.action === 'start' ? 'ツーリング開始成功' : 'ツーリング終了成功'
 
+    // 紐づいている給油履歴IDを取得
+    const fuelLogRecordsForStartEnd = await prisma.tUserMyBikeFuelLog.findMany({
+      where: {
+        touringId: result.id,
+        userMyBikeId: myUserBikeId,
+      },
+      select: {
+        id: true,
+      },
+    })
+    const fuelLogIdsForStartEnd = fuelLogRecordsForStartEnd.map(
+      (record: { id: string }) => record.id
+    )
+
     return c.json<SuccessResponse<ApiResponseTouringDetail>>(
       {
         status: 'success',
@@ -595,6 +567,7 @@ userBike.post(
           startMileage: result.startMileage,
           endMileage: result.endMileage,
           status: result.status,
+          fuelLogIds: fuelLogIdsForStartEnd,
         },
         message,
       },
@@ -644,6 +617,7 @@ userBike.post(
           startMileage: result.startMileage,
           endMileage: result.endMileage,
           status: result.status,
+          fuelLogIds: [], // 登録時は給油履歴は紐づいていない
         },
         message: 'ツーリング登録成功',
       },
@@ -689,6 +663,7 @@ userBike.get(
             startMileage: touring.startMileage,
             endMileage: touring.endMileage,
             status: touring.status,
+            fuelLogIds: [], // 一覧では空配列（詳細APIで取得する）
           }
         }),
         message: 'ツーリング一覧取得成功',
@@ -717,6 +692,18 @@ userBike.get(
       createUserId(userId)
     )
 
+    // 紐づいている給油履歴IDを取得
+    const fuelLogRecords = await prisma.tUserMyBikeFuelLog.findMany({
+      where: {
+        touringId: touringId,
+        userMyBikeId: myUserBikeId,
+      },
+      select: {
+        id: true,
+      },
+    })
+    const fuelLogIds = fuelLogRecords.map((record) => record.id)
+
     return c.json<SuccessResponse<ApiResponseTouringDetail>>(
       {
         status: 'success',
@@ -728,6 +715,7 @@ userBike.get(
           startMileage: touring.startMileage,
           endMileage: touring.endMileage,
           status: touring.status,
+          fuelLogIds: fuelLogIds,
         },
         message: 'ツーリング取得成功',
       },
@@ -770,6 +758,18 @@ userBike.patch(
       })
     })
 
+    // 更新後の紐づいている給油履歴IDを取得
+    const fuelLogRecords = await prisma.tUserMyBikeFuelLog.findMany({
+      where: {
+        touringId: touringId,
+        userMyBikeId: myUserBikeId,
+      },
+      select: {
+        id: true,
+      },
+    })
+    const fuelLogIds = fuelLogRecords.map((record) => record.id)
+
     return c.json<SuccessResponse<ApiResponseTouringDetail>>(
       {
         status: 'success',
@@ -781,6 +781,7 @@ userBike.patch(
           startMileage: result.startMileage,
           endMileage: result.endMileage,
           status: result.status,
+          fuelLogIds: fuelLogIds,
         },
         message: 'ツーリング更新成功',
       },

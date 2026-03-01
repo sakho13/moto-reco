@@ -124,10 +124,31 @@ export class PrismaFuelLogRepository
     myUserBikeId: MyUserBikeId,
     searchParams: FuelLogSearchParams
   ): Promise<FuelLogEntity[]> {
-    const periodDateRange = await this.resolvePeriodDateRange(
-      myUserBikeId,
-      searchParams.period
-    )
+    // 日付範囲条件の構築
+    let dateRangeCondition: { gte: Date; lte: Date } | undefined
+
+    if (searchParams.isDateRangeMode) {
+      // 日付範囲検索モード（startDate/endDate指定時）
+      dateRangeCondition = {
+        gte: searchParams.startDate!,
+        lte: searchParams.endDate!,
+      }
+    } else if (searchParams.period) {
+      // プリセット期間検索モード（period指定時）
+      const periodDateRange = await this.resolvePeriodDateRange(
+        myUserBikeId,
+        searchParams.period
+      )
+      if (!periodDateRange) {
+        return []
+      }
+      dateRangeCondition = {
+        gte: periodDateRange.startDate,
+        lte: periodDateRange.endDate,
+      }
+    }
+
+    // ソート順の構築
     const orderBy =
       searchParams.sortBy === 'refueledAt'
         ? [
@@ -136,19 +157,13 @@ export class PrismaFuelLogRepository
           ]
         : [{ [searchParams.sortBy]: searchParams.sortOrder }]
 
-    if (searchParams.period && !periodDateRange) {
-      return []
-    }
-
+    // クエリ実行
     const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
       where: {
         userMyBikeId: myUserBikeId,
-        ...(periodDateRange
+        ...(dateRangeCondition
           ? {
-              refueledAt: {
-                gte: periodDateRange.startDate,
-                lte: periodDateRange.endDate,
-              },
+              refueledAt: dateRangeCondition,
             }
           : {}),
       },
@@ -291,57 +306,6 @@ export class PrismaFuelLogRepository
         userMyBikeId: myUserBikeId,
       },
     })
-  }
-
-  async findFuelLogsByDateRange(
-    myUserBikeId: MyUserBikeId,
-    startDate: Date,
-    endDate: Date
-  ): Promise<FuelLogEntity[]> {
-    const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
-      where: {
-        userMyBikeId: myUserBikeId,
-        refueledAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-      },
-      select: {
-        id: true,
-        userMyBikeId: true,
-        amount: true,
-        price: true,
-        mileage: true,
-        previousMileage: true,
-        refueledAt: true,
-        memo: true,
-        touringId: true,
-        touring: {
-          select: {
-            title: true,
-          },
-        },
-      },
-      orderBy: {
-        refueledAt: 'asc',
-      },
-    })
-
-    return fuelLogs.map(
-      (log) =>
-        new FuelLogEntity({
-          fuelLogId: createFuelLogId(log.id),
-          myUserBikeId: createMyUserBikeId(log.userMyBikeId),
-          amount: log.amount,
-          totalPrice: log.price,
-          mileage: log.mileage,
-          previousMileage: log.previousMileage,
-          refueledAt: log.refueledAt,
-          memo: log.memo,
-          touringId: log.touringId ? createTouringId(log.touringId) : null,
-          touringTitle: log.touring?.title ?? null,
-        })
-    )
   }
 
   async updateFuelLogTouringId(

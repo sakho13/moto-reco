@@ -11,6 +11,7 @@ import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
+import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 
 type RegisterTouringParams = {
@@ -281,12 +282,14 @@ export class TouringService {
       // 給油履歴の紐づけ更新
       if (params.fuelLogIds !== undefined) {
         // 既存の紐づけを解除
-        const existingFuelLogs =
-          await this.fuelLogRepository.findFuelLogsByDateRange(
-            params.myUserBikeId,
-            updatedTouring.startDate,
-            updatedTouring.endDate
-          )
+        const searchParams = new FuelLogSearchParams({
+          startDate: updatedTouring.startDate,
+          endDate: updatedTouring.endDate,
+        })
+        const existingFuelLogs = await this.fuelLogRepository.findFuelLogs(
+          params.myUserBikeId,
+          searchParams
+        )
 
         const existingFuelLogIdsToUnlink = existingFuelLogs
           .filter(
