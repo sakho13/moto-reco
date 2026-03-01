@@ -1,5 +1,5 @@
 {
-  "plansDirectory": "plans",
+  "plansDirectory": ".plans",
   "permissions": {
     "allow": [
       "Bash(git show:*)",
