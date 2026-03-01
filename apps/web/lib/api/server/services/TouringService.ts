@@ -138,6 +138,17 @@ export class TouringService {
           )
         }
 
+        // 開始時走行距離の自動取得
+        let startMileage = params.startMileage
+        if (startMileage === undefined) {
+          const totalMileage =
+            await this.myUserBikeRepository.findMyUserBikeTotalMileage(
+              params.myUserBikeId,
+              params.userId
+            )
+          startMileage = totalMileage ?? undefined
+        }
+
         const startDate = params.startDate ?? new Date()
         const title = params.title ?? 'ツーリング'
         const touring = new TouringEntity({
@@ -146,7 +157,7 @@ export class TouringService {
           title,
           startDate,
           endDate: startDate,
-          startMileage: params.startMileage ?? null,
+          startMileage: startMileage ?? null,
           endMileage: null,
           status: 'STARTED',
         })
@@ -166,6 +177,17 @@ export class TouringService {
         )
       }
 
+      // 終了時走行距離の自動取得
+      let endMileage = params.endMileage
+      if (endMileage === undefined) {
+        const totalMileage =
+          await this.myUserBikeRepository.findMyUserBikeTotalMileage(
+            params.myUserBikeId,
+            params.userId
+          )
+        endMileage = totalMileage ?? undefined
+      }
+
       const endDate = params.endDate ?? new Date()
       const touring = new TouringEntity({
         touringId: existingTouring.id,
@@ -174,7 +196,7 @@ export class TouringService {
         startDate: existingTouring.startDate,
         endDate,
         startMileage: existingTouring.startMileage,
-        endMileage: params.endMileage ?? existingTouring.endMileage,
+        endMileage: endMileage ?? existingTouring.endMileage,
         status: 'COMPLETED',
       })
 

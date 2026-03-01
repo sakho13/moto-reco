@@ -1693,6 +1693,141 @@ describe('UserBike API Endpoints', () => {
       expect(getTouringJson.data.startMileage).toBe(2000)
       expect(getTouringJson.data.endMileage).toBe(2100)
     })
+
+    describe('総走行距離の自動取得', () => {
+      test('ツーリング開始時にstartMileageが自動設定される', async () => {
+        // 1. 給油履歴を追加してtotalMileageを5000kmに更新
+        await createTestFuelLog(token, myUserBikeId, {
+          refueledAt: new Date().toISOString(),
+          amount: 10,
+          totalPrice: 1500,
+          mileage: 5000,
+          previousMileage: 4900,
+          updateTotalMileage: true,
+        })
+
+        // 2. ツーリング開始（startMileageを送信しない）
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+              // startMileageを送信しない
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(201)
+        expect(json.data.startMileage).toBe(5000)
+      })
+
+      test('ツーリング終了時にendMileageが自動設定される', async () => {
+        // 1. ツーリング開始
+        const startRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+            }),
+          }
+        )
+        const startJson = await startRes.json()
+        const touringId = startJson.data.touringId
+
+        // 2. 給油してtotalMileageを5200kmに更新
+        await createTestFuelLog(token, myUserBikeId, {
+          refueledAt: new Date().toISOString(),
+          amount: 8,
+          totalPrice: 1200,
+          mileage: 5200,
+          previousMileage: 5000,
+          updateTotalMileage: true,
+        })
+
+        // 3. ツーリング終了（endMileageを送信しない）
+        const endRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'end',
+              touringId,
+              // endMileageを送信しない
+            }),
+          }
+        )
+
+        const endJson = await endRes.json()
+        expect(endRes.status).toBe(200)
+        expect(endJson.data.endMileage).toBe(5200)
+        expect(endJson.data.startMileage).toBeDefined()
+
+        // ツーリング距離が計算できることを確認
+        const distance = endJson.data.endMileage! - endJson.data.startMileage!
+        expect(distance).toBeGreaterThan(0)
+      })
+
+      test('フロントエンドから明示的にstartMileageが渡された場合は優先される', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+              startMileage: 9999, // 明示的に指定
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(json.data.startMileage).toBe(9999) // フロントエンドの値が優先
+      })
+
+      test('totalMileageが0の場合でも正常に記録される', async () => {
+        // バイクのtotalMileageが0の状態（デフォルト値のまま）
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(201)
+        // バイクのtotalMileageが2000で作成されているので、それが取得される
+        expect(json.data.startMileage).toBe(2000)
+      })
+    })
   })
 
   describe('POST /api/v1/user-bike/bike/:myUserBikeId/tourings', () => {
