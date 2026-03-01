@@ -1311,6 +1311,126 @@ describe('UserBike API Endpoints', () => {
         expect(new Date(log.refueledAt).toISOString()).toBe(log.refueledAt)
       })
     })
+
+    describe('日付範囲検索機能', () => {
+      test('startDateとendDateを指定して期間内の給油履歴を取得できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-01-15T00:00:00.000Z&endDate=2024-02-15T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.status).toBe('success')
+        expect(Array.isArray(json.data)).toBe(true)
+      })
+
+      test('periodとstartDate/endDateを同時に指定した場合はバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?period=latest-month&startDate=2024-01-01T00:00:00.000Z&endDate=2024-02-01T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+
+      test('startDateのみを指定した場合はバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-01-01T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+
+      test('endDateのみを指定した場合はバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?endDate=2024-02-01T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+
+      test('startDateがendDateより後の場合はバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-03-01T00:00:00.000Z&endDate=2024-01-01T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+
+      test('日付範囲検索時にページネーションが有効であることを確認', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-01-01T00:00:00.000Z&endDate=2024-12-31T23:59:59.999Z&page=1&per-size=5`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBeLessThanOrEqual(5)
+      })
+
+      test('日付範囲検索時にソート順を指定できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-01-01T00:00:00.000Z&endDate=2024-03-01T00:00:00.000Z&sort-order=asc`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        // ソート順が昇順であることを確認
+        if (json.data.length > 1) {
+          expect(
+            new Date(json.data[0].refueledAt).getTime()
+          ).toBeLessThanOrEqual(new Date(json.data[1].refueledAt).getTime())
+        }
+      })
+    })
   })
 
   describe('GET /api/v1/user-bike/bike/:myUserBikeId/fuel-insights', () => {
