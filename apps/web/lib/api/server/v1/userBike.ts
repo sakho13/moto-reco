@@ -8,6 +8,7 @@ import {
   ApiResponseFuelInsight,
   ApiResponseTouringDetail,
   ApiResponseTouringList,
+  ApiResponseBikesOngoingTourings,
   createBikeId,
   createFuelLogId,
   createMyUserBikeId,
@@ -146,6 +147,83 @@ userBike.get(
     })
   }
 )
+
+userBike.get('/bikes/ongoing-tourings', honoAuthMiddleware, async (c) => {
+  const { userId } = c.var.user!
+
+  // ユーザーの全バイクを取得
+  const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+  const bikes = await myUserBikeRepo.findMyUserBikes(
+    createUserId(userId),
+    new UserBikeSearchParams({ sortBy: 'updatedAt', sortOrder: 'desc' })
+  )
+
+  // リポジトリとサービスをインスタンス化（読み取り専用なのでトランザクション不要）
+  const touringRepo = new PrismaTouringRepository(prisma)
+  const fuelLogRepo = new PrismaFuelLogRepository(prisma)
+  const myUserBikeRepoForService = new PrismaMyUserBikeRepository(prisma)
+  const touringService = new TouringService(
+    touringRepo,
+    myUserBikeRepoForService,
+    fuelLogRepo
+  )
+
+  // 各バイクの進行中ツーリングを取得（並列処理）
+  const bikesWithOngoingTouring = await Promise.all(
+    bikes.map(async (bike) => {
+      // サービス経由で進行中ツーリングを取得
+      const tourings = await touringService.getTourings(
+        bike.myUserBikeId,
+        createUserId(userId),
+        new TouringSearchParams({ sortBy: 'startDate', sortOrder: 'desc' })
+      )
+
+      // 進行中のツーリングを見つける
+      const ongoingTouring = tourings.find((t) => t.status === 'STARTED')
+
+      if (!ongoingTouring) {
+        return {
+          myUserBikeId: bike.myUserBikeId,
+          ongoingTouring: null,
+        }
+      }
+
+      // 給油履歴IDを取得（リポジトリ経由）
+      const fuelLogs = await fuelLogRepo.findFuelLogs(
+        bike.myUserBikeId,
+        new FuelLogSearchParams({
+          startDate: ongoingTouring.startDate,
+          endDate: ongoingTouring.endDate,
+        })
+      )
+      const fuelLogIds = fuelLogs
+        .filter((log) => log.touringId === ongoingTouring.id)
+        .map((log) => log.id)
+
+      return {
+        myUserBikeId: bike.myUserBikeId,
+        ongoingTouring: {
+          touringId: ongoingTouring.id,
+          title: ongoingTouring.title,
+          startDate: ongoingTouring.startDate.toISOString(),
+          endDate: ongoingTouring.endDate.toISOString(),
+          startMileage: ongoingTouring.startMileage,
+          endMileage: ongoingTouring.endMileage,
+          status: ongoingTouring.status,
+          fuelLogIds,
+        },
+      }
+    })
+  )
+
+  return c.json<SuccessResponse<ApiResponseBikesOngoingTourings>>({
+    status: 'success',
+    data: {
+      bikes: bikesWithOngoingTouring,
+    },
+    message: '進行中ツーリング一覧取得成功',
+  })
+})
 
 userBike.get('/bike/:myUserBikeId', honoAuthMiddleware, async (c) => {
   const { userId } = c.var.user!

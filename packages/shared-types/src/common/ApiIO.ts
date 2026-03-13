@@ -158,6 +158,19 @@ export type ApiResponseTouringDetail = {
 
 export type ApiResponseTouringList = ApiResponseTouringDetail[]
 
+export type ApiResponseOngoingTouring = {
+  touring: ApiResponseTouringDetail | null
+}
+
+export type ApiResponseBikeOngoingTouring = {
+  myUserBikeId: string
+  ongoingTouring: ApiResponseTouringDetail | null
+}
+
+export type ApiResponseBikesOngoingTourings = {
+  bikes: ApiResponseBikeOngoingTouring[]
+}
+
 export type ApiResponseFuelInsight = {
   averageFuelEfficiency: number | null
   averageAmount: number | null
