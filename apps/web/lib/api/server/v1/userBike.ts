@@ -308,10 +308,12 @@ userBike.get(
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)
     const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
     const userBikeRepo = new PrismaUserBikeRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
     const fuelLogService = new FuelLogService(
       fuelLogRepo,
       myUserBikeRepo,
-      userBikeRepo
+      userBikeRepo,
+      touringRepo
     )
 
     const fuelLogs = await fuelLogService.getFuelLogs(
@@ -356,10 +358,12 @@ userBike.get(
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)
     const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
     const userBikeRepo = new PrismaUserBikeRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
     const fuelLogService = new FuelLogService(
       fuelLogRepo,
       myUserBikeRepo,
-      userBikeRepo
+      userBikeRepo,
+      touringRepo
     )
 
     const fuelLog = await fuelLogService.getFuelLogDetail(
@@ -401,10 +405,12 @@ userBike.post(
       const fuelLogRepo = new PrismaFuelLogRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const userBikeRepo = new PrismaUserBikeRepository(t)
+      const touringRepo = new PrismaTouringRepository(t)
       const service = new FuelLogService(
         fuelLogRepo,
         myUserBikeRepo,
-        userBikeRepo
+        userBikeRepo,
+        touringRepo
       )
 
       return service.registerFuelLog({
@@ -456,10 +462,12 @@ userBike.patch(
       const fuelLogRepo = new PrismaFuelLogRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const userBikeRepo = new PrismaUserBikeRepository(t)
+      const touringRepo = new PrismaTouringRepository(t)
       const service = new FuelLogService(
         fuelLogRepo,
         myUserBikeRepo,
-        userBikeRepo
+        userBikeRepo,
+        touringRepo
       )
 
       return service.updateFuelLog({
@@ -511,10 +519,12 @@ userBike.delete(
       const fuelLogRepo = new PrismaFuelLogRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const userBikeRepo = new PrismaUserBikeRepository(t)
+      const touringRepo = new PrismaTouringRepository(t)
       const service = new FuelLogService(
         fuelLogRepo,
         myUserBikeRepo,
-        userBikeRepo
+        userBikeRepo,
+        touringRepo
       )
 
       return service.deleteFuelLog({
