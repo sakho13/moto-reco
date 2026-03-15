@@ -363,4 +363,22 @@ export class PrismaMyUserBikeRepository
       },
     })
   }
+
+  async findMyUserBikeTotalMileage(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<number | null> {
+    const myUserBike = await this.connection.tUserMyBike.findFirst({
+      where: { id: myUserBikeId, userId, ownStatus: 'OWN' },
+      select: {
+        userBike: {
+          select: {
+            totalMileage: true,
+          },
+        },
+      },
+    })
+
+    return myUserBike?.userBike.totalMileage ?? null
+  }
 }

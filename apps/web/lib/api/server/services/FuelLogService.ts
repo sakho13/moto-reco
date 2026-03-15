@@ -2,12 +2,14 @@ import {
   createFuelLogId,
   FuelLogId,
   MyUserBikeId,
+  TouringId,
   UserId,
 } from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
+import { ITouringRepository } from '../interfaces/ITouringRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
@@ -45,7 +47,8 @@ export class FuelLogService {
   constructor(
     private fuelLogRepository: IFuelLogRepository,
     private myUserBikeRepository: IMyUserBikeRepository,
-    private userBikeRepository: IUserBikeRepository
+    private userBikeRepository: IUserBikeRepository,
+    private touringRepository: ITouringRepository
   ) {}
 
   public async registerFuelLog(
@@ -60,6 +63,29 @@ export class FuelLogService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
+    // 進行中ツーリングの自動紐づけ
+    let touringId: TouringId | null = null
+    let touringTitle: string | null = null
+
+    try {
+      const ongoingTouring = await this.touringRepository.findOngoingTouring(
+        params.myUserBikeId
+      )
+
+      // 給油日時がツーリング期間内であれば自動紐づけ
+      if (
+        ongoingTouring &&
+        params.refueledAt >= ongoingTouring.startDate &&
+        params.refueledAt <= new Date()
+      ) {
+        touringId = ongoingTouring.id
+        touringTitle = ongoingTouring.title
+      }
+    } catch (error) {
+      // ツーリング取得エラーが発生しても給油履歴登録は継続
+      console.error('Failed to auto-link touring:', error)
+    }
+
     const fuelLog = new FuelLogEntity({
       fuelLogId: createFuelLogId(''),
       myUserBikeId: params.myUserBikeId,
@@ -69,6 +95,8 @@ export class FuelLogService {
       amount: params.amount,
       totalPrice: params.totalPrice,
       memo: params.memo ?? null,
+      touringId,
+      touringTitle,
     })
 
     const createdFuelLog = await this.fuelLogRepository.createFuelLog(fuelLog)
@@ -161,6 +189,8 @@ export class FuelLogService {
         amount: params.amount ?? existingFuelLog.amount,
         totalPrice: params.totalPrice ?? existingFuelLog.totalPrice,
         memo: params.memo ?? existingFuelLog.memo,
+        touringId: existingFuelLog.touringId,
+        touringTitle: existingFuelLog.touringTitle,
       })
 
       // 4. 更新実行
