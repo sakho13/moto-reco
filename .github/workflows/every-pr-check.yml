@@ -96,6 +96,7 @@ jobs:
           DEBUG: "1"
           LOCALSTACK_DATA_DIR: /var/lib/localstack
           LS_LOG: trace
+          LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: "1"
 
     steps:
       - name: Checkout repository
