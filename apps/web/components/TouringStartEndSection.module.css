@@ -1,0 +1,326 @@
+/* ========================================
+   アニメーション定義
+   ======================================== */
+
+/* 道路の破線アニメーション */
+@keyframes roadDash {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+/* バイクアイコンのアニメーション（上下に揺れる） */
+@keyframes bikeMove {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* カードのグロー効果（微妙な発光） */
+@keyframes cardGlow {
+  0%,
+  100% {
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: var(--shadow-lg), 0 0 30px rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* ========================================
+   コンテナ
+   ======================================== */
+
+.container {
+  width: 100%;
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+/* ========================================
+   ツーリング中カード（大きな1枚のカード）
+   ======================================== */
+
+.activeTouringCard {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  padding: var(--spacing-6);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: cardGlow 3s ease-in-out infinite;
+  overflow: hidden;
+}
+
+/* ルート風の背景デザイン */
+.routeVisual {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* 道路の破線 */
+.roadDash {
+  position: absolute;
+  bottom: 30%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    to right,
+    white 0px,
+    white 20px,
+    transparent 20px,
+    transparent 40px
+  );
+  animation: roadDash 1.5s linear infinite;
+}
+
+/* バイク情報エリア */
+.bikeInfoArea {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.animatedBikeIcon {
+  flex-shrink: 0;
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  color: white;
+  animation: bikeMove 2s ease-in-out infinite;
+}
+
+.bikeNameLarge {
+  flex: 1;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  line-height: var(--line-height-tight);
+  word-break: break-word;
+}
+
+/* ツーリング情報エリア */
+.touringInfoArea {
+  position: relative;
+  z-index: 1;
+  margin-bottom: var(--spacing-6);
+}
+
+.touringTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  margin-bottom: var(--spacing-2);
+  word-break: break-word;
+}
+
+.elapsedTime {
+  font-size: 2.5rem;
+  font-weight: var(--font-weight-bold);
+  color: white;
+  margin-bottom: var(--spacing-2);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.startDateTime {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 終了ボタン */
+.endButton {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* レスポンシブ: モバイル */
+@media (max-width: 640px) {
+  .activeTouringCard {
+    min-height: 180px;
+    padding: var(--spacing-4);
+  }
+
+  .animatedBikeIcon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .bikeNameLarge {
+    font-size: var(--font-size-lg);
+  }
+
+  .elapsedTime {
+    font-size: 2rem;
+  }
+
+  .touringTitle {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ========================================
+   非ツーリング中の表示
+   ======================================== */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* バイク選択グリッド（小さめ） */
+.bikeSelectionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .bikeSelectionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* コンパクトなバイクカード */
+.compactBikeCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  width: 100%;
+  min-height: 100px;
+  padding: var(--spacing-4);
+  background-color: var(--color-background);
+  border: 2px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+  cursor: pointer;
+}
+
+.compactBikeCard:hover {
+  border-color: var(--color-product);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.compactBikeCard:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.compactBikeHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex: 1;
+}
+
+.compactBikeIcon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-md);
+  color: var(--color-product);
+  transition: all var(--transition-base);
+}
+
+.compactBikeName {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  line-height: var(--line-height-tight);
+  word-break: break-word;
+}
+
+.startButton {
+  width: 100%;
+}
+
+/* レスポンシブ: モバイル */
+@media (max-width: 640px) {
+  .compactBikeCard {
+    padding: var(--spacing-3);
+    min-height: 90px;
+  }
+
+  .compactBikeIcon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .compactBikeName {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* ========================================
+   空状態、ローディング、エラー
+   ======================================== */
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-secondary);
+}
+
+.emptyState p {
+  margin-bottom: var(--spacing-4);
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-text-secondary);
+}
+
+.errorContainer {
+  text-align: center;
+  padding: var(--spacing-6);
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-sm);
+}

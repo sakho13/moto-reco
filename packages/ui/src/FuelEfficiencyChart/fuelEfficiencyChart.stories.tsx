@@ -11,6 +11,9 @@ const buildFuelLog = ({
   totalPrice,
   fuelEfficiency,
   pricePerLiter,
+  memo = null,
+  touringId = null,
+  touringTitle = null,
 }: ApiResponseFuelLogDetail): ApiResponseFuelLogDetail => ({
   fuelLogId,
   refueledAt,
@@ -20,6 +23,9 @@ const buildFuelLog = ({
   totalPrice,
   fuelEfficiency,
   pricePerLiter,
+  memo,
+  touringId,
+  touringTitle,
 })
 
 const now = new Date()
@@ -37,6 +43,9 @@ const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
     totalPrice: 2014,
     fuelEfficiency: 17.3,
     pricePerLiter: 162.5,
+    memo: null,
+    touringId: null,
+    touringTitle: null,
   }),
   buildFuelLog({
     fuelLogId: 'fuel-log-2',
@@ -51,6 +60,9 @@ const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
     totalPrice: 2157,
     fuelEfficiency: 16.8,
     pricePerLiter: 164.6,
+    memo: null,
+    touringId: null,
+    touringTitle: null,
   }),
   buildFuelLog({
     fuelLogId: 'fuel-log-3',
@@ -65,6 +77,9 @@ const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
     totalPrice: 1895,
     fuelEfficiency: 18.4,
     pricePerLiter: 162.0,
+    memo: null,
+    touringId: null,
+    touringTitle: null,
   }),
   buildFuelLog({
     fuelLogId: 'fuel-log-4',
@@ -79,6 +94,9 @@ const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
     totalPrice: 2128,
     fuelEfficiency: 17.1,
     pricePerLiter: 165.0,
+    memo: null,
+    touringId: null,
+    touringTitle: null,
   }),
   buildFuelLog({
     fuelLogId: 'fuel-log-5',
@@ -89,6 +107,9 @@ const sampleFuelLogs: ApiResponseFuelLogDetail[] = [
     totalPrice: 2211,
     fuelEfficiency: 16.6,
     pricePerLiter: 165.0,
+    memo: null,
+    touringId: null,
+    touringTitle: null,
   }),
 ]
 

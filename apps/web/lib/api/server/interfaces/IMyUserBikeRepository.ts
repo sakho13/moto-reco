@@ -48,4 +48,8 @@ export interface IMyUserBikeRepository {
     userId: UserId
   ): Promise<MyUserBikeDetail | null>
   countOwnedBikes(userId: UserId): Promise<number>
+  findMyUserBikeTotalMileage(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<number | null>
 }

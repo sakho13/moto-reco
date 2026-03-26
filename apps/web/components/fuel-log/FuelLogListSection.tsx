@@ -21,12 +21,30 @@ export interface FuelLogListSectionProps {
    * 給油履歴登録ボタンクリック時のコールバック
    */
   onRegister: () => void
+
+  /**
+   * さらに給油履歴を読み込むボタンクリック時のコールバック
+   */
+  onLoadMore?: () => void
+
+  /**
+   * 追加読み込みが可能かどうか
+   */
+  canLoadMore?: boolean
+
+  /**
+   * 追加読み込み中かどうか
+   */
+  isLoadingMore?: boolean
 }
 
 export const FuelLogListSection = ({
   fuelLogs,
   onEdit,
   onRegister,
+  onLoadMore,
+  canLoadMore = false,
+  isLoadingMore = false,
 }: FuelLogListSectionProps) => {
   return (
     <BaseCard title="給油履歴">
@@ -38,7 +56,7 @@ export const FuelLogListSection = ({
           </Button>
         </div>
       ) : (
-        <div>
+        <div className={styles.listContainer}>
           {fuelLogs.map((fuelLog) => (
             <FuelLogItem
               key={fuelLog.fuelLogId}
@@ -46,6 +64,17 @@ export const FuelLogListSection = ({
               onEdit={onEdit}
             />
           ))}
+          {canLoadMore && onLoadMore && (
+            <div className={styles.loadMore}>
+              <Button
+                onClick={onLoadMore}
+                variant="cloud"
+                loading={isLoadingMore}
+              >
+                もっと見る
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </BaseCard>

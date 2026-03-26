@@ -20,9 +20,9 @@ const getPublicBike = async (id: string) => {
 export default async function PublicBikeDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  const { id } = params
+  const { id } = await params
   const bike = await getPublicBike(id)
 
   if (!bike) {

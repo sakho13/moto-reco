@@ -1,4 +1,9 @@
-import { MyUserBikeId, Touring, TouringId } from '@repo/shared-types'
+import {
+  MyUserBikeId,
+  Touring,
+  TouringId,
+  TouringStatus,
+} from '@repo/shared-types'
 
 export class TouringEntity {
   private _value: Touring
@@ -59,6 +64,10 @@ export class TouringEntity {
 
   public get endMileage(): number | null {
     return this._value.endMileage
+  }
+
+  public get status(): TouringStatus {
+    return this._value.status
   }
 
   public toJson(): Touring {
