@@ -13,7 +13,7 @@ permissions:
 
 env:
   GCP_REGION: asia-northeast1
-  GCP_PROJECT_ID: motoreco
+  GCP_PROJECT_ID: motoreco-8ce2a
   ARTIFACT_REGISTRY: asia-northeast1-docker.pkg.dev
   WEB_REPOSITORY: motoreco-web
   MIGRATION_REPOSITORY: motoreco-migration
