@@ -87,46 +87,41 @@ jobs:
           docker push ${MIGRATION_IMAGE}:${IMAGE_TAG}
           docker push ${MIGRATION_IMAGE}:latest
 
-      - name: Run database migration
-        run: |
-          echo "Starting database migration..."
-
-          # Cloud Run Jobsでマイグレーション実行
-          EXECUTION_NAME="migration-$(date +%Y%m%d-%H%M%S)"
-
-          gcloud run jobs execute ${{ env.CLOUD_RUN_JOB }} \
-            --region=${{ env.GCP_REGION }} \
-            --wait \
-            2>&1 | tee migration.log
-
-          # 実行結果の確認
-          EXIT_CODE=$?
-
-          if [ "$EXIT_CODE" != "0" ]; then
-            echo "Migration failed with exit code: $EXIT_CODE"
-
-            # Cloud Loggingからエラーログを取得
-            echo "Fetching migration logs..."
-            gcloud logging read \
-              "resource.type=cloud_run_job AND resource.labels.job_name=${{ env.CLOUD_RUN_JOB }}" \
-              --limit=50 \
-              --format=json \
-              --freshness=5m
-
-            exit 1
-          fi
-
-          echo "Migration completed successfully"
-
-      - name: Deploy to Cloud Run
+      - name: Deploy to Cloud Run (no traffic)
+        id: deploy
         run: |
           IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
           WEB_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.WEB_REPOSITORY }}/web:${IMAGE_TAG}"
 
+          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+
+          # GCPラベル値への変換（ドット→ハイフン）
+          # GCPラベル値にはドットが使えないため、1.0.0 → 1-0-0 に変換
+          APP_VERSION_LABEL=$(echo "$APP_VERSION" | sed 's/\./-/g' | tr '[:upper:]' '[:lower:]' | cut -c1-63)
+
+          # 手動トリガー時のフォールバック処理
+          if [ -z "$APP_VERSION_LABEL" ] || [ "$APP_VERSION_LABEL" = "${{ github.ref_name }}" ]; then
+            APP_VERSION_LABEL="manual-$(date +%Y%m%d-%H%M%S)"
+          fi
+
+          echo "Deploying version: $APP_VERSION (label: $APP_VERSION_LABEL)"
+
+          # --no-traffic オプションを追加
           gcloud run services update ${{ env.CLOUD_RUN_SERVICE }} \
             --region=${{ env.GCP_REGION }} \
             --image=${WEB_IMAGE} \
+            --update-labels=app-version=$APP_VERSION_LABEL \
+            --no-traffic \
             --quiet
+
+          # デプロイされたリビジョン名を取得
+          LATEST_REVISION=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format='value(status.latestCreatedRevisionName)')
+
+          echo "revision_name=${LATEST_REVISION}" >> $GITHUB_OUTPUT
+          echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Wait for deployment
         run: |
@@ -149,6 +144,32 @@ jobs:
 
           echo "Deployment timeout"
           exit 1
+
+      - name: Display next steps
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "✅ Deployment completed (no traffic)"
+          echo "=========================================="
+          echo ""
+          echo "📦 Deployed revision: ${{ steps.deploy.outputs.revision_name }}"
+          echo "🏷️  App version: ${{ steps.deploy.outputs.app_version }}"
+          echo ""
+          echo "⚠️  IMPORTANT: Traffic is NOT switched yet!"
+          echo ""
+          echo "Next steps:"
+          echo ""
+          echo "1️⃣  Run database migration:"
+          echo "   https://github.com/${{ github.repository }}/actions/workflows/run-migration.yml"
+          echo "   👉 Click 'Run workflow' button"
+          echo ""
+          echo "2️⃣  After migration succeeds, switch traffic to new revision:"
+          echo "   https://github.com/${{ github.repository }}/actions/workflows/switch-traffic.yml"
+          echo "   👉 Specify revision: ${{ steps.deploy.outputs.revision_name }}"
+          echo ""
+          echo "📝 Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo ""
+          echo "=========================================="
 
       - name: Create PR to sync main with develop
         env:
