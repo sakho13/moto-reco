@@ -85,6 +85,20 @@ jobs:
           docker push ${MIGRATION_IMAGE}:${APP_VERSION}
           docker push ${MIGRATION_IMAGE}:latest
 
+      - name: Update Cloud Run Job with migration image
+        run: |
+          MIGRATION_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.MIGRATION_REPOSITORY }}/migration:latest"
+
+          echo "Updating Cloud Run Job: ${{ env.CLOUD_RUN_JOB }}"
+          echo "New image: ${MIGRATION_IMAGE}"
+
+          gcloud run jobs update ${{ env.CLOUD_RUN_JOB }} \
+            --region=${{ env.GCP_REGION }} \
+            --image=${MIGRATION_IMAGE} \
+            --quiet
+
+          echo "✅ Cloud Run Job updated successfully"
+
       - name: Deploy to Cloud Run (no traffic)
         id: deploy
         run: |
