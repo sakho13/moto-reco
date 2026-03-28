@@ -52,6 +52,7 @@ services:
       # 起動時にリソースを作るときのディレクトリ
       - LOCALSTACK_DATA_DIR=/var/lib/localstack
       - LS_LOG=trace
+      - LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT=1
     volumes:
       # LocalStackの永続化
       - "./development/localstack/data:/var/lib/localstack"

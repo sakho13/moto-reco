@@ -1,0 +1,291 @@
+name: Deploy to GCP Production
+
+on:
+  push:
+    tags:
+      - 'gcp-release/*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  GCP_REGION: asia-northeast1
+  GCP_PROJECT_ID: motoreco-8ce2a
+  ARTIFACT_REGISTRY: asia-northeast1-docker.pkg.dev
+  WEB_REPOSITORY: motoreco-web
+  MIGRATION_REPOSITORY: motoreco-migration
+  CLOUD_RUN_SERVICE: motoreco-web
+  CLOUD_RUN_JOB: motoreco-migration
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.ARTIFACT_REGISTRY }}
+
+      - name: Build and push Docker image
+        run: |
+          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+
+          WEB_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.WEB_REPOSITORY }}/web"
+
+          docker build -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.PROD_FIREBASE_API_KEY }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.PROD_FIREBASE_AUTH_DOMAIN }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.PROD_FIREBASE_PROJECT_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.PROD_FIREBASE_STORAGE_BUCKET }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PROD_FIREBASE_MESSAGING_SENDER_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.PROD_FIREBASE_APP_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.PROD_FIREBASE_MEASUREMENT_ID }} \
+            --build-arg APP_VERSION=$APP_VERSION \
+            -t ${WEB_IMAGE}:${APP_VERSION} \
+            -t ${WEB_IMAGE}:latest .
+
+          docker push ${WEB_IMAGE}:${APP_VERSION}
+          docker push ${WEB_IMAGE}:latest
+
+      - name: Build and push migration image
+        run: |
+          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+
+          MIGRATION_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.MIGRATION_REPOSITORY }}/migration"
+
+          docker build -f packages/database/Dockerfile.migration \
+            -t ${MIGRATION_IMAGE}:${APP_VERSION} \
+            -t ${MIGRATION_IMAGE}:latest .
+
+          docker push ${MIGRATION_IMAGE}:${APP_VERSION}
+          docker push ${MIGRATION_IMAGE}:latest
+
+      - name: Deploy to Cloud Run (no traffic)
+        id: deploy
+        run: |
+          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          WEB_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.WEB_REPOSITORY }}/web:${APP_VERSION}"
+
+          # GCPラベル値への変換（ドット→ハイフン）
+          # GCPラベル値にはドットが使えないため、1.0.0 → 1-0-0 に変換
+          APP_VERSION_LABEL=$(echo "$APP_VERSION" | sed 's/\./-/g' | tr '[:upper:]' '[:lower:]' | cut -c1-63)
+
+          # 手動トリガー時のフォールバック処理
+          if [ -z "$APP_VERSION_LABEL" ] || [ "$APP_VERSION_LABEL" = "${{ github.ref_name }}" ]; then
+            APP_VERSION_LABEL="manual-$(date +%Y%m%d-%H%M%S)"
+          fi
+
+          echo "Deploying version: $APP_VERSION (label: $APP_VERSION_LABEL)"
+
+          # --no-traffic オプションを追加、リビジョンにバージョンタグを付与
+          gcloud run services update ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --image=${WEB_IMAGE} \
+            --tag=v${APP_VERSION_LABEL} \
+            --update-labels=app-version=$APP_VERSION_LABEL \
+            --set-env-vars=NODE_ENV=production,WEB_PORT=3000,NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false \
+            --set-secrets=DATABASE_URL=database-url:latest,FIREBASE_PRIVATE_KEY=firebase-private-key:latest,FIREBASE_PROJECT_ID=firebase-project-id:latest,FIREBASE_CLIENT_EMAIL=firebase-client-email:latest \
+            --no-traffic \
+            --quiet
+
+          # デプロイされたリビジョン名を取得
+          LATEST_REVISION=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format='value(status.latestCreatedRevisionName)')
+
+          echo "revision_name=${LATEST_REVISION}" >> $GITHUB_OUTPUT
+          echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for deployment to complete..."
+
+          # Cloud Runサービスの状態確認
+          for i in {1..30}; do
+            STATUS=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+              --region=${{ env.GCP_REGION }} \
+              --format='value(status.conditions[0].status)')
+
+            if [ "$STATUS" = "True" ]; then
+              echo "Deployment completed successfully"
+              exit 0
+            fi
+
+            echo "Waiting... (attempt $i/30)"
+            sleep 10
+          done
+
+          echo "Deployment timeout"
+          exit 1
+
+      - name: Display next steps
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "✅ Deployment completed (no traffic)"
+          echo "=========================================="
+          echo ""
+          echo "📦 Deployed revision: ${{ steps.deploy.outputs.revision_name }}"
+          echo "🏷️  App version: ${{ steps.deploy.outputs.app_version }}"
+          echo ""
+          echo "⚠️  IMPORTANT: Traffic is NOT switched yet!"
+          echo ""
+          echo "Next steps:"
+          echo ""
+          echo "1️⃣  Run database migration:"
+          echo "   https://github.com/${{ github.repository }}/actions/workflows/run-migration.yml"
+          echo "   👉 Click 'Run workflow' button"
+          echo ""
+          echo "2️⃣  After migration succeeds, switch traffic to new revision:"
+          echo "   https://github.com/${{ github.repository }}/actions/workflows/switch-traffic.yml"
+          echo "   👉 Specify revision: ${{ steps.deploy.outputs.revision_name }}"
+          echo ""
+          echo "📝 Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo ""
+          echo "=========================================="
+
+      - name: Create PR to sync main with develop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # PR作成失敗時もJobを成功させる（デプロイは成功しているため）
+          set +e
+
+          echo "=========================================="
+          echo "Creating PR: develop → main"
+          echo "=========================================="
+
+          # リリースバージョンの抽出 (gcp-release/1.0.0 → 1.0.0)
+          VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          echo "Release version: $VERSION"
+
+          # 既存のPRをチェック
+          EXISTING_PR=$(gh pr list --base main --head develop --state open --json number --jq '.[0].number' 2>&1)
+
+          if [ $? -ne 0 ]; then
+            echo ""
+            echo "⚠️  Warning: Failed to check existing PRs"
+            echo "$EXISTING_PR"
+            echo "Attempting to create PR anyway..."
+          elif [ -n "$EXISTING_PR" ]; then
+            echo ""
+            echo "ℹ️  PR already exists: #$EXISTING_PR"
+            echo "Skipping PR creation"
+            echo ""
+            echo "PR URL: https://github.com/${{ github.repository }}/pull/$EXISTING_PR"
+            exit 0
+          fi
+
+          # develop と main の差分をチェック
+          git fetch origin main develop
+
+          MAIN_COMMIT=$(git rev-parse origin/main 2>&1)
+          DEVELOP_COMMIT=$(git rev-parse origin/develop 2>&1)
+
+          if [ $? -ne 0 ]; then
+            echo ""
+            echo "⚠️  Warning: Failed to fetch branch information"
+            echo "Please create the sync PR manually:"
+            echo "  gh pr create --base main --head develop"
+            exit 0
+          fi
+
+          echo ""
+          echo "Current state:"
+          echo "  main:    $MAIN_COMMIT"
+          echo "  develop: $DEVELOP_COMMIT"
+
+          # 既に同期済みかチェック
+          if [ "$MAIN_COMMIT" = "$DEVELOP_COMMIT" ]; then
+            echo ""
+            echo "✓ main and develop are already in sync"
+            echo "No PR needed"
+            exit 0
+          fi
+
+          # PRの作成
+          echo ""
+          echo "Creating pull request..."
+
+          PR_TITLE="🚀 Sync main with develop (gcp-release/$VERSION)"
+          PR_BODY="## GCPデプロイ完了後の同期PR
+
+          このPRは、\`gcp-release/$VERSION\` のデプロイ成功後に自動作成されました。
+
+          ### 変更内容
+          - develop ブランチの内容を main ブランチに同期します
+          - リリースバージョン: \`$VERSION\`
+          - デプロイ完了: ✅ (GCP Cloud Run)
+
+          ### マージ方法
+          1. 差分を確認してください
+          2. 問題がなければ、このPRをマージしてください
+          3. Fast-forward mergeが推奨されます
+
+          ### 関連情報
+          - デプロイワークフロー: [\`${{ github.run_id }}\`](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - リリースタグ: \`${{ github.ref_name }}\`
+
+          ---
+          🤖 このPRは GitHub Actions により自動生成されました"
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head develop \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --label "Release" \
+            2>&1)
+
+          if [ $? -eq 0 ]; then
+            echo ""
+            echo "=========================================="
+            echo "✓ PR created successfully"
+            echo "=========================================="
+            echo ""
+            echo "$PR_URL"
+            echo ""
+            echo "Please review and merge the PR to complete the sync."
+          else
+            echo ""
+            echo "=========================================="
+            echo "⚠️  Warning: Failed to create PR"
+            echo "=========================================="
+            echo ""
+            echo "$PR_URL"
+            echo ""
+            echo "Deployment was successful, but PR creation failed."
+            echo "Please create the sync PR manually:"
+            echo "  gh pr create --base main --head develop --title \"🚀 Sync main with develop (gcp-release/$VERSION)\""
+            echo ""
+            echo "Job will continue as successful since deployment completed."
+          fi
+
+          # PR作成失敗でもJobは成功させる
+          exit 0
