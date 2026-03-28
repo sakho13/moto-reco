@@ -1,6 +1,11 @@
 FROM node:22-alpine
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+
+# Cloud SQL Proxyのダウンロード
+ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
+RUN chmod +x /usr/local/bin/cloud_sql_proxy
+
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 # 依存関係のインストール
@@ -10,7 +15,12 @@ RUN pnpm install --filter @repo/database --frozen-lockfile
 
 # Prismaファイルのコピー
 COPY packages/database ./packages/database
+
+# 起動スクリプトをコピー
+COPY packages/database/start-migration.sh /app/start-migration.sh
+RUN chmod +x /app/start-migration.sh
+
 WORKDIR /app/packages/database
 
 # マイグレーション実行
-CMD ["pnpm", "prisma", "migrate", "deploy"]
+CMD ["/app/start-migration.sh"]
