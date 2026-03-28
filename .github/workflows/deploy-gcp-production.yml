@@ -107,7 +107,7 @@ jobs:
           gcloud run services update ${{ env.CLOUD_RUN_SERVICE }} \
             --region=${{ env.GCP_REGION }} \
             --image=${WEB_IMAGE} \
-            --tag=${APP_VERSION_LABEL} \
+            --tag=v${APP_VERSION_LABEL} \
             --update-labels=app-version=$APP_VERSION_LABEL \
             --set-env-vars=NODE_ENV=production,WEB_PORT=3000,NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false \
             --set-secrets=DATABASE_URL=database-url:latest,FIREBASE_PRIVATE_KEY=firebase-private-key:latest,FIREBASE_PROJECT_ID=firebase-project-id:latest,FIREBASE_CLIENT_EMAIL=firebase-client-email:latest \
