@@ -51,9 +51,6 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          # タグ名から/を-に置換してDockerタグとして有効な形式に変換
-          IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
-
           # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
           APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
 
@@ -68,33 +65,32 @@ jobs:
             --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.PROD_FIREBASE_APP_ID }} \
             --build-arg NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.PROD_FIREBASE_MEASUREMENT_ID }} \
             --build-arg APP_VERSION=$APP_VERSION \
-            -t ${WEB_IMAGE}:${IMAGE_TAG} \
+            -t ${WEB_IMAGE}:${APP_VERSION} \
             -t ${WEB_IMAGE}:latest .
 
-          docker push ${WEB_IMAGE}:${IMAGE_TAG}
+          docker push ${WEB_IMAGE}:${APP_VERSION}
           docker push ${WEB_IMAGE}:latest
 
       - name: Build and push migration image
         run: |
-          IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
+          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
 
           MIGRATION_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.MIGRATION_REPOSITORY }}/migration"
 
           docker build -f packages/database/Dockerfile.migration \
-            -t ${MIGRATION_IMAGE}:${IMAGE_TAG} \
+            -t ${MIGRATION_IMAGE}:${APP_VERSION} \
             -t ${MIGRATION_IMAGE}:latest .
 
-          docker push ${MIGRATION_IMAGE}:${IMAGE_TAG}
+          docker push ${MIGRATION_IMAGE}:${APP_VERSION}
           docker push ${MIGRATION_IMAGE}:latest
 
       - name: Deploy to Cloud Run (no traffic)
         id: deploy
         run: |
-          IMAGE_TAG=$(echo "${{ github.ref_name }}" | sed 's/\//-/g')
-          WEB_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.WEB_REPOSITORY }}/web:${IMAGE_TAG}"
-
           # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
           APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          WEB_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.WEB_REPOSITORY }}/web:${APP_VERSION}"
 
           # GCPラベル値への変換（ドット→ハイフン）
           # GCPラベル値にはドットが使えないため、1.0.0 → 1-0-0 に変換
@@ -107,10 +103,11 @@ jobs:
 
           echo "Deploying version: $APP_VERSION (label: $APP_VERSION_LABEL)"
 
-          # --no-traffic オプションを追加
+          # --no-traffic オプションを追加、リビジョンにバージョンタグを付与
           gcloud run services update ${{ env.CLOUD_RUN_SERVICE }} \
             --region=${{ env.GCP_REGION }} \
             --image=${WEB_IMAGE} \
+            --tag=${APP_VERSION_LABEL} \
             --update-labels=app-version=$APP_VERSION_LABEL \
             --set-env-vars=NODE_ENV=production,WEB_PORT=3000,NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false \
             --set-secrets=DATABASE_URL=database-url:latest,FIREBASE_PRIVATE_KEY=firebase-private-key:latest,FIREBASE_PROJECT_ID=firebase-project-id:latest,FIREBASE_CLIENT_EMAIL=firebase-client-email:latest \
