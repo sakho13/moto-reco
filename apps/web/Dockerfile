@@ -60,7 +60,7 @@ WORKDIR /app
 
 # Cloud SQL Proxyのダウンロード
 ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
-RUN chmod +x /usr/local/bin/cloud_sql_proxy
+RUN chmod 755 /usr/local/bin/cloud_sql_proxy
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -75,7 +75,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/
 
 # 起動スクリプトをコピー
 COPY apps/web/start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+RUN chmod 755 /app/start.sh
 
 USER nextjs
 
