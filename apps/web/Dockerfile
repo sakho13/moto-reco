@@ -75,7 +75,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/
 
 # 起動スクリプトをコピー
 COPY apps/web/start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+RUN chmod 755 /app/start.sh
 
 USER nextjs
 
