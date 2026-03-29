@@ -4,7 +4,6 @@ import Image from 'next/image'
 import { LoginCard } from '@/components/LoginCard'
 import { APP_NAME } from '@/lib/statics'
 import TopImage1 from '@/public/top_image_1.png'
-import { APP_NAME } from '@/lib/statics'
 
 export default function Home() {
   return (
