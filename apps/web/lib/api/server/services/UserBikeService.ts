@@ -25,6 +25,7 @@ type RegisterUserBikeParams = {
   purchasePrice?: number
   purchaseMileage?: number
   totalMileage?: number
+  isPublic?: boolean
 }
 
 type UpdateMyUserBikeParams = {
@@ -36,6 +37,7 @@ type UpdateMyUserBikeParams = {
   purchaseMileage?: number | null
   displacement?: number
   totalMileage?: number | null
+  isPublic?: boolean
 }
 
 export class UserBikeService {
@@ -77,16 +79,17 @@ export class UserBikeService {
       throw new ApiV1Error('INVALID_REQUEST', '排気量を指定してください')
     }
 
+    const totalMileage = params.totalMileage ?? params.purchaseMileage ?? 0
+
     const userBike = await this.userBikeRepository.createUserBike(
       new UserBikeEntity({
         bikeId: bike?.id ?? null,
         userBikeId: createUserBikeId(''),
         displacement,
+        totalMileage,
         serialNumber: params.serialNumber ?? null,
       })
     )
-
-    const totalMileage = params.totalMileage ?? params.purchaseMileage ?? 0
 
     const myUserBike = await this.myUserBikeRepository.createMyUserBike(
       new MyUserBikeEntity({
@@ -98,7 +101,7 @@ export class UserBikeService {
         purchaseDate: params.purchaseDate ?? null,
         purchasePrice: params.purchasePrice ?? null,
         purchaseMileage: params.purchaseMileage ?? null,
-        totalMileage,
+        isPublic: params.isPublic ?? false,
         ownedAt: params.purchaseDate ?? new Date(),
         soldAt: null,
         ownStatus: 'OWN',
@@ -146,6 +149,13 @@ export class UserBikeService {
       )
     }
 
+    if (params.totalMileage !== undefined && params.totalMileage !== null) {
+      await this.userBikeRepository.updateTotalMileage(
+        current.userBikeId,
+        params.totalMileage
+      )
+    }
+
     const updatedEntity = new MyUserBikeEntity({
       ...current,
       nickname:
@@ -162,10 +172,8 @@ export class UserBikeService {
         params.purchaseMileage !== undefined
           ? params.purchaseMileage
           : current.purchaseMileage,
-      totalMileage:
-        params.totalMileage !== undefined && params.totalMileage !== null
-          ? params.totalMileage
-          : current.totalMileage,
+      isPublic:
+        params.isPublic !== undefined ? params.isPublic : current.isPublic,
     })
 
     await this.myUserBikeRepository.updateMyUserBike(updatedEntity)

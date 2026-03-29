@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import type {
-  ApiResponseFuelLogList,
+  ApiResponseFuelLogDetail,
   SuccessResponse,
 } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
@@ -14,7 +14,8 @@ import {
   FuelLogForm,
   type FuelLogFormData,
 } from '@/components/fuel-log/FuelLogForm'
-import { authenticatedFetch, apiPatch } from '@/lib/api/client'
+import { TrashIcon } from '@/components/icons/TrashIcon'
+import { apiDelete, authenticatedFetch, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -25,48 +26,49 @@ function FuelLogEditPage() {
   const fuelLogId = params.fuelLogId as string | undefined
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState('')
   const [initialData, setInitialData] = useState<FuelLogFormData | undefined>()
+
+  const detailUrl =
+    bikeId && fuelLogId
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs/${fuelLogId}`
+      : null
 
   const {
     data,
     error: fetchError,
     isLoading,
-  } = useSWR(
-    bikeId ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs` : null,
-    async (url) => {
-      const response = await authenticatedFetch(url, { method: 'GET' })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new ApiV1Error(
-          errorData.errorCode || 'SERVER_ERROR',
-          errorData.message || 'エラーが発生しました'
-        )
-      }
-      const json =
-        (await response.json()) as SuccessResponse<ApiResponseFuelLogList>
-      return json.data
+  } = useSWR(detailUrl, async (url) => {
+    const response = await authenticatedFetch(url, { method: 'GET' })
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new ApiV1Error(
+        errorData.errorCode || 'SERVER_ERROR',
+        errorData.message || 'エラーが発生しました'
+      )
     }
-  )
+    const json =
+      (await response.json()) as SuccessResponse<ApiResponseFuelLogDetail>
+    return json.data
+  })
 
   useEffect(() => {
-    if (data && fuelLogId) {
-      const fuelLog = data.find((log) => log.fuelLogId === fuelLogId)
-      if (fuelLog) {
-        const dateStr = new Date(fuelLog.refueledAt).toISOString().split('T')[0]
-        if (dateStr) {
-          setInitialData({
-            refueledAt: dateStr,
-            mileage: fuelLog.mileage.toString(),
-            previousMileage: fuelLog.previousMileage.toString(),
-            amount: fuelLog.amount.toString(),
-            totalPrice: fuelLog.totalPrice.toString(),
-            updateTotalMileage: false,
-          })
-        }
+    if (data) {
+      const dateStr = new Date(data.refueledAt).toISOString().split('T')[0]
+      if (dateStr) {
+        setInitialData({
+          refueledAt: dateStr,
+          mileage: data.mileage.toString(),
+          previousMileage: data.previousMileage.toString(),
+          amount: data.amount.toString(),
+          totalPrice: data.totalPrice.toString(),
+          memo: data.memo ?? '',
+          updateTotalMileage: false,
+        })
       }
     }
-  }, [data, fuelLogId])
+  }, [data])
 
   const handleFormSubmit = async (formData: FuelLogFormData) => {
     if (!fuelLogId) {
@@ -78,6 +80,7 @@ function FuelLogEditPage() {
     setIsSubmitting(true)
 
     try {
+      const memo = formData.memo.trim()
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
         fuelLogId: fuelLogId,
         refueledAt: new Date(formData.refueledAt),
@@ -85,9 +88,13 @@ function FuelLogEditPage() {
         previousMileage: Number(formData.previousMileage),
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
+        memo: memo.length > 0 ? memo : null,
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      if (detailUrl) {
+        await mutate(detailUrl)
+      }
       toast.success('給油履歴を更新しました', {
         description: '給油履歴一覧へ移動します。',
       })
@@ -96,6 +103,41 @@ function FuelLogEditPage() {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!fuelLogId) {
+      setError('給油履歴IDが不正です')
+      return
+    }
+
+    const isConfirmed = window.confirm(
+      'この給油履歴を削除しますか？この操作は取り消せません。'
+    )
+    if (!isConfirmed) {
+      return
+    }
+
+    setError('')
+    setIsDeleting(true)
+
+    try {
+      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
+        fuelLogId,
+      })
+      await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      if (detailUrl) {
+        await mutate(detailUrl)
+      }
+      toast.success('給油履歴を削除しました', {
+        description: '給油履歴一覧へ移動します。',
+      })
+      router.push(`/app/my-bike/${bikeId}/fuel-logs`)
+    } catch (err) {
+      setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -149,7 +191,20 @@ function FuelLogEditPage() {
         </Button>
       </div>
 
-      <BaseCard title="給油履歴を編集">
+      <BaseCard
+        title="給油履歴を編集"
+        headerAction={
+          <Button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting || isSubmitting}
+            variant="danger"
+            aria-label="削除する"
+          >
+            <TrashIcon />
+          </Button>
+        }
+      >
         <FuelLogForm
           initialData={initialData}
           onSubmit={handleFormSubmit}

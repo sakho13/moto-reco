@@ -168,6 +168,48 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/user/auth/recover:
+    post:
+      summary: ユーザー復帰
+      description: 復帰コードを受け取り、退会状態のユーザーを復帰させます。
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRecover'
+      responses:
+        '200':
+          description: 復帰処理成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/UserRecoverResponse'
+                  message:
+                    type: string
+                    example: 復帰処理が完了しました
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/bikes/manufacturers:
     get:
       summary: バイクメーカー一覧の取得
@@ -509,6 +551,13 @@ paths:
   /api/v1/user-bike/bike/{my-user-bike-id}/fuel-logs:
     get:
       summary: ユーザー所有バイクの燃料ログ一覧取得
+      description: |
+        燃料ログの一覧を取得します。
+        検索モード:
+        1. プリセット期間検索: `period` パラメータを使用
+        2. 自由な日付範囲検索: `startDate` と `endDate` パラメータを使用（両方必須）
+
+        注意: `period` と `startDate/endDate` は同時に指定できません。
       tags:
         - user-bikes
       parameters:
@@ -547,6 +596,38 @@ paths:
               - desc
             default: desc
             description: ソート順序
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum:
+              - latest-year
+              - latest-month
+              - past-year
+              - past-month
+          description: |
+            プリセット期間検索。
+            `startDate/endDate` とは排他的に使用してください。
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date-time
+          description: |
+            開始日時（ISO 8601形式）。
+            `endDate` と両方指定する必要があります。
+            `period` とは排他的に使用してください。
+          example: '2024-01-01T00:00:00.000Z'
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date-time
+          description: |
+            終了日時（ISO 8601形式）。
+            `startDate` と両方指定する必要があります。
+            `period` とは排他的に使用してください。
+          example: '2024-01-31T23:59:59.999Z'
       responses:
         '200':
           description: 燃料ログ一覧取得成功
@@ -614,6 +695,54 @@ paths:
                   message:
                     type: string
                     example: 燃料ログ登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/fuel-logs/{fuel-log-id}:
+    get:
+      summary: ユーザー所有バイクの燃料ログ詳細取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: fuel-log-id
+          required: true
+          schema:
+            type: string
+          description: 燃料ログID
+      responses:
+        '200':
+          description: 燃料ログ詳細取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeFuelLogDetail'
+                  message:
+                    type: string
+                    example: 燃料ログ詳細取得成功
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -769,6 +898,278 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/user-bike/bike/{my-user-bike-id}/tourings:
+    get:
+      summary: ユーザー所有バイクのツーリング一覧取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: query
+          name: sort-by
+          schema:
+            type: string
+            enum:
+              - start-date
+              - end-date
+        - in: query
+          name: sort-order
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+            description: ソート順序
+      responses:
+        '200':
+          description: ツーリング一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      summary: ユーザー所有バイクのツーリング登録
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeTouringRegisterDetail'
+      responses:
+        '201':
+          description: ツーリング登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/tourings/start-end:
+    post:
+      summary: ユーザー所有バイクのツーリング開始/終了
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeTouringStartEndDetail'
+      responses:
+        '200':
+          description: ツーリング終了成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング終了成功
+        '201':
+          description: ツーリング開始成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング開始成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/tourings/{touring-id}:
+    get:
+      summary: ユーザー所有バイクのツーリング詳細取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      responses:
+        '200':
+          description: ツーリング取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      summary: ユーザー所有バイクのツーリング更新
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeTouringUpdateDetail'
+      responses:
+        '200':
+          description: ツーリング更新成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringDetail'
+                  message:
+                    type: string
+                    example: ツーリング更新成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/health:
     get:
       summary: ヘルスチェック
@@ -841,6 +1242,22 @@ components:
         recoveryCode:
           type: string
           example: '12345'
+    UserRecover:
+      type: object
+      required:
+        - recoveryCode
+      properties:
+        recoveryCode:
+          type: string
+          minLength: 5
+          maxLength: 5
+          description: 復帰コード（5桁）
+          example: '12345'
+    UserRecoverResponse:
+      type: object
+      properties:
+        userId:
+          type: string
     ManufacturerDetail:
       type: object
       properties:
@@ -1012,6 +1429,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
         fuelEfficiency:
           type: number
           format: float
@@ -1048,6 +1470,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
         updateTotalMileage:
           type: boolean
           description: 燃料ログ登録後にユーザー所有バイクの総走行距離を更新するかどうか。更新する値が現在の総走行距離よりも小さい場合は更新されません。
@@ -1077,6 +1504,11 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
     MyUserBikeFuelLogDeleteDetail:
       type: object
       required:
@@ -1085,6 +1517,111 @@ components:
         fuelLogId:
           type: string
           description: 燃料ログID
+
+    MyUserBikeTouringDetail:
+      type: object
+      properties:
+        touringId:
+          type: string
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        startDate:
+          type: string
+          description: 開始日（ISO 8601形式）
+        endDate:
+          type: string
+          description: 終了日（ISO 8601形式）
+        startMileage:
+          type: integer
+          nullable: true
+          description: 開始時の総走行距離（km）
+        endMileage:
+          type: integer
+          nullable: true
+          description: 終了時の総走行距離（km）
+    MyUserBikeTouringRegisterDetail:
+      type: object
+      required:
+        - title
+        - startDate
+        - endDate
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        startDate:
+          type: string
+          description: 開始日（ISO 8601形式）
+        endDate:
+          type: string
+          description: 終了日（ISO 8601形式）
+        startMileage:
+          type: integer
+          nullable: true
+          description: 開始時の総走行距離（km）
+        endMileage:
+          type: integer
+          nullable: true
+          description: 終了時の総走行距離（km）
+
+    MyUserBikeTouringUpdateDetail:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+        startDate:
+          type: string
+          description: 開始日（ISO 8601形式）
+        endDate:
+          type: string
+          description: 終了日（ISO 8601形式）
+        startMileage:
+          type: integer
+          nullable: true
+          description: 開始時の総走行距離（km）
+        endMileage:
+          type: integer
+          nullable: true
+          description: 終了時の総走行距離（km）
+
+    MyUserBikeTouringStartEndDetail:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum:
+            - start
+            - end
+          description: 操作種別
+        touringId:
+          type: string
+          description: ツーリングID（終了時に必須）
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: タイトル（開始時の任意）
+        startDate:
+          type: string
+          description: 開始日（ISO 8601形式）
+        endDate:
+          type: string
+          description: 終了日（ISO 8601形式）
+        startMileage:
+          type: integer
+          nullable: true
+          description: 開始時の総走行距離（km）
+        endMileage:
+          type: integer
+          nullable: true
+          description: 終了時の総走行距離（km）
 
     MyUserBikeFuelInsightDetail:
       type: object

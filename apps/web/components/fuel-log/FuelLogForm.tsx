@@ -6,6 +6,7 @@ import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
 
 export interface FuelLogFormData {
@@ -14,6 +15,7 @@ export interface FuelLogFormData {
   previousMileage: string
   amount: string
   totalPrice: string
+  memo: string
   updateTotalMileage: boolean
 }
 
@@ -34,12 +36,21 @@ export const FuelLogForm = ({
   isEdit = false,
   totalMileage,
 }: FuelLogFormProps) => {
+  const getTodayDateString = () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  const today = getTodayDateString()
   const [formData, setFormData] = useState<FuelLogFormData>({
-    refueledAt: '',
+    refueledAt: today ?? '',
     mileage: '',
     previousMileage: '',
     amount: '',
     totalPrice: '',
+    memo: '',
     updateTotalMileage: true,
   })
   const [isUpdateTotalMileageManual, setIsUpdateTotalMileageManual] =
@@ -69,7 +80,6 @@ export const FuelLogForm = ({
     await onSubmit(formData)
   }
 
-  const today = new Date().toISOString().split('T')[0]
   const isUpdateTotalMileageDisabled =
     totalMileage !== undefined &&
     formData.mileage !== '' &&
@@ -135,7 +145,7 @@ export const FuelLogForm = ({
 
       <ToggleSection
         title={`前回の走行距離: ${formData.previousMileage.toLocaleString()} km（自動設定）`}
-        defaultOpen={true}
+        defaultOpen={false}
       >
         <FormField
           label="前回の給油時走行距離 (km)"
@@ -196,6 +206,23 @@ export const FuelLogForm = ({
           required
           disabled={isSubmitting}
           placeholder="例: 2000"
+        />
+      </FormField>
+
+      <FormField label="メモ" htmlFor="memo" helperText="最大500文字">
+        <Textarea
+          id="memo"
+          value={formData.memo}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              memo: e.target.value,
+            }))
+          }
+          maxLength={500}
+          disabled={isSubmitting}
+          placeholder="例: ハイオク満タン"
+          rows={3}
         />
       </FormField>
 

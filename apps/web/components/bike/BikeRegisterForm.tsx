@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@repo/ui/button'
+import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -14,6 +15,7 @@ export interface BikeFormData {
   purchaseMileage: string
   totalMileage: string
   displacement: string
+  isPublic: boolean
 }
 
 export interface BikeRegisterFormProps {
@@ -40,6 +42,7 @@ export const BikeRegisterForm = ({
     purchaseMileage: '',
     totalMileage: '',
     displacement: '',
+    isPublic: false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,6 +138,22 @@ export const BikeRegisterForm = ({
             maxLength={50}
             disabled={isSubmitting}
             placeholder="バイクの愛称（任意）"
+          />
+        </FormField>
+
+        <FormField label="公開設定" htmlFor="isPublic">
+          <Checkbox
+            id="isPublic"
+            checked={formData.isPublic}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                isPublic: e.target.checked,
+              }))
+            }
+            disabled={isSubmitting}
+            label="このバイクを公開する"
+            helperText="公開したバイクは、公開ページに情報が掲載されます。"
           />
         </FormField>
 

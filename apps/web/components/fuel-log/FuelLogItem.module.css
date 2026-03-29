@@ -72,6 +72,41 @@
   opacity: 0.3;
 }
 
+.memoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+  opacity: 0.7;
+  padding-left: 6rem;
+  white-space: pre-wrap;
+}
+
+.memoLabel {
+  flex-shrink: 0;
+  font-weight: var(--font-weight-semibold);
+  opacity: 0.6;
+}
+
+.memoText {
+  line-height: 1.4;
+}
+
+.touringRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+  opacity: 0.6;
+  padding-left: 6rem;
+}
+
+.touringName {
+  font-style: italic;
+}
+
 /* レスポンシブ対応: モバイル */
 @media (max-width: 640px) {
   .mainRow {
@@ -90,6 +125,16 @@
   }
 
   .detailsRow {
+    font-size: 0.625rem;
+    padding-left: 5rem;
+  }
+
+  .memoRow {
+    font-size: 0.625rem;
+    padding-left: 5rem;
+  }
+
+  .touringRow {
     font-size: 0.625rem;
     padding-left: 5rem;
   }

@@ -1,9 +1,38 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { APP_VERSION } from '../lib/statics'
-import styles from './home.module.css'
-import { Footer } from '@/components/docs/Footer'
-import { Navigation } from '@/components/docs/Navigation'
+import styles from './page.module.css'
+import { APP_NAME, APP_VERSION, SITE_URL } from '@/lib/statics'
+
+export const metadata: Metadata = {
+  title: `${APP_NAME} | バイクメンテナンス・給油記録管理アプリ`,
+  description:
+    'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理。走行距離や燃費の推移をグラフで確認でき、次回メンテナンスをリマインド通知。複数台のバイク管理にも対応した無料アプリです。',
+  openGraph: {
+    type: 'website',
+    locale: 'ja_JP',
+    url: SITE_URL,
+    title: `${APP_NAME} | バイクメンテナンス・給油記録管理アプリ`,
+    description:
+      'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理。走行距離や燃費の推移をグラフで確認でき、次回メンテナンスをリマインド通知。',
+    siteName: APP_NAME,
+    images: [
+      {
+        url: '/top_image_1.png',
+        width: 2048,
+        height: 2048,
+        alt: 'moto-reco - バイクメンテナンス管理アプリ',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${APP_NAME} | バイクメンテナンス・給油記録管理アプリ`,
+    description:
+      'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理。走行距離や燃費の推移をグラフで確認。',
+    images: ['/top_image_1.png'],
+  },
+}
 
 const features = [
   {
@@ -29,7 +58,6 @@ const features = [
 export default function Home() {
   return (
     <>
-      <Navigation />
       <div className={styles.page}>
         <header className={styles.header}>
           <div className={styles.brand}>
@@ -112,8 +140,6 @@ export default function Home() {
           </div>
         </section>
       </div>
-
-      <Footer />
     </>
   )
 }

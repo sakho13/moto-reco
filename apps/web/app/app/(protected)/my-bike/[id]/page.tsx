@@ -10,6 +10,7 @@ import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
+import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
 import { authenticatedFetch } from '@/lib/api/client'
@@ -125,6 +126,13 @@ function BikeDetailPage() {
           title="給油履歴"
           description="給油履歴を確認・管理できます"
           icon={<FuelIcon />}
+        />
+
+        <NavigationCard
+          href={`/app/my-bike/${id}/tourings`}
+          title="ツーリング履歴"
+          description="ツーリング履歴を確認・管理できます"
+          icon={<TouringIcon />}
         />
 
         {/* メンテナンス履歴 - disabled 状態 */}

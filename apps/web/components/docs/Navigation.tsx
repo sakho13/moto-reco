@@ -14,6 +14,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '/about', label: 'このアプリについて' },
   { href: '/faq', label: 'FAQ' },
   { href: '/pricing', label: '料金プラン' },
+  { href: '/bikes', label: 'みんなのバイク' },
 ]
 
 export function Navigation() {
@@ -29,7 +30,11 @@ export function Navigation() {
       <div className={styles.navContainer}>
         <ul className={styles.navList}>
           {NAV_LINKS.map((link) => {
-            const isActive = pathname === link.href
+            const isActive =
+              link.href === '/'
+                ? pathname === link.href
+                : pathname.startsWith(link.href)
+
             return (
               <li key={link.href}>
                 <Link
