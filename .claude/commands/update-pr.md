@@ -70,14 +70,17 @@ Closes #{issue_number}
 ユーザーが承認したら、以下のコマンドでPRを更新してください:
 
 ```bash
-gh pr edit {pr_number} \
-  --body "$(cat <<'EOF'
-[生成したDescription]
-EOF
-)"
+gh api repos/{owner}/{repo}/pulls/{pr_number} \
+  --method PATCH \
+  --field body='[生成したDescription]' \
+  --jq '.html_url'
 ```
 
-タイトルも更新する場合は `--title "新しいタイトル"` を追加してください。
+> **注意:** `gh pr edit` は内部で `projectCards` フィールドを含むGraphQLクエリを発行するため、GitHub の Projects (classic) 廃止に伴いエラーが発生する場合があります。そのため `gh api` で直接PATCHリクエストを送る方法を使用してください。
+
+タイトルも更新する場合は `--field title='新しいタイトル'` を追加してください。
+
+`{owner}` と `{repo}` は手順1で取得したPRのURLから抽出してください。
 
 更新後、PRのURLをユーザーに伝えてください。
 
