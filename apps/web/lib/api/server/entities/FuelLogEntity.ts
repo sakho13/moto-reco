@@ -1,4 +1,4 @@
-import { FuelLog, FuelLogId, MyUserBikeId } from '@repo/shared-types'
+import { FuelLog, FuelLogId, MyUserBikeId, TouringId } from '@repo/shared-types'
 
 export class FuelLogEntity {
   private _value: FuelLog
@@ -57,6 +57,14 @@ export class FuelLogEntity {
 
   public get memo(): string | null {
     return this._value.memo
+  }
+
+  public get touringId(): TouringId | null {
+    return this._value.touringId
+  }
+
+  public get touringTitle(): string | null {
+    return this._value.touringTitle
   }
 
   /**

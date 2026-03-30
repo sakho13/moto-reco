@@ -2,8 +2,10 @@ import { subMonths, subYears } from 'date-fns'
 import {
   createFuelLogId,
   createMyUserBikeId,
+  createTouringId,
   FuelLogId,
   MyUserBikeId,
+  TouringId,
 } from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
@@ -84,6 +86,7 @@ export class PrismaFuelLogRepository
         previousMileage: fuelLog.previousMileage,
         refueledAt: fuelLog.refueledAt,
         memo: fuelLog.memo,
+        touringId: fuelLog.touringId,
       },
       select: {
         id: true,
@@ -94,6 +97,12 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
         memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
       },
     })
 
@@ -106,6 +115,8 @@ export class PrismaFuelLogRepository
       previousMileage: created.previousMileage,
       refueledAt: created.refueledAt,
       memo: created.memo,
+      touringId: created.touringId ? createTouringId(created.touringId) : null,
+      touringTitle: created.touring?.title ?? null,
     })
   }
 
@@ -113,10 +124,31 @@ export class PrismaFuelLogRepository
     myUserBikeId: MyUserBikeId,
     searchParams: FuelLogSearchParams
   ): Promise<FuelLogEntity[]> {
-    const periodDateRange = await this.resolvePeriodDateRange(
-      myUserBikeId,
-      searchParams.period
-    )
+    // 日付範囲条件の構築
+    let dateRangeCondition: { gte: Date; lte: Date } | undefined
+
+    if (searchParams.isDateRangeMode) {
+      // 日付範囲検索モード（startDate/endDate指定時）
+      dateRangeCondition = {
+        gte: searchParams.startDate!,
+        lte: searchParams.endDate!,
+      }
+    } else if (searchParams.period) {
+      // プリセット期間検索モード（period指定時）
+      const periodDateRange = await this.resolvePeriodDateRange(
+        myUserBikeId,
+        searchParams.period
+      )
+      if (!periodDateRange) {
+        return []
+      }
+      dateRangeCondition = {
+        gte: periodDateRange.startDate,
+        lte: periodDateRange.endDate,
+      }
+    }
+
+    // ソート順の構築
     const orderBy =
       searchParams.sortBy === 'refueledAt'
         ? [
@@ -125,19 +157,13 @@ export class PrismaFuelLogRepository
           ]
         : [{ [searchParams.sortBy]: searchParams.sortOrder }]
 
-    if (searchParams.period && !periodDateRange) {
-      return []
-    }
-
+    // クエリ実行
     const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
       where: {
         userMyBikeId: myUserBikeId,
-        ...(periodDateRange
+        ...(dateRangeCondition
           ? {
-              refueledAt: {
-                gte: periodDateRange.startDate,
-                lte: periodDateRange.endDate,
-              },
+              refueledAt: dateRangeCondition,
             }
           : {}),
       },
@@ -150,6 +176,12 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
         memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
       },
       orderBy,
       skip: searchParams.skip,
@@ -167,6 +199,8 @@ export class PrismaFuelLogRepository
           previousMileage: log.previousMileage,
           refueledAt: log.refueledAt,
           memo: log.memo,
+          touringId: log.touringId ? createTouringId(log.touringId) : null,
+          touringTitle: log.touring?.title ?? null,
         })
     )
   }
@@ -189,6 +223,12 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
         memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
       },
     })
 
@@ -205,6 +245,8 @@ export class PrismaFuelLogRepository
       previousMileage: fuelLog.previousMileage,
       refueledAt: fuelLog.refueledAt,
       memo: fuelLog.memo,
+      touringId: fuelLog.touringId ? createTouringId(fuelLog.touringId) : null,
+      touringTitle: fuelLog.touring?.title ?? null,
     })
   }
 
@@ -220,6 +262,7 @@ export class PrismaFuelLogRepository
         previousMileage: fuelLog.previousMileage,
         refueledAt: fuelLog.refueledAt,
         memo: fuelLog.memo,
+        touringId: fuelLog.touringId,
       },
       select: {
         id: true,
@@ -230,6 +273,12 @@ export class PrismaFuelLogRepository
         previousMileage: true,
         refueledAt: true,
         memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
       },
     })
 
@@ -242,6 +291,8 @@ export class PrismaFuelLogRepository
       previousMileage: updated.previousMileage,
       refueledAt: updated.refueledAt,
       memo: updated.memo,
+      touringId: updated.touringId ? createTouringId(updated.touringId) : null,
+      touringTitle: updated.touring?.title ?? null,
     })
   }
 
@@ -253,6 +304,69 @@ export class PrismaFuelLogRepository
       where: {
         id: fuelLogId,
         userMyBikeId: myUserBikeId,
+      },
+    })
+  }
+
+  async updateFuelLogTouringId(
+    fuelLogId: FuelLogId,
+    myUserBikeId: MyUserBikeId,
+    touringId: TouringId | null
+  ): Promise<FuelLogEntity> {
+    const updated = await this.connection.tUserMyBikeFuelLog.update({
+      where: {
+        id: fuelLogId,
+        userMyBikeId: myUserBikeId,
+      },
+      data: {
+        touringId: touringId,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        amount: true,
+        price: true,
+        mileage: true,
+        previousMileage: true,
+        refueledAt: true,
+        memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    })
+
+    return new FuelLogEntity({
+      fuelLogId: createFuelLogId(updated.id),
+      myUserBikeId: createMyUserBikeId(updated.userMyBikeId),
+      amount: updated.amount,
+      totalPrice: updated.price,
+      mileage: updated.mileage,
+      previousMileage: updated.previousMileage,
+      refueledAt: updated.refueledAt,
+      memo: updated.memo,
+      touringId: updated.touringId ? createTouringId(updated.touringId) : null,
+      touringTitle: updated.touring?.title ?? null,
+    })
+  }
+
+  async updateMultipleFuelLogsTouringId(
+    fuelLogIds: FuelLogId[],
+    myUserBikeId: MyUserBikeId,
+    touringId: TouringId | null
+  ): Promise<void> {
+    await this.connection.tUserMyBikeFuelLog.updateMany({
+      where: {
+        id: {
+          in: fuelLogIds,
+        },
+        userMyBikeId: myUserBikeId,
+      },
+      data: {
+        touringId: touringId,
       },
     })
   }

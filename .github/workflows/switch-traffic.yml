@@ -1,0 +1,199 @@
+name: Switch Cloud Run Traffic
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'リビジョン名（例: motoreco-web-00042-abc）または "latest" で最新リビジョン'
+        required: true
+        type: string
+      confirm:
+        description: 'トラフィック切り替えを実行するには "CONFIRM" と入力してください'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_REGION: asia-northeast1
+  GCP_PROJECT_ID: motoreco-8ce2a
+  CLOUD_RUN_SERVICE: motoreco-web
+
+jobs:
+  switch-traffic:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate confirmation
+        run: |
+          if [ "${{ inputs.confirm }}" != "CONFIRM" ]; then
+            echo "❌ Error: You must type 'CONFIRM' to proceed"
+            echo "   Received: '${{ inputs.confirm }}'"
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get target revision
+        id: revision
+        run: |
+          if [ "${{ inputs.revision }}" = "latest" ]; then
+            REVISION=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+              --region=${{ env.GCP_REGION }} \
+              --format='value(status.latestCreatedRevisionName)')
+            echo "Using latest revision: $REVISION"
+          else
+            REVISION="${{ inputs.revision }}"
+            echo "Using specified revision: $REVISION"
+          fi
+
+          # リビジョンが存在するか確認
+          if ! gcloud run revisions describe "$REVISION" \
+            --region=${{ env.GCP_REGION }} \
+            --platform=managed >/dev/null 2>&1; then
+            echo "❌ Error: Revision '$REVISION' not found"
+            exit 1
+          fi
+
+          echo "target_revision=${REVISION}" >> $GITHUB_OUTPUT
+
+      - name: Display current traffic state
+        run: |
+          echo "=========================================="
+          echo "Current Traffic Distribution"
+          echo "=========================================="
+          echo ""
+
+          gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format="table(
+              status.traffic.revisionName,
+              status.traffic.percent,
+              status.traffic.tag
+            )"
+
+          echo ""
+
+      - name: Display planned traffic change
+        run: |
+          echo "=========================================="
+          echo "Planned Traffic Switch"
+          echo "=========================================="
+          echo ""
+          echo "Service: ${{ env.CLOUD_RUN_SERVICE }}"
+          echo "Region: ${{ env.GCP_REGION }}"
+          echo ""
+          echo "Target revision: ${{ steps.revision.outputs.target_revision }}"
+          echo "New traffic: 100%"
+          echo ""
+          echo "⚠️  Full traffic switch"
+          echo ""
+          echo "Proceeding in 10 seconds..."
+          sleep 10
+
+      - name: Switch traffic
+        id: switch
+        run: |
+          TARGET_REVISION="${{ steps.revision.outputs.target_revision }}"
+
+          echo "Switching 100% of traffic to ${TARGET_REVISION}..."
+
+          gcloud run services update-traffic ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --to-revisions="${TARGET_REVISION}=100"
+
+          EXIT_CODE=$?
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "❌ Traffic switch failed"
+            exit 1
+          fi
+
+          echo "switch_status=success" >> $GITHUB_OUTPUT
+
+      - name: Verify traffic switch
+        run: |
+          echo ""
+          echo "Waiting for traffic switch to propagate..."
+          sleep 5
+
+          echo ""
+          echo "=========================================="
+          echo "New Traffic Distribution"
+          echo "=========================================="
+          echo ""
+
+          gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format="table(
+              status.traffic.revisionName,
+              status.traffic.percent,
+              status.traffic.tag
+            )"
+
+          echo ""
+
+      - name: Display monitoring instructions
+        if: steps.switch.outputs.switch_status == 'success'
+        run: |
+          echo "=========================================="
+          echo "✅ TRAFFIC SWITCH COMPLETED"
+          echo "=========================================="
+          echo ""
+          echo "Monitor the application for:"
+          echo "  • Error rates"
+          echo "  • Response times"
+          echo "  • Application logs"
+          echo ""
+          echo "Cloud Run Service URL:"
+          SERVICE_URL=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format='value(status.url)')
+          echo "  $SERVICE_URL"
+          echo ""
+          echo "Cloud Logging:"
+          echo "  https://console.cloud.google.com/logs/query;query=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22${{ env.CLOUD_RUN_SERVICE }}%22?project=${{ env.GCP_PROJECT_ID }}"
+          echo ""
+          echo "Cloud Monitoring:"
+          echo "  https://console.cloud.google.com/run/detail/${{ env.GCP_REGION }}/${{ env.CLOUD_RUN_SERVICE }}/metrics?project=${{ env.GCP_PROJECT_ID }}"
+          echo ""
+          echo "=========================================="
+
+      - name: Rollback instructions
+        if: failure()
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "❌ TRAFFIC SWITCH FAILED"
+          echo "=========================================="
+          echo ""
+          echo "The application should still be running on the previous revision."
+          echo ""
+          echo "To investigate:"
+          echo "  1. Check Cloud Run service status"
+          echo "  2. Review Cloud Logging for errors"
+          echo "  3. Verify the target revision is healthy"
+          echo ""
+          echo "Manual rollback (if needed):"
+          echo "  gcloud run services update-traffic ${{ env.CLOUD_RUN_SERVICE }} \\"
+          echo "    --region=${{ env.GCP_REGION }} \\"
+          echo "    --to-revisions=<PREVIOUS_REVISION>=100"
+          echo ""
+          echo "=========================================="

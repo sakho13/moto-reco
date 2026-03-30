@@ -35,6 +35,13 @@ export const TouringRegisterRequestSchema = z
       .int('終了時の総走行距離は整数で指定してください')
       .nonnegative('終了時の総走行距離は0以上で指定してください')
       .optional(),
+    status: z
+      .enum(['STARTED', 'COMPLETED'], {
+        invalid_type_error:
+          'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
+      })
+      .default('COMPLETED')
+      .optional(),
   })
   .refine((data) => data.startDate <= data.endDate, {
     message: '開始日は終了日以前の日付で指定してください',
@@ -92,6 +99,21 @@ export const TouringUpdateRequestSchema = z
       .int('終了時の総走行距離は整数で指定してください')
       .nonnegative('終了時の総走行距離は0以上で指定してください')
       .optional(),
+    status: z
+      .enum(['STARTED', 'COMPLETED'], {
+        invalid_type_error:
+          'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
+      })
+      .optional(),
+    fuelLogIds: z
+      .array(
+        z
+          .string({
+            invalid_type_error: '給油履歴IDは文字列で指定してください',
+          })
+          .min(1, '給油履歴IDは1文字以上で指定してください')
+      )
+      .optional(),
   })
   .refine(
     (data) =>
@@ -99,7 +121,9 @@ export const TouringUpdateRequestSchema = z
       data.startDate !== undefined ||
       data.endDate !== undefined ||
       data.startMileage !== undefined ||
-      data.endMileage !== undefined,
+      data.endMileage !== undefined ||
+      data.status !== undefined ||
+      data.fuelLogIds !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }
@@ -198,3 +222,36 @@ export const TouringListQuerySchema = z.object({
 })
 
 export type TouringListQuery = z.infer<typeof TouringListQuerySchema>
+
+/**
+ * ツーリングステータス更新リクエストのバリデーションスキーマ
+ */
+export const TouringStatusUpdateRequestSchema = z.object({
+  status: z.enum(['STARTED', 'COMPLETED'], {
+    required_error: 'ステータスは必須です',
+    invalid_type_error: 'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
+  }),
+})
+
+export type TouringStatusUpdateRequest = z.infer<
+  typeof TouringStatusUpdateRequestSchema
+>
+
+/**
+ * ツーリングに紐づく給油履歴更新リクエストのバリデーションスキーマ
+ */
+export const TouringFuelLogsUpdateRequestSchema = z.object({
+  fuelLogIds: z
+    .array(
+      z
+        .string({
+          invalid_type_error: '給油履歴IDは文字列で指定してください',
+        })
+        .min(1, '給油履歴IDは1文字以上で指定してください')
+    )
+    .default([]),
+})
+
+export type TouringFuelLogsUpdateRequest = z.infer<
+  typeof TouringFuelLogsUpdateRequestSchema
+>

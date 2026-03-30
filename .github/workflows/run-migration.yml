@@ -1,0 +1,135 @@
+name: Run Database Migration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_REGION: asia-northeast1
+  GCP_PROJECT_ID: motoreco-8ce2a
+  CLOUD_RUN_JOB: motoreco-migration
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Display migration information
+        run: |
+          echo "=========================================="
+          echo "Database Migration Execution"
+          echo "=========================================="
+          echo ""
+          echo "Environment: production"
+          echo "GCP Project: ${{ env.GCP_PROJECT_ID }}"
+          echo "Region: ${{ env.GCP_REGION }}"
+          echo "Job: ${{ env.CLOUD_RUN_JOB }}"
+          echo ""
+
+          echo "Current job configuration:"
+          gcloud run jobs describe ${{ env.CLOUD_RUN_JOB }} \
+            --region=${{ env.GCP_REGION }} \
+            --format="table(
+              metadata.name,
+              spec.template.spec.containers[0].image,
+              metadata.labels
+            )"
+          echo ""
+
+      - name: Confirm migration execution
+        run: |
+          echo "⚠️  WARNING: This will execute database migration in PRODUCTION"
+          echo ""
+          echo "Please ensure:"
+          echo "  ✓ Database backup is available"
+          echo "  ✓ Migration has been tested in staging"
+          echo "  ✓ Rollback plan is prepared"
+          echo ""
+          echo "Proceeding with migration in 10 seconds..."
+          sleep 10
+
+      - name: Run database migration
+        id: migration
+        run: |
+          echo "Starting database migration..."
+
+          EXECUTION_NAME="migration-$(date +%Y%m%d-%H%M%S)"
+
+          gcloud run jobs execute ${{ env.CLOUD_RUN_JOB }} \
+            --region=${{ env.GCP_REGION }} \
+            --wait \
+            2>&1 | tee migration.log
+
+          EXIT_CODE=$?
+
+          if [ "$EXIT_CODE" != "0" ]; then
+            echo "❌ Migration failed with exit code: $EXIT_CODE"
+            echo ""
+            echo "Fetching migration logs from Cloud Logging..."
+
+            gcloud logging read \
+              "resource.type=cloud_run_job AND resource.labels.job_name=${{ env.CLOUD_RUN_JOB }}" \
+              --limit=50 \
+              --format=json \
+              --freshness=5m > migration_error.log
+
+            echo ""
+            echo "Error logs:"
+            cat migration_error.log | jq -r '.[] | .textPayload // .jsonPayload.message // empty'
+
+            echo ""
+            echo "=========================================="
+            echo "❌ MIGRATION FAILED"
+            echo "=========================================="
+            echo ""
+            echo "⚠️  DO NOT switch traffic to the new revision!"
+            echo ""
+            echo "Action required:"
+            echo "  1. Review error logs above"
+            echo "  2. Fix migration issues"
+            echo "  3. Re-run this workflow"
+            echo ""
+
+            exit 1
+          fi
+
+          echo "migration_status=success" >> $GITHUB_OUTPUT
+          echo ""
+          echo "✅ Migration completed successfully"
+
+      - name: Display next steps
+        if: steps.migration.outputs.migration_status == 'success'
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "✅ MIGRATION COMPLETED SUCCESSFULLY"
+          echo "=========================================="
+          echo ""
+          echo "Next step: Switch traffic to the new revision"
+          echo ""
+          echo "Go to:"
+          echo "  https://github.com/${{ github.repository }}/actions/workflows/switch-traffic.yml"
+          echo ""
+          echo "Click 'Run workflow' and specify the revision name from the deploy workflow"
+          echo ""
+          echo "=========================================="

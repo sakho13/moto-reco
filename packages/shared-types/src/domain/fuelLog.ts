@@ -1,4 +1,5 @@
 import { MyUserBikeId } from './bike'
+import { TouringId } from './touring'
 
 export type FuelLogId = string & { readonly __brand: unique symbol }
 export const createFuelLogId = (id: string): FuelLogId => id as FuelLogId
@@ -12,4 +13,6 @@ export type FuelLog = {
   amount: number // 給油量 (L)
   totalPrice: number // 合計価格 (円)
   memo: string | null // メモ
+  touringId: TouringId | null // ツーリングID
+  touringTitle: string | null // ツーリング名（JOIN用）
 }

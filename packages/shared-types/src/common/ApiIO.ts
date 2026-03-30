@@ -141,6 +141,8 @@ export type ApiResponseFuelLogDetail = {
   memo: string | null
   fuelEfficiency: number | null // km/L (計算不可の場合はnull)
   pricePerLiter: number | null // 円/L (給油量0の場合はnull)
+  touringId: string | null // ツーリングID
+  touringTitle: string | null // ツーリングタイトル
 }
 
 export type ApiResponseFuelLogList = ApiResponseFuelLogDetail[]
@@ -160,9 +162,24 @@ export type ApiResponseTouringDetail = {
   endDate: string
   startMileage: number | null
   endMileage: number | null
+  status: 'STARTED' | 'COMPLETED'
+  fuelLogIds: string[]
 }
 
 export type ApiResponseTouringList = ApiResponseTouringDetail[]
+
+export type ApiResponseOngoingTouring = {
+  touring: ApiResponseTouringDetail | null
+}
+
+export type ApiResponseBikeOngoingTouring = {
+  myUserBikeId: string
+  ongoingTouring: ApiResponseTouringDetail | null
+}
+
+export type ApiResponseBikesOngoingTourings = {
+  bikes: ApiResponseBikeOngoingTouring[]
+}
 
 export type ApiResponseFuelInsight = {
   averageFuelEfficiency: number | null

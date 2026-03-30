@@ -30,7 +30,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: myUserBike.purchaseDate,
         purchasePrice: myUserBike.purchasePrice,
         purchaseMileage: myUserBike.purchaseMileage,
-        totalMileage: myUserBike.totalMileage,
         isPublic: myUserBike.isPublic,
         ownedAt: myUserBike.ownedAt,
         soldAt: myUserBike.soldAt,
@@ -44,7 +43,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: true,
         purchasePrice: true,
         purchaseMileage: true,
-        totalMileage: true,
         isPublic: true,
         ownedAt: true,
         soldAt: true,
@@ -53,6 +51,7 @@ export class PrismaMyUserBikeRepository
           select: {
             bikeId: true,
             displacement: true,
+            totalMileage: true,
           },
         },
       },
@@ -69,7 +68,6 @@ export class PrismaMyUserBikeRepository
       purchaseDate: created.purchaseDate,
       purchasePrice: created.purchasePrice,
       purchaseMileage: created.purchaseMileage,
-      totalMileage: created.totalMileage,
       isPublic: created.isPublic,
       ownedAt: created.ownedAt,
       soldAt: created.soldAt,
@@ -93,6 +91,7 @@ export class PrismaMyUserBikeRepository
           select: {
             bikeId: true,
             displacement: true,
+            totalMileage: true,
             bike: {
               include: {
                 manufacturer: true,
@@ -118,7 +117,7 @@ export class PrismaMyUserBikeRepository
       purchaseDate: myUserBike.purchaseDate,
       purchasePrice: myUserBike.purchasePrice,
       purchaseMileage: myUserBike.purchaseMileage,
-      totalMileage: myUserBike.totalMileage,
+      totalMileage: myUserBike.userBike.totalMileage,
       displacement:
         myUserBike.userBike.bike?.displacement ??
         myUserBike.userBike.displacement,
@@ -136,6 +135,7 @@ export class PrismaMyUserBikeRepository
         userBike: {
           select: {
             displacement: true,
+            totalMileage: true,
             bike: {
               include: {
                 manufacturer: true,
@@ -158,7 +158,7 @@ export class PrismaMyUserBikeRepository
         myUserBike.userBike.bike?.displacement ??
         myUserBike.userBike.displacement,
       modelYear: myUserBike.userBike.bike?.modelYear ?? null,
-      totalMileage: myUserBike.totalMileage,
+      totalMileage: myUserBike.userBike.totalMileage,
       updatedAt: myUserBike.updatedAt,
     }))
   }
@@ -172,6 +172,7 @@ export class PrismaMyUserBikeRepository
         userBike: {
           select: {
             displacement: true,
+            totalMileage: true,
             bike: {
               include: {
                 manufacturer: true,
@@ -195,7 +196,7 @@ export class PrismaMyUserBikeRepository
         myUserBike.userBike.bike?.displacement ??
         myUserBike.userBike.displacement,
       modelYear: myUserBike.userBike.bike?.modelYear ?? null,
-      totalMileage: myUserBike.totalMileage,
+      totalMileage: myUserBike.userBike.totalMileage,
       updatedAt: myUserBike.updatedAt,
     }
   }
@@ -214,7 +215,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: true,
         purchasePrice: true,
         purchaseMileage: true,
-        totalMileage: true,
         isPublic: true,
         ownedAt: true,
         soldAt: true,
@@ -243,7 +243,6 @@ export class PrismaMyUserBikeRepository
       purchaseDate: myUserBike.purchaseDate,
       purchasePrice: myUserBike.purchasePrice,
       purchaseMileage: myUserBike.purchaseMileage,
-      totalMileage: myUserBike.totalMileage,
       isPublic: myUserBike.isPublic,
       ownedAt: myUserBike.ownedAt,
       soldAt: myUserBike.soldAt,
@@ -263,7 +262,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: myUserBike.purchaseDate,
         purchasePrice: myUserBike.purchasePrice,
         purchaseMileage: myUserBike.purchaseMileage,
-        totalMileage: myUserBike.totalMileage,
         isPublic: myUserBike.isPublic,
         ownedAt: myUserBike.ownedAt,
         soldAt: myUserBike.soldAt,
@@ -277,7 +275,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: true,
         purchasePrice: true,
         purchaseMileage: true,
-        totalMileage: true,
         isPublic: true,
         ownedAt: true,
         soldAt: true,
@@ -302,7 +299,6 @@ export class PrismaMyUserBikeRepository
       purchaseDate: updated.purchaseDate,
       purchasePrice: updated.purchasePrice,
       purchaseMileage: updated.purchaseMileage,
-      totalMileage: updated.totalMileage,
       isPublic: updated.isPublic,
       ownedAt: updated.ownedAt,
       soldAt: updated.soldAt,
@@ -321,6 +317,7 @@ export class PrismaMyUserBikeRepository
           select: {
             bikeId: true,
             displacement: true,
+            totalMileage: true,
             bike: {
               include: {
                 manufacturer: true,
@@ -347,7 +344,7 @@ export class PrismaMyUserBikeRepository
       purchaseDate: myUserBike.purchaseDate,
       purchasePrice: myUserBike.purchasePrice,
       purchaseMileage: myUserBike.purchaseMileage,
-      totalMileage: myUserBike.totalMileage,
+      totalMileage: myUserBike.userBike.totalMileage,
       displacement:
         myUserBike.userBike.bike?.displacement ??
         myUserBike.userBike.displacement,
@@ -365,5 +362,23 @@ export class PrismaMyUserBikeRepository
         ownStatus: 'OWN',
       },
     })
+  }
+
+  async findMyUserBikeTotalMileage(
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<number | null> {
+    const myUserBike = await this.connection.tUserMyBike.findFirst({
+      where: { id: myUserBikeId, userId, ownStatus: 'OWN' },
+      select: {
+        userBike: {
+          select: {
+            totalMileage: true,
+          },
+        },
+      },
+    })
+
+    return myUserBike?.userBike.totalMileage ?? null
   }
 }

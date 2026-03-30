@@ -93,6 +93,20 @@
   line-height: 1.4;
 }
 
+.touringRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+  opacity: 0.6;
+  padding-left: 6rem;
+}
+
+.touringName {
+  font-style: italic;
+}
+
 /* レスポンシブ対応: モバイル */
 @media (max-width: 640px) {
   .mainRow {
@@ -116,6 +130,11 @@
   }
 
   .memoRow {
+    font-size: 0.625rem;
+    padding-left: 5rem;
+  }
+
+  .touringRow {
     font-size: 0.625rem;
     padding-left: 5rem;
   }

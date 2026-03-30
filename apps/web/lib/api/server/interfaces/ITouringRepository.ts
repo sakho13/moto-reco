@@ -13,4 +13,10 @@ export interface ITouringRepository {
     touringId: TouringId,
     myUserBikeId: MyUserBikeId
   ): Promise<TouringEntity | null>
+  findOngoingTouring(myUserBikeId: MyUserBikeId): Promise<TouringEntity | null>
+  updateTouringStatus(
+    touringId: TouringId,
+    myUserBikeId: MyUserBikeId,
+    status: 'STARTED' | 'COMPLETED'
+  ): Promise<TouringEntity>
 }
