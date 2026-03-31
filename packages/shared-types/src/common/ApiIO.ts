@@ -171,6 +171,18 @@ export type ApiResponseBikesOngoingTourings = {
   bikes: ApiResponseBikeOngoingTouring[]
 }
 
+export type ApiResponseSpotDetail = {
+  spotId: string
+  touringId: string
+  name: string | null
+  memo: string | null
+  latitude: number | null
+  longitude: number | null
+  visitedAt: string
+}
+
+export type ApiResponseSpotList = ApiResponseSpotDetail[]
+
 export type ApiResponseFuelInsight = {
   averageFuelEfficiency: number | null
   averageAmount: number | null

@@ -7,9 +7,10 @@ import styles from './TouringListItem.module.css'
 export interface TouringListItemProps {
   touring: ApiResponseTouringDetail
   onEdit: (touringId: string) => void
+  onDetail?: (touringId: string) => void
 }
 
-export const TouringListItem = ({ touring, onEdit }: TouringListItemProps) => {
+export const TouringListItem = ({ touring, onEdit, onDetail }: TouringListItemProps) => {
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('ja-JP', {
@@ -48,13 +49,24 @@ export const TouringListItem = ({ touring, onEdit }: TouringListItemProps) => {
           </span>
         </div>
 
-        <Button
-          onClick={() => onEdit(touring.touringId)}
-          variant="cloud"
-          size="sm"
-        >
-          編集
-        </Button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {onDetail && (
+            <Button
+              onClick={() => onDetail(touring.touringId)}
+              variant="cloud"
+              size="sm"
+            >
+              詳細
+            </Button>
+          )}
+          <Button
+            onClick={() => onEdit(touring.touringId)}
+            variant="cloud"
+            size="sm"
+          >
+            編集
+          </Button>
+        </div>
       </div>
 
       {/* 行2: 期間 */}

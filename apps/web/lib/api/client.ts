@@ -12,6 +12,8 @@ import {
   ApiResponseTouringList,
   ApiResponseOngoingTouring,
   ApiResponseBikesOngoingTourings,
+  ApiResponseSpotDetail,
+  ApiResponseSpotList,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -219,6 +221,16 @@ type API_EP = {
   [key: `/api/v1/user-bike/bike/${string}/tourings/${string}`]: {
     GET: SuccessResponse<ApiResponseTouringDetail>
     PATCH: SuccessResponse<ApiResponseTouringDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/tourings/${string}/spots`]: {
+    GET: SuccessResponse<ApiResponseSpotList>
+    POST: SuccessResponse<ApiResponseSpotDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/tourings/${string}/spots/${string}`]: {
+    PATCH: SuccessResponse<ApiResponseSpotDetail>
+    DELETE: SuccessResponse<undefined>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}`]: {

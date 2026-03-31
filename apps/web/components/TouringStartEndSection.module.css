@@ -149,11 +149,129 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* アクションボタンエリア */
+.actionButtons {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.spotButton {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+}
+
+.spotButton:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
 /* 終了ボタン */
 .endButton {
   position: relative;
   z-index: 1;
   width: 100%;
+}
+
+/* スポット登録モーダル */
+.spotModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  padding: var(--spacing-4);
+}
+
+@media (min-width: 641px) {
+  .spotModalOverlay {
+    align-items: center;
+  }
+}
+
+.spotModal {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-lg);
+}
+
+.spotModalTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.spotModalField {
+  margin-bottom: var(--spacing-3);
+}
+
+.spotModalLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-1);
+}
+
+.spotModalInput {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-base);
+}
+
+.spotModalInput:focus {
+  border-color: var(--color-product);
+}
+
+.spotModalTextarea {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color var(--transition-base);
+}
+
+.spotModalTextarea:focus {
+  border-color: var(--color-product);
+}
+
+.spotModalLocation {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.spotModalActions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.spotModalActions > * {
+  flex: 1;
 }
 
 /* レスポンシブ: モバイル */

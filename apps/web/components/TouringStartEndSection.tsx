@@ -10,6 +10,7 @@ import { TouringIcon } from './icons/TouringIcon'
 import styles from './TouringStartEndSection.module.css'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
 type BikeWithTouring = {
   myUserBikeId: string
@@ -257,6 +258,12 @@ const ActiveTouringCard = ({
   onEnd,
 }: ActiveTouringCardProps) => {
   const [elapsedTime, setElapsedTime] = useState('')
+  const [showSpotModal, setShowSpotModal] = useState(false)
+  const [spotName, setSpotName] = useState('')
+  const [spotMemo, setSpotMemo] = useState('')
+  const [spotLoading, setSpotLoading] = useState(false)
+  const [locationText, setLocationText] = useState<string | null>(null)
+  const { getCurrentPosition } = useGeolocation()
 
   useEffect(() => {
     const updateElapsedTime = () => {
@@ -298,40 +305,174 @@ const ActiveTouringCard = ({
     }
   }
 
+  const handleOpenSpotModal = async () => {
+    setSpotName('')
+    setSpotMemo('')
+    setLocationText(null)
+    setShowSpotModal(true)
+
+    const position = await getCurrentPosition()
+    if (position) {
+      setLocationText(
+        `${position.latitude.toFixed(5)}, ${position.longitude.toFixed(5)}`
+      )
+    } else {
+      setLocationText('位置情報を取得できませんでした')
+    }
+  }
+
+  const handleRegisterSpot = async () => {
+    setSpotLoading(true)
+    try {
+      const parts = locationText?.includes(',')
+        ? locationText.split(',')
+        : null
+      const position =
+        parts && parts[0] !== undefined && parts[1] !== undefined
+          ? {
+              latitude: parseFloat(parts[0]),
+              longitude: parseFloat(parts[1]),
+            }
+          : null
+
+      await apiPost(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots` as const,
+        {
+          name: spotName.trim() || undefined,
+          memo: spotMemo.trim() || undefined,
+          latitude: position?.latitude,
+          longitude: position?.longitude,
+        }
+      )
+
+      toast.success('スポットを記録しました')
+      setShowSpotModal(false)
+    } catch (error) {
+      if (error instanceof ApiV1Error) {
+        toast.error(error.message)
+      } else {
+        toast.error('スポットの記録に失敗しました')
+      }
+    } finally {
+      setSpotLoading(false)
+    }
+  }
+
   return (
-    <div className={styles.activeTouringCard}>
-      {/* ルート風の背景 */}
-      <div className={styles.routeVisual}>
-        <div className={styles.roadDash} />
-      </div>
-
-      {/* バイク情報 */}
-      <div className={styles.bikeInfoArea}>
-        <div className={styles.animatedBikeIcon}>
-          <BikeIcon />
+    <>
+      <div className={styles.activeTouringCard}>
+        {/* ルート風の背景 */}
+        <div className={styles.routeVisual}>
+          <div className={styles.roadDash} />
         </div>
-        <h3 className={styles.bikeNameLarge}>{bike.bikeName}</h3>
+
+        {/* バイク情報 */}
+        <div className={styles.bikeInfoArea}>
+          <div className={styles.animatedBikeIcon}>
+            <BikeIcon />
+          </div>
+          <h3 className={styles.bikeNameLarge}>{bike.bikeName}</h3>
+        </div>
+
+        {/* ツーリング情報 */}
+        <div className={styles.touringInfoArea}>
+          <h4 className={styles.touringTitle}>{touring.title}</h4>
+          <div className={styles.elapsedTime}>{elapsedTime}</div>
+          <p className={styles.startDateTime}>
+            {formatStartDateTime(touring.startDate)} 開始
+          </p>
+        </div>
+
+        {/* アクションボタン */}
+        <div className={styles.actionButtons}>
+          <Button
+            onClick={handleOpenSpotModal}
+            disabled={isLoading || spotLoading}
+            variant="cloud"
+            size="sm"
+            className={styles.spotButton}
+          >
+            スポットを記録
+          </Button>
+
+          <Button
+            onClick={onEnd}
+            disabled={isLoading}
+            variant="danger"
+            size="md"
+            className={styles.endButton}
+          >
+            {isLoading ? '終了中...' : 'ツーリングを終了'}
+          </Button>
+        </div>
       </div>
 
-      {/* ツーリング情報 */}
-      <div className={styles.touringInfoArea}>
-        <h4 className={styles.touringTitle}>{touring.title}</h4>
-        <div className={styles.elapsedTime}>{elapsedTime}</div>
-        <p className={styles.startDateTime}>
-          {formatStartDateTime(touring.startDate)} 開始
-        </p>
-      </div>
+      {/* スポット記録モーダル */}
+      {showSpotModal && (
+        <div
+          className={styles.spotModalOverlay}
+          onClick={() => setShowSpotModal(false)}
+        >
+          <div
+            className={styles.spotModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={styles.spotModalTitle}>スポットを記録</h3>
 
-      {/* 終了ボタン */}
-      <Button
-        onClick={onEnd}
-        disabled={isLoading}
-        variant="danger"
-        size="md"
-        className={styles.endButton}
-      >
-        {isLoading ? '終了中...' : 'ツーリングを終了'}
-      </Button>
-    </div>
+            <div className={styles.spotModalField}>
+              <label className={styles.spotModalLabel}>
+                スポット名（任意）
+              </label>
+              <input
+                type="text"
+                className={styles.spotModalInput}
+                placeholder="例：道の駅 ○○"
+                value={spotName}
+                onChange={(e) => setSpotName(e.target.value)}
+                maxLength={100}
+              />
+            </div>
+
+            <div className={styles.spotModalField}>
+              <label className={styles.spotModalLabel}>メモ（任意）</label>
+              <textarea
+                className={styles.spotModalTextarea}
+                placeholder="感想や覚えておきたいことを入力"
+                value={spotMemo}
+                onChange={(e) => setSpotMemo(e.target.value)}
+                maxLength={500}
+              />
+            </div>
+
+            <p className={styles.spotModalLocation}>
+              {locationText === null
+                ? '位置情報を取得中...'
+                : locationText.includes(',')
+                  ? `現在地: ${locationText}`
+                  : locationText}
+            </p>
+
+            <div className={styles.spotModalActions}>
+              <Button
+                onClick={() => setShowSpotModal(false)}
+                variant="cloud"
+                size="md"
+                disabled={spotLoading}
+              >
+                キャンセル
+              </Button>
+              <Button
+                onClick={handleRegisterSpot}
+                variant="primary"
+                size="md"
+                disabled={spotLoading || locationText === null}
+              >
+                {spotLoading ? '記録中...' : '記録する'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

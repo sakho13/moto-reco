@@ -18,6 +18,11 @@ export interface TouringListSectionProps {
   onEdit: (touringId: string) => void
 
   /**
+   * ツーリング履歴詳細表示時のコールバック
+   */
+  onDetail?: (touringId: string) => void
+
+  /**
    * ツーリング履歴登録ボタンクリック時のコールバック
    */
   onRegister: () => void
@@ -26,6 +31,7 @@ export interface TouringListSectionProps {
 export const TouringListSection = ({
   tourings,
   onEdit,
+  onDetail,
   onRegister,
 }: TouringListSectionProps) => {
   return (
@@ -44,6 +50,7 @@ export const TouringListSection = ({
               key={touring.touringId}
               touring={touring}
               onEdit={onEdit}
+              onDetail={onDetail}
             />
           ))}
         </div>

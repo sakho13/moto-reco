@@ -47,6 +47,10 @@ function TouringsPage() {
     router.push(`/app/my-bike/${bikeId}/tourings/${touringId}/edit`)
   }
 
+  const handleDetail = (touringId: string) => {
+    router.push(`/app/my-bike/${bikeId}/tourings/${touringId}`)
+  }
+
   const handleRegister = () => {
     router.push(`/app/my-bike/${bikeId}/tourings/register`)
   }
@@ -107,6 +111,7 @@ function TouringsPage() {
         <TouringListSection
           tourings={tourings || []}
           onEdit={handleEdit}
+          onDetail={handleDetail}
           onRegister={handleRegister}
         />
       </div>

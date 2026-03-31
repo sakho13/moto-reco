@@ -9,9 +9,12 @@ import {
   ApiResponseTouringDetail,
   ApiResponseTouringList,
   ApiResponseBikesOngoingTourings,
+  ApiResponseSpotDetail,
+  ApiResponseSpotList,
   createBikeId,
   createFuelLogId,
   createMyUserBikeId,
+  createSpotId,
   createTouringId,
   createUserId,
   FuelInsightPeriod,
@@ -29,6 +32,8 @@ import {
   TouringStartEndRequestSchema,
   TouringListQuerySchema,
   TouringUpdateRequestSchema,
+  SpotRegisterRequestSchema,
+  SpotUpdateRequestSchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -41,10 +46,12 @@ import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaFuelInsightRepository } from '../repositories/PrismaFuelInsightRepository'
 import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
+import { PrismaSpotRepository } from '../repositories/PrismaSpotRepository'
 import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeRepository'
 import { FuelInsightService } from '../services/FuelInsightService'
 import { FuelLogService } from '../services/FuelLogService'
+import { SpotService } from '../services/SpotService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
 import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
@@ -872,6 +879,172 @@ userBike.patch(
           fuelLogIds: fuelLogIds,
         },
         message: 'ツーリング更新成功',
+      },
+      200
+    )
+  }
+)
+
+// スポット登録
+userBike.post(
+  '/bike/:myUserBikeId/tourings/:touringId/spots',
+  honoAuthMiddleware,
+  zodValidateJson(SpotRegisterRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const body = c.req.valid('json')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    const spot = await service.registerSpot({
+      touringId: createTouringId(touringId),
+      myUserBikeId: createMyUserBikeId(myUserBikeId),
+      userId: createUserId(userId),
+      name: body.name,
+      memo: body.memo,
+      latitude: body.latitude,
+      longitude: body.longitude,
+      visitedAt: body.visitedAt,
+    })
+
+    return c.json<SuccessResponse<ApiResponseSpotDetail>>(
+      {
+        status: 'success',
+        data: {
+          spotId: spot.id,
+          touringId: spot.touringId,
+          name: spot.name,
+          memo: spot.memo,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          visitedAt: spot.visitedAt.toISOString(),
+        },
+        message: 'スポット登録成功',
+      },
+      201
+    )
+  }
+)
+
+// スポット一覧取得
+userBike.get(
+  '/bike/:myUserBikeId/tourings/:touringId/spots',
+  honoAuthMiddleware,
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    const spots = await service.getSpots(
+      createTouringId(touringId),
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<ApiResponseSpotList>>(
+      {
+        status: 'success',
+        data: spots.map((spot) => ({
+          spotId: spot.id,
+          touringId: spot.touringId,
+          name: spot.name,
+          memo: spot.memo,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          visitedAt: spot.visitedAt.toISOString(),
+        })),
+        message: 'スポット一覧取得成功',
+      },
+      200
+    )
+  }
+)
+
+// スポット更新
+userBike.patch(
+  '/bike/:myUserBikeId/tourings/:touringId/spots/:spotId',
+  honoAuthMiddleware,
+  zodValidateJson(SpotUpdateRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const spotId = c.req.param('spotId')
+    const body = c.req.valid('json')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    const spot = await service.updateSpot({
+      spotId: createSpotId(spotId),
+      touringId: createTouringId(touringId),
+      myUserBikeId: createMyUserBikeId(myUserBikeId),
+      userId: createUserId(userId),
+      name: body.name,
+      memo: body.memo,
+      latitude: body.latitude,
+      longitude: body.longitude,
+      visitedAt: body.visitedAt,
+    })
+
+    return c.json<SuccessResponse<ApiResponseSpotDetail>>(
+      {
+        status: 'success',
+        data: {
+          spotId: spot.id,
+          touringId: spot.touringId,
+          name: spot.name,
+          memo: spot.memo,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          visitedAt: spot.visitedAt.toISOString(),
+        },
+        message: 'スポット更新成功',
+      },
+      200
+    )
+  }
+)
+
+// スポット削除
+userBike.delete(
+  '/bike/:myUserBikeId/tourings/:touringId/spots/:spotId',
+  honoAuthMiddleware,
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const spotId = c.req.param('spotId')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    await service.deleteSpot(
+      createSpotId(spotId),
+      createTouringId(touringId),
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        data: undefined,
+        message: 'スポット削除成功',
       },
       200
     )
