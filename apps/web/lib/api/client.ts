@@ -228,7 +228,9 @@ type API_EP = {
     POST: SuccessResponse<ApiResponseSpotDetail>
   }
 } & {
-  [key: `/api/v1/user-bike/bike/${string}/tourings/${string}/spots/${string}`]: {
+  [
+    key: `/api/v1/user-bike/bike/${string}/tourings/${string}/spots/${string}`
+  ]: {
     PATCH: SuccessResponse<ApiResponseSpotDetail>
     DELETE: SuccessResponse<undefined>
   }

@@ -324,9 +324,7 @@ const ActiveTouringCard = ({
   const handleRegisterSpot = async () => {
     setSpotLoading(true)
     try {
-      const parts = locationText?.includes(',')
-        ? locationText.split(',')
-        : null
+      const parts = locationText?.includes(',') ? locationText.split(',') : null
       const position =
         parts && parts[0] !== undefined && parts[1] !== undefined
           ? {

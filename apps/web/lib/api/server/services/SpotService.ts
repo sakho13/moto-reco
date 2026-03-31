@@ -141,7 +141,9 @@ export class SpotService {
         name: params.name !== undefined ? params.name : existingSpot.name,
         memo: params.memo !== undefined ? params.memo : existingSpot.memo,
         latitude:
-          params.latitude !== undefined ? params.latitude : existingSpot.latitude,
+          params.latitude !== undefined
+            ? params.latitude
+            : existingSpot.latitude,
         longitude:
           params.longitude !== undefined
             ? params.longitude

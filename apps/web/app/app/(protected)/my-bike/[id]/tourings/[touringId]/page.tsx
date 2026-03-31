@@ -14,12 +14,18 @@ function TouringDetailPage() {
   const bikeId = params.id as string
   const touringId = params.touringId as string
 
-  const { data: touring, error: touringError, isLoading: touringLoading } = useSWR(
+  const {
+    data: touring,
+    error: touringError,
+    isLoading: touringLoading,
+  } = useSWR(
     bikeId && touringId
       ? `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`
       : null,
     async (url) => {
-      const response = await apiGet(url as `/api/v1/user-bike/bike/${string}/tourings/${string}`)
+      const response = await apiGet(
+        url as `/api/v1/user-bike/bike/${string}/tourings/${string}`
+      )
       return response.data
     }
   )
@@ -29,7 +35,9 @@ function TouringDetailPage() {
       ? `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
       : null,
     async (url) => {
-      const response = await apiGet(url as `/api/v1/user-bike/bike/${string}/tourings/${string}/spots`)
+      const response = await apiGet(
+        url as `/api/v1/user-bike/bike/${string}/tourings/${string}/spots`
+      )
       return response.data
     }
   )
