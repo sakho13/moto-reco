@@ -7,6 +7,7 @@ import { Button } from '@repo/ui/button'
 import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
+import styles from './page.module.css'
 
 function TouringDetailPage() {
   const params = useParams()
@@ -90,9 +91,9 @@ function TouringDetailPage() {
             ← 戻る
           </Button>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div className={styles.card}>
           <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">
+          <p className={`mb-4 ${styles.bodyText}`}>
             {touringError instanceof ApiV1Error
               ? touringError.message
               : 'ツーリング情報の取得に失敗しました'}
@@ -128,21 +129,21 @@ function TouringDetailPage() {
 
       <div className="w-full max-w-md space-y-4">
         {/* ツーリング情報 */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div className={styles.card}>
           <div className="flex items-center gap-2 mb-4">
             <h1 className="text-xl font-bold">{touring?.title}</h1>
             <span
-              className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              className={
                 touring?.status === 'STARTED'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-green-100 text-green-700'
-              }`}
+                  ? styles.statusStarted
+                  : styles.statusCompleted
+              }
             >
               {touring?.status === 'STARTED' ? '進行中' : '完了'}
             </span>
           </div>
 
-          <div className="space-y-2 text-sm text-gray-600">
+          <div className={`space-y-2 text-sm ${styles.bodyText}`}>
             <div>
               <span className="font-medium">開始: </span>
               {touring?.startDate ? formatDate(touring.startDate) : '-'}
@@ -161,36 +162,36 @@ function TouringDetailPage() {
         </div>
 
         {/* スポット一覧 */}
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+        <div className={styles.card}>
           <h2 className="text-lg font-semibold mb-4">立ち寄りスポット</h2>
 
           {spotsLoading ? (
-            <p className="text-sm text-gray-500">読み込み中...</p>
+            <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
           ) : !spots || spots.length === 0 ? (
-            <p className="text-sm text-gray-500">
+            <p className={`text-sm ${styles.mutedText}`}>
               スポットはまだ記録されていません
             </p>
           ) : (
             <div className="space-y-3">
               {spots.map((spot: ApiResponseSpotDetail, index: number) => (
-                <div
-                  key={spot.spotId}
-                  className="flex gap-3 p-3 bg-gray-50 rounded-lg"
-                >
-                  <div className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center">
-                    {index + 1}
-                  </div>
+                <div key={spot.spotId} className={styles.spotItem}>
+                  <div className={styles.spotBadge}>{index + 1}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-medium text-sm truncate">
                         {spot.name ?? '無名スポット'}
                       </p>
-                      <span className="text-xs text-gray-400 shrink-0">
+                      <span
+                        className={`shrink-0 ${styles.dimText}`}
+                        style={{ fontSize: '0.75rem' }}
+                      >
                         {formatVisitedAt(spot.visitedAt)}
                       </span>
                     </div>
                     {spot.memo && (
-                      <p className="text-xs text-gray-500 mt-1 wrap-break-word">
+                      <p
+                        className={`text-xs mt-1 wrap-break-word ${styles.mutedText}`}
+                      >
                         {spot.memo}
                       </p>
                     )}
@@ -199,7 +200,7 @@ function TouringDetailPage() {
                         href={`https://maps.google.com/?q=${spot.latitude},${spot.longitude}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-blue-500 hover:text-blue-700 mt-1 inline-block"
+                        className={styles.link}
                       >
                         地図で見る →
                       </a>
