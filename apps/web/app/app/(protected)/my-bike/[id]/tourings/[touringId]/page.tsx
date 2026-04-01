@@ -4,10 +4,10 @@ import { useParams, useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import styles from './page.module.css'
 import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
-import styles from './page.module.css'
 
 function TouringDetailPage() {
   const params = useParams()

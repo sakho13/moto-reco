@@ -216,6 +216,10 @@ userBike.get('/bikes/ongoing-tourings', honoAuthMiddleware, async (c) => {
           endDate: ongoingTouring.endDate.toISOString(),
           startMileage: ongoingTouring.startMileage,
           endMileage: ongoingTouring.endMileage,
+          startLatitude: ongoingTouring.startLatitude,
+          startLongitude: ongoingTouring.startLongitude,
+          endLatitude: ongoingTouring.endLatitude,
+          endLongitude: ongoingTouring.endLongitude,
           status: ongoingTouring.status,
           fuelLogIds,
         },
@@ -620,6 +624,8 @@ userBike.post(
           title: body.title,
           startDate: body.startDate,
           startMileage: body.startMileage,
+          startLatitude: body.startLatitude,
+          startLongitude: body.startLongitude,
         })
       }
 
@@ -630,6 +636,8 @@ userBike.post(
         touringId: body.touringId,
         endDate: body.endDate,
         endMileage: body.endMileage,
+        endLatitude: body.endLatitude,
+        endLongitude: body.endLongitude,
       })
     })
 
@@ -661,6 +669,10 @@ userBike.post(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          startLatitude: result.startLatitude,
+          startLongitude: result.startLongitude,
+          endLatitude: result.endLatitude,
+          endLongitude: result.endLongitude,
           status: result.status,
           fuelLogIds: fuelLogIdsForStartEnd,
         },
@@ -711,6 +723,10 @@ userBike.post(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          startLatitude: result.startLatitude,
+          startLongitude: result.startLongitude,
+          endLatitude: result.endLatitude,
+          endLongitude: result.endLongitude,
           status: result.status,
           fuelLogIds: [], // 登録時は給油履歴は紐づいていない
         },
@@ -757,6 +773,10 @@ userBike.get(
             endDate: touring.endDate.toISOString(),
             startMileage: touring.startMileage,
             endMileage: touring.endMileage,
+            startLatitude: touring.startLatitude,
+            startLongitude: touring.startLongitude,
+            endLatitude: touring.endLatitude,
+            endLongitude: touring.endLongitude,
             status: touring.status,
             fuelLogIds: [], // 一覧では空配列（詳細APIで取得する）
           }
@@ -809,6 +829,10 @@ userBike.get(
           endDate: touring.endDate.toISOString(),
           startMileage: touring.startMileage,
           endMileage: touring.endMileage,
+          startLatitude: touring.startLatitude,
+          startLongitude: touring.startLongitude,
+          endLatitude: touring.endLatitude,
+          endLongitude: touring.endLongitude,
           status: touring.status,
           fuelLogIds: fuelLogIds,
         },
@@ -875,6 +899,10 @@ userBike.patch(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          startLatitude: result.startLatitude,
+          startLongitude: result.startLongitude,
+          endLatitude: result.endLatitude,
+          endLongitude: result.endLongitude,
           status: result.status,
           fuelLogIds: fuelLogIds,
         },

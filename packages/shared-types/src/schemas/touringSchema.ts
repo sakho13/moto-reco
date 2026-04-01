@@ -178,6 +178,20 @@ const TouringStartRequestSchema = z.object({
     .int('開始時の総走行距離は整数で指定してください')
     .nonnegative('開始時の総走行距離は0以上で指定してください')
     .optional(),
+  startLatitude: z
+    .number({
+      invalid_type_error: '開始地点の緯度は数値で指定してください',
+    })
+    .min(-90, '開始地点の緯度は-90以上で指定してください')
+    .max(90, '開始地点の緯度は90以下で指定してください')
+    .optional(),
+  startLongitude: z
+    .number({
+      invalid_type_error: '開始地点の経度は数値で指定してください',
+    })
+    .min(-180, '開始地点の経度は-180以上で指定してください')
+    .max(180, '開始地点の経度は180以下で指定してください')
+    .optional(),
 })
 
 const TouringEndRequestSchema = z.object({
@@ -201,6 +215,20 @@ const TouringEndRequestSchema = z.object({
     })
     .int('終了時の総走行距離は整数で指定してください')
     .nonnegative('終了時の総走行距離は0以上で指定してください')
+    .optional(),
+  endLatitude: z
+    .number({
+      invalid_type_error: '終了地点の緯度は数値で指定してください',
+    })
+    .min(-90, '終了地点の緯度は-90以上で指定してください')
+    .max(90, '終了地点の緯度は90以下で指定してください')
+    .optional(),
+  endLongitude: z
+    .number({
+      invalid_type_error: '終了地点の経度は数値で指定してください',
+    })
+    .min(-180, '終了地点の経度は-180以上で指定してください')
+    .max(180, '終了地点の経度は180以下で指定してください')
     .optional(),
 })
 

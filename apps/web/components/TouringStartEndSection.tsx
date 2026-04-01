@@ -25,6 +25,7 @@ type BikeWithTouring = {
 export const TouringStartEndSection = () => {
   const router = useRouter()
   const [loadingBikeId, setLoadingBikeId] = useState<string | null>(null)
+  const { getCurrentPosition } = useGeolocation()
 
   // バイク一覧取得
   const {
@@ -87,12 +88,16 @@ export const TouringStartEndSection = () => {
         day: 'numeric',
       })}のツーリング`
 
+      const position = await getCurrentPosition()
+
       await apiPost(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end` as const,
         {
           action: 'start',
           title: defaultTitle,
           startDate: now.toISOString(),
+          startLatitude: position?.latitude,
+          startLongitude: position?.longitude,
         }
       )
 
@@ -113,12 +118,16 @@ export const TouringStartEndSection = () => {
   const handleEndTouring = async (myUserBikeId: string, touringId: string) => {
     setLoadingBikeId(myUserBikeId)
     try {
+      const position = await getCurrentPosition()
+
       await apiPost(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end` as const,
         {
           action: 'end',
           touringId,
           endDate: new Date().toISOString(),
+          endLatitude: position?.latitude,
+          endLongitude: position?.longitude,
         }
       )
 

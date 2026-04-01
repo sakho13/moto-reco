@@ -152,6 +152,10 @@ export type ApiResponseTouringDetail = {
   endDate: string
   startMileage: number | null
   endMileage: number | null
+  startLatitude: number | null
+  startLongitude: number | null
+  endLatitude: number | null
+  endLongitude: number | null
   status: 'STARTED' | 'COMPLETED'
   fuelLogIds: string[]
 }

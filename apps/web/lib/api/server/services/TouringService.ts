@@ -32,6 +32,8 @@ type StartTouringParams = {
   title?: string
   startDate?: Date
   startMileage?: number
+  startLatitude?: number
+  startLongitude?: number
 }
 
 type EndTouringParams = {
@@ -41,6 +43,8 @@ type EndTouringParams = {
   touringId: string
   endDate?: Date
   endMileage?: number
+  endLatitude?: number
+  endLongitude?: number
 }
 
 type TouringActionParams = StartTouringParams | EndTouringParams
@@ -101,6 +105,10 @@ export class TouringService {
         endDate: params.endDate,
         startMileage: params.startMileage ?? null,
         endMileage: params.endMileage ?? null,
+        startLatitude: null,
+        startLongitude: null,
+        endLatitude: null,
+        endLongitude: null,
         status,
       })
 
@@ -159,6 +167,10 @@ export class TouringService {
           endDate: startDate,
           startMileage: startMileage ?? null,
           endMileage: null,
+          startLatitude: params.startLatitude ?? null,
+          startLongitude: params.startLongitude ?? null,
+          endLatitude: null,
+          endLongitude: null,
           status: 'STARTED',
         })
 
@@ -197,6 +209,10 @@ export class TouringService {
         endDate,
         startMileage: existingTouring.startMileage,
         endMileage: endMileage ?? existingTouring.endMileage,
+        startLatitude: existingTouring.startLatitude,
+        startLongitude: existingTouring.startLongitude,
+        endLatitude: params.endLatitude ?? null,
+        endLongitude: params.endLongitude ?? null,
         status: 'COMPLETED',
       })
 
@@ -296,6 +312,10 @@ export class TouringService {
         endDate: params.endDate ?? existingTouring.endDate,
         startMileage: params.startMileage ?? existingTouring.startMileage,
         endMileage: params.endMileage ?? existingTouring.endMileage,
+        startLatitude: existingTouring.startLatitude,
+        startLongitude: existingTouring.startLongitude,
+        endLatitude: existingTouring.endLatitude,
+        endLongitude: existingTouring.endLongitude,
         status: newStatus,
       })
 
