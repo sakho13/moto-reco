@@ -7,6 +7,7 @@ import type {
   SuccessResponse,
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import { InfoBox } from '@/components/bike/InfoBox'
 import { TouringListSection } from '@/components/touring/TouringListSection'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
@@ -106,6 +107,10 @@ function TouringsPage() {
           ツーリング履歴を登録
         </Button>
       </div>
+
+      <InfoBox variant="info" className="w-full max-w-md mt-3 text-sm">
+        開始・終了地点の位置情報は本人のみ閲覧でき、他のユーザーには公開されません。
+      </InfoBox>
 
       <div className="w-full max-w-md">
         <TouringListSection

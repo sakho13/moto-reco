@@ -5,6 +5,8 @@ import useSWR from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
+import TouringRouteMap from '@/components/touring/TouringRouteMap'
+import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -108,6 +110,45 @@ function TouringDetailPage() {
       ? (touring?.endMileage ?? 0) - (touring?.startMileage ?? 0)
       : null
 
+  const mapPoints: MapPoint[] = []
+
+  if (touring?.startLatitude != null && touring?.startLongitude != null) {
+    mapPoints.push({
+      lat: touring.startLatitude,
+      lng: touring.startLongitude,
+      label: '出発地',
+      type: 'start',
+    })
+  }
+
+  if (spots) {
+    spots
+      .filter(
+        (s: ApiResponseSpotDetail) => s.latitude != null && s.longitude != null
+      )
+      .forEach((s: ApiResponseSpotDetail, i: number) => {
+        mapPoints.push({
+          lat: s.latitude!,
+          lng: s.longitude!,
+          label: s.name ?? `スポット ${i + 1}`,
+          type: 'spot',
+        })
+      })
+  }
+
+  if (
+    touring?.status === 'COMPLETED' &&
+    touring?.endLatitude != null &&
+    touring?.endLongitude != null
+  ) {
+    mapPoints.push({
+      lat: touring.endLatitude,
+      lng: touring.endLongitude,
+      label: '終着地',
+      type: 'end',
+    })
+  }
+
   return (
     <>
       <div className="w-full max-w-md flex flex-row gap-2 mb-4">
@@ -161,6 +202,17 @@ function TouringDetailPage() {
           </div>
         </div>
 
+        {/* ルートマップ */}
+        {mapPoints.length > 0 && (
+          <div className={styles.card}>
+            <h2 className="text-lg font-semibold mb-3">ルート</h2>
+            <TouringRouteMap
+              points={mapPoints}
+              containerClassName={styles.mapContainer}
+            />
+          </div>
+        )}
+
         {/* スポット一覧 */}
         <div className={styles.card}>
           <h2 className="text-lg font-semibold mb-4">立ち寄りスポット</h2>
@@ -194,16 +246,6 @@ function TouringDetailPage() {
                       >
                         {spot.memo}
                       </p>
-                    )}
-                    {spot.latitude !== null && spot.longitude !== null && (
-                      <a
-                        href={`https://maps.google.com/?q=${spot.latitude},${spot.longitude}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.link}
-                      >
-                        地図で見る →
-                      </a>
                     )}
                   </div>
                 </div>

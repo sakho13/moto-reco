@@ -74,3 +74,9 @@
 .link:hover {
   opacity: 0.8;
 }
+
+.mapContainer {
+  height: 280px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
