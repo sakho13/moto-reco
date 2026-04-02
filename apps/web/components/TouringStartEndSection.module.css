@@ -256,13 +256,29 @@
   border-color: var(--color-product);
 }
 
-.spotModalLocation {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+.spotMapArea {
+  height: 180px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-cloud);
   margin-bottom: var(--spacing-4);
+}
+
+.spotMap {
+  width: 100%;
+  height: 100%;
+}
+
+.spotMapMessage {
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: var(--spacing-1);
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  opacity: 0.5;
+  text-align: center;
+  padding: var(--spacing-4);
 }
 
 .spotModalActions {

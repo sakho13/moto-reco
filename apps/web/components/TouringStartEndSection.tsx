@@ -8,6 +8,7 @@ import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from './icons/BikeIcon'
 import { TouringIcon } from './icons/TouringIcon'
 import styles from './TouringStartEndSection.module.css'
+import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -88,7 +89,7 @@ export const TouringStartEndSection = () => {
         day: 'numeric',
       })}のツーリング`
 
-      const position = await getCurrentPosition()
+      const { position } = await getCurrentPosition()
 
       await apiPost(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end` as const,
@@ -118,7 +119,7 @@ export const TouringStartEndSection = () => {
   const handleEndTouring = async (myUserBikeId: string, touringId: string) => {
     setLoadingBikeId(myUserBikeId)
     try {
-      const position = await getCurrentPosition()
+      const { position } = await getCurrentPosition()
 
       await apiPost(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end` as const,
@@ -271,7 +272,13 @@ const ActiveTouringCard = ({
   const [spotName, setSpotName] = useState('')
   const [spotMemo, setSpotMemo] = useState('')
   const [spotLoading, setSpotLoading] = useState(false)
-  const [locationText, setLocationText] = useState<string | null>(null)
+  const [geoPosition, setGeoPosition] = useState<{
+    lat: number
+    lng: number
+  } | null>(null)
+  const [geoStatus, setGeoStatus] = useState<
+    'loading' | 'success' | 'denied' | 'error'
+  >('loading')
   const { getCurrentPosition } = useGeolocation()
 
   useEffect(() => {
@@ -317,38 +324,31 @@ const ActiveTouringCard = ({
   const handleOpenSpotModal = async () => {
     setSpotName('')
     setSpotMemo('')
-    setLocationText(null)
+    setGeoPosition(null)
+    setGeoStatus('loading')
     setShowSpotModal(true)
 
-    const position = await getCurrentPosition()
+    const { position, denied } = await getCurrentPosition()
     if (position) {
-      setLocationText(
-        `${position.latitude.toFixed(5)}, ${position.longitude.toFixed(5)}`
-      )
+      setGeoPosition({ lat: position.latitude, lng: position.longitude })
+      setGeoStatus('success')
+    } else if (denied) {
+      setGeoStatus('denied')
     } else {
-      setLocationText('位置情報を取得できませんでした')
+      setGeoStatus('error')
     }
   }
 
   const handleRegisterSpot = async () => {
     setSpotLoading(true)
     try {
-      const parts = locationText?.includes(',') ? locationText.split(',') : null
-      const position =
-        parts && parts[0] !== undefined && parts[1] !== undefined
-          ? {
-              latitude: parseFloat(parts[0]),
-              longitude: parseFloat(parts[1]),
-            }
-          : null
-
       await apiPost(
         `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots` as const,
         {
           name: spotName.trim() || undefined,
           memo: spotMemo.trim() || undefined,
-          latitude: position?.latitude,
-          longitude: position?.longitude,
+          latitude: geoPosition?.lat,
+          longitude: geoPosition?.lng,
         }
       )
 
@@ -451,13 +451,34 @@ const ActiveTouringCard = ({
               />
             </div>
 
-            <p className={styles.spotModalLocation}>
-              {locationText === null
-                ? '位置情報を取得中...'
-                : locationText.includes(',')
-                  ? `現在地: ${locationText}`
-                  : locationText}
-            </p>
+            <div className={styles.spotMapArea}>
+              {geoStatus === 'loading' && (
+                <div className={styles.spotMapMessage}>位置情報を取得中...</div>
+              )}
+              {geoStatus === 'denied' && (
+                <div className={styles.spotMapMessage}>
+                  位置情報の使用が許可されていません
+                </div>
+              )}
+              {geoStatus === 'error' && (
+                <div className={styles.spotMapMessage}>
+                  位置情報を取得できませんでした
+                </div>
+              )}
+              {geoStatus === 'success' && geoPosition && (
+                <TouringRouteMap
+                  points={[
+                    {
+                      lat: geoPosition.lat,
+                      lng: geoPosition.lng,
+                      label: '現在地',
+                      type: 'spot',
+                    },
+                  ]}
+                  containerClassName={styles.spotMap}
+                />
+              )}
+            </div>
 
             <div className={styles.spotModalActions}>
               <Button
@@ -472,7 +493,7 @@ const ActiveTouringCard = ({
                 onClick={handleRegisterSpot}
                 variant="primary"
                 size="md"
-                disabled={spotLoading || locationText === null}
+                disabled={spotLoading || geoStatus === 'loading'}
               >
                 {spotLoading ? '記録中...' : '記録する'}
               </Button>

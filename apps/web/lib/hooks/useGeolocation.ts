@@ -5,30 +5,42 @@ type GeoPosition = {
   longitude: number
 }
 
+type GeoResult = {
+  position: GeoPosition | null
+  denied: boolean
+}
+
 /**
  * ブラウザのGeolocation APIで現在地を取得するフック
  */
 export const useGeolocation = () => {
   /**
    * 現在地を取得する
-   * 取得失敗時はnullを返す（記録は位置情報なしで続行可能）
+   * 取得失敗時はposition=nullを返す（記録は位置情報なしで続行可能）
+   * denied=trueの場合はユーザーが位置情報の使用を拒否している
    */
-  const getCurrentPosition = (): Promise<GeoPosition | null> => {
+  const getCurrentPosition = (): Promise<GeoResult> => {
     return new Promise((resolve) => {
       if (!navigator.geolocation) {
-        resolve(null)
+        resolve({ position: null, denied: false })
         return
       }
 
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        (pos) => {
           resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
+            position: {
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+            },
+            denied: false,
           })
         },
-        () => {
-          resolve(null)
+        (error) => {
+          resolve({
+            position: null,
+            denied: error.code === error.PERMISSION_DENIED,
+          })
         },
         {
           enableHighAccuracy: true,
