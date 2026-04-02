@@ -80,3 +80,16 @@
   border-radius: var(--radius-md);
   overflow: hidden;
 }
+
+.mapContainerLarge {
+  height: 400px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .mapContainerLarge {
+    height: 100%;
+    min-height: 500px;
+  }
+}
