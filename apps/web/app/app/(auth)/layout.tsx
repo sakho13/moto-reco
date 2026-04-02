@@ -1,7 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 import styles from './layout.module.css'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -21,14 +19,6 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   const { user, loading } = useAuth()
-  const router = useRouter()
-
-  useEffect(() => {
-    // 認証済みユーザーはホームへリダイレクト
-    if (!loading && user) {
-      router.push('/app/home')
-    }
-  }, [user, loading, router])
 
   // ローディング中
   if (loading) {
@@ -51,6 +41,12 @@ export default function AuthLayout({
     )
   }
 
-  // 認証済みの場合は何も表示しない（リダイレクト処理中）
-  return null
+  // 認証済みユーザーは認証フォームを表示しない
+  return (
+    <div className={styles.authLayout}>
+      <div className={styles.loadingContainer}>
+        <p className={styles.loadingText}>ホームへ移動してください。</p>
+      </div>
+    </div>
+  )
 }
