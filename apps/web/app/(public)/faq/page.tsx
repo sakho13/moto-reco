@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     description: `${APP_NAME}の使い方や機能に関するよくある質問と回答をまとめています。`,
     images: ['/top_image_1.png'],
   },
+  alternates: {
+    canonical: '/faq',
+  },
 }
 
 export default function FaqPage() {

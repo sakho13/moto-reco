@@ -7,6 +7,9 @@ import { APP_NAME } from '@/lib/statics'
 export const metadata = {
   title: `公開バイク一覧`,
   description: `${APP_NAME}で公開されているバイク情報の一覧です。`,
+  alternates: {
+    canonical: '/bikes',
+  },
 }
 
 export const revalidate = 300

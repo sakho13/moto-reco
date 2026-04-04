@@ -32,6 +32,9 @@ export const metadata: Metadata = {
       'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理。走行距離や燃費の推移をグラフで確認。',
     images: ['/top_image_1.png'],
   },
+  alternates: {
+    canonical: '/',
+  },
 }
 
 const features = [

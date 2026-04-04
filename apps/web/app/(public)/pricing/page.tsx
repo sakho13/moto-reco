@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     description: `${APP_NAME}の料金プラン。無料プランですべての基本機能をご利用いただけます。`,
     images: ['/top_image_1.png'],
   },
+  alternates: {
+    canonical: '/pricing',
+  },
 }
 
 export default function PricingPage() {

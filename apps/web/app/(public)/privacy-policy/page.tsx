@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     description: `${APP_NAME}のプライバシーポリシーです。`,
     images: ['/top_image_1.png'],
   },
+  alternates: {
+    canonical: '/privacy-policy',
+  },
 }
 
 export default function PrivacyPolicyPage() {

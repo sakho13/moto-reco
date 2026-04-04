@@ -12,9 +12,6 @@ export const metadata: Metadata = {
   description:
     'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理するアプリです。',
   metadataBase: new URL(SITE_URL),
-  alternates: {
-    canonical: '/',
-  },
   keywords: [
     'バイク',
     'bike',

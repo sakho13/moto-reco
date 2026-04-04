@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     description: `${APP_NAME} は、バイクのメンテナンス管理を簡単に行うためのアプリです。`,
     images: ['/top_image_1.png'],
   },
+  alternates: {
+    canonical: '/about',
+  },
 }
 
 const features = [

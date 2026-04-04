@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { prisma } from '@repo/database'
 import { createMyUserBikeId } from '@repo/shared-types'
@@ -7,9 +8,19 @@ import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/Prisma
 import { PrismaTouringRepository } from '@/lib/api/server/repositories/PrismaTouringRepository'
 import { APP_NAME } from '@/lib/statics'
 
-export const metadata = {
-  title: `公開バイク詳細`,
-  description: `${APP_NAME}で公開されているバイクの詳細ページです。`,
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  return {
+    title: `公開バイク詳細`,
+    description: `${APP_NAME}で公開されているバイクの詳細ページです。`,
+    alternates: {
+      canonical: `/bikes/${id}`,
+    },
+  }
 }
 
 export const revalidate = 300
