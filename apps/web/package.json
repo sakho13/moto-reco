@@ -30,6 +30,7 @@
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "leaflet": "1.9.4",
     "recharts": "3.6.0",
     "swr": "2.3.8",
     "zod": "catalog:"
@@ -40,6 +41,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/leaflet": "1.9.14",
     "@types/recharts": "2.0.1",
     "@vitest/ui": "catalog:",
     "eslint": "catalog:",

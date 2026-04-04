@@ -11,7 +11,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
 import { trackEvent } from '@/lib/analytics'
-import { apiPost } from '@/lib/api/client'
+import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -100,12 +100,13 @@ export function RegisterCard() {
       }
 
       // 3. API呼び出し: ユーザー情報登録
-      const response = await apiPost('/api/v1/user/auth/register', {
+      await apiPost('/api/v1/user/auth/register', {
         name: name.trim(),
       })
 
-      // 4. プロフィールキャッシュを事前設定(レースコンディション回避)
-      mutate('/api/v1/user/profile', response.data)
+      // 4. プロフィール取得を明示的に実行し、登録反映を確認
+      const profileResponse = await apiGet('/api/v1/user/profile')
+      await mutate('/api/v1/user/profile', profileResponse.data, false)
       trackEvent('web_sign_up', {
         method: 'email',
       })
