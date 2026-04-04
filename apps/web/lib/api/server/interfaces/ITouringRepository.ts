@@ -19,4 +19,5 @@ export interface ITouringRepository {
     myUserBikeId: MyUserBikeId,
     status: 'STARTED' | 'COMPLETED'
   ): Promise<TouringEntity>
+  deleteTouring(touringId: TouringId, myUserBikeId: MyUserBikeId): Promise<void>
 }

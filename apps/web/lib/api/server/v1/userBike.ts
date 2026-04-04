@@ -32,6 +32,7 @@ import {
   TouringStartEndRequestSchema,
   TouringListQuerySchema,
   TouringUpdateRequestSchema,
+  TouringDeleteRequestSchema,
   SpotRegisterRequestSchema,
   SpotUpdateRequestSchema,
 } from '@repo/shared-types'
@@ -549,6 +550,43 @@ userBike.delete(
       {
         status: 'success',
         message: '燃料ログ削除成功',
+        data: undefined,
+      },
+      200
+    )
+  }
+)
+
+userBike.delete(
+  '/bike/:myUserBikeId/tourings',
+  honoAuthMiddleware,
+  zodValidateJson(TouringDeleteRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    await prisma.$transaction((t) => {
+      const touringRepo = new PrismaTouringRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const service = new TouringService(
+        touringRepo,
+        myUserBikeRepo,
+        fuelLogRepo
+      )
+
+      return service.deleteTouring({
+        touringId: createTouringId(body.touringId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+      })
+    })
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        message: 'ツーリング削除成功',
         data: undefined,
       },
       200

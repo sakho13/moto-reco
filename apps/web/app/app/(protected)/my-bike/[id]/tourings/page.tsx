@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import useSWR, { mutate } from 'swr'
 import type {
@@ -9,6 +10,7 @@ import type {
 import { Button } from '@repo/ui/button'
 import { InfoBox } from '@/components/bike/InfoBox'
 import { TouringListSection } from '@/components/touring/TouringListSection'
+import { TouringDeleteConfirmModal } from '@/components/touring/TouringDeleteConfirmModal'
 import { authenticatedFetch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -17,6 +19,10 @@ function TouringsPage() {
   const params = useParams()
   const router = useRouter()
   const bikeId = params.id as string
+
+  const [pendingDeleteTouringId, setPendingDeleteTouringId] = useState<
+    string | null
+  >(null)
 
   const fetchTourings = async (url: string) => {
     const response = await authenticatedFetch(url, { method: 'GET' })
@@ -44,12 +50,14 @@ function TouringsPage() {
     fetchTourings
   )
 
-  const handleDelete = async (touringId: string) => {
-    const isConfirmed = window.confirm(
-      'このツーリング履歴を削除しますか？この操作は取り消せません。'
-    )
-    if (!isConfirmed) return
+  const handleDelete = (touringId: string) => {
+    setPendingDeleteTouringId(touringId)
+  }
 
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteTouringId) return
+    const touringId = pendingDeleteTouringId
+    setPendingDeleteTouringId(null)
     try {
       await apiDelete(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
         touringId,
@@ -60,6 +68,10 @@ function TouringsPage() {
     } catch {
       // エラーは無視（toast通知は不要）
     }
+  }
+
+  const handleCancelDelete = () => {
+    setPendingDeleteTouringId(null)
   }
 
   const handleDetail = (touringId: string) => {
@@ -134,6 +146,13 @@ function TouringsPage() {
           onRegister={handleRegister}
         />
       </div>
+
+      {pendingDeleteTouringId !== null && (
+        <TouringDeleteConfirmModal
+          onCancel={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </>
   )
 }

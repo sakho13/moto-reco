@@ -367,4 +367,31 @@ export class TouringService {
       throw error
     }
   }
+
+  public async deleteTouring(params: {
+    touringId: TouringId
+    myUserBikeId: MyUserBikeId
+    userId: UserId
+  }): Promise<void> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      params.myUserBikeId,
+      params.userId
+    )
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const existingTouring = await this.touringRepository.findTouringById(
+      params.touringId,
+      params.myUserBikeId
+    )
+    if (!existingTouring) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
+    }
+
+    await this.touringRepository.deleteTouring(
+      params.touringId,
+      params.myUserBikeId
+    )
+  }
 }

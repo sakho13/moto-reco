@@ -283,3 +283,17 @@ export const TouringFuelLogsUpdateRequestSchema = z.object({
 export type TouringFuelLogsUpdateRequest = z.infer<
   typeof TouringFuelLogsUpdateRequestSchema
 >
+
+/**
+ * ツーリング削除リクエストのバリデーションスキーマ
+ */
+export const TouringDeleteRequestSchema = z.object({
+  touringId: z
+    .string({
+      required_error: 'ツーリングIDは必須です',
+      invalid_type_error: 'ツーリングIDは文字列で指定してください',
+    })
+    .min(1, 'ツーリングIDは1文字以上で指定してください'),
+})
+
+export type TouringDeleteRequest = z.infer<typeof TouringDeleteRequestSchema>

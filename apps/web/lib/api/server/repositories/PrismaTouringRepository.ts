@@ -184,4 +184,16 @@ export class PrismaTouringRepository
 
     return toTouringEntity(updated)
   }
+
+  async deleteTouring(
+    touringId: TouringId,
+    myUserBikeId: MyUserBikeId
+  ): Promise<void> {
+    await this.connection.tUserMyBikeTouring.delete({
+      where: {
+        id: touringId,
+        userMyBikeId: myUserBikeId,
+      },
+    })
+  }
 }

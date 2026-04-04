@@ -210,6 +210,7 @@ type API_EP = {
   [key: `/api/v1/user-bike/bike/${string}/tourings`]: {
     GET: SuccessResponse<ApiResponseTouringList>
     POST: SuccessResponse<ApiResponseTouringDetail>
+    DELETE: SuccessResponse<undefined>
   }
   [key: `/api/v1/user-bike/bike/${string}/tourings/start-end`]: {
     POST: SuccessResponse<ApiResponseTouringDetail>
