@@ -912,6 +912,10 @@ userBike.patch(
         endMileage: body.endMileage,
         status: body.status,
         fuelLogIds: body.fuelLogIds?.map(createFuelLogId),
+        startLatitude: body.startLatitude,
+        startLongitude: body.startLongitude,
+        endLatitude: body.endLatitude,
+        endLongitude: body.endLongitude,
       })
     })
 

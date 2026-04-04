@@ -18,6 +18,7 @@ import {
 import {
   createMultipleTourings,
   createTestTouring,
+  createTestSpot,
 } from '../../helpers/touringHelper'
 import {
   expectValidationError,
@@ -2633,6 +2634,71 @@ describe('UserBike API Endpoints', () => {
       expect(getTouringJson.data.endDate).toBe(endDate)
       expect(getTouringJson.data.endMileage).toBe(4300)
     })
+
+    test('開始・終了位置を更新できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: 35.6895,
+            startLongitude: 139.6917,
+            endLatitude: 34.6937,
+            endLongitude: 135.5023,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.startLatitude).toBeCloseTo(35.6895)
+      expect(json.data.startLongitude).toBeCloseTo(139.6917)
+      expect(json.data.endLatitude).toBeCloseTo(34.6937)
+      expect(json.data.endLongitude).toBeCloseTo(135.5023)
+    })
+
+    test('位置情報をnullで削除できる', async () => {
+      // まず位置情報を設定
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: 35.6895,
+            startLongitude: 139.6917,
+          }),
+        }
+      )
+
+      // nullで削除
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: null,
+            startLongitude: null,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.startLatitude).toBeNull()
+      expect(json.data.startLongitude).toBeNull()
+    })
   })
 
   describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
@@ -3241,6 +3307,152 @@ describe('UserBike API Endpoints', () => {
           },
           body: JSON.stringify({
             fuelLogId: otherFuelLogId,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/tourings/:touringId/spots/:spotId', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringId: string
+    let spotId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 500,
+        nickname: 'スポット更新テスト用バイク',
+        totalMileage: 5000,
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      touringId = await createTestTouring(token, myUserBikeId, {
+        title: 'スポット更新テスト用ツーリング',
+        startDate: '2024-11-01T00:00:00.000Z',
+        endDate: '2024-11-02T00:00:00.000Z',
+      })
+
+      spotId = await createTestSpot(token, myUserBikeId, touringId, {
+        visitedAt: '2024-11-01T10:00:00.000Z',
+        name: '更新前スポット',
+        memo: '更新前メモ',
+        latitude: 35.0,
+        longitude: 135.0,
+      })
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        'PATCH',
+        { name: '更新後スポット' }
+      )
+    })
+
+    test('更新項目が指定されていない場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('スポットの名前とメモを更新できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: '更新後スポット',
+            memo: '更新後メモ',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.spotId).toBe(spotId)
+      expect(json.data.name).toBe('更新後スポット')
+      expect(json.data.memo).toBe('更新後メモ')
+    })
+
+    test('スポットの位置情報を更新できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 36.5,
+            longitude: 136.5,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.latitude).toBeCloseTo(36.5)
+      expect(json.data.longitude).toBeCloseTo(136.5)
+    })
+
+    test('スポットの位置情報をnullで削除できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: null,
+            longitude: null,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.latitude).toBeNull()
+      expect(json.data.longitude).toBeNull()
+    })
+
+    test('存在しないスポットIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${randomUUID()}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: '更新後スポット',
           }),
         }
       )

@@ -60,6 +60,10 @@ type UpdateTouringParams = {
   endMileage?: number
   status?: TouringStatus
   fuelLogIds?: FuelLogId[]
+  startLatitude?: number | null
+  startLongitude?: number | null
+  endLatitude?: number | null
+  endLongitude?: number | null
 }
 
 export class TouringService {
@@ -312,10 +316,22 @@ export class TouringService {
         endDate: params.endDate ?? existingTouring.endDate,
         startMileage: params.startMileage ?? existingTouring.startMileage,
         endMileage: params.endMileage ?? existingTouring.endMileage,
-        startLatitude: existingTouring.startLatitude,
-        startLongitude: existingTouring.startLongitude,
-        endLatitude: existingTouring.endLatitude,
-        endLongitude: existingTouring.endLongitude,
+        startLatitude:
+          'startLatitude' in params
+            ? (params.startLatitude ?? null)
+            : existingTouring.startLatitude,
+        startLongitude:
+          'startLongitude' in params
+            ? (params.startLongitude ?? null)
+            : existingTouring.startLongitude,
+        endLatitude:
+          'endLatitude' in params
+            ? (params.endLatitude ?? null)
+            : existingTouring.endLatitude,
+        endLongitude:
+          'endLongitude' in params
+            ? (params.endLongitude ?? null)
+            : existingTouring.endLongitude,
         status: newStatus,
       })
 

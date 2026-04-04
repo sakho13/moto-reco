@@ -7,7 +7,9 @@ import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
+import { SpotEditModal } from '@/components/spot/SpotEditModal'
 import { TouringEditModal } from '@/components/touring/TouringEditModal'
+import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet } from '@/lib/api/client'
@@ -20,6 +22,12 @@ function TouringDetailPage() {
   const bikeId = params.id as string
   const touringId = params.touringId as string
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingLocationTarget, setEditingLocationTarget] = useState<
+    'start' | 'end' | null
+  >(null)
+  const [editingSpot, setEditingSpot] = useState<ApiResponseSpotDetail | null>(
+    null
+  )
 
   const {
     data: touring,
@@ -165,7 +173,27 @@ function TouringDetailPage() {
     }
   }
 
+  const handleLocationEditSuccess = async () => {
+    await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`)
+    setEditingLocationTarget(null)
+  }
+
+  const handleSpotEditSuccess = async () => {
+    await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
+    setEditingSpot(null)
+  }
+
   const hasMap = mapPoints.length > 0
+
+  const startLocation =
+    touring?.startLatitude != null && touring?.startLongitude != null
+      ? { lat: touring.startLatitude, lng: touring.startLongitude }
+      : null
+
+  const endLocation =
+    touring?.endLatitude != null && touring?.endLongitude != null
+      ? { lat: touring.endLatitude, lng: touring.endLongitude }
+      : null
 
   const touringInfoCard = (
     <div className={styles.card}>
@@ -216,37 +244,104 @@ function TouringDetailPage() {
 
       {spotsLoading ? (
         <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-      ) : !spots || spots.length === 0 ? (
-        <p className={`text-sm ${styles.mutedText}`}>
-          スポットはまだ記録されていません
-        </p>
       ) : (
         <div className="space-y-3">
-          {spots.map((spot: ApiResponseSpotDetail, index: number) => (
-            <div key={spot.spotId} className={styles.spotItem}>
-              <div className={styles.spotBadge}>{index + 1}</div>
+          {/* 出発地 */}
+          <div className={styles.spotItem}>
+            <div className={styles.startBadge}>出</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-medium text-sm">出発地</p>
+                <button
+                  onClick={() => setEditingLocationTarget('start')}
+                  className={styles.editButton}
+                  aria-label="出発地を編集"
+                >
+                  <EditIcon />
+                </button>
+              </div>
+              {startLocation ? (
+                <p className={`text-xs mt-1 ${styles.mutedText}`}>
+                  {startLocation.lat.toFixed(5)}, {startLocation.lng.toFixed(5)}
+                </p>
+              ) : (
+                <p className={`text-xs mt-1 ${styles.mutedText}`}>位置未設定</p>
+              )}
+            </div>
+          </div>
+
+          {/* 立ち寄りスポット */}
+          {spots && spots.length > 0
+            ? spots.map((spot: ApiResponseSpotDetail, index: number) => (
+                <div key={spot.spotId} className={styles.spotItem}>
+                  <div className={styles.spotBadge}>{index + 1}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-sm truncate">
+                        {spot.name ?? '無名スポット'}
+                      </p>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span
+                          className={styles.dimText}
+                          style={{ fontSize: '0.75rem' }}
+                        >
+                          {formatVisitedAt(spot.visitedAt)}
+                        </span>
+                        <button
+                          onClick={() => setEditingSpot(spot)}
+                          className={styles.editButton}
+                          aria-label="スポットを編集"
+                        >
+                          <EditIcon />
+                        </button>
+                      </div>
+                    </div>
+                    {spot.memo && (
+                      <p
+                        className={`text-xs mt-1 wrap-break-word ${styles.mutedText}`}
+                      >
+                        {spot.memo}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))
+            : null}
+
+          {/* スポットがない場合のメッセージ */}
+          {(!spots || spots.length === 0) && (
+            <p className={`text-sm ${styles.mutedText}`}>
+              スポットはまだ記録されていません
+            </p>
+          )}
+
+          {/* 終着地（COMPLETEDの場合のみ表示） */}
+          {touring?.status === 'COMPLETED' && (
+            <div className={styles.spotItem}>
+              <div className={styles.endBadge}>着</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium text-sm truncate">
-                    {spot.name ?? '無名スポット'}
-                  </p>
-                  <span
-                    className={`shrink-0 ${styles.dimText}`}
-                    style={{ fontSize: '0.75rem' }}
+                  <p className="font-medium text-sm">終着地</p>
+                  <button
+                    onClick={() => setEditingLocationTarget('end')}
+                    className={styles.editButton}
+                    aria-label="終着地を編集"
                   >
-                    {formatVisitedAt(spot.visitedAt)}
-                  </span>
+                    <EditIcon />
+                  </button>
                 </div>
-                {spot.memo && (
-                  <p
-                    className={`text-xs mt-1 wrap-break-word ${styles.mutedText}`}
-                  >
-                    {spot.memo}
+                {endLocation ? (
+                  <p className={`text-xs mt-1 ${styles.mutedText}`}>
+                    {endLocation.lat.toFixed(5)}, {endLocation.lng.toFixed(5)}
+                  </p>
+                ) : (
+                  <p className={`text-xs mt-1 ${styles.mutedText}`}>
+                    位置未設定
                   </p>
                 )}
               </div>
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
@@ -267,7 +362,6 @@ function TouringDetailPage() {
 
       {hasMap ? (
         <div className="w-full max-w-5xl flex flex-col md:flex-row md:gap-6 md:items-start gap-4">
-          {/* 左: マップ */}
           <div className="md:flex-1 min-w-0">
             <div className={`${styles.card} h-full`}>
               <TouringRouteMap
@@ -276,7 +370,6 @@ function TouringDetailPage() {
               />
             </div>
           </div>
-          {/* 右: 情報 + スポット */}
           <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
             {touringInfoCard}
             {spotsCard}
@@ -295,6 +388,29 @@ function TouringDetailPage() {
           touringId={touringId}
           onClose={() => setIsEditModalOpen(false)}
           onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {editingLocationTarget && (
+        <TouringLocationEditModal
+          bikeId={bikeId}
+          touringId={touringId}
+          type={editingLocationTarget}
+          initialLocation={
+            editingLocationTarget === 'start' ? startLocation : endLocation
+          }
+          onClose={() => setEditingLocationTarget(null)}
+          onSuccess={handleLocationEditSuccess}
+        />
+      )}
+
+      {editingSpot && (
+        <SpotEditModal
+          bikeId={bikeId}
+          touringId={touringId}
+          spot={editingSpot}
+          onClose={() => setEditingSpot(null)}
+          onSuccess={handleSpotEditSuccess}
         />
       )}
     </>

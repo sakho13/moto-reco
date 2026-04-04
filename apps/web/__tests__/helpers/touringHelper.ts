@@ -1,6 +1,37 @@
 import { app } from '@/lib/api/server/app'
 
 /**
+ * テスト用スポットを作成する
+ */
+export async function createTestSpot(
+  token: string,
+  myUserBikeId: string,
+  touringId: string,
+  data: {
+    visitedAt: string
+    name?: string
+    memo?: string
+    latitude?: number
+    longitude?: number
+  }
+): Promise<string> {
+  const res = await app.request(
+    `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  )
+
+  const json = await res.json()
+  return json.data.spotId
+}
+
+/**
  * テスト用ツーリングを作成する
  */
 export async function createTestTouring(
