@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import styles from './layout.module.css'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -45,7 +46,10 @@ export default function AuthLayout({
   return (
     <div className={styles.authLayout}>
       <div className={styles.loadingContainer}>
-        <p className={styles.loadingText}>ホームへ移動してください。</p>
+        <p className={styles.loadingText}>すでにログイン済みです</p>
+        <Link href="/app/home" className={styles.homeButton}>
+          ホームに移動する
+        </Link>
       </div>
     </div>
   )
