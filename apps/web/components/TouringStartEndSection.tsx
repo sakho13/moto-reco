@@ -8,8 +8,10 @@ import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from './icons/BikeIcon'
 import { TouringIcon } from './icons/TouringIcon'
 import styles from './TouringStartEndSection.module.css'
+import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
 type BikeWithTouring = {
   myUserBikeId: string
@@ -24,6 +26,7 @@ type BikeWithTouring = {
 export const TouringStartEndSection = () => {
   const router = useRouter()
   const [loadingBikeId, setLoadingBikeId] = useState<string | null>(null)
+  const { getCurrentPosition } = useGeolocation()
 
   // バイク一覧取得
   const {
@@ -86,12 +89,16 @@ export const TouringStartEndSection = () => {
         day: 'numeric',
       })}のツーリング`
 
+      const { position } = await getCurrentPosition()
+
       await apiPost(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end` as const,
         {
           action: 'start',
           title: defaultTitle,
           startDate: now.toISOString(),
+          startLatitude: position?.latitude,
+          startLongitude: position?.longitude,
         }
       )
 
@@ -112,12 +119,16 @@ export const TouringStartEndSection = () => {
   const handleEndTouring = async (myUserBikeId: string, touringId: string) => {
     setLoadingBikeId(myUserBikeId)
     try {
+      const { position } = await getCurrentPosition()
+
       await apiPost(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end` as const,
         {
           action: 'end',
           touringId,
           endDate: new Date().toISOString(),
+          endLatitude: position?.latitude,
+          endLongitude: position?.longitude,
         }
       )
 
@@ -257,6 +268,18 @@ const ActiveTouringCard = ({
   onEnd,
 }: ActiveTouringCardProps) => {
   const [elapsedTime, setElapsedTime] = useState('')
+  const [showSpotModal, setShowSpotModal] = useState(false)
+  const [spotName, setSpotName] = useState('')
+  const [spotMemo, setSpotMemo] = useState('')
+  const [spotLoading, setSpotLoading] = useState(false)
+  const [geoPosition, setGeoPosition] = useState<{
+    lat: number
+    lng: number
+  } | null>(null)
+  const [geoStatus, setGeoStatus] = useState<
+    'loading' | 'success' | 'denied' | 'error'
+  >('loading')
+  const { getCurrentPosition } = useGeolocation()
 
   useEffect(() => {
     const updateElapsedTime = () => {
@@ -298,40 +321,186 @@ const ActiveTouringCard = ({
     }
   }
 
+  const handleOpenSpotModal = async () => {
+    setSpotName('')
+    setSpotMemo('')
+    setGeoPosition(null)
+    setGeoStatus('loading')
+    setShowSpotModal(true)
+
+    const { position, denied } = await getCurrentPosition()
+    if (position) {
+      setGeoPosition({ lat: position.latitude, lng: position.longitude })
+      setGeoStatus('success')
+    } else if (denied) {
+      setGeoStatus('denied')
+    } else {
+      setGeoStatus('error')
+    }
+  }
+
+  const handleRegisterSpot = async () => {
+    setSpotLoading(true)
+    try {
+      await apiPost(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots` as const,
+        {
+          name: spotName.trim() || undefined,
+          memo: spotMemo.trim() || undefined,
+          latitude: geoPosition?.lat,
+          longitude: geoPosition?.lng,
+        }
+      )
+
+      toast.success('スポットを記録しました')
+      setShowSpotModal(false)
+    } catch (error) {
+      if (error instanceof ApiV1Error) {
+        toast.error(error.message)
+      } else {
+        toast.error('スポットの記録に失敗しました')
+      }
+    } finally {
+      setSpotLoading(false)
+    }
+  }
+
   return (
-    <div className={styles.activeTouringCard}>
-      {/* ルート風の背景 */}
-      <div className={styles.routeVisual}>
-        <div className={styles.roadDash} />
-      </div>
-
-      {/* バイク情報 */}
-      <div className={styles.bikeInfoArea}>
-        <div className={styles.animatedBikeIcon}>
-          <BikeIcon />
+    <>
+      <div className={styles.activeTouringCard}>
+        {/* ルート風の背景 */}
+        <div className={styles.routeVisual}>
+          <div className={styles.roadDash} />
         </div>
-        <h3 className={styles.bikeNameLarge}>{bike.bikeName}</h3>
+
+        {/* バイク情報 */}
+        <div className={styles.bikeInfoArea}>
+          <div className={styles.animatedBikeIcon}>
+            <BikeIcon />
+          </div>
+          <h3 className={styles.bikeNameLarge}>{bike.bikeName}</h3>
+        </div>
+
+        {/* ツーリング情報 */}
+        <div className={styles.touringInfoArea}>
+          <h4 className={styles.touringTitle}>{touring.title}</h4>
+          <div className={styles.elapsedTime}>{elapsedTime}</div>
+          <p className={styles.startDateTime}>
+            {formatStartDateTime(touring.startDate)} 開始
+          </p>
+        </div>
+
+        {/* アクションボタン */}
+        <div className={styles.actionButtons}>
+          <Button
+            onClick={handleOpenSpotModal}
+            disabled={isLoading || spotLoading}
+            variant="cloud"
+            size="sm"
+            className={styles.spotButton}
+          >
+            スポットを記録
+          </Button>
+
+          <Button
+            onClick={onEnd}
+            disabled={isLoading}
+            variant="danger"
+            size="md"
+            className={styles.endButton}
+          >
+            {isLoading ? '終了中...' : 'ツーリングを終了'}
+          </Button>
+        </div>
       </div>
 
-      {/* ツーリング情報 */}
-      <div className={styles.touringInfoArea}>
-        <h4 className={styles.touringTitle}>{touring.title}</h4>
-        <div className={styles.elapsedTime}>{elapsedTime}</div>
-        <p className={styles.startDateTime}>
-          {formatStartDateTime(touring.startDate)} 開始
-        </p>
-      </div>
+      {/* スポット記録モーダル */}
+      {showSpotModal && (
+        <div
+          className={styles.spotModalOverlay}
+          onClick={() => setShowSpotModal(false)}
+        >
+          <div
+            className={styles.spotModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={styles.spotModalTitle}>スポットを記録</h3>
 
-      {/* 終了ボタン */}
-      <Button
-        onClick={onEnd}
-        disabled={isLoading}
-        variant="danger"
-        size="md"
-        className={styles.endButton}
-      >
-        {isLoading ? '終了中...' : 'ツーリングを終了'}
-      </Button>
-    </div>
+            <div className={styles.spotModalField}>
+              <label className={styles.spotModalLabel}>
+                スポット名（任意）
+              </label>
+              <input
+                type="text"
+                className={styles.spotModalInput}
+                placeholder="例：道の駅 ○○"
+                value={spotName}
+                onChange={(e) => setSpotName(e.target.value)}
+                maxLength={100}
+              />
+            </div>
+
+            <div className={styles.spotModalField}>
+              <label className={styles.spotModalLabel}>メモ（任意）</label>
+              <textarea
+                className={styles.spotModalTextarea}
+                placeholder="感想や覚えておきたいことを入力"
+                value={spotMemo}
+                onChange={(e) => setSpotMemo(e.target.value)}
+                maxLength={500}
+              />
+            </div>
+
+            <div className={styles.spotMapArea}>
+              {geoStatus === 'loading' && (
+                <div className={styles.spotMapMessage}>位置情報を取得中...</div>
+              )}
+              {geoStatus === 'denied' && (
+                <div className={styles.spotMapMessage}>
+                  位置情報の使用が許可されていません
+                </div>
+              )}
+              {geoStatus === 'error' && (
+                <div className={styles.spotMapMessage}>
+                  位置情報を取得できませんでした
+                </div>
+              )}
+              {geoStatus === 'success' && geoPosition && (
+                <TouringRouteMap
+                  points={[
+                    {
+                      lat: geoPosition.lat,
+                      lng: geoPosition.lng,
+                      label: '現在地',
+                      type: 'spot',
+                    },
+                  ]}
+                  containerClassName={styles.spotMap}
+                />
+              )}
+            </div>
+
+            <div className={styles.spotModalActions}>
+              <Button
+                onClick={() => setShowSpotModal(false)}
+                variant="cloud"
+                size="md"
+                disabled={spotLoading}
+              >
+                キャンセル
+              </Button>
+              <Button
+                onClick={handleRegisterSpot}
+                variant="primary"
+                size="md"
+                disabled={spotLoading || geoStatus === 'loading'}
+              >
+                {spotLoading ? '記録中...' : '記録する'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
