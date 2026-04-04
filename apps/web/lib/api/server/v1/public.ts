@@ -1,7 +1,13 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
-import { ApiResponsePublicBikeList, SuccessResponse } from '@repo/shared-types'
+import {
+  ApiResponsePublicBikeList,
+  ApiResponsePublicTouringList,
+  createMyUserBikeId,
+  SuccessResponse,
+} from '@repo/shared-types'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
+import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
 
 const publicRoute = new Hono()
 
@@ -24,6 +30,30 @@ publicRoute.get('/bikes', async (c) => {
       })),
     },
     message: '公開バイク一覧取得成功',
+  })
+})
+
+publicRoute.get('/bikes/:bikeId/tourings', async (c) => {
+  const { bikeId } = c.req.param()
+  const touringRepo = new PrismaTouringRepository(prisma)
+  const tourings = await touringRepo.findPublicTouringsByBikeId(
+    createMyUserBikeId(bikeId)
+  )
+
+  return c.json<SuccessResponse<ApiResponsePublicTouringList>>({
+    status: 'success',
+    data: {
+      tourings: tourings.map((t) => ({
+        touringId: t.touringId,
+        title: t.title,
+        startDate: t.startDate.toISOString(),
+        endDate: t.endDate.toISOString(),
+        startMileage: t.startMileage,
+        endMileage: t.endMileage,
+        status: t.status,
+      })),
+    },
+    message: '公開ツーリング一覧取得成功',
   })
 })
 

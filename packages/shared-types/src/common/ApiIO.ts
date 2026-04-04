@@ -162,6 +162,18 @@ export type ApiResponseTouringDetail = {
 
 export type ApiResponseTouringList = ApiResponseTouringDetail[]
 
+export type ApiResponsePublicTouringList = {
+  tourings: {
+    touringId: string
+    title: string
+    startDate: string
+    endDate: string
+    startMileage: number | null
+    endMileage: number | null
+    status: 'STARTED' | 'COMPLETED'
+  }[]
+}
+
 export type ApiResponseOngoingTouring = {
   touring: ApiResponseTouringDetail | null
 }

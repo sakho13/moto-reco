@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import type {
   ApiResponseTouringDetail,
@@ -9,8 +9,8 @@ import type {
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { InfoBox } from '@/components/bike/InfoBox'
-import { TouringListSection } from '@/components/touring/TouringListSection'
 import { TouringDeleteConfirmModal } from '@/components/touring/TouringDeleteConfirmModal'
+import { TouringListSection } from '@/components/touring/TouringListSection'
 import { authenticatedFetch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'

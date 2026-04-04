@@ -1,8 +1,8 @@
 'use client'
 
 import { Button } from '@repo/ui/button'
-import { XIcon } from '@/components/icons/XIcon'
 import styles from './TouringDeleteConfirmModal.module.css'
+import { XIcon } from '@/components/icons/XIcon'
 
 interface TouringDeleteConfirmModalProps {
   onCancel: () => void
