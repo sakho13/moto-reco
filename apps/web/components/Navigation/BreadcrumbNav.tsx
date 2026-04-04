@@ -48,10 +48,8 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
         label: 'ツーリング履歴',
         href: `/app/my-bike/${segments[2]}/tourings`,
       })
-      if (segments[4] === 'register') {
-        items.push({ label: '登録' })
-      } else if (segments[5] === 'edit') {
-        items.push({ label: '編集' })
+      if (segments[4]) {
+        items.push({ label: 'ツーリング詳細' })
       }
       return items
     }
