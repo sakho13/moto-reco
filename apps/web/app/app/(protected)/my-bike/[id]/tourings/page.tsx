@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 import type {
   ApiResponseTouringDetail,
   SuccessResponse,
@@ -9,7 +9,7 @@ import type {
 import { Button } from '@repo/ui/button'
 import { InfoBox } from '@/components/bike/InfoBox'
 import { TouringListSection } from '@/components/touring/TouringListSection'
-import { authenticatedFetch } from '@/lib/api/client'
+import { authenticatedFetch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -44,8 +44,20 @@ function TouringsPage() {
     fetchTourings
   )
 
-  const handleEdit = (touringId: string) => {
-    router.push(`/app/my-bike/${bikeId}/tourings/${touringId}/edit`)
+  const handleDelete = async (touringId: string) => {
+    const isConfirmed = window.confirm(
+      'このツーリング履歴を削除しますか？この操作は取り消せません。'
+    )
+    if (!isConfirmed) return
+
+    try {
+      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/tourings`, { touringId })
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=end-date&sort-order=desc`
+      )
+    } catch {
+      // エラーは無視（toast通知は不要）
+    }
   }
 
   const handleDetail = (touringId: string) => {
@@ -115,8 +127,8 @@ function TouringsPage() {
       <div className="w-full max-w-md">
         <TouringListSection
           tourings={tourings || []}
-          onEdit={handleEdit}
           onDetail={handleDetail}
+          onDelete={handleDelete}
           onRegister={handleRegister}
         />
       </div>

@@ -1,10 +1,13 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import useSWR from 'swr'
+import { useState } from 'react'
+import useSWR, { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
+import { EditIcon } from '@/components/icons/EditIcon'
+import { TouringEditModal } from '@/components/touring/TouringEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet } from '@/lib/api/client'
@@ -16,6 +19,7 @@ function TouringDetailPage() {
   const router = useRouter()
   const bikeId = params.id as string
   const touringId = params.touringId as string
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   const {
     data: touring,
@@ -149,21 +153,42 @@ function TouringDetailPage() {
     })
   }
 
+  const handleEditSuccess = async (action: 'update' | 'delete') => {
+    if (action === 'delete') {
+      router.push(`/app/my-bike/${bikeId}/tourings`)
+    } else {
+      await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`)
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
+      )
+      setIsEditModalOpen(false)
+    }
+  }
+
   const hasMap = mapPoints.length > 0
 
   const touringInfoCard = (
     <div className={styles.card}>
-      <div className="flex items-center gap-2 mb-4">
-        <h1 className="text-xl font-bold">{touring?.title}</h1>
-        <span
-          className={
-            touring?.status === 'STARTED'
-              ? styles.statusStarted
-              : styles.statusCompleted
-          }
+      <div className="flex items-start justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <h1 className="text-xl font-bold truncate">{touring?.title}</h1>
+          <span
+            className={
+              touring?.status === 'STARTED'
+                ? styles.statusStarted
+                : styles.statusCompleted
+            }
+          >
+            {touring?.status === 'STARTED' ? '進行中' : '完了'}
+          </span>
+        </div>
+        <button
+          onClick={() => setIsEditModalOpen(true)}
+          className={styles.editButton}
+          aria-label="編集"
         >
-          {touring?.status === 'STARTED' ? '進行中' : '完了'}
-        </span>
+          <EditIcon />
+        </button>
       </div>
 
       <div className={`space-y-2 text-sm ${styles.bodyText}`}>
@@ -238,14 +263,6 @@ function TouringDetailPage() {
         >
           ← 戻る
         </Button>
-        <Button
-          onClick={() =>
-            router.push(`/app/my-bike/${bikeId}/tourings/${touringId}/edit`)
-          }
-          variant="cloud"
-        >
-          編集
-        </Button>
       </div>
 
       {hasMap ? (
@@ -270,6 +287,15 @@ function TouringDetailPage() {
           {touringInfoCard}
           {spotsCard}
         </div>
+      )}
+
+      {isEditModalOpen && (
+        <TouringEditModal
+          bikeId={bikeId}
+          touringId={touringId}
+          onClose={() => setIsEditModalOpen(false)}
+          onSuccess={handleEditSuccess}
+        />
       )}
     </>
   )

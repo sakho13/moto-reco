@@ -75,6 +75,25 @@
   opacity: 0.8;
 }
 
+.editButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  opacity: 0.5;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.editButton:hover {
+  opacity: 1;
+}
+
 .mapContainer {
   height: 280px;
   border-radius: var(--radius-md);

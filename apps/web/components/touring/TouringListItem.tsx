@@ -3,17 +3,18 @@
 import type { ApiResponseTouringDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './TouringListItem.module.css'
+import { TrashIcon } from '@/components/icons/TrashIcon'
 
 export interface TouringListItemProps {
   touring: ApiResponseTouringDetail
-  onEdit: (touringId: string) => void
   onDetail?: (touringId: string) => void
+  onDelete?: (touringId: string) => void
 }
 
 export const TouringListItem = ({
   touring,
-  onEdit,
   onDetail,
+  onDelete,
 }: TouringListItemProps) => {
   const formatDate = (dateString: string) => {
     try {
@@ -63,13 +64,15 @@ export const TouringListItem = ({
               詳細
             </Button>
           )}
-          <Button
-            onClick={() => onEdit(touring.touringId)}
-            variant="cloud"
-            size="sm"
-          >
-            編集
-          </Button>
+          {onDelete && (
+            <Button
+              onClick={() => onDelete(touring.touringId)}
+              variant="danger"
+              size="sm"
+            >
+              <TrashIcon />
+            </Button>
+          )}
         </div>
       </div>
 
