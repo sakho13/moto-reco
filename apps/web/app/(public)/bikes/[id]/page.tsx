@@ -8,7 +8,7 @@ import { PrismaTouringRepository } from '@/lib/api/server/repositories/PrismaTou
 import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
-  title: `${APP_NAME} | 公開バイク詳細`,
+  title: `公開バイク詳細`,
   description: `${APP_NAME}で公開されているバイクの詳細ページです。`,
 }
 

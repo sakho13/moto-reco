@@ -4,7 +4,7 @@ import styles from './page.module.css'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} | このアプリについて`,
+  title: `このアプリについて`,
   description: `${APP_NAME} は、バイクのメンテナンス管理を簡単に行うためのアプリです。バイク登録・給油記録・メンテナンス履歴の機能を紹介します。`,
   openGraph: {
     type: 'website',

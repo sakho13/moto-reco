@@ -18,9 +18,16 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: APP_NAME,
-  description: 'バイクメンテナンス・給油記録管理アプリ',
+  title: {
+    default: APP_NAME,
+    template: '%s | ' + APP_NAME,
+  },
+  description:
+    'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理するアプリです。',
   metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: '/',
+  },
   keywords: [
     'バイク',
     'bike',

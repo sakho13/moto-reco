@@ -5,7 +5,7 @@ import { PricingCard } from '@/components/docs/pricing/PricingCard'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} | 料金プラン`,
+  title: `料金プラン`,
   description: `${APP_NAME}の料金プランをご確認いただけます。無料プランですべての基本機能(バイク登録2台まで、メンテナンス記録、給油記録)をご利用いただけます。`,
   openGraph: {
     url: `${SITE_URL}/pricing`,

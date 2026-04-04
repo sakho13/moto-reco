@@ -3,7 +3,7 @@ import styles from './page.module.css'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} | プライバシーポリシー`,
+  title: `プライバシーポリシー`,
   description: `${APP_NAME}のプライバシーポリシーです。取得する情報や利用目的、第三者提供の有無について説明します。`,
   openGraph: {
     url: `${SITE_URL}/privacy-policy`,
