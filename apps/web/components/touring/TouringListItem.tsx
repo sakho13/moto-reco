@@ -3,13 +3,19 @@
 import type { ApiResponseTouringDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './TouringListItem.module.css'
+import { TrashIcon } from '@/components/icons/TrashIcon'
 
 export interface TouringListItemProps {
   touring: ApiResponseTouringDetail
-  onEdit: (touringId: string) => void
+  onDetail?: (touringId: string) => void
+  onDelete?: (touringId: string) => void
 }
 
-export const TouringListItem = ({ touring, onEdit }: TouringListItemProps) => {
+export const TouringListItem = ({
+  touring,
+  onDetail,
+  onDelete,
+}: TouringListItemProps) => {
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('ja-JP', {
@@ -48,13 +54,26 @@ export const TouringListItem = ({ touring, onEdit }: TouringListItemProps) => {
           </span>
         </div>
 
-        <Button
-          onClick={() => onEdit(touring.touringId)}
-          variant="cloud"
-          size="sm"
-        >
-          編集
-        </Button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {onDetail && (
+            <Button
+              onClick={() => onDetail(touring.touringId)}
+              variant="cloud"
+              size="sm"
+            >
+              詳細
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              onClick={() => onDelete(touring.touringId)}
+              variant="danger"
+              size="sm"
+            >
+              <TrashIcon />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* 行2: 期間 */}

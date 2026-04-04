@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { prisma } from '@repo/database'
 import { createMyUserBikeId } from '@repo/shared-types'
 import styles from './page.module.css'
+import TouringList from './TouringList'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
+import { PrismaTouringRepository } from '@/lib/api/server/repositories/PrismaTouringRepository'
 import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
@@ -17,13 +19,21 @@ const getPublicBike = async (id: string) => {
   return repo.findPublicBikeById(createMyUserBikeId(id))
 }
 
+const getPublicTourings = async (id: string) => {
+  const repo = new PrismaTouringRepository(prisma)
+  return repo.findPublicTouringsByBikeId(createMyUserBikeId(id))
+}
+
 export default async function PublicBikeDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const bike = await getPublicBike(id)
+  const [bike, tourings] = await Promise.all([
+    getPublicBike(id),
+    getPublicTourings(id),
+  ])
 
   if (!bike) {
     return (
@@ -71,8 +81,14 @@ export default async function PublicBikeDetailPage({
 
       <div className="h-4" />
 
+      <section className={styles.card}>
+        <h2 className={styles.label}>ツーリング履歴</h2>
+        <TouringList tourings={tourings} />
+      </section>
+
+      <div className="h-4" />
+
       <section className={styles.emptyState}>
-        <p>詳細情報は順次拡充予定です。</p>
         <Link href="/bikes">公開バイク一覧に戻る</Link>
       </section>
     </div>
