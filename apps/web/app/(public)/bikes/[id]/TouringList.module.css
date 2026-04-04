@@ -1,0 +1,26 @@
+.toggleButton {
+  margin-top: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1px solid rgba(23, 23, 23, 0.2);
+  background: transparent;
+  color: rgba(23, 23, 23, 0.7);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.toggleButton:hover {
+  background: rgba(23, 23, 23, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .toggleButton {
+    border-color: rgba(237, 237, 237, 0.25);
+    color: rgba(237, 237, 237, 0.7);
+  }
+
+  .toggleButton:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
