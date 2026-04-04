@@ -27,6 +27,10 @@ export const metadata: Metadata = {
     'ツーリング',
     'ツーリング記録',
   ],
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
