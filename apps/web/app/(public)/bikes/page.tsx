@@ -5,8 +5,11 @@ import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/Prisma
 import { APP_NAME } from '@/lib/statics'
 
 export const metadata = {
-  title: `${APP_NAME} | 公開バイク一覧`,
+  title: `公開バイク一覧`,
   description: `${APP_NAME}で公開されているバイク情報の一覧です。`,
+  alternates: {
+    canonical: '/bikes',
+  },
 }
 
 export const revalidate = 300
