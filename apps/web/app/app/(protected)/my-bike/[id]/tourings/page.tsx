@@ -51,7 +51,9 @@ function TouringsPage() {
     if (!isConfirmed) return
 
     try {
-      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/tourings`, { touringId })
+      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
+        touringId,
+      })
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=end-date&sort-order=desc`
       )
