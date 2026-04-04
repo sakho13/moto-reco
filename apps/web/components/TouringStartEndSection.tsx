@@ -147,17 +147,36 @@ export const TouringStartEndSection = () => {
   }
 
   if (bikesError) {
+    const isUserNotRegisteredError =
+      bikesError instanceof ApiV1Error &&
+      bikesError.errorCode === 'USER_NOT_REGISTERED'
+
     return (
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>ツーリング</h2>
         </div>
         <div className={styles.errorContainer}>
-          <p className={styles.errorMessage}>
-            {bikesError instanceof ApiV1Error
-              ? bikesError.message
-              : 'バイク情報の取得に失敗しました'}
-          </p>
+          {isUserNotRegisteredError ? (
+            <>
+              <p className={styles.errorMessage}>
+                ユーザー登録の反映を確認しています。数秒後に再読み込みしてください。
+              </p>
+              <Button
+                onClick={() => router.refresh()}
+                size="sm"
+                variant="cloud"
+              >
+                再読み込み
+              </Button>
+            </>
+          ) : (
+            <p className={styles.errorMessage}>
+              {bikesError instanceof ApiV1Error
+                ? bikesError.message
+                : 'バイク情報の取得に失敗しました'}
+            </p>
+          )}
         </div>
       </div>
     )
