@@ -6,7 +6,10 @@ import { navigationItems } from './navigationItems'
 
 export function MobileNavigation() {
   return (
-    <nav className={styles.bottomNavigation} aria-label="モバイルナビゲーション">
+    <nav
+      className={styles.bottomNavigation}
+      aria-label="モバイルナビゲーション"
+    >
       {navigationItems.map((item) => (
         <NavigationButton
           key={item.id}

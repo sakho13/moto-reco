@@ -31,7 +31,10 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     }
 
     if (segments[3] === 'fuel-logs') {
-      items.push({ label: '給油履歴', href: `/app/my-bike/${segments[2]}/fuel-logs` })
+      items.push({
+        label: '給油履歴',
+        href: `/app/my-bike/${segments[2]}/fuel-logs`,
+      })
       if (segments[4] === 'register') {
         items.push({ label: '登録' })
       } else if (segments[5] === 'edit') {
@@ -41,7 +44,10 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     }
 
     if (segments[3] === 'tourings') {
-      items.push({ label: 'ツーリング履歴', href: `/app/my-bike/${segments[2]}/tourings` })
+      items.push({
+        label: 'ツーリング履歴',
+        href: `/app/my-bike/${segments[2]}/tourings`,
+      })
       if (segments[4] === 'register') {
         items.push({ label: '登録' })
       } else if (segments[5] === 'edit') {
@@ -92,7 +98,9 @@ export function BreadcrumbNav() {
                   {item.label}
                 </Link>
               ) : (
-                <span aria-current={isLast ? 'page' : undefined}>{item.label}</span>
+                <span aria-current={isLast ? 'page' : undefined}>
+                  {item.label}
+                </span>
               )}
               {!isLast && <span className={styles.separator}>/</span>}
             </li>
