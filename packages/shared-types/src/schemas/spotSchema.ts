@@ -93,3 +93,12 @@ export const SpotUpdateRequestSchema = z
   )
 
 export type SpotUpdateRequest = z.infer<typeof SpotUpdateRequestSchema>
+
+/**
+ * スポット並び替えリクエストのバリデーションスキーマ
+ */
+export const SpotReorderRequestSchema = z.object({
+  spotIds: z.array(z.string()).min(1, 'スポットIDを1件以上指定してください'),
+})
+
+export type SpotReorderRequest = z.infer<typeof SpotReorderRequestSchema>

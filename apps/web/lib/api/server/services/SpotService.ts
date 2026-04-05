@@ -5,6 +5,7 @@ import {
   TouringId,
   UserId,
 } from '@repo/shared-types'
+import type { SpotReorderRequest } from '@repo/shared-types'
 import { SpotEntity } from '../entities/SpotEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
@@ -69,6 +70,7 @@ export class SpotService {
         latitude: params.latitude ?? null,
         longitude: params.longitude ?? null,
         visitedAt: params.visitedAt ?? new Date(),
+        sortOrder: 0, // createSpot でカウントして末尾に設定される
       })
 
       return await this.spotRepository.createSpot(spot)
@@ -149,6 +151,7 @@ export class SpotService {
             ? params.longitude
             : existingSpot.longitude,
         visitedAt: params.visitedAt ?? existingSpot.visitedAt,
+        sortOrder: existingSpot.sortOrder,
       })
 
       return await this.spotRepository.updateSpot(updatedSpot)
@@ -194,5 +197,35 @@ export class SpotService {
     }
 
     await this.spotRepository.deleteSpot(spotId, touringId)
+  }
+
+  public async reorderSpots(
+    spotIds: SpotReorderRequest['spotIds'],
+    touringId: TouringId,
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<void> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      myUserBikeId,
+      userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const touring = await this.touringRepository.findTouringById(
+      touringId,
+      myUserBikeId
+    )
+
+    if (!touring) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
+    }
+
+    await this.spotRepository.reorderSpots(
+      spotIds.map((id) => createSpotId(id)),
+      touringId
+    )
   }
 }

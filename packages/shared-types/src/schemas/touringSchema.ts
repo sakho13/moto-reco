@@ -114,6 +114,38 @@ export const TouringUpdateRequestSchema = z
           .min(1, '給油履歴IDは1文字以上で指定してください')
       )
       .optional(),
+    startLatitude: z
+      .number({
+        invalid_type_error: '開始地点の緯度は数値で指定してください',
+      })
+      .min(-90, '開始地点の緯度は-90以上で指定してください')
+      .max(90, '開始地点の緯度は90以下で指定してください')
+      .nullable()
+      .optional(),
+    startLongitude: z
+      .number({
+        invalid_type_error: '開始地点の経度は数値で指定してください',
+      })
+      .min(-180, '開始地点の経度は-180以上で指定してください')
+      .max(180, '開始地点の経度は180以下で指定してください')
+      .nullable()
+      .optional(),
+    endLatitude: z
+      .number({
+        invalid_type_error: '終了地点の緯度は数値で指定してください',
+      })
+      .min(-90, '終了地点の緯度は-90以上で指定してください')
+      .max(90, '終了地点の緯度は90以下で指定してください')
+      .nullable()
+      .optional(),
+    endLongitude: z
+      .number({
+        invalid_type_error: '終了地点の経度は数値で指定してください',
+      })
+      .min(-180, '終了地点の経度は-180以上で指定してください')
+      .max(180, '終了地点の経度は180以下で指定してください')
+      .nullable()
+      .optional(),
   })
   .refine(
     (data) =>
@@ -123,7 +155,11 @@ export const TouringUpdateRequestSchema = z
       data.startMileage !== undefined ||
       data.endMileage !== undefined ||
       data.status !== undefined ||
-      data.fuelLogIds !== undefined,
+      data.fuelLogIds !== undefined ||
+      data.startLatitude !== undefined ||
+      data.startLongitude !== undefined ||
+      data.endLatitude !== undefined ||
+      data.endLongitude !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }

@@ -35,6 +35,7 @@ import {
   TouringDeleteRequestSchema,
   SpotRegisterRequestSchema,
   SpotUpdateRequestSchema,
+  SpotReorderRequestSchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -912,6 +913,10 @@ userBike.patch(
         endMileage: body.endMileage,
         status: body.status,
         fuelLogIds: body.fuelLogIds?.map(createFuelLogId),
+        startLatitude: body.startLatitude,
+        startLongitude: body.startLongitude,
+        endLatitude: body.endLatitude,
+        endLongitude: body.endLongitude,
       })
     })
 
@@ -989,6 +994,7 @@ userBike.post(
           latitude: spot.latitude,
           longitude: spot.longitude,
           visitedAt: spot.visitedAt.toISOString(),
+          sortOrder: spot.sortOrder,
         },
         message: 'スポット登録成功',
       },
@@ -1028,8 +1034,43 @@ userBike.get(
           latitude: spot.latitude,
           longitude: spot.longitude,
           visitedAt: spot.visitedAt.toISOString(),
+          sortOrder: spot.sortOrder,
         })),
         message: 'スポット一覧取得成功',
+      },
+      200
+    )
+  }
+)
+
+// スポット並び替え（/:spotId より前に定義）
+userBike.patch(
+  '/bike/:myUserBikeId/tourings/:touringId/spots/reorder',
+  honoAuthMiddleware,
+  zodValidateJson(SpotReorderRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const body = c.req.valid('json')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    await service.reorderSpots(
+      body.spotIds,
+      createTouringId(touringId),
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        data: undefined,
+        message: 'スポット並び替え成功',
       },
       200
     )
@@ -1076,6 +1117,7 @@ userBike.patch(
           latitude: spot.latitude,
           longitude: spot.longitude,
           visitedAt: spot.visitedAt.toISOString(),
+          sortOrder: spot.sortOrder,
         },
         message: 'スポット更新成功',
       },

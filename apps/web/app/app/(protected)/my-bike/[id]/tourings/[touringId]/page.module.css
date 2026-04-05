@@ -64,6 +64,34 @@
   justify-content: center;
 }
 
+.startBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: #10b981;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.endBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .link {
   color: var(--color-product);
   font-size: 0.75rem;
@@ -98,6 +126,30 @@
   height: 280px;
   border-radius: var(--radius-md);
   overflow: hidden;
+}
+
+.mapWrapper {
+  position: relative;
+}
+
+.googleMapsLink {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  color: #1a73e8;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.googleMapsLink:hover {
+  opacity: 0.85;
 }
 
 .mapContainerLarge {
