@@ -7,6 +7,7 @@ import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
+import { SpotAddModal } from '@/components/spot/SpotAddModal'
 import { SpotEditModal } from '@/components/spot/SpotEditModal'
 import { TouringEditModal } from '@/components/touring/TouringEditModal'
 import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
@@ -46,6 +47,7 @@ function TouringDetailPage() {
   const [editingSpot, setEditingSpot] = useState<ApiResponseSpotDetail | null>(
     null
   )
+  const [isAddSpotModalOpen, setIsAddSpotModalOpen] = useState(false)
 
   const {
     data: touring,
@@ -201,6 +203,16 @@ function TouringDetailPage() {
     setEditingSpot(null)
   }
 
+  const handleSpotAddSuccess = async () => {
+    await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
+    setIsAddSpotModalOpen(false)
+  }
+
+  const handleSpotDeleteSuccess = async () => {
+    await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
+    setEditingSpot(null)
+  }
+
   const hasMap = mapPoints.length > 0
   const googleMapsUrl = buildGoogleMapsUrl(mapPoints)
 
@@ -259,7 +271,16 @@ function TouringDetailPage() {
 
   const spotsCard = (
     <div className={styles.card}>
-      <h2 className="text-lg font-semibold mb-4">立ち寄りスポット</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">立ち寄りスポット</h2>
+        <button
+          onClick={() => setIsAddSpotModalOpen(true)}
+          className={styles.editButton}
+          aria-label="スポットを追加"
+        >
+          ＋
+        </button>
+      </div>
 
       {spotsLoading ? (
         <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
@@ -442,6 +463,16 @@ function TouringDetailPage() {
           spot={editingSpot}
           onClose={() => setEditingSpot(null)}
           onSuccess={handleSpotEditSuccess}
+          onDelete={handleSpotDeleteSuccess}
+        />
+      )}
+
+      {isAddSpotModalOpen && (
+        <SpotAddModal
+          bikeId={bikeId}
+          touringId={touringId}
+          onClose={() => setIsAddSpotModalOpen(false)}
+          onSuccess={handleSpotAddSuccess}
         />
       )}
     </>

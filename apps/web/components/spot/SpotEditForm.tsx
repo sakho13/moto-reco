@@ -3,9 +3,14 @@
 import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
+import { FormField } from '@repo/ui/formField'
+import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
+import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
-import { apiPatch } from '@/lib/api/client'
+import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
+import { apiDelete, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 interface SpotEditFormProps {
@@ -13,6 +18,7 @@ interface SpotEditFormProps {
   touringId: string
   spot: ApiResponseSpotDetail
   onSuccess: () => void
+  onDelete?: () => void
 }
 
 type SpotFormState = {
@@ -29,11 +35,14 @@ export function SpotEditForm({
   touringId,
   spot,
   onSuccess,
+  onDelete,
 }: SpotEditFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isSavingLocation, setIsSavingLocation] = useState(false)
   const [error, setError] = useState('')
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number
     lng: number
@@ -83,6 +92,27 @@ export function SpotEditForm({
     }
   }
 
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true)
+    try {
+      await apiDelete(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots/${spot.spotId}`
+      )
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
+      )
+      toast.success('スポットを削除しました')
+      onDelete?.()
+    } catch (err) {
+      toast.error(
+        err instanceof ApiV1Error ? err.message : 'スポットの削除に失敗しました'
+      )
+    } finally {
+      setIsDeleting(false)
+      setIsDeleteModalOpen(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -113,9 +143,9 @@ export function SpotEditForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">スポット名</label>
-          <input
+        <FormField label="スポット名" htmlFor="spotName">
+          <Input
+            id="spotName"
             type="text"
             value={formState.name}
             onChange={(e) =>
@@ -123,13 +153,13 @@ export function SpotEditForm({
             }
             maxLength={100}
             placeholder="スポット名（任意）"
-            className="w-full border rounded px-3 py-2 text-sm"
+            disabled={isSubmitting}
           />
-        </div>
+        </FormField>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">メモ</label>
-          <textarea
+        <FormField label="メモ" htmlFor="spotMemo">
+          <Textarea
+            id="spotMemo"
             value={formState.memo}
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, memo: e.target.value }))
@@ -137,50 +167,71 @@ export function SpotEditForm({
             maxLength={500}
             rows={3}
             placeholder="メモ（任意）"
-            className="w-full border rounded px-3 py-2 text-sm resize-none"
+            disabled={isSubmitting}
           />
-        </div>
+        </FormField>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">訪問日時</label>
-          <input
+        <FormField label="訪問日時" htmlFor="spotVisitedAt">
+          <Input
+            id="spotVisitedAt"
             type="datetime-local"
             value={formState.visitedAt}
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, visitedAt: e.target.value }))
             }
-            className="w-full border rounded px-3 py-2 text-sm"
+            disabled={isSubmitting}
           />
-        </div>
+        </FormField>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">位置</label>
+        <FormField label="位置">
           <div className="flex items-center gap-2">
             <p className="text-xs opacity-60 flex-1">
               {currentLocation
                 ? `${currentLocation.lat.toFixed(5)}, ${currentLocation.lng.toFixed(5)}`
                 : '未設定'}
             </p>
-            <button
+            <Button
               type="button"
+              variant="cloud"
+              size="sm"
               onClick={() => setIsLocationModalOpen(true)}
-              className="text-xs border rounded px-2 py-1"
             >
               地図で変更
-            </button>
+            </Button>
           </div>
-        </div>
+        </FormField>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full border rounded px-4 py-2 text-sm font-medium disabled:opacity-50"
+          fullWidth
+          loading={isSubmitting}
         >
-          {isSubmitting ? '更新中...' : '更新する'}
-        </button>
+          更新する
+        </Button>
+
+        {onDelete && (
+          <Button
+            type="button"
+            variant="danger"
+            fullWidth
+            disabled={isDeleting}
+            loading={isDeleting}
+            onClick={() => setIsDeleteModalOpen(true)}
+          >
+            削除する
+          </Button>
+        )}
       </form>
+
+      {isDeleteModalOpen && (
+        <SpotDeleteConfirmModal
+          onCancel={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+        />
+      )}
 
       {isLocationModalOpen && (
         <LocationPickerModal
