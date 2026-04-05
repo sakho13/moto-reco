@@ -46,6 +46,10 @@ export class SpotEntity {
     return this._value.visitedAt
   }
 
+  public get sortOrder(): number {
+    return this._value.sortOrder
+  }
+
   public toJson(): Spot {
     return this._value
   }

@@ -14,6 +14,9 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
     "@hono/zod-validator": "catalog:",
     "@next/third-parties": "catalog:",
     "@repo/database": "workspace:*",
@@ -26,11 +29,11 @@
     "firebase": "catalog:",
     "firebase-admin": "catalog:",
     "hono": "catalog:",
+    "leaflet": "1.9.4",
     "lucide-react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "leaflet": "1.9.4",
     "recharts": "3.6.0",
     "swr": "2.3.8",
     "zod": "catalog:"
@@ -38,10 +41,10 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/leaflet": "1.9.14",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@types/leaflet": "1.9.14",
     "@types/recharts": "2.0.1",
     "@vitest/ui": "catalog:",
     "eslint": "catalog:",

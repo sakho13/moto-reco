@@ -195,6 +195,7 @@ export type ApiResponseSpotDetail = {
   latitude: number | null
   longitude: number | null
   visitedAt: string
+  sortOrder: number
 }
 
 export type ApiResponseSpotList = ApiResponseSpotDetail[]

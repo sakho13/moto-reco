@@ -196,13 +196,14 @@ model TUserMyBikeTouringSpot {
   latitude  Float?   @map("latitude")
   longitude Float?   @map("longitude")
   visitedAt DateTime @default(now()) @map("visited_at")
+  sortOrder Int      @default(0) @map("sort_order")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   touring TUserMyBikeTouring @relation(fields: [touringId], references: [id], onDelete: Cascade)
 
-  @@index([touringId, visitedAt])
+  @@index([touringId, sortOrder])
 }
 
 model TUserQuit {

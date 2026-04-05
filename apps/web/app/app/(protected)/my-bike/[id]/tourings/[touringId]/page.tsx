@@ -1,19 +1,35 @@
 'use client'
 
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import type { DragEndEvent } from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
+import { SortableSpotItem } from '@/components/spot/SortableSpotItem'
 import { SpotAddModal } from '@/components/spot/SpotAddModal'
 import { SpotEditModal } from '@/components/spot/SpotEditModal'
 import { TouringEditModal } from '@/components/touring/TouringEditModal'
 import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
-import { apiGet } from '@/lib/api/client'
+import { apiGet, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -48,6 +64,14 @@ function TouringDetailPage() {
     null
   )
   const [isAddSpotModalOpen, setIsAddSpotModalOpen] = useState(false)
+  const [localSpots, setLocalSpots] = useState<ApiResponseSpotDetail[]>([])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 5 },
+    })
+  )
 
   const {
     data: touring,
@@ -77,6 +101,12 @@ function TouringDetailPage() {
     }
   )
 
+  useEffect(() => {
+    if (spots) {
+      setLocalSpots(spots)
+    }
+  }, [spots])
+
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('ja-JP', {
@@ -101,6 +131,33 @@ function TouringDetailPage() {
       })
     } catch {
       return dateString
+    }
+  }
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = localSpots.findIndex((s) => s.spotId === active.id)
+    const newIndex = localSpots.findIndex((s) => s.spotId === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+
+    const reordered = arrayMove(localSpots, oldIndex, newIndex)
+    setLocalSpots(reordered)
+
+    try {
+      await apiPatch(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots/reorder`,
+        { spotIds: reordered.map((s) => s.spotId) }
+      )
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
+      )
+    } catch (err) {
+      setLocalSpots(localSpots)
+      toast.error(
+        err instanceof ApiV1Error ? err.message : '並び替えに失敗しました'
+      )
     }
   }
 
@@ -153,8 +210,8 @@ function TouringDetailPage() {
     })
   }
 
-  if (spots) {
-    spots
+  if (localSpots) {
+    localSpots
       .filter(
         (s: ApiResponseSpotDetail) => s.latitude != null && s.longitude != null
       )
@@ -310,46 +367,39 @@ function TouringDetailPage() {
             </div>
           </div>
 
-          {/* 立ち寄りスポット */}
-          {spots && spots.length > 0
-            ? spots.map((spot: ApiResponseSpotDetail, index: number) => (
-                <div key={spot.spotId} className={styles.spotItem}>
-                  <div className={styles.spotBadge}>{index + 1}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium text-sm truncate">
-                        {spot.name ?? '無名スポット'}
-                      </p>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <span
-                          className={styles.dimText}
-                          style={{ fontSize: '0.75rem' }}
-                        >
-                          {formatVisitedAt(spot.visitedAt)}
-                        </span>
-                        <button
-                          onClick={() => setEditingSpot(spot)}
-                          className={styles.editButton}
-                          aria-label="スポットを編集"
-                        >
-                          <EditIcon />
-                        </button>
-                      </div>
-                    </div>
-                    {spot.memo && (
-                      <p
-                        className={`text-xs mt-1 wrap-break-word ${styles.mutedText}`}
-                      >
-                        {spot.memo}
-                      </p>
-                    )}
-                  </div>
+          {/* 立ち寄りスポット（DnD） */}
+          {localSpots && localSpots.length > 0 && (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={localSpots.map((s) => s.spotId)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {localSpots.map((spot, index) => (
+                    <SortableSpotItem
+                      key={spot.spotId}
+                      spot={spot}
+                      index={index}
+                      editButtonClassName={styles.editButton}
+                      spotItemClassName={styles.spotItem}
+                      spotBadgeClassName={styles.spotBadge}
+                      mutedTextClassName={styles.mutedText}
+                      dimTextClassName={styles.dimText}
+                      formatVisitedAt={formatVisitedAt}
+                      onEdit={setEditingSpot}
+                    />
+                  ))}
                 </div>
-              ))
-            : null}
+              </SortableContext>
+            </DndContext>
+          )}
 
           {/* スポットがない場合のメッセージ */}
-          {(!spots || spots.length === 0) && (
+          {(!localSpots || localSpots.length === 0) && (
             <p className={`text-sm ${styles.mutedText}`}>
               スポットはまだ記録されていません
             </p>
