@@ -7,4 +7,5 @@ export interface ISpotRepository {
   findSpotById(spotId: SpotId, touringId: TouringId): Promise<SpotEntity | null>
   updateSpot(spot: SpotEntity): Promise<SpotEntity>
   deleteSpot(spotId: SpotId, touringId: TouringId): Promise<void>
+  reorderSpots(spotIds: SpotId[], touringId: TouringId): Promise<void>
 }

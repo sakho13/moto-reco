@@ -1,3 +1,4 @@
+import { PrismaClient } from '@repo/database'
 import {
   createSpotId,
   createTouringId,
@@ -13,6 +14,10 @@ export class PrismaSpotRepository
   implements ISpotRepository
 {
   async createSpot(spot: SpotEntity): Promise<SpotEntity> {
+    const count = await this.connection.tUserMyBikeTouringSpot.count({
+      where: { touringId: spot.touringId },
+    })
+
     const created = await this.connection.tUserMyBikeTouringSpot.create({
       data: {
         touringId: spot.touringId,
@@ -21,6 +26,7 @@ export class PrismaSpotRepository
         latitude: spot.latitude,
         longitude: spot.longitude,
         visitedAt: spot.visitedAt,
+        sortOrder: count,
       },
       select: {
         id: true,
@@ -30,6 +36,7 @@ export class PrismaSpotRepository
         latitude: true,
         longitude: true,
         visitedAt: true,
+        sortOrder: true,
       },
     })
 
@@ -41,6 +48,7 @@ export class PrismaSpotRepository
       latitude: created.latitude,
       longitude: created.longitude,
       visitedAt: created.visitedAt,
+      sortOrder: created.sortOrder,
     })
   }
 
@@ -57,9 +65,10 @@ export class PrismaSpotRepository
         latitude: true,
         longitude: true,
         visitedAt: true,
+        sortOrder: true,
       },
       orderBy: {
-        visitedAt: 'asc',
+        sortOrder: 'asc',
       },
     })
 
@@ -73,6 +82,7 @@ export class PrismaSpotRepository
           latitude: spot.latitude,
           longitude: spot.longitude,
           visitedAt: spot.visitedAt,
+          sortOrder: spot.sortOrder,
         })
     )
   }
@@ -94,6 +104,7 @@ export class PrismaSpotRepository
         latitude: true,
         longitude: true,
         visitedAt: true,
+        sortOrder: true,
       },
     })
 
@@ -109,6 +120,7 @@ export class PrismaSpotRepository
       latitude: spot.latitude,
       longitude: spot.longitude,
       visitedAt: spot.visitedAt,
+      sortOrder: spot.sortOrder,
     })
   }
 
@@ -132,6 +144,7 @@ export class PrismaSpotRepository
         latitude: true,
         longitude: true,
         visitedAt: true,
+        sortOrder: true,
       },
     })
 
@@ -143,6 +156,7 @@ export class PrismaSpotRepository
       latitude: updated.latitude,
       longitude: updated.longitude,
       visitedAt: updated.visitedAt,
+      sortOrder: updated.sortOrder,
     })
   }
 
@@ -153,5 +167,16 @@ export class PrismaSpotRepository
         touringId,
       },
     })
+  }
+
+  async reorderSpots(spotIds: SpotId[]): Promise<void> {
+    await (this.connection as PrismaClient).$transaction(
+      spotIds.map((spotId, index) =>
+        this.connection.tUserMyBikeTouringSpot.update({
+          where: { id: spotId },
+          data: { sortOrder: index },
+        })
+      )
+    )
   }
 }

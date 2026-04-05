@@ -11,4 +11,5 @@ export type Spot = {
   latitude: number | null
   longitude: number | null
   visitedAt: Date
+  sortOrder: number
 }
