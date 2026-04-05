@@ -16,6 +16,24 @@ import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
+function buildGoogleMapsUrl(points: MapPoint[]): string | null {
+  const first = points[0]
+  const last = points[points.length - 1]
+  if (!first) return null
+  if (points.length === 1) {
+    return `https://www.google.com/maps/search/?api=1&query=${first.lat},${first.lng}`
+  }
+  if (!last) return null
+  const origin = `${first.lat},${first.lng}`
+  const destination = `${last.lat},${last.lng}`
+  const waypoints = points
+    .slice(1, -1)
+    .map((p) => `${p.lat},${p.lng}`)
+    .join('|')
+  const base = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`
+  return waypoints ? `${base}&waypoints=${encodeURIComponent(waypoints)}` : base
+}
+
 function TouringDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -184,6 +202,7 @@ function TouringDetailPage() {
   }
 
   const hasMap = mapPoints.length > 0
+  const googleMapsUrl = buildGoogleMapsUrl(mapPoints)
 
   const startLocation =
     touring?.startLatitude != null && touring?.startLongitude != null
@@ -364,10 +383,22 @@ function TouringDetailPage() {
         <div className="w-full max-w-5xl flex flex-col md:flex-row md:gap-6 md:items-start gap-4">
           <div className="md:flex-1 min-w-0">
             <div className={`${styles.card} h-full`}>
-              <TouringRouteMap
-                points={mapPoints}
-                containerClassName={styles.mapContainerLarge}
-              />
+              <div className={styles.mapWrapper}>
+                <TouringRouteMap
+                  points={mapPoints}
+                  containerClassName={styles.mapContainerLarge}
+                />
+                {googleMapsUrl && (
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.googleMapsLink}
+                  >
+                    Googleマップで経路を表示
+                  </a>
+                )}
+              </div>
             </div>
           </div>
           <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
