@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { Button } from '@repo/ui/button'
+import { FuelLogRegisterModal } from './fuel-log/FuelLogRegisterModal'
 import { BikeIcon } from './icons/BikeIcon'
 import { FuelIcon } from './icons/FuelIcon'
 import styles from './QuickFuelSection.module.css'
@@ -11,6 +13,7 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 export const QuickFuelSection = () => {
   const router = useRouter()
+  const [selectedBikeId, setSelectedBikeId] = useState<string | null>(null)
 
   const { data, error, isLoading } = useSWR(
     '/api/v1/user-bike/bikes',
@@ -23,7 +26,7 @@ export const QuickFuelSection = () => {
   const bikes = data?.bikes ?? []
 
   const handleBikeClick = (bikeId: string) => {
-    router.push(`/app/my-bike/${bikeId}/fuel-logs/register`)
+    setSelectedBikeId(bikeId)
   }
 
   if (error) {
@@ -91,40 +94,50 @@ export const QuickFuelSection = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <FuelIcon />
-          <h2 className={styles.title}>給油を登録する</h2>
+    <>
+      {selectedBikeId && (
+        <FuelLogRegisterModal
+          bikeId={selectedBikeId}
+          onClose={() => setSelectedBikeId(null)}
+          onSuccess={() => setSelectedBikeId(null)}
+        />
+      )}
+
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <div className={styles.headerContent}>
+            <FuelIcon />
+            <h2 className={styles.title}>給油を登録する</h2>
+          </div>
+        </div>
+
+        <div className={styles.bikeSelectionSection}>
+          <div className={styles.bikeGrid}>
+            {bikes.map((bike) => {
+              const title =
+                bike.nickname ||
+                `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
+
+              return (
+                <button
+                  key={bike.myUserBikeId}
+                  type="button"
+                  onClick={() => handleBikeClick(bike.myUserBikeId)}
+                  className={styles.bikeCard}
+                  aria-label={`${title}の給油を登録`}
+                >
+                  <div className={styles.bikeIconContainer}>
+                    <BikeIcon />
+                  </div>
+                  <div className={styles.bikeTextContainer}>
+                    <h4 className={styles.bikeTitle}>{title}</h4>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
-
-      <div className={styles.bikeSelectionSection}>
-        <div className={styles.bikeGrid}>
-          {bikes.map((bike) => {
-            const title =
-              bike.nickname ||
-              `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
-
-            return (
-              <button
-                key={bike.myUserBikeId}
-                type="button"
-                onClick={() => handleBikeClick(bike.myUserBikeId)}
-                className={styles.bikeCard}
-                aria-label={`${title}の給油を登録`}
-              >
-                <div className={styles.bikeIconContainer}>
-                  <BikeIcon />
-                </div>
-                <div className={styles.bikeTextContainer}>
-                  <h4 className={styles.bikeTitle}>{title}</h4>
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-    </div>
+    </>
   )
 }

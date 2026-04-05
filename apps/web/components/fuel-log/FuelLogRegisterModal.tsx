@@ -1,6 +1,5 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import type {
@@ -8,23 +7,25 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
-import { BaseCard } from '@repo/ui/baseCard'
-import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { ToggleSection } from '@repo/ui/toggleSection'
-import {
-  FuelLogForm,
-  type FuelLogFormData,
-} from '@/components/fuel-log/FuelLogForm'
+import { XIcon } from '@/components/icons/XIcon'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { withAuth } from '@/lib/hoc/withAuth'
+import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
+import styles from './FuelLogRegisterModal.module.css'
 
-function FuelLogRegisterPage() {
-  const router = useRouter()
-  const params = useParams()
-  const bikeId = params.id as string
+interface FuelLogRegisterModalProps {
+  bikeId: string
+  onClose: () => void
+  onSuccess: () => void
+}
 
+export function FuelLogRegisterModal({
+  bikeId,
+  onClose,
+  onSuccess,
+}: FuelLogRegisterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -44,6 +45,7 @@ function FuelLogRegisterPage() {
       return json.data
     }
   )
+
   const { data: fuelLogs } = useSWR(
     bikeId
       ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?per-size=1&sort-order=desc`
@@ -81,10 +83,8 @@ function FuelLogRegisterPage() {
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
-      toast.success('給油履歴を登録しました', {
-        description: '給油履歴一覧へ移動します。',
-      })
-      router.push(`/app/my-bike/${bikeId}/fuel-logs`)
+      toast.success('給油履歴を登録しました')
+      onSuccess()
     } catch (err) {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
@@ -105,19 +105,21 @@ function FuelLogRegisterPage() {
   }
 
   return (
-    <>
-      <div className="w-full max-w-md flex flex-row gap-2">
-        <Button
-          onClick={() => router.push(`/app/my-bike/${bikeId}/fuel-logs`)}
-          variant="cloud"
-        >
-          ← 戻る
-        </Button>
-      </div>
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
+          <h2 className="text-lg font-semibold">給油履歴を登録</h2>
+          <button
+            onClick={onClose}
+            className={styles.closeButton}
+            aria-label="閉じる"
+          >
+            <XIcon />
+          </button>
+        </div>
 
-      <BaseCard title="給油履歴を登録">
-        <div style={{ marginBottom: 'var(--spacing-4)' }}>
-          {previousFuelLog && (
+        {previousFuelLog && (
+          <div className={styles.previousLog}>
             <ToggleSection title="前回の給油履歴">
               <dl
                 style={{
@@ -168,8 +170,8 @@ function FuelLogRegisterPage() {
                 )}
               </dl>
             </ToggleSection>
-          )}
-        </div>
+          </div>
+        )}
 
         <FuelLogForm
           onSubmit={handleFormSubmit}
@@ -177,9 +179,7 @@ function FuelLogRegisterPage() {
           error={error}
           totalMileage={bike?.totalMileage}
         />
-      </BaseCard>
-    </>
+      </div>
+    </div>
   )
 }
-
-export default withAuth(FuelLogRegisterPage)

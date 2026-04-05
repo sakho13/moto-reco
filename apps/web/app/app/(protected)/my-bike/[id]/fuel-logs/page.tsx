@@ -15,6 +15,7 @@ import { Select } from '@repo/ui/select'
 import type { SelectOption } from '@repo/ui/select'
 import styles from './page.module.css'
 import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
+import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -24,6 +25,7 @@ function FuelLogsPage() {
   const router = useRouter()
   const bikeId = params.id as string
   const [chartPeriod, setChartPeriod] = useState<FuelLogPeriod>('latest-year')
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
 
   const chartPeriodOptions: SelectOption[] = [
     { value: 'latest-year', label: '最新の履歴から1年' },
@@ -73,7 +75,7 @@ function FuelLogsPage() {
   }
 
   const handleRegister = () => {
-    router.push(`/app/my-bike/${bikeId}/fuel-logs/register`)
+    setIsRegisterModalOpen(true)
   }
 
   const handleLoadMore = () => {
@@ -131,6 +133,17 @@ function FuelLogsPage() {
 
   return (
     <>
+      {isRegisterModalOpen && (
+        <FuelLogRegisterModal
+          bikeId={bikeId}
+          onClose={() => setIsRegisterModalOpen(false)}
+          onSuccess={() => {
+            setIsRegisterModalOpen(false)
+            setSize(1)
+          }}
+        />
+      )}
+
       <div className="w-full max-w-md flex flex-row gap-2">
         <Button
           onClick={() => router.push(`/app/my-bike/${bikeId}`)}
