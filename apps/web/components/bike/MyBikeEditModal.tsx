@@ -6,11 +6,11 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { MyBikeEditForm, type MyBikeEditFormData } from './MyBikeEditForm'
+import styles from './MyBikeEditModal.module.css'
 import { XIcon } from '@/components/icons/XIcon'
 import { authenticatedFetch, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { MyBikeEditForm, type MyBikeEditFormData } from './MyBikeEditForm'
-import styles from './MyBikeEditModal.module.css'
 
 interface MyBikeEditModalProps {
   bikeId: string

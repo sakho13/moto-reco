@@ -9,11 +9,11 @@ import type {
 } from '@repo/shared-types'
 import { toast } from '@repo/ui/sonner'
 import { ToggleSection } from '@repo/ui/toggleSection'
+import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
+import styles from './FuelLogRegisterModal.module.css'
 import { XIcon } from '@/components/icons/XIcon'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
-import styles from './FuelLogRegisterModal.module.css'
 
 interface FuelLogRegisterModalProps {
   bikeId: string
