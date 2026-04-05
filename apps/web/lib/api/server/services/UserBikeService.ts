@@ -95,6 +95,9 @@ export class UserBikeService {
       new MyUserBikeEntity({
         bikeId: userBike.bikeId,
         userBikeId: userBike.id,
+        displacement: userBike.displacement,
+        totalMileage: userBike.totalMileage,
+        serialNumber: userBike.serialNumber,
         myUserBikeId: createMyUserBikeId(''),
         userId: params.userId,
         nickname: params.nickname ?? null,

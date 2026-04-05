@@ -1,15 +1,25 @@
 import {
-  BikeId,
   MyUserBike,
   MyUserBikeId,
+  UserBike,
   UserBikeId,
   UserId,
 } from '@repo/shared-types'
+import { UserBikeEntity } from './UserBikeEntity'
 
-export class MyUserBikeEntity {
-  private _value: MyUserBike
+export class MyUserBikeEntity extends UserBikeEntity {
+  private _myValue: MyUserBike
 
   constructor(myUserBike: MyUserBike) {
+    const userBike: UserBike = {
+      bikeId: myUserBike.bikeId,
+      userBikeId: myUserBike.userBikeId,
+      displacement: myUserBike.displacement,
+      totalMileage: myUserBike.totalMileage,
+      serialNumber: myUserBike.serialNumber,
+    }
+    super(userBike) // displacement > 0, totalMileage >= 0 を検証
+
     if (myUserBike.purchaseMileage !== null && myUserBike.purchaseMileage < 0) {
       throw new Error('購入時走行距離は0以上である必要があります')
     }
@@ -18,18 +28,27 @@ export class MyUserBikeEntity {
       throw new Error('購入価格は0以上である必要があります')
     }
 
-    this._value = {
-      ...myUserBike,
-      bikeId: myUserBike.bikeId ?? null,
+    // _value は super() で正規化済み（serialNumber.trim, bikeId ?? null）
+    this._myValue = {
+      ...this._value,
+      myUserBikeId: myUserBike.myUserBikeId,
+      userId: myUserBike.userId,
+      nickname: myUserBike.nickname,
+      purchaseDate: myUserBike.purchaseDate,
+      purchasePrice: myUserBike.purchasePrice,
+      purchaseMileage: myUserBike.purchaseMileage,
+      isPublic: myUserBike.isPublic,
+      ownedAt: myUserBike.ownedAt,
+      soldAt: myUserBike.soldAt,
+      ownStatus: myUserBike.ownStatus,
     }
   }
 
-  public get id(): MyUserBikeId {
-    return this._value.myUserBikeId
-  }
+  // bikeId は UserBikeEntity から継承
+  // id (UserBikeId) は UserBikeEntity から継承
 
-  public get bikeId(): BikeId | null {
-    return this._value.bikeId
+  public get myUserBikeId(): MyUserBikeId {
+    return this._myValue.myUserBikeId
   }
 
   public get userBikeId(): UserBikeId {
@@ -37,42 +56,42 @@ export class MyUserBikeEntity {
   }
 
   public get userId(): UserId {
-    return this._value.userId
+    return this._myValue.userId
   }
 
   public get nickname(): string | null {
-    return this._value.nickname
+    return this._myValue.nickname
   }
 
   public get purchaseDate(): Date | null {
-    return this._value.purchaseDate
+    return this._myValue.purchaseDate
   }
 
   public get purchasePrice(): number | null {
-    return this._value.purchasePrice
+    return this._myValue.purchasePrice
   }
 
   public get purchaseMileage(): number | null {
-    return this._value.purchaseMileage
+    return this._myValue.purchaseMileage
   }
 
   public get isPublic(): boolean {
-    return this._value.isPublic
+    return this._myValue.isPublic
   }
 
   public get ownedAt(): Date {
-    return this._value.ownedAt
+    return this._myValue.ownedAt
   }
 
   public get soldAt(): Date | null {
-    return this._value.soldAt
+    return this._myValue.soldAt
   }
 
   public get ownStatus(): MyUserBike['ownStatus'] {
-    return this._value.ownStatus
+    return this._myValue.ownStatus
   }
 
-  public toJson(): MyUserBike {
-    return this._value
+  public override toJson(): MyUserBike {
+    return this._myValue
   }
 }

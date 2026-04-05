@@ -120,7 +120,10 @@ userBike.post(
         isPublic: body.isPublic,
       })
 
-      return service.getMyUserBikeDetail(myUserBike.id, createUserId(userId))
+      return service.getMyUserBikeDetail(
+        myUserBike.myUserBikeId,
+        createUserId(userId)
+      )
     })
 
     return c.json<SuccessResponse<ApiResponseUserBikeDetail>>(

@@ -52,6 +52,7 @@ export class PrismaMyUserBikeRepository
             bikeId: true,
             displacement: true,
             totalMileage: true,
+            serialNumber: true,
           },
         },
       },
@@ -62,6 +63,9 @@ export class PrismaMyUserBikeRepository
         ? createBikeId(created.userBike.bikeId)
         : null,
       userBikeId: createUserBikeId(created.userBikeId),
+      displacement: created.userBike.displacement,
+      totalMileage: created.userBike.totalMileage,
+      serialNumber: created.userBike.serialNumber,
       myUserBikeId: createMyUserBikeId(created.id),
       userId: createUserId(created.userId),
       nickname: created.nickname,
@@ -223,6 +227,8 @@ export class PrismaMyUserBikeRepository
           select: {
             bikeId: true,
             displacement: true,
+            totalMileage: true,
+            serialNumber: true,
           },
         },
       },
@@ -237,6 +243,9 @@ export class PrismaMyUserBikeRepository
         ? createBikeId(myUserBike.userBike.bikeId)
         : null,
       userBikeId: createUserBikeId(myUserBike.userBikeId),
+      displacement: myUserBike.userBike.displacement,
+      totalMileage: myUserBike.userBike.totalMileage,
+      serialNumber: myUserBike.userBike.serialNumber,
       myUserBikeId: createMyUserBikeId(myUserBike.id),
       userId: createUserId(myUserBike.userId),
       nickname: myUserBike.nickname,
@@ -255,7 +264,7 @@ export class PrismaMyUserBikeRepository
   ): Promise<MyUserBikeEntity> {
     const updated = await this.connection.tUserMyBike.update({
       where: {
-        id: myUserBike.id,
+        id: myUserBike.myUserBikeId,
       },
       data: {
         nickname: myUserBike.nickname,
@@ -283,6 +292,8 @@ export class PrismaMyUserBikeRepository
           select: {
             bikeId: true,
             displacement: true,
+            totalMileage: true,
+            serialNumber: true,
           },
         },
       },
@@ -293,6 +304,9 @@ export class PrismaMyUserBikeRepository
         ? createBikeId(updated.userBike.bikeId)
         : null,
       userBikeId: createUserBikeId(updated.userBikeId),
+      displacement: updated.userBike.displacement,
+      totalMileage: updated.userBike.totalMileage,
+      serialNumber: updated.userBike.serialNumber,
       myUserBikeId: createMyUserBikeId(updated.id),
       userId: createUserId(updated.userId),
       nickname: updated.nickname,
