@@ -8,11 +8,11 @@ import type {
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
+import styles from './FuelLogEditModal.module.css'
+import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
 import { XIcon } from '@/components/icons/XIcon'
 import { apiDelete, apiPatch, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
-import styles from './FuelLogEditModal.module.css'
 
 interface FuelLogEditModalProps {
   bikeId: string
