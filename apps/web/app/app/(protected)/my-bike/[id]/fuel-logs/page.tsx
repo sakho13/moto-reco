@@ -14,6 +14,7 @@ import { FuelEfficiencyChart } from '@repo/ui/fuelEfficiencyChart'
 import { Select } from '@repo/ui/select'
 import type { SelectOption } from '@repo/ui/select'
 import styles from './page.module.css'
+import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
 import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
 import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal'
 import { authenticatedFetch } from '@/lib/api/client'
@@ -26,6 +27,7 @@ function FuelLogsPage() {
   const bikeId = params.id as string
   const [chartPeriod, setChartPeriod] = useState<FuelLogPeriod>('latest-year')
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
+  const [editingFuelLogId, setEditingFuelLogId] = useState<string | null>(null)
 
   const chartPeriodOptions: SelectOption[] = [
     { value: 'latest-year', label: '最新の履歴から1年' },
@@ -71,7 +73,7 @@ function FuelLogsPage() {
   )
 
   const handleEdit = (fuelLogId: string) => {
-    router.push(`/app/my-bike/${bikeId}/fuel-logs/${fuelLogId}/edit`)
+    setEditingFuelLogId(fuelLogId)
   }
 
   const handleRegister = () => {
@@ -139,6 +141,18 @@ function FuelLogsPage() {
           onClose={() => setIsRegisterModalOpen(false)}
           onSuccess={() => {
             setIsRegisterModalOpen(false)
+            setSize(1)
+          }}
+        />
+      )}
+
+      {editingFuelLogId && (
+        <FuelLogEditModal
+          bikeId={bikeId}
+          fuelLogId={editingFuelLogId}
+          onClose={() => setEditingFuelLogId(null)}
+          onSuccess={() => {
+            setEditingFuelLogId(null)
             setSize(1)
           }}
         />
