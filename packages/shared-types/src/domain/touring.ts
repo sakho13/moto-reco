@@ -13,5 +13,9 @@ export type Touring = {
   endDate: Date
   startMileage: number | null
   endMileage: number | null
+  startLatitude: number | null
+  startLongitude: number | null
+  endLatitude: number | null
+  endLongitude: number | null
   status: TouringStatus
 }

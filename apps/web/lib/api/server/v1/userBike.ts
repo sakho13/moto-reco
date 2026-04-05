@@ -10,10 +10,13 @@ import {
   ApiResponseTouringDetail,
   ApiResponseTouringList,
   ApiResponseBikesOngoingTourings,
+  ApiResponseSpotDetail,
+  ApiResponseSpotList,
   createBikeId,
   createFuelLogId,
   createMaintenanceLogId,
   createMyUserBikeId,
+  createSpotId,
   createTouringId,
   createUserId,
   FuelInsightPeriod,
@@ -33,6 +36,10 @@ import {
   TouringStartEndRequestSchema,
   TouringListQuerySchema,
   TouringUpdateRequestSchema,
+  TouringDeleteRequestSchema,
+  SpotRegisterRequestSchema,
+  SpotUpdateRequestSchema,
+  SpotReorderRequestSchema,
 } from '@repo/shared-types'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -46,11 +53,13 @@ import { PrismaFuelInsightRepository } from '../repositories/PrismaFuelInsightRe
 import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository'
 import { PrismaMaintenanceLogRepository } from '../repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
+import { PrismaSpotRepository } from '../repositories/PrismaSpotRepository'
 import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeRepository'
 import { FuelInsightService } from '../services/FuelInsightService'
 import { FuelLogService } from '../services/FuelLogService'
 import { MaintenanceLogService } from '../services/MaintenanceLogService'
+import { SpotService } from '../services/SpotService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
 import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
@@ -215,6 +224,10 @@ userBike.get('/bikes/ongoing-tourings', honoAuthMiddleware, async (c) => {
           endDate: ongoingTouring.endDate.toISOString(),
           startMileage: ongoingTouring.startMileage,
           endMileage: ongoingTouring.endMileage,
+          startLatitude: ongoingTouring.startLatitude,
+          startLongitude: ongoingTouring.startLongitude,
+          endLatitude: ongoingTouring.endLatitude,
+          endLongitude: ongoingTouring.endLongitude,
           status: ongoingTouring.status,
           fuelLogIds,
         },
@@ -551,6 +564,43 @@ userBike.delete(
   }
 )
 
+userBike.delete(
+  '/bike/:myUserBikeId/tourings',
+  honoAuthMiddleware,
+  zodValidateJson(TouringDeleteRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    await prisma.$transaction((t) => {
+      const touringRepo = new PrismaTouringRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const service = new TouringService(
+        touringRepo,
+        myUserBikeRepo,
+        fuelLogRepo
+      )
+
+      return service.deleteTouring({
+        touringId: createTouringId(body.touringId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+      })
+    })
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        message: 'ツーリング削除成功',
+        data: undefined,
+      },
+      200
+    )
+  }
+)
+
 userBike.post(
   '/bike/:myUserBikeId/maintenance-logs',
   honoAuthMiddleware,
@@ -710,6 +760,8 @@ userBike.post(
           title: body.title,
           startDate: body.startDate,
           startMileage: body.startMileage,
+          startLatitude: body.startLatitude,
+          startLongitude: body.startLongitude,
         })
       }
 
@@ -720,6 +772,8 @@ userBike.post(
         touringId: body.touringId,
         endDate: body.endDate,
         endMileage: body.endMileage,
+        endLatitude: body.endLatitude,
+        endLongitude: body.endLongitude,
       })
     })
 
@@ -751,6 +805,10 @@ userBike.post(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          startLatitude: result.startLatitude,
+          startLongitude: result.startLongitude,
+          endLatitude: result.endLatitude,
+          endLongitude: result.endLongitude,
           status: result.status,
           fuelLogIds: fuelLogIdsForStartEnd,
         },
@@ -801,6 +859,10 @@ userBike.post(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          startLatitude: result.startLatitude,
+          startLongitude: result.startLongitude,
+          endLatitude: result.endLatitude,
+          endLongitude: result.endLongitude,
           status: result.status,
           fuelLogIds: [], // 登録時は給油履歴は紐づいていない
         },
@@ -847,6 +909,10 @@ userBike.get(
             endDate: touring.endDate.toISOString(),
             startMileage: touring.startMileage,
             endMileage: touring.endMileage,
+            startLatitude: touring.startLatitude,
+            startLongitude: touring.startLongitude,
+            endLatitude: touring.endLatitude,
+            endLongitude: touring.endLongitude,
             status: touring.status,
             fuelLogIds: [], // 一覧では空配列（詳細APIで取得する）
           }
@@ -899,6 +965,10 @@ userBike.get(
           endDate: touring.endDate.toISOString(),
           startMileage: touring.startMileage,
           endMileage: touring.endMileage,
+          startLatitude: touring.startLatitude,
+          startLongitude: touring.startLongitude,
+          endLatitude: touring.endLatitude,
+          endLongitude: touring.endLongitude,
           status: touring.status,
           fuelLogIds: fuelLogIds,
         },
@@ -940,6 +1010,10 @@ userBike.patch(
         endMileage: body.endMileage,
         status: body.status,
         fuelLogIds: body.fuelLogIds?.map(createFuelLogId),
+        startLatitude: body.startLatitude,
+        startLongitude: body.startLongitude,
+        endLatitude: body.endLatitude,
+        endLongitude: body.endLongitude,
       })
     })
 
@@ -965,10 +1039,217 @@ userBike.patch(
           endDate: result.endDate.toISOString(),
           startMileage: result.startMileage,
           endMileage: result.endMileage,
+          startLatitude: result.startLatitude,
+          startLongitude: result.startLongitude,
+          endLatitude: result.endLatitude,
+          endLongitude: result.endLongitude,
           status: result.status,
           fuelLogIds: fuelLogIds,
         },
         message: 'ツーリング更新成功',
+      },
+      200
+    )
+  }
+)
+
+// スポット登録
+userBike.post(
+  '/bike/:myUserBikeId/tourings/:touringId/spots',
+  honoAuthMiddleware,
+  zodValidateJson(SpotRegisterRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const body = c.req.valid('json')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    const spot = await service.registerSpot({
+      touringId: createTouringId(touringId),
+      myUserBikeId: createMyUserBikeId(myUserBikeId),
+      userId: createUserId(userId),
+      name: body.name,
+      memo: body.memo,
+      latitude: body.latitude,
+      longitude: body.longitude,
+      visitedAt: body.visitedAt,
+    })
+
+    return c.json<SuccessResponse<ApiResponseSpotDetail>>(
+      {
+        status: 'success',
+        data: {
+          spotId: spot.id,
+          touringId: spot.touringId,
+          name: spot.name,
+          memo: spot.memo,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          visitedAt: spot.visitedAt.toISOString(),
+          sortOrder: spot.sortOrder,
+        },
+        message: 'スポット登録成功',
+      },
+      201
+    )
+  }
+)
+
+// スポット一覧取得
+userBike.get(
+  '/bike/:myUserBikeId/tourings/:touringId/spots',
+  honoAuthMiddleware,
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    const spots = await service.getSpots(
+      createTouringId(touringId),
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<ApiResponseSpotList>>(
+      {
+        status: 'success',
+        data: spots.map((spot) => ({
+          spotId: spot.id,
+          touringId: spot.touringId,
+          name: spot.name,
+          memo: spot.memo,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          visitedAt: spot.visitedAt.toISOString(),
+          sortOrder: spot.sortOrder,
+        })),
+        message: 'スポット一覧取得成功',
+      },
+      200
+    )
+  }
+)
+
+// スポット並び替え（/:spotId より前に定義）
+userBike.patch(
+  '/bike/:myUserBikeId/tourings/:touringId/spots/reorder',
+  honoAuthMiddleware,
+  zodValidateJson(SpotReorderRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const body = c.req.valid('json')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    await service.reorderSpots(
+      body.spotIds,
+      createTouringId(touringId),
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        data: undefined,
+        message: 'スポット並び替え成功',
+      },
+      200
+    )
+  }
+)
+
+// スポット更新
+userBike.patch(
+  '/bike/:myUserBikeId/tourings/:touringId/spots/:spotId',
+  honoAuthMiddleware,
+  zodValidateJson(SpotUpdateRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const spotId = c.req.param('spotId')
+    const body = c.req.valid('json')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    const spot = await service.updateSpot({
+      spotId: createSpotId(spotId),
+      touringId: createTouringId(touringId),
+      myUserBikeId: createMyUserBikeId(myUserBikeId),
+      userId: createUserId(userId),
+      name: body.name,
+      memo: body.memo,
+      latitude: body.latitude,
+      longitude: body.longitude,
+      visitedAt: body.visitedAt,
+    })
+
+    return c.json<SuccessResponse<ApiResponseSpotDetail>>(
+      {
+        status: 'success',
+        data: {
+          spotId: spot.id,
+          touringId: spot.touringId,
+          name: spot.name,
+          memo: spot.memo,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          visitedAt: spot.visitedAt.toISOString(),
+          sortOrder: spot.sortOrder,
+        },
+        message: 'スポット更新成功',
+      },
+      200
+    )
+  }
+)
+
+// スポット削除
+userBike.delete(
+  '/bike/:myUserBikeId/tourings/:touringId/spots/:spotId',
+  honoAuthMiddleware,
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const touringId = c.req.param('touringId')
+    const spotId = c.req.param('spotId')
+
+    const spotRepo = new PrismaSpotRepository(prisma)
+    const touringRepo = new PrismaTouringRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new SpotService(spotRepo, touringRepo, myUserBikeRepo)
+
+    await service.deleteSpot(
+      createSpotId(spotId),
+      createTouringId(touringId),
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        data: undefined,
+        message: 'スポット削除成功',
       },
       200
     )

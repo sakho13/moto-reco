@@ -162,11 +162,27 @@ export type ApiResponseTouringDetail = {
   endDate: string
   startMileage: number | null
   endMileage: number | null
+  startLatitude: number | null
+  startLongitude: number | null
+  endLatitude: number | null
+  endLongitude: number | null
   status: 'STARTED' | 'COMPLETED'
   fuelLogIds: string[]
 }
 
 export type ApiResponseTouringList = ApiResponseTouringDetail[]
+
+export type ApiResponsePublicTouringList = {
+  tourings: {
+    touringId: string
+    title: string
+    startDate: string
+    endDate: string
+    startMileage: number | null
+    endMileage: number | null
+    status: 'STARTED' | 'COMPLETED'
+  }[]
+}
 
 export type ApiResponseOngoingTouring = {
   touring: ApiResponseTouringDetail | null
@@ -180,6 +196,19 @@ export type ApiResponseBikeOngoingTouring = {
 export type ApiResponseBikesOngoingTourings = {
   bikes: ApiResponseBikeOngoingTouring[]
 }
+
+export type ApiResponseSpotDetail = {
+  spotId: string
+  touringId: string
+  name: string | null
+  memo: string | null
+  latitude: number | null
+  longitude: number | null
+  visitedAt: string
+  sortOrder: number
+}
+
+export type ApiResponseSpotList = ApiResponseSpotDetail[]
 
 export type ApiResponseFuelInsight = {
   averageFuelEfficiency: number | null

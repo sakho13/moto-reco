@@ -11,15 +11,6 @@ function Page() {
   return (
     <>
       <div className="w-full max-w-md flex flex-row gap-2">
-        <Button
-          onClick={() => {
-            router.push('/app/home')
-          }}
-          variant="cloud"
-        >
-          ← 戻る
-        </Button>
-
         <Button onClick={() => router.push('/app/bike/register')}>
           バイクを登録
         </Button>

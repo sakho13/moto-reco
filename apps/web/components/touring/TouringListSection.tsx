@@ -13,9 +13,14 @@ export interface TouringListSectionProps {
   tourings: ApiResponseTouringDetail[]
 
   /**
-   * ツーリング履歴編集時のコールバック
+   * ツーリング履歴詳細表示時のコールバック
    */
-  onEdit: (touringId: string) => void
+  onDetail?: (touringId: string) => void
+
+  /**
+   * ツーリング履歴削除時のコールバック
+   */
+  onDelete?: (touringId: string) => void
 
   /**
    * ツーリング履歴登録ボタンクリック時のコールバック
@@ -25,7 +30,8 @@ export interface TouringListSectionProps {
 
 export const TouringListSection = ({
   tourings,
-  onEdit,
+  onDetail,
+  onDelete,
   onRegister,
 }: TouringListSectionProps) => {
   return (
@@ -43,7 +49,8 @@ export const TouringListSection = ({
             <TouringListItem
               key={touring.touringId}
               touring={touring}
-              onEdit={onEdit}
+              onDetail={onDetail}
+              onDelete={onDelete}
             />
           ))}
         </div>

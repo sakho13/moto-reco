@@ -44,6 +44,22 @@
   color: var(--color-muted-foreground);
 }
 
+.homeButton {
+  display: inline-block;
+  padding: var(--spacing-2) var(--spacing-6);
+  background-color: var(--color-product);
+  color: var(--color-product-foreground);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.homeButton:hover {
+  opacity: 0.85;
+}
+
 /* Responsive Design */
 @media (max-width: 640px) {
   .authLayout {

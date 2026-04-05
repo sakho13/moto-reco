@@ -5,7 +5,7 @@ import styles from './page.module.css'
 import { APP_NAME, APP_VERSION, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} | バイクメンテナンス・給油記録管理アプリ`,
+  title: `バイクメンテナンス・給油記録管理アプリ`,
   description:
     'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理。走行距離や燃費の推移をグラフで確認でき、次回メンテナンスをリマインド通知。複数台のバイク管理にも対応した無料アプリです。',
   openGraph: {
@@ -31,6 +31,9 @@ export const metadata: Metadata = {
     description:
       'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理。走行距離や燃費の推移をグラフで確認。',
     images: ['/top_image_1.png'],
+  },
+  alternates: {
+    canonical: '/',
   },
 }
 

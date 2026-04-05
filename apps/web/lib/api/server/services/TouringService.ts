@@ -32,6 +32,8 @@ type StartTouringParams = {
   title?: string
   startDate?: Date
   startMileage?: number
+  startLatitude?: number
+  startLongitude?: number
 }
 
 type EndTouringParams = {
@@ -41,6 +43,8 @@ type EndTouringParams = {
   touringId: string
   endDate?: Date
   endMileage?: number
+  endLatitude?: number
+  endLongitude?: number
 }
 
 type TouringActionParams = StartTouringParams | EndTouringParams
@@ -56,6 +60,10 @@ type UpdateTouringParams = {
   endMileage?: number
   status?: TouringStatus
   fuelLogIds?: FuelLogId[]
+  startLatitude?: number | null
+  startLongitude?: number | null
+  endLatitude?: number | null
+  endLongitude?: number | null
 }
 
 export class TouringService {
@@ -101,6 +109,10 @@ export class TouringService {
         endDate: params.endDate,
         startMileage: params.startMileage ?? null,
         endMileage: params.endMileage ?? null,
+        startLatitude: null,
+        startLongitude: null,
+        endLatitude: null,
+        endLongitude: null,
         status,
       })
 
@@ -159,6 +171,10 @@ export class TouringService {
           endDate: startDate,
           startMileage: startMileage ?? null,
           endMileage: null,
+          startLatitude: params.startLatitude ?? null,
+          startLongitude: params.startLongitude ?? null,
+          endLatitude: null,
+          endLongitude: null,
           status: 'STARTED',
         })
 
@@ -197,6 +213,10 @@ export class TouringService {
         endDate,
         startMileage: existingTouring.startMileage,
         endMileage: endMileage ?? existingTouring.endMileage,
+        startLatitude: existingTouring.startLatitude,
+        startLongitude: existingTouring.startLongitude,
+        endLatitude: params.endLatitude ?? null,
+        endLongitude: params.endLongitude ?? null,
         status: 'COMPLETED',
       })
 
@@ -296,6 +316,22 @@ export class TouringService {
         endDate: params.endDate ?? existingTouring.endDate,
         startMileage: params.startMileage ?? existingTouring.startMileage,
         endMileage: params.endMileage ?? existingTouring.endMileage,
+        startLatitude:
+          'startLatitude' in params
+            ? (params.startLatitude ?? null)
+            : existingTouring.startLatitude,
+        startLongitude:
+          'startLongitude' in params
+            ? (params.startLongitude ?? null)
+            : existingTouring.startLongitude,
+        endLatitude:
+          'endLatitude' in params
+            ? (params.endLatitude ?? null)
+            : existingTouring.endLatitude,
+        endLongitude:
+          'endLongitude' in params
+            ? (params.endLongitude ?? null)
+            : existingTouring.endLongitude,
         status: newStatus,
       })
 
@@ -346,5 +382,32 @@ export class TouringService {
       }
       throw error
     }
+  }
+
+  public async deleteTouring(params: {
+    touringId: TouringId
+    myUserBikeId: MyUserBikeId
+    userId: UserId
+  }): Promise<void> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      params.myUserBikeId,
+      params.userId
+    )
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const existingTouring = await this.touringRepository.findTouringById(
+      params.touringId,
+      params.myUserBikeId
+    )
+    if (!existingTouring) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
+    }
+
+    await this.touringRepository.deleteTouring(
+      params.touringId,
+      params.myUserBikeId
+    )
   }
 }

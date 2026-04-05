@@ -199,21 +199,44 @@ model TUserMyBikeTouring {
   id           String        @id @default(cuid(2))
   userMyBikeId String        @map("my_bike_id")
 
-  title        String        @map("title")
-  startDate    DateTime      @map("start_date")
-  endDate      DateTime      @map("end_date")
-  startMileage Int?          @map("start_mileage")
-  endMileage   Int?          @map("end_mileage")
-  status       TouringStatus @default(COMPLETED) @map("status")
+  title          String        @map("title")
+  startDate      DateTime      @map("start_date")
+  endDate        DateTime      @map("end_date")
+  startMileage   Int?          @map("start_mileage")
+  endMileage     Int?          @map("end_mileage")
+  startLatitude  Float?        @map("start_latitude")
+  startLongitude Float?        @map("start_longitude")
+  endLatitude    Float?        @map("end_latitude")
+  endLongitude   Float?        @map("end_longitude")
+  status         TouringStatus @default(COMPLETED) @map("status")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  userMyBike TUserMyBike          @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike              @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   fuelLogs   TUserMyBikeFuelLog[]
+  spots      TUserMyBikeTouringSpot[]
 
   @@index([userMyBikeId, startDate])
   @@index([userMyBikeId, status])
+}
+
+model TUserMyBikeTouringSpot {
+  id        String   @id @default(cuid(2))
+  touringId String   @map("touring_id")
+  name      String?  @map("name")
+  memo      String?  @map("memo")
+  latitude  Float?   @map("latitude")
+  longitude Float?   @map("longitude")
+  visitedAt DateTime @default(now()) @map("visited_at")
+  sortOrder Int      @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  touring TUserMyBikeTouring @relation(fields: [touringId], references: [id], onDelete: Cascade)
+
+  @@index([touringId, sortOrder])
 }
 
 model TUserQuit {

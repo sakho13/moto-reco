@@ -1,3 +1,4 @@
+import { BreadcrumbNav } from '@/components/Navigation/BreadcrumbNav'
 import { DesktopSidebar } from '@/components/Navigation/DesktopSidebar'
 import { MobileNavigation } from '@/components/Navigation/MobileNavigation'
 
@@ -11,7 +12,8 @@ export default function Layout({ children }: Props) {
       <DesktopSidebar />
       <MobileNavigation />
 
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 gap-8">
+      <div className="min-h-screen w-full flex flex-col items-center p-4 gap-6 pb-24 sm:pb-4">
+        <BreadcrumbNav />
         {children}
       </div>
     </>
