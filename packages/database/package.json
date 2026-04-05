@@ -10,14 +10,14 @@
     "db:seed": "dotenv -e .env.local -- tsx prisma/seed.ts"
   },
   "devDependencies": {
-    "@types/pg": "8.15.6",
+    "@types/pg": "8.20.0",
     "tsx": "catalog:"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.0.0",
     "@prisma/client": "7.0.0",
     "dotenv": "catalog:",
-    "pg": "8.16.3",
+    "pg": "8.20.0",
     "prisma": "7.0.0"
   },
   "exports": {
