@@ -1,8 +1,7 @@
 'use client'
 
 import { SpotAddForm } from './SpotAddForm'
-import { XIcon } from '@/components/icons/XIcon'
-import styles from '@/components/touring/TouringEditModal.module.css'
+import { ModalBase } from '@/components/common/ModalBase'
 
 type SpotAddModalProps = {
   bikeId: string
@@ -21,24 +20,12 @@ export function SpotAddModal({
   onSuccess,
 }: SpotAddModalProps) {
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h2 className="text-lg font-semibold">スポットを追加</h2>
-          <button
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="閉じる"
-          >
-            <XIcon />
-          </button>
-        </div>
-        <SpotAddForm
-          bikeId={bikeId}
-          touringId={touringId}
-          onSuccess={onSuccess}
-        />
-      </div>
-    </div>
+    <ModalBase title="スポットを追加" onClose={onClose}>
+      <SpotAddForm
+        bikeId={bikeId}
+        touringId={touringId}
+        onSuccess={onSuccess}
+      />
+    </ModalBase>
   )
 }
