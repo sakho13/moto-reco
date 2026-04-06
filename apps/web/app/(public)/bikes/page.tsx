@@ -15,8 +15,12 @@ export const metadata = {
 export const revalidate = 300
 
 const getPublicBikes = async () => {
-  const repo = new PrismaMyUserBikeRepository(prisma)
-  return repo.findPublicBikes()
+  try {
+    const repo = new PrismaMyUserBikeRepository(prisma)
+    return repo.findPublicBikes()
+  } catch {
+    return []
+  }
 }
 
 export default async function PublicBikesPage() {
