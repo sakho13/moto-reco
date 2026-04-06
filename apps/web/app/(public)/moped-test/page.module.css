@@ -1,0 +1,108 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 120px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.version,
+.lastResult {
+  color: #666;
+  font-size: 14px;
+}
+
+.questionList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.questionCard {
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+
+.questionCategory {
+  font-size: 12px;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.answerButtons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.answerButtons button {
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.answerButtons button.selected {
+  border-color: #171717;
+  background: #f0f0f0;
+}
+
+.selected {
+  border-color: #171717;
+  background: #f0f0f0;
+}
+
+.resultBox {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8f8f8;
+}
+
+.correct {
+  color: #007d32;
+  font-weight: 700;
+}
+
+.incorrect {
+  color: #c62828;
+  font-weight: 700;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.submitButton,
+.resetButton {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.submitButton {
+  background: #171717;
+  color: #fff;
+}
+
+.resetButton {
+  background: #f1f1f1;
+  color: #171717;
+}
+
+.summary {
+  font-weight: 700;
+}
