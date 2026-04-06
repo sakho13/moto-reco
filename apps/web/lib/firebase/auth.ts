@@ -2,6 +2,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  sendPasswordResetEmail,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   type UserCredential,
@@ -29,6 +30,14 @@ export const registerWithEmail = async (
 ): Promise<UserCredential> => {
   const auth = getFirebaseAuth()
   return await createUserWithEmailAndPassword(auth, email, password)
+}
+
+/**
+ * メールアドレス宛にパスワード再設定メールを送信
+ */
+export const requestPasswordReset = async (email: string): Promise<void> => {
+  const auth = getFirebaseAuth()
+  await sendPasswordResetEmail(auth, email)
 }
 
 /**
