@@ -7,8 +7,7 @@ import type {
   SuccessResponse,
 } from '@repo/shared-types'
 import { MyBikeEditForm, type MyBikeEditFormData } from './MyBikeEditForm'
-import styles from './MyBikeEditModal.module.css'
-import { XIcon } from '@/components/icons/XIcon'
+import { ModalBase } from '@/components/common/ModalBase'
 import { authenticatedFetch, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
@@ -85,31 +84,18 @@ export function MyBikeEditModal({
   }
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h2 className="text-lg font-semibold">マイバイク情報を編集</h2>
-          <button
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="閉じる"
-          >
-            <XIcon />
-          </button>
-        </div>
+    <ModalBase title="マイバイク情報を編集" onClose={onClose}>
+      {isLoading && <p>読み込み中...</p>}
 
-        {isLoading && <p>読み込み中...</p>}
-
-        {!isLoading && initialData && (
-          <MyBikeEditForm
-            initialData={initialData}
-            isDisplacementEditable={isDisplacementEditable}
-            onSubmit={handleFormSubmit}
-            isSubmitting={isSubmitting}
-            error={error}
-          />
-        )}
-      </div>
-    </div>
+      {!isLoading && initialData && (
+        <MyBikeEditForm
+          initialData={initialData}
+          isDisplacementEditable={isDisplacementEditable}
+          onSubmit={handleFormSubmit}
+          isSubmitting={isSubmitting}
+          error={error}
+        />
+      )}
+    </ModalBase>
   )
 }

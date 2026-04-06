@@ -11,7 +11,7 @@ import { toast } from '@repo/ui/sonner'
 import { ToggleSection } from '@repo/ui/toggleSection'
 import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
 import styles from './FuelLogRegisterModal.module.css'
-import { XIcon } from '@/components/icons/XIcon'
+import { ModalBase } from '@/components/common/ModalBase'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
@@ -105,81 +105,68 @@ export function FuelLogRegisterModal({
   }
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h2 className="text-lg font-semibold">給油履歴を登録</h2>
-          <button
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="閉じる"
-          >
-            <XIcon />
-          </button>
+    <ModalBase title="給油履歴を登録" onClose={onClose}>
+      {previousFuelLog && (
+        <div className={styles.previousLog}>
+          <ToggleSection title="前回の給油履歴">
+            <dl
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'auto 1fr',
+                gap: 'var(--spacing-2)',
+                fontSize: 'var(--font-size-sm)',
+              }}
+            >
+              <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                給油日:
+              </dt>
+              <dd style={{ color: 'var(--color-ink)' }}>
+                {formatDate(previousFuelLog.refueledAt)}
+              </dd>
+              <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                走行距離:
+              </dt>
+              <dd style={{ color: 'var(--color-ink)' }}>
+                {previousFuelLog.mileage.toLocaleString()} km
+              </dd>
+              <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                給油量:
+              </dt>
+              <dd style={{ color: 'var(--color-ink)' }}>
+                {previousFuelLog.amount.toFixed(2)} L
+              </dd>
+              <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                給油価格:
+              </dt>
+              <dd style={{ color: 'var(--color-ink)' }}>
+                ¥{previousFuelLog.totalPrice.toLocaleString()}
+              </dd>
+              {previousFuelLog.memo && (
+                <>
+                  <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
+                    メモ:
+                  </dt>
+                  <dd
+                    style={{
+                      color: 'var(--color-ink)',
+                      whiteSpace: 'pre-wrap',
+                    }}
+                  >
+                    {previousFuelLog.memo}
+                  </dd>
+                </>
+              )}
+            </dl>
+          </ToggleSection>
         </div>
+      )}
 
-        {previousFuelLog && (
-          <div className={styles.previousLog}>
-            <ToggleSection title="前回の給油履歴">
-              <dl
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'auto 1fr',
-                  gap: 'var(--spacing-2)',
-                  fontSize: 'var(--font-size-sm)',
-                }}
-              >
-                <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                  給油日:
-                </dt>
-                <dd style={{ color: 'var(--color-ink)' }}>
-                  {formatDate(previousFuelLog.refueledAt)}
-                </dd>
-                <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                  走行距離:
-                </dt>
-                <dd style={{ color: 'var(--color-ink)' }}>
-                  {previousFuelLog.mileage.toLocaleString()} km
-                </dd>
-                <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                  給油量:
-                </dt>
-                <dd style={{ color: 'var(--color-ink)' }}>
-                  {previousFuelLog.amount.toFixed(2)} L
-                </dd>
-                <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                  給油価格:
-                </dt>
-                <dd style={{ color: 'var(--color-ink)' }}>
-                  ¥{previousFuelLog.totalPrice.toLocaleString()}
-                </dd>
-                {previousFuelLog.memo && (
-                  <>
-                    <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                      メモ:
-                    </dt>
-                    <dd
-                      style={{
-                        color: 'var(--color-ink)',
-                        whiteSpace: 'pre-wrap',
-                      }}
-                    >
-                      {previousFuelLog.memo}
-                    </dd>
-                  </>
-                )}
-              </dl>
-            </ToggleSection>
-          </div>
-        )}
-
-        <FuelLogForm
-          onSubmit={handleFormSubmit}
-          isSubmitting={isSubmitting}
-          error={error}
-          totalMileage={bike?.totalMileage}
-        />
-      </div>
-    </div>
+      <FuelLogForm
+        onSubmit={handleFormSubmit}
+        isSubmitting={isSubmitting}
+        error={error}
+        totalMileage={bike?.totalMileage}
+      />
+    </ModalBase>
   )
 }

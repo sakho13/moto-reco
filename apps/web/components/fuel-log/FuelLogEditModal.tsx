@@ -8,9 +8,8 @@ import type {
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
-import styles from './FuelLogEditModal.module.css'
 import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
-import { XIcon } from '@/components/icons/XIcon'
+import { ModalBase } from '@/components/common/ModalBase'
 import { apiDelete, apiPatch, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
@@ -117,44 +116,31 @@ export function FuelLogEditModal({
   }
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h2 className="text-lg font-semibold">給油履歴を編集</h2>
-          <button
-            onClick={onClose}
-            className={styles.closeButton}
-            aria-label="閉じる"
+    <ModalBase title="給油履歴を編集" onClose={onClose}>
+      {isLoading && <p>読み込み中...</p>}
+
+      {!isLoading && initialData && (
+        <>
+          <FuelLogForm
+            initialData={initialData}
+            onSubmit={handleFormSubmit}
+            isSubmitting={isSubmitting}
+            error={error}
+            isEdit={true}
+          />
+          <Button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting || isSubmitting}
+            variant="danger"
+            fullWidth
+            loading={isDeleting}
+            style={{ marginTop: 'var(--spacing-2)' }}
           >
-            <XIcon />
-          </button>
-        </div>
-
-        {isLoading && <p>読み込み中...</p>}
-
-        {!isLoading && initialData && (
-          <>
-            <FuelLogForm
-              initialData={initialData}
-              onSubmit={handleFormSubmit}
-              isSubmitting={isSubmitting}
-              error={error}
-              isEdit={true}
-            />
-            <Button
-              type="button"
-              onClick={handleDelete}
-              disabled={isDeleting || isSubmitting}
-              variant="danger"
-              fullWidth
-              loading={isDeleting}
-              style={{ marginTop: 'var(--spacing-2)' }}
-            >
-              削除する
-            </Button>
-          </>
-        )}
-      </div>
-    </div>
+            削除する
+          </Button>
+        </>
+      )}
+    </ModalBase>
   )
 }
