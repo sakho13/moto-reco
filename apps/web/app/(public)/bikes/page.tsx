@@ -17,8 +17,9 @@ export const revalidate = 300
 const getPublicBikes = async () => {
   try {
     const repo = new PrismaMyUserBikeRepository(prisma)
-    return repo.findPublicBikes()
-  } catch {
+    return await repo.findPublicBikes()
+  } catch (e) {
+    console.error('[/bikes] DB接続に失敗したため空配列を返します:', e)
     return []
   }
 }
