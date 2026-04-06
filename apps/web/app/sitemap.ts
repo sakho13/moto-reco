@@ -3,6 +3,8 @@ import { prisma } from '@repo/database'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
 import { SITE_URL } from '@/lib/statics'
 
+export const revalidate = 300
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -46,6 +48,7 @@ async function fetchPublicBikes() {
   try {
     const repo = new PrismaMyUserBikeRepository(prisma)
     const bikes = await repo.findPublicBikes()
+    console.log(`[sitemap] 公開バイク取得: ${bikes.length}件`)
 
     const bikesPages: MetadataRoute.Sitemap = bikes.map((bike) => ({
       url: `${SITE_URL}/bikes/${bike.myUserBikeId.toString()}`,
@@ -56,7 +59,10 @@ async function fetchPublicBikes() {
 
     return bikesPages
   } catch (error) {
-    console.error('Failed to fetch public bikes for sitemap:', error)
+    console.error('[sitemap] 公開バイク取得失敗', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return []
   }
 }
