@@ -15,8 +15,13 @@ export const metadata = {
 export const revalidate = 300
 
 const getPublicBikes = async () => {
-  const repo = new PrismaMyUserBikeRepository(prisma)
-  return repo.findPublicBikes()
+  try {
+    const repo = new PrismaMyUserBikeRepository(prisma)
+    return await repo.findPublicBikes()
+  } catch (e) {
+    console.error('[/bikes] DB接続に失敗したため空配列を返します:', e)
+    return []
+  }
 }
 
 export default async function PublicBikesPage() {
