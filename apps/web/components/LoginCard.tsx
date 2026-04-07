@@ -161,6 +161,10 @@ export function LoginCard() {
           />
         </FormField>
 
+        <div className="mb-4 text-right text-sm">
+          <Link href="/app/reset-password">パスワードをお忘れですか？</Link>
+        </div>
+
         <Button
           type="submit"
           variant="primary"
