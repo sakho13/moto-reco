@@ -1068,6 +1068,76 @@ describe('UserBike API Endpoints', () => {
     })
   })
 
+  describe('GET /api/v1/user-bike/bike/:myUserBikeId/history', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'ヒストリーテスト用',
+      })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('給油履歴とツーリング履歴を時系列で統合して取得できる', async () => {
+      await createTestTouring(token, myUserBikeId, {
+        title: '箱根ツーリング',
+        startDate: '2024-04-01T00:00:00.000Z',
+        endDate: '2024-04-02T00:00:00.000Z',
+      })
+
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-04-05T00:00:00.000Z',
+        mileage: 1200,
+        previousMileage: 1100,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.data).toHaveLength(2)
+      expect(json.data[0].type).toBe('FUEL_LOG')
+      expect(json.data[1].type).toBe('TOURING')
+    })
+
+    test('他ユーザーのバイクIDを指定した場合は404となる', async () => {
+      const otherUser = await createTestUser()
+      const otherBike = await createTestUserBike(otherUser.token, {
+        displacement: 250,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${otherBike.myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+
   describe('GET /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
     let token: string
     let myUserBikeId: string

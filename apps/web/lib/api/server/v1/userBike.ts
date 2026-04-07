@@ -6,6 +6,7 @@ import {
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
   ApiResponseFuelInsight,
+  ApiResponseBikeHistoryList,
   ApiResponseTouringDetail,
   ApiResponseTouringList,
   ApiResponseBikesOngoingTourings,
@@ -37,6 +38,7 @@ import {
   SpotUpdateRequestSchema,
   SpotReorderRequestSchema,
 } from '@repo/shared-types'
+import { ApiV1Error } from '../errors/ApiV1Error'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import {
@@ -298,6 +300,93 @@ userBike.patch(
     })
   }
 )
+
+userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
+  const { userId } = c.var.user!
+  const myUserBikeId = c.req.param('myUserBikeId')
+
+  const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+  const myUserBike = await myUserBikeRepo.findMyUserBikeById(
+    createMyUserBikeId(myUserBikeId),
+    createUserId(userId)
+  )
+
+  if (!myUserBike) {
+    throw new ApiV1Error('NOT_FOUND', 'バイクが見つかりません')
+  }
+
+  const [fuelLogs, tourings] = await Promise.all([
+    prisma.tUserMyBikeFuelLog.findMany({
+      where: { userMyBikeId: myUserBikeId },
+      include: {
+        touring: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    }),
+    prisma.tUserMyBikeTouring.findMany({
+      where: { userMyBikeId: myUserBikeId },
+    }),
+  ])
+
+  const historyItems: ApiResponseBikeHistoryList = [
+    ...fuelLogs.map((log) => {
+      const distance = log.mileage - log.previousMileage
+      const fuelEfficiency = distance > 0 ? distance / log.amount : null
+      const pricePerLiter = log.amount > 0 ? log.price / log.amount : null
+
+      return {
+        type: 'FUEL_LOG' as const,
+        occurredAt: log.refueledAt.toISOString(),
+        fuelLog: {
+          fuelLogId: log.id,
+          refueledAt: log.refueledAt.toISOString(),
+          mileage: log.mileage,
+          previousMileage: log.previousMileage,
+          amount: log.amount,
+          totalPrice: log.price,
+          memo: log.memo,
+          fuelEfficiency,
+          pricePerLiter,
+          touringId: log.touringId,
+          touringTitle: log.touring?.title ?? null,
+        },
+      }
+    }),
+    ...tourings.map((touring) => ({
+      type: 'TOURING' as const,
+      occurredAt: touring.endDate.toISOString(),
+      touring: {
+        touringId: touring.id,
+        title: touring.title,
+        startDate: touring.startDate.toISOString(),
+        endDate: touring.endDate.toISOString(),
+        startMileage: touring.startMileage,
+        endMileage: touring.endMileage,
+        startLatitude: touring.startLatitude,
+        startLongitude: touring.startLongitude,
+        endLatitude: touring.endLatitude,
+        endLongitude: touring.endLongitude,
+        status: touring.status,
+        fuelLogIds: [],
+      },
+    })),
+  ]
+
+  historyItems.sort(
+    (a, b) =>
+      new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+  )
+
+  return c.json<SuccessResponse<ApiResponseBikeHistoryList>>({
+    status: 'success',
+    data: historyItems,
+    message: 'バイクヒストリー一覧取得成功',
+  })
+})
 
 userBike.get(
   '/bike/:myUserBikeId/fuel-logs',

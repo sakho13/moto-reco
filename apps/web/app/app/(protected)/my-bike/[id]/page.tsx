@@ -12,6 +12,7 @@ import { Button } from '@repo/ui/button'
 import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
+import { HistoryIcon } from '@/components/icons/HistoryIcon'
 import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
@@ -135,6 +136,13 @@ function BikeDetailPage() {
 
       {/* 履歴管理セクション */}
       <div className="w-full max-w-md flex flex-col gap-4">
+        <NavigationCard
+          href={`/app/my-bike/${id}/history`}
+          title="バイクヒストリー"
+          description="ツーリング・給油の時系列履歴を確認できます"
+          icon={<HistoryIcon />}
+        />
+
         <NavigationCard
           href={`/app/my-bike/${id}/fuel-logs`}
           title="給油履歴"
