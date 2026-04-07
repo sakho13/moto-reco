@@ -84,7 +84,9 @@ export function LoginCard() {
           const currentUser = auth.currentUser
 
           if (!currentUser) {
-            throw new Error('認証情報の取得に失敗しました')
+            throw new Error('認証情報の取得に失敗しました', {
+              cause: profileError,
+            })
           }
 
           // displayName のフォールバック
