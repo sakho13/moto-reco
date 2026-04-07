@@ -15,7 +15,7 @@
     "storybook": "turbo run storybook"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.1.18",
+    "@tailwindcss/postcss": "4.2.2",
     "dotenv": "catalog:",
     "dotenv-cli": "catalog:",
     "prettier": "catalog:",
