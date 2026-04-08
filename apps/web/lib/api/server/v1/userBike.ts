@@ -750,7 +750,7 @@ userBike.post(
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
-    const result = await prisma.$transaction((t) => {
+    const result = await prisma.$transaction(async (t) => {
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const fuelLogRepo = new PrismaFuelLogRepository(t)
@@ -773,7 +773,7 @@ userBike.post(
         })
       }
 
-      return service.handleTouringAction({
+      const touring = await service.handleTouringAction({
         action: 'end',
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
@@ -783,6 +783,17 @@ userBike.post(
         endLatitude: body.endLatitude,
         endLongitude: body.endLongitude,
       })
+
+      const historyRepo = new PrismaHistoryRepository(t)
+      await historyRepo.createHistory({
+        userId: createUserId(userId),
+        userMyBikeId: createMyUserBikeId(myUserBikeId),
+        type: 'TOURING',
+        occurredAt: touring.endDate,
+        touringId: touring.id,
+      })
+
+      return touring
     })
 
     const status = body.action === 'start' ? 201 : 200
