@@ -7,6 +7,7 @@ import {
   ApiResponseFuelLogList,
   ApiResponseFuelInsight,
   ApiResponseBikeHistoryList,
+  ApiResponseAllBikesHistoryList,
   ApiResponseTouringDetail,
   ApiResponseTouringList,
   ApiResponseBikesOngoingTourings,
@@ -302,6 +303,113 @@ userBike.patch(
   }
 )
 
+userBike.get('/history', honoAuthMiddleware, async (c) => {
+  const { userId } = c.var.user!
+
+  const histories = await prisma.tUserMyBikeHistory.findMany({
+    where: { userId },
+    include: {
+      userMyBike: {
+        include: {
+          userBike: {
+            include: {
+              bike: {
+                include: {
+                  manufacturer: { select: { name: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+      fuelLog: {
+        include: {
+          touring: {
+            select: { id: true, title: true },
+          },
+        },
+      },
+      touring: true,
+    },
+    orderBy: { occurredAt: 'desc' },
+  })
+
+  const historyItems: ApiResponseAllBikesHistoryList = histories.flatMap(
+    (h): ApiResponseAllBikesHistoryList => {
+      const bikeId = h.userMyBikeId ?? ''
+      const myBike = h.userMyBike
+      const bikeName = myBike
+        ? (myBike.nickname ??
+          (`${myBike.userBike.bike?.manufacturer?.name ?? ''} ${myBike.userBike.bike?.modelName ?? ''}`.trim() ||
+            '不明なバイク'))
+        : '不明なバイク'
+
+      if (h.type === 'FUEL_LOG' && h.fuelLog) {
+        const log = h.fuelLog
+        const distance = log.mileage - log.previousMileage
+        const fuelEfficiency = distance > 0 ? distance / log.amount : null
+        const pricePerLiter = log.amount > 0 ? log.price / log.amount : null
+
+        return [
+          {
+            type: 'FUEL_LOG' as const,
+            occurredAt: h.occurredAt.toISOString(),
+            bikeId,
+            bikeName,
+            fuelLog: {
+              fuelLogId: log.id,
+              refueledAt: log.refueledAt.toISOString(),
+              mileage: log.mileage,
+              previousMileage: log.previousMileage,
+              amount: log.amount,
+              totalPrice: log.price,
+              memo: log.memo,
+              fuelEfficiency,
+              pricePerLiter,
+              touringId: log.touringId,
+              touringTitle: log.touring?.title ?? null,
+            },
+          },
+        ]
+      }
+
+      if (h.type === 'TOURING' && h.touring) {
+        const touring = h.touring
+        return [
+          {
+            type: 'TOURING' as const,
+            occurredAt: h.occurredAt.toISOString(),
+            bikeId,
+            bikeName,
+            touring: {
+              touringId: touring.id,
+              title: touring.title,
+              startDate: touring.startDate.toISOString(),
+              endDate: touring.endDate.toISOString(),
+              startMileage: touring.startMileage,
+              endMileage: touring.endMileage,
+              startLatitude: touring.startLatitude,
+              startLongitude: touring.startLongitude,
+              endLatitude: touring.endLatitude,
+              endLongitude: touring.endLongitude,
+              status: touring.status,
+              fuelLogIds: [],
+            },
+          },
+        ]
+      }
+
+      return []
+    }
+  )
+
+  return c.json<SuccessResponse<ApiResponseAllBikesHistoryList>>({
+    status: 'success',
+    data: historyItems,
+    message: '全バイクヒストリー一覧取得成功',
+  })
+})
+
 userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
   const { userId } = c.var.user!
   const myUserBikeId = c.req.param('myUserBikeId')
@@ -331,60 +439,62 @@ userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
     orderBy: { occurredAt: 'desc' },
   })
 
-  const historyItems: ApiResponseBikeHistoryList = histories.flatMap((h) => {
-    if (h.type === 'FUEL_LOG' && h.fuelLog) {
-      const log = h.fuelLog
-      const distance = log.mileage - log.previousMileage
-      const fuelEfficiency = distance > 0 ? distance / log.amount : null
-      const pricePerLiter = log.amount > 0 ? log.price / log.amount : null
+  const historyItems: ApiResponseBikeHistoryList = histories.flatMap(
+    (h): ApiResponseBikeHistoryList => {
+      if (h.type === 'FUEL_LOG' && h.fuelLog) {
+        const log = h.fuelLog
+        const distance = log.mileage - log.previousMileage
+        const fuelEfficiency = distance > 0 ? distance / log.amount : null
+        const pricePerLiter = log.amount > 0 ? log.price / log.amount : null
 
-      return [
-        {
-          type: 'FUEL_LOG' as const,
-          occurredAt: h.occurredAt.toISOString(),
-          fuelLog: {
-            fuelLogId: log.id,
-            refueledAt: log.refueledAt.toISOString(),
-            mileage: log.mileage,
-            previousMileage: log.previousMileage,
-            amount: log.amount,
-            totalPrice: log.price,
-            memo: log.memo,
-            fuelEfficiency,
-            pricePerLiter,
-            touringId: log.touringId,
-            touringTitle: log.touring?.title ?? null,
+        return [
+          {
+            type: 'FUEL_LOG' as const,
+            occurredAt: h.occurredAt.toISOString(),
+            fuelLog: {
+              fuelLogId: log.id,
+              refueledAt: log.refueledAt.toISOString(),
+              mileage: log.mileage,
+              previousMileage: log.previousMileage,
+              amount: log.amount,
+              totalPrice: log.price,
+              memo: log.memo,
+              fuelEfficiency,
+              pricePerLiter,
+              touringId: log.touringId,
+              touringTitle: log.touring?.title ?? null,
+            },
           },
-        },
-      ]
-    }
+        ]
+      }
 
-    if (h.type === 'TOURING' && h.touring) {
-      const touring = h.touring
-      return [
-        {
-          type: 'TOURING' as const,
-          occurredAt: h.occurredAt.toISOString(),
-          touring: {
-            touringId: touring.id,
-            title: touring.title,
-            startDate: touring.startDate.toISOString(),
-            endDate: touring.endDate.toISOString(),
-            startMileage: touring.startMileage,
-            endMileage: touring.endMileage,
-            startLatitude: touring.startLatitude,
-            startLongitude: touring.startLongitude,
-            endLatitude: touring.endLatitude,
-            endLongitude: touring.endLongitude,
-            status: touring.status,
-            fuelLogIds: [],
+      if (h.type === 'TOURING' && h.touring) {
+        const touring = h.touring
+        return [
+          {
+            type: 'TOURING' as const,
+            occurredAt: h.occurredAt.toISOString(),
+            touring: {
+              touringId: touring.id,
+              title: touring.title,
+              startDate: touring.startDate.toISOString(),
+              endDate: touring.endDate.toISOString(),
+              startMileage: touring.startMileage,
+              endMileage: touring.endMileage,
+              startLatitude: touring.startLatitude,
+              startLongitude: touring.startLongitude,
+              endLatitude: touring.endLatitude,
+              endLongitude: touring.endLongitude,
+              status: touring.status,
+              fuelLogIds: [],
+            },
           },
-        },
-      ]
-    }
+        ]
+      }
 
-    return []
-  })
+      return []
+    }
+  )
 
   return c.json<SuccessResponse<ApiResponseBikeHistoryList>>({
     status: 'success',

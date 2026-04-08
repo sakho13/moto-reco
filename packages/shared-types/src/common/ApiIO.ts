@@ -159,6 +159,13 @@ export type ApiResponseBikeHistoryItem =
 
 export type ApiResponseBikeHistoryList = ApiResponseBikeHistoryItem[]
 
+export type ApiResponseAllBikesHistoryItem = ApiResponseBikeHistoryItem & {
+  bikeId: string
+  bikeName: string
+}
+
+export type ApiResponseAllBikesHistoryList = ApiResponseAllBikesHistoryItem[]
+
 export type ApiResponseTouringDetail = {
   touringId: string
   title: string

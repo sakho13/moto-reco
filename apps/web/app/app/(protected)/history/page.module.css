@@ -16,7 +16,13 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .badge {
@@ -38,9 +44,15 @@
   color: #047857;
 }
 
+.bikeName {
+  font-size: 12px;
+  color: #6b7280;
+}
+
 .date {
   color: #4b5563;
   font-size: 13px;
+  flex-shrink: 0;
 }
 
 .detail {
