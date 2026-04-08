@@ -1136,6 +1136,93 @@ describe('UserBike API Endpoints', () => {
       expect(res.status).toBe(404)
       expect404Error(json)
     })
+
+    test('給油履歴を登録するとヒストリーに追加される', async () => {
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-05-01T00:00:00.000Z',
+        mileage: 2000,
+        previousMileage: 1900,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toHaveLength(1)
+      expect(json.data[0].type).toBe('FUEL_LOG')
+    })
+
+    test('ツーリングを登録するとヒストリーに追加される', async () => {
+      await createTestTouring(token, myUserBikeId, {
+        title: '富士山ツーリング',
+        startDate: '2024-06-01T00:00:00.000Z',
+        endDate: '2024-06-02T00:00:00.000Z',
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toHaveLength(1)
+      expect(json.data[0].type).toBe('TOURING')
+    })
+
+    test('給油履歴を削除するとヒストリーからも削除される', async () => {
+      const fuelLogId = await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-07-01T00:00:00.000Z',
+        mileage: 3000,
+        previousMileage: 2900,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      // 削除前はヒストリーに1件存在する
+      const beforeRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const beforeJson = await beforeRes.json()
+      expect(beforeJson.data).toHaveLength(1)
+
+      // 給油履歴を削除
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fuelLogId }),
+      })
+
+      // 削除後はヒストリーも0件になる
+      const afterRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const afterJson = await afterRes.json()
+      expect(afterRes.status).toBe(200)
+      expect(afterJson.data).toHaveLength(0)
+    })
   })
 
   describe('GET /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
