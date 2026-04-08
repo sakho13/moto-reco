@@ -25,7 +25,9 @@ export function ResetPasswordCard() {
 
     try {
       await requestPasswordReset(email)
-      setSuccess('パスワード再設定メールを送信しました。メールをご確認ください。')
+      setSuccess(
+        'パスワード再設定メールを送信しました。メールをご確認ください。'
+      )
     } catch (err) {
       console.error('Password reset error:', err)
       setError(
