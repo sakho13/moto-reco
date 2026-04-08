@@ -5,10 +5,10 @@
 }
 
 .historyItem {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-cloud);
   border-radius: 12px;
   padding: 12px;
-  background: #ffffff;
+  background: var(--color-background);
 }
 
 .header {
@@ -28,6 +28,7 @@
 .badge {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   border-radius: 9999px;
   padding: 2px 8px;
   font-size: 12px;
@@ -35,33 +36,52 @@
 }
 
 .badgeFuel {
-  background-color: #ecfeff;
-  color: #0e7490;
+  background-color: var(--color-cloud);
+  color: var(--color-product);
 }
 
 .badgeTouring {
-  background-color: #ecfdf5;
-  color: #047857;
+  background-color: var(--color-cloud);
+  color: var(--color-success);
 }
 
 .bikeName {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-inkLight);
 }
 
 .date {
-  color: #4b5563;
+  color: var(--color-inkLight);
   font-size: 13px;
   flex-shrink: 0;
 }
 
 .detail {
-  color: #111827;
+  color: var(--color-ink);
   font-size: 14px;
 }
 
 .empty {
-  color: #6b7280;
+  color: var(--color-inkLight);
   text-align: center;
   padding: 24px 0;
+}
+
+.errorCard {
+  background: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+}
+
+.errorTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  color: var(--color-ink);
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { Fuel, MapPin } from 'lucide-react'
 import useSWR from 'swr'
 import type {
   ApiResponseAllBikesHistoryList,
@@ -53,9 +54,9 @@ function HistoryPage() {
   if (error) {
     return (
       <div className="w-full max-w-2xl">
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700">
+        <div className={styles.errorCard}>
+          <h1 className={styles.errorTitle}>エラー</h1>
+          <p className={styles.errorMessage}>
             {error instanceof ApiV1Error
               ? error.message
               : 'ヒストリーの取得に失敗しました'}
@@ -80,7 +81,17 @@ function HistoryPage() {
                     <span
                       className={`${styles.badge} ${item.type === 'FUEL_LOG' ? styles.badgeFuel : styles.badgeTouring}`}
                     >
-                      {item.type === 'FUEL_LOG' ? '給油' : 'ツーリング'}
+                      {item.type === 'FUEL_LOG' ? (
+                        <>
+                          <Fuel size={12} />
+                          給油
+                        </>
+                      ) : (
+                        <>
+                          <MapPin size={12} />
+                          ツーリング
+                        </>
+                      )}
                     </span>
                     <span className={styles.bikeName}>{item.bikeName}</span>
                   </div>
