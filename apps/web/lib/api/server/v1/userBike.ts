@@ -38,6 +38,7 @@ import {
   SpotRegisterRequestSchema,
   SpotUpdateRequestSchema,
   SpotReorderRequestSchema,
+  HistoryListQuerySchema,
 } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
@@ -306,6 +307,22 @@ userBike.patch(
 userBike.get('/history', honoAuthMiddleware, async (c) => {
   const { userId } = c.var.user!
 
+  const queryResult = HistoryListQuerySchema.safeParse(c.req.query())
+  if (!queryResult.success) {
+    return c.json(
+      {
+        status: 'error',
+        errorCode: 'VALIDATION_ERROR',
+        message: 'クエリパラメータが不正です',
+      },
+      400
+    )
+  }
+  const page = queryResult.data.page ?? 1
+  const pageSize = queryResult.data['per-size'] ?? 20
+  const skip = (page - 1) * pageSize
+  const take = pageSize
+
   const histories = await prisma.tUserMyBikeHistory.findMany({
     where: { userId },
     include: {
@@ -332,6 +349,8 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
       touring: true,
     },
     orderBy: { occurredAt: 'desc' },
+    skip,
+    take,
   })
 
   const historyItems: ApiResponseAllBikesHistoryList = histories.flatMap(

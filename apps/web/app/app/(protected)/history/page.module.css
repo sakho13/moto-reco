@@ -67,6 +67,13 @@
   padding: 24px 0;
 }
 
+.loadingMore {
+  color: var(--color-inkLight);
+  text-align: center;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
 .errorCard {
   background: var(--color-background);
   border: 1px solid var(--color-cloud);

@@ -1,7 +1,8 @@
 'use client'
 
 import { Fuel, MapPin } from 'lucide-react'
-import useSWR from 'swr'
+import { useEffect, useRef } from 'react'
+import useSWRInfinite from 'swr/infinite'
 import type {
   ApiResponseAllBikesHistoryList,
   SuccessResponse,
@@ -12,23 +13,49 @@ import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
+const PAGE_SIZE = 10
+
 function HistoryPage() {
-  const { data, error, isLoading } = useSWR(
-    '/api/v1/user-bike/history',
-    async (url) => {
-      const response = await authenticatedFetch(url, { method: 'GET' })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new ApiV1Error(
-          errorData.errorCode || 'SERVER_ERROR',
-          errorData.message || 'エラーが発生しました'
-        )
-      }
-      const json =
-        (await response.json()) as SuccessResponse<ApiResponseAllBikesHistoryList>
-      return json.data
+  const fetchHistory = async (url: string) => {
+    const response = await authenticatedFetch(url, { method: 'GET' })
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new ApiV1Error(
+        errorData.errorCode || 'SERVER_ERROR',
+        errorData.message || 'エラーが発生しました'
+      )
     }
-  )
+    const json =
+      (await response.json()) as SuccessResponse<ApiResponseAllBikesHistoryList>
+    return json.data
+  }
+
+  const { data, error, isLoading, size, setSize, isValidating } =
+    useSWRInfinite(
+      (pageIndex) =>
+        `/api/v1/user-bike/history?per-size=${PAGE_SIZE}&page=${pageIndex + 1}`,
+      fetchHistory
+    )
+
+  const historyItems = data ? data.flat() : []
+  const lastPageCount = data?.[data.length - 1]?.length ?? 0
+  const canLoadMore = lastPageCount === PAGE_SIZE
+  const isLoadingMore = isValidating && !isLoading && size > 0
+
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!sentinelRef.current || !canLoadMore) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isLoadingMore) {
+          setSize((s) => s + 1)
+        }
+      },
+      { threshold: 0.1 }
+    )
+    observer.observe(sentinelRef.current)
+    return () => observer.disconnect()
+  }, [canLoadMore, isLoadingMore, setSize])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -69,9 +96,9 @@ function HistoryPage() {
   return (
     <div className="w-full max-w-md">
       <BaseCard title="ヒストリー">
-        {data && data.length > 0 ? (
+        {historyItems.length > 0 ? (
           <div className={styles.historyList}>
-            {data.map((item) => (
+            {historyItems.map((item) => (
               <div
                 key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.touring.touringId}`}
                 className={styles.historyItem}
@@ -126,6 +153,10 @@ function HistoryPage() {
                 )}
               </div>
             ))}
+            <div ref={sentinelRef} />
+            {isLoadingMore && (
+              <p className={styles.loadingMore}>読み込み中...</p>
+            )}
           </div>
         ) : (
           <p className={styles.empty}>ヒストリーはまだありません</p>
