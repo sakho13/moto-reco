@@ -40,6 +40,26 @@ export class PrismaHistoryRepository
     })
   }
 
+  public async updateOccurredAtByFuelLogId(
+    fuelLogId: Parameters<IHistoryRepository['updateOccurredAtByFuelLogId']>[0],
+    occurredAt: Parameters<IHistoryRepository['updateOccurredAtByFuelLogId']>[1]
+  ): Promise<void> {
+    await this.connection.tUserMyBikeHistory.updateMany({
+      where: { fuelLogId },
+      data: { occurredAt },
+    })
+  }
+
+  public async updateOccurredAtByTouringId(
+    touringId: Parameters<IHistoryRepository['updateOccurredAtByTouringId']>[0],
+    occurredAt: Parameters<IHistoryRepository['updateOccurredAtByTouringId']>[1]
+  ): Promise<void> {
+    await this.connection.tUserMyBikeHistory.updateMany({
+      where: { touringId },
+      data: { occurredAt },
+    })
+  }
+
   public async findHistoriesByMyBikeId(
     myUserBikeId: Parameters<IHistoryRepository['findHistoriesByMyBikeId']>[0]
   ): Promise<HistoryEntity[]> {

@@ -705,11 +705,12 @@ userBike.patch(
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
-    const result = await prisma.$transaction((t) => {
+    const result = await prisma.$transaction(async (t) => {
       const fuelLogRepo = new PrismaFuelLogRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const userBikeRepo = new PrismaUserBikeRepository(t)
       const touringRepo = new PrismaTouringRepository(t)
+      const historyRepo = new PrismaHistoryRepository(t)
       const service = new FuelLogService(
         fuelLogRepo,
         myUserBikeRepo,
@@ -717,7 +718,7 @@ userBike.patch(
         touringRepo
       )
 
-      return service.updateFuelLog({
+      const updated = await service.updateFuelLog({
         fuelLogId: createFuelLogId(body.fuelLogId),
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
@@ -728,6 +729,16 @@ userBike.patch(
         totalPrice: body.totalPrice,
         memo: body.memo,
       })
+
+      // 給油日時が変更された場合、ヒストリーの occurredAt を更新
+      if (body.refueledAt !== undefined) {
+        await historyRepo.updateOccurredAtByFuelLogId(
+          createFuelLogId(body.fuelLogId),
+          updated.refueledAt
+        )
+      }
+
+      return updated
     })
 
     return c.json<SuccessResponse<ApiResponseFuelLogDetail>>(
@@ -1148,17 +1159,18 @@ userBike.patch(
     const touringId = c.req.param('touringId')
     const body = c.req.valid('json')
 
-    const result = await prisma.$transaction((t) => {
+    const result = await prisma.$transaction(async (t) => {
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const historyRepo = new PrismaHistoryRepository(t)
       const service = new TouringService(
         touringRepo,
         myUserBikeRepo,
         fuelLogRepo
       )
 
-      return service.updateTouring({
+      const updated = await service.updateTouring({
         touringId: createTouringId(touringId),
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
@@ -1174,6 +1186,16 @@ userBike.patch(
         endLatitude: body.endLatitude,
         endLongitude: body.endLongitude,
       })
+
+      // ツーリング終了日が変更された場合、ヒストリーの occurredAt を更新
+      if (body.endDate !== undefined) {
+        await historyRepo.updateOccurredAtByTouringId(
+          createTouringId(touringId),
+          updated.endDate
+        )
+      }
+
+      return updated
     })
 
     // 更新後の紐づいている給油履歴IDを取得
