@@ -3001,6 +3001,52 @@ describe('UserBike API Endpoints', () => {
       expect(json.data.startLatitude).toBeNull()
       expect(json.data.startLongitude).toBeNull()
     })
+
+    test('終了日を変更するとヒストリーの occurredAt も更新される', async () => {
+      const newEndDate = '2024-10-20T00:00:00.000Z'
+
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ endDate: newEndDate }),
+        }
+      )
+
+      const historyRecord = await prisma.tUserMyBikeHistory.findFirst({
+        where: { touringId },
+      })
+      expect(historyRecord?.occurredAt.toISOString()).toBe(newEndDate)
+    })
+
+    test('終了日以外のフィールドのみ変更した場合はヒストリーの occurredAt は変わらない', async () => {
+      const originalHistory = await prisma.tUserMyBikeHistory.findFirst({
+        where: { touringId },
+      })
+
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: '日付変更なし更新' }),
+        }
+      )
+
+      const historyRecord = await prisma.tUserMyBikeHistory.findFirst({
+        where: { touringId },
+      })
+      expect(historyRecord?.occurredAt.toISOString()).toBe(
+        originalHistory?.occurredAt.toISOString()
+      )
+    })
   })
 
   describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
@@ -3380,6 +3426,46 @@ describe('UserBike API Endpoints', () => {
       expect(json.errorCode).toBe('INVALID_REQUEST')
       expect(json.message).toBe(
         '前回走行距離は給油時走行距離以下である必要があります'
+      )
+    })
+
+    test('給油日時を変更するとヒストリーの occurredAt も更新される', async () => {
+      const newRefueledAt = '2024-03-15T15:30:00.000Z'
+
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fuelLogId, refueledAt: newRefueledAt }),
+      })
+
+      const historyRecord = await prisma.tUserMyBikeHistory.findFirst({
+        where: { fuelLogId },
+      })
+      expect(historyRecord?.occurredAt.toISOString()).toBe(newRefueledAt)
+    })
+
+    test('給油日時以外のフィールドのみ変更した場合はヒストリーの occurredAt は変わらない', async () => {
+      const originalHistory = await prisma.tUserMyBikeHistory.findFirst({
+        where: { fuelLogId },
+      })
+
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fuelLogId, mileage: 2000 }),
+      })
+
+      const historyRecord = await prisma.tUserMyBikeHistory.findFirst({
+        where: { fuelLogId },
+      })
+      expect(historyRecord?.occurredAt.toISOString()).toBe(
+        originalHistory?.occurredAt.toISOString()
       )
     })
   })
