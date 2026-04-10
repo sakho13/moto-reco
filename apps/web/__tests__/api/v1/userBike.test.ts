@@ -3017,16 +3017,29 @@ describe('UserBike API Endpoints', () => {
         }
       )
 
-      const historyRecord = await prisma.tUserMyBikeHistory.findFirst({
-        where: { touringId },
-      })
-      expect(historyRecord?.occurredAt.toISOString()).toBe(newEndDate)
+      const historyRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const historyJson = await historyRes.json()
+      expect(historyRes.status).toBe(200)
+      expect(historyJson.data).toHaveLength(1)
+      expect(historyJson.data[0].occurredAt).toBe(newEndDate)
     })
 
     test('終了日以外のフィールドのみ変更した場合はヒストリーの occurredAt は変わらない', async () => {
-      const originalHistory = await prisma.tUserMyBikeHistory.findFirst({
-        where: { touringId },
-      })
+      const beforeRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const beforeJson = await beforeRes.json()
+      const originalOccurredAt = beforeJson.data[0].occurredAt
 
       await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
@@ -3040,12 +3053,16 @@ describe('UserBike API Endpoints', () => {
         }
       )
 
-      const historyRecord = await prisma.tUserMyBikeHistory.findFirst({
-        where: { touringId },
-      })
-      expect(historyRecord?.occurredAt.toISOString()).toBe(
-        originalHistory?.occurredAt.toISOString()
+      const afterRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
       )
+      const afterJson = await afterRes.json()
+      expect(afterRes.status).toBe(200)
+      expect(afterJson.data[0].occurredAt).toBe(originalOccurredAt)
     })
   })
 
@@ -3441,16 +3458,29 @@ describe('UserBike API Endpoints', () => {
         body: JSON.stringify({ fuelLogId, refueledAt: newRefueledAt }),
       })
 
-      const historyRecord = await prisma.tUserMyBikeHistory.findFirst({
-        where: { fuelLogId },
-      })
-      expect(historyRecord?.occurredAt.toISOString()).toBe(newRefueledAt)
+      const historyRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const historyJson = await historyRes.json()
+      expect(historyRes.status).toBe(200)
+      expect(historyJson.data).toHaveLength(1)
+      expect(historyJson.data[0].occurredAt).toBe(newRefueledAt)
     })
 
     test('給油日時以外のフィールドのみ変更した場合はヒストリーの occurredAt は変わらない', async () => {
-      const originalHistory = await prisma.tUserMyBikeHistory.findFirst({
-        where: { fuelLogId },
-      })
+      const beforeRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const beforeJson = await beforeRes.json()
+      const originalOccurredAt = beforeJson.data[0].occurredAt
 
       await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
         method: 'PATCH',
@@ -3461,12 +3491,16 @@ describe('UserBike API Endpoints', () => {
         body: JSON.stringify({ fuelLogId, mileage: 2000 }),
       })
 
-      const historyRecord = await prisma.tUserMyBikeHistory.findFirst({
-        where: { fuelLogId },
-      })
-      expect(historyRecord?.occurredAt.toISOString()).toBe(
-        originalHistory?.occurredAt.toISOString()
+      const afterRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
       )
+      const afterJson = await afterRes.json()
+      expect(afterRes.status).toBe(200)
+      expect(afterJson.data[0].occurredAt).toBe(originalOccurredAt)
     })
   })
 
