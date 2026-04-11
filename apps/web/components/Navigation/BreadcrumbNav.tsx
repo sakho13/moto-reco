@@ -61,6 +61,11 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return items
   }
 
+  if (segments[1] === 'history') {
+    items.push({ label: 'ヒストリー' })
+    return items
+  }
+
   if (segments[1] === 'bike' && segments[2] === 'register') {
     items.push({ label: 'バイク登録' })
     return items

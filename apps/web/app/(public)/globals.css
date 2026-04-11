@@ -3,11 +3,9 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html[data-theme-mode='dark'] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 html,
@@ -36,15 +34,10 @@ a {
   display: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+html[data-theme-mode='dark'] .imgLight {
+  display: none;
+}
 
-  .imgLight {
-    display: none;
-  }
-  .imgDark {
-    display: unset;
-  }
+html[data-theme-mode='dark'] .imgDark {
+  display: unset;
 }
