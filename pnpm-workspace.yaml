@@ -32,3 +32,8 @@ catalog:
 
   vitest: 2.1.8
   '@vitest/ui': 2.1.8
+
+  # shadcn/ui 関連
+  'class-variance-authority': 0.7.1
+  clsx: 2.1.1
+  'tailwind-merge': 2.6.0

@@ -16,8 +16,10 @@ env:
   GCP_PROJECT_ID: motoreco-8ce2a
   ARTIFACT_REGISTRY: asia-northeast1-docker.pkg.dev
   WEB_REPOSITORY: motoreco-web
+  ADMIN_REPOSITORY: motoreco-admin
   MIGRATION_REPOSITORY: motoreco-migration
   CLOUD_RUN_SERVICE: motoreco-web
+  CLOUD_RUN_SERVICE_ADMIN: motoreco-admin
   CLOUD_RUN_JOB: motoreco-migration
 
 jobs:
@@ -70,6 +72,49 @@ jobs:
 
           docker push ${WEB_IMAGE}:${APP_VERSION}
           docker push ${WEB_IMAGE}:latest
+
+      - name: Build and push Admin Docker image
+        run: |
+          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+
+          ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin"
+
+          docker build -f apps/admin/Dockerfile \
+            --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.PROD_FIREBASE_API_KEY }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.PROD_FIREBASE_AUTH_DOMAIN }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.PROD_FIREBASE_PROJECT_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.PROD_FIREBASE_STORAGE_BUCKET }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PROD_FIREBASE_MESSAGING_SENDER_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.PROD_FIREBASE_APP_ID }} \
+            --build-arg APP_VERSION=$APP_VERSION \
+            -t ${ADMIN_IMAGE}:${APP_VERSION} \
+            -t ${ADMIN_IMAGE}:latest .
+
+          docker push ${ADMIN_IMAGE}:${APP_VERSION}
+          docker push ${ADMIN_IMAGE}:latest
+
+      - name: Deploy Admin to Cloud Run
+        run: |
+          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin:${APP_VERSION}"
+
+          APP_VERSION_LABEL=$(echo "$APP_VERSION" | sed 's/\./-/g' | tr '[:upper:]' '[:lower:]' | cut -c1-63)
+
+          if [ -z "$APP_VERSION_LABEL" ] || [ "$APP_VERSION_LABEL" = "${{ github.ref_name }}" ]; then
+            APP_VERSION_LABEL="manual-$(date +%Y%m%d-%H%M%S)"
+          fi
+
+          gcloud run services update ${{ env.CLOUD_RUN_SERVICE_ADMIN }} \
+            --region=${{ env.GCP_REGION }} \
+            --image=${ADMIN_IMAGE} \
+            --update-labels=app-version=$APP_VERSION_LABEL \
+            --set-env-vars=NODE_ENV=production,NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false \
+            --set-secrets=DATABASE_URL=database-url:latest,FIREBASE_PRIVATE_KEY=firebase-private-key:latest,FIREBASE_PROJECT_ID=firebase-project-id:latest,FIREBASE_CLIENT_EMAIL=firebase-client-email:latest \
+            --quiet
+
+          echo "✅ Admin Cloud Run updated successfully"
 
       - name: Build and push migration image
         run: |

@@ -49,7 +49,8 @@
         "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID",
         "NEXT_PUBLIC_USE_FIREBASE_EMULATOR",
         "WEB_PORT",
-        "DOCS_PORT"
+        "DOCS_PORT",
+        "ADMIN_PORT"
       ]
     },
     "db:generate": {
