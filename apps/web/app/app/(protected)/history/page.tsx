@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import useSWRInfinite from 'swr/infinite'
 import type {
   ApiResponseAllBikesHistoryList,
@@ -9,8 +9,8 @@ import type {
 } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import styles from './page.module.css'
-import { HistoryItemCard } from '@/components/history/HistoryItemCard'
 import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
+import { HistoryItemCard } from '@/components/history/HistoryItemCard'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
