@@ -6,7 +6,7 @@ import styles from './page.module.css'
 import TouringList from './TouringList'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
 import { PrismaTouringRepository } from '@/lib/api/server/repositories/PrismaTouringRepository'
-import { APP_NAME } from '@/lib/statics'
+import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export async function generateMetadata({
   params,
@@ -17,6 +17,7 @@ export async function generateMetadata({
   return {
     title: `公開バイク詳細`,
     description: `${APP_NAME}で公開されているバイクの詳細ページです。`,
+    metadataBase: new URL(SITE_URL),
     alternates: {
       canonical: `/bikes/${id}`,
     },

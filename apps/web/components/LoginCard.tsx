@@ -84,7 +84,9 @@ export function LoginCard() {
           const currentUser = auth.currentUser
 
           if (!currentUser) {
-            throw new Error('認証情報の取得に失敗しました')
+            throw new Error('認証情報の取得に失敗しました', {
+              cause: profileError,
+            })
           }
 
           // displayName のフォールバック
@@ -160,6 +162,10 @@ export function LoginCard() {
             autoComplete="current-password"
           />
         </FormField>
+
+        <div className="mb-4 text-right text-sm">
+          <Link href="/app/reset-password">パスワードをお忘れですか？</Link>
+        </div>
 
         <Button
           type="submit"

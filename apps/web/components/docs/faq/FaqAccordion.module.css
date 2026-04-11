@@ -28,9 +28,7 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .categoryTitle {
-    color: #ededed;
-    border-left-color: #ededed;
-  }
+html[data-theme-mode='dark'] .categoryTitle {
+  color: #ededed;
+  border-left-color: #ededed;
 }

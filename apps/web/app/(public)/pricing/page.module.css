@@ -113,17 +113,15 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .description,
-  .faqItem p {
-    color: rgba(237, 237, 237, 0.7);
-  }
+html[data-theme-mode='dark'] .description,
+html[data-theme-mode='dark'] .faqItem p {
+  color: rgba(237, 237, 237, 0.7);
+}
 
-  .faqSection {
-    border-top-color: rgba(255, 255, 255, 0.1);
-  }
+html[data-theme-mode='dark'] .faqSection {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
 
-  .faqItem {
-    background: rgba(255, 255, 255, 0.04);
-  }
+html[data-theme-mode='dark'] .faqItem {
+  background: rgba(255, 255, 255, 0.04);
 }

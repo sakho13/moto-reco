@@ -14,13 +14,11 @@
   background: rgba(23, 23, 23, 0.06);
 }
 
-@media (prefers-color-scheme: dark) {
-  .toggleButton {
-    border-color: rgba(237, 237, 237, 0.25);
-    color: rgba(237, 237, 237, 0.7);
-  }
+html[data-theme-mode='dark'] .toggleButton {
+  border-color: rgba(237, 237, 237, 0.25);
+  color: rgba(237, 237, 237, 0.7);
+}
 
-  .toggleButton:hover {
-    background: rgba(255, 255, 255, 0.06);
-  }
+html[data-theme-mode='dark'] .toggleButton:hover {
+  background: rgba(255, 255, 255, 0.06);
 }
