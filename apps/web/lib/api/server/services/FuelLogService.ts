@@ -2,13 +2,15 @@ import {
   createFuelLogId,
   FuelLogId,
   MyUserBikeId,
+  TouringId,
   UserId,
 } from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
-import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
+import { ITouringRepository } from '../interfaces/ITouringRepository'
+import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
 type RegisterFuelLogParams = {
@@ -44,7 +46,9 @@ type DeleteFuelLogParams = {
 export class FuelLogService {
   constructor(
     private fuelLogRepository: IFuelLogRepository,
-    private myUserBikeRepository: IMyUserBikeRepository
+    private myUserBikeRepository: IMyUserBikeRepository,
+    private userBikeRepository: IUserBikeRepository,
+    private touringRepository: ITouringRepository
   ) {}
 
   public async registerFuelLog(
@@ -59,6 +63,29 @@ export class FuelLogService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
+    // 進行中ツーリングの自動紐づけ
+    let touringId: TouringId | null = null
+    let touringTitle: string | null = null
+
+    try {
+      const ongoingTouring = await this.touringRepository.findOngoingTouring(
+        params.myUserBikeId
+      )
+
+      // 給油日時がツーリング期間内であれば自動紐づけ
+      if (
+        ongoingTouring &&
+        params.refueledAt >= ongoingTouring.startDate &&
+        params.refueledAt <= new Date()
+      ) {
+        touringId = ongoingTouring.id
+        touringTitle = ongoingTouring.title
+      }
+    } catch (error) {
+      // ツーリング取得エラーが発生しても給油履歴登録は継続
+      console.error('Failed to auto-link touring:', error)
+    }
+
     const fuelLog = new FuelLogEntity({
       fuelLogId: createFuelLogId(''),
       myUserBikeId: params.myUserBikeId,
@@ -68,17 +95,17 @@ export class FuelLogService {
       amount: params.amount,
       totalPrice: params.totalPrice,
       memo: params.memo ?? null,
+      touringId,
+      touringTitle,
     })
 
     const createdFuelLog = await this.fuelLogRepository.createFuelLog(fuelLog)
 
-    if (params.updateTotalMileage && params.mileage > myUserBike.totalMileage) {
-      const current = myUserBike.toJson()
-      const updatedEntity = new MyUserBikeEntity({
-        ...current,
-        totalMileage: params.mileage,
-      })
-      await this.myUserBikeRepository.updateMyUserBike(updatedEntity)
+    if (params.updateTotalMileage) {
+      await this.userBikeRepository.updateTotalMileageIfGreater(
+        myUserBike.userBikeId,
+        params.mileage
+      )
     }
 
     return createdFuelLog
@@ -99,6 +126,32 @@ export class FuelLogService {
     }
 
     return await this.fuelLogRepository.findFuelLogs(myUserBikeId, searchParams)
+  }
+
+  public async getFuelLogDetail(
+    fuelLogId: FuelLogId,
+    myUserBikeId: MyUserBikeId,
+    userId: UserId
+  ): Promise<FuelLogEntity> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      myUserBikeId,
+      userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    const fuelLog = await this.fuelLogRepository.findFuelLogById(
+      fuelLogId,
+      myUserBikeId
+    )
+
+    if (!fuelLog) {
+      throw new ApiV1Error('NOT_FOUND', '指定された燃料ログが見つかりません')
+    }
+
+    return fuelLog
   }
 
   public async updateFuelLog(
@@ -136,6 +189,8 @@ export class FuelLogService {
         amount: params.amount ?? existingFuelLog.amount,
         totalPrice: params.totalPrice ?? existingFuelLog.totalPrice,
         memo: params.memo ?? existingFuelLog.memo,
+        touringId: existingFuelLog.touringId,
+        touringTitle: existingFuelLog.touringTitle,
       })
 
       // 4. 更新実行

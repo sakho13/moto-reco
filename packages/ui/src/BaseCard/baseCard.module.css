@@ -61,6 +61,11 @@
   text-decoration: underline;
 }
 
+.noBorder {
+  border: none;
+  box-shadow: none;
+}
+
 /* Responsive Design */
 @media (max-width: 640px) {
   .baseCard {

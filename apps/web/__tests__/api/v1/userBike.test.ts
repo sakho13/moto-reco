@@ -18,6 +18,7 @@ import {
 import {
   createMultipleTourings,
   createTestTouring,
+  createTestSpot,
 } from '../../helpers/touringHelper'
 import {
   expectValidationError,
@@ -104,12 +105,12 @@ describe('UserBike API Endpoints', () => {
       })
       expect(userBikeRecord?.serialNumber).toBe(serialNumber)
       expect(userBikeRecord?.bikeId).toBe(bikeId)
+      expect(userBikeRecord?.totalMileage).toBe(1500)
 
       const myUserBikeRecord = await prisma.tUserMyBike.findUnique({
         where: { id: json.data.myUserBikeId },
       })
       expect(myUserBikeRecord?.userId).toBe(userId)
-      expect(myUserBikeRecord?.totalMileage).toBe(1500)
       expect(myUserBikeRecord?.purchasePrice).toBe(500000)
       expect(myUserBikeRecord?.purchaseMileage).toBe(1200)
       expect(myUserBikeRecord?.purchaseDate?.toISOString()).toBe(purchaseDate)
@@ -574,12 +575,17 @@ describe('UserBike API Endpoints', () => {
       const myUserBikeRecord = await prisma.tUserMyBike.findUnique({
         where: { id: myUserBikeId },
       })
+      const userBikeRecord = myUserBikeRecord
+        ? await prisma.tUserBike.findUnique({
+            where: { id: myUserBikeRecord.userBikeId },
+          })
+        : null
 
       expect(myUserBikeRecord?.nickname).toBe(updatedNickname)
       expect(myUserBikeRecord?.purchaseDate?.toISOString()).toBe(purchaseDate)
       expect(myUserBikeRecord?.purchasePrice).toBe(450000)
       expect(myUserBikeRecord?.purchaseMileage).toBe(1300)
-      expect(myUserBikeRecord?.totalMileage).toBe(2100)
+      expect(userBikeRecord?.totalMileage).toBe(2100)
     })
 
     test('排気量のみで登録したバイクの排気量を更新できる', async () => {
@@ -768,6 +774,8 @@ describe('UserBike API Endpoints', () => {
           memo,
           fuelEfficiency: 9.5, // 小数点以下1桁で四捨五入
           pricePerLiter: 171.4, // 小数点以下1桁で四捨五入
+          touringId: null,
+          touringTitle: null,
         },
         message: '燃料ログ登録成功',
       })
@@ -788,7 +796,14 @@ describe('UserBike API Endpoints', () => {
       const myUserBikeBefore = await prisma.tUserMyBike.findUnique({
         where: { id: myUserBikeId },
       })
-      const currentMileage = myUserBikeBefore?.totalMileage ?? 0
+      if (!myUserBikeBefore) {
+        throw new Error('テストバイクが見つかりません')
+      }
+
+      const userBikeBefore = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
+      })
+      const currentMileage = userBikeBefore?.totalMileage ?? 0
 
       const newMileage = currentMileage + 500
       const refueledAt = '2024-03-15T10:00:00.000Z'
@@ -816,17 +831,24 @@ describe('UserBike API Endpoints', () => {
       expect(res.status).toBe(201)
       expect(json.data.mileage).toBe(newMileage)
 
-      const myUserBikeAfter = await prisma.tUserMyBike.findUnique({
-        where: { id: myUserBikeId },
+      const userBikeAfter = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
       })
-      expect(myUserBikeAfter?.totalMileage).toBe(newMileage)
+      expect(userBikeAfter?.totalMileage).toBe(newMileage)
     })
 
     test('updateTotalMileageがtrueでも現在値より小さい場合は更新されない', async () => {
       const myUserBikeBefore = await prisma.tUserMyBike.findUnique({
         where: { id: myUserBikeId },
       })
-      const currentMileage = myUserBikeBefore?.totalMileage ?? 0
+      if (!myUserBikeBefore) {
+        throw new Error('テストバイクが見つかりません')
+      }
+
+      const userBikeBefore = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
+      })
+      const currentMileage = userBikeBefore?.totalMileage ?? 0
 
       const smallerMileage = currentMileage - 100
       const refueledAt = '2024-02-01T10:00:00.000Z'
@@ -854,10 +876,497 @@ describe('UserBike API Endpoints', () => {
       expect(res.status).toBe(201)
       expect(json.data.mileage).toBe(smallerMileage)
 
-      const myUserBikeAfter = await prisma.tUserMyBike.findUnique({
-        where: { id: myUserBikeId },
+      const userBikeAfter = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
       })
-      expect(myUserBikeAfter?.totalMileage).toBe(currentMileage)
+      expect(userBikeAfter?.totalMileage).toBe(currentMileage)
+    })
+
+    describe('進行中ツーリングへの自動紐づけ', () => {
+      test('進行中ツーリングがある場合、給油履歴が自動的に紐づけられる', async () => {
+        // 1. ツーリング開始
+        const touringRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+            }),
+          }
+        )
+        const touringJson = await touringRes.json()
+        const touringId = touringJson.data.touringId
+
+        // 2. 給油履歴を登録（touringIdは指定しない）
+        const fuelLogRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              refueledAt: new Date().toISOString(),
+              mileage: 3000,
+              previousMileage: 2900,
+              amount: 10,
+              totalPrice: 1500,
+              updateTotalMileage: true,
+            }),
+          }
+        )
+
+        const fuelLogJson = await fuelLogRes.json()
+        expect(fuelLogRes.status).toBe(201)
+        expect(fuelLogJson.data.touringId).toBe(touringId)
+        expect(fuelLogJson.data.touringTitle).toBe('テストツーリング')
+      })
+
+      test('進行中ツーリングがない場合、給油履歴は紐づけられない', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              refueledAt: new Date().toISOString(),
+              mileage: 3000,
+              previousMileage: 2900,
+              amount: 10,
+              totalPrice: 1500,
+              updateTotalMileage: true,
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(201)
+        expect(json.data.touringId).toBeNull()
+        expect(json.data.touringTitle).toBeNull()
+      })
+
+      test('給油日時がツーリング開始前の場合、紐づけられない', async () => {
+        const startDate = new Date()
+
+        // 1. ツーリング開始
+        await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+              startDate: startDate.toISOString(),
+            }),
+          }
+        )
+
+        // 2. 開始前の給油履歴を登録
+        const pastDate = new Date(startDate.getTime() - 86400000) // 1日前
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              refueledAt: pastDate.toISOString(),
+              mileage: 3000,
+              previousMileage: 2900,
+              amount: 10,
+              totalPrice: 1500,
+              updateTotalMileage: true,
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(201)
+        expect(json.data.touringId).toBeNull()
+      })
+
+      test('複数の給油履歴が同じツーリングに自動紐づけされる', async () => {
+        // 1. ツーリング開始
+        const touringRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+            }),
+          }
+        )
+        const touringJson = await touringRes.json()
+        const touringId = touringJson.data.touringId
+
+        // 2. 1回目の給油
+        const res1 = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              refueledAt: new Date().toISOString(),
+              mileage: 3000,
+              previousMileage: 2900,
+              amount: 10,
+              totalPrice: 1500,
+              updateTotalMileage: true,
+            }),
+          }
+        )
+
+        // 3. 2回目の給油
+        const res2 = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              refueledAt: new Date().toISOString(),
+              mileage: 3100,
+              previousMileage: 3000,
+              amount: 10,
+              totalPrice: 1500,
+              updateTotalMileage: true,
+            }),
+          }
+        )
+
+        const json1 = await res1.json()
+        const json2 = await res2.json()
+
+        expect(json1.data.touringId).toBe(touringId)
+        expect(json2.data.touringId).toBe(touringId)
+      })
+    })
+  })
+
+  describe('GET /api/v1/user-bike/history', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '全ヒストリーテスト用',
+      })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user-bike/history', 'GET')
+    })
+
+    test('バイクがない場合は空配列が返る', async () => {
+      const user = await createTestUser()
+      const res = await app.request('/api/v1/user-bike/history', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.data).toHaveLength(0)
+    })
+
+    test('給油履歴とツーリング履歴を時系列で統合して取得できる', async () => {
+      await createTestTouring(token, myUserBikeId, {
+        title: '箱根ツーリング',
+        startDate: '2024-04-01T00:00:00.000Z',
+        endDate: '2024-04-02T00:00:00.000Z',
+      })
+
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-04-05T00:00:00.000Z',
+        mileage: 1200,
+        previousMileage: 1100,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      const res = await app.request('/api/v1/user-bike/history', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.data).toHaveLength(2)
+      expect(json.data[0].type).toBe('FUEL_LOG')
+      expect(json.data[1].type).toBe('TOURING')
+    })
+
+    test('各ヒストリーアイテムに bikeId と bikeName が含まれる', async () => {
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-05-01T00:00:00.000Z',
+        mileage: 2000,
+        previousMileage: 1900,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      const res = await app.request('/api/v1/user-bike/history', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data[0].bikeId).toBe(myUserBikeId)
+      expect(typeof json.data[0].bikeName).toBe('string')
+      expect(json.data[0].bikeName).toBe('全ヒストリーテスト用')
+    })
+
+    test('複数バイクの履歴が統合して返される', async () => {
+      const bike2 = await createTestUserBike(token, {
+        displacement: 250,
+        nickname: '2台目バイク',
+      })
+
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-06-01T00:00:00.000Z',
+        mileage: 1000,
+        previousMileage: 900,
+        amount: 10,
+        totalPrice: 1500,
+      })
+      await createTestTouring(token, bike2.myUserBikeId, {
+        title: '2台目ツーリング',
+        startDate: '2024-06-02T00:00:00.000Z',
+        endDate: '2024-06-03T00:00:00.000Z',
+      })
+
+      const res = await app.request('/api/v1/user-bike/history', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toHaveLength(2)
+      const bikeIds = json.data.map((item: { bikeId: string }) => item.bikeId)
+      expect(bikeIds).toContain(myUserBikeId)
+      expect(bikeIds).toContain(bike2.myUserBikeId)
+    })
+
+    test('他ユーザーのデータが混入しない', async () => {
+      const otherUser = await createTestUser()
+      const otherBike = await createTestUserBike(otherUser.token, {
+        displacement: 600,
+      })
+      await createTestFuelLog(otherUser.token, otherBike.myUserBikeId, {
+        refueledAt: '2024-07-01T00:00:00.000Z',
+        mileage: 3000,
+        previousMileage: 2900,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-07-02T00:00:00.000Z',
+        mileage: 1500,
+        previousMileage: 1400,
+        amount: 10,
+        totalPrice: 1500,
+      })
+
+      const res = await app.request('/api/v1/user-bike/history', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toHaveLength(1)
+      expect(json.data[0].bikeId).toBe(myUserBikeId)
+    })
+  })
+
+  describe('GET /api/v1/user-bike/bike/:myUserBikeId/history', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'ヒストリーテスト用',
+      })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('給油履歴とツーリング履歴を時系列で統合して取得できる', async () => {
+      await createTestTouring(token, myUserBikeId, {
+        title: '箱根ツーリング',
+        startDate: '2024-04-01T00:00:00.000Z',
+        endDate: '2024-04-02T00:00:00.000Z',
+      })
+
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-04-05T00:00:00.000Z',
+        mileage: 1200,
+        previousMileage: 1100,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.data).toHaveLength(2)
+      expect(json.data[0].type).toBe('FUEL_LOG')
+      expect(json.data[1].type).toBe('TOURING')
+    })
+
+    test('他ユーザーのバイクIDを指定した場合は404となる', async () => {
+      const otherUser = await createTestUser()
+      const otherBike = await createTestUserBike(otherUser.token, {
+        displacement: 250,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${otherBike.myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('給油履歴を登録するとヒストリーに追加される', async () => {
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-05-01T00:00:00.000Z',
+        mileage: 2000,
+        previousMileage: 1900,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toHaveLength(1)
+      expect(json.data[0].type).toBe('FUEL_LOG')
+    })
+
+    test('ツーリングを登録するとヒストリーに追加される', async () => {
+      await createTestTouring(token, myUserBikeId, {
+        title: '富士山ツーリング',
+        startDate: '2024-06-01T00:00:00.000Z',
+        endDate: '2024-06-02T00:00:00.000Z',
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toHaveLength(1)
+      expect(json.data[0].type).toBe('TOURING')
+    })
+
+    test('給油履歴を削除するとヒストリーからも削除される', async () => {
+      const fuelLogId = await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-07-01T00:00:00.000Z',
+        mileage: 3000,
+        previousMileage: 2900,
+        amount: 10,
+        totalPrice: 1800,
+      })
+
+      // 削除前はヒストリーに1件存在する
+      const beforeRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const beforeJson = await beforeRes.json()
+      expect(beforeJson.data).toHaveLength(1)
+
+      // 給油履歴を削除
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fuelLogId }),
+      })
+
+      // 削除後はヒストリーも0件になる
+      const afterRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const afterJson = await afterRes.json()
+      expect(afterRes.status).toBe(200)
+      expect(afterJson.data).toHaveLength(0)
     })
   })
 
@@ -1292,6 +1801,126 @@ describe('UserBike API Endpoints', () => {
         expect(new Date(log.refueledAt).toISOString()).toBe(log.refueledAt)
       })
     })
+
+    describe('日付範囲検索機能', () => {
+      test('startDateとendDateを指定して期間内の給油履歴を取得できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-01-15T00:00:00.000Z&endDate=2024-02-15T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.status).toBe('success')
+        expect(Array.isArray(json.data)).toBe(true)
+      })
+
+      test('periodとstartDate/endDateを同時に指定した場合はバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?period=latest-month&startDate=2024-01-01T00:00:00.000Z&endDate=2024-02-01T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+
+      test('startDateのみを指定した場合はバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-01-01T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+
+      test('endDateのみを指定した場合はバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?endDate=2024-02-01T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+
+      test('startDateがendDateより後の場合はバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-03-01T00:00:00.000Z&endDate=2024-01-01T00:00:00.000Z`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+
+      test('日付範囲検索時にページネーションが有効であることを確認', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-01-01T00:00:00.000Z&endDate=2024-12-31T23:59:59.999Z&page=1&per-size=5`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBeLessThanOrEqual(5)
+      })
+
+      test('日付範囲検索時にソート順を指定できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?startDate=2024-01-01T00:00:00.000Z&endDate=2024-03-01T00:00:00.000Z&sort-order=asc`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        // ソート順が昇順であることを確認
+        if (json.data.length > 1) {
+          expect(
+            new Date(json.data[0].refueledAt).getTime()
+          ).toBeLessThanOrEqual(new Date(json.data[1].refueledAt).getTime())
+        }
+      })
+    })
   })
 
   describe('GET /api/v1/user-bike/bike/:myUserBikeId/fuel-insights', () => {
@@ -1457,6 +2086,12 @@ describe('UserBike API Endpoints', () => {
           endDate: startDate,
           startMileage: 2000,
           endMileage: null,
+          startLatitude: null,
+          startLongitude: null,
+          endLatitude: null,
+          endLongitude: null,
+          status: 'STARTED',
+          fuelLogIds: [],
         },
         message: 'ツーリング開始成功',
       })
@@ -1531,6 +2166,12 @@ describe('UserBike API Endpoints', () => {
           endDate,
           startMileage: 2000,
           endMileage: 2100,
+          startLatitude: null,
+          startLongitude: null,
+          endLatitude: null,
+          endLongitude: null,
+          status: 'COMPLETED',
+          fuelLogIds: [],
         },
         message: 'ツーリング終了成功',
       })
@@ -1553,6 +2194,141 @@ describe('UserBike API Endpoints', () => {
       expect(getTouringJson.data.endDate).toBe(endDate)
       expect(getTouringJson.data.startMileage).toBe(2000)
       expect(getTouringJson.data.endMileage).toBe(2100)
+    })
+
+    describe('総走行距離の自動取得', () => {
+      test('ツーリング開始時にstartMileageが自動設定される', async () => {
+        // 1. 給油履歴を追加してtotalMileageを5000kmに更新
+        await createTestFuelLog(token, myUserBikeId, {
+          refueledAt: new Date().toISOString(),
+          amount: 10,
+          totalPrice: 1500,
+          mileage: 5000,
+          previousMileage: 4900,
+          updateTotalMileage: true,
+        })
+
+        // 2. ツーリング開始（startMileageを送信しない）
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+              // startMileageを送信しない
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(201)
+        expect(json.data.startMileage).toBe(5000)
+      })
+
+      test('ツーリング終了時にendMileageが自動設定される', async () => {
+        // 1. ツーリング開始
+        const startRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+            }),
+          }
+        )
+        const startJson = await startRes.json()
+        const touringId = startJson.data.touringId
+
+        // 2. 給油してtotalMileageを5200kmに更新
+        await createTestFuelLog(token, myUserBikeId, {
+          refueledAt: new Date().toISOString(),
+          amount: 8,
+          totalPrice: 1200,
+          mileage: 5200,
+          previousMileage: 5000,
+          updateTotalMileage: true,
+        })
+
+        // 3. ツーリング終了（endMileageを送信しない）
+        const endRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'end',
+              touringId,
+              // endMileageを送信しない
+            }),
+          }
+        )
+
+        const endJson = await endRes.json()
+        expect(endRes.status).toBe(200)
+        expect(endJson.data.endMileage).toBe(5200)
+        expect(endJson.data.startMileage).toBeDefined()
+
+        // ツーリング距離が計算できることを確認
+        const distance = endJson.data.endMileage! - endJson.data.startMileage!
+        expect(distance).toBeGreaterThan(0)
+      })
+
+      test('フロントエンドから明示的にstartMileageが渡された場合は優先される', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+              startMileage: 9999, // 明示的に指定
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(json.data.startMileage).toBe(9999) // フロントエンドの値が優先
+      })
+
+      test('totalMileageが0の場合でも正常に記録される', async () => {
+        // バイクのtotalMileageが0の状態（デフォルト値のまま）
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              title: 'テストツーリング',
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(201)
+        // バイクのtotalMileageが2000で作成されているので、それが取得される
+        expect(json.data.startMileage).toBe(2000)
+      })
     })
   })
 
@@ -1681,6 +2457,12 @@ describe('UserBike API Endpoints', () => {
           endDate,
           startMileage: 2000,
           endMileage: 2300,
+          startLatitude: null,
+          startLongitude: null,
+          endLatitude: null,
+          endLongitude: null,
+          status: 'COMPLETED',
+          fuelLogIds: [],
         },
         message: 'ツーリング登録成功',
       })
@@ -1972,6 +2754,12 @@ describe('UserBike API Endpoints', () => {
           endDate: '2024-10-12T00:00:00.000Z',
           startMileage: 4000,
           endMileage: 4200,
+          startLatitude: null,
+          startLongitude: null,
+          endLatitude: null,
+          endLongitude: null,
+          status: 'COMPLETED',
+          fuelLogIds: [],
         },
         message: 'ツーリング取得成功',
       })
@@ -2121,6 +2909,12 @@ describe('UserBike API Endpoints', () => {
           endDate,
           startMileage: 4000,
           endMileage: 4300,
+          startLatitude: null,
+          startLongitude: null,
+          endLatitude: null,
+          endLongitude: null,
+          status: 'COMPLETED',
+          fuelLogIds: [],
         },
         message: 'ツーリング更新成功',
       })
@@ -2141,6 +2935,134 @@ describe('UserBike API Endpoints', () => {
       expect(getTouringJson.data.title).toBe('更新後ツーリング')
       expect(getTouringJson.data.endDate).toBe(endDate)
       expect(getTouringJson.data.endMileage).toBe(4300)
+    })
+
+    test('開始・終了位置を更新できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: 35.6895,
+            startLongitude: 139.6917,
+            endLatitude: 34.6937,
+            endLongitude: 135.5023,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.startLatitude).toBeCloseTo(35.6895)
+      expect(json.data.startLongitude).toBeCloseTo(139.6917)
+      expect(json.data.endLatitude).toBeCloseTo(34.6937)
+      expect(json.data.endLongitude).toBeCloseTo(135.5023)
+    })
+
+    test('位置情報をnullで削除できる', async () => {
+      // まず位置情報を設定
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: 35.6895,
+            startLongitude: 139.6917,
+          }),
+        }
+      )
+
+      // nullで削除
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: null,
+            startLongitude: null,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.startLatitude).toBeNull()
+      expect(json.data.startLongitude).toBeNull()
+    })
+
+    test('終了日を変更するとヒストリーの occurredAt も更新される', async () => {
+      const newEndDate = '2024-10-20T00:00:00.000Z'
+
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ endDate: newEndDate }),
+        }
+      )
+
+      const historyRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const historyJson = await historyRes.json()
+      expect(historyRes.status).toBe(200)
+      expect(historyJson.data).toHaveLength(1)
+      expect(historyJson.data[0].occurredAt).toBe(newEndDate)
+    })
+
+    test('終了日以外のフィールドのみ変更した場合はヒストリーの occurredAt は変わらない', async () => {
+      const beforeRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const beforeJson = await beforeRes.json()
+      const originalOccurredAt = beforeJson.data[0].occurredAt
+
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: '日付変更なし更新' }),
+        }
+      )
+
+      const afterRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const afterJson = await afterRes.json()
+      expect(afterRes.status).toBe(200)
+      expect(afterJson.data[0].occurredAt).toBe(originalOccurredAt)
     })
   })
 
@@ -2329,6 +3251,8 @@ describe('UserBike API Endpoints', () => {
           memo,
           fuelEfficiency: 16, // (2000 - 1800) / 12.5
           pricePerLiter: 160, // 2000 / 12.5
+          touringId: null,
+          touringTitle: null,
         },
         message: '燃料ログ更新成功',
       })
@@ -2521,6 +3445,63 @@ describe('UserBike API Endpoints', () => {
         '前回走行距離は給油時走行距離以下である必要があります'
       )
     })
+
+    test('給油日時を変更するとヒストリーの occurredAt も更新される', async () => {
+      const newRefueledAt = '2024-03-15T15:30:00.000Z'
+
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fuelLogId, refueledAt: newRefueledAt }),
+      })
+
+      const historyRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const historyJson = await historyRes.json()
+      expect(historyRes.status).toBe(200)
+      expect(historyJson.data).toHaveLength(1)
+      expect(historyJson.data[0].occurredAt).toBe(newRefueledAt)
+    })
+
+    test('給油日時以外のフィールドのみ変更した場合はヒストリーの occurredAt は変わらない', async () => {
+      const beforeRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const beforeJson = await beforeRes.json()
+      const originalOccurredAt = beforeJson.data[0].occurredAt
+
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fuelLogId, mileage: 2000 }),
+      })
+
+      const afterRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/history`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const afterJson = await afterRes.json()
+      expect(afterRes.status).toBe(200)
+      expect(afterJson.data[0].occurredAt).toBe(originalOccurredAt)
+    })
   })
 
   describe('DELETE /api/v1/user-bike/bike/:myUserBikeId/fuel-logs', () => {
@@ -2658,8 +3639,14 @@ describe('UserBike API Endpoints', () => {
 
     test('削除後に総走行距離が更新されないことを確認', async () => {
       // 削除前のバイクの総走行距離を取得
-      const bikeBefore = await prisma.tUserMyBike.findUnique({
+      const myUserBikeBefore = await prisma.tUserMyBike.findUnique({
         where: { id: myUserBikeId },
+      })
+      if (!myUserBikeBefore) {
+        throw new Error('テストバイクが見つかりません')
+      }
+      const bikeBefore = await prisma.tUserBike.findUnique({
+        where: { id: myUserBikeBefore.userBikeId },
       })
       const totalMileageBefore = bikeBefore?.totalMileage
 
@@ -2742,6 +3729,152 @@ describe('UserBike API Endpoints', () => {
           },
           body: JSON.stringify({
             fuelLogId: otherFuelLogId,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/tourings/:touringId/spots/:spotId', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringId: string
+    let spotId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 500,
+        nickname: 'スポット更新テスト用バイク',
+        totalMileage: 5000,
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      touringId = await createTestTouring(token, myUserBikeId, {
+        title: 'スポット更新テスト用ツーリング',
+        startDate: '2024-11-01T00:00:00.000Z',
+        endDate: '2024-11-02T00:00:00.000Z',
+      })
+
+      spotId = await createTestSpot(token, myUserBikeId, touringId, {
+        visitedAt: '2024-11-01T10:00:00.000Z',
+        name: '更新前スポット',
+        memo: '更新前メモ',
+        latitude: 35.0,
+        longitude: 135.0,
+      })
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        'PATCH',
+        { name: '更新後スポット' }
+      )
+    })
+
+    test('更新項目が指定されていない場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('スポットの名前とメモを更新できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: '更新後スポット',
+            memo: '更新後メモ',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.spotId).toBe(spotId)
+      expect(json.data.name).toBe('更新後スポット')
+      expect(json.data.memo).toBe('更新後メモ')
+    })
+
+    test('スポットの位置情報を更新できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 36.5,
+            longitude: 136.5,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.latitude).toBeCloseTo(36.5)
+      expect(json.data.longitude).toBeCloseTo(136.5)
+    })
+
+    test('スポットの位置情報をnullで削除できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: null,
+            longitude: null,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.latitude).toBeNull()
+      expect(json.data.longitude).toBeNull()
+    })
+
+    test('存在しないスポットIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${randomUUID()}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: '更新後スポット',
           }),
         }
       )

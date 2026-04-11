@@ -1,4 +1,9 @@
-import { MyUserBikeId, Touring, TouringId } from '@repo/shared-types'
+import {
+  MyUserBikeId,
+  Touring,
+  TouringId,
+  TouringStatus,
+} from '@repo/shared-types'
 
 export class TouringEntity {
   private _value: Touring
@@ -30,6 +35,34 @@ export class TouringEntity {
       )
     }
 
+    if (
+      touring.startLatitude !== null &&
+      (touring.startLatitude < -90 || touring.startLatitude > 90)
+    ) {
+      throw new Error('開始地点の緯度は-90以上90以下である必要があります')
+    }
+
+    if (
+      touring.startLongitude !== null &&
+      (touring.startLongitude < -180 || touring.startLongitude > 180)
+    ) {
+      throw new Error('開始地点の経度は-180以上180以下である必要があります')
+    }
+
+    if (
+      touring.endLatitude !== null &&
+      (touring.endLatitude < -90 || touring.endLatitude > 90)
+    ) {
+      throw new Error('終了地点の緯度は-90以上90以下である必要があります')
+    }
+
+    if (
+      touring.endLongitude !== null &&
+      (touring.endLongitude < -180 || touring.endLongitude > 180)
+    ) {
+      throw new Error('終了地点の経度は-180以上180以下である必要があります')
+    }
+
     this._value = touring
   }
 
@@ -59,6 +92,26 @@ export class TouringEntity {
 
   public get endMileage(): number | null {
     return this._value.endMileage
+  }
+
+  public get startLatitude(): number | null {
+    return this._value.startLatitude
+  }
+
+  public get startLongitude(): number | null {
+    return this._value.startLongitude
+  }
+
+  public get endLatitude(): number | null {
+    return this._value.endLatitude
+  }
+
+  public get endLongitude(): number | null {
+    return this._value.endLongitude
+  }
+
+  public get status(): TouringStatus {
+    return this._value.status
   }
 
   public toJson(): Touring {

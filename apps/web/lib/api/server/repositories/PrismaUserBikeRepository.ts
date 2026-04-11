@@ -13,11 +13,13 @@ export class PrismaUserBikeRepository
         bikeId: userBike.bikeId,
         displacement: userBike.displacement,
         serialNumber: userBike.serialNumber,
+        totalMileage: userBike.totalMileage,
       },
       select: {
         id: true,
         bikeId: true,
         displacement: true,
+        totalMileage: true,
         serialNumber: true,
       },
     })
@@ -26,6 +28,7 @@ export class PrismaUserBikeRepository
       bikeId: created.bikeId ? createBikeId(created.bikeId) : null,
       userBikeId: createUserBikeId(created.id),
       displacement: created.displacement,
+      totalMileage: created.totalMileage,
       serialNumber: created.serialNumber,
     })
   }
@@ -43,6 +46,7 @@ export class PrismaUserBikeRepository
         id: true,
         bikeId: true,
         displacement: true,
+        totalMileage: true,
         serialNumber: true,
       },
     })
@@ -51,7 +55,54 @@ export class PrismaUserBikeRepository
       bikeId: updated.bikeId ? createBikeId(updated.bikeId) : null,
       userBikeId: createUserBikeId(updated.id),
       displacement: updated.displacement,
+      totalMileage: updated.totalMileage,
       serialNumber: updated.serialNumber,
     })
+  }
+
+  async updateTotalMileage(
+    userBikeId: UserBikeEntity['id'],
+    totalMileage: number
+  ): Promise<UserBikeEntity> {
+    const updated = await this.connection.tUserBike.update({
+      where: { id: userBikeId },
+      data: {
+        totalMileage,
+      },
+      select: {
+        id: true,
+        bikeId: true,
+        displacement: true,
+        totalMileage: true,
+        serialNumber: true,
+      },
+    })
+
+    return new UserBikeEntity({
+      bikeId: updated.bikeId ? createBikeId(updated.bikeId) : null,
+      userBikeId: createUserBikeId(updated.id),
+      displacement: updated.displacement,
+      totalMileage: updated.totalMileage,
+      serialNumber: updated.serialNumber,
+    })
+  }
+
+  async updateTotalMileageIfGreater(
+    userBikeId: UserBikeEntity['id'],
+    totalMileage: number
+  ): Promise<boolean> {
+    const result = await this.connection.tUserBike.updateMany({
+      where: {
+        id: userBikeId,
+        totalMileage: {
+          lt: totalMileage,
+        },
+      },
+      data: {
+        totalMileage,
+      },
+    })
+
+    return result.count > 0
   }
 }

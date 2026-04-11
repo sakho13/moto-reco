@@ -551,6 +551,13 @@ paths:
   /api/v1/user-bike/bike/{my-user-bike-id}/fuel-logs:
     get:
       summary: ユーザー所有バイクの燃料ログ一覧取得
+      description: |
+        燃料ログの一覧を取得します。
+        検索モード:
+        1. プリセット期間検索: `period` パラメータを使用
+        2. 自由な日付範囲検索: `startDate` と `endDate` パラメータを使用（両方必須）
+
+        注意: `period` と `startDate/endDate` は同時に指定できません。
       tags:
         - user-bikes
       parameters:
@@ -598,7 +605,29 @@ paths:
               - latest-month
               - past-year
               - past-month
-          description: 燃費グラフなどの表示範囲を指定する期間
+          description: |
+            プリセット期間検索。
+            `startDate/endDate` とは排他的に使用してください。
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date-time
+          description: |
+            開始日時（ISO 8601形式）。
+            `endDate` と両方指定する必要があります。
+            `period` とは排他的に使用してください。
+          example: '2024-01-01T00:00:00.000Z'
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date-time
+          description: |
+            終了日時（ISO 8601形式）。
+            `startDate` と両方指定する必要があります。
+            `period` とは排他的に使用してください。
+          example: '2024-01-31T23:59:59.999Z'
       responses:
         '200':
           description: 燃料ログ一覧取得成功
@@ -666,6 +695,54 @@ paths:
                   message:
                     type: string
                     example: 燃料ログ登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/fuel-logs/{fuel-log-id}:
+    get:
+      summary: ユーザー所有バイクの燃料ログ詳細取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: fuel-log-id
+          required: true
+          schema:
+            type: string
+          description: 燃料ログID
+      responses:
+        '200':
+          description: 燃料ログ詳細取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeFuelLogDetail'
+                  message:
+                    type: string
+                    example: 燃料ログ詳細取得成功
         '400':
           $ref: '#/components/responses/Error400'
         '401':

@@ -1,15 +1,18 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import useSWR from 'swr'
+import { useState } from 'react'
+import useSWR, { mutate } from 'swr'
 import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
+import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
+import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
 import { authenticatedFetch } from '@/lib/api/client'
@@ -20,6 +23,7 @@ function BikeDetailPage() {
   const params = useParams()
   const router = useRouter()
   const id = params.id as string
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   const { data, error, isLoading } = useSWR(
     id ? `/api/v1/user-bike/bike/${id}` : null,
@@ -88,6 +92,17 @@ function BikeDetailPage() {
 
   return (
     <>
+      {isEditModalOpen && (
+        <MyBikeEditModal
+          bikeId={id}
+          onClose={() => setIsEditModalOpen(false)}
+          onSuccess={() => {
+            setIsEditModalOpen(false)
+            mutate(`/api/v1/user-bike/bike/${id}`)
+          }}
+        />
+      )}
+
       <div className="w-full max-w-md mb-4">
         <Button variant="cloud" onClick={() => router.push('/app/my-bike')}>
           ← 戻る
@@ -99,7 +114,7 @@ function BikeDetailPage() {
           title={displayTitle}
           headerAction={
             <Button
-              onClick={() => router.push(`/app/my-bike/${id}/edit`)}
+              onClick={() => setIsEditModalOpen(true)}
               variant="cloud"
               size="sm"
               aria-label="バイク情報を編集"
@@ -125,6 +140,13 @@ function BikeDetailPage() {
           title="給油履歴"
           description="給油履歴を確認・管理できます"
           icon={<FuelIcon />}
+        />
+
+        <NavigationCard
+          href={`/app/my-bike/${id}/tourings`}
+          title="ツーリング履歴"
+          description="ツーリング履歴を確認・管理できます"
+          icon={<TouringIcon />}
         />
 
         {/* メンテナンス履歴 - disabled 状態 */}

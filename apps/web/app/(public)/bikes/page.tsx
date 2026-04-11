@@ -1,18 +1,28 @@
+import Link from 'next/link'
 import { prisma } from '@repo/database'
 import styles from './page.module.css'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
-import { APP_NAME } from '@/lib/statics'
+import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata = {
-  title: `${APP_NAME} | 公開バイク一覧`,
+  title: `公開バイク一覧`,
   description: `${APP_NAME}で公開されているバイク情報の一覧です。`,
+  metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: '/bikes',
+  },
 }
 
 export const revalidate = 300
 
 const getPublicBikes = async () => {
-  const repo = new PrismaMyUserBikeRepository(prisma)
-  return repo.findPublicBikes()
+  try {
+    const repo = new PrismaMyUserBikeRepository(prisma)
+    return await repo.findPublicBikes()
+  } catch (e) {
+    console.error('[/bikes] DB接続に失敗したため空配列を返します:', e)
+    return []
+  }
 }
 
 export default async function PublicBikesPage() {
@@ -40,7 +50,11 @@ export default async function PublicBikesPage() {
             const subtitle = `${bike.displacement}cc${bike.modelYear ? ` / ${bike.modelYear}年式` : ''}`
 
             return (
-              <article key={bike.myUserBikeId} className={styles.card}>
+              <Link
+                key={bike.myUserBikeId}
+                href={`/bikes/${bike.myUserBikeId}`}
+                className={styles.card}
+              >
                 <div className={styles.cardHeader}>
                   <h2 className={styles.cardTitle}>{title}</h2>
                   <p className={styles.cardSubtitle}>{subtitle}</p>
@@ -53,7 +67,7 @@ export default async function PublicBikesPage() {
                     最終更新日: {bike.updatedAt.toLocaleDateString('ja-JP')}
                   </div>
                 </div>
-              </article>
+              </Link>
             )
           })}
         </div>

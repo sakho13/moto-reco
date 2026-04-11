@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import styles from './Navigation.module.css'
+import { ThemeToggleButton } from '@/components/ThemeToggleButton'
 
 interface NavLink {
   href: string
@@ -11,8 +12,10 @@ interface NavLink {
 
 const NAV_LINKS: NavLink[] = [
   { href: '/', label: 'ホーム' },
+  { href: '/about', label: 'このアプリについて' },
   { href: '/faq', label: 'FAQ' },
   { href: '/pricing', label: '料金プラン' },
+  { href: '/bikes', label: 'みんなのバイク' },
 ]
 
 export function Navigation() {
@@ -28,7 +31,11 @@ export function Navigation() {
       <div className={styles.navContainer}>
         <ul className={styles.navList}>
           {NAV_LINKS.map((link) => {
-            const isActive = pathname === link.href
+            const isActive =
+              link.href === '/'
+                ? pathname === link.href
+                : pathname.startsWith(link.href)
+
             return (
               <li key={link.href}>
                 <Link
@@ -42,15 +49,18 @@ export function Navigation() {
             )
           })}
         </ul>
-        <Link
-          href={`/app/login`}
-          target="_blank"
-          rel="noreferrer"
-          className={styles.loginButton}
-          aria-label="ログインページを新しいタブで開く"
-        >
-          ログイン
-        </Link>
+        <div className={styles.navActions}>
+          <ThemeToggleButton />
+          <Link
+            href={`/app/login`}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.loginButton}
+            aria-label="ログインページを新しいタブで開く"
+          >
+            ログイン
+          </Link>
+        </div>
       </div>
     </nav>
   )

@@ -15,11 +15,11 @@
   },
   "dependencies": {
     "@premieroctet/next-admin-generator-prisma": "1.1.0",
-    "@prisma/adapter-pg": "7.0.0",
-    "@prisma/client": "7.0.0",
+    "@prisma/adapter-pg": "7.7.0",
+    "@prisma/client": "7.7.0",
     "dotenv": "catalog:",
     "pg": "8.16.3",
-    "prisma": "7.0.0"
+    "prisma": "7.7.0"
   },
   "exports": {
     ".": "./src/index.ts"

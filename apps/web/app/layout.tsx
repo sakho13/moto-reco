@@ -5,9 +5,6 @@ import './globals.css'
 import { FirebaseAnalytics } from '@/components/FirebaseAnalytics'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
-// Firebase認証を使用しているため、動的レンダリングを強制
-export const dynamic = 'force-dynamic'
-
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
   variable: '--font-geist-sans',
@@ -18,17 +15,25 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: APP_NAME,
-  description: 'バイクメンテナンス・給油記録管理アプリ',
+  title: {
+    default: APP_NAME,
+    template: '%s | ' + APP_NAME,
+  },
+  description:
+    'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理するアプリです。',
   metadataBase: new URL(SITE_URL),
   keywords: [
     'バイク',
+    'bike',
     'モーターサイクル',
+    'motorcycle',
+    '原付',
+    'エコ',
+    '給油',
+    '燃費',
+    '整備',
     'メンテナンス',
-    '給油記録',
-    '燃費管理',
-    '整備履歴',
-    'バイク管理アプリ',
+    'バイク管理',
     'ツーリング',
     'ツーリング記録',
   ],

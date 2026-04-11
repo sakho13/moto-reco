@@ -66,15 +66,83 @@ export const FuelLogPeriodSchema = z.enum([
 
 export type FuelLogPeriod = z.infer<typeof FuelLogPeriodSchema>
 
-export const FuelLogListQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1).optional(),
-  'per-size': z.coerce.number().int().min(1).max(100).default(20).optional(),
-  'sort-by': z.enum(['refueled-at', 'mileage']).optional(),
-  'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
-  period: FuelLogPeriodSchema.optional(),
-})
+export const FuelLogListQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1).optional(),
+    'per-size': z.coerce.number().int().min(1).max(100).default(20).optional(),
+    'sort-by': z.enum(['refueled-at', 'mileage']).optional(),
+    'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+    period: FuelLogPeriodSchema.optional(),
+    // 日付範囲検索用パラメータ
+    startDate: z.coerce
+      .date({
+        invalid_type_error: '開始日は日付形式で指定してください',
+      })
+      .optional(),
+    endDate: z.coerce
+      .date({
+        invalid_type_error: '終了日は日付形式で指定してください',
+      })
+      .optional(),
+  })
+  // 排他制御: period と startDate/endDate の両方指定を禁止
+  .refine(
+    (data) => {
+      if (data.period && (data.startDate || data.endDate)) {
+        return false
+      }
+      return true
+    },
+    {
+      message: 'periodとstartDate/endDateは同時に指定できません',
+    }
+  )
+  // startDate/endDate はセットで指定
+  .refine(
+    (data) => {
+      if (data.startDate && !data.endDate) return false
+      if (!data.startDate && data.endDate) return false
+      return true
+    },
+    {
+      message: 'startDateとendDateは両方指定する必要があります',
+    }
+  )
+  // 日付の前後関係チェック
+  .refine(
+    (data) => {
+      if (data.startDate && data.endDate) {
+        return data.startDate <= data.endDate
+      }
+      return true
+    },
+    {
+      message: '開始日は終了日以前の日付で指定してください',
+      path: ['startDate'],
+    }
+  )
 
 export type FuelLogListQuery = z.infer<typeof FuelLogListQuerySchema>
+
+/**
+ * 燃料ログ詳細取得パスパラメータのバリデーションスキーマ
+ */
+export const FuelLogDetailParamSchema = z.object({
+  myUserBikeId: z
+    .string({
+      required_error: 'バイクIDは必須です',
+      invalid_type_error: 'バイクIDは文字列で指定してください',
+    })
+    .min(1, 'バイクIDは1文字以上で指定してください'),
+  fuelLogId: z
+    .string({
+      required_error: '燃料ログIDは必須です',
+      invalid_type_error: '燃料ログIDは文字列で指定してください',
+    })
+    .min(1, '燃料ログIDは1文字以上で指定してください'),
+})
+
+export type FuelLogDetailParam = z.infer<typeof FuelLogDetailParamSchema>
 
 /**
  * 燃料ログ更新リクエストのバリデーションスキーマ
@@ -165,3 +233,19 @@ export const FuelLogDeleteRequestSchema = z.object({
 })
 
 export type FuelLogDeleteRequest = z.infer<typeof FuelLogDeleteRequestSchema>
+
+/**
+ * 給油履歴のツーリング紐づけ更新リクエストのバリデーションスキーマ
+ */
+export const FuelLogTouringUpdateRequestSchema = z.object({
+  touringId: z
+    .string({
+      invalid_type_error: 'ツーリングIDは文字列で指定してください',
+    })
+    .min(1, 'ツーリングIDは1文字以上で指定してください')
+    .nullable(),
+})
+
+export type FuelLogTouringUpdateRequest = z.infer<
+  typeof FuelLogTouringUpdateRequestSchema
+>
