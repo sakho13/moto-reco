@@ -1,0 +1,71 @@
+'use client'
+
+import Link from 'next/link'
+import useSWR from 'swr'
+import type {
+  ApiResponseAllBikesHistoryList,
+  SuccessResponse,
+} from '@repo/shared-types'
+import { BaseCard } from '@repo/ui/baseCard'
+import { HistoryItemCard } from './history/HistoryItemCard'
+import styles from './RecentHistorySection.module.css'
+import { authenticatedFetch } from '@/lib/api/client'
+import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+
+const PAGE_SIZE = 5
+
+export const RecentHistorySection = () => {
+  const { data, error, isLoading } = useSWR(
+    `/api/v1/user-bike/history?page=1&per-size=${PAGE_SIZE}`,
+    async (url) => {
+      const response = await authenticatedFetch(url, { method: 'GET' })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new ApiV1Error(
+          errorData.errorCode || 'SERVER_ERROR',
+          errorData.message || 'エラーが発生しました'
+        )
+      }
+      const json =
+        (await response.json()) as SuccessResponse<ApiResponseAllBikesHistoryList>
+      return json.data
+    }
+  )
+
+  const moreLink = (
+    <Link href="/app/history" className={styles.moreLink}>
+      もっと見る →
+    </Link>
+  )
+
+  if (isLoading) {
+    return (
+      <BaseCard title="ヒストリー" headerAction={moreLink} noBorder>
+        <p className={styles.empty}>読み込み中...</p>
+      </BaseCard>
+    )
+  }
+
+  if (error) {
+    return null
+  }
+
+  const historyItems = data ?? []
+
+  return (
+    <BaseCard title="ヒストリー" headerAction={moreLink} noBorder>
+      {historyItems.length > 0 ? (
+        <div className={styles.historyList}>
+          {historyItems.map((item) => (
+            <HistoryItemCard
+              key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.touring.touringId}`}
+              item={item}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className={styles.empty}>ヒストリーはまだありません</p>
+      )}
+    </BaseCard>
+  )
+}

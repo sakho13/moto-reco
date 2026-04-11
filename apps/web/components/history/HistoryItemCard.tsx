@@ -1,0 +1,64 @@
+import { Fuel, MapPin } from 'lucide-react'
+import type { ApiResponseAllBikesHistoryItem } from '@repo/shared-types'
+import styles from './HistoryItemCard.module.css'
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+type Props = {
+  item: ApiResponseAllBikesHistoryItem
+}
+
+export const HistoryItemCard = ({ item }: Props) => {
+  return (
+    <div className={styles.historyItemCard}>
+      <div className={styles.header}>
+        <div className={styles.badges}>
+          <span
+            className={`${styles.badge} ${item.type === 'FUEL_LOG' ? styles.badgeFuel : styles.badgeTouring}`}
+          >
+            {item.type === 'FUEL_LOG' ? (
+              <>
+                <Fuel size={12} />
+                給油
+              </>
+            ) : (
+              <>
+                <MapPin size={12} />
+                ツーリング
+              </>
+            )}
+          </span>
+          <span className={styles.bikeName}>{item.bikeName}</span>
+        </div>
+        <span className={styles.date}>{formatDate(item.occurredAt)}</span>
+      </div>
+
+      {item.type === 'FUEL_LOG' ? (
+        <div className={styles.detail}>
+          <div>走行距離: {item.fuelLog.mileage.toLocaleString()} km</div>
+          <div>
+            給油量: {item.fuelLog.amount.toLocaleString()} L /{' '}
+            {item.fuelLog.totalPrice.toLocaleString()} 円
+          </div>
+        </div>
+      ) : (
+        <div className={styles.detail}>
+          <div>{item.touring.title}</div>
+          <div>
+            {new Date(item.touring.startDate).toLocaleDateString('ja-JP')} 〜{' '}
+            {new Date(item.touring.endDate).toLocaleDateString('ja-JP')}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
