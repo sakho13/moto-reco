@@ -42,3 +42,45 @@ ALTER TABLE "TUserMyBikeHistory" ADD CONSTRAINT "TUserMyBikeHistory_fuel_log_id_
 
 -- AddForeignKey
 ALTER TABLE "TUserMyBikeHistory" ADD CONSTRAINT "TUserMyBikeHistory_touring_id_fkey" FOREIGN KEY ("touring_id") REFERENCES "TUserMyBikeTouring"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- MigrateData: 既存の給油履歴からヒストリーレコードを生成
+INSERT INTO "TUserMyBikeHistory" (
+    "id",
+    "user_id",
+    "my_bike_id",
+    "type",
+    "occurred_at",
+    "fuel_log_id",
+    "updated_at"
+)
+SELECT
+    gen_random_uuid()::TEXT,
+    b."user_id",
+    f."my_bike_id",
+    'FUEL_LOG'::"BikeHistoryType",
+    f."refueled_at",
+    f."id",
+    NOW()
+FROM "TUserMyBikeFuelLog" f
+JOIN "TUserMyBike" b ON f."my_bike_id" = b."id";
+
+-- MigrateData: 既存のツーリング記録からヒストリーレコードを生成
+INSERT INTO "TUserMyBikeHistory" (
+    "id",
+    "user_id",
+    "my_bike_id",
+    "type",
+    "occurred_at",
+    "touring_id",
+    "updated_at"
+)
+SELECT
+    gen_random_uuid()::TEXT,
+    b."user_id",
+    t."my_bike_id",
+    'TOURING'::"BikeHistoryType",
+    t."end_date",
+    t."id",
+    NOW()
+FROM "TUserMyBikeTouring" t
+JOIN "TUserMyBike" b ON t."my_bike_id" = b."id";
