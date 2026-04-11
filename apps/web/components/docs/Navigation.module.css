@@ -46,6 +46,13 @@
   font-weight: 600;
 }
 
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
 .loginButton {
   display: inline-flex;
   align-items: center;
@@ -59,7 +66,6 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 12px rgba(23, 23, 23, 0.15);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .loginButton:hover {
@@ -110,33 +116,31 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .nav {
-    background: rgba(10, 10, 10, 0.9);
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-  }
+html[data-theme-mode='dark'] .nav {
+  background: rgba(10, 10, 10, 0.9);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
 
-  .navLink {
-    color: rgba(237, 237, 237, 0.7);
-  }
+html[data-theme-mode='dark'] .navLink {
+  color: rgba(237, 237, 237, 0.7);
+}
 
-  .navLink:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(237, 237, 237, 0.9);
-  }
+html[data-theme-mode='dark'] .navLink:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(237, 237, 237, 0.9);
+}
 
-  .navLink.active {
-    background: #ededed;
-    color: #0a0a0a;
-  }
+html[data-theme-mode='dark'] .navLink.active {
+  background: #ededed;
+  color: #0a0a0a;
+}
 
-  .loginButton {
-    background: #ededed;
-    color: #0a0a0a;
-    box-shadow: 0 4px 12px rgba(237, 237, 237, 0.15);
-  }
+html[data-theme-mode='dark'] .loginButton {
+  background: #ededed;
+  color: #0a0a0a;
+  box-shadow: 0 4px 12px rgba(237, 237, 237, 0.15);
+}
 
-  .loginButton:hover {
-    box-shadow: 0 6px 16px rgba(237, 237, 237, 0.2);
-  }
+html[data-theme-mode='dark'] .loginButton:hover {
+  box-shadow: 0 6px 16px rgba(237, 237, 237, 0.2);
 }

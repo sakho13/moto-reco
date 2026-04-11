@@ -143,37 +143,35 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .description,
-  .sectionDescription,
-  .featureDescription {
-    color: rgba(237, 237, 237, 0.7);
-  }
+html[data-theme-mode='dark'] .description,
+html[data-theme-mode='dark'] .sectionDescription,
+html[data-theme-mode='dark'] .featureDescription {
+  color: rgba(237, 237, 237, 0.7);
+}
 
-  .missionText {
-    color: rgba(237, 237, 237, 0.75);
-  }
+html[data-theme-mode='dark'] .missionText {
+  color: rgba(237, 237, 237, 0.75);
+}
 
-  .missionSection {
-    background: rgba(255, 255, 255, 0.06);
-  }
+html[data-theme-mode='dark'] .missionSection {
+  background: rgba(255, 255, 255, 0.06);
+}
 
-  .featureCard {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
+html[data-theme-mode='dark'] .featureCard {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
 
-  .ctaSection {
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--foreground);
-  }
+html[data-theme-mode='dark'] .ctaSection {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--foreground);
+}
 
-  .ctaText {
-    color: rgba(237, 237, 237, 0.8);
-  }
+html[data-theme-mode='dark'] .ctaText {
+  color: rgba(237, 237, 237, 0.8);
+}
 
-  .ctaButton {
-    background: #ededed;
-    color: #0a0a0a;
-    box-shadow: 0 8px 20px rgba(237, 237, 237, 0.15);
-  }
+html[data-theme-mode='dark'] .ctaButton {
+  background: #ededed;
+  color: #0a0a0a;
+  box-shadow: 0 8px 20px rgba(237, 237, 237, 0.15);
 }

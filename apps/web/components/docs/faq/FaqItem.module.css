@@ -91,28 +91,26 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .faqItem {
-    background: rgba(255, 255, 255, 0.04);
-  }
+html[data-theme-mode='dark'] .faqItem {
+  background: rgba(255, 255, 255, 0.04);
+}
 
-  .question:hover {
-    background: rgba(255, 255, 255, 0.06);
-  }
+html[data-theme-mode='dark'] .question:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
 
-  .question:focus-visible {
-    outline-color: #ededed;
-  }
+html[data-theme-mode='dark'] .question:focus-visible {
+  outline-color: #ededed;
+}
 
-  .questionText {
-    color: #ededed;
-  }
+html[data-theme-mode='dark'] .questionText {
+  color: #ededed;
+}
 
-  .icon {
-    color: rgba(237, 237, 237, 0.6);
-  }
+html[data-theme-mode='dark'] .icon {
+  color: rgba(237, 237, 237, 0.6);
+}
 
-  .answer p {
-    color: rgba(237, 237, 237, 0.7);
-  }
+html[data-theme-mode='dark'] .answer p {
+  color: rgba(237, 237, 237, 0.7);
 }
