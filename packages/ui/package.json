@@ -9,22 +9,34 @@
   "scripts": {
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "devDependencies": {
-    "@repo/theme": "workspace:*",
     "@repo/eslint-config": "workspace:*",
+    "@repo/theme": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@storybook/addon-essentials": "8.6.15",
+    "@storybook/addon-interactions": "8.6.15",
+    "@storybook/react-vite": "8.6.15",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/react-native": "0.73.0",
+    "@types/recharts": "2.0.1",
+    "@vitejs/plugin-react": "4.7.0",
     "eslint": "catalog:",
+    "storybook": "8.6.15",
+    "vite": "5.4.21",
     "typescript": "catalog:"
   },
   "dependencies": {
+    "@repo/shared-types": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "recharts": "3.8.1",
+    "sonner": "catalog:"
   },
   "peerDependencies": {
     "react-native": "*"

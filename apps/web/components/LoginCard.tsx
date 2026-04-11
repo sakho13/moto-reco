@@ -8,6 +8,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseAuth } from '@/lib/firebase/config'
@@ -32,7 +33,8 @@ export function LoginCard() {
 
     try {
       await signInWithEmail(email, password)
-      router.push('/home')
+      trackEvent('web_login', { method: 'email' })
+      router.push('/app/home')
     } catch (err) {
       console.error('Login error:', err)
       setError(
@@ -65,7 +67,8 @@ export function LoginCard() {
         await apiGet('/api/v1/user/profile')
 
         // 成功 = 既に登録済み
-        router.push('/')
+        trackEvent('web_login', { method: 'google' })
+        router.push('/app/home')
         return
       } catch (profileError: unknown) {
         // profile APIのエラーをハンドリング
@@ -81,7 +84,9 @@ export function LoginCard() {
           const currentUser = auth.currentUser
 
           if (!currentUser) {
-            throw new Error('認証情報の取得に失敗しました')
+            throw new Error('認証情報の取得に失敗しました', {
+              cause: profileError,
+            })
           }
 
           // displayName のフォールバック
@@ -94,7 +99,9 @@ export function LoginCard() {
           await apiPost('/api/v1/user/auth/register', { name: userName })
 
           // 4. 登録成功 → ホームへ
-          router.push('/')
+          trackEvent('web_sign_up', { method: 'google' })
+          trackEvent('web_login', { method: 'google' })
+          router.push('/app/home')
           return
         }
 
@@ -119,7 +126,7 @@ export function LoginCard() {
       footer={
         <p>
           アカウントをお持ちでない方は
-          <Link href="/register">新規登録</Link>
+          <Link href="/app/register">新規登録</Link>
         </p>
       }
     >
@@ -156,6 +163,10 @@ export function LoginCard() {
           />
         </FormField>
 
+        <div className="mb-4 text-right text-sm">
+          <Link href="/app/reset-password">パスワードをお忘れですか？</Link>
+        </div>
+
         <Button
           type="submit"
           variant="primary"
@@ -176,7 +187,7 @@ export function LoginCard() {
         variant="social"
         size="lg"
         fullWidth
-        disabled={loading}
+        disabled={true}
       >
         Googleでログイン
       </Button>

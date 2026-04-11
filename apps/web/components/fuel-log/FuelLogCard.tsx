@@ -86,6 +86,14 @@ export const FuelLogCard = ({ fuelLog, onEdit }: FuelLogCardProps) => {
         <dd style={{ color: 'var(--color-ink)' }}>
           ¥{fuelLog.totalPrice.toLocaleString()}
         </dd>
+        {fuelLog.memo && (
+          <>
+            <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>メモ:</dt>
+            <dd style={{ color: 'var(--color-ink)', whiteSpace: 'pre-wrap' }}>
+              {fuelLog.memo}
+            </dd>
+          </>
+        )}
       </dl>
     </div>
   )

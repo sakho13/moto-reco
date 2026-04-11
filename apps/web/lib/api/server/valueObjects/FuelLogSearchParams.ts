@@ -1,3 +1,5 @@
+import type { FuelLogPeriod } from '@repo/shared-types'
+
 /**
  * 燃料ログ検索パラメータを表すバリューオブジェクト
  */
@@ -6,17 +8,26 @@ export class FuelLogSearchParams {
   private readonly _pageSize: number
   private readonly _sortBy: 'refueledAt' | 'mileage'
   private readonly _sortOrder: 'asc' | 'desc'
+  private readonly _period?: FuelLogPeriod
+  private readonly _startDate?: Date
+  private readonly _endDate?: Date
 
   constructor(params: {
     page?: number
     pageSize?: number
     sortBy?: 'refueledAt' | 'mileage'
     sortOrder?: 'asc' | 'desc'
+    period?: FuelLogPeriod
+    startDate?: Date
+    endDate?: Date
   }) {
     this._page = params.page && params.page > 0 ? params.page : 1
     this._pageSize = this.validatePageSize(params.pageSize)
     this._sortBy = params.sortBy || 'refueledAt'
     this._sortOrder = params.sortOrder || 'desc'
+    this._period = params.period
+    this._startDate = params.startDate
+    this._endDate = params.endDate
   }
 
   private validatePageSize(size?: number): number {
@@ -47,5 +58,21 @@ export class FuelLogSearchParams {
 
   get sortOrder(): 'asc' | 'desc' {
     return this._sortOrder
+  }
+
+  get period(): FuelLogPeriod | undefined {
+    return this._period
+  }
+
+  get startDate(): Date | undefined {
+    return this._startDate
+  }
+
+  get endDate(): Date | undefined {
+    return this._endDate
+  }
+
+  get isDateRangeMode(): boolean {
+    return this._startDate !== undefined && this._endDate !== undefined
   }
 }

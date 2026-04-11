@@ -32,10 +32,14 @@ app.route('/api/v1', ApiV1)
 
 // グローバルエラーハンドラ
 app.onError((err, c) => {
+  const url = c.req.url
+
   if (err instanceof ApiV1Error) {
+    console.error(`[API_ERROR] ${url}`, err.toErrorResponse())
     return c.json(err.toErrorResponse(), err.statusCode as ContentfulStatusCode)
   }
 
+  console.error(`[SERVER_ERROR] ${url}`, JSON.stringify(err))
   const unknownError = new ApiV1Error('SERVER_ERROR', 'Unknown server error')
   return c.json(unknownError.toErrorResponse(), 500)
 })

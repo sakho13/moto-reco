@@ -1,4 +1,4 @@
-import { FuelLog, FuelLogId, MyUserBikeId } from '@repo/shared-types'
+import { FuelLog, FuelLogId, MyUserBikeId, TouringId } from '@repo/shared-types'
 
 export class FuelLogEntity {
   private _value: FuelLog
@@ -53,6 +53,46 @@ export class FuelLogEntity {
 
   public get totalPrice(): number {
     return this._value.totalPrice
+  }
+
+  public get memo(): string | null {
+    return this._value.memo
+  }
+
+  public get touringId(): TouringId | null {
+    return this._value.touringId
+  }
+
+  public get touringTitle(): string | null {
+    return this._value.touringTitle
+  }
+
+  /**
+   * 今回給油での走行距離
+   */
+  public get distance(): number {
+    return this.mileage - this.previousMileage
+  }
+
+  /**
+   * 燃費（km/L）。初回給油など計算不可の場合はnull (小数点以下1桁で四捨五入)
+   */
+  public get fuelEfficiency(): number | null {
+    const distance = this.distance
+    if (distance <= 0) {
+      return null
+    }
+    return Math.round((distance / this.amount) * 10) / 10
+  }
+
+  /**
+   * リットル単価（円/L）。給油量が0の場合はnull (小数点以下1桁で四捨五入)
+   */
+  public get pricePerLiter(): number | null {
+    if (this.amount <= 0) {
+      return null
+    }
+    return Math.round((this.totalPrice / this.amount) * 10) / 10
   }
 
   public toJson(): FuelLog {

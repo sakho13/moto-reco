@@ -12,6 +12,11 @@
 - **`api`**: Hono バックエンドAPI
 - **`docs`**: Next.js ドキュメントサイト / OpenAPI仕様書 (http://localhost:3001)
 
+### 開発ツール
+
+- **Storybook**: UIコンポーネント開発環境 (http://localhost:6006)
+  - `packages/ui`のコンポーネントをStorybookで開発・確認できます
+
 #### ポート番号
 
 - Webアプリ: `WEB_PORT` (デフォルト: 3000)
@@ -132,9 +137,13 @@ pnpm dev:web
 
 # APIサーバーのみ
 pnpm dev:api
+```
 
-# ドキュメントサイトのみ
-pnpm dev:docs
+### Storybookの起動
+
+```bash
+# UIコンポーネント開発用
+pnpm storybook
 ```
 
 ## データベース操作
@@ -162,7 +171,6 @@ pnpm build
 
 # 特定のアプリをビルド
 pnpm turbo build --filter=web
-pnpm turbo build --filter=api
 ```
 
 ## テスト

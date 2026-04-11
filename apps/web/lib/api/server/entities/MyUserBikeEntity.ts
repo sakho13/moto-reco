@@ -10,10 +10,6 @@ export class MyUserBikeEntity {
   private _value: MyUserBike
 
   constructor(myUserBike: MyUserBike) {
-    if (myUserBike.totalMileage < 0) {
-      throw new Error('総走行距離は0以上である必要があります')
-    }
-
     if (myUserBike.purchaseMileage !== null && myUserBike.purchaseMileage < 0) {
       throw new Error('購入時走行距離は0以上である必要があります')
     }
@@ -60,8 +56,8 @@ export class MyUserBikeEntity {
     return this._value.purchaseMileage
   }
 
-  public get totalMileage(): number {
-    return this._value.totalMileage
+  public get isPublic(): boolean {
+    return this._value.isPublic
   }
 
   public get ownedAt(): Date {

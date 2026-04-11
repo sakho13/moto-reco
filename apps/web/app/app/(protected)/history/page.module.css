@@ -1,0 +1,37 @@
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty {
+  color: var(--color-inkLight);
+  text-align: center;
+  padding: 24px 0;
+}
+
+.loadingMore {
+  color: var(--color-inkLight);
+  text-align: center;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.errorCard {
+  background: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 24px;
+}
+
+.errorTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  color: var(--color-ink);
+}

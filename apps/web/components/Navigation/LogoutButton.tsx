@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@repo/ui/button'
 import { LogOutIcon } from '@/components/icons/LogOutIcon'
+import { trackEvent } from '@/lib/analytics'
 import { useAuth } from '@/lib/hooks/useAuth'
 
 export function LogoutButton() {
@@ -15,7 +16,8 @@ export function LogoutButton() {
     setIsLoading(true)
     try {
       await signOut()
-      router.push('/')
+      trackEvent('web_logout')
+      router.push('/app/login')
     } catch (error) {
       console.error('Logout error:', error)
       setIsLoading(false)

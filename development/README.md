@@ -8,8 +8,6 @@
 - `docs/01_domain/`: ドメイン設計
 - `docs/02_design/`: システム設計
 - `docs/03_development/`: 開発ルール
-  - `coding.md`: コーディング規約
-  - `git.md`: Git運用ルール
   - `monorepo.md`: monorepo参照規約
 
 ## コマンド
@@ -39,6 +37,19 @@ pnpm turbo db:deploy
 # prisma studioの起動 (packages/database内で実行)
 pnpm prisma studio
 ```
+
+### Storybook
+
+UIコンポーネントの開発・確認にはStorybookを使用します。
+
+```bash
+# Storybookの起動
+pnpm storybook
+```
+
+起動後、http://localhost:6006 でアクセスできます。
+
+詳細な使い方は [`packages/ui/README.md`](../packages/ui/README.md#storybookでのコンポーネント開発) を参照してください。
 
 ## Git Worktree開発
 

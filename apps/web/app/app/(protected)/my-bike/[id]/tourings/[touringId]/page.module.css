@@ -1,0 +1,166 @@
+.card {
+  background: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+}
+
+.bodyText {
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+
+.mutedText {
+  color: var(--color-ink);
+  opacity: 0.5;
+}
+
+.dimText {
+  color: var(--color-ink);
+  opacity: 0.4;
+}
+
+.statusStarted {
+  background-color: #10b981;
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.statusCompleted {
+  background-color: var(--color-cloud);
+  color: var(--color-ink);
+  opacity: 0.7;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.spotItem {
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.spotBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: var(--color-product);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.startBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: #10b981;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.endBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.link {
+  color: var(--color-product);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: inline-block;
+}
+
+.link:hover {
+  opacity: 0.8;
+}
+
+.editButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  opacity: 0.5;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.editButton:hover {
+  opacity: 1;
+}
+
+.mapContainer {
+  height: 280px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.mapWrapper {
+  position: relative;
+}
+
+.googleMapsLink {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white;
+  color: #1a73e8;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.googleMapsLink:hover {
+  opacity: 0.85;
+}
+
+.mapContainerLarge {
+  height: 400px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .mapContainerLarge {
+    height: 100%;
+    min-height: 500px;
+  }
+}

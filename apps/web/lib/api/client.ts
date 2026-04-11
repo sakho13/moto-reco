@@ -8,6 +8,12 @@ import {
   ApiResponseFuelLogList,
   ApiResponseUserQuit,
   ApiResponseFuelInsight,
+  ApiResponseTouringDetail,
+  ApiResponseTouringList,
+  ApiResponseOngoingTouring,
+  ApiResponseBikesOngoingTourings,
+  ApiResponseSpotDetail,
+  ApiResponseSpotList,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -36,7 +42,7 @@ export const authenticatedFetch = async (
     'Content-Type': 'application/json',
   }
 
-  return fetch(`${url}`, {
+  return fetch(url, {
     ...options,
     headers,
   })
@@ -155,11 +161,15 @@ export const apiPatch = async <U extends keyof API_EP>(
  * @throws {ApiV1Error} APIエラーが発生した場合
  */
 export const apiDelete = async <U extends keyof API_EP>(
-  url: U
+  url: U,
+  data?: unknown
 ): Promise<
   API_EP[U] extends { DELETE: unknown } ? API_EP[U]['DELETE'] : never
 > => {
-  const response = await authenticatedFetch(url, { method: 'DELETE' })
+  const response = await authenticatedFetch(url, {
+    method: 'DELETE',
+    body: data ? JSON.stringify(data) : undefined,
+  })
   return handleApiResponse(response)
 }
 
@@ -180,6 +190,9 @@ type API_EP = {
   '/api/v1/user-bike/bikes': {
     GET: SuccessResponse<ApiResponseUserBikeList>
   }
+  '/api/v1/user-bike/bikes/ongoing-tourings': {
+    GET: SuccessResponse<ApiResponseBikesOngoingTourings>
+  }
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
   }
@@ -188,10 +201,39 @@ type API_EP = {
     GET: SuccessResponse<ApiResponseFuelLogList>
     POST: SuccessResponse<ApiResponseFuelLogDetail>
     PATCH: SuccessResponse<ApiResponseFuelLogDetail>
+    DELETE: SuccessResponse<undefined>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-insights`]: {
     GET: SuccessResponse<ApiResponseFuelInsight>
+  }
+  [key: `/api/v1/user-bike/bike/${string}/tourings`]: {
+    GET: SuccessResponse<ApiResponseTouringList>
+    POST: SuccessResponse<ApiResponseTouringDetail>
+    DELETE: SuccessResponse<undefined>
+  }
+  [key: `/api/v1/user-bike/bike/${string}/tourings/start-end`]: {
+    POST: SuccessResponse<ApiResponseTouringDetail>
+  }
+  [key: `/api/v1/user-bike/bike/${string}/tourings/ongoing`]: {
+    GET: SuccessResponse<ApiResponseOngoingTouring>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/tourings/${string}`]: {
+    GET: SuccessResponse<ApiResponseTouringDetail>
+    PATCH: SuccessResponse<ApiResponseTouringDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/tourings/${string}/spots`]: {
+    GET: SuccessResponse<ApiResponseSpotList>
+    POST: SuccessResponse<ApiResponseSpotDetail>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/tourings/${string}/spots/${string}`
+  ]: {
+    PATCH: SuccessResponse<ApiResponseSpotDetail>
+    DELETE: SuccessResponse<undefined>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}`]: {

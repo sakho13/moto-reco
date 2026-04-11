@@ -6,6 +6,8 @@ import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { Textarea } from '@repo/ui/textarea'
+import { ToggleSection } from '@repo/ui/toggleSection'
 
 export interface FuelLogFormData {
   refueledAt: string
@@ -13,6 +15,7 @@ export interface FuelLogFormData {
   previousMileage: string
   amount: string
   totalPrice: string
+  memo: string
   updateTotalMileage: boolean
 }
 
@@ -33,14 +36,25 @@ export const FuelLogForm = ({
   isEdit = false,
   totalMileage,
 }: FuelLogFormProps) => {
+  const getTodayDateString = () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+  const today = getTodayDateString()
   const [formData, setFormData] = useState<FuelLogFormData>({
-    refueledAt: '',
+    refueledAt: today ?? '',
     mileage: '',
     previousMileage: '',
     amount: '',
     totalPrice: '',
+    memo: '',
     updateTotalMileage: true,
   })
+  const [isUpdateTotalMileageManual, setIsUpdateTotalMileageManual] =
+    useState(false)
 
   useEffect(() => {
     if (initialData) {
@@ -55,7 +69,9 @@ export const FuelLogForm = ({
         ...prev,
         mileage: totalMileage.toString(),
         previousMileage: totalMileage.toString(),
+        updateTotalMileage: false,
       }))
+      setIsUpdateTotalMileageManual(false)
     }
   }, [isEdit, totalMileage])
 
@@ -64,7 +80,10 @@ export const FuelLogForm = ({
     await onSubmit(formData)
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const isUpdateTotalMileageDisabled =
+    totalMileage !== undefined &&
+    formData.mileage !== '' &&
+    Number(formData.mileage) <= totalMileage
 
   return (
     <form
@@ -99,21 +118,22 @@ export const FuelLogForm = ({
           value={formData.mileage}
           onChange={(e) => {
             const newMileage = e.target.value
+            const isDisabled =
+              totalMileage !== undefined &&
+              newMileage !== '' &&
+              Number(newMileage) <= totalMileage
             setFormData((prev) => ({
               ...prev,
               mileage: newMileage,
-              previousMileage:
-                !isEdit &&
-                (prev.previousMileage === '' ||
-                  prev.previousMileage === prev.mileage)
-                  ? newMileage
-                  : prev.previousMileage,
-              // 総走行距離以下になったら自動的にチェックを外す
-              updateTotalMileage:
-                totalMileage !== undefined && Number(newMileage) <= totalMileage
-                  ? false
-                  : prev.updateTotalMileage,
+              updateTotalMileage: isDisabled
+                ? false
+                : isUpdateTotalMileageManual
+                  ? prev.updateTotalMileage
+                  : true,
             }))
+            if (isDisabled) {
+              setIsUpdateTotalMileageManual(false)
+            }
           }}
           min="0"
           step="1"
@@ -123,28 +143,33 @@ export const FuelLogForm = ({
         />
       </FormField>
 
-      <FormField
-        label="前回給油時走行距離 (km)"
-        htmlFor="previousMileage"
-        required
+      <ToggleSection
+        title={`前回の走行距離: ${formData.previousMileage.toLocaleString()} km（自動設定）`}
+        defaultOpen={false}
       >
-        <Input
-          id="previousMileage"
-          type="number"
-          value={formData.previousMileage}
-          onChange={(e) =>
-            setFormData((prev) => ({
-              ...prev,
-              previousMileage: e.target.value,
-            }))
-          }
-          min="0"
-          step="1"
+        <FormField
+          label="前回の給油時走行距離 (km)"
+          htmlFor="previousMileage"
           required
-          disabled={isSubmitting}
-          placeholder="例: 4800"
-        />
-      </FormField>
+        >
+          <Input
+            id="previousMileage"
+            type="number"
+            value={formData.previousMileage}
+            onChange={(e) => {
+              setFormData((prev) => ({
+                ...prev,
+                previousMileage: e.target.value,
+              }))
+            }}
+            min="0"
+            step="1"
+            required
+            disabled={isSubmitting}
+            placeholder="例: 4800"
+          />
+        </FormField>
+      </ToggleSection>
 
       <FormField label="給油量 (L)" htmlFor="amount" required>
         <Input
@@ -184,23 +209,37 @@ export const FuelLogForm = ({
         />
       </FormField>
 
+      <FormField label="メモ" htmlFor="memo" helperText="最大500文字">
+        <Textarea
+          id="memo"
+          value={formData.memo}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              memo: e.target.value,
+            }))
+          }
+          maxLength={500}
+          disabled={isSubmitting}
+          placeholder="例: ハイオク満タン"
+          rows={3}
+        />
+      </FormField>
+
       {!isEdit && totalMileage !== undefined && (
         <FormField label="" htmlFor="updateTotalMileage">
           <Checkbox
             id="updateTotalMileage"
             label="総走行距離を更新する"
             checked={formData.updateTotalMileage}
-            onChange={(e) =>
+            onChange={(e) => {
               setFormData((prev) => ({
                 ...prev,
                 updateTotalMileage: e.target.checked,
               }))
-            }
-            disabled={
-              isSubmitting ||
-              (formData.mileage !== '' &&
-                Number(formData.mileage) <= totalMileage)
-            }
+              setIsUpdateTotalMileageManual(true)
+            }}
+            disabled={isSubmitting || isUpdateTotalMileageDisabled}
           />
         </FormField>
       )}

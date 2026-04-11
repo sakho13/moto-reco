@@ -1,0 +1,33 @@
+/* Sonnerのカラーをテーマシステムに適合させる */
+[data-sonner-toaster] {
+  /* 成功トーストのカラー設定 */
+  --success-bg: color-mix(in srgb, var(--color-success) 10%, transparent);
+  --success-border: var(--color-success);
+  --success-text: var(--color-successActive);
+
+  /* エラートーストのカラー設定 */
+  --error-bg: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  --error-border: var(--color-danger);
+  --error-text: var(--color-dangerActive);
+
+  /* 警告トーストのカラー設定 */
+  --warning-bg: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  --warning-border: var(--color-warning);
+  --warning-text: var(--color-warningActive);
+}
+
+/* ダークモード対応 */
+html[data-theme-mode='dark'] [data-sonner-toaster] {
+  /* ダークモードでは背景色の透明度を少し上げる */
+  --success-bg: color-mix(in srgb, var(--color-success) 15%, transparent);
+  --success-border: var(--color-successHover);
+  --success-text: var(--color-success);
+
+  --error-bg: color-mix(in srgb, var(--color-danger) 15%, transparent);
+  --error-border: var(--color-dangerHover);
+  --error-text: var(--color-danger);
+
+  --warning-bg: color-mix(in srgb, var(--color-warning) 15%, transparent);
+  --warning-border: var(--color-warningHover);
+  --warning-text: var(--color-warning);
+}

@@ -6,7 +6,8 @@ packages:
 catalog:
   typescript: 5.9.2
   tsx: 4.20.6
-  eslint: 9.39.1
+  '@eslint/js': 9.39.4
+  eslint: 9.39.4
   dotenv: 17.2.3
   dotenv-cli: 11.0.0
   prettier: 3.6.2
@@ -16,9 +17,11 @@ catalog:
   firebase: 12.6.0
   'firebase-admin': 13.6.0
   next: 16.0.7
+  '@next/third-parties': 16.1.1
   react: 19.2.1
   react-dom: 19.2.1
   lucide-react: 0.561.0
+  sonner: 2.0.7
 
   '@types/node': 22.15.3
   '@types/react': 19.2.2

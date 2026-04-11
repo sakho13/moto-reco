@@ -6,7 +6,7 @@
 
 このパッケージは以下を提供します：
 
-- **UIコンポーネント**: Button, Input, Label, ErrorMessage, FormField, AuthCard など
+- **UIコンポーネント**: Button, Input, Textarea, Checkbox, Select, Label, ErrorMessage, FormField, BaseCard, ToggleSection, FuelEfficiencyChart
 - **テーマシステム**: `ThemeProvider` と `useTheme` フックによるテーマ管理
 - **CSS変数**: 61個のデザイントークンベースのCSS変数
 - **TypeScript対応**: 完全な型定義
@@ -223,7 +223,7 @@ export function ThemeToggle() {
 
 ```tsx
 interface ButtonProps {
-  variant?: 'primary' | 'danger' | 'social'
+  variant?: 'primary' | 'danger' | 'social' | 'cloud'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   fullWidth?: boolean
@@ -345,6 +345,232 @@ interface BaseCardProps {
 >
   <LoginForm />
 </BaseCard>
+```
+
+### Textarea
+
+複数行テキスト入力フィールドコンポーネント。エラー状態とヘルパーテキストをサポート。
+
+```tsx
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  error?: boolean
+  helperText?: string
+}
+```
+
+**主な機能:**
+
+- 複数行入力対応
+- エラー状態表示（ボーダー色が危険色に変更）
+- ヘルパーテキスト表示
+- 垂直方向のみリサイズ可能
+- 最小高さ: 80px
+
+**使用例:**
+
+```tsx
+<Textarea
+  placeholder="メモを入力してください"
+  rows={3}
+  error={!!memoError}
+  helperText="最大500文字"
+  maxLength={500}
+/>
+```
+
+### Checkbox
+
+チェックボックスコンポーネント。ラベル統合型でエラー状態をサポート。
+
+```tsx
+interface CheckboxProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+  error?: boolean
+  helperText?: string
+  label?: string
+}
+```
+
+**主な機能:**
+
+- ラベル統合型（label内にinput配置）
+- エラー状態表示
+- ヘルパーテキスト表示
+- アクセント色: `--color-product`（blue）
+- サイズ: 20px × 20px
+
+**使用例:**
+
+```tsx
+<Checkbox
+  id="terms"
+  checked={accepted}
+  onChange={(e) => setAccepted(e.target.checked)}
+  label="利用規約に同意する"
+/>
+```
+
+### Select
+
+セレクトボックスコンポーネント。選択肢配列で管理し、エラー状態をサポート。
+
+```tsx
+interface SelectOption {
+  value: string
+  label: string
+  disabled?: boolean
+}
+
+interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  options: SelectOption[]
+  error?: boolean
+  helperText?: string
+  placeholder?: string
+}
+```
+
+**主な機能:**
+
+- ネイティブなselect要素を使用
+- 選択肢を配列で管理
+- エラー状態表示
+- ヘルパーテキスト表示
+- プレースホルダー対応
+- アクセシビリティ対応（aria-describedby）
+
+**使用例:**
+
+```tsx
+<Select
+  options={[
+    { value: 'option1', label: 'オプション1' },
+    { value: 'option2', label: 'オプション2' },
+    { value: 'option3', label: 'オプション3', disabled: true },
+  ]}
+  placeholder="選択してください"
+  error={!!selectError}
+  helperText="いずれかを選択してください"
+/>
+```
+
+### ToggleSection
+
+アコーディオン型のコンテンツ開閉セクション。初期表示状態を制御可能。
+
+```tsx
+interface ToggleSectionProps extends HTMLAttributes<HTMLDivElement> {
+  title: string
+  defaultOpen?: boolean
+  children: React.ReactNode
+}
+```
+
+**主な機能:**
+
+- アコーディオン型のコンテンツ表示/非表示
+- 初期表示状態を制御（defaultOpen）
+- aria-expanded属性でアクセシビリティ対応
+- アイコン表示（+: 閉じた状態、−: 開いた状態）
+- フォーカス時にアウトライン表示
+
+**使用例:**
+
+```tsx
+<ToggleSection title="詳細設定" defaultOpen={false}>
+  <div className="p-4">
+    <p>詳細な設定内容がここに表示されます</p>
+  </div>
+</ToggleSection>
+```
+
+### FuelEfficiencyChart
+
+給油履歴データを元に燃費推移をグラフで可視化するコンポーネント。Rechartsを使用。
+
+```tsx
+interface FuelEfficiencyChartProps {
+  fuelLogs: ApiResponseFuelLogDetail[]
+}
+
+interface FuelChartDataPoint {
+  date: string // 表示用日付（MM/DD形式）
+  originalDate: string // 元のISO日付文字列
+  fuelEfficiency: number // 燃費 (km/L)
+  mileage: number // 総走行距離 (km)
+  amount: number // 給油量 (L)
+  totalPrice: number // 給油価格 (円)
+}
+
+interface FuelEfficiencyStats {
+  maxEfficiency: number // 最高燃費
+  maxEfficiencyDate: string // 最高燃費の日付
+  minEfficiency: number // 最低燃費
+  minEfficiencyDate: string // 最低燃費の日付
+  averageEfficiency: number // 平均燃費
+  dataPointCount: number // データポイント数
+}
+```
+
+**主な機能:**
+
+- Recharts LineChartで燃費推移を可視化
+- 給油ログデータを自動変換・フィルタリング
+- 直近1年分（365日）のデータを自動抽出
+- データ変換と統計計算をmemo化（パフォーマンス最適化）
+- レスポンシブデザイン（モバイルでは高さ300px）
+
+**表示要素:**
+
+1. **メインラインチャート**: 燃費推移（青色）
+2. **平均値ライン**: 破線で平均燃費表示（緑色）
+3. **最高燃費マーカー**: 緑色ドット + 「最高: X.X」ラベル
+4. **最低燃費マーカー**: 赤色ドット + 「最低: X.X」ラベル
+5. **カスタムツールチップ**: 日付・燃費・走行距離・給油量を表示
+6. **空状態**: データがない場合の「燃費データがありません」メッセージ
+
+**カスタムツールチップ表示内容:**
+
+```
+2024/12/15
+燃費: 18.4 km/L
+走行距離: 13,640 km
+給油量: 11.7 L
+```
+
+**使用例:**
+
+```tsx
+import { FuelEfficiencyChart } from '@repo/ui/fuelEfficiencyChart'
+import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
+
+function FuelLogsPage() {
+  const [fuelLogs, setFuelLogs] = useState<ApiResponseFuelLogDetail[]>([])
+
+  // データ取得...
+
+  return (
+    <div>
+      <h2>燃費グラフ</h2>
+      {fuelLogs.length >= 2 ? (
+        <FuelEfficiencyChart fuelLogs={fuelLogs} />
+      ) : (
+        <p>グラフ表示には2回以上の給油履歴が必要です</p>
+      )}
+    </div>
+  )
+}
+```
+
+**Storybook:**
+
+FuelEfficiencyChartコンポーネントにはStorybookストーリーが実装されています：
+
+- `Default`: 5ヶ月間の実データサンプル
+- `Empty`: 空データでの表示確認
+
+```bash
+pnpm storybook
+# http://localhost:6006 で確認可能
 ```
 
 ## スタイリング方法
@@ -471,6 +697,78 @@ export default function LoginPage() {
   )
 }
 ```
+
+## Storybookでのコンポーネント開発
+
+このパッケージではStorybookを使用したコンポーネント開発をサポートしています。
+
+### Storybookの起動
+
+プロジェクトルートから起動:
+
+```bash
+pnpm storybook
+```
+
+または、`packages/ui`内から直接起動:
+
+```bash
+cd packages/ui
+pnpm storybook
+```
+
+起動後、http://localhost:6006 でStorybookにアクセスできます。
+
+### ストーリーファイルの作成
+
+コンポーネントのストーリーは、コンポーネントと同じディレクトリに`*.stories.tsx`ファイルとして作成します。
+
+**ファイル配置例**:
+
+```
+src/
+  └── MyComponent/
+      ├── myComponent.tsx          # コンポーネント本体
+      ├── myComponent.module.css   # スタイル
+      └── myComponent.stories.tsx  # Storybookストーリー
+```
+
+**ストーリーファイルの基本構造**:
+
+```tsx
+import type { Meta, StoryObj } from '@storybook/react'
+import { MyComponent } from './myComponent'
+
+const meta: Meta<typeof MyComponent> = {
+  title: 'ui/MyComponent',
+  component: MyComponent,
+}
+
+export default meta
+type Story = StoryObj<typeof MyComponent>
+
+export const Default: Story = {
+  args: {
+    // propsの値
+  },
+}
+
+export const Variant: Story = {
+  args: {
+    // 別のpropsの値
+  },
+}
+```
+
+### テーマとの統合
+
+StorybookのプレビューはThemeProviderでラップされているため、すべてのストーリーで自動的にテーマが適用されます。CSS変数も利用可能です。
+
+### 既存のストーリー
+
+参考として、以下のストーリーが実装済みです:
+
+- `src/FuelEfficiencyChart/fuelEfficiencyChart.stories.tsx`
 
 ## 関連パッケージ
 

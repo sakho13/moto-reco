@@ -49,6 +49,10 @@ export type ApiResponseUserQuit = {
   recoveryCode: string
 }
 
+export type ApiResponseUserRecover = {
+  userId: string
+}
+
 export type ApiResponseManufacturer = {
   manufacturers: {
     manufacturerId: string
@@ -88,6 +92,7 @@ export type ApiResponseUserBikeList = {
     totalMileage: number
     displacement: number
     modelYear: number | null
+    isPublic: boolean
     createdAt: string
     updatedAt: string
   }[]
@@ -106,8 +111,22 @@ export type ApiResponseUserBikeDetail = {
   totalMileage: number
   displacement: number
   modelYear: number | null
+  isPublic: boolean
   createdAt: string
   updatedAt: string
+}
+
+export type ApiResponsePublicBikeList = {
+  bikes: {
+    myUserBikeId: string
+    manufacturerName: string | null
+    modelName: string | null
+    nickname: string | null
+    displacement: number
+    modelYear: number | null
+    totalMileage: number
+    updatedAt: string
+  }[]
 }
 
 export type ApiResponseFuelLogDetail = {
@@ -117,9 +136,90 @@ export type ApiResponseFuelLogDetail = {
   previousMileage: number
   amount: number
   totalPrice: number
+  memo: string | null
+  fuelEfficiency: number | null // km/L (計算不可の場合はnull)
+  pricePerLiter: number | null // 円/L (給油量0の場合はnull)
+  touringId: string | null // ツーリングID
+  touringTitle: string | null // ツーリングタイトル
 }
 
 export type ApiResponseFuelLogList = ApiResponseFuelLogDetail[]
+
+export type ApiResponseBikeHistoryItem =
+  | {
+      type: 'FUEL_LOG'
+      occurredAt: string
+      fuelLog: ApiResponseFuelLogDetail
+    }
+  | {
+      type: 'TOURING'
+      occurredAt: string
+      touring: ApiResponseTouringDetail
+    }
+
+export type ApiResponseBikeHistoryList = ApiResponseBikeHistoryItem[]
+
+export type ApiResponseAllBikesHistoryItem = ApiResponseBikeHistoryItem & {
+  bikeId: string
+  bikeName: string
+}
+
+export type ApiResponseAllBikesHistoryList = ApiResponseAllBikesHistoryItem[]
+
+export type ApiResponseTouringDetail = {
+  touringId: string
+  title: string
+  startDate: string
+  endDate: string
+  startMileage: number | null
+  endMileage: number | null
+  startLatitude: number | null
+  startLongitude: number | null
+  endLatitude: number | null
+  endLongitude: number | null
+  status: 'STARTED' | 'COMPLETED'
+  fuelLogIds: string[]
+}
+
+export type ApiResponseTouringList = ApiResponseTouringDetail[]
+
+export type ApiResponsePublicTouringList = {
+  tourings: {
+    touringId: string
+    title: string
+    startDate: string
+    endDate: string
+    startMileage: number | null
+    endMileage: number | null
+    status: 'STARTED' | 'COMPLETED'
+  }[]
+}
+
+export type ApiResponseOngoingTouring = {
+  touring: ApiResponseTouringDetail | null
+}
+
+export type ApiResponseBikeOngoingTouring = {
+  myUserBikeId: string
+  ongoingTouring: ApiResponseTouringDetail | null
+}
+
+export type ApiResponseBikesOngoingTourings = {
+  bikes: ApiResponseBikeOngoingTouring[]
+}
+
+export type ApiResponseSpotDetail = {
+  spotId: string
+  touringId: string
+  name: string | null
+  memo: string | null
+  latitude: number | null
+  longitude: number | null
+  visitedAt: string
+  sortOrder: number
+}
+
+export type ApiResponseSpotList = ApiResponseSpotDetail[]
 
 export type ApiResponseFuelInsight = {
   averageFuelEfficiency: number | null

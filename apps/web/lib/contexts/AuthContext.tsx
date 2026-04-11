@@ -38,6 +38,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return result.user.getIdToken()
   }
 
+  const handleRequestPasswordReset = async (email: string) => {
+    await authService.requestPasswordReset(email)
+  }
+
   const handleSignInWithGoogle = async () => {
     const result = await authService.signInWithGoogle()
     return result.user.getIdToken()
@@ -62,6 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loading,
     signInWithEmail: handleSignInWithEmail,
     registerWithEmail: handleRegisterWithEmail,
+    requestPasswordReset: handleRequestPasswordReset,
     signInWithGoogle: handleSignInWithGoogle,
     signOut: handleSignOut,
     getIdToken: handleGetIdToken,

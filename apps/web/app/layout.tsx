@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
-import { Footer } from '../components/Footer'
-import { Providers } from '../components/Providers'
-import { ThemeToggleButton } from '../components/ThemeToggleButton'
+import './sonner-custom.css'
 import './globals.css'
-
-// Firebase認証を使用しているため、動的レンダリングを強制
-export const dynamic = 'force-dynamic'
+import { FirebaseAnalytics } from '@/components/FirebaseAnalytics'
+import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -18,8 +15,28 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'MotoReco Web App',
-  description: 'MotoReco Web Application',
+  title: {
+    default: APP_NAME,
+    template: '%s | ' + APP_NAME,
+  },
+  description:
+    'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理するアプリです。',
+  metadataBase: new URL(SITE_URL),
+  keywords: [
+    'バイク',
+    'bike',
+    'モーターサイクル',
+    'motorcycle',
+    '原付',
+    'エコ',
+    '給油',
+    '燃費',
+    '整備',
+    'メンテナンス',
+    'バイク管理',
+    'ツーリング',
+    'ツーリング記録',
+  ],
 }
 
 export default function RootLayout({
@@ -30,21 +47,8 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning={true}>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Providers>
-          <div className="fixed top-4 right-4 z-50">
-            <ThemeToggleButton />
-          </div>
-          <div
-            style={{
-              minHeight: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <div style={{ flex: 1 }}>{children}</div>
-            <Footer />
-          </div>
-        </Providers>
+        {children}
+        <FirebaseAnalytics />
       </body>
     </html>
   )

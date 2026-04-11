@@ -1,0 +1,51 @@
+.page {
+  color: var(--foreground);
+  background: var(--background);
+  min-height: 100vh;
+  padding: 80px 96px 64px;
+  font-family: var(--font-geist-sans);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: clamp(32px, 4vw, 48px);
+  letter-spacing: -0.02em;
+}
+
+.description {
+  font-size: 18px;
+  line-height: 1.7;
+  color: rgba(23, 23, 23, 0.7);
+}
+
+.faqContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  max-width: 900px;
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: 64px 24px 48px;
+  }
+
+  .header {
+    margin-bottom: 32px;
+  }
+
+  .faqContainer {
+    gap: 40px;
+  }
+}
+
+html[data-theme-mode='dark'] .description {
+  color: rgba(237, 237, 237, 0.7);
+}

@@ -32,6 +32,29 @@ export class PrismaUserRepository
       : null
   }
 
+  async findByIdIncludingInactive(userId: UserId): Promise<UserEntity | null> {
+    const user = await this.connection.mUser.findFirst({
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        role: true,
+      },
+      where: {
+        id: userId,
+      },
+    })
+
+    return user
+      ? new UserEntity({
+          id: createUserId(user.id),
+          name: user.name,
+          role: user.role,
+          status: user.status,
+        })
+      : null
+  }
+
   async findByAuthProvider(
     authProvider: AuthProviderEntity
   ): Promise<UserEntity | null> {
@@ -131,6 +154,18 @@ export class PrismaUserRepository
       },
       data: {
         status: 'INACTIVE',
+      },
+    })
+  }
+
+  async activateUser(userId: UserId): Promise<void> {
+    await this.connection.mUser.update({
+      where: {
+        id: userId,
+        status: 'INACTIVE',
+      },
+      data: {
+        status: 'ACTIVE',
       },
     })
   }

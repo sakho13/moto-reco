@@ -9,7 +9,9 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
-import { apiPost } from '@/lib/api/client'
+import { toast } from '@repo/ui/sonner'
+import { trackEvent } from '@/lib/analytics'
+import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -98,15 +100,22 @@ export function RegisterCard() {
       }
 
       // 3. API呼び出し: ユーザー情報登録
-      const response = await apiPost('/api/v1/user/auth/register', {
+      await apiPost('/api/v1/user/auth/register', {
         name: name.trim(),
       })
 
-      // 4. プロフィールキャッシュを事前設定(レースコンディション回避)
-      mutate('/api/v1/user/profile', response.data)
+      // 4. プロフィール取得を明示的に実行し、登録反映を確認
+      const profileResponse = await apiGet('/api/v1/user/profile')
+      await mutate('/api/v1/user/profile', profileResponse.data, false)
+      trackEvent('web_sign_up', {
+        method: 'email',
+      })
 
       // 5. ホームページへリダイレクト
-      router.push('/home')
+      toast.success('アカウントを作成しました', {
+        description: 'ホーム画面へ移動します。',
+      })
+      router.push('/app/home')
     } catch (err: unknown) {
       // Firebaseエラーの場合
       if (
@@ -138,7 +147,7 @@ export function RegisterCard() {
       footer={
         <p>
           すでにアカウントをお持ちの方は
-          <Link href="/login">ログイン</Link>
+          <Link href="/app/login">ログイン</Link>
         </p>
       }
     >
@@ -231,6 +240,21 @@ export function RegisterCard() {
         >
           登録する
         </Button>
+        <p className="mt-4 text-xs leading-relaxed text-gray-500">
+          登録することで
+          <Link
+            style={{
+              textDecoration: 'underline',
+            }}
+            href="/privacy-policy"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="プライバシーポリシーを新しいタブで開く"
+          >
+            プライバシーポリシー
+          </Link>
+          に同意したものとみなします。
+        </p>
       </form>
     </BaseCard>
   )
