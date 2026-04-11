@@ -57,7 +57,7 @@
 
 .note {
   font-size: 14px;
-  color: rgba(23, 23, 23, 0.64);
+  color: rgba(23, 23, 23, 0.75);
 }
 
 @media (max-width: 900px) {

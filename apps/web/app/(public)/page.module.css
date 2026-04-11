@@ -26,7 +26,7 @@
   width: fit-content;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.12);
   font-size: 14px;
   font-weight: 600;
 }
@@ -84,7 +84,7 @@
 }
 
 .sectionAlt {
-  background: rgba(23, 23, 23, 0.04);
+  background: rgba(23, 23, 23, 0.06);
   border-radius: 32px;
   padding: 48px;
 }

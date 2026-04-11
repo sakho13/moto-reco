@@ -2,6 +2,7 @@
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
+  border: 1px solid rgba(23, 23, 23, 0.1);
   box-shadow: 0 2px 8px rgba(23, 23, 23, 0.06);
   transition: box-shadow 0.2s ease;
 }

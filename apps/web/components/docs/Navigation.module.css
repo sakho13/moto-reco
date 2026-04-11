@@ -32,7 +32,7 @@
   font-size: 15px;
   font-weight: 500;
   transition: background 0.2s ease, color 0.2s ease;
-  color: rgba(23, 23, 23, 0.7);
+  color: rgba(23, 23, 23, 0.8);
 }
 
 .navLink:hover {
