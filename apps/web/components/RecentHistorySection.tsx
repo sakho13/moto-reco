@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import type {
   ApiResponseAllBikesHistoryList,
@@ -8,6 +10,7 @@ import type {
 } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { HistoryItemCard } from './history/HistoryItemCard'
+import { FuelLogEditModal } from './fuel-log/FuelLogEditModal'
 import styles from './RecentHistorySection.module.css'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
@@ -15,6 +18,12 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 const PAGE_SIZE = 5
 
 export const RecentHistorySection = () => {
+  const router = useRouter()
+  const [editingFuelLog, setEditingFuelLog] = useState<{
+    bikeId: string
+    fuelLogId: string
+  } | null>(null)
+
   const { data, error, isLoading } = useSWR(
     `/api/v1/user-bike/history?page=1&per-size=${PAGE_SIZE}`,
     async (url) => {
@@ -60,11 +69,31 @@ export const RecentHistorySection = () => {
             <HistoryItemCard
               key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.touring.touringId}`}
               item={item}
+              onClick={
+                item.type === 'FUEL_LOG'
+                  ? () =>
+                      setEditingFuelLog({
+                        bikeId: item.bikeId,
+                        fuelLogId: item.fuelLog.fuelLogId,
+                      })
+                  : () =>
+                      router.push(
+                        `/app/my-bike/${item.bikeId}/tourings/${item.touring.touringId}`
+                      )
+              }
             />
           ))}
         </div>
       ) : (
         <p className={styles.empty}>ヒストリーはまだありません</p>
+      )}
+      {editingFuelLog && (
+        <FuelLogEditModal
+          bikeId={editingFuelLog.bikeId}
+          fuelLogId={editingFuelLog.fuelLogId}
+          onClose={() => setEditingFuelLog(null)}
+          onSuccess={() => setEditingFuelLog(null)}
+        />
       )}
     </BaseCard>
   )

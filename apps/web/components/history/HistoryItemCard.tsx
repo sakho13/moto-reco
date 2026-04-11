@@ -15,11 +15,18 @@ const formatDate = (dateString: string) => {
 
 type Props = {
   item: ApiResponseAllBikesHistoryItem
+  onClick?: () => void
 }
 
-export const HistoryItemCard = ({ item }: Props) => {
+export const HistoryItemCard = ({ item, onClick }: Props) => {
   return (
-    <div className={styles.historyItemCard}>
+    <div
+      className={`${styles.historyItemCard} ${onClick ? styles.clickable : ''}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
+    >
       <div className={styles.header}>
         <div className={styles.badges}>
           <span

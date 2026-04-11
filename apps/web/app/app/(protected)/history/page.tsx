@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import useSWRInfinite from 'swr/infinite'
 import type {
   ApiResponseAllBikesHistoryList,
@@ -9,6 +10,7 @@ import type {
 import { BaseCard } from '@repo/ui/baseCard'
 import styles from './page.module.css'
 import { HistoryItemCard } from '@/components/history/HistoryItemCard'
+import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -16,6 +18,12 @@ import { withAuth } from '@/lib/hoc/withAuth'
 const PAGE_SIZE = 10
 
 function HistoryPage() {
+  const router = useRouter()
+  const [editingFuelLog, setEditingFuelLog] = useState<{
+    bikeId: string
+    fuelLogId: string
+  } | null>(null)
+
   const fetchHistory = async (url: string) => {
     const response = await authenticatedFetch(url, { method: 'GET' })
     if (!response.ok) {
@@ -91,6 +99,18 @@ function HistoryPage() {
               <HistoryItemCard
                 key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.touring.touringId}`}
                 item={item}
+                onClick={
+                  item.type === 'FUEL_LOG'
+                    ? () =>
+                        setEditingFuelLog({
+                          bikeId: item.bikeId,
+                          fuelLogId: item.fuelLog.fuelLogId,
+                        })
+                    : () =>
+                        router.push(
+                          `/app/my-bike/${item.bikeId}/tourings/${item.touring.touringId}`
+                        )
+                }
               />
             ))}
             <div ref={sentinelRef} />
@@ -102,6 +122,17 @@ function HistoryPage() {
           <p className={styles.empty}>ヒストリーはまだありません</p>
         )}
       </BaseCard>
+      {editingFuelLog && (
+        <FuelLogEditModal
+          bikeId={editingFuelLog.bikeId}
+          fuelLogId={editingFuelLog.fuelLogId}
+          onClose={() => setEditingFuelLog(null)}
+          onSuccess={() => {
+            setEditingFuelLog(null)
+            setSize(1)
+          }}
+        />
+      )}
     </div>
   )
 }
