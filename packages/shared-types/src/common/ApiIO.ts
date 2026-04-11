@@ -145,6 +145,27 @@ export type ApiResponseFuelLogDetail = {
 
 export type ApiResponseFuelLogList = ApiResponseFuelLogDetail[]
 
+export type ApiResponseBikeHistoryItem =
+  | {
+      type: 'FUEL_LOG'
+      occurredAt: string
+      fuelLog: ApiResponseFuelLogDetail
+    }
+  | {
+      type: 'TOURING'
+      occurredAt: string
+      touring: ApiResponseTouringDetail
+    }
+
+export type ApiResponseBikeHistoryList = ApiResponseBikeHistoryItem[]
+
+export type ApiResponseAllBikesHistoryItem = ApiResponseBikeHistoryItem & {
+  bikeId: string
+  bikeName: string
+}
+
+export type ApiResponseAllBikesHistoryList = ApiResponseAllBikesHistoryItem[]
+
 export type ApiResponseTouringDetail = {
   touringId: string
   title: string

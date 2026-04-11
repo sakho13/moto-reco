@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Footer } from '@/components/Footer'
 import { Providers } from '@/components/Providers'
 import { ThemeToggleButton } from '@/components/ThemeToggleButton'
 import { APP_NAME } from '@/lib/statics'
@@ -30,17 +29,7 @@ export default function RootLayout({
         <div className="fixed top-4 right-4 z-50">
           <ThemeToggleButton />
         </div>
-        <div
-          style={{
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <div style={{ flex: 1 }}>{children}</div>
-
-          <Footer />
-        </div>
+        {children}
       </Providers>
     </>
   )

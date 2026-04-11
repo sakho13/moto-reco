@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import styles from './Navigation.module.css'
+import { ThemeToggleButton } from '@/components/ThemeToggleButton'
 
 interface NavLink {
   href: string
@@ -48,15 +49,18 @@ export function Navigation() {
             )
           })}
         </ul>
-        <Link
-          href={`/app/login`}
-          target="_blank"
-          rel="noreferrer"
-          className={styles.loginButton}
-          aria-label="ログインページを新しいタブで開く"
-        >
-          ログイン
-        </Link>
+        <div className={styles.navActions}>
+          <ThemeToggleButton />
+          <Link
+            href={`/app/login`}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.loginButton}
+            aria-label="ログインページを新しいタブで開く"
+          >
+            ログイン
+          </Link>
+        </div>
       </div>
     </nav>
   )
