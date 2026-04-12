@@ -6,17 +6,36 @@ import {
   ApiResponseMopedTestQuestionSet,
   MopedTestAnswerOption,
 } from '@repo/shared-types'
+import { HistorySection } from './HistorySection'
 import styles from './page.module.css'
 import { SwipeCardDeck } from './SwipeCardDeck'
 
 type AnswerMap = Record<string, MopedTestAnswerOption>
 
-type TestResult = {
+export type AnswerRecord = {
+  questionId: string
+  selected: MopedTestAnswerOption
+  isCorrect: boolean
+}
+
+export type TestSession = {
+  sessionId: string
+  submittedAt: string
+  score: number
+  totalCount: number
+  passScore: number
+  isPassed: boolean
+  answers: AnswerRecord[]
+}
+
+// 移行用：旧フォーマット
+type LegacyTestResult = {
   score: number
   submittedAt: string
 }
 
-const RESULT_STORAGE_KEY = 'moped-test:last-result'
+const HISTORY_STORAGE_KEY = 'moped-test:history'
+const LEGACY_RESULT_STORAGE_KEY = 'moped-test:last-result'
 
 function calcScore(
   questions: ApiResponseMopedTestQuestion[],
@@ -29,13 +48,43 @@ function calcScore(
   }, 0)
 }
 
+function loadHistory(): TestSession[] {
+  try {
+    const stored = localStorage.getItem(HISTORY_STORAGE_KEY)
+    if (stored) {
+      return JSON.parse(stored) as TestSession[]
+    }
+    // 旧フォーマットからの移行
+    const legacy = localStorage.getItem(LEGACY_RESULT_STORAGE_KEY)
+    if (legacy) {
+      const old = JSON.parse(legacy) as LegacyTestResult
+      const migrated: TestSession = {
+        sessionId: 'legacy',
+        submittedAt: old.submittedAt,
+        score: old.score,
+        totalCount: 0,
+        passScore: 0,
+        isPassed: false,
+        answers: [],
+      }
+      localStorage.removeItem(LEGACY_RESULT_STORAGE_KEY)
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify([migrated]))
+      return [migrated]
+    }
+  } catch {
+    // 不正データは無視
+  }
+  return []
+}
+
 export function MopedTestClient() {
   const [questionSet, setQuestionSet] =
     useState<ApiResponseMopedTestQuestionSet | null>(null)
   const [answers, setAnswers] = useState<AnswerMap>({})
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
-  const [lastResult, setLastResult] = useState<TestResult | null>(null)
+  const [history, setHistory] = useState<TestSession[]>([])
+  const [showHistory, setShowHistory] = useState(false)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -59,26 +108,40 @@ export function MopedTestClient() {
       }
     }
 
-    const stored = localStorage.getItem(RESULT_STORAGE_KEY)
-    if (stored) {
-      setLastResult(JSON.parse(stored) as TestResult)
-    }
-
+    setHistory(loadHistory())
     fetchQuestions()
   }, [])
 
   const onComplete = (finalAnswers: AnswerMap) => {
     if (!questionSet) return
-    // setState の非同期を避けるため finalAnswers を直接使用してスコアを計算
+
     const finalScore = calcScore(questionSet.questions, finalAnswers)
-    const result: TestResult = {
-      score: finalScore,
+
+    const answerRecords: AnswerRecord[] = questionSet.questions.map((q) => ({
+      questionId: q.questionId,
+      selected: finalAnswers[q.questionId] ?? 'false',
+      isCorrect: finalAnswers[q.questionId] === q.correctAnswer,
+    }))
+
+    const newSession: TestSession = {
+      sessionId: Date.now().toString(36),
       submittedAt: new Date().toISOString(),
+      score: finalScore,
+      totalCount: questionSet.questionCount,
+      passScore: questionSet.passScore,
+      isPassed: finalScore >= questionSet.passScore,
+      answers: answerRecords,
     }
-    localStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(result))
+
+    const updatedHistory = [newSession, ...history]
+    try {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory))
+    } catch {
+      // localStorage が使えない環境では無視
+    }
+    setHistory(updatedHistory)
     setAnswers(finalAnswers)
     setScore(finalScore)
-    setLastResult(result)
     setSubmitted(true)
   }
 
@@ -86,6 +149,21 @@ export function MopedTestClient() {
     setAnswers({})
     setScore(0)
     setSubmitted(false)
+    setShowHistory(false)
+  }
+
+  const onClearHistory = () => {
+    try {
+      localStorage.removeItem(HISTORY_STORAGE_KEY)
+    } catch {
+      // ignore
+    }
+    setHistory([])
+    setShowHistory(false)
+  }
+
+  const onToggleHistory = () => {
+    setShowHistory((prev) => !prev)
   }
 
   if (loading) {
@@ -101,6 +179,7 @@ export function MopedTestClient() {
   }
 
   const isPassed = score >= questionSet.passScore
+  const lastSession = history[0] ?? null
 
   return (
     <main className={styles.page}>
@@ -112,13 +191,26 @@ export function MopedTestClient() {
         <p className={styles.version}>
           データバージョン: {questionSet.version}
         </p>
-        {lastResult && (
+        {lastSession && (
           <p className={styles.lastResult}>
-            前回結果: {lastResult.score}点（
-            {new Date(lastResult.submittedAt).toLocaleString('ja-JP')}）
+            前回結果: {lastSession.score}点（
+            {new Date(lastSession.submittedAt).toLocaleString('ja-JP')}）
           </p>
         )}
+        {history.length > 0 && (
+          <button
+            type="button"
+            onClick={onToggleHistory}
+            className={styles.historyToggleButton}
+          >
+            {showHistory ? '履歴を閉じる' : `履歴を見る（${history.length}件）`}
+          </button>
+        )}
       </header>
+
+      {showHistory && (
+        <HistorySection history={history} onClearHistory={onClearHistory} />
+      )}
 
       {!submitted ? (
         <SwipeCardDeck
@@ -177,7 +269,20 @@ export function MopedTestClient() {
             >
               もう一度挑戦
             </button>
+            <button
+              type="button"
+              onClick={onToggleHistory}
+              className={styles.historyToggleButton}
+            >
+              {showHistory
+                ? '履歴を閉じる'
+                : `履歴を見る（${history.length}件）`}
+            </button>
           </footer>
+
+          {showHistory && (
+            <HistorySection history={history} onClearHistory={onClearHistory} />
+          )}
         </div>
       )}
     </main>

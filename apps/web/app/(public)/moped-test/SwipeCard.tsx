@@ -97,11 +97,16 @@ export function SwipeCard({
       if (isAnimating.current) return
       isAnimating.current = true
       onDragChange?.(0)
-      // Step1: isDragging=false にして deltaX を保持（退場開始位置として使用）
-      pendingExitRef.current = direction
-      setDrag((prev) => ({ ...prev, isDragging: false }))
+      if (drag.isDragging) {
+        // ドラッグ中: isDragging を false に戻してから useEffect で退場開始
+        pendingExitRef.current = direction
+        setDrag((prev) => ({ ...prev, isDragging: false }))
+      } else {
+        // ボタン押下など（ドラッグなし）: 直接退場アニメーションを開始
+        setExitDirection(direction)
+      }
     },
-    [onDragChange]
+    [drag.isDragging, onDragChange]
   )
 
   const handlePointerUp = useCallback(() => {

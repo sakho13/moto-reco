@@ -374,3 +374,213 @@ html[data-theme-mode='dark'] .retryButton {
   background: #fff;
   color: #171717;
 }
+
+/* =====================
+   履歴ボタン（ヘッダー・フッター内）
+   ===================== */
+
+.historyToggleButton {
+  background: none;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.historyToggleButton:hover {
+  background: #f0f0f0;
+}
+
+/* =====================
+   履歴セクション全体
+   ===================== */
+
+.historySection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: #f8f8f8;
+  border-radius: 12px;
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.clearHistoryButton {
+  background: none;
+  border: 1px solid #c62828;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #c62828;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.clearHistoryButton:hover {
+  background: rgba(198, 40, 40, 0.08);
+}
+
+/* グラフラッパー */
+.historyChart {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 8px 4px;
+}
+
+/* =====================
+   セッション一覧
+   ===================== */
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyItem {
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.historyItemSummary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+}
+
+.historyItemSummary::-webkit-details-marker {
+  display: none;
+}
+
+.historyItemIndex {
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.historyItemDate {
+  color: #666;
+  font-size: 13px;
+  flex: 1;
+}
+
+.historyItemScore {
+  font-weight: 600;
+}
+
+.historyItemBadge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid currentColor;
+}
+
+/* =====================
+   問題ごとの正誤グリッド
+   ===================== */
+
+.historyAnswerGrid {
+  padding: 0 16px 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.historyAnswerSummary {
+  font-size: 13px;
+  padding: 8px 0 6px;
+}
+
+.historyAnswerList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.historyAnswerItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 4px 6px;
+  min-width: 36px;
+}
+
+.historyAnswerNum {
+  color: #888;
+  font-size: 10px;
+}
+
+.historyAnswerCorrect {
+  background: rgba(0, 125, 50, 0.1);
+  color: #007d32;
+}
+
+.historyAnswerIncorrect {
+  background: rgba(198, 40, 40, 0.1);
+  color: #c62828;
+}
+
+/* =====================
+   ダークモード（履歴）
+   ===================== */
+
+html[data-theme-mode='dark'] .historySection {
+  background: #1a1a1a;
+}
+
+html[data-theme-mode='dark'] .historyChart {
+  background: #111;
+}
+
+html[data-theme-mode='dark'] .historyItem {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+html[data-theme-mode='dark'] .historyAnswerGrid {
+  border-top-color: #2a2a2a;
+}
+
+html[data-theme-mode='dark'] .historyItemDate {
+  color: #888;
+}
+
+html[data-theme-mode='dark'] .historyToggleButton {
+  border-color: #555;
+  color: #aaa;
+}
+
+html[data-theme-mode='dark'] .historyToggleButton:hover {
+  background: #2a2a2a;
+}
+
+html[data-theme-mode='dark'] .historyAnswerCorrect {
+  background: rgba(0, 125, 50, 0.2);
+}
+
+html[data-theme-mode='dark'] .historyAnswerIncorrect {
+  background: rgba(198, 40, 40, 0.2);
+}
