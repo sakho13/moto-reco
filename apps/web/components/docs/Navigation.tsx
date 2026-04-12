@@ -13,7 +13,6 @@ interface NavLink {
 const NAV_LINKS: NavLink[] = [
   { href: '/', label: 'ホーム' },
   { href: '/about', label: 'このアプリについて' },
-  { href: '/moped-test', label: '原付学科試験' },
   { href: '/faq', label: 'FAQ' },
   { href: '/pricing', label: '料金プラン' },
   { href: '/bikes', label: 'みんなのバイク' },

@@ -32,6 +32,7 @@ export const metadata: Metadata = {
       'バイクのメンテナンス履歴・給油記録・整備スケジュールを一元管理。走行距離や燃費の推移をグラフで確認。',
     images: ['/top_image_1.png'],
   },
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/',
   },
@@ -142,6 +143,19 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <div className={styles.loginCard}>
+          <div>
+            <p className={styles.badge}>安全運転のために</p>
+            <h2 className={styles.loginCardTitle}>原付免許試験の練習</h2>
+            <p>
+              原付免許の取得を目指す方向けに、学科試験の○×問題を練習できます。
+            </p>
+          </div>
+          <Link href="/moped-test" className={styles.loginCardButton}>
+            練習を始める
+          </Link>
+        </div>
       </div>
     </>
   )
