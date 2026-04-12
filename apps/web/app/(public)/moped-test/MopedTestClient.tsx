@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ApiResponseMopedTestQuestion,
   ApiResponseMopedTestQuestionSet,
   MopedTestAnswerOption,
 } from '@repo/shared-types'
 import styles from './page.module.css'
+import { SwipeCardDeck } from './SwipeCardDeck'
 
 type AnswerMap = Record<string, MopedTestAnswerOption>
 
@@ -17,11 +18,23 @@ type TestResult = {
 
 const RESULT_STORAGE_KEY = 'moped-test:last-result'
 
+function calcScore(
+  questions: ApiResponseMopedTestQuestion[],
+  answers: AnswerMap
+): number {
+  return questions.reduce((point, question) => {
+    return answers[question.questionId] === question.correctAnswer
+      ? point + 1
+      : point
+  }, 0)
+}
+
 export function MopedTestClient() {
   const [questionSet, setQuestionSet] =
     useState<ApiResponseMopedTestQuestionSet | null>(null)
   const [answers, setAnswers] = useState<AnswerMap>({})
   const [submitted, setSubmitted] = useState(false)
+  const [score, setScore] = useState(0)
   const [lastResult, setLastResult] = useState<TestResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -54,43 +67,24 @@ export function MopedTestClient() {
     fetchQuestions()
   }, [])
 
-  const score = useMemo(() => {
-    if (!questionSet) {
-      return 0
-    }
-
-    return questionSet.questions.reduce((point, question) => {
-      return answers[question.questionId] === question.correctAnswer
-        ? point + 1
-        : point
-    }, 0)
-  }, [answers, questionSet])
-
-  const isPassed = questionSet ? score >= questionSet.passScore : false
-
-  const onChangeAnswer = (
-    question: ApiResponseMopedTestQuestion,
-    answer: MopedTestAnswerOption
-  ) => {
-    setAnswers((prev) => ({ ...prev, [question.questionId]: answer }))
-  }
-
-  const onSubmit = () => {
-    if (!questionSet) {
-      return
-    }
-
-    setSubmitted(true)
-    const result = {
-      score,
+  const onComplete = (finalAnswers: AnswerMap) => {
+    if (!questionSet) return
+    // setState の非同期を避けるため finalAnswers を直接使用してスコアを計算
+    const finalScore = calcScore(questionSet.questions, finalAnswers)
+    const result: TestResult = {
+      score: finalScore,
       submittedAt: new Date().toISOString(),
     }
     localStorage.setItem(RESULT_STORAGE_KEY, JSON.stringify(result))
+    setAnswers(finalAnswers)
+    setScore(finalScore)
     setLastResult(result)
+    setSubmitted(true)
   }
 
   const onReset = () => {
     setAnswers({})
+    setScore(0)
     setSubmitted(false)
   }
 
@@ -105,6 +99,8 @@ export function MopedTestClient() {
       </div>
     )
   }
+
+  const isPassed = score >= questionSet.passScore
 
   return (
     <main className={styles.page}>
@@ -124,66 +120,66 @@ export function MopedTestClient() {
         )}
       </header>
 
-      <section className={styles.questionList}>
-        {questionSet.questions.map((question, index) => {
-          const selected = answers[question.questionId]
-          const isCorrect = selected === question.correctAnswer
+      {!submitted ? (
+        <SwipeCardDeck
+          questions={questionSet.questions}
+          onComplete={onComplete}
+        />
+      ) : (
+        <div className={styles.resultScreen}>
+          <div className={styles.resultSummaryBox}>
+            <p className={styles.resultScore}>
+              {score}
+              <span className={styles.resultScoreUnit}>
+                {' '}
+                / {questionSet.questionCount} 点
+              </span>
+            </p>
+            <p
+              className={`${styles.resultPassLabel} ${isPassed ? styles.resultPass : styles.resultFail}`}
+            >
+              {isPassed ? '合格' : '不合格'}
+            </p>
+          </div>
 
-          return (
-            <article key={question.questionId} className={styles.questionCard}>
-              <p className={styles.questionCategory}>{question.category}</p>
-              <h2>
-                Q{index + 1}. {question.statement}
-              </h2>
-              <div className={styles.answerButtons}>
-                <button
-                  type="button"
-                  onClick={() => onChangeAnswer(question, 'true')}
-                  className={selected === 'true' ? styles.selected : ''}
-                >
-                  正しい
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChangeAnswer(question, 'false')}
-                  className={selected === 'false' ? styles.selected : ''}
-                >
-                  誤り
-                </button>
-              </div>
+          <div className={styles.resultQuestionList}>
+            {questionSet.questions.map((question, index) => {
+              const selected = answers[question.questionId]
+              const isCorrect = selected === question.correctAnswer
 
-              {submitted && (
-                <div className={styles.resultBox}>
-                  <p className={isCorrect ? styles.correct : styles.incorrect}>
+              return (
+                <article
+                  key={question.questionId}
+                  className={styles.resultQuestionItem}
+                >
+                  <p className={styles.questionCategory}>{question.category}</p>
+                  <h3>
+                    Q{index + 1}. {question.statement}
+                  </h3>
+                  <p
+                    className={`${styles.resultJudge} ${isCorrect ? styles.correct : styles.incorrect}`}
+                  >
                     {isCorrect ? '✅ 正解' : '❌ 不正解'}
                   </p>
-                  <p>{question.explanation}</p>
-                </div>
-              )}
-            </article>
-          )
-        })}
-      </section>
+                  <p className={styles.resultExplanation}>
+                    {question.explanation}
+                  </p>
+                </article>
+              )
+            })}
+          </div>
 
-      <footer className={styles.footer}>
-        <button
-          type="button"
-          onClick={onSubmit}
-          className={styles.submitButton}
-        >
-          採点する
-        </button>
-        <button type="button" onClick={onReset} className={styles.resetButton}>
-          回答をリセット
-        </button>
-
-        {submitted && (
-          <p className={styles.summary}>
-            結果: {score} / {questionSet.questionCount} 点（
-            {isPassed ? '合格' : '不合格'}）
-          </p>
-        )}
-      </footer>
+          <footer className={styles.resultFooter}>
+            <button
+              type="button"
+              onClick={onReset}
+              className={styles.retryButton}
+            >
+              もう一度挑戦
+            </button>
+          </footer>
+        </div>
+      )}
     </main>
   )
 }

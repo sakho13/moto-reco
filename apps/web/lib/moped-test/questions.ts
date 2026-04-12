@@ -14,7 +14,8 @@ const mopedQuestions: ApiResponseMopedTestQuestion[] = [
   },
   {
     questionId: 'moped-002',
-    statement: '原付は二段階右折の標識がなくても、片側3車線以上では二段階右折が必要。',
+    statement:
+      '原付は二段階右折の標識がなくても、片側3車線以上では二段階右折が必要。',
     category: '二段階右折',
     correctAnswer: 'true',
     explanation:
@@ -41,8 +42,7 @@ const mopedQuestions: ApiResponseMopedTestQuestion[] = [
     statement: '原付の法定最高速度は一般道路で時速50kmである。',
     category: '速度制限',
     correctAnswer: 'false',
-    explanation:
-      '原動機付自転車の法定最高速度は時速30kmです。',
+    explanation: '原動機付自転車の法定最高速度は時速30kmです。',
   },
   {
     questionId: 'moped-006',
@@ -73,11 +73,13 @@ const mopedQuestions: ApiResponseMopedTestQuestion[] = [
     statement: '見通しの悪い交差点では徐行して安全確認を行う。',
     category: '交通ルール',
     correctAnswer: 'true',
-    explanation: '見通しの悪い交差点は徐行し、歩行者・車両の有無を確認して進みます。',
+    explanation:
+      '見通しの悪い交差点は徐行し、歩行者・車両の有無を確認して進みます。',
   },
   {
     questionId: 'moped-010',
-    statement: '走行中にスマートフォンを手で持って通話しても、短時間なら違反にならない。',
+    statement:
+      '走行中にスマートフォンを手で持って通話しても、短時間なら違反にならない。',
     category: '安全運転',
     correctAnswer: 'false',
     explanation:

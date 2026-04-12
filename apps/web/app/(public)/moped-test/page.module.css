@@ -5,6 +5,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  overflow-x: hidden;
 }
 
 .header h1 {
@@ -18,18 +19,294 @@
   font-size: 14px;
 }
 
-.questionList {
+/* =====================
+   スワイプデッキ
+   ===================== */
+
+.deckWrapper {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 
-.questionCard {
+.progressBar {
+  width: 100%;
+  max-width: 420px;
+  height: 4px;
+  background: #e5e5e5;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #171717;
+  border-radius: 2px;
+  transition: width 0.35s ease;
+}
+
+.progressLabel {
+  font-size: 13px;
+  color: #666;
+}
+
+.swipeDeck {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 380px;
+}
+
+/* 背後カード */
+.swipeCardBehind {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transition: transform 0.1s ease;
+}
+
+.swipeCardBehindInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background: #f0f0f0;
+  box-shadow: 0 4px 16px rgba(23, 23, 23, 0.06);
+}
+
+/* トップカード */
+.swipeCard {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(23, 23, 23, 0.12);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  will-change: transform;
+  overflow: hidden;
+}
+
+.swipeCard:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: 2px;
+}
+
+.swipeCard:active {
+  cursor: grabbing;
+}
+
+.snapBack {
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+
+/* スワイプオーバーレイ */
+.swipeOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  pointer-events: none;
+  border: 3px solid transparent;
+  opacity: 0;
+}
+
+.overlayTrue {
+  background: rgba(0, 180, 80, 0.15);
+  border-color: rgba(0, 180, 80, 0.6);
+  color: #007d32;
+}
+
+.overlayFalse {
+  background: rgba(198, 40, 40, 0.12);
+  border-color: rgba(198, 40, 40, 0.5);
+  color: #c62828;
+}
+
+/* カード内コンテンツ */
+.swipeCardContent {
+  position: relative;
+  z-index: 1;
+  padding: 28px 24px 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.questionNumber {
+  font-size: 12px;
+  color: #999;
+}
+
+.questionStatement {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+  flex: 1;
+  margin: 0;
+}
+
+/* タップ用ヒントボタン */
+.hintButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.hintButtonFalse,
+.hintButtonTrue {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.hintButtonFalse {
+  border-color: #c62828;
+  color: #c62828;
+}
+
+.hintButtonFalse:hover {
+  background: rgba(198, 40, 40, 0.08);
+}
+
+.hintButtonTrue {
+  border-color: #007d32;
+  color: #007d32;
+}
+
+.hintButtonTrue:hover {
+  background: rgba(0, 180, 80, 0.08);
+}
+
+.swipeHint {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+}
+
+/* =====================
+   結果画面
+   ===================== */
+
+.resultScreen {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.resultSummaryBox {
+  text-align: center;
+  padding: 32px 16px;
+  border-radius: 16px;
+  background: #f8f8f8;
+}
+
+.resultScore {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.resultScoreUnit {
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.resultPassLabel {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.resultPass {
+  color: #007d32;
+}
+
+.resultFail {
+  color: #c62828;
+}
+
+.resultQuestionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resultQuestionItem {
   border: 1px solid #e5e5e5;
   border-radius: 12px;
   padding: 16px;
   background: #fff;
 }
+
+.resultQuestionItem .questionCategory {
+  font-size: 12px;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.resultQuestionItem h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.resultJudge {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.correct {
+  color: #007d32;
+}
+
+.incorrect {
+  color: #c62828;
+}
+
+.resultExplanation {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.resultFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.retryButton {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  background: #171717;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* =====================
+   共通
+   ===================== */
 
 .questionCategory {
   font-size: 12px;
@@ -37,72 +314,49 @@
   margin-bottom: 8px;
 }
 
-.answerButtons {
-  display: flex;
-  gap: 8px;
-  margin-top: 12px;
+/* =====================
+   ダークモード
+   ===================== */
+
+html[data-theme-mode='dark'] .swipeCard {
+  background: #1a1a1a;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-.answerButtons button {
-  border: 1px solid #d0d0d0;
+html[data-theme-mode='dark'] .swipeCardBehindInner {
+  background: #222;
+}
+
+html[data-theme-mode='dark'] .resultSummaryBox {
+  background: #1a1a1a;
+}
+
+html[data-theme-mode='dark'] .resultQuestionItem {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+html[data-theme-mode='dark'] .resultExplanation {
+  color: #aaa;
+}
+
+html[data-theme-mode='dark'] .version,
+html[data-theme-mode='dark'] .lastResult,
+html[data-theme-mode='dark'] .progressLabel,
+html[data-theme-mode='dark'] .swipeHint,
+html[data-theme-mode='dark'] .questionNumber {
+  color: #888;
+}
+
+html[data-theme-mode='dark'] .progressBar {
+  background: #333;
+}
+
+html[data-theme-mode='dark'] .progressFill {
   background: #fff;
-  border-radius: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
 }
 
-.answerButtons button.selected {
-  border-color: #171717;
-  background: #f0f0f0;
-}
-
-.selected {
-  border-color: #171717;
-  background: #f0f0f0;
-}
-
-.resultBox {
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  background: #f8f8f8;
-}
-
-.correct {
-  color: #007d32;
-  font-weight: 700;
-}
-
-.incorrect {
-  color: #c62828;
-  font-weight: 700;
-}
-
-.footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
-.submitButton,
-.resetButton {
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  cursor: pointer;
-}
-
-.submitButton {
-  background: #171717;
-  color: #fff;
-}
-
-.resetButton {
-  background: #f1f1f1;
+html[data-theme-mode='dark'] .retryButton {
+  background: #fff;
   color: #171717;
-}
-
-.summary {
-  font-weight: 700;
 }
