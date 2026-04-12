@@ -224,7 +224,10 @@ export function SwipeCard({
           />
         )}
 
-        <div className={styles.hintButtons}>
+        <div
+          className={styles.hintButtons}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           <button
             type="button"
             className={styles.hintButtonFalse}
