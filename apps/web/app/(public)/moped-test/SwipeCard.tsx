@@ -209,6 +209,16 @@ export function SwipeCard({
         </p>
         <h2 className={styles.questionStatement}>{question.statement}</h2>
 
+        {question.imagePath && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={`/${question.imagePath}`}
+            alt="問題の図"
+            className={styles.questionImage}
+            draggable={false}
+          />
+        )}
+
         <div className={styles.hintButtons}>
           <button
             type="button"

@@ -203,6 +203,7 @@ export type ApiResponseMopedTestQuestion = {
   category: string
   correctAnswer: MopedTestAnswerOption
   explanation: string
+  imagePath?: string
 }
 
 export type ApiResponseMopedTestQuestionSet = {
