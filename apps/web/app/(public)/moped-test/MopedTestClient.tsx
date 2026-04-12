@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import styles from './page.module.css'
 import {
   ApiResponseMopedTestQuestion,
   ApiResponseMopedTestQuestionSet,
   MopedTestAnswerOption,
 } from '@repo/shared-types'
+import styles from './page.module.css'
 
 type AnswerMap = Record<string, MopedTestAnswerOption>
 
@@ -37,7 +37,9 @@ export function MopedTestClient() {
         setQuestionSet(json.data)
       } catch (error) {
         setErrorMessage(
-          error instanceof Error ? error.message : '不明なエラーが発生しました。'
+          error instanceof Error
+            ? error.message
+            : '不明なエラーが発生しました。'
         )
       } finally {
         setLoading(false)
@@ -97,7 +99,11 @@ export function MopedTestClient() {
   }
 
   if (!questionSet || errorMessage) {
-    return <div className={styles.page}>問題の取得に失敗しました: {errorMessage}</div>
+    return (
+      <div className={styles.page}>
+        問題の取得に失敗しました: {errorMessage}
+      </div>
+    )
   }
 
   return (
@@ -107,10 +113,13 @@ export function MopedTestClient() {
         <p>
           全{questionSet.questionCount}問・合格ライン {questionSet.passScore}点
         </p>
-        <p className={styles.version}>データバージョン: {questionSet.version}</p>
+        <p className={styles.version}>
+          データバージョン: {questionSet.version}
+        </p>
         {lastResult && (
           <p className={styles.lastResult}>
-            前回結果: {lastResult.score}点（{new Date(lastResult.submittedAt).toLocaleString('ja-JP')}）
+            前回結果: {lastResult.score}点（
+            {new Date(lastResult.submittedAt).toLocaleString('ja-JP')}）
           </p>
         )}
       </header>
@@ -157,7 +166,11 @@ export function MopedTestClient() {
       </section>
 
       <footer className={styles.footer}>
-        <button type="button" onClick={onSubmit} className={styles.submitButton}>
+        <button
+          type="button"
+          onClick={onSubmit}
+          className={styles.submitButton}
+        >
           採点する
         </button>
         <button type="button" onClick={onReset} className={styles.resetButton}>
