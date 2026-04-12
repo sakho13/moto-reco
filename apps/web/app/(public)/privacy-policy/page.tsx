@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     description: `${APP_NAME}のプライバシーポリシーです。`,
     images: ['/top_image_1.png'],
   },
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/privacy-policy',
   },

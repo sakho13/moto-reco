@@ -23,6 +23,10 @@ export interface BaseCardProps extends HTMLAttributes<HTMLDivElement> {
    * ヘッダー右上のアクション（例: 編集ボタン）
    */
   headerAction?: React.ReactNode
+  /**
+   * trueにするとカードの枠線・影を非表示にする
+   */
+  noBorder?: boolean
 }
 
 /**
@@ -48,8 +52,17 @@ export interface BaseCardProps extends HTMLAttributes<HTMLDivElement> {
  * ```
  */
 export const BaseCard = forwardRef<HTMLDivElement, BaseCardProps>(
-  ({ title, footer, headerAction, className, children, ...props }, ref) => {
-    const cardClasses = [styles.baseCard, className].filter(Boolean).join(' ')
+  (
+    { title, footer, headerAction, noBorder, className, children, ...props },
+    ref
+  ) => {
+    const cardClasses = [
+      styles.baseCard,
+      noBorder && styles.noBorder,
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ')
 
     return (
       <div ref={ref} className={cardClasses} {...props}>

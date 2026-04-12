@@ -5,9 +5,6 @@ import './globals.css'
 import { FirebaseAnalytics } from '@/components/FirebaseAnalytics'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
-// Firebase認証を使用しているため、動的レンダリングを強制
-export const dynamic = 'force-dynamic'
-
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
   variable: '--font-geist-sans',

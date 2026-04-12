@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { prisma } from '@repo/database'
 import styles from './page.module.css'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
-import { APP_NAME } from '@/lib/statics'
+import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata = {
   title: `公開バイク一覧`,
   description: `${APP_NAME}で公開されているバイク情報の一覧です。`,
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: '/bikes',
   },
@@ -15,8 +16,13 @@ export const metadata = {
 export const revalidate = 300
 
 const getPublicBikes = async () => {
-  const repo = new PrismaMyUserBikeRepository(prisma)
-  return repo.findPublicBikes()
+  try {
+    const repo = new PrismaMyUserBikeRepository(prisma)
+    return await repo.findPublicBikes()
+  } catch (e) {
+    console.error('[/bikes] DB接続に失敗したため空配列を返します:', e)
+    return []
+  }
 }
 
 export default async function PublicBikesPage() {

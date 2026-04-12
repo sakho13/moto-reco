@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { ThemeProvider } from '@repo/ui/context/ThemeContext'
 import './globals.css'
 import { Footer } from '@/components/docs/Footer'
 import { Navigation } from '@/components/docs/Navigation'
@@ -40,11 +41,13 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <Navigation />
+      <ThemeProvider initialThemeName="default">
+        <Navigation />
 
-      {children}
+        {children}
 
-      <Footer />
+        <Footer />
+      </ThemeProvider>
     </>
   )
 }

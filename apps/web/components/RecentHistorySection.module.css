@@ -1,0 +1,24 @@
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty {
+  color: var(--color-inkLight);
+  text-align: center;
+  padding: 24px 0;
+}
+
+.moreLink {
+  display: block;
+  color: var(--color-inkLight);
+  font-size: 14px;
+  text-decoration: none;
+  margin-top: 4px;
+  margin-right: 4px;
+}
+
+.moreLink:hover {
+  text-decoration: underline;
+}
