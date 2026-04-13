@@ -195,6 +195,25 @@ export type ApiResponsePublicTouringList = {
   }[]
 }
 
+export type MopedTestAnswerOption = 'true' | 'false'
+
+export type ApiResponseMopedTestQuestion = {
+  questionId: string
+  statement: string
+  category: string
+  correctAnswer: MopedTestAnswerOption
+  explanation: string
+  imagePath?: string
+}
+
+export type ApiResponseMopedTestQuestionSet = {
+  title: string
+  version: string
+  questionCount: number
+  passScore: number
+  questions: ApiResponseMopedTestQuestion[]
+}
+
 export type ApiResponseOngoingTouring = {
   touring: ApiResponseTouringDetail | null
 }
