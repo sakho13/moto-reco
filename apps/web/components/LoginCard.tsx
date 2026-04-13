@@ -16,7 +16,8 @@ import { useAuth } from '@/lib/hooks/useAuth'
 
 export function LoginCard() {
   const router = useRouter()
-  const { signInWithEmail, signInWithGoogle, signOut } = useAuth()
+  const { signInWithEmail, signInWithGoogle, signOut, signInAsGuest } =
+    useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -40,6 +41,35 @@ export function LoginCard() {
       setError(
         'ログインに失敗しました。メールアドレスとパスワードを確認してください。'
       )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /**
+   * ゲストログイン処理
+   *
+   * フロー:
+   * 1. Firebase匿名認証
+   * 2. ゲストユーザー登録API呼び出し
+   * 3. ホームへリダイレクト
+   */
+  const handleGuestLogin = async () => {
+    setError(null)
+    setLoading(true)
+
+    try {
+      await signInAsGuest()
+
+      // ゲスト登録API呼び出し
+      await apiPost('/api/v1/user/auth/guest/register', {})
+
+      trackEvent('web_guest_login', { method: 'anonymous' })
+      router.push('/app/home')
+    } catch (err) {
+      console.error('Guest login error:', err)
+      await signOut()
+      setError('ゲストログインに失敗しました。もう一度お試しください。')
     } finally {
       setLoading(false)
     }
@@ -190,6 +220,20 @@ export function LoginCard() {
         disabled={true}
       >
         Googleでログイン
+      </Button>
+
+      <div className="divider">
+        <span>または</span>
+      </div>
+
+      <Button
+        onClick={handleGuestLogin}
+        variant="cloud"
+        size="lg"
+        fullWidth
+        loading={loading}
+      >
+        ゲストとして始める
       </Button>
     </BaseCard>
   )

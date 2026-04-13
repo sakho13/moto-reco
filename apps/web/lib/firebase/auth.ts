@@ -5,6 +5,10 @@ import {
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
+  signInAnonymously as firebaseSignInAnonymously,
+  linkWithPopup,
+  linkWithCredential,
+  EmailAuthProvider,
   type UserCredential,
   type User,
 } from 'firebase/auth'
@@ -68,4 +72,40 @@ export const getIdToken = async (user: User): Promise<string | null> => {
     console.error('IDトークン取得エラー:', error)
     return null
   }
+}
+
+/**
+ * 匿名ユーザーとしてサインイン（ゲストモード）
+ */
+export const signInAnonymously = async (): Promise<UserCredential> => {
+  const auth = getFirebaseAuth()
+  return await firebaseSignInAnonymously(auth)
+}
+
+/**
+ * 匿名アカウントをGoogleアカウントに連携（ゲスト→本登録）
+ */
+export const linkAnonymousWithGoogle = async (): Promise<UserCredential> => {
+  const auth = getFirebaseAuth()
+  if (!auth.currentUser) {
+    throw new Error('ログインユーザーが存在しません')
+  }
+  const provider = new GoogleAuthProvider()
+  provider.addScope('https://www.googleapis.com/auth/userinfo.profile')
+  return await linkWithPopup(auth.currentUser, provider)
+}
+
+/**
+ * 匿名アカウントをメール/パスワードアカウントに連携（ゲスト→本登録）
+ */
+export const linkAnonymousWithEmail = async (
+  email: string,
+  password: string
+): Promise<UserCredential> => {
+  const auth = getFirebaseAuth()
+  if (!auth.currentUser) {
+    throw new Error('ログインユーザーが存在しません')
+  }
+  const credential = EmailAuthProvider.credential(email, password)
+  return await linkWithCredential(auth.currentUser, credential)
 }

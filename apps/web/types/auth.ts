@@ -9,4 +9,12 @@ export interface AuthContextType {
   signInWithGoogle: () => Promise<string>
   signOut: () => Promise<boolean>
   getIdToken: () => Promise<string | null>
+  /** ゲストとして匿名ログインし、IDトークンを返す */
+  signInAsGuest: () => Promise<string>
+  /** ゲストアカウントをGoogleアカウントに連携してアップグレード、新トークンを返す */
+  upgradeGuestWithGoogle: () => Promise<string>
+  /** ゲストアカウントをメール/パスワードアカウントに連携してアップグレード、新トークンを返す */
+  upgradeGuestWithEmail: (email: string, password: string) => Promise<string>
+  /** 現在のユーザーがゲスト（匿名）かどうか */
+  isGuest: boolean
 }

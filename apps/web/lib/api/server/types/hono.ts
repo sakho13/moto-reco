@@ -6,6 +6,9 @@ export type HonoVariables = {
     // 内部User ID（MUser.id）
     userId: UserId
 
+    // ユーザーロール
+    role: 'USER' | 'ADMIN' | 'GUEST'
+
     // 認証情報
     email?: string
     emailVerified?: boolean

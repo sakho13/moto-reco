@@ -14,12 +14,15 @@ import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 
 // 無料プランのバイク登録上限
 const FREE_PLAN_BIKE_LIMIT = 2
+// ゲストアカウントのバイク登録上限
+const GUEST_PLAN_BIKE_LIMIT = 1
 
 type RegisterUserBikeParams = {
   bikeId?: BikeId | null
   displacement?: number
   serialNumber?: string | null
   userId: UserId
+  role: 'USER' | 'ADMIN' | 'GUEST'
   nickname?: string
   purchaseDate?: Date
   purchasePrice?: number
@@ -49,22 +52,29 @@ export class UserBikeService {
 
   /**
    * バイク登録数の制限をチェック
-   * 無料プランでは2台まで登録可能
+   * ゲストは1台、無料プランは2台まで登録可能
    */
-  private async validateBikeRegistrationLimit(userId: UserId): Promise<void> {
+  private async validateBikeRegistrationLimit(
+    userId: UserId,
+    role: 'USER' | 'ADMIN' | 'GUEST'
+  ): Promise<void> {
     const currentCount = await this.myUserBikeRepository.countOwnedBikes(userId)
+    const limit =
+      role === 'GUEST' ? GUEST_PLAN_BIKE_LIMIT : FREE_PLAN_BIKE_LIMIT
 
-    if (currentCount >= FREE_PLAN_BIKE_LIMIT) {
+    if (currentCount >= limit) {
       throw new ApiV1Error(
         'INVALID_REQUEST',
-        '無料プランでは2台まで登録可能です'
+        role === 'GUEST'
+          ? 'ゲストアカウントはバイクを1台まで登録できます'
+          : '無料プランでは2台まで登録可能です'
       )
     }
   }
 
   public async registerUserBike(params: RegisterUserBikeParams) {
     // バイク登録数制限チェック
-    await this.validateBikeRegistrationLimit(params.userId)
+    await this.validateBikeRegistrationLimit(params.userId, params.role)
 
     let bike: BikeEntity | null = null
     if (params.bikeId) {
@@ -91,6 +101,10 @@ export class UserBikeService {
       })
     )
 
+    // ゲストアカウントはバイクを公開できない
+    const isPublic =
+      params.role === 'GUEST' ? false : (params.isPublic ?? false)
+
     const myUserBike = await this.myUserBikeRepository.createMyUserBike(
       new MyUserBikeEntity({
         bikeId: userBike.bikeId,
@@ -101,7 +115,7 @@ export class UserBikeService {
         purchaseDate: params.purchaseDate ?? null,
         purchasePrice: params.purchasePrice ?? null,
         purchaseMileage: params.purchaseMileage ?? null,
-        isPublic: params.isPublic ?? false,
+        isPublic,
         ownedAt: params.purchaseDate ?? new Date(),
         soldAt: null,
         ownStatus: 'OWN',

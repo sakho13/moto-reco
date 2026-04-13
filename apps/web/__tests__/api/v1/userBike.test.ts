@@ -9,7 +9,11 @@ import {
   afterEach,
 } from 'vitest'
 import { prisma } from '@repo/database'
-import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
+import {
+  createGuestUser,
+  createTestUser,
+  testAuthRequired,
+} from '../../helpers/authHelper'
 import { createTestUserBike, getTestBikeId } from '../../helpers/bikeHelper'
 import {
   createTestFuelLog,
@@ -3882,6 +3886,236 @@ describe('UserBike API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(404)
       expect404Error(json)
+    })
+  })
+
+  describe('ゲストアカウント制限', () => {
+    describe('バイク登録制限（1台まで）', () => {
+      test('ゲストは1台目のバイクを登録できる', async () => {
+        const { token } = await createGuestUser()
+
+        const res = await app.request('/api/v1/user-bike/register', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            displacement: 250,
+            nickname: 'ゲストバイク1',
+          }),
+        })
+
+        expect(res.status).toBe(201)
+        const json = await res.json()
+        expect(json.status).toBe('success')
+      })
+
+      test('ゲストは2台目のバイクを登録できない', async () => {
+        const { token } = await createGuestUser()
+
+        // 1台目
+        await createTestUserBike(token, {
+          displacement: 250,
+          nickname: 'ゲストバイク1',
+        })
+
+        // 2台目（エラーになる）
+        const res = await app.request('/api/v1/user-bike/register', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            displacement: 400,
+            nickname: 'ゲストバイク2',
+          }),
+        })
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expect(json).toMatchObject({
+          status: 'error',
+          errorCode: 'INVALID_REQUEST',
+          message: 'ゲストアカウントはバイクを1台まで登録できます',
+        })
+      })
+
+      test('ゲストのバイクは isPublic が false に強制される', async () => {
+        const { token } = await createGuestUser()
+
+        const res = await app.request('/api/v1/user-bike/register', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            displacement: 250,
+            nickname: 'ゲストバイク',
+            isPublic: true,
+          }),
+        })
+
+        expect(res.status).toBe(201)
+        const json = await res.json()
+        const myUserBikeId = json.data.myUserBikeId
+
+        const record = await prisma.tUserMyBike.findUnique({
+          where: { id: myUserBikeId },
+          select: { isPublic: true },
+        })
+        expect(record?.isPublic).toBe(false)
+      })
+    })
+
+    describe('給油履歴制限（5件まで）', () => {
+      test('ゲストは5件まで給油履歴を登録できる', async () => {
+        const { token } = await createGuestUser()
+        const { myUserBikeId } = await createTestUserBike(token, {
+          displacement: 250,
+        })
+
+        for (let i = 1; i <= 5; i++) {
+          const res = await app.request(
+            `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                refueledAt: `2024-01-0${i}T10:00:00.000Z`,
+                mileage: i * 100,
+                previousMileage: (i - 1) * 100,
+                amount: 10,
+                totalPrice: 1500,
+              }),
+            }
+          )
+          expect(res.status).toBe(201)
+        }
+      })
+
+      test('ゲストは6件目の給油履歴を登録できない', async () => {
+        const { token } = await createGuestUser()
+        const { myUserBikeId } = await createTestUserBike(token, {
+          displacement: 250,
+        })
+
+        // 5件登録
+        await createMultipleFuelLogs(
+          token,
+          myUserBikeId,
+          Array.from({ length: 5 }, (_, i) => ({
+            refueledAt: `2024-01-${String(i + 1).padStart(2, '0')}T10:00:00.000Z`,
+            mileage: (i + 1) * 100,
+            previousMileage: i * 100,
+            amount: 10,
+            totalPrice: 1500,
+          }))
+        )
+
+        // 6件目（エラー）
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              refueledAt: '2024-01-06T10:00:00.000Z',
+              mileage: 600,
+              previousMileage: 500,
+              amount: 10,
+              totalPrice: 1500,
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expect(json).toMatchObject({
+          status: 'error',
+          errorCode: 'INVALID_REQUEST',
+          message: 'ゲストアカウントは給油履歴を5件まで登録できます',
+        })
+      })
+    })
+
+    describe('ツーリング制限（2件まで）', () => {
+      test('ゲストは2件までツーリングを登録できる', async () => {
+        const { token } = await createGuestUser()
+        const { myUserBikeId } = await createTestUserBike(token, {
+          displacement: 250,
+        })
+
+        for (let i = 1; i <= 2; i++) {
+          const res = await app.request(
+            `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                title: `ゲストツーリング${i}`,
+                startDate: `2024-01-0${i}T09:00:00.000Z`,
+                endDate: `2024-01-0${i}T18:00:00.000Z`,
+              }),
+            }
+          )
+          expect(res.status).toBe(201)
+        }
+      })
+
+      test('ゲストは3件目のツーリングを登録できない', async () => {
+        const { token } = await createGuestUser()
+        const { myUserBikeId } = await createTestUserBike(token, {
+          displacement: 250,
+        })
+
+        // 2件登録
+        await createMultipleTourings(
+          token,
+          myUserBikeId,
+          Array.from({ length: 2 }, (_, i) => ({
+            title: `ゲストツーリング${i + 1}`,
+            startDate: `2024-01-0${i + 1}T09:00:00.000Z`,
+            endDate: `2024-01-0${i + 1}T18:00:00.000Z`,
+          }))
+        )
+
+        // 3件目（エラー）
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: 'ゲストツーリング3',
+              startDate: '2024-01-03T09:00:00.000Z',
+              endDate: '2024-01-03T18:00:00.000Z',
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expect(json).toMatchObject({
+          status: 'error',
+          errorCode: 'INVALID_REQUEST',
+          message: 'ゲストアカウントはツーリング履歴を2件まで登録できます',
+        })
+      })
     })
   })
 })

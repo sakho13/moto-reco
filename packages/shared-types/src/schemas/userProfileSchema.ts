@@ -38,3 +38,34 @@ export type UserProfileUpdateRequest = z.infer<
 export type UserAuthRegisterRequest = z.infer<
   typeof UserAuthRegisterRequestSchema
 >
+
+/**
+ * ゲストユーザー登録リクエストのバリデーションスキーマ
+ *
+ * @remarks
+ * - name: 省略可（省略時はサーバーでゲスト名を自動生成）
+ */
+export const GuestRegisterRequestSchema = z.object({
+  name: z
+    .string()
+    .min(1, '名前は1文字以上である必要があります')
+    .max(50, '名前は50文字以内である必要があります')
+    .trim()
+    .optional(),
+})
+
+export type GuestRegisterRequest = z.infer<typeof GuestRegisterRequestSchema>
+
+/**
+ * ゲストアカウントアップグレードリクエストのバリデーションスキーマ
+ */
+export const GuestUpgradeRequestSchema = z.object({
+  name: z
+    .string()
+    .min(1, '名前は1文字以上である必要があります')
+    .max(50, '名前は50文字以内である必要があります')
+    .trim()
+    .optional(),
+})
+
+export type GuestUpgradeRequest = z.infer<typeof GuestUpgradeRequestSchema>

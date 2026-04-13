@@ -2,7 +2,11 @@ import { describe, expect, test } from 'vitest'
 import { prisma } from '@repo/database'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
-import { handleRegisterByFirebase } from '../../helpers/firebaseTestToken'
+import {
+  handleAnonymousSignInByFirebase,
+  handleLinkAnonymousWithEmail,
+  handleRegisterByFirebase,
+} from '../../helpers/firebaseTestToken'
 import { app } from '@/lib/api/server/app'
 
 describe('User API Endpoints', () => {
@@ -416,6 +420,258 @@ describe('User API Endpoints', () => {
       expect(
         authProviders.every((provider) => provider.isActive === true)
       ).toBe(true)
+    })
+  })
+
+  describe('POST /api/v1/user/auth/guest/register', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      const res = await app.request('/api/v1/user/auth/guest/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'AUTH_FAILED',
+      })
+      expect(res.status).toBe(401)
+    })
+
+    test('匿名トークンでゲストユーザーが登録される', async () => {
+      const credential = await handleAnonymousSignInByFirebase()
+      const token = await credential.user.getIdToken()
+
+      const res = await app.request('/api/v1/user/auth/guest/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json).toMatchObject({
+        status: 'success',
+        data: {
+          userId: expect.any(String),
+          name: expect.any(String),
+        },
+      })
+
+      // DBでGUESTロールを確認
+      const userId = json.data.userId
+      const dbUser = await prisma.mUser.findFirst({
+        where: { id: userId },
+        select: { role: true },
+      })
+      expect(dbUser?.role).toBe('GUEST')
+    })
+
+    test('ゲストユーザー名を指定して登録できる', async () => {
+      const credential = await handleAnonymousSignInByFirebase()
+      const token = await credential.user.getIdToken()
+
+      const res = await app.request('/api/v1/user/auth/guest/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: 'テストゲスト' }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.name).toBe('テストゲスト')
+    })
+
+    test('通常の認証トークンではゲスト登録できない', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+
+      const res = await app.request('/api/v1/user/auth/guest/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'INVALID_REQUEST',
+      })
+      expect(res.status).toBe(400)
+    })
+
+    test('同一匿名UIDでの重複登録は既存ユーザーを返す（冪等性）', async () => {
+      const credential = await handleAnonymousSignInByFirebase()
+      const token = await credential.user.getIdToken()
+
+      const res1 = await app.request('/api/v1/user/auth/guest/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+      const json1 = await res1.json()
+
+      const res2 = await app.request('/api/v1/user/auth/guest/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+      const json2 = await res2.json()
+
+      expect(json1.data.userId).toBe(json2.data.userId)
+    })
+  })
+
+  describe('POST /api/v1/user/auth/guest/upgrade', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      const res = await app.request('/api/v1/user/auth/guest/upgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'AUTH_FAILED',
+      })
+      expect(res.status).toBe(401)
+    })
+
+    test('匿名トークンではアップグレードできない', async () => {
+      const credential = await handleAnonymousSignInByFirebase()
+      const token = await credential.user.getIdToken()
+
+      // ゲスト登録
+      await app.request('/api/v1/user/auth/guest/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+
+      // 匿名トークンでアップグレードを試みる
+      const res = await app.request('/api/v1/user/auth/guest/upgrade', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'INVALID_REQUEST',
+      })
+      expect(res.status).toBe(400)
+    })
+
+    test('メール連携後にゲストをUSERにアップグレードできる', async () => {
+      // 1. 匿名サインイン
+      const anonCredential = await handleAnonymousSignInByFirebase()
+      const anonToken = await anonCredential.user.getIdToken()
+
+      // 2. ゲスト登録
+      const registerRes = await app.request(
+        '/api/v1/user/auth/guest/register',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${anonToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: 'ゲストユーザー' }),
+        }
+      )
+      const registerJson = await registerRes.json()
+      expect(registerRes.status).toBe(201)
+      const userId = registerJson.data.userId
+
+      // 3. Firebase Account Linking（匿名→メール）
+      const email = createRandomEmail()
+      const linkedCredential = await handleLinkAnonymousWithEmail(
+        email,
+        'password'
+      )
+      const linkedToken = await linkedCredential.user.getIdToken()
+
+      // 4. アップグレードAPI呼び出し
+      const upgradeRes = await app.request('/api/v1/user/auth/guest/upgrade', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${linkedToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+
+      const upgradeJson = await upgradeRes.json()
+      expect(upgradeRes.status).toBe(200)
+      expect(upgradeJson).toMatchObject({
+        status: 'success',
+        data: {
+          userId,
+          name: expect.any(String),
+        },
+      })
+
+      // 5. DBでUSERロールに変更されたことを確認
+      const dbUser = await prisma.mUser.findFirst({
+        where: { id: userId },
+        select: { role: true },
+      })
+      expect(dbUser?.role).toBe('USER')
+
+      // 6. 認証プロバイダーがFIREBASE_EMAILに変更されたことを確認
+      const dbProvider = await prisma.mAuthProvider.findFirst({
+        where: { userId },
+        select: { providerType: true },
+      })
+      expect(dbProvider?.providerType).toBe('FIREBASE_EMAIL')
+    })
+
+    test('ゲスト登録なしでアップグレードするとエラーになる', async () => {
+      // 通常のメールユーザー（DBにゲストとして登録なし）でアップグレードを試みる
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+
+      const res = await app.request('/api/v1/user/auth/guest/upgrade', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'NOT_FOUND',
+      })
+      expect(res.status).toBe(404)
     })
   })
 })
