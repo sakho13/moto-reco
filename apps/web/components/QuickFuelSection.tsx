@@ -10,9 +10,13 @@ import { FuelIcon } from './icons/FuelIcon'
 import styles from './QuickFuelSection.module.css'
 import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useAuth } from '@/lib/hooks/useAuth'
+
+const GUEST_FUEL_LOG_LIMIT = 5
 
 export const QuickFuelSection = () => {
   const router = useRouter()
+  const { isGuest } = useAuth()
   const [selectedBikeId, setSelectedBikeId] = useState<string | null>(null)
 
   const { data, error, isLoading } = useSWR(
@@ -25,7 +29,25 @@ export const QuickFuelSection = () => {
 
   const bikes = data?.bikes ?? []
 
+  // ゲストアカウントの給油履歴件数を取得（ゲスト時のみ、1台目のバイクを対象）
+  const guestBikeId = isGuest && bikes.length > 0 ? bikes[0].myUserBikeId : null
+  const { data: guestFuelLogsData } = useSWR(
+    guestBikeId
+      ? `/api/v1/user-bike/bike/${guestBikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=10&page=1`
+      : null,
+    async (url) => {
+      const response = await apiGet(url)
+      return response.data
+    }
+  )
+  const guestFuelLogCount = Array.isArray(guestFuelLogsData)
+    ? guestFuelLogsData.length
+    : 0
+  const isAtGuestFuelLimit =
+    isGuest && guestFuelLogCount >= GUEST_FUEL_LOG_LIMIT
+
   const handleBikeClick = (bikeId: string) => {
+    if (isAtGuestFuelLimit) return
     setSelectedBikeId(bikeId)
   }
 
@@ -111,6 +133,13 @@ export const QuickFuelSection = () => {
           </div>
         </div>
 
+        {isAtGuestFuelLimit && (
+          <p className={styles.guestLimitMessage}>
+            ゲストアカウントは給油履歴を{GUEST_FUEL_LOG_LIMIT}
+            件まで登録できます。
+          </p>
+        )}
+
         <div className={styles.bikeSelectionSection}>
           <div className={styles.bikeGrid}>
             {bikes.map((bike) => {
@@ -123,8 +152,9 @@ export const QuickFuelSection = () => {
                   key={bike.myUserBikeId}
                   type="button"
                   onClick={() => handleBikeClick(bike.myUserBikeId)}
-                  className={styles.bikeCard}
+                  className={`${styles.bikeCard} ${isAtGuestFuelLimit ? styles.bikeCardDisabled : ''}`}
                   aria-label={`${title}の給油を登録`}
+                  disabled={isAtGuestFuelLimit}
                 >
                   <div className={styles.bikeIconContainer}>
                     <BikeIcon />

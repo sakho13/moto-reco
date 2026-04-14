@@ -152,3 +152,17 @@
   margin-bottom: var(--spacing-4);
   font-size: var(--font-size-sm);
 }
+
+.bikeCardDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.guestLimitMessage {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink-muted, #6b7280);
+  text-align: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  margin-bottom: var(--spacing-2);
+}

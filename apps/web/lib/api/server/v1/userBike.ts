@@ -271,7 +271,7 @@ userBike.patch(
   honoAuthMiddleware,
   zodValidateJson(UserBikeUpdateRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const body = c.req.valid('json')
 
     const detail = await prisma.$transaction((t) => {
@@ -287,6 +287,7 @@ userBike.patch(
       return service.updateMyUserBike({
         myUserBikeId: createMyUserBikeId(c.req.param('myUserBikeId')),
         userId: createUserId(userId),
+        role,
         nickname: body.nickname,
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,

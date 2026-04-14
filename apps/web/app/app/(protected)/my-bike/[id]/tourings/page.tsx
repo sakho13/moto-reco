@@ -13,11 +13,15 @@ import { TouringDeleteConfirmModal } from '@/components/touring/TouringDeleteCon
 import { TouringListSection } from '@/components/touring/TouringListSection'
 import { authenticatedFetch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { withAuth } from '@/lib/hoc/withAuth'
+
+const GUEST_TOURING_LIMIT = 2
 
 function TouringsPage() {
   const params = useParams()
   const router = useRouter()
+  const { isGuest } = useAuth()
   const bikeId = params.id as string
 
   const [pendingDeleteTouringId, setPendingDeleteTouringId] = useState<
@@ -119,19 +123,38 @@ function TouringsPage() {
     )
   }
 
+  const isAtGuestTouringLimit =
+    isGuest && (tourings?.length ?? 0) >= GUEST_TOURING_LIMIT
+
   return (
     <>
-      <div className="w-full max-w-md flex flex-row gap-2">
-        <Button
-          onClick={() => router.push(`/app/my-bike/${bikeId}`)}
-          variant="cloud"
-        >
-          ← 戻る
-        </Button>
+      <div className="w-full max-w-md flex flex-col gap-2">
+        <div className="flex flex-row gap-2">
+          <Button
+            onClick={() => router.push(`/app/my-bike/${bikeId}`)}
+            variant="cloud"
+          >
+            ← 戻る
+          </Button>
 
-        <Button onClick={handleRegister} variant="primary">
-          ツーリング履歴を登録
-        </Button>
+          <Button
+            onClick={handleRegister}
+            variant="primary"
+            disabled={isAtGuestTouringLimit}
+          >
+            ツーリング履歴を登録
+          </Button>
+        </div>
+        {isGuest && !isLoading && (
+          <InfoBox
+            variant={isAtGuestTouringLimit ? 'warning' : 'info'}
+            className="text-sm"
+          >
+            ゲストアカウントはツーリングを{GUEST_TOURING_LIMIT}
+            件まで登録できます（
+            {tourings?.length ?? 0}/{GUEST_TOURING_LIMIT}件）
+          </InfoBox>
+        )}
       </div>
 
       <InfoBox variant="info" className="w-full max-w-md mt-3 text-sm">

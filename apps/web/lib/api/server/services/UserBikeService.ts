@@ -34,6 +34,7 @@ type RegisterUserBikeParams = {
 type UpdateMyUserBikeParams = {
   myUserBikeId: ReturnType<typeof createMyUserBikeId>
   userId: UserId
+  role: 'USER' | 'ADMIN' | 'GUEST'
   nickname?: string | null
   purchaseDate?: Date | null
   purchasePrice?: number | null
@@ -186,8 +187,13 @@ export class UserBikeService {
         params.purchaseMileage !== undefined
           ? params.purchaseMileage
           : current.purchaseMileage,
+      // ゲストアカウントはバイクを公開できない
       isPublic:
-        params.isPublic !== undefined ? params.isPublic : current.isPublic,
+        params.role === 'GUEST'
+          ? false
+          : params.isPublic !== undefined
+            ? params.isPublic
+            : current.isPublic,
     })
 
     await this.myUserBikeRepository.updateMyUserBike(updatedEntity)

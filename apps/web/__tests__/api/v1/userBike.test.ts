@@ -3968,6 +3968,38 @@ describe('UserBike API Endpoints', () => {
         })
         expect(record?.isPublic).toBe(false)
       })
+
+      test('ゲストは PATCH でも isPublic が false に強制される', async () => {
+        const { token } = await createGuestUser()
+        const { myUserBikeId } = await createTestUserBike(token, {
+          displacement: 250,
+          nickname: 'ゲストバイク',
+        })
+
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              isPublic: true,
+            }),
+          }
+        )
+
+        expect(res.status).toBe(200)
+        const json = await res.json()
+        expect(json.data.isPublic).toBe(false)
+
+        const record = await prisma.tUserMyBike.findUnique({
+          where: { id: myUserBikeId },
+          select: { isPublic: true },
+        })
+        expect(record?.isPublic).toBe(false)
+      })
     })
 
     describe('給油履歴制限（5件まで）', () => {

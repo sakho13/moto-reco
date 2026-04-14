@@ -11,6 +11,7 @@ import styles from './TouringStartEndSection.module.css'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
 type BikeWithTouring = {
@@ -23,8 +24,11 @@ type BikeWithTouring = {
   } | null
 }
 
+const GUEST_TOURING_LIMIT = 2
+
 export const TouringStartEndSection = () => {
   const router = useRouter()
+  const { isGuest } = useAuth()
   const [loadingBikeId, setLoadingBikeId] = useState<string | null>(null)
   const { getCurrentPosition } = useGeolocation()
 
@@ -39,6 +43,20 @@ export const TouringStartEndSection = () => {
   })
 
   const bikes = bikesData?.bikes ?? []
+
+  // ゲストアカウントのツーリング件数を取得（ゲスト時のみ、1台目のバイクを対象）
+  const guestBikeId = isGuest && bikes.length > 0 ? bikes[0].myUserBikeId : null
+  const { data: guestTouringsData } = useSWR(
+    guestBikeId
+      ? `/api/v1/user-bike/bike/${guestBikeId}/tourings?sort-by=end-date&sort-order=desc`
+      : null,
+    async (url) => {
+      const response = await apiGet(url)
+      return response.data
+    }
+  )
+  const isAtGuestTouringLimit =
+    isGuest && (guestTouringsData?.length ?? 0) >= GUEST_TOURING_LIMIT
 
   // 全バイクの進行中ツーリングを一括取得
   const { data: ongoingTouringsData } = useSWR(
@@ -240,6 +258,13 @@ export const TouringStartEndSection = () => {
         </div>
       </div>
 
+      {isAtGuestTouringLimit && (
+        <p className={styles.guestLimitMessage}>
+          ゲストアカウントはツーリングを{GUEST_TOURING_LIMIT}
+          件まで登録できます。
+        </p>
+      )}
+
       <div className={styles.bikeSelectionGrid}>
         {bikesWithTouring.map((bike) => {
           const isLoading = loadingBikeId === bike.myUserBikeId
@@ -257,7 +282,7 @@ export const TouringStartEndSection = () => {
                 onClick={() =>
                   handleStartTouring(bike.myUserBikeId, bike.bikeName)
                 }
-                disabled={isLoading}
+                disabled={isLoading || isAtGuestTouringLimit}
                 variant="primary"
                 size="sm"
                 className={styles.startButton}
