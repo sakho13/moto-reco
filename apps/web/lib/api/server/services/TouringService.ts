@@ -6,6 +6,7 @@ import {
   TouringStatus,
   UserId,
 } from '@repo/shared-types'
+import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
@@ -13,9 +14,6 @@ import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
-
-// ゲストアカウントのツーリング履歴登録上限
-const GUEST_TOURING_LIMIT = 2
 
 type RegisterTouringParams = {
   myUserBikeId: MyUserBikeId
@@ -95,7 +93,7 @@ export class TouringService {
       const count = await this.touringRepository.countTourings(
         params.myUserBikeId
       )
-      if (count >= GUEST_TOURING_LIMIT) {
+      if (count >= GUEST_ACCOUNT_LIMITS.TOURING) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
           'ゲストアカウントはツーリング履歴を2件まで登録できます'
@@ -162,7 +160,7 @@ export class TouringService {
           const count = await this.touringRepository.countTourings(
             params.myUserBikeId
           )
-          if (count >= GUEST_TOURING_LIMIT) {
+          if (count >= GUEST_ACCOUNT_LIMITS.TOURING) {
             throw new ApiV1Error(
               'INVALID_REQUEST',
               'ゲストアカウントはツーリング履歴を2件まで登録できます'

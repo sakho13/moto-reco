@@ -5,10 +5,9 @@ import useSWR from 'swr'
 import { Button } from '@repo/ui/button'
 import { MyBikeListSection } from '@/components/MyBikeListSection'
 import { apiGet } from '@/lib/api/client'
-import { useAuth } from '@/lib/hooks/useAuth'
 import { withAuth } from '@/lib/hoc/withAuth'
-
-const GUEST_PLAN_BIKE_LIMIT = 1
+import { useAuth } from '@/lib/hooks/useAuth'
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 function Page() {
   const router = useRouter()
@@ -24,7 +23,7 @@ function Page() {
   )
   const bikes = bikesData?.bikes ?? []
   const isAtGuestBikeLimit =
-    isGuest && !bikesLoading && bikes.length >= GUEST_PLAN_BIKE_LIMIT
+    isGuest && !bikesLoading && bikes.length >= GUEST_ACCOUNT_LIMITS.BIKE
 
   return (
     <>
@@ -39,7 +38,7 @@ function Page() {
         </div>
         {isAtGuestBikeLimit && (
           <p className="text-sm text-gray-500">
-            ゲストアカウントはバイクを{GUEST_PLAN_BIKE_LIMIT}
+            ゲストアカウントはバイクを{GUEST_ACCOUNT_LIMITS.BIKE}
             台まで登録できます。
           </p>
         )}

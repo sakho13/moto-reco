@@ -13,10 +13,9 @@ import { TouringDeleteConfirmModal } from '@/components/touring/TouringDeleteCon
 import { TouringListSection } from '@/components/touring/TouringListSection'
 import { authenticatedFetch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { useAuth } from '@/lib/hooks/useAuth'
 import { withAuth } from '@/lib/hoc/withAuth'
-
-const GUEST_TOURING_LIMIT = 2
+import { useAuth } from '@/lib/hooks/useAuth'
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 function TouringsPage() {
   const params = useParams()
@@ -124,7 +123,7 @@ function TouringsPage() {
   }
 
   const isAtGuestTouringLimit =
-    isGuest && (tourings?.length ?? 0) >= GUEST_TOURING_LIMIT
+    isGuest && (tourings?.length ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
 
   return (
     <>
@@ -150,9 +149,9 @@ function TouringsPage() {
             variant={isAtGuestTouringLimit ? 'warning' : 'info'}
             className="text-sm"
           >
-            ゲストアカウントはツーリングを{GUEST_TOURING_LIMIT}
+            ゲストアカウントはツーリングを{GUEST_ACCOUNT_LIMITS.TOURING}
             件まで登録できます（
-            {tourings?.length ?? 0}/{GUEST_TOURING_LIMIT}件）
+            {tourings?.length ?? 0}/{GUEST_ACCOUNT_LIMITS.TOURING}件）
           </InfoBox>
         )}
       </div>

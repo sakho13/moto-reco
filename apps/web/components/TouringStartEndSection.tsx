@@ -13,6 +13,7 @@ import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 type BikeWithTouring = {
   myUserBikeId: string
@@ -23,8 +24,6 @@ type BikeWithTouring = {
     startDate: string
   } | null
 }
-
-const GUEST_TOURING_LIMIT = 2
 
 export const TouringStartEndSection = () => {
   const router = useRouter()
@@ -56,7 +55,7 @@ export const TouringStartEndSection = () => {
     }
   )
   const isAtGuestTouringLimit =
-    isGuest && (guestTouringsData?.length ?? 0) >= GUEST_TOURING_LIMIT
+    isGuest && (guestTouringsData?.length ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
 
   // 全バイクの進行中ツーリングを一括取得
   const { data: ongoingTouringsData } = useSWR(
@@ -260,7 +259,7 @@ export const TouringStartEndSection = () => {
 
       {isAtGuestTouringLimit && (
         <p className={styles.guestLimitMessage}>
-          ゲストアカウントはツーリングを{GUEST_TOURING_LIMIT}
+          ゲストアカウントはツーリングを{GUEST_ACCOUNT_LIMITS.TOURING}
           件まで登録できます。
         </p>
       )}

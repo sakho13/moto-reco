@@ -11,8 +11,7 @@ import styles from './QuickFuelSection.module.css'
 import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useAuth } from '@/lib/hooks/useAuth'
-
-const GUEST_FUEL_LOG_LIMIT = 5
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 export const QuickFuelSection = () => {
   const router = useRouter()
@@ -44,7 +43,7 @@ export const QuickFuelSection = () => {
     ? guestFuelLogsData.length
     : 0
   const isAtGuestFuelLimit =
-    isGuest && guestFuelLogCount >= GUEST_FUEL_LOG_LIMIT
+    isGuest && guestFuelLogCount >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
 
   const handleBikeClick = (bikeId: string) => {
     if (isAtGuestFuelLimit) return
@@ -135,7 +134,7 @@ export const QuickFuelSection = () => {
 
         {isAtGuestFuelLimit && (
           <p className={styles.guestLimitMessage}>
-            ゲストアカウントは給油履歴を{GUEST_FUEL_LOG_LIMIT}
+            ゲストアカウントは給油履歴を{GUEST_ACCOUNT_LIMITS.FUEL_LOG}
             件まで登録できます。
           </p>
         )}

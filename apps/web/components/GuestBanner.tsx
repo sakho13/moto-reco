@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 /**
  * ゲストアカウント利用中に表示するバナー
@@ -17,7 +18,7 @@ export function GuestBanner() {
     ? new Date(user.metadata.creationTime)
     : null
   const expiresAt = createdAt
-    ? new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000)
+    ? new Date(createdAt.getTime() + GUEST_ACCOUNT_LIMITS.TTL_MS)
     : null
   const daysLeft = expiresAt
     ? Math.max(

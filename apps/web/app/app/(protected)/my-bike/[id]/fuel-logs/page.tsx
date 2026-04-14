@@ -20,10 +20,9 @@ import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
 import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { useAuth } from '@/lib/hooks/useAuth'
 import { withAuth } from '@/lib/hoc/withAuth'
-
-const GUEST_FUEL_LOG_LIMIT = 5
+import { useAuth } from '@/lib/hooks/useAuth'
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 function FuelLogsPage() {
   const params = useParams()
@@ -131,7 +130,7 @@ function FuelLogsPage() {
   const canLoadMore = lastPageCount === 10
   const isLoadingMore = isValidating && !isLoading && size > 0
   const isAtGuestFuelLimit =
-    isGuest && !isLoading && fuelLogs.length >= GUEST_FUEL_LOG_LIMIT
+    isGuest && !isLoading && fuelLogs.length >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
 
   const chartFuelLogs = chartData || []
 
@@ -184,9 +183,9 @@ function FuelLogsPage() {
         </div>
         {isGuest && !isLoading && (
           <InfoBox variant={isAtGuestFuelLimit ? 'warning' : 'info'}>
-            ゲストアカウントは給油履歴を{GUEST_FUEL_LOG_LIMIT}
+            ゲストアカウントは給油履歴を{GUEST_ACCOUNT_LIMITS.FUEL_LOG}
             件まで登録できます（
-            {fuelLogs.length}/{GUEST_FUEL_LOG_LIMIT}件）
+            {fuelLogs.length}/{GUEST_ACCOUNT_LIMITS.FUEL_LOG}件）
           </InfoBox>
         )}
       </div>

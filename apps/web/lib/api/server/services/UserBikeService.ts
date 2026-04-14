@@ -4,6 +4,7 @@ import {
   createUserBikeId,
   UserId,
 } from '@repo/shared-types'
+import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { BikeEntity } from '../entities/BikeEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeEntity } from '../entities/UserBikeEntity'
@@ -14,8 +15,6 @@ import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 
 // 無料プランのバイク登録上限
 const FREE_PLAN_BIKE_LIMIT = 2
-// ゲストアカウントのバイク登録上限
-const GUEST_PLAN_BIKE_LIMIT = 1
 
 type RegisterUserBikeParams = {
   bikeId?: BikeId | null
@@ -61,7 +60,7 @@ export class UserBikeService {
   ): Promise<void> {
     const currentCount = await this.myUserBikeRepository.countOwnedBikes(userId)
     const limit =
-      role === 'GUEST' ? GUEST_PLAN_BIKE_LIMIT : FREE_PLAN_BIKE_LIMIT
+      role === 'GUEST' ? GUEST_ACCOUNT_LIMITS.BIKE : FREE_PLAN_BIKE_LIMIT
 
     if (currentCount >= limit) {
       throw new ApiV1Error(

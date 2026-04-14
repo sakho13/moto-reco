@@ -5,6 +5,7 @@ import {
   TouringId,
   UserId,
 } from '@repo/shared-types'
+import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
@@ -12,9 +13,6 @@ import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
-
-// ゲストアカウントの給油履歴登録上限
-const GUEST_FUEL_LOG_LIMIT = 5
 
 type RegisterFuelLogParams = {
   myUserBikeId: MyUserBikeId
@@ -72,7 +70,7 @@ export class FuelLogService {
       const count = await this.fuelLogRepository.countFuelLogs(
         params.myUserBikeId
       )
-      if (count >= GUEST_FUEL_LOG_LIMIT) {
+      if (count >= GUEST_ACCOUNT_LIMITS.FUEL_LOG) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
           'ゲストアカウントは給油履歴を5件まで登録できます'

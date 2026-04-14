@@ -1,13 +1,11 @@
 import { Context, Next } from 'hono'
 import { prisma } from '@repo/database'
 import { createUserId } from '@repo/shared-types'
+import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
 import { HonoVariables } from '../types/hono'
-
-/** ゲストアカウントの有効期間（ミリ秒） */
-const GUEST_ACCOUNT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 /**
  * Hono用認証ミドルウェア
@@ -51,7 +49,7 @@ export async function honoAuthMiddleware(
     // Step 3: ゲストアカウントの有効期限チェック（登録から7日）
     if (userInfo.role === 'GUEST') {
       const expiresAt = new Date(
-        userInfo.createdAt.getTime() + GUEST_ACCOUNT_TTL_MS
+        userInfo.createdAt.getTime() + GUEST_ACCOUNT_LIMITS.TTL_MS
       )
       if (new Date() > expiresAt) {
         throw new ApiV1Error(
