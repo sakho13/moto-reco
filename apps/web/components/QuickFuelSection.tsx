@@ -28,22 +28,9 @@ export const QuickFuelSection = () => {
 
   const bikes = data?.bikes ?? []
 
-  // ゲストアカウントの給油履歴件数を取得（ゲスト時のみ、1台目のバイクを対象）
-  const guestBikeId = isGuest && bikes.length > 0 ? bikes[0].myUserBikeId : null
-  const { data: guestFuelLogsData } = useSWR(
-    guestBikeId
-      ? `/api/v1/user-bike/bike/${guestBikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=10&page=1`
-      : null,
-    async (url) => {
-      const response = await apiGet(url)
-      return response.data
-    }
-  )
-  const guestFuelLogCount = Array.isArray(guestFuelLogsData)
-    ? guestFuelLogsData.length
-    : 0
+  // ゲストアカウントの給油上限チェック（バイク一覧レスポンスのカウントを利用）
   const isAtGuestFuelLimit =
-    isGuest && guestFuelLogCount >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
+    isGuest && (bikes[0]?.fuelLogCount ?? 0) >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
 
   const handleBikeClick = (bikeId: string) => {
     if (isAtGuestFuelLimit) return

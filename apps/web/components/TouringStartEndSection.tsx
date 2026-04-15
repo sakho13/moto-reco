@@ -43,19 +43,9 @@ export const TouringStartEndSection = () => {
 
   const bikes = bikesData?.bikes ?? []
 
-  // ゲストアカウントのツーリング件数を取得（ゲスト時のみ、1台目のバイクを対象）
-  const guestBikeId = isGuest && bikes.length > 0 ? bikes[0].myUserBikeId : null
-  const { data: guestTouringsData } = useSWR(
-    guestBikeId
-      ? `/api/v1/user-bike/bike/${guestBikeId}/tourings?sort-by=end-date&sort-order=desc`
-      : null,
-    async (url) => {
-      const response = await apiGet(url)
-      return response.data
-    }
-  )
+  // ゲストアカウントのツーリング上限チェック（バイク一覧レスポンスのカウントを利用）
   const isAtGuestTouringLimit =
-    isGuest && (guestTouringsData?.length ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
+    isGuest && (bikes[0]?.touringCount ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
 
   // 全バイクの進行中ツーリングを一括取得
   const { data: ongoingTouringsData } = useSWR(

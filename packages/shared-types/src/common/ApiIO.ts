@@ -97,6 +97,8 @@ export type ApiResponseUserBikeList = {
     isPublic: boolean
     createdAt: string
     updatedAt: string
+    fuelLogCount: number
+    touringCount: number
   }[]
 }
 
@@ -116,6 +118,8 @@ export type ApiResponseUserBikeDetail = {
   isPublic: boolean
   createdAt: string
   updatedAt: string
+  fuelLogCount: number
+  touringCount: number
 }
 
 export type ApiResponsePublicBikeList = {

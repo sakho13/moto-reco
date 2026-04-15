@@ -86,6 +86,8 @@ const toApiResponseUserBikeDetail = (
   isPublic: detail.isPublic,
   createdAt: detail.createdAt.toISOString(),
   updatedAt: detail.updatedAt.toISOString(),
+  fuelLogCount: detail.fuelLogCount,
+  touringCount: detail.touringCount,
 })
 
 userBike.post(
