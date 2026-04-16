@@ -48,9 +48,9 @@ export type UserAuthRegisterRequest = z.infer<
 export const GuestRegisterRequestSchema = z.object({
   name: z
     .string()
+    .trim()
     .min(1, '名前は1文字以上である必要があります')
     .max(50, '名前は50文字以内である必要があります')
-    .trim()
     .optional(),
 })
 

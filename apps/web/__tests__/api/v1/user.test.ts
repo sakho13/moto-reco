@@ -533,6 +533,33 @@ describe('User API Endpoints', () => {
       expect(res.status).toBe(400)
     })
 
+    test('空白のみのゲストユーザー名はバリデーションエラーとなる', async () => {
+      const credential = await handleAnonymousSignInByFirebase()
+      const token = await credential.user.getIdToken()
+
+      const res = await app.request('/api/v1/user/auth/guest/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: '   ' }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'VALIDATION_ERROR',
+        details: expect.arrayContaining([
+          {
+            field: 'name',
+            message: expect.any(String),
+          },
+        ]),
+      })
+    })
+
     test('同一匿名UIDでの重複登録は既存ユーザーを返す（冪等性）', async () => {
       const credential = await handleAnonymousSignInByFirebase()
       const token = await credential.user.getIdToken()
