@@ -1,5 +1,6 @@
 'use client'
 
+import { UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
@@ -8,6 +9,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
@@ -212,29 +214,34 @@ export function LoginCard() {
         <span>または</span>
       </div>
 
-      <Button
-        onClick={handleGoogleLogin}
-        variant="social"
-        size="lg"
-        fullWidth
-        disabled={true}
-      >
-        Googleでログイン
-      </Button>
+      <div className="flex justify-center gap-4">
+        <Button
+          onClick={handleGoogleLogin}
+          variant="social"
+          size="icon"
+          disabled={true}
+          aria-label="Googleでログイン"
+          title="Googleでログイン"
+        >
+          <GoogleIcon />
+        </Button>
 
-      <div className="divider">
-        <span>または</span>
+        <div className="flex flex-col items-center gap-1">
+          <Button
+            onClick={handleGuestLogin}
+            variant="cloud"
+            size="icon"
+            loading={loading}
+            aria-label="ゲストとして始める"
+            title="ゲストとして始める"
+          >
+            <UserRound size={20} />
+          </Button>
+          <span className="text-xs" style={{ color: 'var(--color-inkLight)' }}>
+            ゲスト
+          </span>
+        </div>
       </div>
-
-      <Button
-        onClick={handleGuestLogin}
-        variant="cloud"
-        size="lg"
-        fullWidth
-        loading={loading}
-      >
-        ゲストとして始める
-      </Button>
     </BaseCard>
   )
 }
