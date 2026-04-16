@@ -5,7 +5,6 @@ export type AnalyticsEventName =
   | 'web_logout'
   | 'web_sign_up'
   | 'web_guest_login'
-  | 'web_guest_upgrade'
 
 /**
  * Google Analyticsにカスタムイベントを送信する

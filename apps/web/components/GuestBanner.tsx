@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
@@ -9,7 +9,8 @@ import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
  * 有効期限の残り日数と本登録への誘導を表示する
  */
 export function GuestBanner() {
-  const { isGuest, user } = useAuth()
+  const { isGuest, user, signOut } = useAuth()
+  const router = useRouter()
 
   if (!isGuest || !user) return null
 
@@ -39,12 +40,15 @@ export function GuestBanner() {
             : 'バイク1台・給油5件・ツーリング2件まで'}
         </span>
       </div>
-      <Link
-        href="/app/upgrade"
+      <button
+        onClick={async () => {
+          await signOut()
+          router.push('/app/register')
+        }}
         className="shrink-0 bg-amber-600 text-white px-3 py-1.5 rounded-md font-medium hover:bg-amber-700 transition-colors"
       >
-        本登録する
-      </Link>
+        ログアウトして本登録する
+      </button>
     </div>
   )
 }

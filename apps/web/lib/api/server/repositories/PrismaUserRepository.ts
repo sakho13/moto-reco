@@ -204,27 +204,4 @@ export class PrismaUserRepository
       status: createdUser.status,
     })
   }
-
-  async upgradeGuestUser(userId: UserId, name?: string): Promise<UserEntity> {
-    const updatedUser = await this.connection.mUser.update({
-      where: { id: userId, role: 'GUEST', status: 'ACTIVE' },
-      data: {
-        role: 'USER',
-        ...(name ? { name } : {}),
-      },
-      select: {
-        id: true,
-        name: true,
-        status: true,
-        role: true,
-      },
-    })
-
-    return new UserEntity({
-      id: createUserId(updatedUser.id),
-      name: updatedUser.name,
-      role: updatedUser.role,
-      status: updatedUser.status,
-    })
-  }
 }

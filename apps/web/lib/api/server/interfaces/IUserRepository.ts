@@ -53,9 +53,4 @@ export interface IUserRepository {
     user: UserEntity,
     authProvider: AuthProviderEntity
   ): Promise<UserEntity>
-
-  /**
-   * ゲストユーザーを正規ユーザーに昇格
-   */
-  upgradeGuestUser(userId: UserId, name?: string): Promise<UserEntity>
 }

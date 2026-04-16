@@ -5,8 +5,6 @@ import {
   ApiResponseUserQuit,
   ApiResponseUserRecover,
   GuestRegisterRequestSchema,
-  GuestUpgradeRequestSchema,
-  ProviderType,
   SuccessResponse,
   UserAuthRecoverRequestSchema,
   UserAuthQuitRequestSchema,
@@ -295,71 +293,6 @@ user.post(
       },
       201
     )
-  }
-)
-
-/**
- * ゲストアカウントを正規アカウントにアップグレードするエンドポイント
- *
- * Firebase Account Linking後のトークン（匿名UIDのままでプロバイダーが変わったもの）を受け取り、
- * ゲストアカウントを正規ユーザーに切り替えます。
- *
- * @route POST /api/v1/user/auth/guest/upgrade
- * @param {GuestUpgradeRequest} body.name - ユーザー名（省略可）
- * @returns {200} アップグレード成功
- * @throws {400} バリデーションエラー
- * @throws {401} 認証失敗
- * @throws {404} ゲストアカウントが見つからない
- * @throws {500} サーバーエラー
- */
-user.post(
-  '/auth/guest/upgrade',
-  zodValidateJson(GuestUpgradeRequestSchema),
-  async (c) => {
-    const authHeader = c.req.header('Authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new ApiV1Error('AUTH_FAILED', '認証トークンが提供されていません')
-    }
-
-    const token = authHeader.substring('Bearer '.length)
-    const firebaseAuthRepo = new FirebaseAuthRepository()
-    const authProvider = await firebaseAuthRepo.authorize(token)
-
-    if (!authProvider) {
-      throw new ApiV1Error('AUTH_FAILED', '認証トークンが無効です')
-    }
-
-    // 匿名認証トークンはアップグレード済みではないためエラー
-    if (authProvider.provider === 'FIREBASE_ANONYMOUS') {
-      throw new ApiV1Error(
-        'INVALID_REQUEST',
-        'アップグレードにはメールまたはGoogleアカウントを連携してください'
-      )
-    }
-
-    const body = c.req.valid('json')
-
-    const upgradedUser = await prisma.$transaction(async (t) => {
-      const userRepo = new PrismaUserRepository(t)
-      const authProviderRepo = new PrismaAuthProviderRepository(t)
-      const service = new UserService(userRepo)
-
-      return service.upgradeGuestUser(
-        authProvider.externalId,
-        authProvider.provider as Exclude<ProviderType, 'FIREBASE_ANONYMOUS'>,
-        authProviderRepo,
-        body.name
-      )
-    })
-
-    return c.json<SuccessResponse<ApiResponseUserProfile>>({
-      status: 'success',
-      data: {
-        userId: upgradedUser.id,
-        name: upgradedUser.name,
-      },
-      message: 'アカウントのアップグレードが完了しました',
-    })
   }
 )
 

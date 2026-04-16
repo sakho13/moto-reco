@@ -117,31 +117,4 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
       },
     })
   }
-
-  /**
-   * ゲストアップグレード時に認証プロバイダーのタイプを切り替える
-   * FIREBASE_ANONYMOUS → 新しいプロバイダータイプへ更新
-   */
-  async upgradeGuestProviderType(
-    externalId: string,
-    newProviderType: Exclude<ProviderType, 'FIREBASE_ANONYMOUS'>
-  ): Promise<string | null> {
-    const authProvider = await this.connection.mAuthProvider.findFirst({
-      where: {
-        externalId,
-        providerType: 'FIREBASE_ANONYMOUS',
-        isActive: true,
-      },
-      select: { id: true, userId: true },
-    })
-
-    if (!authProvider) return null
-
-    await this.connection.mAuthProvider.update({
-      where: { id: authProvider.id },
-      data: { providerType: newProviderType },
-    })
-
-    return authProvider.userId
-  }
 }

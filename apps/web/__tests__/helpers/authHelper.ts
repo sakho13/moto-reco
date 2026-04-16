@@ -2,7 +2,6 @@ import { expect } from 'vitest'
 import { createRandomEmail } from './createRandomEmail'
 import {
   handleAnonymousSignInByFirebase,
-  handleLinkAnonymousWithEmail,
   handleRegisterByFirebase,
 } from './firebaseTestToken'
 import { app } from '@/lib/api/server/app'
@@ -59,44 +58,6 @@ export async function createGuestUser(): Promise<{
   const userId = registerJson.data.userId
 
   return { token, userId }
-}
-
-/**
- * ゲストユーザーを作成してアップグレード（メール連携）する
- */
-export async function upgradeGuestUserWithEmail(guestToken: string): Promise<{
-  token: string
-  userId: string
-  email: string
-}> {
-  // まずゲスト登録
-  const registerRes = await app.request('/api/v1/user/auth/guest/register', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${guestToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({}),
-  })
-  const registerJson = await registerRes.json()
-  const userId = registerJson.data.userId
-
-  // Firebase Account Linking（匿名→メール）
-  const email = createRandomEmail()
-  const linkedCredential = await handleLinkAnonymousWithEmail(email, 'password')
-  const token = await linkedCredential.user.getIdToken()
-
-  // アップグレードAPI呼び出し
-  await app.request('/api/v1/user/auth/guest/upgrade', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({}),
-  })
-
-  return { token, userId, email }
 }
 
 /**
