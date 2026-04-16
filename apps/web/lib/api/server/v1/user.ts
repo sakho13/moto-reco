@@ -115,6 +115,13 @@ user.post(
       throw new ApiV1Error('AUTH_FAILED', '認証トークンが無効です')
     }
 
+    if (authProvider.provider === 'FIREBASE_ANONYMOUS') {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        '匿名認証トークンでは通常登録できません'
+      )
+    }
+
     const body = c.req.valid('json')
 
     const user = await prisma.$transaction(async (t) => {

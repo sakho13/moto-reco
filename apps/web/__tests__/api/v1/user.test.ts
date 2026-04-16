@@ -241,6 +241,29 @@ describe('User API Endpoints', () => {
       // 既存の名前が保持されることを確認
       expect(json2.data.name).toBe('テストユーザー')
     })
+
+    test('匿名トークンでは通常登録できない', async () => {
+      const credential = await handleAnonymousSignInByFirebase()
+      const token = await credential.user.getIdToken()
+
+      const res = await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'テストユーザー',
+        }),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'INVALID_REQUEST',
+      })
+      expect(res.status).toBe(400)
+    })
   })
 
   describe('POST /api/v1/user/auth/quit', () => {
