@@ -3,6 +3,22 @@ const nextConfig = {
   output: 'standalone',
   transpilePackages: ['@repo/shared-types', '@repo/database'],
 
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.moto-reco.com',
+          },
+        ],
+        destination: 'https://moto-reco.com/:path*',
+        permanent: true,
+      },
+    ]
+  },
+
   headers: () => {
     return [
       {

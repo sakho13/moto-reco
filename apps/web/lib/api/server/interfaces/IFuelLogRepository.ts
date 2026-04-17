@@ -24,4 +24,5 @@ export interface IFuelLogRepository {
     myUserBikeId: MyUserBikeId,
     touringId: TouringId | null
   ): Promise<void>
+  countFuelLogs(myUserBikeId: MyUserBikeId): Promise<number>
 }

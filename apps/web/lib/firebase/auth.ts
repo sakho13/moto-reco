@@ -5,6 +5,7 @@ import {
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
+  signInAnonymously as firebaseSignInAnonymously,
   type UserCredential,
   type User,
 } from 'firebase/auth'
@@ -68,4 +69,12 @@ export const getIdToken = async (user: User): Promise<string | null> => {
     console.error('IDトークン取得エラー:', error)
     return null
   }
+}
+
+/**
+ * 匿名ユーザーとしてサインイン（ゲストモード）
+ */
+export const signInAnonymously = async (): Promise<UserCredential> => {
+  const auth = getFirebaseAuth()
+  return await firebaseSignInAnonymously(auth)
 }

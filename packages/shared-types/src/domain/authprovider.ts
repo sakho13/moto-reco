@@ -3,6 +3,7 @@ import { UserId } from './user'
 export const ProviderTypeMap = {
   FIREBASE_EMAIL: 'FIREBASE_EMAIL',
   FIREBASE_GOOGLE: 'FIREBASE_GOOGLE',
+  FIREBASE_ANONYMOUS: 'FIREBASE_ANONYMOUS',
 } as const
 
 export type ProviderType =

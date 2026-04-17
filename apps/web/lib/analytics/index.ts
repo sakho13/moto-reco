@@ -1,6 +1,10 @@
 import { sendGAEvent } from '@next/third-parties/google'
 
-export type AnalyticsEventName = 'web_login' | 'web_logout' | 'web_sign_up'
+export type AnalyticsEventName =
+  | 'web_login'
+  | 'web_logout'
+  | 'web_sign_up'
+  | 'web_guest_login'
 
 /**
  * Google Analyticsにカスタムイベントを送信する

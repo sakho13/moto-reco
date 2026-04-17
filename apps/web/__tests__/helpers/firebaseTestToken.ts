@@ -1,9 +1,13 @@
 import { getApps, initializeApp } from 'firebase/app'
 import {
+  EmailAuthProvider,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   getAuth,
+  linkWithCredential,
+  signInAnonymously,
   signInWithEmailAndPassword,
+  signOut,
 } from 'firebase/auth'
 
 let authInstance: ReturnType<typeof getAuth> | null = null
@@ -57,4 +61,25 @@ export const handleLoginByFirebase = async (
   const auth = getFirebaseClientAuth()
   if (!auth) throw new Error('Firebase auth is not initialized')
   return await signInWithEmailAndPassword(auth, email, password)
+}
+
+export const handleAnonymousSignInByFirebase = async () => {
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error('Firebase auth is not initialized')
+  // 既存のセッションをクリアして必ず新しい匿名ユーザーを作成する
+  if (auth.currentUser) {
+    await signOut(auth)
+  }
+  return await signInAnonymously(auth)
+}
+
+export const handleLinkAnonymousWithEmail = async (
+  email: string,
+  password: string
+) => {
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error('Firebase auth is not initialized')
+  if (!auth.currentUser) throw new Error('No current user to link')
+  const credential = EmailAuthProvider.credential(email, password)
+  return await linkWithCredential(auth.currentUser, credential)
 }

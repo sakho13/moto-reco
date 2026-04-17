@@ -45,4 +45,12 @@ export interface IUserRepository {
    * ユーザーを有効状態にする
    */
   activateUser(userId: UserId): Promise<void>
+
+  /**
+   * ゲストユーザーを作成
+   */
+  createGuestUser(
+    user: UserEntity,
+    authProvider: AuthProviderEntity
+  ): Promise<UserEntity>
 }

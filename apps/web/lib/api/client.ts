@@ -184,6 +184,9 @@ type API_EP = {
   '/api/v1/user/auth/quit': {
     POST: SuccessResponse<ApiResponseUserQuit>
   }
+  '/api/v1/user/auth/guest/register': {
+    POST: SuccessResponse<ApiResponseUserProfile>
+  }
   '/api/v1/bikes/manufacturers': {
     GET: SuccessResponse<ApiResponseManufacturer>
   }
