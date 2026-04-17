@@ -5,6 +5,7 @@ import {
   TouringId,
   UserId,
 } from '@repo/shared-types'
+import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
@@ -16,6 +17,7 @@ import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 type RegisterFuelLogParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
+  role: 'USER' | 'ADMIN' | 'GUEST'
   refueledAt: Date
   mileage: number
   previousMileage: number
@@ -61,6 +63,19 @@ export class FuelLogService {
 
     if (!myUserBike) {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    // ゲストアカウントの給油履歴登録数チェック
+    if (params.role === 'GUEST') {
+      const count = await this.fuelLogRepository.countFuelLogs(
+        params.myUserBikeId
+      )
+      if (count >= GUEST_ACCOUNT_LIMITS.FUEL_LOG) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          'ゲストアカウントは給油履歴を5件まで登録できます'
+        )
+      }
     }
 
     // 進行中ツーリングの自動紐づけ

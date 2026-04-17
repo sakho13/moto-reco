@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "MUserRole" ADD VALUE 'GUEST';
+
+-- AlterEnum
+ALTER TYPE "ProviderType" ADD VALUE 'FIREBASE_ANONYMOUS';

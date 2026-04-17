@@ -1,6 +1,9 @@
 import { expect } from 'vitest'
 import { createRandomEmail } from './createRandomEmail'
-import { handleRegisterByFirebase } from './firebaseTestToken'
+import {
+  handleAnonymousSignInByFirebase,
+  handleRegisterByFirebase,
+} from './firebaseTestToken'
 import { app } from '@/lib/api/server/app'
 
 /**
@@ -30,6 +33,31 @@ export async function createTestUser(): Promise<{
   const userId = registerJson.data.userId
 
   return { token, userId, email }
+}
+
+/**
+ * ゲストユーザーを作成してトークンを取得する
+ */
+export async function createGuestUser(): Promise<{
+  token: string
+  userId: string
+}> {
+  const credential = await handleAnonymousSignInByFirebase()
+  const token = await credential.user.getIdToken()
+
+  const registerRes = await app.request('/api/v1/user/auth/guest/register', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({}),
+  })
+
+  const registerJson = await registerRes.json()
+  const userId = registerJson.data.userId
+
+  return { token, userId }
 }
 
 /**

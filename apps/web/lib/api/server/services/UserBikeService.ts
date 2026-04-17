@@ -4,6 +4,7 @@ import {
   createUserBikeId,
   UserId,
 } from '@repo/shared-types'
+import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { BikeEntity } from '../entities/BikeEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeEntity } from '../entities/UserBikeEntity'
@@ -20,6 +21,7 @@ type RegisterUserBikeParams = {
   displacement?: number
   serialNumber?: string | null
   userId: UserId
+  role: 'USER' | 'ADMIN' | 'GUEST'
   nickname?: string
   purchaseDate?: Date
   purchasePrice?: number
@@ -31,6 +33,7 @@ type RegisterUserBikeParams = {
 type UpdateMyUserBikeParams = {
   myUserBikeId: ReturnType<typeof createMyUserBikeId>
   userId: UserId
+  role: 'USER' | 'ADMIN' | 'GUEST'
   nickname?: string | null
   purchaseDate?: Date | null
   purchasePrice?: number | null
@@ -49,22 +52,29 @@ export class UserBikeService {
 
   /**
    * バイク登録数の制限をチェック
-   * 無料プランでは2台まで登録可能
+   * ゲストは1台、無料プランは2台まで登録可能
    */
-  private async validateBikeRegistrationLimit(userId: UserId): Promise<void> {
+  private async validateBikeRegistrationLimit(
+    userId: UserId,
+    role: 'USER' | 'ADMIN' | 'GUEST'
+  ): Promise<void> {
     const currentCount = await this.myUserBikeRepository.countOwnedBikes(userId)
+    const limit =
+      role === 'GUEST' ? GUEST_ACCOUNT_LIMITS.BIKE : FREE_PLAN_BIKE_LIMIT
 
-    if (currentCount >= FREE_PLAN_BIKE_LIMIT) {
+    if (currentCount >= limit) {
       throw new ApiV1Error(
         'INVALID_REQUEST',
-        '無料プランでは2台まで登録可能です'
+        role === 'GUEST'
+          ? 'ゲストアカウントはバイクを1台まで登録できます'
+          : '無料プランでは2台まで登録可能です'
       )
     }
   }
 
   public async registerUserBike(params: RegisterUserBikeParams) {
     // バイク登録数制限チェック
-    await this.validateBikeRegistrationLimit(params.userId)
+    await this.validateBikeRegistrationLimit(params.userId, params.role)
 
     let bike: BikeEntity | null = null
     if (params.bikeId) {
@@ -91,6 +101,10 @@ export class UserBikeService {
       })
     )
 
+    // ゲストアカウントはバイクを公開できない
+    const isPublic =
+      params.role === 'GUEST' ? false : (params.isPublic ?? false)
+
     const myUserBike = await this.myUserBikeRepository.createMyUserBike(
       new MyUserBikeEntity({
         bikeId: userBike.bikeId,
@@ -101,7 +115,7 @@ export class UserBikeService {
         purchaseDate: params.purchaseDate ?? null,
         purchasePrice: params.purchasePrice ?? null,
         purchaseMileage: params.purchaseMileage ?? null,
-        isPublic: params.isPublic ?? false,
+        isPublic,
         ownedAt: params.purchaseDate ?? new Date(),
         soldAt: null,
         ownStatus: 'OWN',
@@ -172,8 +186,13 @@ export class UserBikeService {
         params.purchaseMileage !== undefined
           ? params.purchaseMileage
           : current.purchaseMileage,
+      // ゲストアカウントはバイクを公開できない
       isPublic:
-        params.isPublic !== undefined ? params.isPublic : current.isPublic,
+        params.role === 'GUEST'
+          ? false
+          : params.isPublic !== undefined
+            ? params.isPublic
+            : current.isPublic,
     })
 
     await this.myUserBikeRepository.updateMyUserBike(updatedEntity)

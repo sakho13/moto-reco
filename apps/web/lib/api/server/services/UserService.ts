@@ -34,4 +34,32 @@ export class UserService {
     )
     return newUser
   }
+
+  /**
+   * ゲストユーザーを作成する
+   * Firebase匿名認証トークンで呼び出す
+   */
+  public async createGuestUser(
+    authProvider: AuthProviderEntity,
+    user: { name?: string }
+  ): Promise<UserEntity> {
+    const existingUser =
+      await this._userRepository.findByAuthProvider(authProvider)
+
+    if (existingUser) {
+      return existingUser
+    }
+
+    const guestName = user.name ?? `ゲスト_${Date.now()}`
+
+    return this._userRepository.createGuestUser(
+      new UserEntity({
+        id: createUserId(''),
+        name: guestName,
+        role: 'GUEST',
+        status: 'ACTIVE',
+      }),
+      authProvider
+    )
+  }
 }

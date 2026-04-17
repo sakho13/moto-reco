@@ -1,3 +1,4 @@
+import { GuestBanner } from '@/components/GuestBanner'
 import { BreadcrumbNav } from '@/components/Navigation/BreadcrumbNav'
 import { DesktopSidebar } from '@/components/Navigation/DesktopSidebar'
 import { MobileNavigation } from '@/components/Navigation/MobileNavigation'
@@ -14,6 +15,7 @@ export default function Layout({ children }: Props) {
 
       <div className="min-h-screen w-full flex flex-col items-center p-4 gap-6 pb-24 sm:pb-4">
         <BreadcrumbNav />
+        <GuestBanner />
         {children}
       </div>
     </>
