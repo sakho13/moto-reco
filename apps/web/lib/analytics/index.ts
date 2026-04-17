@@ -4,6 +4,11 @@ export type AnalyticsEventName =
   | 'web_login'
   | 'web_logout'
   | 'web_sign_up'
+  | 'fuel_log_create'
+  | 'fuel_log_update'
+  | 'fuel_log_delete'
+  | 'fuel_log_error'
+  | 'login_error'
   | 'web_guest_login'
 
 /**

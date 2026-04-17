@@ -40,6 +40,18 @@ export function LoginCard() {
       router.push('/app/home')
     } catch (err) {
       console.error('Login error:', err)
+      trackEvent('login_error', {
+        method: 'email',
+        error_code:
+          err instanceof ApiV1Error
+            ? err.errorCode
+            : typeof err === 'object' &&
+                err !== null &&
+                'code' in err &&
+                typeof err.code === 'string'
+              ? err.code
+              : undefined,
+      })
       setError(
         'ログインに失敗しました。メールアドレスとパスワードを確認してください。'
       )
@@ -142,6 +154,18 @@ export function LoginCard() {
       }
     } catch (err) {
       console.error('Google login error:', err)
+      trackEvent('login_error', {
+        method: 'google',
+        error_code:
+          err instanceof ApiV1Error
+            ? err.errorCode
+            : typeof err === 'object' &&
+                err !== null &&
+                'code' in err &&
+                typeof err.code === 'string'
+              ? err.code
+              : undefined,
+      })
 
       // エラー時はログアウト
       await signOut()
