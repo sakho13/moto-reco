@@ -1,0 +1,586 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 120px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-x: hidden;
+}
+
+.header h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.version,
+.lastResult {
+  color: #666;
+  font-size: 14px;
+}
+
+/* =====================
+   スワイプデッキ
+   ===================== */
+
+.deckWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.progressBar {
+  width: 100%;
+  max-width: 420px;
+  height: 4px;
+  background: #e5e5e5;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #171717;
+  border-radius: 2px;
+  transition: width 0.35s ease;
+}
+
+.progressLabel {
+  font-size: 13px;
+  color: #666;
+}
+
+.swipeDeck {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 480px;
+}
+
+/* 背後カード */
+.swipeCardBehind {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transition: transform 0.1s ease;
+}
+
+.swipeCardBehindInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background: #f0f0f0;
+  box-shadow: 0 4px 16px rgba(23, 23, 23, 0.06);
+}
+
+/* トップカード */
+.swipeCard {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 32px rgba(23, 23, 23, 0.12);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  will-change: transform;
+  overflow: hidden;
+}
+
+.swipeCard:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: 2px;
+}
+
+.swipeCard:active {
+  cursor: grabbing;
+}
+
+.snapBack {
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+
+/* スワイプオーバーレイ */
+.swipeOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  pointer-events: none;
+  border: 3px solid transparent;
+  opacity: 0;
+}
+
+.overlayTrue {
+  background: rgba(0, 180, 80, 0.15);
+  border-color: rgba(0, 180, 80, 0.6);
+  color: #007d32;
+}
+
+.overlayFalse {
+  background: rgba(198, 40, 40, 0.12);
+  border-color: rgba(198, 40, 40, 0.5);
+  color: #c62828;
+}
+
+/* カード内コンテンツ */
+.swipeCardContent {
+  position: relative;
+  z-index: 1;
+  padding: 28px 24px 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.questionNumber {
+  font-size: 12px;
+  color: #999;
+}
+
+.questionStatement {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+  flex: 1;
+  margin: 0;
+}
+
+/* 問題画像 */
+.questionImage {
+  width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f5f5f5;
+  padding: 4px;
+}
+
+/* タップ用ヒントボタン */
+.hintButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.hintButtonFalse,
+.hintButtonTrue {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.hintButtonFalse {
+  border-color: #c62828;
+  color: #c62828;
+}
+
+.hintButtonFalse:hover {
+  background: rgba(198, 40, 40, 0.08);
+}
+
+.hintButtonTrue {
+  border-color: #007d32;
+  color: #007d32;
+}
+
+.hintButtonTrue:hover {
+  background: rgba(0, 180, 80, 0.08);
+}
+
+.swipeHint {
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+}
+
+/* =====================
+   結果画面
+   ===================== */
+
+.resultScreen {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.resultSummaryBox {
+  text-align: center;
+  padding: 32px 16px;
+  border-radius: 16px;
+  background: #f8f8f8;
+}
+
+.resultScore {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.resultScoreUnit {
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.resultPassLabel {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.resultPass {
+  color: #007d32;
+}
+
+.resultFail {
+  color: #c62828;
+}
+
+.resultQuestionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resultQuestionItem {
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+
+.resultQuestionItem .questionCategory {
+  font-size: 12px;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.resultQuestionItem h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.resultJudge {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.correct {
+  color: #007d32;
+}
+
+.incorrect {
+  color: #c62828;
+}
+
+.resultExplanation {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.resultFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.retryButton {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  background: #171717;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* =====================
+   共通
+   ===================== */
+
+.questionCategory {
+  font-size: 12px;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+/* =====================
+   ダークモード
+   ===================== */
+
+html[data-theme-mode='dark'] .questionImage {
+  background: #2a2a2a;
+}
+
+html[data-theme-mode='dark'] .swipeCard {
+  background: #1a1a1a;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme-mode='dark'] .swipeCardBehindInner {
+  background: #222;
+}
+
+html[data-theme-mode='dark'] .resultSummaryBox {
+  background: #1a1a1a;
+}
+
+html[data-theme-mode='dark'] .resultQuestionItem {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+html[data-theme-mode='dark'] .resultExplanation {
+  color: #aaa;
+}
+
+html[data-theme-mode='dark'] .version,
+html[data-theme-mode='dark'] .lastResult,
+html[data-theme-mode='dark'] .progressLabel,
+html[data-theme-mode='dark'] .swipeHint,
+html[data-theme-mode='dark'] .questionNumber {
+  color: #888;
+}
+
+html[data-theme-mode='dark'] .progressBar {
+  background: #333;
+}
+
+html[data-theme-mode='dark'] .progressFill {
+  background: #fff;
+}
+
+html[data-theme-mode='dark'] .retryButton {
+  background: #fff;
+  color: #171717;
+}
+
+/* =====================
+   履歴ボタン（ヘッダー・フッター内）
+   ===================== */
+
+.historyToggleButton {
+  background: none;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.historyToggleButton:hover {
+  background: #f0f0f0;
+}
+
+/* =====================
+   履歴セクション全体
+   ===================== */
+
+.historySection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: #f8f8f8;
+  border-radius: 12px;
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.clearHistoryButton {
+  background: none;
+  border: 1px solid #c62828;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #c62828;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.clearHistoryButton:hover {
+  background: rgba(198, 40, 40, 0.08);
+}
+
+/* グラフラッパー */
+.historyChart {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 8px 4px;
+}
+
+/* =====================
+   セッション一覧
+   ===================== */
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyItem {
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.historyItemSummary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+}
+
+.historyItemSummary::-webkit-details-marker {
+  display: none;
+}
+
+.historyItemIndex {
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.historyItemDate {
+  color: #666;
+  font-size: 13px;
+  flex: 1;
+}
+
+.historyItemScore {
+  font-weight: 600;
+}
+
+.historyItemBadge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid currentColor;
+}
+
+/* =====================
+   問題ごとの正誤グリッド
+   ===================== */
+
+.historyAnswerGrid {
+  padding: 0 16px 12px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.historyAnswerSummary {
+  font-size: 13px;
+  padding: 8px 0 6px;
+}
+
+.historyAnswerList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.historyAnswerItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 4px 6px;
+  min-width: 36px;
+}
+
+.historyAnswerNum {
+  color: #888;
+  font-size: 10px;
+}
+
+.historyAnswerCorrect {
+  background: rgba(0, 125, 50, 0.1);
+  color: #007d32;
+}
+
+.historyAnswerIncorrect {
+  background: rgba(198, 40, 40, 0.1);
+  color: #c62828;
+}
+
+/* =====================
+   ダークモード（履歴）
+   ===================== */
+
+html[data-theme-mode='dark'] .historySection {
+  background: #1a1a1a;
+}
+
+html[data-theme-mode='dark'] .historyChart {
+  background: #111;
+}
+
+html[data-theme-mode='dark'] .historyItem {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+html[data-theme-mode='dark'] .historyAnswerGrid {
+  border-top-color: #2a2a2a;
+}
+
+html[data-theme-mode='dark'] .historyItemDate {
+  color: #888;
+}
+
+html[data-theme-mode='dark'] .historyToggleButton {
+  border-color: #555;
+  color: #aaa;
+}
+
+html[data-theme-mode='dark'] .historyToggleButton:hover {
+  background: #2a2a2a;
+}
+
+html[data-theme-mode='dark'] .historyAnswerCorrect {
+  background: rgba(0, 125, 50, 0.2);
+}
+
+html[data-theme-mode='dark'] .historyAnswerIncorrect {
+  background: rgba(198, 40, 40, 0.2);
+}

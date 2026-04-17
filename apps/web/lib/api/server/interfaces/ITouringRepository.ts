@@ -33,4 +33,5 @@ export interface ITouringRepository {
   findPublicTouringsByBikeId(
     myUserBikeId: MyUserBikeId
   ): Promise<PublicTouringDetail[]>
+  countTourings(myUserBikeId: MyUserBikeId): Promise<number>
 }
