@@ -27,6 +27,7 @@ export interface BikeRegisterFormProps {
   onSubmit: (data: BikeFormData) => Promise<void>
   isSubmitting: boolean
   error: string
+  isGuest?: boolean
 }
 
 export const BikeRegisterForm = ({
@@ -34,6 +35,7 @@ export const BikeRegisterForm = ({
   onSubmit,
   isSubmitting,
   error,
+  isGuest,
 }: BikeRegisterFormProps) => {
   const [formData, setFormData] = useState<BikeFormData>({
     nickname: '',
@@ -151,9 +153,13 @@ export const BikeRegisterForm = ({
                 isPublic: e.target.checked,
               }))
             }
-            disabled={isSubmitting}
+            disabled={isSubmitting || (isGuest ?? false)}
             label="このバイクを公開する"
-            helperText="公開したバイクは、公開ページに情報が掲載されます。"
+            helperText={
+              isGuest
+                ? 'ゲストアカウントはバイクを公開できません。'
+                : '公開したバイクは、公開ページに情報が掲載されます。'
+            }
           />
         </FormField>
 

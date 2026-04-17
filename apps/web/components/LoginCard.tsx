@@ -1,5 +1,6 @@
 'use client'
 
+import { UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
@@ -8,6 +9,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
@@ -16,7 +18,8 @@ import { useAuth } from '@/lib/hooks/useAuth'
 
 export function LoginCard() {
   const router = useRouter()
-  const { signInWithEmail, signInWithGoogle, signOut } = useAuth()
+  const { signInWithEmail, signInWithGoogle, signOut, signInAsGuest } =
+    useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -52,6 +55,35 @@ export function LoginCard() {
       setError(
         'ログインに失敗しました。メールアドレスとパスワードを確認してください。'
       )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /**
+   * ゲストログイン処理
+   *
+   * フロー:
+   * 1. Firebase匿名認証
+   * 2. ゲストユーザー登録API呼び出し
+   * 3. ホームへリダイレクト
+   */
+  const handleGuestLogin = async () => {
+    setError(null)
+    setLoading(true)
+
+    try {
+      await signInAsGuest()
+
+      // ゲスト登録API呼び出し
+      await apiPost('/api/v1/user/auth/guest/register', {})
+
+      trackEvent('web_guest_login', { method: 'anonymous' })
+      router.push('/app/home')
+    } catch (err) {
+      console.error('Guest login error:', err)
+      await signOut()
+      setError('ゲストログインに失敗しました。もう一度お試しください。')
     } finally {
       setLoading(false)
     }
@@ -206,15 +238,34 @@ export function LoginCard() {
         <span>または</span>
       </div>
 
-      <Button
-        onClick={handleGoogleLogin}
-        variant="social"
-        size="lg"
-        fullWidth
-        disabled={true}
-      >
-        Googleでログイン
-      </Button>
+      <div className="flex justify-center gap-4">
+        <Button
+          onClick={handleGoogleLogin}
+          variant="social"
+          size="icon"
+          disabled={true}
+          aria-label="Googleでログイン"
+          title="Googleでログイン"
+        >
+          <GoogleIcon />
+        </Button>
+
+        <div className="flex flex-col items-center gap-1">
+          <Button
+            onClick={handleGuestLogin}
+            variant="cloud"
+            size="icon"
+            loading={loading}
+            aria-label="ゲストとして始める"
+            title="ゲストとして始める"
+          >
+            <UserRound size={20} />
+          </Button>
+          <span className="text-xs" style={{ color: 'var(--color-inkLight)' }}>
+            ゲスト
+          </span>
+        </div>
+      </div>
     </BaseCard>
   )
 }

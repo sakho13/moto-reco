@@ -9,6 +9,7 @@ export type AnalyticsEventName =
   | 'fuel_log_delete'
   | 'fuel_log_error'
   | 'login_error'
+  | 'web_guest_login'
 
 /**
  * Google Analyticsにカスタムイベントを送信する

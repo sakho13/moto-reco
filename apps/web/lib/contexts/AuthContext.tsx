@@ -61,6 +61,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return await authService.getIdToken(user)
   }
 
+  const handleSignInAsGuest = async (): Promise<string> => {
+    const result = await authService.signInAnonymously()
+    return result.user.getIdToken()
+  }
+
   const value: AuthContextType = {
     user,
     loading,
@@ -70,6 +75,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signInWithGoogle: handleSignInWithGoogle,
     signOut: handleSignOut,
     getIdToken: handleGetIdToken,
+    signInAsGuest: handleSignInAsGuest,
+    isGuest: user?.isAnonymous ?? false,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

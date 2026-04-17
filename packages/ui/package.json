@@ -17,9 +17,9 @@
     "@repo/eslint-config": "workspace:*",
     "@repo/theme": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@storybook/addon-essentials": "8.6.15",
+    "@storybook/addon-essentials": "8.6.18",
     "@storybook/addon-interactions": "8.6.15",
-    "@storybook/react-vite": "8.6.15",
+    "@storybook/react-vite": "10.3.5",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -27,7 +27,7 @@
     "@vitejs/plugin-react": "4.7.0",
     "eslint": "catalog:",
     "storybook": "8.6.15",
-    "vite": "5.4.21",
+    "vite": "8.0.8",
     "typescript": "catalog:"
   },
   "dependencies": {

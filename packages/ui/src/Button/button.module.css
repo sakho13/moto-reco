@@ -105,6 +105,14 @@
   min-height: 3rem;
 }
 
+/* Icon */
+.button.icon {
+  padding: var(--spacing-3);
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+}
+
 /* ===== Full Width ===== */
 
 .button.fullWidth {

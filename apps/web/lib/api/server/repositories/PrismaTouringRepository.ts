@@ -234,4 +234,10 @@ export class PrismaTouringRepository
       status: t.status,
     }))
   }
+
+  async countTourings(myUserBikeId: MyUserBikeId): Promise<number> {
+    return this.connection.tUserMyBikeTouring.count({
+      where: { userMyBikeId: myUserBikeId },
+    })
+  }
 }

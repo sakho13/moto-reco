@@ -21,6 +21,7 @@ export interface MyBikeEditFormProps {
   onSubmit: (data: MyBikeEditFormData) => Promise<void>
   isSubmitting: boolean
   error: string
+  isGuest?: boolean
 }
 
 export const MyBikeEditForm = ({
@@ -29,6 +30,7 @@ export const MyBikeEditForm = ({
   onSubmit,
   isSubmitting,
   error,
+  isGuest,
 }: MyBikeEditFormProps) => {
   const [formData, setFormData] = useState<MyBikeEditFormData>(initialData)
 
@@ -109,9 +111,13 @@ export const MyBikeEditForm = ({
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, isPublic: e.target.checked }))
           }
-          disabled={isSubmitting}
+          disabled={isSubmitting || (isGuest ?? false)}
           label="このバイクを公開する"
-          helperText="公開したバイクは、公開ページに情報が掲載されます。"
+          helperText={
+            isGuest
+              ? 'ゲストアカウントはバイクを公開できません。'
+              : '公開したバイクは、公開ページに情報が掲載されます。'
+          }
         />
       </FormField>
 

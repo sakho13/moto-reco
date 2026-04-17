@@ -10,9 +10,12 @@ import { FuelIcon } from './icons/FuelIcon'
 import styles from './QuickFuelSection.module.css'
 import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 export const QuickFuelSection = () => {
   const router = useRouter()
+  const { isGuest } = useAuth()
   const [selectedBikeId, setSelectedBikeId] = useState<string | null>(null)
 
   const { data, error, isLoading } = useSWR(
@@ -25,7 +28,12 @@ export const QuickFuelSection = () => {
 
   const bikes = data?.bikes ?? []
 
+  // ゲストアカウントの給油上限チェック（バイク一覧レスポンスのカウントを利用）
+  const isAtGuestFuelLimit =
+    isGuest && (bikes[0]?.fuelLogCount ?? 0) >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
+
   const handleBikeClick = (bikeId: string) => {
+    if (isAtGuestFuelLimit) return
     setSelectedBikeId(bikeId)
   }
 
@@ -111,6 +119,13 @@ export const QuickFuelSection = () => {
           </div>
         </div>
 
+        {isAtGuestFuelLimit && (
+          <p className={styles.guestLimitMessage}>
+            ゲストアカウントは給油履歴を{GUEST_ACCOUNT_LIMITS.FUEL_LOG}
+            件まで登録できます。
+          </p>
+        )}
+
         <div className={styles.bikeSelectionSection}>
           <div className={styles.bikeGrid}>
             {bikes.map((bike) => {
@@ -123,8 +138,9 @@ export const QuickFuelSection = () => {
                   key={bike.myUserBikeId}
                   type="button"
                   onClick={() => handleBikeClick(bike.myUserBikeId)}
-                  className={styles.bikeCard}
+                  className={`${styles.bikeCard} ${isAtGuestFuelLimit ? styles.bikeCardDisabled : ''}`}
                   aria-label={`${title}の給油を登録`}
+                  disabled={isAtGuestFuelLimit}
                 >
                   <div className={styles.bikeIconContainer}>
                     <BikeIcon />

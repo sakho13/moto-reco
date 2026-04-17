@@ -169,4 +169,39 @@ export class PrismaUserRepository
       },
     })
   }
+
+  async createGuestUser(
+    user: UserEntity,
+    authProvider: AuthProviderEntity
+  ): Promise<UserEntity> {
+    const createdUser = await this.connection.mUser.create({
+      data: {
+        name: user.name,
+        status: 'ACTIVE',
+        role: 'GUEST',
+        authProviders: {
+          create: [
+            {
+              externalId: authProvider.externalId,
+              providerType: authProvider.provider,
+              isActive: true,
+            },
+          ],
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        role: true,
+      },
+    })
+
+    return new UserEntity({
+      id: createUserId(createdUser.id),
+      name: createdUser.name,
+      role: createdUser.role,
+      status: createdUser.status,
+    })
+  }
 }

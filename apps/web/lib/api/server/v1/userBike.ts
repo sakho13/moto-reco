@@ -86,6 +86,8 @@ const toApiResponseUserBikeDetail = (
   isPublic: detail.isPublic,
   createdAt: detail.createdAt.toISOString(),
   updatedAt: detail.updatedAt.toISOString(),
+  fuelLogCount: detail.fuelLogCount,
+  touringCount: detail.touringCount,
 })
 
 userBike.post(
@@ -93,7 +95,7 @@ userBike.post(
   honoAuthMiddleware,
   zodValidateJson(UserBikeRegisterRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const body = c.req.valid('json')
 
     const detail = await prisma.$transaction(async (t) => {
@@ -111,6 +113,7 @@ userBike.post(
         displacement: body.displacement,
         serialNumber: body.serialNumber,
         userId,
+        role,
         nickname: body.nickname,
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,
@@ -270,7 +273,7 @@ userBike.patch(
   honoAuthMiddleware,
   zodValidateJson(UserBikeUpdateRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const body = c.req.valid('json')
 
     const detail = await prisma.$transaction((t) => {
@@ -286,6 +289,7 @@ userBike.patch(
       return service.updateMyUserBike({
         myUserBikeId: createMyUserBikeId(c.req.param('myUserBikeId')),
         userId: createUserId(userId),
+        role,
         nickname: body.nickname,
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,
@@ -633,7 +637,7 @@ userBike.post(
   honoAuthMiddleware,
   zodValidateJson(FuelLogRegisterRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -652,6 +656,7 @@ userBike.post(
       const fuelLog = await service.registerFuelLog({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
+        role,
         refueledAt: body.refueledAt,
         mileage: body.mileage,
         previousMileage: body.previousMileage,
@@ -886,7 +891,7 @@ userBike.post(
   honoAuthMiddleware,
   zodValidateJson(TouringStartEndRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -905,6 +910,7 @@ userBike.post(
           action: 'start',
           myUserBikeId: createMyUserBikeId(myUserBikeId),
           userId: createUserId(userId),
+          role,
           title: body.title,
           startDate: body.startDate,
           startMileage: body.startMileage,
@@ -983,7 +989,7 @@ userBike.post(
   honoAuthMiddleware,
   zodValidateJson(TouringRegisterRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -1000,6 +1006,7 @@ userBike.post(
       const touring = await service.registerTouring({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
+        role,
         title: body.title,
         startDate: body.startDate,
         endDate: body.endDate,

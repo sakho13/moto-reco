@@ -16,6 +16,7 @@ export const ErrorCodeMap = {
   VALIDATION_ERROR: 'VALIDATION_ERROR',
   AUTH_FAILED: 'AUTH_FAILED',
   USER_NOT_REGISTERED: 'USER_NOT_REGISTERED',
+  GUEST_EXPIRED: 'GUEST_EXPIRED',
   NOT_FOUND: 'NOT_FOUND',
   SERVER_ERROR: 'SERVER_ERROR',
 } as const
@@ -28,6 +29,7 @@ export const ErrorCodeToHttpStatus = {
   VALIDATION_ERROR: 400,
   AUTH_FAILED: 401,
   USER_NOT_REGISTERED: 403,
+  GUEST_EXPIRED: 401,
   NOT_FOUND: 404,
   SERVER_ERROR: 500,
 } as const satisfies Record<ErrorCode, number>
@@ -95,6 +97,8 @@ export type ApiResponseUserBikeList = {
     isPublic: boolean
     createdAt: string
     updatedAt: string
+    fuelLogCount: number
+    touringCount: number
   }[]
 }
 
@@ -114,6 +118,8 @@ export type ApiResponseUserBikeDetail = {
   isPublic: boolean
   createdAt: string
   updatedAt: string
+  fuelLogCount: number
+  touringCount: number
 }
 
 export type ApiResponsePublicBikeList = {

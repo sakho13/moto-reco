@@ -9,4 +9,8 @@ export interface AuthContextType {
   signInWithGoogle: () => Promise<string>
   signOut: () => Promise<boolean>
   getIdToken: () => Promise<string | null>
+  /** ゲストとして匿名ログインし、IDトークンを返す */
+  signInAsGuest: () => Promise<string>
+  /** 現在のユーザーがゲスト（匿名）かどうか */
+  isGuest: boolean
 }

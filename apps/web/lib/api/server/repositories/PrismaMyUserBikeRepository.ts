@@ -99,6 +99,12 @@ export class PrismaMyUserBikeRepository
             },
           },
         },
+        _count: {
+          select: {
+            fuelLogs: true,
+            tourings: true,
+          },
+        },
       },
       orderBy: {
         [sortByMap[searchParams.sortBy]]: searchParams.sortOrder,
@@ -125,6 +131,8 @@ export class PrismaMyUserBikeRepository
       isPublic: myUserBike.isPublic,
       createdAt: myUserBike.createdAt,
       updatedAt: myUserBike.updatedAt,
+      fuelLogCount: myUserBike._count.fuelLogs,
+      touringCount: myUserBike._count.tourings,
     }))
   }
 
@@ -325,6 +333,12 @@ export class PrismaMyUserBikeRepository
             },
           },
         },
+        _count: {
+          select: {
+            fuelLogs: true,
+            tourings: true,
+          },
+        },
       },
     })
 
@@ -352,6 +366,8 @@ export class PrismaMyUserBikeRepository
       isPublic: myUserBike.isPublic,
       createdAt: myUserBike.createdAt,
       updatedAt: myUserBike.updatedAt,
+      fuelLogCount: myUserBike._count.fuelLogs,
+      touringCount: myUserBike._count.tourings,
     }
   }
 
