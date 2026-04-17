@@ -18,7 +18,7 @@
     "@repo/theme": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@storybook/addon-essentials": "8.6.15",
-    "@storybook/addon-interactions": "8.6.15",
+    "@storybook/addon-interactions": "8.6.18",
     "@storybook/react-vite": "10.3.5",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
