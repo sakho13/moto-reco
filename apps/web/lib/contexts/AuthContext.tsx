@@ -38,6 +38,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return result.user.getIdToken()
   }
 
+  const handleRequestPasswordReset = async (email: string) => {
+    await authService.requestPasswordReset(email)
+  }
+
   const handleSignInWithGoogle = async () => {
     const result = await authService.signInWithGoogle()
     return result.user.getIdToken()
@@ -57,14 +61,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return await authService.getIdToken(user)
   }
 
+  const handleSignInAsGuest = async (): Promise<string> => {
+    const result = await authService.signInAnonymously()
+    return result.user.getIdToken()
+  }
+
   const value: AuthContextType = {
     user,
     loading,
     signInWithEmail: handleSignInWithEmail,
     registerWithEmail: handleRegisterWithEmail,
+    requestPasswordReset: handleRequestPasswordReset,
     signInWithGoogle: handleSignInWithGoogle,
     signOut: handleSignOut,
     getIdToken: handleGetIdToken,
+    signInAsGuest: handleSignInAsGuest,
+    isGuest: user?.isAnonymous ?? false,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

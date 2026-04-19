@@ -57,7 +57,7 @@
 
 .period {
   font-size: 15px;
-  color: rgba(23, 23, 23, 0.6);
+  color: rgba(23, 23, 23, 0.75);
   font-weight: 500;
 }
 
@@ -158,35 +158,33 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .card {
-    background: rgba(255, 255, 255, 0.04);
-  }
+html[data-theme-mode='dark'] .card {
+  background: rgba(255, 255, 255, 0.04);
+}
 
-  .popular {
-    border-color: #ededed;
-  }
+html[data-theme-mode='dark'] .popular {
+  border-color: #ededed;
+}
 
-  .badge {
-    background: #ededed;
-    color: #0a0a0a;
-  }
+html[data-theme-mode='dark'] .badge {
+  background: #ededed;
+  color: #0a0a0a;
+}
 
-  .period,
-  .description {
-    color: rgba(237, 237, 237, 0.6);
-  }
+html[data-theme-mode='dark'] .period,
+html[data-theme-mode='dark'] .description {
+  color: rgba(237, 237, 237, 0.6);
+}
 
-  .checkIcon {
-    color: #ededed;
-  }
+html[data-theme-mode='dark'] .checkIcon {
+  color: #ededed;
+}
 
-  .cta {
-    background: #ededed;
-    color: #0a0a0a;
-  }
+html[data-theme-mode='dark'] .cta {
+  background: #ededed;
+  color: #0a0a0a;
+}
 
-  .ctaDisabled {
-    background: rgba(255, 255, 255, 0.2);
-  }
+html[data-theme-mode='dark'] .ctaDisabled {
+  background: rgba(255, 255, 255, 0.2);
 }

@@ -2,8 +2,10 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  sendPasswordResetEmail,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
+  signInAnonymously as firebaseSignInAnonymously,
   type UserCredential,
   type User,
 } from 'firebase/auth'
@@ -29,6 +31,14 @@ export const registerWithEmail = async (
 ): Promise<UserCredential> => {
   const auth = getFirebaseAuth()
   return await createUserWithEmailAndPassword(auth, email, password)
+}
+
+/**
+ * メールアドレス宛にパスワード再設定メールを送信
+ */
+export const requestPasswordReset = async (email: string): Promise<void> => {
+  const auth = getFirebaseAuth()
+  await sendPasswordResetEmail(auth, email)
 }
 
 /**
@@ -59,4 +69,12 @@ export const getIdToken = async (user: User): Promise<string | null> => {
     console.error('IDトークン取得エラー:', error)
     return null
   }
+}
+
+/**
+ * 匿名ユーザーとしてサインイン（ゲストモード）
+ */
+export const signInAnonymously = async (): Promise<UserCredential> => {
+  const auth = getFirebaseAuth()
+  return await firebaseSignInAnonymously(auth)
 }

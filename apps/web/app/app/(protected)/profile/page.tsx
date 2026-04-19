@@ -1,6 +1,7 @@
 'use client'
 
 import { BaseCard } from '@repo/ui/baseCard'
+import { FooterCard } from '@/components/FooterCard'
 import { LogoutButton } from '@/components/Navigation/LogoutButton'
 import { ProfileCard } from '@/components/ProfileCard'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -36,6 +37,7 @@ function ProfileEditPage() {
         </div>
         <LogoutButton />
       </BaseCard>
+      <FooterCard />
     </div>
   )
 }

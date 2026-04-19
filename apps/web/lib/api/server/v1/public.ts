@@ -2,12 +2,14 @@ import { Hono } from 'hono'
 import { prisma } from '@repo/database'
 import {
   ApiResponsePublicBikeList,
+  ApiResponseMopedTestQuestionSet,
   ApiResponsePublicTouringList,
   createMyUserBikeId,
   SuccessResponse,
 } from '@repo/shared-types'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
+import { getMopedTestQuestionSet } from '@/lib/moped-test/questions'
 
 const publicRoute = new Hono()
 
@@ -54,6 +56,14 @@ publicRoute.get('/bikes/:bikeId/tourings', async (c) => {
       })),
     },
     message: '公開ツーリング一覧取得成功',
+  })
+})
+
+publicRoute.get('/moped-test/questions', async (c) => {
+  return c.json<SuccessResponse<ApiResponseMopedTestQuestionSet>>({
+    status: 'success',
+    data: getMopedTestQuestionSet(),
+    message: '原付学科試験の問題取得成功',
   })
 })
 

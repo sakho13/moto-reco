@@ -4,6 +4,7 @@ import {
   ApiResponseUserProfile,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
+  GuestRegisterRequestSchema,
   SuccessResponse,
   UserAuthRecoverRequestSchema,
   UserAuthQuitRequestSchema,
@@ -112,6 +113,13 @@ user.post(
 
     if (!authProvider) {
       throw new ApiV1Error('AUTH_FAILED', '認証トークンが無効です')
+    }
+
+    if (authProvider.provider === 'FIREBASE_ANONYMOUS') {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        '匿名認証トークンでは通常登録できません'
+      )
     }
 
     const body = c.req.valid('json')
@@ -232,6 +240,66 @@ user.post(
       },
       message: '復帰処理が完了しました',
     })
+  }
+)
+
+/**
+ * ゲストユーザー登録エンドポイント
+ *
+ * Firebase匿名認証トークンを受け取り、ゲストユーザーを作成します。
+ * 既に同じ匿名UIDでゲストユーザーが存在する場合は既存ユーザーを返します（冪等性）。
+ *
+ * @route POST /api/v1/user/auth/guest/register
+ * @param {GuestRegisterRequest} body.name - ユーザー名（省略可）
+ * @returns {201} ゲストユーザー登録成功
+ * @throws {400} バリデーションエラー
+ * @throws {401} 認証失敗
+ * @throws {500} サーバーエラー
+ */
+user.post(
+  '/auth/guest/register',
+  zodValidateJson(GuestRegisterRequestSchema),
+  async (c) => {
+    const authHeader = c.req.header('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new ApiV1Error('AUTH_FAILED', '認証トークンが提供されていません')
+    }
+
+    const token = authHeader.substring('Bearer '.length)
+    const firebaseAuthRepo = new FirebaseAuthRepository()
+    const authProvider = await firebaseAuthRepo.authorize(token)
+
+    if (!authProvider) {
+      throw new ApiV1Error('AUTH_FAILED', '認証トークンが無効です')
+    }
+
+    // 匿名認証トークンのみ受け付ける
+    if (authProvider.provider !== 'FIREBASE_ANONYMOUS') {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        'ゲスト登録には匿名認証トークンが必要です'
+      )
+    }
+
+    const body = c.req.valid('json')
+
+    const guestUser = await prisma.$transaction(async (t) => {
+      const userRepo = new PrismaUserRepository(t)
+      const service = new UserService(userRepo)
+      return service.createGuestUser(authProvider, { name: body.name })
+    })
+
+    return c.json<SuccessResponse<ApiResponseUserProfile>>(
+      {
+        status: 'success',
+        data: {
+          userId: guestUser.id,
+          name: guestUser.name,
+        },
+        message: 'ゲストユーザー登録成功',
+      },
+      201
+    )
   }
 )
 

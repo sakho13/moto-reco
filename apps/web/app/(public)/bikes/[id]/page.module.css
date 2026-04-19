@@ -43,7 +43,7 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(23, 23, 23, 0.55);
+  color: rgba(23, 23, 23, 0.75);
 }
 
 .value {
@@ -76,16 +76,14 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .subtitle,
-  .card,
-  .label,
-  .emptyState {
-    color: rgba(237, 237, 237, 0.7);
-  }
+html[data-theme-mode='dark'] .subtitle,
+html[data-theme-mode='dark'] .card,
+html[data-theme-mode='dark'] .label,
+html[data-theme-mode='dark'] .emptyState {
+  color: rgba(237, 237, 237, 0.7);
+}
 
-  .card,
-  .emptyState {
-    background: rgba(255, 255, 255, 0.04);
-  }
+html[data-theme-mode='dark'] .card,
+html[data-theme-mode='dark'] .emptyState {
+  background: rgba(255, 255, 255, 0.04);
 }

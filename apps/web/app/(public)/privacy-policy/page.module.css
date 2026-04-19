@@ -57,7 +57,7 @@
 
 .note {
   font-size: 14px;
-  color: rgba(23, 23, 23, 0.64);
+  color: rgba(23, 23, 23, 0.75);
 }
 
 @media (max-width: 900px) {
@@ -66,10 +66,8 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .description,
-  .sectionBody,
-  .note {
-    color: rgba(237, 237, 237, 0.7);
-  }
+html[data-theme-mode='dark'] .description,
+html[data-theme-mode='dark'] .sectionBody,
+html[data-theme-mode='dark'] .note {
+  color: rgba(237, 237, 237, 0.7);
 }

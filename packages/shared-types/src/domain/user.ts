@@ -4,6 +4,6 @@ export const createUserId = (id: string): UserId => id as UserId
 export type User = {
   id: UserId
   name: string
-  role: 'USER' | 'ADMIN'
+  role: 'USER' | 'ADMIN' | 'GUEST'
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
 }

@@ -6,6 +6,7 @@ import {
   TouringStatus,
   UserId,
 } from '@repo/shared-types'
+import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
@@ -17,6 +18,7 @@ import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 type RegisterTouringParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
+  role: 'USER' | 'ADMIN' | 'GUEST'
   title: string
   startDate: Date
   endDate: Date
@@ -29,6 +31,7 @@ type StartTouringParams = {
   action: 'start'
   myUserBikeId: MyUserBikeId
   userId: UserId
+  role: 'USER' | 'ADMIN' | 'GUEST'
   title?: string
   startDate?: Date
   startMileage?: number
@@ -85,6 +88,19 @@ export class TouringService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
+    // ゲストアカウントのツーリング登録数チェック
+    if (params.role === 'GUEST') {
+      const count = await this.touringRepository.countTourings(
+        params.myUserBikeId
+      )
+      if (count >= GUEST_ACCOUNT_LIMITS.TOURING) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          'ゲストアカウントはツーリング履歴を2件まで登録できます'
+        )
+      }
+    }
+
     const status = params.status ?? 'COMPLETED'
 
     // STARTEDで登録する場合は、既に進行中のツーリングがないかチェック
@@ -139,6 +155,19 @@ export class TouringService {
 
     try {
       if (params.action === 'start') {
+        // ゲストアカウントのツーリング登録数チェック
+        if (params.role === 'GUEST') {
+          const count = await this.touringRepository.countTourings(
+            params.myUserBikeId
+          )
+          if (count >= GUEST_ACCOUNT_LIMITS.TOURING) {
+            throw new ApiV1Error(
+              'INVALID_REQUEST',
+              'ゲストアカウントはツーリング履歴を2件まで登録できます'
+            )
+          }
+        }
+
         // 既に進行中のツーリングがないかチェック
         const ongoingTouring = await this.touringRepository.findOngoingTouring(
           params.myUserBikeId

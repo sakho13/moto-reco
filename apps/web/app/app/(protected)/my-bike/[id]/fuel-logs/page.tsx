@@ -14,16 +14,20 @@ import { FuelEfficiencyChart } from '@repo/ui/fuelEfficiencyChart'
 import { Select } from '@repo/ui/select'
 import type { SelectOption } from '@repo/ui/select'
 import styles from './page.module.css'
+import { InfoBox } from '@/components/bike/InfoBox'
 import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
 import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
 import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 function FuelLogsPage() {
   const params = useParams()
   const router = useRouter()
+  const { isGuest } = useAuth()
   const bikeId = params.id as string
   const [chartPeriod, setChartPeriod] = useState<FuelLogPeriod>('latest-year')
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
@@ -125,6 +129,8 @@ function FuelLogsPage() {
   const lastPageCount = data?.[data.length - 1]?.length ?? 0
   const canLoadMore = lastPageCount === 10
   const isLoadingMore = isValidating && !isLoading && size > 0
+  const isAtGuestFuelLimit =
+    isGuest && !isLoading && fuelLogs.length >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
 
   const chartFuelLogs = chartData || []
 
@@ -158,17 +164,30 @@ function FuelLogsPage() {
         />
       )}
 
-      <div className="w-full max-w-md flex flex-row gap-2">
-        <Button
-          onClick={() => router.push(`/app/my-bike/${bikeId}`)}
-          variant="cloud"
-        >
-          ← 戻る
-        </Button>
+      <div className="w-full max-w-md flex flex-col gap-2">
+        <div className="flex flex-row gap-2">
+          <Button
+            onClick={() => router.push(`/app/my-bike/${bikeId}`)}
+            variant="cloud"
+          >
+            ← 戻る
+          </Button>
 
-        <Button onClick={handleRegister} variant="primary">
-          給油履歴を登録
-        </Button>
+          <Button
+            onClick={handleRegister}
+            variant="primary"
+            disabled={isAtGuestFuelLimit}
+          >
+            給油履歴を登録
+          </Button>
+        </div>
+        {isGuest && !isLoading && (
+          <InfoBox variant={isAtGuestFuelLimit ? 'warning' : 'info'}>
+            ゲストアカウントは給油履歴を{GUEST_ACCOUNT_LIMITS.FUEL_LOG}
+            件まで登録できます（
+            {fuelLogs.length}/{GUEST_ACCOUNT_LIMITS.FUEL_LOG}件）
+          </InfoBox>
+        )}
       </div>
 
       <div className={styles.pageLayout}>

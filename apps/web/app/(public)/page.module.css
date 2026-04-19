@@ -1,15 +1,3 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 .page {
   color: var(--foreground);
   background: var(--background);
@@ -38,7 +26,7 @@
   width: fit-content;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.12);
   font-size: 14px;
   font-weight: 600;
 }
@@ -96,7 +84,7 @@
 }
 
 .sectionAlt {
-  background: rgba(23, 23, 23, 0.04);
+  background: rgba(23, 23, 23, 0.06);
   border-radius: 32px;
   padding: 48px;
 }
@@ -196,6 +184,31 @@
   margin-top: 8px;
 }
 
+.loginCardTitle {
+  font-size: clamp(20px, 2.5vw, 28px);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.loginCardButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  background: #ffffff;
+  color: #171717;
+  white-space: nowrap;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.loginCardButton:hover {
+  transform: translateY(-1px);
+}
+
 @media (max-width: 900px) {
   .page {
     padding: 64px 24px 48px;
@@ -212,34 +225,41 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .badge {
-    background: rgba(255, 255, 255, 0.12);
-  }
+html[data-theme-mode='dark'] .badge {
+  background: rgba(255, 255, 255, 0.12);
+}
 
-  .lead,
-  .sectionHeader p,
-  .cardBody p,
-  .detailItem ul {
-    color: rgba(237, 237, 237, 0.7);
-  }
+html[data-theme-mode='dark'] .lead,
+html[data-theme-mode='dark'] .sectionHeader p,
+html[data-theme-mode='dark'] .cardBody p,
+html[data-theme-mode='dark'] .detailItem ul {
+  color: rgba(237, 237, 237, 0.7);
+}
 
-  .primaryButton {
-    background: #ededed;
-    color: #0a0a0a;
-  }
+html[data-theme-mode='dark'] .primaryButton {
+  background: #ededed;
+  color: #0a0a0a;
+}
 
-  .secondaryButton {
-    border-color: rgba(255, 255, 255, 0.3);
-  }
+html[data-theme-mode='dark'] .secondaryButton {
+  border-color: rgba(255, 255, 255, 0.3);
+}
 
-  .sectionAlt,
-  .card,
-  .detailItem {
-    background: rgba(255, 255, 255, 0.04);
-  }
+html[data-theme-mode='dark'] .sectionAlt,
+html[data-theme-mode='dark'] .card,
+html[data-theme-mode='dark'] .detailItem {
+  background: rgba(255, 255, 255, 0.04);
+}
 
-  .loginCard {
-    background: #0f0f0f;
-  }
+.loginCard .badge {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+html[data-theme-mode='dark'] .loginCard {
+  background: #0f0f0f;
+}
+
+html[data-theme-mode='dark'] .loginCardButton {
+  background: #ededed;
+  color: #0a0a0a;
 }

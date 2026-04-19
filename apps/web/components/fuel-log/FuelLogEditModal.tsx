@@ -10,6 +10,7 @@ import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
 import { ModalBase } from '@/components/common/ModalBase'
+import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
@@ -79,12 +80,22 @@ export function FuelLogEditModal({
         totalPrice: Number(formData.totalPrice),
         memo: memo.length > 0 ? memo : null,
       })
+      trackEvent('fuel_log_update')
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
       await mutate(detailUrl)
       toast.success('給油履歴を更新しました')
       onSuccess('update')
     } catch (err) {
+      trackEvent('fuel_log_error', {
+        operation: 'update',
+        ...(err instanceof ApiV1Error
+          ? {
+              error_code: err.errorCode,
+              error_message: err.message,
+            }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
@@ -104,11 +115,21 @@ export function FuelLogEditModal({
       await apiDelete(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
         fuelLogId,
       })
+      trackEvent('fuel_log_delete')
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
       await mutate(detailUrl)
       toast.success('給油履歴を削除しました')
       onSuccess('delete')
     } catch (err) {
+      trackEvent('fuel_log_error', {
+        operation: 'delete',
+        ...(err instanceof ApiV1Error
+          ? {
+              error_code: err.errorCode,
+              error_message: err.message,
+            }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsDeleting(false)

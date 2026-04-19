@@ -40,6 +40,7 @@ model MUser {
 
   authProviders MAuthProvider[]
   myBikes       TUserMyBike[]
+  histories     TUserMyBikeHistory[]
   userQuit      TUserQuit?
 }
 
@@ -132,9 +133,10 @@ model TUserMyBike {
   user     MUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userBike TUserBike @relation(fields: [userBikeId], references: [id], onDelete: Restrict)
 
-  fuelLogs TUserMyBikeFuelLog[]
+  fuelLogs        TUserMyBikeFuelLog[]
   maintenanceLogs TUserMyBikeMaintenance[]
-  tourings TUserMyBikeTouring[]
+  tourings        TUserMyBikeTouring[]
+  histories       TUserMyBikeHistory[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
@@ -158,6 +160,7 @@ model TUserMyBikeFuelLog {
 
   userMyBike TUserMyBike         @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   touring    TUserMyBikeTouring? @relation(fields: [touringId], references: [id], onDelete: SetNull)
+  history    TUserMyBikeHistory?
 
   @@index([userMyBikeId, refueledAt])
   @@index([touringId])
@@ -216,9 +219,33 @@ model TUserMyBikeTouring {
   userMyBike TUserMyBike              @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   fuelLogs   TUserMyBikeFuelLog[]
   spots      TUserMyBikeTouringSpot[]
+  history    TUserMyBikeHistory?
 
   @@index([userMyBikeId, startDate])
   @@index([userMyBikeId, status])
+}
+
+model TUserMyBikeHistory {
+  id           String          @id @default(cuid(2))
+  userId       String          @map("user_id")
+  userMyBikeId String?         @map("my_bike_id")
+  type         BikeHistoryType @map("type")
+  occurredAt   DateTime        @map("occurred_at")
+
+  fuelLogId String? @unique @map("fuel_log_id")
+  touringId String? @unique @map("touring_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user       MUser                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike?         @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
+  fuelLog    TUserMyBikeFuelLog?  @relation(fields: [fuelLogId], references: [id], onDelete: Cascade)
+  touring    TUserMyBikeTouring?  @relation(fields: [touringId], references: [id], onDelete: Cascade)
+
+  @@index([userId, occurredAt(sort: Desc)])
+  @@index([userMyBikeId, occurredAt(sort: Desc)])
+  @@index([type])
 }
 
 model TUserMyBikeTouringSpot {
@@ -267,11 +294,13 @@ enum MUserStatus {
 enum MUserRole {
   USER
   ADMIN
+  GUEST
 }
 
 enum ProviderType {
   FIREBASE_EMAIL
   FIREBASE_GOOGLE
+  FIREBASE_ANONYMOUS
 }
 
 enum BikeStatus {
@@ -325,4 +354,10 @@ enum UserQuitStatus {
 enum TouringStatus {
   STARTED
   COMPLETED
+}
+
+enum BikeHistoryType {
+  FUEL_LOG
+  TOURING
+  MAINTENANCE
 }
