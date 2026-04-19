@@ -15,10 +15,15 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
-    "expo": "55.0.14",
+    "expo": "55.0.15",
     "expo-status-bar": "55.0.5",
     "react": "catalog:",
     "react-native": "0.83.4"
+  },
+  "expo": {
+    "install": {
+      "exclude": ["react", "@types/react"]
+    }
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
