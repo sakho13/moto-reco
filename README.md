@@ -176,7 +176,7 @@ pnpm turbo build --filter=web
 ## テスト
 
 ```bash
-# すべてのテストを実行
+# すべてのユニットテストを実行
 pnpm test
 
 # テストをウォッチモードで実行
@@ -184,6 +184,25 @@ pnpm turbo test:watch
 
 # カバレッジレポート付きでテスト
 pnpm turbo test:coverage
+```
+
+### E2E テスト (Playwright)
+
+E2E テストを実行するには、事前に開発サーバーを起動してください。
+
+```bash
+# 事前準備: インフラ起動 + 開発サーバー起動
+docker compose up -d
+pnpm dev:web
+
+# E2E テストを実行（Chromium）
+pnpm test:e2e
+
+# UI モードで実行（ブラウザで操作確認しながらデバッグ）
+pnpm --filter @apps/e2e test:e2e:ui
+
+# テスト結果レポートを表示
+pnpm --filter @apps/e2e test:e2e:report
 ```
 
 ## リント・フォーマット

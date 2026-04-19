@@ -32,3 +32,5 @@ catalog:
 
   vitest: 2.1.8
   '@vitest/ui': 2.1.8
+
+  '@playwright/test': 1.52.0
