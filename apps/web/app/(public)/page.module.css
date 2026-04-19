@@ -184,6 +184,31 @@
   margin-top: 8px;
 }
 
+.loginCardTitle {
+  font-size: clamp(20px, 2.5vw, 28px);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.loginCardButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  background: #ffffff;
+  color: #171717;
+  white-space: nowrap;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.loginCardButton:hover {
+  transform: translateY(-1px);
+}
+
 @media (max-width: 900px) {
   .page {
     padding: 64px 24px 48px;
@@ -226,6 +251,15 @@ html[data-theme-mode='dark'] .detailItem {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.loginCard .badge {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 html[data-theme-mode='dark'] .loginCard {
   background: #0f0f0f;
+}
+
+html[data-theme-mode='dark'] .loginCardButton {
+  background: #ededed;
+  color: #0a0a0a;
 }

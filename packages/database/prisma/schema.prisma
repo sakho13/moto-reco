@@ -261,11 +261,13 @@ enum MUserStatus {
 enum MUserRole {
   USER
   ADMIN
+  GUEST
 }
 
 enum ProviderType {
   FIREBASE_EMAIL
   FIREBASE_GOOGLE
+  FIREBASE_ANONYMOUS
 }
 
 enum BikeStatus {

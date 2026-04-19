@@ -12,6 +12,7 @@ import { ToggleSection } from '@repo/ui/toggleSection'
 import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
 import styles from './FuelLogRegisterModal.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
+import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
@@ -81,11 +82,24 @@ export function FuelLogRegisterModal({
         memo: memo.length > 0 ? memo : null,
         updateTotalMileage: formData.updateTotalMileage,
       })
+      trackEvent('fuel_log_create', {
+        has_memo: memo.length > 0,
+        update_total_mileage: formData.updateTotalMileage,
+      })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
       toast.success('給油履歴を登録しました')
       onSuccess()
     } catch (err) {
+      trackEvent('fuel_log_error', {
+        operation: 'create',
+        ...(err instanceof ApiV1Error
+          ? {
+              error_code: err.errorCode,
+              error_message: err.message,
+            }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)

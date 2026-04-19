@@ -1,6 +1,7 @@
 import { Context, Next } from 'hono'
 import { prisma } from '@repo/database'
 import { createUserId } from '@repo/shared-types'
+import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
@@ -31,23 +32,37 @@ export async function honoAuthMiddleware(
       throw new ApiV1Error('AUTH_FAILED', '認証トークンが無効です')
     }
 
-    // Step 2: MAuthProviderから内部User IDを取得
+    // Step 2: MAuthProviderから内部User情報（ID・ロール・作成日時）を取得
     const authProviderRepo = new PrismaAuthProviderRepository(prisma)
-    const userId = await authProviderRepo.findActiveUserIdByExternalId(
+    const userInfo = await authProviderRepo.findActiveUserInfoByExternalId(
       authProvider.externalId,
       authProvider.provider
     )
 
-    if (!userId) {
+    if (!userInfo) {
       throw new ApiV1Error(
         'USER_NOT_REGISTERED',
         'ユーザー登録が完了していません'
       )
     }
 
+    // Step 3: ゲストアカウントの有効期限チェック（登録から7日）
+    if (userInfo.role === 'GUEST') {
+      const expiresAt = new Date(
+        userInfo.createdAt.getTime() + GUEST_ACCOUNT_LIMITS.TTL_MS
+      )
+      if (new Date() > expiresAt) {
+        throw new ApiV1Error(
+          'GUEST_EXPIRED',
+          'ゲストアカウントの有効期限が切れました。本登録を行ってください。'
+        )
+      }
+    }
+
     // Honoのコンテキストにユーザー情報を設定
     c.set('user', {
-      userId: createUserId(userId),
+      userId: createUserId(userInfo.userId),
+      role: userInfo.role,
       email: authProvider.metadata?.email as string | undefined,
       emailVerified: authProvider.metadata?.emailVerified as
         | boolean

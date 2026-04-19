@@ -11,7 +11,9 @@ import styles from './TouringStartEndSection.module.css'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
+import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 type BikeWithTouring = {
   myUserBikeId: string
@@ -25,6 +27,7 @@ type BikeWithTouring = {
 
 export const TouringStartEndSection = () => {
   const router = useRouter()
+  const { isGuest } = useAuth()
   const [loadingBikeId, setLoadingBikeId] = useState<string | null>(null)
   const { getCurrentPosition } = useGeolocation()
 
@@ -39,6 +42,10 @@ export const TouringStartEndSection = () => {
   })
 
   const bikes = bikesData?.bikes ?? []
+
+  // ゲストアカウントのツーリング上限チェック（バイク一覧レスポンスのカウントを利用）
+  const isAtGuestTouringLimit =
+    isGuest && (bikes[0]?.touringCount ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
 
   // 全バイクの進行中ツーリングを一括取得
   const { data: ongoingTouringsData } = useSWR(
@@ -240,6 +247,13 @@ export const TouringStartEndSection = () => {
         </div>
       </div>
 
+      {isAtGuestTouringLimit && (
+        <p className={styles.guestLimitMessage}>
+          ゲストアカウントはツーリングを{GUEST_ACCOUNT_LIMITS.TOURING}
+          件まで登録できます。
+        </p>
+      )}
+
       <div className={styles.bikeSelectionGrid}>
         {bikesWithTouring.map((bike) => {
           const isLoading = loadingBikeId === bike.myUserBikeId
@@ -257,7 +271,7 @@ export const TouringStartEndSection = () => {
                 onClick={() =>
                   handleStartTouring(bike.myUserBikeId, bike.bikeName)
                 }
-                disabled={isLoading}
+                disabled={isLoading || isAtGuestTouringLimit}
                 variant="primary"
                 size="sm"
                 className={styles.startButton}

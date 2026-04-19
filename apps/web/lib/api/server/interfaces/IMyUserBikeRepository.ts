@@ -18,6 +18,8 @@ export type MyUserBikeDetail = {
   isPublic: boolean
   createdAt: Date
   updatedAt: Date
+  fuelLogCount: number
+  touringCount: number
 }
 
 export type PublicMyUserBikeDetail = {

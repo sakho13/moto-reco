@@ -59,6 +59,10 @@ export class FirebaseAuthRepository implements IAuthRepository {
       return ProviderTypeMap.FIREBASE_EMAIL
     }
 
+    if (firebaseProvider === 'anonymous') {
+      return ProviderTypeMap.FIREBASE_ANONYMOUS
+    }
+
     throw new Error(`Unsupported provider type: ${firebaseProvider}`)
   }
 }
