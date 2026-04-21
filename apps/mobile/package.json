@@ -5,7 +5,9 @@
   "private": true,
   "main": "index.ts",
   "scripts": {
-    "dev": "expo start",
+    "dev": "expo start --lan",
+    "dev:wsl": "REACT_NATIVE_PACKAGER_HOSTNAME=$(powershell.exe -Command \"(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { \\$_.PrefixOrigin -eq 'Dhcp' -and \\$_.InterfaceAlias -notlike 'vEthernet*' } | Select-Object -First 1).IPAddress\" | tr -d '\\r\\n') expo start --lan",
+    "dev:android-emu": "REACT_NATIVE_PACKAGER_HOSTNAME=10.0.2.2 expo start --lan",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -18,14 +20,18 @@
     "expo": "55.0.15",
     "expo-status-bar": "55.0.5",
     "react": "catalog:",
-    "react-native": "0.83.4"
+    "react-native": "0.83.6"
   },
   "expo": {
     "install": {
-      "exclude": ["react", "@types/react"]
+      "exclude": [
+        "react",
+        "@types/react"
+      ]
     }
   },
   "devDependencies": {
+    "@expo/ngrok": "4.1.3",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:",
