@@ -6,8 +6,7 @@ import styles from './textarea.module.css'
 /**
  * Textareaコンポーネントのプロパティ
  */
-export interface TextareaProps
-  extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   /**
    * エラー状態
    * @default false

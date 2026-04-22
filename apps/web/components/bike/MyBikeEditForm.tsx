@@ -76,6 +76,7 @@ export const MyBikeEditForm = ({
         <Input
           id="totalMileage"
           type="number"
+          inputMode="numeric"
           value={formData.totalMileage}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, totalMileage: e.target.value }))
@@ -92,6 +93,7 @@ export const MyBikeEditForm = ({
         <Input
           id="displacement"
           type="number"
+          inputMode="numeric"
           value={formData.displacement}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, displacement: e.target.value }))

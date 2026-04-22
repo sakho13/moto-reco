@@ -110,6 +110,7 @@ export const BikeRegisterForm = ({
             <Input
               id="displacement"
               type="number"
+              inputMode="numeric"
               value={formData.displacement}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -183,6 +184,7 @@ export const BikeRegisterForm = ({
           <Input
             id="purchasePrice"
             type="number"
+            inputMode="numeric"
             value={formData.purchasePrice}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -201,6 +203,7 @@ export const BikeRegisterForm = ({
           <Input
             id="purchaseMileage"
             type="number"
+            inputMode="numeric"
             value={formData.purchaseMileage}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -219,6 +222,7 @@ export const BikeRegisterForm = ({
           <Input
             id="totalMileage"
             type="number"
+            inputMode="numeric"
             value={formData.totalMileage}
             onChange={(e) =>
               setFormData((prev) => ({
