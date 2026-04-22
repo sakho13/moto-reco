@@ -348,6 +348,7 @@ export const TouringStartEndSection = () => {
               </label>
               <input
                 type="number"
+                inputMode="numeric"
                 className={styles.spotModalInput}
                 placeholder="例：12345"
                 value={startMileageInput}
@@ -599,6 +600,7 @@ const ActiveTouringCard = ({
               </label>
               <input
                 type="number"
+                inputMode="numeric"
                 className={styles.spotModalInput}
                 placeholder="例：12400"
                 value={endMileageInput}
