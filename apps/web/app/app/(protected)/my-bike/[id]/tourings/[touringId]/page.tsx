@@ -63,7 +63,9 @@ function TouringDetailPage() {
   const [editingSpot, setEditingSpot] = useState<ApiResponseSpotDetail | null>(
     null
   )
-  const [isAddSpotModalOpen, setIsAddSpotModalOpen] = useState(false)
+  const [addModalType, setAddModalType] = useState<'SPOT' | 'BREAK' | null>(
+    null
+  )
   const [localSpots, setLocalSpots] = useState<ApiResponseSpotDetail[]>([])
 
   const sensors = useSensors(
@@ -219,8 +221,10 @@ function TouringDetailPage() {
         mapPoints.push({
           lat: s.latitude!,
           lng: s.longitude!,
-          label: s.name ?? `スポット ${i + 1}`,
-          type: 'spot',
+          label:
+            s.name ??
+            (s.type === 'BREAK' ? `休憩 ${i + 1}` : `スポット ${i + 1}`),
+          type: s.type === 'BREAK' ? 'break' : 'spot',
         })
       })
   }
@@ -262,7 +266,7 @@ function TouringDetailPage() {
 
   const handleSpotAddSuccess = async () => {
     await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
-    setIsAddSpotModalOpen(false)
+    setAddModalType(null)
   }
 
   const handleSpotDeleteSuccess = async () => {
@@ -329,14 +333,26 @@ function TouringDetailPage() {
   const spotsCard = (
     <div className={styles.card}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">立ち寄りスポット</h2>
-        <button
-          onClick={() => setIsAddSpotModalOpen(true)}
-          className={styles.editButton}
-          aria-label="スポットを追加"
-        >
-          ＋
-        </button>
+        <h2 className="text-lg font-semibold">スポット・休憩</h2>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setAddModalType('SPOT')}
+            className={styles.editButton}
+            aria-label="スポットを追加"
+            title="立ち寄りを追加"
+          >
+            ＋
+          </button>
+          <button
+            onClick={() => setAddModalType('BREAK')}
+            className={styles.editButton}
+            aria-label="休憩を追加"
+            title="休憩を追加"
+            style={{ fontSize: '0.75rem', padding: '2px 6px' }}
+          >
+            休
+          </button>
+        </div>
       </div>
 
       {spotsLoading ? (
@@ -517,11 +533,12 @@ function TouringDetailPage() {
         />
       )}
 
-      {isAddSpotModalOpen && (
+      {addModalType !== null && (
         <SpotAddModal
           bikeId={bikeId}
           touringId={touringId}
-          onClose={() => setIsAddSpotModalOpen(false)}
+          initialType={addModalType}
+          onClose={() => setAddModalType(null)}
           onSuccess={handleSpotAddSuccess}
         />
       )}

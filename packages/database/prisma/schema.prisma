@@ -216,14 +216,16 @@ model TUserMyBikeHistory {
 }
 
 model TUserMyBikeTouringSpot {
-  id        String   @id @default(cuid(2))
-  touringId String   @map("touring_id")
-  name      String?  @map("name")
-  memo      String?  @map("memo")
-  latitude  Float?   @map("latitude")
-  longitude Float?   @map("longitude")
-  visitedAt DateTime @default(now()) @map("visited_at")
-  sortOrder Int      @default(0) @map("sort_order")
+  id        String    @id @default(cuid(2))
+  touringId String    @map("touring_id")
+  type      SpotType  @default(SPOT) @map("type")
+  name      String?   @map("name")
+  memo      String?   @map("memo")
+  latitude  Float?    @map("latitude")
+  longitude Float?    @map("longitude")
+  visitedAt DateTime  @default(now()) @map("visited_at")
+  endAt     DateTime? @map("end_at")
+  sortOrder Int       @default(0) @map("sort_order")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -321,6 +323,11 @@ enum UserQuitStatus {
 enum TouringStatus {
   STARTED
   COMPLETED
+}
+
+enum SpotType {
+  SPOT
+  BREAK
 }
 
 enum BikeHistoryType {

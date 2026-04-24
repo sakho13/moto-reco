@@ -9,10 +9,12 @@ export async function createTestSpot(
   touringId: string,
   data: {
     visitedAt: string
+    type?: 'SPOT' | 'BREAK'
     name?: string
     memo?: string
     latitude?: number
     longitude?: number
+    endAt?: string
   }
 ): Promise<string> {
   const res = await app.request(
