@@ -6,10 +6,8 @@ import styles from './checkbox.module.css'
 /**
  * Checkboxコンポーネントのプロパティ
  */
-export interface CheckboxProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'type'
-> {
+export interface CheckboxProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   /**
    * エラー状態
    * @default false
