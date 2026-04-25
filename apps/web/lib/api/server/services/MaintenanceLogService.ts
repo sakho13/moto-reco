@@ -11,6 +11,14 @@ import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 
+type GetMaintenanceLogsParams = {
+  myUserBikeId: MyUserBikeId
+  userId: UserId
+  page: number
+  perSize: number
+  sortOrder: 'asc' | 'desc'
+}
+
 type RegisterMaintenanceLogParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
@@ -37,6 +45,26 @@ export class MaintenanceLogService {
     private maintenanceLogRepository: IMaintenanceLogRepository,
     private myUserBikeRepository: IMyUserBikeRepository
   ) {}
+
+  public async getMaintenanceLogs(
+    params: GetMaintenanceLogsParams
+  ): Promise<MaintenanceLogEntity[]> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      params.myUserBikeId,
+      params.userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    return this.maintenanceLogRepository.findMaintenanceLogs({
+      myUserBikeId: params.myUserBikeId,
+      page: params.page,
+      perSize: params.perSize,
+      sortOrder: params.sortOrder,
+    })
+  }
 
   public async registerMaintenanceLog(
     params: RegisterMaintenanceLogParams

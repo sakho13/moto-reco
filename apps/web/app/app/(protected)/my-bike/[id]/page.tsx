@@ -149,22 +149,12 @@ function BikeDetailPage() {
           icon={<TouringIcon />}
         />
 
-        {/* メンテナンス履歴 - disabled 状態 */}
-        <div
-          style={{
-            opacity: 0.5,
-            pointerEvents: 'none',
-            cursor: 'not-allowed',
-          }}
-          aria-disabled="true"
-        >
-          <NavigationCard
-            href="#"
-            title="メンテナンス履歴"
-            description="準備中です"
-            icon={<WrenchIcon />}
-          />
-        </div>
+        <NavigationCard
+          href={`/app/my-bike/${id}/maintenance-logs`}
+          title="メンテナンス履歴"
+          description="メンテナンス履歴を確認・管理できます"
+          icon={<WrenchIcon />}
+        />
       </div>
     </>
   )

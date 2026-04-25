@@ -6,6 +6,8 @@ import {
   ApiResponseUserBikeRegister,
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
+  ApiResponseMaintenanceLogDetail,
+  ApiResponseMaintenanceLogList,
   ApiResponseUserQuit,
   ApiResponseFuelInsight,
   ApiResponseTouringDetail,
@@ -205,6 +207,12 @@ type API_EP = {
     POST: SuccessResponse<ApiResponseFuelLogDetail>
     PATCH: SuccessResponse<ApiResponseFuelLogDetail>
     DELETE: SuccessResponse<undefined>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/maintenance-logs`]: {
+    GET: SuccessResponse<ApiResponseMaintenanceLogList>
+    POST: SuccessResponse<ApiResponseMaintenanceLogDetail>
+    PATCH: SuccessResponse<ApiResponseMaintenanceLogDetail>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-insights`]: {

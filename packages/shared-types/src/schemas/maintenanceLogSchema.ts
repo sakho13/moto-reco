@@ -95,3 +95,16 @@ export const MaintenanceLogUpdateRequestSchema = z
 export type MaintenanceLogUpdateRequest = z.infer<
   typeof MaintenanceLogUpdateRequestSchema
 >
+
+/**
+ * メンテナンス履歴一覧取得クエリのバリデーションスキーマ
+ */
+export const MaintenanceLogListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  'per-size': z.coerce.number().int().min(1).max(100).default(20).optional(),
+  'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+})
+
+export type MaintenanceLogListQuery = z.infer<
+  typeof MaintenanceLogListQuerySchema
+>

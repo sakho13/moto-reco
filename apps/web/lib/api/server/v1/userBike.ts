@@ -7,6 +7,7 @@ import {
   ApiResponseFuelLogList,
   ApiResponseFuelInsight,
   ApiResponseMaintenanceLogDetail,
+  ApiResponseMaintenanceLogList,
   ApiResponseBikeHistoryList,
   ApiResponseAllBikesHistoryList,
   ApiResponseTouringDetail,
@@ -22,6 +23,7 @@ import {
   createTouringId,
   createUserId,
   FuelInsightPeriod,
+  MaintenanceLogListQuerySchema,
   MaintenanceLogRegisterRequestSchema,
   MaintenanceLogUpdateRequestSchema,
   SuccessResponse,
@@ -848,6 +850,44 @@ userBike.delete(
         status: 'success',
         message: 'ツーリング削除成功',
         data: undefined,
+      },
+      200
+    )
+  }
+)
+
+userBike.get(
+  '/bike/:myUserBikeId/maintenance-logs',
+  honoAuthMiddleware,
+  zodValidateQuery(MaintenanceLogListQuerySchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const query = c.req.valid('query')
+
+    const maintenanceLogRepo = new PrismaMaintenanceLogRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new MaintenanceLogService(maintenanceLogRepo, myUserBikeRepo)
+
+    const logs = await service.getMaintenanceLogs({
+      myUserBikeId: createMyUserBikeId(myUserBikeId),
+      userId: createUserId(userId),
+      page: query.page ?? 1,
+      perSize: query['per-size'] ?? 20,
+      sortOrder: query['sort-order'] ?? 'desc',
+    })
+
+    return c.json<SuccessResponse<ApiResponseMaintenanceLogList>>(
+      {
+        status: 'success',
+        data: logs.map((log) => ({
+          maintenanceLogId: log.id,
+          performedAt: log.performedAt.toISOString(),
+          mileage: log.mileage,
+          memo: log.memo,
+          items: log.items,
+        })),
+        message: 'メンテナンス履歴一覧取得成功',
       },
       200
     )
