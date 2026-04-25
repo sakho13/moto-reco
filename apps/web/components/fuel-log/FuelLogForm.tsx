@@ -115,6 +115,7 @@ export const FuelLogForm = ({
         <Input
           id="mileage"
           type="number"
+          inputMode="numeric"
           value={formData.mileage}
           onChange={(e) => {
             const newMileage = e.target.value
@@ -155,6 +156,7 @@ export const FuelLogForm = ({
           <Input
             id="previousMileage"
             type="number"
+            inputMode="numeric"
             value={formData.previousMileage}
             onChange={(e) => {
               setFormData((prev) => ({
@@ -175,6 +177,7 @@ export const FuelLogForm = ({
         <Input
           id="amount"
           type="number"
+          inputMode="decimal"
           value={formData.amount}
           onChange={(e) =>
             setFormData((prev) => ({
@@ -194,6 +197,7 @@ export const FuelLogForm = ({
         <Input
           id="totalPrice"
           type="number"
+          inputMode="numeric"
           value={formData.totalPrice}
           onChange={(e) =>
             setFormData((prev) => ({

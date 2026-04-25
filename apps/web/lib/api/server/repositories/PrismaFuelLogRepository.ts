@@ -370,4 +370,10 @@ export class PrismaFuelLogRepository
       },
     })
   }
+
+  async countFuelLogs(myUserBikeId: MyUserBikeId): Promise<number> {
+    return this.connection.tUserMyBikeFuelLog.count({
+      where: { userMyBikeId: myUserBikeId },
+    })
+  }
 }

@@ -1,6 +1,12 @@
 import { ProviderType, UserId } from '@repo/shared-types'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
+export type ActiveUserInfo = {
+  userId: string
+  role: 'USER' | 'ADMIN' | 'GUEST'
+  createdAt: Date
+}
+
 export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
   /**
    * 外部ID（Firebase UIDなど）からアクティブな内部User IDを取得
@@ -26,6 +32,38 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
     })
 
     return authProvider?.user?.id ?? null
+  }
+
+  /**
+   * 外部ID（Firebase UIDなど）からアクティブなユーザー情報（ID・ロール・作成日時）を取得
+   */
+  async findActiveUserInfoByExternalId(
+    externalId: string,
+    providerType: ProviderType
+  ): Promise<ActiveUserInfo | null> {
+    const authProvider = await this.connection.mAuthProvider.findFirst({
+      select: {
+        user: {
+          select: { id: true, role: true, createdAt: true },
+        },
+      },
+      where: {
+        externalId: externalId,
+        providerType: providerType,
+        isActive: true,
+        user: {
+          status: 'ACTIVE',
+        },
+      },
+    })
+
+    if (!authProvider?.user) return null
+
+    return {
+      userId: authProvider.user.id,
+      role: authProvider.user.role as ActiveUserInfo['role'],
+      createdAt: authProvider.user.createdAt,
+    }
   }
 
   /**

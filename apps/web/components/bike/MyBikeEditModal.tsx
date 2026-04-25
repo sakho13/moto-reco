@@ -10,6 +10,7 @@ import { MyBikeEditForm, type MyBikeEditFormData } from './MyBikeEditForm'
 import { ModalBase } from '@/components/common/ModalBase'
 import { authenticatedFetch, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 interface MyBikeEditModalProps {
   bikeId: string
@@ -22,6 +23,7 @@ export function MyBikeEditModal({
   onClose,
   onSuccess,
 }: MyBikeEditModalProps) {
+  const { isGuest } = useAuth()
   const [initialData, setInitialData] = useState<MyBikeEditFormData | null>(
     null
   )
@@ -94,6 +96,7 @@ export function MyBikeEditModal({
           onSubmit={handleFormSubmit}
           isSubmitting={isSubmitting}
           error={error}
+          isGuest={isGuest}
         />
       )}
     </ModalBase>

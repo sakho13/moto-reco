@@ -27,6 +27,7 @@ export interface BikeRegisterFormProps {
   onSubmit: (data: BikeFormData) => Promise<void>
   isSubmitting: boolean
   error: string
+  isGuest?: boolean
 }
 
 export const BikeRegisterForm = ({
@@ -34,6 +35,7 @@ export const BikeRegisterForm = ({
   onSubmit,
   isSubmitting,
   error,
+  isGuest,
 }: BikeRegisterFormProps) => {
   const [formData, setFormData] = useState<BikeFormData>({
     nickname: '',
@@ -108,6 +110,7 @@ export const BikeRegisterForm = ({
             <Input
               id="displacement"
               type="number"
+              inputMode="numeric"
               value={formData.displacement}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -151,9 +154,13 @@ export const BikeRegisterForm = ({
                 isPublic: e.target.checked,
               }))
             }
-            disabled={isSubmitting}
+            disabled={isSubmitting || (isGuest ?? false)}
             label="このバイクを公開する"
-            helperText="公開したバイクは、公開ページに情報が掲載されます。"
+            helperText={
+              isGuest
+                ? 'ゲストアカウントはバイクを公開できません。'
+                : '公開したバイクは、公開ページに情報が掲載されます。'
+            }
           />
         </FormField>
 
@@ -177,6 +184,7 @@ export const BikeRegisterForm = ({
           <Input
             id="purchasePrice"
             type="number"
+            inputMode="numeric"
             value={formData.purchasePrice}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -195,6 +203,7 @@ export const BikeRegisterForm = ({
           <Input
             id="purchaseMileage"
             type="number"
+            inputMode="numeric"
             value={formData.purchaseMileage}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -213,6 +222,7 @@ export const BikeRegisterForm = ({
           <Input
             id="totalMileage"
             type="number"
+            inputMode="numeric"
             value={formData.totalMileage}
             onChange={(e) =>
               setFormData((prev) => ({
