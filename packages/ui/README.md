@@ -383,10 +383,8 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 チェックボックスコンポーネント。ラベル統合型でエラー状態をサポート。
 
 ```tsx
-interface CheckboxProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  'type'
-> {
+interface CheckboxProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   error?: boolean
   helperText?: string
   label?: string
