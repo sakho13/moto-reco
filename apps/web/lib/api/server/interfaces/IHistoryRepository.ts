@@ -2,6 +2,7 @@ import {
   BikeHistoryType,
   FuelLogId,
   MyUserBikeId,
+  PostId,
   TouringId,
   UserId,
 } from '@repo/shared-types'
@@ -14,6 +15,7 @@ type CreateHistoryParams = {
   occurredAt: Date
   fuelLogId?: FuelLogId
   touringId?: TouringId
+  postId?: PostId
 }
 
 export interface IHistoryRepository {
@@ -27,4 +29,5 @@ export interface IHistoryRepository {
     touringId: TouringId,
     occurredAt: Date
   ): Promise<void>
+  updateOccurredAtByPostId(postId: PostId, occurredAt: Date): Promise<void>
 }

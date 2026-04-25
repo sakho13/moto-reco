@@ -15,10 +15,13 @@ import {
   ApiResponseBikesOngoingTourings,
   ApiResponseSpotDetail,
   ApiResponseSpotList,
+  ApiResponsePostDetail,
+  ApiResponsePostList,
   createBikeId,
   createFuelLogId,
   createMaintenanceLogId,
   createMyUserBikeId,
+  createPostId,
   createSpotId,
   createTouringId,
   createUserId,
@@ -45,6 +48,8 @@ import {
   SpotUpdateRequestSchema,
   SpotReorderRequestSchema,
   HistoryListQuerySchema,
+  PostRegisterRequestSchema,
+  PostListQuerySchema,
 } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
@@ -60,12 +65,14 @@ import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository
 import { PrismaHistoryRepository } from '../repositories/PrismaHistoryRepository'
 import { PrismaMaintenanceLogRepository } from '../repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
+import { PrismaPostRepository } from '../repositories/PrismaPostRepository'
 import { PrismaSpotRepository } from '../repositories/PrismaSpotRepository'
 import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeRepository'
 import { FuelInsightService } from '../services/FuelInsightService'
 import { FuelLogService } from '../services/FuelLogService'
 import { MaintenanceLogService } from '../services/MaintenanceLogService'
+import { PostService } from '../services/PostService'
 import { SpotService } from '../services/SpotService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
@@ -362,6 +369,11 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
         },
       },
       touring: true,
+      post: {
+        include: {
+          photos: { orderBy: { orderIndex: 'asc' } },
+        },
+      },
     },
     orderBy: { occurredAt: 'desc' },
     skip,
@@ -433,6 +445,29 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
         ]
       }
 
+      if (h.type === 'POST' && h.post) {
+        const post = h.post
+        return [
+          {
+            type: 'POST' as const,
+            occurredAt: h.occurredAt.toISOString(),
+            bikeId,
+            bikeName,
+            post: {
+              postId: post.id,
+              title: post.title,
+              description: post.description,
+              occurredAt: post.occurredAt.toISOString(),
+              photos: post.photos.map((p) => ({
+                postPhotoId: p.id,
+                photoUrl: p.photoUrl,
+                orderIndex: p.orderIndex,
+              })),
+            },
+          },
+        ]
+      }
+
       return []
     }
   )
@@ -469,6 +504,11 @@ userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
         },
       },
       touring: true,
+      post: {
+        include: {
+          photos: { orderBy: { orderIndex: 'asc' } },
+        },
+      },
     },
     orderBy: { occurredAt: 'desc' },
   })
@@ -521,6 +561,27 @@ userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
               endLongitude: touring.endLongitude,
               status: touring.status,
               fuelLogIds: [],
+            },
+          },
+        ]
+      }
+
+      if (h.type === 'POST' && h.post) {
+        const post = h.post
+        return [
+          {
+            type: 'POST' as const,
+            occurredAt: h.occurredAt.toISOString(),
+            post: {
+              postId: post.id,
+              title: post.title,
+              description: post.description,
+              occurredAt: post.occurredAt.toISOString(),
+              photos: post.photos.map((p) => ({
+                postPhotoId: p.id,
+                photoUrl: p.photoUrl,
+                orderIndex: p.orderIndex,
+              })),
             },
           },
         ]
@@ -1590,6 +1651,194 @@ userBike.delete(
         status: 'success',
         data: undefined,
         message: 'スポット削除成功',
+      },
+      200
+    )
+  }
+)
+
+const toApiResponsePostDetail = (post: {
+  id: string
+  title: string | null
+  description: string | null
+  occurredAt: Date
+  photos: { id: string; photoUrl: string; orderIndex: number }[]
+}): ApiResponsePostDetail => ({
+  postId: post.id,
+  title: post.title,
+  description: post.description,
+  occurredAt: post.occurredAt.toISOString(),
+  photos: post.photos.map((p) => ({
+    postPhotoId: p.id,
+    photoUrl: p.photoUrl,
+    orderIndex: p.orderIndex,
+  })),
+})
+
+// 投稿登録
+userBike.post(
+  '/bike/:myUserBikeId/posts',
+  honoAuthMiddleware,
+  zodValidateJson(PostRegisterRequestSchema),
+  async (c) => {
+    const { userId, role } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const post = await prisma.$transaction(async (t) => {
+      const postRepo = new PrismaPostRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new PostService(postRepo, myUserBikeRepo)
+
+      const created = await service.registerPost({
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        role,
+        title: body.title,
+        description: body.description,
+        occurredAt: body.occurredAt,
+        photoUrls: body.photoUrls,
+      })
+
+      const historyRepo = new PrismaHistoryRepository(t)
+      await historyRepo.createHistory({
+        userId: createUserId(userId),
+        userMyBikeId: createMyUserBikeId(myUserBikeId),
+        type: 'POST',
+        occurredAt: created.occurredAt,
+        postId: createPostId(created.id),
+      })
+
+      return created
+    })
+
+    return c.json<SuccessResponse<ApiResponsePostDetail>>(
+      {
+        status: 'success',
+        data: toApiResponsePostDetail({
+          id: post.id,
+          title: post.title,
+          description: post.description,
+          occurredAt: post.occurredAt,
+          photos: post.photos.map((p) => ({
+            id: p.postPhotoId,
+            photoUrl: p.photoUrl,
+            orderIndex: p.orderIndex,
+          })),
+        }),
+        message: '投稿登録成功',
+      },
+      201
+    )
+  }
+)
+
+// 投稿一覧取得
+userBike.get(
+  '/bike/:myUserBikeId/posts',
+  honoAuthMiddleware,
+  zodValidateQuery(PostListQuerySchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const query = c.req.valid('query')
+
+    const page = query.page ?? 1
+    const pageSize = query['per-size'] ?? 20
+
+    const postRepo = new PrismaPostRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new PostService(postRepo, myUserBikeRepo)
+
+    const posts = await service.getPosts(
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId),
+      { page, pageSize }
+    )
+
+    return c.json<SuccessResponse<ApiResponsePostList>>({
+      status: 'success',
+      data: posts.map((post) =>
+        toApiResponsePostDetail({
+          id: post.id,
+          title: post.title,
+          description: post.description,
+          occurredAt: post.occurredAt,
+          photos: post.photos.map((p) => ({
+            id: p.postPhotoId,
+            photoUrl: p.photoUrl,
+            orderIndex: p.orderIndex,
+          })),
+        })
+      ),
+      message: '投稿一覧取得成功',
+    })
+  }
+)
+
+// 投稿詳細取得
+userBike.get(
+  '/bike/:myUserBikeId/posts/:postId',
+  honoAuthMiddleware,
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const postId = c.req.param('postId')
+
+    const postRepo = new PrismaPostRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new PostService(postRepo, myUserBikeRepo)
+
+    const post = await service.getPostById(
+      createPostId(postId),
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
+    )
+
+    return c.json<SuccessResponse<ApiResponsePostDetail>>({
+      status: 'success',
+      data: toApiResponsePostDetail({
+        id: post.id,
+        title: post.title,
+        description: post.description,
+        occurredAt: post.occurredAt,
+        photos: post.photos.map((p) => ({
+          id: p.postPhotoId,
+          photoUrl: p.photoUrl,
+          orderIndex: p.orderIndex,
+        })),
+      }),
+      message: '投稿詳細取得成功',
+    })
+  }
+)
+
+// 投稿削除
+userBike.delete(
+  '/bike/:myUserBikeId/posts/:postId',
+  honoAuthMiddleware,
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const postId = c.req.param('postId')
+
+    await prisma.$transaction((t) => {
+      const postRepo = new PrismaPostRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new PostService(postRepo, myUserBikeRepo)
+
+      return service.deletePost({
+        postId: createPostId(postId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+      })
+    })
+
+    return c.json<SuccessResponse<undefined>>(
+      {
+        status: 'success',
+        data: undefined,
+        message: '投稿削除成功',
       },
       200
     )

@@ -63,6 +63,11 @@
   color: var(--color-success);
 }
 
+.badgePost {
+  background-color: var(--color-cloud);
+  color: var(--color-inkLight);
+}
+
 .bikeName {
   font-size: 12px;
   color: var(--color-inkLight);

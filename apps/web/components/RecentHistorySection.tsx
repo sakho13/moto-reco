@@ -67,7 +67,7 @@ export const RecentHistorySection = () => {
         <div className={styles.historyList}>
           {historyItems.map((item) => (
             <HistoryItemCard
-              key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.touring.touringId}`}
+              key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.type === 'TOURING' ? item.touring.touringId : item.post.postId}`}
               item={item}
               onClick={
                 item.type === 'FUEL_LOG'
@@ -76,10 +76,12 @@ export const RecentHistorySection = () => {
                         bikeId: item.bikeId,
                         fuelLogId: item.fuelLog.fuelLogId,
                       })
-                  : () =>
-                      router.push(
-                        `/app/my-bike/${item.bikeId}/tourings/${item.touring.touringId}`
-                      )
+                  : item.type === 'TOURING'
+                    ? () =>
+                        router.push(
+                          `/app/my-bike/${item.bikeId}/tourings/${item.touring.touringId}`
+                        )
+                    : undefined
               }
             />
           ))}

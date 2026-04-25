@@ -41,6 +41,7 @@ model MUser {
   authProviders MAuthProvider[]
   myBikes       TUserMyBike[]
   histories     TUserMyBikeHistory[]
+  posts         TUserMyBikePost[]
   userQuit      TUserQuit?
 }
 
@@ -137,6 +138,7 @@ model TUserMyBike {
   maintenanceLogs TUserMyBikeMaintenance[]
   tourings        TUserMyBikeTouring[]
   histories       TUserMyBikeHistory[]
+  posts           TUserMyBikePost[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
@@ -234,6 +236,7 @@ model TUserMyBikeHistory {
 
   fuelLogId String? @unique @map("fuel_log_id")
   touringId String? @unique @map("touring_id")
+  postId    String? @unique @map("post_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -242,10 +245,43 @@ model TUserMyBikeHistory {
   userMyBike TUserMyBike?         @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
   fuelLog    TUserMyBikeFuelLog?  @relation(fields: [fuelLogId], references: [id], onDelete: Cascade)
   touring    TUserMyBikeTouring?  @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  post       TUserMyBikePost?     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([userId, occurredAt(sort: Desc)])
   @@index([userMyBikeId, occurredAt(sort: Desc)])
   @@index([type])
+}
+
+model TUserMyBikePost {
+  id           String   @id @default(cuid(2))
+  userMyBikeId String   @map("my_bike_id")
+  userId       String   @map("user_id")
+  title        String?  @map("title")
+  description  String?  @map("description")
+  occurredAt   DateTime @map("occurred_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userMyBike TUserMyBike              @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  user       MUser                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos     TUserMyBikePostPhoto[]
+  history    TUserMyBikeHistory?
+
+  @@index([userMyBikeId, occurredAt(sort: Desc)])
+}
+
+model TUserMyBikePostPhoto {
+  id         String @id @default(cuid(2))
+  postId     String @map("post_id")
+  photoUrl   String @map("photo_url")
+  orderIndex Int    @default(0) @map("order_index")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post TUserMyBikePost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId, orderIndex])
 }
 
 model TUserMyBikeTouringSpot {
@@ -367,4 +403,5 @@ enum BikeHistoryType {
   FUEL_LOG
   TOURING
   MAINTENANCE
+  POST
 }

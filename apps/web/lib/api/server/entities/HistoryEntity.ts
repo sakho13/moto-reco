@@ -4,6 +4,7 @@ import {
   History,
   HistoryId,
   MyUserBikeId,
+  PostId,
   TouringId,
   UserId,
 } from '@repo/shared-types'
@@ -41,6 +42,10 @@ export class HistoryEntity {
 
   public get touringId(): TouringId | null {
     return this._value.touringId
+  }
+
+  public get postId(): PostId | null {
+    return this._value.postId
   }
 
   public toJson(): History {

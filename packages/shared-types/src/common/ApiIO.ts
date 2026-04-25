@@ -163,6 +163,22 @@ export type ApiResponseMaintenanceLogDetail = {
 
 export type ApiResponseMaintenanceLogList = ApiResponseMaintenanceLogDetail[]
 
+export type ApiResponsePostPhotoDetail = {
+  postPhotoId: string
+  photoUrl: string
+  orderIndex: number
+}
+
+export type ApiResponsePostDetail = {
+  postId: string
+  title: string | null
+  description: string | null
+  occurredAt: string
+  photos: ApiResponsePostPhotoDetail[]
+}
+
+export type ApiResponsePostList = ApiResponsePostDetail[]
+
 export type ApiResponseBikeHistoryItem =
   | {
       type: 'FUEL_LOG'
@@ -173,6 +189,11 @@ export type ApiResponseBikeHistoryItem =
       type: 'TOURING'
       occurredAt: string
       touring: ApiResponseTouringDetail
+    }
+  | {
+      type: 'POST'
+      occurredAt: string
+      post: ApiResponsePostDetail
     }
 
 export type ApiResponseBikeHistoryList = ApiResponseBikeHistoryItem[]

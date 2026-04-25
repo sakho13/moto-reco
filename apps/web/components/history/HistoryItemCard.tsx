@@ -1,4 +1,4 @@
-import { ChevronRight, Fuel, MapPin } from 'lucide-react'
+import { Camera, ChevronRight, Fuel, MapPin } from 'lucide-react'
 import type { ApiResponseAllBikesHistoryItem } from '@repo/shared-types'
 import styles from './HistoryItemCard.module.css'
 
@@ -19,6 +19,13 @@ type Props = {
 }
 
 export const HistoryItemCard = ({ item, onClick }: Props) => {
+  const badgeClass =
+    item.type === 'FUEL_LOG'
+      ? styles.badgeFuel
+      : item.type === 'TOURING'
+        ? styles.badgeTouring
+        : styles.badgePost
+
   return (
     <div
       className={`${styles.historyItemCard} ${onClick ? styles.clickable : ''}`}
@@ -30,18 +37,21 @@ export const HistoryItemCard = ({ item, onClick }: Props) => {
       <div className={styles.content}>
         <div className={styles.header}>
           <div className={styles.badges}>
-            <span
-              className={`${styles.badge} ${item.type === 'FUEL_LOG' ? styles.badgeFuel : styles.badgeTouring}`}
-            >
+            <span className={`${styles.badge} ${badgeClass}`}>
               {item.type === 'FUEL_LOG' ? (
                 <>
                   <Fuel size={12} />
                   給油
                 </>
-              ) : (
+              ) : item.type === 'TOURING' ? (
                 <>
                   <MapPin size={12} />
                   ツーリング
+                </>
+              ) : (
+                <>
+                  <Camera size={12} />
+                  投稿
                 </>
               )}
             </span>
@@ -58,13 +68,18 @@ export const HistoryItemCard = ({ item, onClick }: Props) => {
               {item.fuelLog.totalPrice.toLocaleString()} 円
             </div>
           </div>
-        ) : (
+        ) : item.type === 'TOURING' ? (
           <div className={styles.detail}>
             <div>{item.touring.title}</div>
             <div>
               {new Date(item.touring.startDate).toLocaleDateString('ja-JP')} 〜{' '}
               {new Date(item.touring.endDate).toLocaleDateString('ja-JP')}
             </div>
+          </div>
+        ) : (
+          <div className={styles.detail}>
+            <div>{item.post.title ?? '（タイトルなし）'}</div>
+            <div>写真 {item.post.photos.length} 枚</div>
           </div>
         )}
       </div>
