@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 import { prisma } from '@repo/database'
 import { createMyUserBikeId } from '@repo/shared-types'
 import styles from './page.module.css'
@@ -48,20 +49,7 @@ export default async function PublicBikeDetailPage({
   ])
 
   if (!bike) {
-    return (
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>公開バイクが見つかりません</h1>
-          <p className={styles.subtitle}>
-            指定されたバイクは公開されていないか削除されています。
-          </p>
-        </header>
-
-        <div className={styles.emptyState}>
-          <Link href="/bikes">公開バイク一覧に戻る</Link>
-        </div>
-      </div>
-    )
+    notFound()
   }
 
   const title =
