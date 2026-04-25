@@ -2,8 +2,8 @@
 
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
-import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 import styles from './MaintenanceLogItem.module.css'
+import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 
 type MaintenanceLogItemProps = {
   log: ApiResponseMaintenanceLogDetail

@@ -3,8 +3,8 @@
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
-import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 import styles from './MaintenanceLogByItemSection.module.css'
+import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 
 type ItemHistory = {
   performedAt: string
@@ -45,7 +45,8 @@ const buildItemHistoryMap = (
 ): Map<string, ItemHistory[]> => {
   const map = new Map<string, ItemHistory[]>()
   const sorted = [...logs].sort(
-    (a, b) => new Date(b.performedAt).getTime() - new Date(a.performedAt).getTime()
+    (a, b) =>
+      new Date(b.performedAt).getTime() - new Date(a.performedAt).getTime()
   )
   for (const log of sorted) {
     for (const item of log.items) {
@@ -139,9 +140,11 @@ export const MaintenanceLogByItemSection = ({
                               </span>
                             )}
                             {masterItem.recommendedPeriodMonths !== null &&
-                              masterItem.recommendedMileageInterval === null && (
+                              masterItem.recommendedMileageInterval ===
+                                null && (
                                 <span className={styles.nextInfo}>
-                                  推奨: {masterItem.recommendedPeriodMonths}ヶ月毎
+                                  推奨: {masterItem.recommendedPeriodMonths}
+                                  ヶ月毎
                                 </span>
                               )}
                           </>

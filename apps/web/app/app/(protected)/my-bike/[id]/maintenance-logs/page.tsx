@@ -11,6 +11,7 @@ import type {
   SuccessResponse,
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import styles from './page.module.css'
 import { MaintenanceLogByItemSection } from '@/components/maintenance-log/MaintenanceLogByItemSection'
 import { MaintenanceLogEditModal } from '@/components/maintenance-log/MaintenanceLogEditModal'
 import { MaintenanceLogListSection } from '@/components/maintenance-log/MaintenanceLogListSection'
@@ -18,7 +19,6 @@ import { MaintenanceLogRegisterModal } from '@/components/maintenance-log/Mainte
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
-import styles from './page.module.css'
 
 const PER_SIZE = 20
 
