@@ -6,7 +6,10 @@ import {
   MyUserBikeId,
 } from '@repo/shared-types'
 import { MaintenanceLogEntity } from '../entities/MaintenanceLogEntity'
-import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
+import {
+  IMaintenanceLogRepository,
+  MaintenanceLogListParams,
+} from '../interfaces/IMaintenanceLogRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 type MaintenanceLogRow = {
@@ -103,6 +106,33 @@ export class PrismaMaintenanceLogRepository
     }
 
     return mapToEntity(maintenanceLog)
+  }
+
+  async findMaintenanceLogs(
+    params: MaintenanceLogListParams
+  ): Promise<MaintenanceLogEntity[]> {
+    const { myUserBikeId, page, perSize, sortOrder } = params
+    const logs = await this.connection.tUserMyBikeMaintenance.findMany({
+      where: { userMyBikeId: myUserBikeId },
+      orderBy: { performedAt: sortOrder },
+      skip: (page - 1) * perSize,
+      take: perSize,
+      select: {
+        id: true,
+        userMyBikeId: true,
+        performedAt: true,
+        mileage: true,
+        memo: true,
+        maintenanceItems: {
+          select: {
+            type: true,
+            value: true,
+          },
+        },
+      },
+    })
+
+    return logs.map(mapToEntity)
   }
 
   async updateMaintenanceLog(

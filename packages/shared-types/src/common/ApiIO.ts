@@ -161,6 +161,8 @@ export type ApiResponseMaintenanceLogDetail = {
   items: MaintenanceLogItem[]
 }
 
+export type ApiResponseMaintenanceLogList = ApiResponseMaintenanceLogDetail[]
+
 export type ApiResponseBikeHistoryItem =
   | {
       type: 'FUEL_LOG'
