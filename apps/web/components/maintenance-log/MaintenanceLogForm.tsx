@@ -99,7 +99,9 @@ export const MaintenanceLogForm = ({
   const itemsByCategory = CATEGORY_ORDER.map((category) => ({
     category,
     label: CATEGORY_LABELS[category] ?? category,
-    items: MAINTENANCE_ITEMS_MASTER.filter((item) => item.category === category),
+    items: MAINTENANCE_ITEMS_MASTER.filter(
+      (item) => item.category === category
+    ),
   }))
 
   return (
@@ -164,11 +166,16 @@ export const MaintenanceLogForm = ({
             color: 'var(--color-ink)',
           }}
         >
-          メンテナンス項目 <span style={{ color: 'var(--color-danger)' }}>*</span>
+          メンテナンス項目{' '}
+          <span style={{ color: 'var(--color-danger)' }}>*</span>
         </p>
 
         <div
-          style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--spacing-4)',
+          }}
         >
           {itemsByCategory.map(({ category, label, items }) => (
             <div key={category}>
@@ -197,8 +204,12 @@ export const MaintenanceLogForm = ({
                     key={item.type}
                     id={`item-${item.type}`}
                     label={item.typeName}
-                    checked={formData.selectedItems.includes(item.type as MaintenanceType)}
-                    onChange={() => handleItemToggle(item.type as MaintenanceType)}
+                    checked={formData.selectedItems.includes(
+                      item.type as MaintenanceType
+                    )}
+                    onChange={() =>
+                      handleItemToggle(item.type as MaintenanceType)
+                    }
                     disabled={isSubmitting}
                   />
                 ))}

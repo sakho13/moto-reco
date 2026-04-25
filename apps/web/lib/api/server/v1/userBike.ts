@@ -867,7 +867,10 @@ userBike.get(
 
     const maintenanceLogRepo = new PrismaMaintenanceLogRepository(prisma)
     const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
-    const service = new MaintenanceLogService(maintenanceLogRepo, myUserBikeRepo)
+    const service = new MaintenanceLogService(
+      maintenanceLogRepo,
+      myUserBikeRepo
+    )
 
     const logs = await service.getMaintenanceLogs({
       myUserBikeId: createMyUserBikeId(myUserBikeId),

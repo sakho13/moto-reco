@@ -23,16 +23,24 @@ const formatDate = (dateString: string) => {
 }
 
 const getTypeName = (type: string): string => {
-  return MAINTENANCE_ITEMS_MASTER.find((item) => item.type === type)?.typeName ?? type
+  return (
+    MAINTENANCE_ITEMS_MASTER.find((item) => item.type === type)?.typeName ??
+    type
+  )
 }
 
-export const MaintenanceLogItem = ({ log, onEdit }: MaintenanceLogItemProps) => {
+export const MaintenanceLogItem = ({
+  log,
+  onEdit,
+}: MaintenanceLogItemProps) => {
   return (
     <div className={styles.item}>
       <div className={styles.mainRow}>
         <div className={styles.dateBlock}>
           <span className={styles.date}>{formatDate(log.performedAt)}</span>
-          <span className={styles.mileage}>{log.mileage.toLocaleString()}km</span>
+          <span className={styles.mileage}>
+            {log.mileage.toLocaleString()}km
+          </span>
         </div>
 
         <Button

@@ -2,21 +2,27 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
+import useSWR from 'swr'
 import useSWRInfinite from 'swr/infinite'
 import type {
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
+  ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import { MaintenanceLogByItemSection } from '@/components/maintenance-log/MaintenanceLogByItemSection'
 import { MaintenanceLogEditModal } from '@/components/maintenance-log/MaintenanceLogEditModal'
 import { MaintenanceLogListSection } from '@/components/maintenance-log/MaintenanceLogListSection'
 import { MaintenanceLogRegisterModal } from '@/components/maintenance-log/MaintenanceLogRegisterModal'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
+import styles from './page.module.css'
 
 const PER_SIZE = 20
+
+type ViewMode = 'date' | 'item'
 
 function MaintenanceLogsPage() {
   const params = useParams()
@@ -25,6 +31,7 @@ function MaintenanceLogsPage() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
   const [editingLog, setEditingLog] =
     useState<ApiResponseMaintenanceLogDetail | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('date')
 
   const fetchLogs = async (url: string) => {
     const response = await authenticatedFetch(url, { method: 'GET' })
@@ -40,6 +47,7 @@ function MaintenanceLogsPage() {
     return json.data
   }
 
+  // 日付順ビュー用: 無限スクロール
   const { data, error, isLoading, size, setSize, isValidating } =
     useSWRInfinite(
       (pageIndex: number) =>
@@ -48,6 +56,26 @@ function MaintenanceLogsPage() {
           : null,
       fetchLogs
     )
+
+  // 項目別ビュー用: 全件取得（最大100件）
+  const { data: allLogs, isLoading: isAllLoading } = useSWR(
+    viewMode === 'item' && bikeId
+      ? `/api/v1/user-bike/bike/${bikeId}/maintenance-logs?sort-order=desc&per-size=100&page=1`
+      : null,
+    fetchLogs
+  )
+
+  // 現在の総走行距離取得
+  const { data: bikeData } = useSWR(
+    bikeId ? `/api/v1/user-bike/bike/${bikeId}` : null,
+    async (url) => {
+      const response = await authenticatedFetch(url, { method: 'GET' })
+      if (!response.ok) return null
+      const json =
+        (await response.json()) as SuccessResponse<ApiResponseUserBikeDetail>
+      return json.data
+    }
+  )
 
   if (isLoading) {
     return (
@@ -96,6 +124,10 @@ function MaintenanceLogsPage() {
     if (log) setEditingLog(log)
   }
 
+  const handleSuccess = () => {
+    setSize(1)
+  }
+
   return (
     <>
       {isRegisterModalOpen && (
@@ -104,7 +136,7 @@ function MaintenanceLogsPage() {
           onClose={() => setIsRegisterModalOpen(false)}
           onSuccess={() => {
             setIsRegisterModalOpen(false)
-            setSize(1)
+            handleSuccess()
           }}
         />
       )}
@@ -116,7 +148,7 @@ function MaintenanceLogsPage() {
           onClose={() => setEditingLog(null)}
           onSuccess={() => {
             setEditingLog(null)
-            setSize(1)
+            handleSuccess()
           }}
         />
       )}
@@ -134,15 +166,43 @@ function MaintenanceLogsPage() {
         </Button>
       </div>
 
+      {/* ビュー切替タブ */}
+      <div className={`w-full max-w-md ${styles.viewToggle}`}>
+        <button
+          className={`${styles.toggleButton} ${viewMode === 'date' ? styles.active : ''}`}
+          onClick={() => setViewMode('date')}
+        >
+          日付順
+        </button>
+        <button
+          className={`${styles.toggleButton} ${viewMode === 'item' ? styles.active : ''}`}
+          onClick={() => setViewMode('item')}
+        >
+          項目別
+        </button>
+      </div>
+
       <div className="w-full max-w-md">
-        <MaintenanceLogListSection
-          logs={logs}
-          onEdit={handleEdit}
-          onRegister={() => setIsRegisterModalOpen(true)}
-          onLoadMore={() => setSize(size + 1)}
-          canLoadMore={canLoadMore}
-          isLoadingMore={isLoadingMore}
-        />
+        {viewMode === 'date' ? (
+          <MaintenanceLogListSection
+            logs={logs}
+            onEdit={handleEdit}
+            onRegister={() => setIsRegisterModalOpen(true)}
+            onLoadMore={() => setSize(size + 1)}
+            canLoadMore={canLoadMore}
+            isLoadingMore={isLoadingMore}
+          />
+        ) : isAllLoading ? (
+          <div className="flex items-center justify-center p-8">
+            <p>読み込み中...</p>
+          </div>
+        ) : (
+          <MaintenanceLogByItemSection
+            logs={allLogs ?? []}
+            currentMileage={bikeData?.totalMileage}
+            onRegister={() => setIsRegisterModalOpen(true)}
+          />
+        )}
       </div>
     </>
   )
