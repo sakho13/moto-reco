@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function FaqPage() {
   return (
-    <div className={styles.page}>
+    <div className="public-page-container">
       <header className={styles.header}>
         <h1 className={styles.title}>よくある質問</h1>
         <p className={styles.description}>

@@ -1404,11 +1404,13 @@ userBike.post(
       touringId: createTouringId(touringId),
       myUserBikeId: createMyUserBikeId(myUserBikeId),
       userId: createUserId(userId),
+      type: body.type,
       name: body.name,
       memo: body.memo,
       latitude: body.latitude,
       longitude: body.longitude,
       visitedAt: body.visitedAt,
+      endAt: body.endAt,
     })
 
     return c.json<SuccessResponse<ApiResponseSpotDetail>>(
@@ -1417,11 +1419,13 @@ userBike.post(
         data: {
           spotId: spot.id,
           touringId: spot.touringId,
+          type: spot.type,
           name: spot.name,
           memo: spot.memo,
           latitude: spot.latitude,
           longitude: spot.longitude,
           visitedAt: spot.visitedAt.toISOString(),
+          endAt: spot.endAt?.toISOString() ?? null,
           sortOrder: spot.sortOrder,
         },
         message: 'スポット登録成功',
@@ -1457,11 +1461,13 @@ userBike.get(
         data: spots.map((spot) => ({
           spotId: spot.id,
           touringId: spot.touringId,
+          type: spot.type,
           name: spot.name,
           memo: spot.memo,
           latitude: spot.latitude,
           longitude: spot.longitude,
           visitedAt: spot.visitedAt.toISOString(),
+          endAt: spot.endAt?.toISOString() ?? null,
           sortOrder: spot.sortOrder,
         })),
         message: 'スポット一覧取得成功',
@@ -1532,6 +1538,7 @@ userBike.patch(
       latitude: body.latitude,
       longitude: body.longitude,
       visitedAt: body.visitedAt,
+      endAt: body.endAt,
     })
 
     return c.json<SuccessResponse<ApiResponseSpotDetail>>(
@@ -1540,11 +1547,13 @@ userBike.patch(
         data: {
           spotId: spot.id,
           touringId: spot.touringId,
+          type: spot.type,
           name: spot.name,
           memo: spot.memo,
           latitude: spot.latitude,
           longitude: spot.longitude,
           visitedAt: spot.visitedAt.toISOString(),
+          endAt: spot.endAt?.toISOString() ?? null,
           sortOrder: spot.sortOrder,
         },
         message: 'スポット更新成功',

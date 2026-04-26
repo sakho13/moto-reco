@@ -29,7 +29,7 @@ import { TouringEditModal } from '@/components/touring/TouringEditModal'
 import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
-import { apiGet, apiPatch } from '@/lib/api/client'
+import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -63,8 +63,11 @@ function TouringDetailPage() {
   const [editingSpot, setEditingSpot] = useState<ApiResponseSpotDetail | null>(
     null
   )
-  const [isAddSpotModalOpen, setIsAddSpotModalOpen] = useState(false)
+  const [addModalType, setAddModalType] = useState<'SPOT' | 'BREAK' | null>(
+    null
+  )
   const [localSpots, setLocalSpots] = useState<ApiResponseSpotDetail[]>([])
+  const [isBreakLoading, setIsBreakLoading] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -219,8 +222,10 @@ function TouringDetailPage() {
         mapPoints.push({
           lat: s.latitude!,
           lng: s.longitude!,
-          label: s.name ?? `スポット ${i + 1}`,
-          type: 'spot',
+          label:
+            s.name ??
+            (s.type === 'BREAK' ? `休憩 ${i + 1}` : `スポット ${i + 1}`),
+          type: s.type === 'BREAK' ? 'break' : 'spot',
         })
       })
   }
@@ -262,12 +267,56 @@ function TouringDetailPage() {
 
   const handleSpotAddSuccess = async () => {
     await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
-    setIsAddSpotModalOpen(false)
+    setAddModalType(null)
   }
 
   const handleSpotDeleteSuccess = async () => {
     await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
     setEditingSpot(null)
+  }
+
+  const currentBreak =
+    localSpots.find((s) => s.type === 'BREAK' && s.endAt === null) ?? null
+
+  const handleQuickBreakStart = async () => {
+    setIsBreakLoading(true)
+    try {
+      await apiPost(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`,
+        { type: 'BREAK', visitedAt: new Date() }
+      )
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
+      )
+      toast.success('休憩を開始しました')
+    } catch (err) {
+      toast.error(
+        err instanceof ApiV1Error ? err.message : '休憩の開始に失敗しました'
+      )
+    } finally {
+      setIsBreakLoading(false)
+    }
+  }
+
+  const handleQuickBreakEnd = async () => {
+    if (!currentBreak) return
+    setIsBreakLoading(true)
+    try {
+      await apiPatch(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots/${currentBreak.spotId}`,
+        { endAt: new Date() }
+      )
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
+      )
+      toast.success('休憩を終了しました')
+    } catch (err) {
+      toast.error(
+        err instanceof ApiV1Error ? err.message : '休憩の終了に失敗しました'
+      )
+    } finally {
+      setIsBreakLoading(false)
+    }
   }
 
   const hasMap = mapPoints.length > 0
@@ -329,15 +378,43 @@ function TouringDetailPage() {
   const spotsCard = (
     <div className={styles.card}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">立ち寄りスポット</h2>
+        <h2 className="text-lg font-semibold">スポット・休憩</h2>
         <button
-          onClick={() => setIsAddSpotModalOpen(true)}
+          onClick={() => setAddModalType('SPOT')}
           className={styles.editButton}
           aria-label="スポットを追加"
+          title="スポット・休憩を追加"
         >
           ＋
         </button>
       </div>
+
+      {touring?.status === 'STARTED' && (
+        <div className="mb-4">
+          {currentBreak ? (
+            <div className={styles.breakBanner}>
+              <span className={styles.breakBannerText}>
+                休憩中 {formatVisitedAt(currentBreak.visitedAt)}〜
+              </span>
+              <button
+                onClick={handleQuickBreakEnd}
+                disabled={isBreakLoading}
+                className={styles.breakEndButton}
+              >
+                休憩終了
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleQuickBreakStart}
+              disabled={isBreakLoading}
+              className={styles.breakStartButton}
+            >
+              休憩を始める
+            </button>
+          )}
+        </div>
+      )}
 
       {spotsLoading ? (
         <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
@@ -517,11 +594,12 @@ function TouringDetailPage() {
         />
       )}
 
-      {isAddSpotModalOpen && (
+      {addModalType !== null && (
         <SpotAddModal
           bikeId={bikeId}
           touringId={touringId}
-          onClose={() => setIsAddSpotModalOpen(false)}
+          initialType={addModalType}
+          onClose={() => setAddModalType(null)}
           onSuccess={handleSpotAddSuccess}
         />
       )}

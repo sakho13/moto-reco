@@ -1,4 +1,4 @@
-import { Spot, SpotId, TouringId } from '@repo/shared-types'
+import { Spot, SpotId, SpotType, TouringId } from '@repo/shared-types'
 
 export class SpotEntity {
   private _value: Spot
@@ -15,6 +15,10 @@ export class SpotEntity {
       throw new Error('経度は-180以上180以下である必要があります')
     }
 
+    if (spot.endAt !== null && spot.visitedAt > spot.endAt) {
+      throw new Error('開始日時は終了日時以前である必要があります')
+    }
+
     this._value = spot
   }
 
@@ -24,6 +28,10 @@ export class SpotEntity {
 
   public get touringId(): TouringId {
     return this._value.touringId
+  }
+
+  public get type(): SpotType {
+    return this._value.type
   }
 
   public get name(): string | null {
@@ -44,6 +52,10 @@ export class SpotEntity {
 
   public get visitedAt(): Date {
     return this._value.visitedAt
+  }
+
+  public get endAt(): Date | null {
+    return this._value.endAt
   }
 
   public get sortOrder(): number {

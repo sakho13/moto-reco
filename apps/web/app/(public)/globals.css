@@ -41,3 +41,17 @@ html[data-theme-mode='dark'] .imgLight {
 html[data-theme-mode='dark'] .imgDark {
   display: unset;
 }
+
+.public-page-container {
+  color: var(--foreground);
+  background: var(--background);
+  min-height: 100vh;
+  padding: 80px 96px 64px;
+  font-family: var(--font-geist-sans);
+}
+
+@media (max-width: 900px) {
+  .public-page-container {
+    padding: 64px 24px 48px;
+  }
+}

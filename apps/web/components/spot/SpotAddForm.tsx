@@ -14,13 +14,16 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 type SpotAddFormProps = {
   bikeId: string
   touringId: string
+  initialType?: 'SPOT' | 'BREAK'
   onSuccess: () => void
 }
 
 type SpotFormState = {
+  type: 'SPOT' | 'BREAK'
   name: string
   memo: string
   visitedAt: string
+  endAt: string
 }
 
 const getNowLocalString = () => {
@@ -30,11 +33,12 @@ const getNowLocalString = () => {
 }
 
 /**
- * スポット追加フォーム
+ * スポット・休憩追加フォーム
  */
 export function SpotAddForm({
   bikeId,
   touringId,
+  initialType = 'SPOT',
   onSuccess,
 }: SpotAddFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,10 +48,14 @@ export function SpotAddForm({
     null
   )
   const [formState, setFormState] = useState<SpotFormState>({
+    type: initialType,
     name: '',
     memo: '',
     visitedAt: getNowLocalString(),
+    endAt: '',
   })
+
+  const isBreak = formState.type === 'BREAK'
 
   const handleLocationSaved = (lat: number, lng: number) => {
     setLocation({ lat, lng })
@@ -63,9 +71,14 @@ export function SpotAddForm({
       await apiPost(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`,
         {
+          type: formState.type,
           name: formState.name !== '' ? formState.name : undefined,
           memo: formState.memo !== '' ? formState.memo : undefined,
           visitedAt: new Date(formState.visitedAt),
+          endAt:
+            isBreak && formState.endAt !== ''
+              ? new Date(formState.endAt)
+              : undefined,
           latitude: location?.lat,
           longitude: location?.lng,
         }
@@ -74,7 +87,7 @@ export function SpotAddForm({
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
       )
-      toast.success('スポットを追加しました')
+      toast.success(isBreak ? '休憩を追加しました' : 'スポットを追加しました')
       onSuccess()
     } catch (err) {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
@@ -86,7 +99,38 @@ export function SpotAddForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <FormField label="スポット名" htmlFor="spotName">
+        <FormField label="種別" htmlFor="spotType">
+          <div className="flex gap-3">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                name="spotType"
+                value="SPOT"
+                checked={formState.type === 'SPOT'}
+                onChange={() =>
+                  setFormState((prev) => ({ ...prev, type: 'SPOT' }))
+                }
+                disabled={isSubmitting}
+              />
+              <span className="text-sm">立ち寄り</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                name="spotType"
+                value="BREAK"
+                checked={formState.type === 'BREAK'}
+                onChange={() =>
+                  setFormState((prev) => ({ ...prev, type: 'BREAK' }))
+                }
+                disabled={isSubmitting}
+              />
+              <span className="text-sm">休憩</span>
+            </label>
+          </div>
+        </FormField>
+
+        <FormField label={isBreak ? '場所名' : 'スポット名'} htmlFor="spotName">
           <Input
             id="spotName"
             type="text"
@@ -95,7 +139,7 @@ export function SpotAddForm({
               setFormState((prev) => ({ ...prev, name: e.target.value }))
             }
             maxLength={100}
-            placeholder="スポット名（任意）"
+            placeholder={isBreak ? '場所名（任意）' : 'スポット名（任意）'}
             disabled={isSubmitting}
           />
         </FormField>
@@ -114,7 +158,10 @@ export function SpotAddForm({
           />
         </FormField>
 
-        <FormField label="訪問日時" htmlFor="spotVisitedAt">
+        <FormField
+          label={isBreak ? '休憩開始' : '訪問日時'}
+          htmlFor="spotVisitedAt"
+        >
           <Input
             id="spotVisitedAt"
             type="datetime-local"
@@ -125,6 +172,20 @@ export function SpotAddForm({
             disabled={isSubmitting}
           />
         </FormField>
+
+        {isBreak && (
+          <FormField label="休憩終了（任意）" htmlFor="spotEndAt">
+            <Input
+              id="spotEndAt"
+              type="datetime-local"
+              value={formState.endAt}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, endAt: e.target.value }))
+              }
+              disabled={isSubmitting}
+            />
+          </FormField>
+        )}
 
         <FormField label="位置">
           <div className="flex items-center gap-2">

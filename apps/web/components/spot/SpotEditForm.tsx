@@ -25,10 +25,17 @@ type SpotFormState = {
   name: string
   memo: string
   visitedAt: string
+  endAt: string
+}
+
+const toLocalDateTimeString = (dateString: string) => {
+  const d = new Date(dateString)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 /**
- * スポット編集フォーム
+ * スポット・休憩編集フォーム
  */
 export function SpotEditForm({
   bikeId,
@@ -51,17 +58,18 @@ export function SpotEditForm({
     name: '',
     memo: '',
     visitedAt: '',
+    endAt: '',
   })
 
-  useEffect(() => {
-    const visitedAtLocal = new Date(spot.visitedAt)
-    const pad = (n: number) => String(n).padStart(2, '0')
-    const visitedAtStr = `${visitedAtLocal.getFullYear()}-${pad(visitedAtLocal.getMonth() + 1)}-${pad(visitedAtLocal.getDate())}T${pad(visitedAtLocal.getHours())}:${pad(visitedAtLocal.getMinutes())}`
+  const isBreak = spot.type === 'BREAK'
+  const label = isBreak ? '休憩' : 'スポット'
 
+  useEffect(() => {
     setFormState({
       name: spot.name ?? '',
       memo: spot.memo ?? '',
-      visitedAt: visitedAtStr,
+      visitedAt: toLocalDateTimeString(spot.visitedAt),
+      endAt: spot.endAt ? toLocalDateTimeString(spot.endAt) : '',
     })
 
     if (spot.latitude != null && spot.longitude != null) {
@@ -101,11 +109,11 @@ export function SpotEditForm({
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
       )
-      toast.success('スポットを削除しました')
+      toast.success(`${label}を削除しました`)
       onDelete?.()
     } catch (err) {
       toast.error(
-        err instanceof ApiV1Error ? err.message : 'スポットの削除に失敗しました'
+        err instanceof ApiV1Error ? err.message : `${label}の削除に失敗しました`
       )
     } finally {
       setIsDeleting(false)
@@ -125,13 +133,18 @@ export function SpotEditForm({
           name: formState.name !== '' ? formState.name : null,
           memo: formState.memo !== '' ? formState.memo : null,
           visitedAt: new Date(formState.visitedAt),
+          endAt: isBreak
+            ? formState.endAt !== ''
+              ? new Date(formState.endAt)
+              : null
+            : undefined,
         }
       )
 
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
       )
-      toast.success('スポットを更新しました')
+      toast.success(`${label}を更新しました`)
       onSuccess()
     } catch (err) {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
@@ -143,7 +156,7 @@ export function SpotEditForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <FormField label="スポット名" htmlFor="spotName">
+        <FormField label={isBreak ? '場所名' : 'スポット名'} htmlFor="spotName">
           <Input
             id="spotName"
             type="text"
@@ -152,7 +165,7 @@ export function SpotEditForm({
               setFormState((prev) => ({ ...prev, name: e.target.value }))
             }
             maxLength={100}
-            placeholder="スポット名（任意）"
+            placeholder={isBreak ? '場所名（任意）' : 'スポット名（任意）'}
             disabled={isSubmitting}
           />
         </FormField>
@@ -171,7 +184,10 @@ export function SpotEditForm({
           />
         </FormField>
 
-        <FormField label="訪問日時" htmlFor="spotVisitedAt">
+        <FormField
+          label={isBreak ? '休憩開始' : '訪問日時'}
+          htmlFor="spotVisitedAt"
+        >
           <Input
             id="spotVisitedAt"
             type="datetime-local"
@@ -182,6 +198,20 @@ export function SpotEditForm({
             disabled={isSubmitting}
           />
         </FormField>
+
+        {isBreak && (
+          <FormField label="休憩終了（任意）" htmlFor="spotEndAt">
+            <Input
+              id="spotEndAt"
+              type="datetime-local"
+              value={formState.endAt}
+              onChange={(e) =>
+                setFormState((prev) => ({ ...prev, endAt: e.target.value }))
+              }
+              disabled={isSubmitting}
+            />
+          </FormField>
+        )}
 
         <FormField label="位置">
           <div className="flex items-center gap-2">
