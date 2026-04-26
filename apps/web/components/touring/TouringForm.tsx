@@ -154,6 +154,7 @@ export const TouringForm = ({
         <Input
           id="startMileage"
           type="number"
+          inputMode="numeric"
           value={formData.startMileage}
           onChange={(e) => {
             setFormData((prev) => ({
@@ -173,6 +174,7 @@ export const TouringForm = ({
         <Input
           id="endMileage"
           type="number"
+          inputMode="numeric"
           value={formData.endMileage}
           onChange={(e) => {
             setFormData((prev) => ({

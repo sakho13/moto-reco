@@ -149,6 +149,12 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+.startMileageInfo {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: var(--spacing-1);
+}
+
 /* アクションボタンエリア */
 .actionButtons {
   position: relative;
@@ -288,6 +294,18 @@
 
 .spotModalActions > * {
   flex: 1;
+}
+
+.mileageModalHint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-3);
+}
+
+.mileageModalError {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  margin-top: var(--spacing-1);
 }
 
 /* レスポンシブ: モバイル */
