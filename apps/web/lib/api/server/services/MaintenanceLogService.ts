@@ -6,7 +6,6 @@ import {
   UserId,
 } from '@repo/shared-types'
 import { MaintenanceLogEntity } from '../entities/MaintenanceLogEntity'
-import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
@@ -91,12 +90,10 @@ export class MaintenanceLogService {
       await this.maintenanceLogRepository.createMaintenanceLog(maintenanceLog)
 
     if (params.updateTotalMileage && params.mileage > myUserBike.totalMileage) {
-      const current = myUserBike.toJson()
-      const updatedEntity = new MyUserBikeEntity({
-        ...current,
-        totalMileage: params.mileage,
-      })
-      await this.myUserBikeRepository.updateMyUserBike(updatedEntity)
+      await this.myUserBikeRepository.updateTotalMileage(
+        myUserBike.userBikeId,
+        params.mileage
+      )
     }
 
     return created
@@ -144,12 +141,10 @@ export class MaintenanceLogService {
         params.updateTotalMileage &&
         result.mileage > myUserBike.totalMileage
       ) {
-        const current = myUserBike.toJson()
-        const updatedEntity = new MyUserBikeEntity({
-          ...current,
-          totalMileage: result.mileage,
-        })
-        await this.myUserBikeRepository.updateMyUserBike(updatedEntity)
+        await this.myUserBikeRepository.updateTotalMileage(
+          myUserBike.userBikeId,
+          result.mileage
+        )
       }
 
       return result

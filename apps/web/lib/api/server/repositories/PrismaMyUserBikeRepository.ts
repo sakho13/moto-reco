@@ -5,6 +5,7 @@ import {
   createUserId,
   MyUserBikeId,
   UserId,
+  UserBikeId,
 } from '@repo/shared-types'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import {
@@ -325,6 +326,16 @@ export class PrismaMyUserBikeRepository
       ownedAt: updated.ownedAt,
       soldAt: updated.soldAt,
       ownStatus: updated.ownStatus,
+    })
+  }
+
+  async updateTotalMileage(
+    userBikeId: UserBikeId,
+    totalMileage: number
+  ): Promise<void> {
+    await this.connection.tUserBike.update({
+      where: { id: userBikeId },
+      data: { totalMileage },
     })
   }
 
