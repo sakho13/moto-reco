@@ -2,8 +2,8 @@
 
 import { Map } from 'lucide-react'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
-import { ClickableListCard } from '@/components/ClickableListCard'
 import styles from './FuelLogItem.module.css'
+import { ClickableListCard } from '@/components/ClickableListCard'
 
 export interface FuelLogItemProps {
   fuelLog: ApiResponseFuelLogDetail

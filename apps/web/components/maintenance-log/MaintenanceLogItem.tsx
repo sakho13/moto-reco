@@ -1,8 +1,8 @@
 'use client'
 
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
-import { ClickableListCard } from '@/components/ClickableListCard'
 import styles from './MaintenanceLogItem.module.css'
+import { ClickableListCard } from '@/components/ClickableListCard'
 import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 
 type MaintenanceLogItemProps = {
