@@ -45,6 +45,10 @@ export interface IMyUserBikeRepository {
     userId: UserId
   ): Promise<MyUserBikeEntity | null>
   updateMyUserBike(myUserBike: MyUserBikeEntity): Promise<MyUserBikeEntity>
+  updateTotalMileage(
+    userBikeId: UserBikeId,
+    totalMileage: number
+  ): Promise<void>
   findMyUserBikeDetail(
     myUserBikeId: MyUserBikeId,
     userId: UserId
