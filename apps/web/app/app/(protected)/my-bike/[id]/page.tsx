@@ -144,7 +144,7 @@ function BikeDetailPage() {
       </div>
 
       {/* 履歴管理セクション */}
-      <div className="w-full max-w-md flex flex-col gap-4">
+      <div className="w-full max-w-md flex flex-col gap-4 mb-20">
         <NavigationCard
           href={`/app/my-bike/${id}/fuel-logs`}
           title="給油履歴"
