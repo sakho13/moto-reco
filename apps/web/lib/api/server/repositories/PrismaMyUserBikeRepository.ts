@@ -283,6 +283,11 @@ export class PrismaMyUserBikeRepository
         ownedAt: myUserBike.ownedAt,
         soldAt: myUserBike.soldAt,
         ownStatus: myUserBike.ownStatus,
+        userBike: {
+          update: {
+            totalMileage: myUserBike.totalMileage,
+          },
+        },
       },
       select: {
         id: true,
