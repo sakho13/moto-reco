@@ -6,6 +6,8 @@ import {
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
   ApiResponseFuelInsight,
+  ApiResponseMaintenanceLogDetail,
+  ApiResponseMaintenanceLogList,
   ApiResponseBikeHistoryList,
   ApiResponseAllBikesHistoryList,
   ApiResponseTouringDetail,
@@ -15,11 +17,15 @@ import {
   ApiResponseSpotList,
   createBikeId,
   createFuelLogId,
+  createMaintenanceLogId,
   createMyUserBikeId,
   createSpotId,
   createTouringId,
   createUserId,
   FuelInsightPeriod,
+  MaintenanceLogListQuerySchema,
+  MaintenanceLogRegisterRequestSchema,
+  MaintenanceLogUpdateRequestSchema,
   SuccessResponse,
   UserBikeRegisterRequestSchema,
   UserBikeUpdateRequestSchema,
@@ -52,12 +58,14 @@ import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaFuelInsightRepository } from '../repositories/PrismaFuelInsightRepository'
 import { PrismaFuelLogRepository } from '../repositories/PrismaFuelLogRepository'
 import { PrismaHistoryRepository } from '../repositories/PrismaHistoryRepository'
+import { PrismaMaintenanceLogRepository } from '../repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaSpotRepository } from '../repositories/PrismaSpotRepository'
 import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeRepository'
 import { FuelInsightService } from '../services/FuelInsightService'
 import { FuelLogService } from '../services/FuelLogService'
+import { MaintenanceLogService } from '../services/MaintenanceLogService'
 import { SpotService } from '../services/SpotService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
@@ -122,7 +130,10 @@ userBike.post(
         isPublic: body.isPublic,
       })
 
-      return service.getMyUserBikeDetail(myUserBike.id, createUserId(userId))
+      return service.getMyUserBikeDetail(
+        myUserBike.myUserBikeId,
+        createUserId(userId)
+      )
     })
 
     return c.json<SuccessResponse<ApiResponseUserBikeDetail>>(
@@ -839,6 +850,138 @@ userBike.delete(
         status: 'success',
         message: 'ツーリング削除成功',
         data: undefined,
+      },
+      200
+    )
+  }
+)
+
+userBike.get(
+  '/bike/:myUserBikeId/maintenance-logs',
+  honoAuthMiddleware,
+  zodValidateQuery(MaintenanceLogListQuerySchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const query = c.req.valid('query')
+
+    const maintenanceLogRepo = new PrismaMaintenanceLogRepository(prisma)
+    const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+    const service = new MaintenanceLogService(
+      maintenanceLogRepo,
+      myUserBikeRepo
+    )
+
+    const logs = await service.getMaintenanceLogs({
+      myUserBikeId: createMyUserBikeId(myUserBikeId),
+      userId: createUserId(userId),
+      page: query.page ?? 1,
+      perSize: query['per-size'] ?? 20,
+      sortOrder: query['sort-order'] ?? 'desc',
+    })
+
+    return c.json<SuccessResponse<ApiResponseMaintenanceLogList>>(
+      {
+        status: 'success',
+        data: logs.map((log) => ({
+          maintenanceLogId: log.id,
+          performedAt: log.performedAt.toISOString(),
+          mileage: log.mileage,
+          memo: log.memo,
+          items: log.items,
+        })),
+        message: 'メンテナンス履歴一覧取得成功',
+      },
+      200
+    )
+  }
+)
+
+userBike.post(
+  '/bike/:myUserBikeId/maintenance-logs',
+  honoAuthMiddleware,
+  zodValidateJson(MaintenanceLogRegisterRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const maintenanceLogRepo = new PrismaMaintenanceLogRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new MaintenanceLogService(
+        maintenanceLogRepo,
+        myUserBikeRepo
+      )
+
+      return service.registerMaintenanceLog({
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        performedAt: body.performedAt,
+        mileage: body.mileage,
+        memo: body.memo,
+        items: body.items,
+        updateTotalMileage: body.updateTotalMileage,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseMaintenanceLogDetail>>(
+      {
+        status: 'success',
+        data: {
+          maintenanceLogId: result.id,
+          performedAt: result.performedAt.toISOString(),
+          mileage: result.mileage,
+          memo: result.memo,
+          items: result.items,
+        },
+        message: 'メンテナンス履歴登録成功',
+      },
+      201
+    )
+  }
+)
+
+userBike.patch(
+  '/bike/:myUserBikeId/maintenance-logs',
+  honoAuthMiddleware,
+  zodValidateJson(MaintenanceLogUpdateRequestSchema),
+  async (c) => {
+    const { userId } = c.var.user!
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction((t) => {
+      const maintenanceLogRepo = new PrismaMaintenanceLogRepository(t)
+      const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
+      const service = new MaintenanceLogService(
+        maintenanceLogRepo,
+        myUserBikeRepo
+      )
+
+      return service.updateMaintenanceLog({
+        maintenanceLogId: createMaintenanceLogId(body.maintenanceLogId),
+        myUserBikeId: createMyUserBikeId(myUserBikeId),
+        userId: createUserId(userId),
+        performedAt: body.performedAt,
+        mileage: body.mileage,
+        memo: body.memo,
+        items: body.items,
+        updateTotalMileage: body.updateTotalMileage,
+      })
+    })
+
+    return c.json<SuccessResponse<ApiResponseMaintenanceLogDetail>>(
+      {
+        status: 'success',
+        data: {
+          maintenanceLogId: result.id,
+          performedAt: result.performedAt.toISOString(),
+          mileage: result.mileage,
+          memo: result.memo,
+          items: result.items,
+        },
+        message: 'メンテナンス履歴更新成功',
       },
       200
     )
