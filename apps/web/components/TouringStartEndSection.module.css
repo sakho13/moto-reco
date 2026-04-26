@@ -175,6 +175,68 @@
   background-color: rgba(255, 255, 255, 0.3);
 }
 
+/* 右上の休憩ボタンエリア */
+.breakCornerArea {
+  position: absolute;
+  top: var(--spacing-4);
+  right: var(--spacing-4);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.breakCornerButton {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--radius-md);
+  background-color: rgba(251, 191, 36, 0.28);
+  border: 1px solid rgba(251, 191, 36, 0.65);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.breakCornerButton:hover:not(:disabled) {
+  background-color: rgba(251, 191, 36, 0.45);
+}
+
+.breakCornerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.breakCornerEndButton {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--radius-md);
+  background-color: rgba(251, 191, 36, 0.55);
+  border: 1px solid rgba(251, 191, 36, 0.9);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.breakCornerEndButton:hover:not(:disabled) {
+  background-color: rgba(251, 191, 36, 0.7);
+}
+
+.breakCornerEndButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.breakCornerStatus {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: right;
+}
+
 /* 終了ボタン */
 .endButton {
   position: relative;
