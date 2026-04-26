@@ -66,7 +66,15 @@ async function fetchBlogPages() {
     if (!microCMSClient) return []
     const data = await microCMSClient.getList<Blog>({
       endpoint: 'motoreco-blogs',
-      queries: { orders: '-publishedAt', limit: 100, fields: 'slug,updatedAt' },
+      queries: {
+        orders: '-publishedAt',
+        limit: 100,
+        fields: 'slug,updatedAt',
+        filters:
+          process.env.NODE_ENV !== 'development'
+            ? 'status[equals]published'
+            : undefined,
+      },
     })
     console.log(`[sitemap] ブログ記事取得: ${data.contents.length}件`)
 
