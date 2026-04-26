@@ -1,0 +1,131 @@
+.article {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  max-width: 720px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.articleTitle {
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.date {
+  font-size: 14px;
+  color: rgba(23, 23, 23, 0.5);
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.keyword {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: rgba(23, 23, 23, 0.06);
+  color: rgba(23, 23, 23, 0.7);
+}
+
+.eyecatch {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(23, 23, 23, 0.05);
+}
+
+.content {
+  font-size: 16px;
+  line-height: 1.9;
+  color: rgba(23, 23, 23, 0.85);
+}
+
+.content h2 {
+  font-size: clamp(20px, 2.5vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 2em 0 0.75em;
+}
+
+.content h3 {
+  font-size: clamp(17px, 2vw, 20px);
+  font-weight: 600;
+  margin: 1.5em 0 0.5em;
+}
+
+.content p {
+  margin: 0 0 1.25em;
+}
+
+.content ul,
+.content ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.25em;
+}
+
+.content li {
+  margin-bottom: 6px;
+}
+
+.content a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.content img {
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+.content blockquote {
+  margin: 1.5em 0;
+  padding: 16px 24px;
+  border-left: 4px solid rgba(23, 23, 23, 0.2);
+  color: rgba(23, 23, 23, 0.65);
+}
+
+html[data-theme-mode='dark'] .date {
+  color: rgba(237, 237, 237, 0.5);
+}
+
+html[data-theme-mode='dark'] .keyword {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(237, 237, 237, 0.7);
+}
+
+html[data-theme-mode='dark'] .eyecatch {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html[data-theme-mode='dark'] .content {
+  color: rgba(237, 237, 237, 0.85);
+}
+
+html[data-theme-mode='dark'] .content blockquote {
+  border-left-color: rgba(237, 237, 237, 0.2);
+  color: rgba(237, 237, 237, 0.65);
+}
