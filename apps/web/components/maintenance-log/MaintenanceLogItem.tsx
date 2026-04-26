@@ -1,7 +1,7 @@
 'use client'
 
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
-import { Button } from '@repo/ui/button'
+import { ClickableListCard } from '@/components/ClickableListCard'
 import styles from './MaintenanceLogItem.module.css'
 import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 
@@ -34,22 +34,10 @@ export const MaintenanceLogItem = ({
   onEdit,
 }: MaintenanceLogItemProps) => {
   return (
-    <div className={styles.item}>
-      <div className={styles.mainRow}>
-        <div className={styles.dateBlock}>
-          <span className={styles.date}>{formatDate(log.performedAt)}</span>
-          <span className={styles.mileage}>
-            {log.mileage.toLocaleString()}km
-          </span>
-        </div>
-
-        <Button
-          onClick={() => onEdit(log.maintenanceLogId)}
-          variant="cloud"
-          size="sm"
-        >
-          編集
-        </Button>
+    <ClickableListCard onClick={() => onEdit(log.maintenanceLogId)}>
+      <div className={styles.dateBlock}>
+        <span className={styles.date}>{formatDate(log.performedAt)}</span>
+        <span className={styles.mileage}>{log.mileage.toLocaleString()}km</span>
       </div>
 
       <div className={styles.itemsRow}>
@@ -66,6 +54,6 @@ export const MaintenanceLogItem = ({
           <span className={styles.memoText}>{log.memo}</span>
         </div>
       )}
-    </div>
+    </ClickableListCard>
   )
 }
