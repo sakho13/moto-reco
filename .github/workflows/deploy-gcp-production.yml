@@ -3,7 +3,7 @@ name: Deploy to GCP Production
 on:
   push:
     tags:
-      - 'gcp-release/*'
+      - "gcp-release/*"
   workflow_dispatch:
 
 permissions:
@@ -64,6 +64,8 @@ jobs:
             --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PROD_FIREBASE_MESSAGING_SENDER_ID }} \
             --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.PROD_FIREBASE_APP_ID }} \
             --build-arg NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=${{ secrets.PROD_FIREBASE_MEASUREMENT_ID }} \
+            --build-arg MICRO_CMS_API_KEY=${{ secrets.MICRO_CMS_API_KEY }} \
+            --build-arg MICRO_CMS_SERVICE_DOMAIN=${{ secrets.MICRO_CMS_SERVICE_DOMAIN }} \
             --build-arg APP_VERSION=$APP_VERSION \
             -t ${WEB_IMAGE}:${APP_VERSION} \
             -t ${WEB_IMAGE}:latest .
