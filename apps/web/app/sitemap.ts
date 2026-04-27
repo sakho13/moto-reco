@@ -78,7 +78,7 @@ async function fetchBlogPages() {
         fields: 'slug,updatedAt',
         filters:
           process.env.NODE_ENV !== 'development'
-            ? 'status[equals]published'
+            ? 'status[contains]published'
             : undefined,
       },
     })

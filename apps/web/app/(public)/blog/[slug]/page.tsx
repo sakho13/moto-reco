@@ -22,7 +22,7 @@ async function getBlogBySlug(slug: string): Promise<Blog | null> {
       queries: {
         filters: `slug[equals]${slug}${
           process.env.NODE_ENV !== 'development'
-            ? '[and]status[equals]published'
+            ? '[and]status[contains]published'
             : ''
         }`,
         limit: 1,

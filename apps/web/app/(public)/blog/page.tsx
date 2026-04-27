@@ -29,33 +29,21 @@ export const metadata: Metadata = {
 }
 
 async function getBlogs(): Promise<Blog[]> {
-  const filter =
-    process.env.NODE_ENV !== 'development'
-      ? 'status[equals]published'
-      : undefined
-  console.log('[microCMS] getBlogs filter:', filter)
   try {
-    if (!microCMSClient) {
-      console.warn('[microCMS] getBlogs: client is null')
-      return []
-    }
+    if (!microCMSClient) return []
     const data = await microCMSClient.getList<Blog>({
       endpoint: 'motoreco-blogs',
       queries: {
         orders: '-publishedAt',
         limit: 100,
-        filters: filter,
+        filters:
+          process.env.NODE_ENV !== 'development'
+            ? 'status[contains]published'
+            : undefined,
       },
     })
-    console.log(
-      '[microCMS] getBlogs count:',
-      data.contents.length,
-      'total:',
-      data.totalCount
-    )
     return data.contents
-  } catch (e) {
-    console.error('[microCMS] getBlogs error:', e)
+  } catch {
     return []
   }
 }

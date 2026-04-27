@@ -27,33 +27,21 @@ export const metadata: Metadata = {
 }
 
 async function getReleaseNotes(): Promise<ReleaseNote[]> {
-  const filter =
-    process.env.NODE_ENV !== 'development'
-      ? 'status[equals]published'
-      : undefined
-  console.log('[microCMS] getReleaseNotes filter:', filter)
   try {
-    if (!microCMSClient) {
-      console.warn('[microCMS] getReleaseNotes: client is null')
-      return []
-    }
+    if (!microCMSClient) return []
     const data = await microCMSClient.getList<ReleaseNote>({
       endpoint: 'motoreco-releases',
       queries: {
         orders: '-publishedAt',
         limit: 100,
-        filters: filter,
+        filters:
+          process.env.NODE_ENV !== 'development'
+            ? 'status[contains]published'
+            : undefined,
       },
     })
-    console.log(
-      '[microCMS] getReleaseNotes count:',
-      data.contents.length,
-      'total:',
-      data.totalCount
-    )
     return data.contents
-  } catch (e) {
-    console.error('[microCMS] getReleaseNotes error:', e)
+  } catch {
     return []
   }
 }
