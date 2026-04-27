@@ -248,11 +248,13 @@ export type ApiResponseBikesOngoingTourings = {
 export type ApiResponseSpotDetail = {
   spotId: string
   touringId: string
+  type: 'SPOT' | 'BREAK'
   name: string | null
   memo: string | null
   latitude: number | null
   longitude: number | null
   visitedAt: string
+  endAt: string | null
   sortOrder: number
 }
 

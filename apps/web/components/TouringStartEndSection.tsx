@@ -3,13 +3,14 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from './icons/BikeIcon'
 import { TouringIcon } from './icons/TouringIcon'
 import styles from './TouringStartEndSection.module.css'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
-import { apiGet, apiPost } from '@/lib/api/client'
+import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -412,7 +413,21 @@ const ActiveTouringCard = ({
   const [showEndMileageModal, setShowEndMileageModal] = useState(false)
   const [endMileageInput, setEndMileageInput] = useState('')
   const [endMileageError, setEndMileageError] = useState('')
+  const [isBreakLoading, setIsBreakLoading] = useState(false)
   const { getCurrentPosition } = useGeolocation()
+
+  const { data: spots } = useSWR(
+    `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots`,
+    async (url) => {
+      const response = await apiGet(
+        url as `/api/v1/user-bike/bike/${string}/tourings/${string}/spots`
+      )
+      return response.data as ApiResponseSpotDetail[]
+    }
+  )
+
+  const currentBreak =
+    spots?.find((s) => s.type === 'BREAK' && s.endAt === null) ?? null
 
   useEffect(() => {
     const updateElapsedTime = () => {
@@ -498,6 +513,54 @@ const ActiveTouringCard = ({
     }
   }
 
+  const formatBreakTime = (dateString: string) => {
+    const date = new Date(dateString)
+    const h = String(date.getHours()).padStart(2, '0')
+    const m = String(date.getMinutes()).padStart(2, '0')
+    return `${h}:${m}`
+  }
+
+  const handleQuickBreakStart = async () => {
+    setIsBreakLoading(true)
+    try {
+      await apiPost(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots` as const,
+        { type: 'BREAK', visitedAt: new Date() }
+      )
+      await mutate(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots`
+      )
+      toast.success('休憩を開始しました')
+    } catch (error) {
+      toast.error(
+        error instanceof ApiV1Error ? error.message : '休憩の開始に失敗しました'
+      )
+    } finally {
+      setIsBreakLoading(false)
+    }
+  }
+
+  const handleQuickBreakEnd = async () => {
+    if (!currentBreak) return
+    setIsBreakLoading(true)
+    try {
+      await apiPatch(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots/${currentBreak.spotId}` as const,
+        { endAt: new Date() }
+      )
+      await mutate(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots`
+      )
+      toast.success('休憩を終了しました')
+    } catch (error) {
+      toast.error(
+        error instanceof ApiV1Error ? error.message : '休憩の終了に失敗しました'
+      )
+    } finally {
+      setIsBreakLoading(false)
+    }
+  }
+
   const handleOpenEndMileageModal = () => {
     setEndMileageInput('')
     setEndMileageError('')
@@ -528,6 +591,32 @@ const ActiveTouringCard = ({
         {/* ルート風の背景 */}
         <div className={styles.routeVisual}>
           <div className={styles.roadDash} />
+        </div>
+
+        {/* 右上の休憩ボタン */}
+        <div className={styles.breakCornerArea}>
+          {currentBreak ? (
+            <>
+              <span className={styles.breakCornerStatus}>
+                休憩中 {formatBreakTime(currentBreak.visitedAt)}〜
+              </span>
+              <button
+                onClick={handleQuickBreakEnd}
+                disabled={isBreakLoading || isLoading}
+                className={styles.breakCornerEndButton}
+              >
+                {isBreakLoading ? '...' : '休憩終了'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleQuickBreakStart}
+              disabled={isBreakLoading || isLoading || spotLoading}
+              className={styles.breakCornerButton}
+            >
+              {isBreakLoading ? '...' : '休憩を始める'}
+            </button>
+          )}
         </div>
 
         {/* バイク情報 */}
