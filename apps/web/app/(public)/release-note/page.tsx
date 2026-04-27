@@ -41,7 +41,8 @@ async function getReleaseNotes(): Promise<ReleaseNote[]> {
       },
     })
     return data.contents
-  } catch {
+  } catch (e) {
+    console.error('[microCMS] getReleaseNotes error:', e)
     return []
   }
 }

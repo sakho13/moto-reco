@@ -44,7 +44,8 @@ async function getBlogs(): Promise<Blog[]> {
       },
     })
     return data.contents
-  } catch {
+  } catch (e) {
+    console.error('[microCMS] getBlogs error:', e)
     return []
   }
 }
