@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { BlogToc } from './BlogToc'
 import styles from './page.module.css'
+import { parseHeadings } from '@/lib/blog/toc'
 import { microCMSClient } from '@/lib/microcms/config'
 import type { Blog } from '@/lib/microcms/types'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
@@ -66,6 +68,8 @@ export default async function BlogDetailPage({ params }: Props) {
     notFound()
   }
 
+  const { headings, contentHtml } = parseHeadings(blog.content)
+
   return (
     <div className="public-page-container">
       <article className={styles.article}>
@@ -111,9 +115,11 @@ export default async function BlogDetailPage({ params }: Props) {
           )}
         </header>
 
+        <BlogToc headings={headings} />
+
         <div
           className={styles.content}
-          dangerouslySetInnerHTML={{ __html: blog.content }}
+          dangerouslySetInnerHTML={{ __html: contentHtml }}
         />
       </article>
     </div>
