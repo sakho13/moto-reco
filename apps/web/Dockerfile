@@ -69,6 +69,11 @@ RUN chmod 755 /usr/local/bin/cloud_sql_proxy
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+ARG MICRO_CMS_API_KEY
+ARG MICRO_CMS_SERVICE_DOMAIN
+ENV MICRO_CMS_API_KEY=$MICRO_CMS_API_KEY
+ENV MICRO_CMS_SERVICE_DOMAIN=$MICRO_CMS_SERVICE_DOMAIN
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
