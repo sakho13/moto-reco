@@ -28,9 +28,7 @@ export const createMyUserBikeId = (id: string): MyUserBikeId =>
 
 import { UserId } from './user'
 
-export type MyUserBike = {
-  bikeId: BikeId | null
-  userBikeId: UserBikeId
+export type MyUserBike = UserBike & {
   myUserBikeId: MyUserBikeId
   userId: UserId
 

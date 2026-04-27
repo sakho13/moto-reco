@@ -1,0 +1,30 @@
+.viewToggle {
+  display: flex;
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.toggleButton {
+  flex: 1;
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  opacity: 0.6;
+}
+
+.toggleButton:hover {
+  background-color: var(--color-cloud);
+  opacity: 1;
+}
+
+.toggleButton.active {
+  background-color: var(--color-primary);
+  color: white;
+  opacity: 1;
+}

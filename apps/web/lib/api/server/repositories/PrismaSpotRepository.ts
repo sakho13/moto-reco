@@ -3,11 +3,52 @@ import {
   createSpotId,
   createTouringId,
   SpotId,
+  SpotType,
   TouringId,
 } from '@repo/shared-types'
 import { SpotEntity } from '../entities/SpotEntity'
 import { ISpotRepository } from '../interfaces/ISpotRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
+
+const spotSelect = {
+  id: true,
+  touringId: true,
+  type: true,
+  name: true,
+  memo: true,
+  latitude: true,
+  longitude: true,
+  visitedAt: true,
+  endAt: true,
+  sortOrder: true,
+} as const
+
+type SpotRow = {
+  id: string
+  touringId: string
+  type: SpotType
+  name: string | null
+  memo: string | null
+  latitude: number | null
+  longitude: number | null
+  visitedAt: Date
+  endAt: Date | null
+  sortOrder: number
+}
+
+const toSpotEntity = (row: SpotRow): SpotEntity =>
+  new SpotEntity({
+    spotId: createSpotId(row.id),
+    touringId: createTouringId(row.touringId),
+    type: row.type,
+    name: row.name,
+    memo: row.memo,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    visitedAt: row.visitedAt,
+    endAt: row.endAt,
+    sortOrder: row.sortOrder,
+  })
 
 export class PrismaSpotRepository
   extends PrismaRepositoryBase
@@ -21,70 +62,29 @@ export class PrismaSpotRepository
     const created = await this.connection.tUserMyBikeTouringSpot.create({
       data: {
         touringId: spot.touringId,
+        type: spot.type,
         name: spot.name,
         memo: spot.memo,
         latitude: spot.latitude,
         longitude: spot.longitude,
         visitedAt: spot.visitedAt,
+        endAt: spot.endAt,
         sortOrder: count,
       },
-      select: {
-        id: true,
-        touringId: true,
-        name: true,
-        memo: true,
-        latitude: true,
-        longitude: true,
-        visitedAt: true,
-        sortOrder: true,
-      },
+      select: spotSelect,
     })
 
-    return new SpotEntity({
-      spotId: createSpotId(created.id),
-      touringId: createTouringId(created.touringId),
-      name: created.name,
-      memo: created.memo,
-      latitude: created.latitude,
-      longitude: created.longitude,
-      visitedAt: created.visitedAt,
-      sortOrder: created.sortOrder,
-    })
+    return toSpotEntity(created)
   }
 
   async findSpotsByTouringId(touringId: TouringId): Promise<SpotEntity[]> {
     const spots = await this.connection.tUserMyBikeTouringSpot.findMany({
-      where: {
-        touringId,
-      },
-      select: {
-        id: true,
-        touringId: true,
-        name: true,
-        memo: true,
-        latitude: true,
-        longitude: true,
-        visitedAt: true,
-        sortOrder: true,
-      },
-      orderBy: {
-        sortOrder: 'asc',
-      },
+      where: { touringId },
+      select: spotSelect,
+      orderBy: { sortOrder: 'asc' },
     })
 
-    return spots.map(
-      (spot) =>
-        new SpotEntity({
-          spotId: createSpotId(spot.id),
-          touringId: createTouringId(spot.touringId),
-          name: spot.name,
-          memo: spot.memo,
-          latitude: spot.latitude,
-          longitude: spot.longitude,
-          visitedAt: spot.visitedAt,
-          sortOrder: spot.sortOrder,
-        })
-    )
+    return spots.map(toSpotEntity)
   }
 
   async findSpotById(
@@ -92,80 +92,35 @@ export class PrismaSpotRepository
     touringId: TouringId
   ): Promise<SpotEntity | null> {
     const spot = await this.connection.tUserMyBikeTouringSpot.findFirst({
-      where: {
-        id: spotId,
-        touringId,
-      },
-      select: {
-        id: true,
-        touringId: true,
-        name: true,
-        memo: true,
-        latitude: true,
-        longitude: true,
-        visitedAt: true,
-        sortOrder: true,
-      },
+      where: { id: spotId, touringId },
+      select: spotSelect,
     })
 
-    if (!spot) {
-      return null
-    }
+    if (!spot) return null
 
-    return new SpotEntity({
-      spotId: createSpotId(spot.id),
-      touringId: createTouringId(spot.touringId),
-      name: spot.name,
-      memo: spot.memo,
-      latitude: spot.latitude,
-      longitude: spot.longitude,
-      visitedAt: spot.visitedAt,
-      sortOrder: spot.sortOrder,
-    })
+    return toSpotEntity(spot)
   }
 
   async updateSpot(spot: SpotEntity): Promise<SpotEntity> {
     const updated = await this.connection.tUserMyBikeTouringSpot.update({
-      where: {
-        id: spot.id,
-      },
+      where: { id: spot.id },
       data: {
         name: spot.name,
         memo: spot.memo,
         latitude: spot.latitude,
         longitude: spot.longitude,
         visitedAt: spot.visitedAt,
+        endAt: spot.endAt,
       },
-      select: {
-        id: true,
-        touringId: true,
-        name: true,
-        memo: true,
-        latitude: true,
-        longitude: true,
-        visitedAt: true,
-        sortOrder: true,
-      },
+      select: spotSelect,
     })
 
-    return new SpotEntity({
-      spotId: createSpotId(updated.id),
-      touringId: createTouringId(updated.touringId),
-      name: updated.name,
-      memo: updated.memo,
-      latitude: updated.latitude,
-      longitude: updated.longitude,
-      visitedAt: updated.visitedAt,
-      sortOrder: updated.sortOrder,
-    })
+    return toSpotEntity(updated)
   }
 
   async deleteSpot(spotId: SpotId, touringId: TouringId): Promise<void> {
     await this.connection.tUserMyBikeTouringSpot.deleteMany({
-      where: {
-        id: spotId,
-        touringId,
-      },
+      where: { id: spotId, touringId },
     })
   }
 

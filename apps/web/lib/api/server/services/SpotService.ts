@@ -2,6 +2,7 @@ import {
   createSpotId,
   MyUserBikeId,
   SpotId,
+  SpotType,
   TouringId,
   UserId,
 } from '@repo/shared-types'
@@ -16,11 +17,13 @@ type RegisterSpotParams = {
   touringId: TouringId
   myUserBikeId: MyUserBikeId
   userId: UserId
+  type?: SpotType
   name?: string
   memo?: string
   latitude?: number
   longitude?: number
   visitedAt?: Date
+  endAt?: Date
 }
 
 type UpdateSpotParams = {
@@ -33,6 +36,7 @@ type UpdateSpotParams = {
   latitude?: number | null
   longitude?: number | null
   visitedAt?: Date
+  endAt?: Date | null
 }
 
 export class SpotService {
@@ -65,11 +69,13 @@ export class SpotService {
       const spot = new SpotEntity({
         spotId: createSpotId(''),
         touringId: params.touringId,
+        type: params.type ?? 'SPOT',
         name: params.name ?? null,
         memo: params.memo ?? null,
         latitude: params.latitude ?? null,
         longitude: params.longitude ?? null,
         visitedAt: params.visitedAt ?? new Date(),
+        endAt: params.endAt ?? null,
         sortOrder: 0, // createSpot でカウントして末尾に設定される
       })
 
@@ -140,6 +146,7 @@ export class SpotService {
       const updatedSpot = new SpotEntity({
         spotId: existingSpot.id,
         touringId: existingSpot.touringId,
+        type: existingSpot.type,
         name: params.name !== undefined ? params.name : existingSpot.name,
         memo: params.memo !== undefined ? params.memo : existingSpot.memo,
         latitude:
@@ -151,6 +158,7 @@ export class SpotService {
             ? params.longitude
             : existingSpot.longitude,
         visitedAt: params.visitedAt ?? existingSpot.visitedAt,
+        endAt: params.endAt !== undefined ? params.endAt : existingSpot.endAt,
         sortOrder: existingSpot.sortOrder,
       })
 

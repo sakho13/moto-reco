@@ -20,13 +20,11 @@
 .navigationCard:hover {
   border-color: var(--color-product);
   box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-  border-width: 1px;
 }
 
 /* active状態 */
 .navigationCard:active {
-  transform: translateY(0) scale(0.98);
+  transform: scale(0.98);
 }
 
 /* アイコンコンテナ */
@@ -63,6 +61,14 @@
   color: var(--color-inkLight);
   line-height: var(--line-height-normal);
   margin: 0;
+}
+
+/* 右端の矢印アイコン */
+.chevron {
+  flex-shrink: 0;
+  color: var(--color-inkLight);
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 /* レスポンシブ */

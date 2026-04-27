@@ -102,7 +102,7 @@ export const MAINTENANCE_ITEMS_MASTER: readonly MaintenanceItemWithoutId[] = [
   {
     type: 'OIL_CLEANER',
     category: 'ENGINE',
-    typeName: 'オイルクリーナー',
+    typeName: 'オイルフィルター',
     categoryName: 'エンジン',
     recommendedMileageInterval: 6000,
     recommendedPeriodMonths: 12,

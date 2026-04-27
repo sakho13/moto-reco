@@ -14,7 +14,7 @@ interface SpotEditModalProps {
 }
 
 /**
- * スポット編集モーダル
+ * スポット・休憩編集モーダル
  */
 export function SpotEditModal({
   bikeId,
@@ -24,8 +24,10 @@ export function SpotEditModal({
   onSuccess,
   onDelete,
 }: SpotEditModalProps) {
+  const title = spot.type === 'BREAK' ? '休憩を編集' : 'スポットを編集'
+
   return (
-    <ModalBase title="スポットを編集" onClose={onClose}>
+    <ModalBase title={title} onClose={onClose}>
       <SpotEditForm
         bikeId={bikeId}
         touringId={touringId}

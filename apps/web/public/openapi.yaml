@@ -844,6 +844,100 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/user-bike/bike/{my-user-bike-id}/maintenance-logs:
+    post:
+      summary: ユーザー所有バイクのメンテナンス履歴登録
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeMaintenanceLogRegisterDetail'
+      responses:
+        '201':
+          description: メンテナンス履歴登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeMaintenanceLogDetail'
+                  message:
+                    type: string
+                    example: メンテナンス履歴登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    patch:
+      summary: ユーザー所有バイクのメンテナンス履歴更新
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeMaintenanceLogUpdateDetail'
+      responses:
+        '200':
+          description: メンテナンス履歴更新成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeMaintenanceLogDetail'
+                  message:
+                    type: string
+                    example: メンテナンス履歴更新成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/user-bike/bike/{my-user-bike-id}/fuel-insights:
     get:
       summary: ユーザー所有バイクの燃費インサイト取得
@@ -1518,6 +1612,95 @@ components:
           type: string
           description: 燃料ログID
 
+    MyUserBikeMaintenanceLogItem:
+      type: object
+      required:
+        - maintenanceType
+      properties:
+        maintenanceType:
+          $ref: '#/components/schemas/MaintenanceType'
+        value:
+          type: number
+          format: float
+          nullable: true
+          description: メンテナンス項目の入力値
+
+    MyUserBikeMaintenanceLogDetail:
+      type: object
+      properties:
+        maintenanceLogId:
+          type: string
+        performedAt:
+          type: string
+          description: メンテナンス実施日時（ISO 8601形式）
+        mileage:
+          type: integer
+          description: 実施時走行距離（km）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyUserBikeMaintenanceLogItem'
+
+    MyUserBikeMaintenanceLogRegisterDetail:
+      type: object
+      required:
+        - performedAt
+        - mileage
+        - items
+      properties:
+        performedAt:
+          type: string
+          description: メンテナンス実施日時（ISO 8601形式）
+        mileage:
+          type: integer
+          description: 実施時走行距離（km）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyUserBikeMaintenanceLogItem'
+        updateTotalMileage:
+          type: boolean
+          description: メンテナンス履歴登録後にユーザー所有バイクの総走行距離を更新するかどうか。更新する値が現在の総走行距離よりも小さい場合は更新されません。
+          default: false
+
+    MyUserBikeMaintenanceLogUpdateDetail:
+      type: object
+      required:
+        - maintenanceLogId
+      properties:
+        maintenanceLogId:
+          type: string
+          description: メンテナンス履歴ID
+        performedAt:
+          type: string
+          description: メンテナンス実施日時（ISO 8601形式）
+        mileage:
+          type: integer
+          description: 実施時走行距離（km）
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyUserBikeMaintenanceLogItem'
+        updateTotalMileage:
+          type: boolean
+          description: メンテナンス履歴更新後にユーザー所有バイクの総走行距離を更新するかどうか。更新する値が現在の総走行距離よりも小さい場合は更新されません。
+          default: false
+
     MyUserBikeTouringDetail:
       type: object
       properties:
@@ -1692,6 +1875,23 @@ components:
         - MASTER_CYLINDER_CUP
         - BRAKE_CALIPER_SEAL
         - BRAKE_CABLE
+        # エンジン
+        - SPARK_PLUG
+        - COOLANT
+        - ENGINE_OIL
+        - OIL_CLEANER
+        # 動力伝達装置
+        - TRANSMISSION_OIL
+        - DRIVE_CHAIN
+        - DRIVE_BELT
+        # タイヤ
+        - FRONT_TIRE
+        - REAR_TIRE
+        # 電気装置
+        - BATTERY
+        - LIGHT
+        - TURN_SIGNAL
+        - HORN
 
   responses:
     Error400:

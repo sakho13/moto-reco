@@ -29,7 +29,7 @@ export default async function PublicBikesPage() {
   const bikes = await getPublicBikes()
 
   return (
-    <div className={styles.page}>
+    <div className="public-page-container">
       <header className={styles.header}>
         <h1 className={styles.title}>公開バイク一覧</h1>
         <p className={styles.description}>
