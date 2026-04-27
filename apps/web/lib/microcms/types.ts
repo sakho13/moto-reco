@@ -4,6 +4,9 @@ export type ReleaseNote = {
   title: string
   version: string
   content: string
+  status: 'draft' | 'published'
+  releaseType: 'patch' | 'minor' | 'major'
+  releaseDate: string
 } & MicroCMSListContent
 
 export type Blog = {

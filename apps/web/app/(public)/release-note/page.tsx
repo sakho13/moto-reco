@@ -70,10 +70,10 @@ export default async function ReleaseNotePage() {
                 <span className={styles.version}>v{note.version}</span>
                 <time
                   className={styles.date}
-                  dateTime={note.publishedAt ?? note.createdAt}
+                  dateTime={note.releaseDate ?? note.createdAt}
                 >
                   {new Date(
-                    note.publishedAt ?? note.createdAt
+                    note.releaseDate ?? note.createdAt
                   ).toLocaleDateString('ja-JP', {
                     year: 'numeric',
                     month: 'long',
