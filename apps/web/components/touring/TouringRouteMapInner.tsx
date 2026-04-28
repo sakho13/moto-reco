@@ -8,7 +8,7 @@ export type MapPoint = {
   lat: number
   lng: number
   label: string
-  type: 'start' | 'spot' | 'end'
+  type: 'start' | 'spot' | 'break' | 'end'
 }
 
 type Props = {
@@ -19,6 +19,7 @@ type Props = {
 const COLORS: Record<MapPoint['type'], string> = {
   start: '#10b981',
   spot: '#6366f1',
+  break: '#f59e0b',
   end: '#ef4444',
 }
 

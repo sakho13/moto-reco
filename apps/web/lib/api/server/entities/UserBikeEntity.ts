@@ -1,7 +1,7 @@
 import { BikeId, UserBike, UserBikeId } from '@repo/shared-types'
 
 export class UserBikeEntity {
-  private _value: UserBike
+  protected _value: UserBike
 
   constructor(userBike: UserBike) {
     if (userBike.displacement <= 0) {

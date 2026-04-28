@@ -90,6 +90,11 @@ function BikeDetailPage() {
     bike.nickname ||
     `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
 
+  const formatDate = (iso: string) => {
+    const d = new Date(iso)
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+  }
+
   return (
     <>
       {isEditModalOpen && (
@@ -123,18 +128,23 @@ function BikeDetailPage() {
             </Button>
           }
         >
-          <div className="flex flex-row gap-2 select-none">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm select-none">
             <span>総走行距離: {bike.totalMileage.toLocaleString()}km</span>
-            <span>モデル: {bike.modelName || '不明'}</span>
             <span>
               排気量: {bike.displacement ? `${bike.displacement}cc` : '不明'}
             </span>
+            <span>
+              購入日:{' '}
+              {bike.purchaseDate ? formatDate(bike.purchaseDate) : '未設定'}
+            </span>
+            <span>給油回数: {bike.fuelLogCount}回</span>
+            <span>ツーリング回数: {bike.touringCount}回</span>
           </div>
         </BaseCard>
       </div>
 
       {/* 履歴管理セクション */}
-      <div className="w-full max-w-md flex flex-col gap-4">
+      <div className="w-full max-w-md flex flex-col gap-4 mb-20">
         <NavigationCard
           href={`/app/my-bike/${id}/fuel-logs`}
           title="給油履歴"
@@ -149,22 +159,12 @@ function BikeDetailPage() {
           icon={<TouringIcon />}
         />
 
-        {/* メンテナンス履歴 - disabled 状態 */}
-        <div
-          style={{
-            opacity: 0.5,
-            pointerEvents: 'none',
-            cursor: 'not-allowed',
-          }}
-          aria-disabled="true"
-        >
-          <NavigationCard
-            href="#"
-            title="メンテナンス履歴"
-            description="準備中です"
-            icon={<WrenchIcon />}
-          />
-        </div>
+        <NavigationCard
+          href={`/app/my-bike/${id}/maintenance-logs`}
+          title="メンテナンス履歴"
+          description="メンテナンス履歴を確認・管理できます"
+          icon={<WrenchIcon />}
+        />
       </div>
     </>
   )

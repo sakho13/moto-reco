@@ -133,9 +133,10 @@ model TUserMyBike {
   user     MUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userBike TUserBike @relation(fields: [userBikeId], references: [id], onDelete: Restrict)
 
-  fuelLogs  TUserMyBikeFuelLog[]
-  tourings  TUserMyBikeTouring[]
-  histories TUserMyBikeHistory[]
+  fuelLogs        TUserMyBikeFuelLog[]
+  maintenanceLogs TUserMyBikeMaintenance[]
+  tourings        TUserMyBikeTouring[]
+  histories       TUserMyBikeHistory[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
@@ -163,6 +164,38 @@ model TUserMyBikeFuelLog {
 
   @@index([userMyBikeId, refueledAt])
   @@index([touringId])
+}
+
+model TUserMyBikeMaintenance {
+  id           String @id @default(cuid(2))
+  userMyBikeId String @map("my_bike_id")
+
+  performedAt DateTime @map("performed_at") // 実施日時
+  mileage     Int      @map("mileage") // 実施時走行距離/km
+  memo        String?  @map("memo") // メモ
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userMyBike       TUserMyBike                 @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  maintenanceItems TUserMyBikeMaintenanceItem[]
+
+  @@index([userMyBikeId, performedAt])
+}
+
+model TUserMyBikeMaintenanceItem {
+  id            String          @id @default(cuid(2))
+  maintenanceId String          @map("maintenance_id")
+  type          MaintenanceType @map("maintenance_type")
+  value         Float?          @map("value") // メンテナンス項目の入力値
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  maintenanceLog TUserMyBikeMaintenance @relation(fields: [maintenanceId], references: [id], onDelete: Cascade)
+
+  @@unique([maintenanceId, type])
+  @@index([maintenanceId])
 }
 
 model TUserMyBikeTouring {
@@ -216,14 +249,16 @@ model TUserMyBikeHistory {
 }
 
 model TUserMyBikeTouringSpot {
-  id        String   @id @default(cuid(2))
-  touringId String   @map("touring_id")
-  name      String?  @map("name")
-  memo      String?  @map("memo")
-  latitude  Float?   @map("latitude")
-  longitude Float?   @map("longitude")
-  visitedAt DateTime @default(now()) @map("visited_at")
-  sortOrder Int      @default(0) @map("sort_order")
+  id        String    @id @default(cuid(2))
+  touringId String    @map("touring_id")
+  type      SpotType  @default(SPOT) @map("type")
+  name      String?   @map("name")
+  memo      String?   @map("memo")
+  latitude  Float?    @map("latitude")
+  longitude Float?    @map("longitude")
+  visitedAt DateTime  @default(now()) @map("visited_at")
+  endAt     DateTime? @map("end_at")
+  sortOrder Int       @default(0) @map("sort_order")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -321,6 +356,11 @@ enum UserQuitStatus {
 enum TouringStatus {
   STARTED
   COMPLETED
+}
+
+enum SpotType {
+  SPOT
+  BREAK
 }
 
 enum BikeHistoryType {
