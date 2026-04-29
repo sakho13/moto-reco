@@ -17,10 +17,10 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
-    "expo": "55.0.15",
-    "expo-status-bar": "55.0.5",
+    "expo": "~54.0.34",
+    "expo-status-bar": "~3.0.9",
     "react": "catalog:",
-    "react-native": "0.83.6"
+    "react-native": "0.81.5"
   },
   "expo": {
     "install": {
