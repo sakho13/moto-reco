@@ -1,3 +1,5 @@
+import type { MaintenanceLogItem } from '../domain/maintenanceLog'
+
 export type SuccessResponse<T> = {
   status: 'success'
   data: T
@@ -151,6 +153,16 @@ export type ApiResponseFuelLogDetail = {
 
 export type ApiResponseFuelLogList = ApiResponseFuelLogDetail[]
 
+export type ApiResponseMaintenanceLogDetail = {
+  maintenanceLogId: string
+  performedAt: string
+  mileage: number
+  memo: string | null
+  items: MaintenanceLogItem[]
+}
+
+export type ApiResponseMaintenanceLogList = ApiResponseMaintenanceLogDetail[]
+
 export type ApiResponseBikeHistoryItem =
   | {
       type: 'FUEL_LOG'
@@ -236,11 +248,13 @@ export type ApiResponseBikesOngoingTourings = {
 export type ApiResponseSpotDetail = {
   spotId: string
   touringId: string
+  type: 'SPOT' | 'BREAK'
   name: string | null
   memo: string | null
   latitude: number | null
   longitude: number | null
   visitedAt: string
+  endAt: string | null
   sortOrder: number
 }
 

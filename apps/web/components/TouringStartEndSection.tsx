@@ -3,13 +3,14 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from './icons/BikeIcon'
 import { TouringIcon } from './icons/TouringIcon'
 import styles from './TouringStartEndSection.module.css'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
-import { apiGet, apiPost } from '@/lib/api/client'
+import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -18,10 +19,12 @@ import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 type BikeWithTouring = {
   myUserBikeId: string
   bikeName: string
+  totalMileage: number
   ongoingTouring: {
     touringId: string
     title: string
     startDate: string
+    startMileage: number | null
   } | null
 }
 
@@ -30,6 +33,12 @@ export const TouringStartEndSection = () => {
   const { isGuest } = useAuth()
   const [loadingBikeId, setLoadingBikeId] = useState<string | null>(null)
   const { getCurrentPosition } = useGeolocation()
+  const [pendingStartBike, setPendingStartBike] = useState<{
+    myUserBikeId: string
+    bikeName: string
+    totalMileage: number
+  } | null>(null)
+  const [startMileageInput, setStartMileageInput] = useState('')
 
   // バイク一覧取得
   const {
@@ -72,11 +81,13 @@ export const TouringStartEndSection = () => {
     return {
       myUserBikeId: bike.myUserBikeId,
       bikeName,
+      totalMileage: bike.totalMileage,
       ongoingTouring: ongoingData?.ongoingTouring
         ? {
             touringId: ongoingData.ongoingTouring.touringId,
             title: ongoingData.ongoingTouring.title,
             startDate: ongoingData.ongoingTouring.startDate,
+            startMileage: ongoingData.ongoingTouring.startMileage,
           }
         : null,
     }
@@ -87,7 +98,11 @@ export const TouringStartEndSection = () => {
     (bike) => bike.ongoingTouring !== null
   )
 
-  const handleStartTouring = async (myUserBikeId: string, bikeName: string) => {
+  const handleStartTouring = async (
+    myUserBikeId: string,
+    bikeName: string,
+    startMileage?: number
+  ) => {
     setLoadingBikeId(myUserBikeId)
     try {
       const now = new Date()
@@ -106,6 +121,7 @@ export const TouringStartEndSection = () => {
           startDate: now.toISOString(),
           startLatitude: position?.latitude,
           startLongitude: position?.longitude,
+          startMileage,
         }
       )
 
@@ -123,7 +139,11 @@ export const TouringStartEndSection = () => {
     }
   }
 
-  const handleEndTouring = async (myUserBikeId: string, touringId: string) => {
+  const handleEndTouring = async (
+    myUserBikeId: string,
+    touringId: string,
+    endMileage?: number
+  ) => {
     setLoadingBikeId(myUserBikeId)
     try {
       const { position } = await getCurrentPosition()
@@ -136,6 +156,7 @@ export const TouringStartEndSection = () => {
           endDate: new Date().toISOString(),
           endLatitude: position?.latitude,
           endLongitude: position?.longitude,
+          endMileage,
         }
       )
 
@@ -151,6 +172,28 @@ export const TouringStartEndSection = () => {
     } finally {
       setLoadingBikeId(null)
     }
+  }
+
+  const handleOpenStartModal = (
+    myUserBikeId: string,
+    bikeName: string,
+    totalMileage: number
+  ) => {
+    setPendingStartBike({ myUserBikeId, bikeName, totalMileage })
+    setStartMileageInput(String(totalMileage))
+  }
+
+  const handleConfirmStart = async () => {
+    if (!pendingStartBike) return
+    const parsed = parseInt(startMileageInput, 10)
+    const mileage =
+      startMileageInput !== '' && !isNaN(parsed) ? parsed : undefined
+    setPendingStartBike(null)
+    await handleStartTouring(
+      pendingStartBike.myUserBikeId,
+      pendingStartBike.bikeName,
+      mileage
+    )
   }
 
   if (bikesError) {
@@ -226,10 +269,11 @@ export const TouringStartEndSection = () => {
           bike={activeBike}
           touring={activeBike.ongoingTouring}
           isLoading={loadingBikeId === activeBike.myUserBikeId}
-          onEnd={() =>
+          onEnd={(endMileage) =>
             handleEndTouring(
               activeBike.myUserBikeId,
-              activeBike.ongoingTouring!.touringId
+              activeBike.ongoingTouring!.touringId,
+              endMileage
             )
           }
         />
@@ -269,7 +313,11 @@ export const TouringStartEndSection = () => {
 
               <Button
                 onClick={() =>
-                  handleStartTouring(bike.myUserBikeId, bike.bikeName)
+                  handleOpenStartModal(
+                    bike.myUserBikeId,
+                    bike.bikeName,
+                    bike.totalMileage
+                  )
                 }
                 disabled={isLoading || isAtGuestTouringLimit}
                 variant="primary"
@@ -282,6 +330,56 @@ export const TouringStartEndSection = () => {
           )
         })}
       </div>
+
+      {/* 開始時 走行距離入力モーダル */}
+      {pendingStartBike && (
+        <div
+          className={styles.spotModalOverlay}
+          onClick={() => setPendingStartBike(null)}
+        >
+          <div
+            className={styles.spotModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={styles.spotModalTitle}>出発時の走行距離</h3>
+
+            <div className={styles.spotModalField}>
+              <label className={styles.spotModalLabel}>
+                現在の走行距離（km）
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                className={styles.spotModalInput}
+                placeholder="例：12345"
+                value={startMileageInput}
+                onChange={(e) => setStartMileageInput(e.target.value)}
+                min={0}
+                step={1}
+              />
+            </div>
+
+            <div className={styles.spotModalActions}>
+              <Button
+                onClick={() => setPendingStartBike(null)}
+                variant="cloud"
+                size="md"
+                disabled={loadingBikeId !== null}
+              >
+                キャンセル
+              </Button>
+              <Button
+                onClick={handleConfirmStart}
+                variant="primary"
+                size="md"
+                disabled={loadingBikeId !== null}
+              >
+                開始する
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -291,7 +389,7 @@ type ActiveTouringCardProps = {
   bike: BikeWithTouring
   touring: NonNullable<BikeWithTouring['ongoingTouring']>
   isLoading: boolean
-  onEnd: () => void
+  onEnd: (endMileage?: number) => void
 }
 
 const ActiveTouringCard = ({
@@ -312,7 +410,24 @@ const ActiveTouringCard = ({
   const [geoStatus, setGeoStatus] = useState<
     'loading' | 'success' | 'denied' | 'error'
   >('loading')
+  const [showEndMileageModal, setShowEndMileageModal] = useState(false)
+  const [endMileageInput, setEndMileageInput] = useState('')
+  const [endMileageError, setEndMileageError] = useState('')
+  const [isBreakLoading, setIsBreakLoading] = useState(false)
   const { getCurrentPosition } = useGeolocation()
+
+  const { data: spots } = useSWR(
+    `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots`,
+    async (url) => {
+      const response = await apiGet(
+        url as `/api/v1/user-bike/bike/${string}/tourings/${string}/spots`
+      )
+      return response.data as ApiResponseSpotDetail[]
+    }
+  )
+
+  const currentBreak =
+    spots?.find((s) => s.type === 'BREAK' && s.endAt === null) ?? null
 
   useEffect(() => {
     const updateElapsedTime = () => {
@@ -398,12 +513,110 @@ const ActiveTouringCard = ({
     }
   }
 
+  const formatBreakTime = (dateString: string) => {
+    const date = new Date(dateString)
+    const h = String(date.getHours()).padStart(2, '0')
+    const m = String(date.getMinutes()).padStart(2, '0')
+    return `${h}:${m}`
+  }
+
+  const handleQuickBreakStart = async () => {
+    setIsBreakLoading(true)
+    try {
+      await apiPost(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots` as const,
+        { type: 'BREAK', visitedAt: new Date() }
+      )
+      await mutate(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots`
+      )
+      toast.success('休憩を開始しました')
+    } catch (error) {
+      toast.error(
+        error instanceof ApiV1Error ? error.message : '休憩の開始に失敗しました'
+      )
+    } finally {
+      setIsBreakLoading(false)
+    }
+  }
+
+  const handleQuickBreakEnd = async () => {
+    if (!currentBreak) return
+    setIsBreakLoading(true)
+    try {
+      await apiPatch(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots/${currentBreak.spotId}` as const,
+        { endAt: new Date() }
+      )
+      await mutate(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/tourings/${touring.touringId}/spots`
+      )
+      toast.success('休憩を終了しました')
+    } catch (error) {
+      toast.error(
+        error instanceof ApiV1Error ? error.message : '休憩の終了に失敗しました'
+      )
+    } finally {
+      setIsBreakLoading(false)
+    }
+  }
+
+  const handleOpenEndMileageModal = () => {
+    setEndMileageInput('')
+    setEndMileageError('')
+    setShowEndMileageModal(true)
+  }
+
+  const handleConfirmEnd = () => {
+    const parsed = parseInt(endMileageInput, 10)
+    const mileage =
+      endMileageInput !== '' && !isNaN(parsed) ? parsed : undefined
+    if (
+      mileage !== undefined &&
+      touring.startMileage !== null &&
+      mileage < touring.startMileage
+    ) {
+      setEndMileageError(
+        `終了時の走行距離は開始時（${touring.startMileage.toLocaleString()}km）以上で入力してください`
+      )
+      return
+    }
+    setShowEndMileageModal(false)
+    onEnd(mileage)
+  }
+
   return (
     <>
       <div className={styles.activeTouringCard}>
         {/* ルート風の背景 */}
         <div className={styles.routeVisual}>
           <div className={styles.roadDash} />
+        </div>
+
+        {/* 右上の休憩ボタン */}
+        <div className={styles.breakCornerArea}>
+          {currentBreak ? (
+            <>
+              <span className={styles.breakCornerStatus}>
+                休憩中 {formatBreakTime(currentBreak.visitedAt)}〜
+              </span>
+              <button
+                onClick={handleQuickBreakEnd}
+                disabled={isBreakLoading || isLoading}
+                className={styles.breakCornerEndButton}
+              >
+                {isBreakLoading ? '...' : '休憩終了'}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleQuickBreakStart}
+              disabled={isBreakLoading || isLoading || spotLoading}
+              className={styles.breakCornerButton}
+            >
+              {isBreakLoading ? '...' : '休憩を始める'}
+            </button>
+          )}
         </div>
 
         {/* バイク情報 */}
@@ -421,6 +634,11 @@ const ActiveTouringCard = ({
           <p className={styles.startDateTime}>
             {formatStartDateTime(touring.startDate)} 開始
           </p>
+          {touring.startMileage !== null && (
+            <p className={styles.startMileageInfo}>
+              出発時走行距離: {touring.startMileage.toLocaleString()}km
+            </p>
+          )}
         </div>
 
         {/* アクションボタン */}
@@ -436,7 +654,7 @@ const ActiveTouringCard = ({
           </Button>
 
           <Button
-            onClick={onEnd}
+            onClick={handleOpenEndMileageModal}
             disabled={isLoading}
             variant="danger"
             size="md"
@@ -446,6 +664,68 @@ const ActiveTouringCard = ({
           </Button>
         </div>
       </div>
+
+      {/* 終了時 走行距離入力モーダル */}
+      {showEndMileageModal && (
+        <div
+          className={styles.spotModalOverlay}
+          onClick={() => setShowEndMileageModal(false)}
+        >
+          <div
+            className={styles.spotModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={styles.spotModalTitle}>到着時の走行距離</h3>
+
+            {touring.startMileage !== null && (
+              <p className={styles.mileageModalHint}>
+                出発時走行距離: {touring.startMileage.toLocaleString()}km
+              </p>
+            )}
+
+            <div className={styles.spotModalField}>
+              <label className={styles.spotModalLabel}>
+                現在の走行距離（km）
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                className={styles.spotModalInput}
+                placeholder="例：12400"
+                value={endMileageInput}
+                onChange={(e) => {
+                  setEndMileageInput(e.target.value)
+                  setEndMileageError('')
+                }}
+                min={touring.startMileage ?? 0}
+                step={1}
+              />
+              {endMileageError && (
+                <p className={styles.mileageModalError}>{endMileageError}</p>
+              )}
+            </div>
+
+            <div className={styles.spotModalActions}>
+              <Button
+                onClick={() => setShowEndMileageModal(false)}
+                variant="cloud"
+                size="md"
+                disabled={isLoading}
+              >
+                キャンセル
+              </Button>
+              <Button
+                onClick={handleConfirmEnd}
+                variant="danger"
+                size="md"
+                disabled={isLoading}
+              >
+                終了する
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* スポット記録モーダル */}
       {showSpotModal && (

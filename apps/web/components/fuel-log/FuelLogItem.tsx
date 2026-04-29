@@ -2,8 +2,8 @@
 
 import { Map } from 'lucide-react'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
-import { Button } from '@repo/ui/button'
 import styles from './FuelLogItem.module.css'
+import { ClickableListCard } from '@/components/ClickableListCard'
 
 export interface FuelLogItemProps {
   fuelLog: ApiResponseFuelLogDetail
@@ -24,8 +24,8 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
   }
 
   return (
-    <div className={styles.item}>
-      {/* 行1: メイン情報（燃費・総走行距離・日付・編集） */}
+    <ClickableListCard onClick={() => onEdit(fuelLog.fuelLogId)}>
+      {/* 行1: メイン情報（燃費・総走行距離・日付） */}
       <div className={styles.mainRow}>
         <div className={styles.fuelEfficiency}>
           {fuelLog.fuelEfficiency !== null ? (
@@ -45,14 +45,6 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
 
           <span className={styles.date}>{formatDate(fuelLog.refueledAt)}</span>
         </div>
-
-        <Button
-          onClick={() => onEdit(fuelLog.fuelLogId)}
-          variant="cloud"
-          size="sm"
-        >
-          編集
-        </Button>
       </div>
 
       {/* 行2: 詳細情報（給油量・価格・単価） */}
@@ -81,6 +73,6 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
           <span className={styles.touringName}>{fuelLog.touringTitle}</span>
         </div>
       )}
-    </div>
+    </ClickableListCard>
   )
 }

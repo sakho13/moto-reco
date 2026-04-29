@@ -1,0 +1,130 @@
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-8) var(--spacing-4);
+  color: var(--color-ink);
+  opacity: 0.7;
+  text-align: center;
+}
+
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.categorySection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.categoryLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: var(--spacing-1);
+  border-bottom: 1px solid var(--color-cloud);
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+}
+
+.itemRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid var(--color-cloud);
+}
+
+.itemRow:last-child {
+  border-bottom: none;
+}
+
+.itemRow.overdue {
+  background-color: color-mix(in srgb, var(--color-danger) 5%, transparent);
+  border-radius: var(--radius-sm);
+  padding-left: var(--spacing-2);
+  padding-right: var(--spacing-2);
+}
+
+.itemName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 8rem;
+}
+
+.overdueTag {
+  display: inline-block;
+  padding: 1px var(--spacing-1);
+  background-color: var(--color-danger);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-bold);
+}
+
+.itemDetail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
+.lastDate {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.lastMileage {
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+  opacity: 0.6;
+}
+
+.nextInfo {
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+  opacity: 0.5;
+}
+
+.noRecord {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  opacity: 0.4;
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .itemRow {
+    flex-direction: column;
+    gap: var(--spacing-1);
+  }
+
+  .itemDetail {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .itemName {
+    min-width: unset;
+  }
+}

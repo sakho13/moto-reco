@@ -3889,6 +3889,160 @@ describe('UserBike API Endpoints', () => {
     })
   })
 
+  describe('POST /api/v1/user-bike/bike/:myUserBikeId/tourings/:touringId/spots (休憩登録)', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 500,
+        nickname: '休憩テスト用バイク',
+        totalMileage: 5000,
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      touringId = await createTestTouring(token, myUserBikeId, {
+        title: '休憩テスト用ツーリング',
+        startDate: '2024-11-01T00:00:00.000Z',
+        endDate: '2024-11-02T00:00:00.000Z',
+      })
+    })
+
+    test('type=BREAKで休憩を登録できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            visitedAt: '2024-11-01T10:00:00.000Z',
+            endAt: '2024-11-01T10:30:00.000Z',
+            memo: '休憩メモ',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.type).toBe('BREAK')
+      expect(json.data.endAt).not.toBeNull()
+      expect(json.data.memo).toBe('休憩メモ')
+    })
+
+    test('type未指定の場合はSPOTとして登録される', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            visitedAt: '2024-11-01T10:00:00.000Z',
+            name: 'テストスポット',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.type).toBe('SPOT')
+      expect(json.data.endAt).toBeNull()
+    })
+
+    test('endAtがvisitedAtより前の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            visitedAt: '2024-11-01T11:00:00.000Z',
+            endAt: '2024-11-01T10:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('休憩のendAtをPATCHで更新できる', async () => {
+      const breakSpotId = await createTestSpot(token, myUserBikeId, touringId, {
+        visitedAt: '2024-11-01T10:00:00.000Z',
+        name: '休憩場所',
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${breakSpotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            endAt: '2024-11-01T10:30:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.endAt).not.toBeNull()
+    })
+
+    test('一覧取得でtypeとendAtが返される', async () => {
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            visitedAt: '2024-11-01T10:00:00.000Z',
+            endAt: '2024-11-01T10:30:00.000Z',
+          }),
+        }
+      )
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      const breakSpot = json.data.find(
+        (s: { type: string }) => s.type === 'BREAK'
+      )
+      expect(breakSpot).toBeDefined()
+      expect(breakSpot.endAt).not.toBeNull()
+    })
+  })
+
   describe('ゲストアカウント制限', () => {
     describe('バイク登録制限（1台まで）', () => {
       test('ゲストは1台目のバイクを登録できる', async () => {

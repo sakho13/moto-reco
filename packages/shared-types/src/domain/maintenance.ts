@@ -1,37 +1,43 @@
 // メンテナンスカテゴリ（保険は別エンドポイントで管理）
-export type MaintenanceCategory =
-  | 'BRAKE' // ブレーキ装置
-  | 'ENGINE' // エンジン
-  | 'TRANSMISSION' // 動力伝達装置
-  | 'TIRE' // タイヤ
-  | 'ELECTRIC' // 電気装置
+export const MAINTENANCE_CATEGORIES = [
+  'BRAKE', // ブレーキ装置
+  'ENGINE', // エンジン
+  'TRANSMISSION', // 動力伝達装置
+  'TIRE', // タイヤ
+  'ELECTRIC', // 電気装置
+] as const
+
+export type MaintenanceCategory = (typeof MAINTENANCE_CATEGORIES)[number]
 
 // メンテナンスタイプ（保険は除外）
-export type MaintenanceType =
+export const MAINTENANCE_TYPES = [
   // ブレーキ装置
-  | 'BRAKE_FLUID'
-  | 'FRONT_BRAKE_PAD'
-  | 'REAR_BRAKE_PAD'
-  | 'MASTER_CYLINDER_CUP'
-  | 'BRAKE_CALIPER_SEAL'
-  | 'BRAKE_CABLE'
+  'BRAKE_FLUID',
+  'FRONT_BRAKE_PAD',
+  'REAR_BRAKE_PAD',
+  'MASTER_CYLINDER_CUP',
+  'BRAKE_CALIPER_SEAL',
+  'BRAKE_CABLE',
   // エンジン
-  | 'SPARK_PLUG'
-  | 'COOLANT'
-  | 'ENGINE_OIL'
-  | 'OIL_CLEANER'
+  'SPARK_PLUG',
+  'COOLANT',
+  'ENGINE_OIL',
+  'OIL_CLEANER',
   // 動力伝達装置
-  | 'TRANSMISSION_OIL'
-  | 'DRIVE_CHAIN'
-  | 'DRIVE_BELT'
+  'TRANSMISSION_OIL',
+  'DRIVE_CHAIN',
+  'DRIVE_BELT',
   // タイヤ
-  | 'FRONT_TIRE'
-  | 'REAR_TIRE'
+  'FRONT_TIRE',
+  'REAR_TIRE',
   // 電気装置
-  | 'BATTERY'
-  | 'LIGHT'
-  | 'TURN_SIGNAL'
-  | 'HORN'
+  'BATTERY',
+  'LIGHT',
+  'TURN_SIGNAL',
+  'HORN',
+] as const
+
+export type MaintenanceType = (typeof MAINTENANCE_TYPES)[number]
 
 // メンテナンス項目データ
 export type MaintenanceItem = {
