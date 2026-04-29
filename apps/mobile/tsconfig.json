@@ -1,0 +1,17 @@
+{
+  "extends": [
+    "expo/tsconfig.base",
+    "@repo/typescript-config/base.json"
+  ],
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-native"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

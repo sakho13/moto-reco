@@ -18,14 +18,14 @@ catalog:
   'firebase-admin': 13.6.0
   next: 16.0.7
   '@next/third-parties': 16.2.4
-  react: 19.2.1
-  react-dom: 19.2.1
+  react: 19.1.0
+  react-dom: 19.1.0
   lucide-react: 0.561.0
   sonner: 2.0.7
 
   '@types/node': 22.15.3
-  '@types/react': 19.2.2
-  '@types/react-dom': 19.2.2
+  '@types/react': 19.1.17
+  '@types/react-dom': 19.1.11
 
   zod: 3.23.8
   '@hono/zod-validator': 0.7.6

@@ -10,6 +10,7 @@
 |---|---|---|
 | `@apps/web` | Next.js メインアプリケーション | `apps/web/` |
 | `@apps/docs` | Next.js ドキュメントサイト | `apps/docs/` |
+| `@apps/mobile` | Expo モバイルアプリケーション | `apps/mobile/` |
 
 ### パッケージ (packages/)
 
@@ -39,6 +40,12 @@
 
 @apps/docs
   ├── @repo/ui
+  │   └── @repo/theme
+  ├── @repo/eslint-config (devDependencies)
+  └── @repo/typescript-config (devDependencies)
+
+@apps/mobile
+  ├── @repo/ui (React Native版のコンポーネントを使用)
   │   └── @repo/theme
   ├── @repo/eslint-config (devDependencies)
   └── @repo/typescript-config (devDependencies)

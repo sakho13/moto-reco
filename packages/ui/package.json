@@ -23,6 +23,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/react-native": "0.73.0",
     "@types/recharts": "2.0.1",
     "@vitejs/plugin-react": "4.7.0",
     "eslint": "catalog:",
@@ -36,5 +37,13 @@
     "react-dom": "catalog:",
     "recharts": "3.8.1",
     "sonner": "catalog:"
+  },
+  "peerDependencies": {
+    "react-native": "*"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    }
   }
 }
