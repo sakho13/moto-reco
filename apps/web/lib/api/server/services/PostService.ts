@@ -1,4 +1,4 @@
-import { createPostId, MyUserBikeId, PostId, UserId } from '@repo/shared-types'
+import { MyUserBikeId, PostId, UserId } from '@repo/shared-types'
 import { PostEntity } from '../entities/PostEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
