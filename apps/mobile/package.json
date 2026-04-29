@@ -16,7 +16,6 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
     "expo": "~54.0.34",
     "expo-status-bar": "~3.0.9",
     "react": "catalog:",

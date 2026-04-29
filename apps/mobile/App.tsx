@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar'
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { Button } from '@repo/ui/button.native'
-import { Card } from '@repo/ui/card.native'
-import { Code } from '@repo/ui/code.native'
+import { Button } from './components/Button'
+import { Card } from './components/Card'
+import { Code } from './components/Code'
 
 export default function App() {
   const handlePress = () => {
@@ -12,6 +12,21 @@ export default function App() {
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
+
+      {/* <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <Text style={styles.title}>moto-reco Mobile App</Text>
+        <Text style={styles.subtitle}>
+          Expo project with shared UI components
+        </Text>
+
+        <View>
+          <Button>BUTTON</Button>
+        </View>
+      </ScrollView> */}
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -34,10 +49,10 @@ export default function App() {
           <Button variant="social" onPress={handlePress} size="sm">
             Small Button
           </Button>
-          <View style={styles.spacer} />
+          {/* <View style={styles.spacer} />
           <Button variant="cloud" loading>
             Loading...
-          </Button>
+          </Button> */}
         </View>
 
         <View style={styles.section}>
