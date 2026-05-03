@@ -15,4 +15,7 @@ export type Blog = {
   keyword: string[]
   content: string
   eyecatch?: MicroCMSImage
+  tags: string
+  seoTitle: string
+  seoDescription: string
 } & MicroCMSListContent
