@@ -7,7 +7,7 @@ export class ResendEmailRepository implements EmailRepository {
 
   constructor(
     apiKey: string | undefined,
-    private readonly _from: string = 'MotoReco <no-reply@motoreco.app>'
+    private readonly _from: string = 'MotoReco <no-reply@moto-reco.com>'
   ) {
     this._client = apiKey && apiKey !== 'dummy' ? new Resend(apiKey) : null
   }
