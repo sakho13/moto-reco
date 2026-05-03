@@ -64,6 +64,7 @@ pnpm storybook
 DATABASE_PORT=5432                    # PostgreSQL
 DOCKER_FIREBASE_UI_PORT=4000          # Firebase Emulator UI
 DOCKER_FIREBASE_AUTH_PORT=9099        # Firebase Auth Emulator
+DOCKER_FIREBASE_STORAGE_PORT=9199     # Firebase Storage Emulator
 DOCKER_LOCALSTACK_PORT=4566           # LocalStack Gateway
 DOCKER_LOCALSTACK_SERVICES_START=4510 # LocalStack Services Range Start
 DOCKER_LOCALSTACK_SERVICES_END=4559   # LocalStack Services Range End
@@ -76,11 +77,13 @@ DOCKER_LOCALSTACK_SERVICES_END=4559   # LocalStack Services Range End
 | DATABASE_PORT                    | 5432           | 5433       | 5434       |
 | DOCKER_FIREBASE_UI_PORT          | 4000           | 4100       | 4200       |
 | DOCKER_FIREBASE_AUTH_PORT        | 9099           | 9199       | 9299       |
+| DOCKER_FIREBASE_STORAGE_PORT     | 9199           | 9299       | 9399       |
 | DOCKER_LOCALSTACK_PORT           | 4566           | 4666       | 4766       |
 | DOCKER_LOCALSTACK_SERVICES_START | 4510           | 4610       | 4710       |
 | DOCKER_LOCALSTACK_SERVICES_END   | 4559           | 4659       | 4759       |
 
-**注意**: ポートを変更した場合、`DATABASE_URL`や`FIREBASE_AUTH_EMULATOR_HOST`なども更新してください。
+**注意**: ポートを変更した場合、`DATABASE_URL`や`FIREBASE_AUTH_EMULATOR_HOST`なども更新してください。  
+**注意**: Worktree A では `DOCKER_FIREBASE_AUTH_PORT=9199` と `DOCKER_FIREBASE_STORAGE_PORT`（デフォルト 9199）が競合します。Worktree A で Storage を使う場合は `DOCKER_FIREBASE_STORAGE_PORT=9299` を明示的に設定してください。
 
 ## LAN端末（iPhone等）からのFirebase Emulator接続
 
