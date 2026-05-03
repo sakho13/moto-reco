@@ -24,12 +24,14 @@ export function ProfileCard() {
   // ローカル状態（編集用）
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
+  const [editNotificationEmail, setEditNotificationEmail] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [updateError, setUpdateError] = useState<string | null>(null)
 
   // 編集モードの開始
   const handleEdit = () => {
     setEditName(data?.name || '')
+    setEditNotificationEmail(data?.notificationEmail || '')
     setIsEditing(true)
     setUpdateError(null)
   }
@@ -38,6 +40,7 @@ export function ProfileCard() {
   const handleCancel = () => {
     setIsEditing(false)
     setEditName('')
+    setEditNotificationEmail('')
     setUpdateError(null)
   }
 
@@ -54,6 +57,7 @@ export function ProfileCard() {
     try {
       const response = await apiPost('/api/v1/user/profile', {
         name: editName.trim(),
+        notificationEmail: editNotificationEmail.trim() || null,
       })
 
       // SWRキャッシュを更新
@@ -126,6 +130,21 @@ export function ProfileCard() {
             />
           </FormField>
 
+          <FormField
+            label="通知メールアドレス"
+            htmlFor="profile-notification-email"
+          >
+            <Input
+              id="profile-notification-email"
+              type="email"
+              placeholder="通知用メールアドレスを入力"
+              value={editNotificationEmail}
+              onChange={(e) => setEditNotificationEmail(e.target.value)}
+              disabled={isSaving}
+              autoComplete="email"
+            />
+          </FormField>
+
           <div style={{ marginTop: '16px', display: 'flex', gap: '8px' }}>
             <Button type="submit" disabled={isSaving}>
               {isSaving ? '保存中...' : '保存'}
@@ -161,6 +180,7 @@ export function ProfileCard() {
     >
       <div>
         <p>名前: {data?.name || '未設定'}</p>
+        <p>通知メールアドレス: {data?.notificationEmail || '未設定'}</p>
       </div>
     </BaseCard>
   )
