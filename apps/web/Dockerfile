@@ -59,8 +59,8 @@ FROM base AS runner
 WORKDIR /app
 
 # Cloud SQL Proxyのダウンロード
-ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
-RUN chmod 755 /usr/local/bin/cloud_sql_proxy
+# ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
+# RUN chmod 755 /usr/local/bin/cloud_sql_proxy
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

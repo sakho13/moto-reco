@@ -3,8 +3,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Cloud SQL Proxyのダウンロード
-ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
-RUN chmod +x /usr/local/bin/cloud_sql_proxy
+# ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
+# RUN chmod +x /usr/local/bin/cloud_sql_proxy
 
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
