@@ -20,6 +20,7 @@ import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitReposito
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
 import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
+import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 
 const user = new Hono()
 
@@ -133,6 +134,23 @@ user.post(
       })
       return user
     })
+
+    if (authProvider.metadata?.email) {
+      const emailRepository = new ResendEmailRepository(
+        process.env.RESEND_API_KEY,
+        process.env.RESEND_FROM_EMAIL
+      )
+      const emailService = new EmailService(emailRepository)
+
+      emailService
+        .sendByType(EmailType.WELCOME, {
+          to: authProvider.metadata.email,
+          userName: user.name,
+        })
+        .catch((error: unknown) => {
+          console.error('Welcomeメール送信に失敗しました', error)
+        })
+    }
 
     return c.json<SuccessResponse<ApiResponseUserProfile>>(
       {

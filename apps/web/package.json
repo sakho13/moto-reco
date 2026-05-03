@@ -37,7 +37,8 @@
     "react-dom": "catalog:",
     "recharts": "3.8.1",
     "swr": "2.4.1",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@repo/email": "workspace:*"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

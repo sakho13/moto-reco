@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
@@ -7,6 +7,12 @@ import {
   handleRegisterByFirebase,
 } from '../../helpers/firebaseTestToken'
 import { app } from '@/lib/api/server/app'
+
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+  vi.restoreAllMocks()
+})
 
 describe('User API Endpoints', () => {
   describe('POST /api/v1/user/profile', () => {
@@ -173,6 +179,40 @@ describe('User API Endpoints', () => {
         message: expect.any(String),
       })
       expect(res.status).toBe(401)
+    })
+
+    test('新規ユーザー登録時にWelcomeメールを送信する', async () => {
+      vi.stubEnv('RESEND_API_KEY', 'test-key')
+      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ id: 'email-id' }), { status: 200 })
+      )
+
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+
+      const res = await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'Welcomeテストユーザー',
+        }),
+      })
+
+      expect(res.status).toBe(201)
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(fetchMock).toHaveBeenCalledWith(
+        'https://api.resend.com/emails',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            Authorization: 'Bearer test-key',
+          }),
+        })
+      )
     })
 
     test('新規ユーザー登録ができる', async () => {
