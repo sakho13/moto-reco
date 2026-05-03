@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
+import { ResendEmailRepository } from '@repo/email'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import {
@@ -152,6 +153,7 @@ describe('User API Endpoints', () => {
         data: {
           userId: expect.any(String),
           name: '更新後の名前',
+          notificationEmail: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -181,12 +183,9 @@ describe('User API Endpoints', () => {
     })
 
     test('新規ユーザー登録時にWelcomeメールを送信する', async () => {
-      vi.stubEnv('RESEND_API_KEY', 'test-key')
-      const fetchMock = vi
-        .spyOn(globalThis, 'fetch')
-        .mockResolvedValue(
-          new Response(JSON.stringify({ id: 'email-id' }), { status: 200 })
-        )
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
 
       const email = createRandomEmail()
       const credential = await handleRegisterByFirebase(email, 'password')
@@ -204,16 +203,7 @@ describe('User API Endpoints', () => {
       })
 
       expect(res.status).toBe(201)
-      expect(fetchMock).toHaveBeenCalledTimes(1)
-      expect(fetchMock).toHaveBeenCalledWith(
-        'https://api.resend.com/emails',
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            Authorization: 'Bearer test-key',
-          }),
-        })
-      )
+      expect(sendSpy).toHaveBeenCalledTimes(1)
     })
 
     test('新規ユーザー登録ができる', async () => {
@@ -237,6 +227,7 @@ describe('User API Endpoints', () => {
         data: {
           userId: expect.any(String),
           name: 'テストユーザー',
+          notificationEmail: expect.any(String),
         },
         message: expect.any(String),
       })
