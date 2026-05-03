@@ -15,6 +15,7 @@ export class PrismaUserRepository
         name: true,
         status: true,
         role: true,
+        notificationEmail: true,
       },
       where: {
         id: userId,
@@ -28,6 +29,7 @@ export class PrismaUserRepository
           name: user.name,
           role: user.role,
           status: user.status,
+          notificationEmail: user.notificationEmail,
         })
       : null
   }
@@ -39,6 +41,7 @@ export class PrismaUserRepository
         name: true,
         status: true,
         role: true,
+        notificationEmail: true,
       },
       where: {
         id: userId,
@@ -51,6 +54,7 @@ export class PrismaUserRepository
           name: user.name,
           role: user.role,
           status: user.status,
+          notificationEmail: user.notificationEmail,
         })
       : null
   }
@@ -64,6 +68,7 @@ export class PrismaUserRepository
         name: true,
         status: true,
         role: true,
+        notificationEmail: true,
       },
       where: {
         authProviders: {
@@ -82,6 +87,7 @@ export class PrismaUserRepository
           name: user.name,
           role: user.role,
           status: user.status,
+          notificationEmail: user.notificationEmail,
         })
       : null
   }
@@ -95,6 +101,7 @@ export class PrismaUserRepository
         name: user.name,
         status: 'ACTIVE',
         role: 'USER',
+        notificationEmail: user.notificationEmail,
         authProviders: {
           create: [
             {
@@ -110,6 +117,7 @@ export class PrismaUserRepository
         name: true,
         status: true,
         role: true,
+        notificationEmail: true,
       },
     })
 
@@ -118,6 +126,7 @@ export class PrismaUserRepository
       name: createdUser.name,
       role: createdUser.role,
       status: createdUser.status,
+      notificationEmail: createdUser.notificationEmail,
     })
   }
 
@@ -129,12 +138,14 @@ export class PrismaUserRepository
       },
       data: {
         name: user.name,
+        notificationEmail: user.notificationEmail,
       },
       select: {
         id: true,
         name: true,
         status: true,
         role: true,
+        notificationEmail: true,
       },
     })
 
@@ -143,6 +154,7 @@ export class PrismaUserRepository
       name: updatedUser.name,
       role: updatedUser.role,
       status: updatedUser.status,
+      notificationEmail: updatedUser.notificationEmail,
     })
   }
 
@@ -194,6 +206,7 @@ export class PrismaUserRepository
         name: true,
         status: true,
         role: true,
+        notificationEmail: true,
       },
     })
 
@@ -202,6 +215,7 @@ export class PrismaUserRepository
       name: createdUser.name,
       role: createdUser.role,
       status: createdUser.status,
+      notificationEmail: createdUser.notificationEmail,
     })
   }
 }

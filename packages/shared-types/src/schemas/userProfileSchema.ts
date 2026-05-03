@@ -5,6 +5,7 @@ import { z } from 'zod'
  *
  * @remarks
  * - name: 1文字以上50文字以下の文字列
+ * - notificationEmail: 通知用メールアドレス（省略可、nullで削除）
  */
 export const UserProfileUpdateRequestSchema = z.object({
   name: z
@@ -15,6 +16,13 @@ export const UserProfileUpdateRequestSchema = z.object({
     .min(1, '名前は1文字以上である必要があります')
     .max(50, '名前は50文字以内である必要があります')
     .trim(),
+  notificationEmail: z
+    .string({
+      invalid_type_error: '通知メールアドレスは文字列である必要があります',
+    })
+    .email('有効なメールアドレスを入力してください')
+    .nullable()
+    .optional(),
 })
 
 /**

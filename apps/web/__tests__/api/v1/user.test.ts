@@ -1,5 +1,6 @@
-import { describe, expect, test } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
+import { ResendEmailRepository } from '@repo/email'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import {
@@ -7,6 +8,11 @@ import {
   handleRegisterByFirebase,
 } from '../../helpers/firebaseTestToken'
 import { app } from '@/lib/api/server/app'
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+  vi.restoreAllMocks()
+})
 
 describe('User API Endpoints', () => {
   describe('POST /api/v1/user/profile', () => {
@@ -147,6 +153,7 @@ describe('User API Endpoints', () => {
         data: {
           userId: expect.any(String),
           name: '更新後の名前',
+          notificationEmail: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -175,6 +182,30 @@ describe('User API Endpoints', () => {
       expect(res.status).toBe(401)
     })
 
+    test('新規ユーザー登録時にWelcomeメールを送信する', async () => {
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+
+      const res = await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'Welcomeテストユーザー',
+        }),
+      })
+
+      expect(res.status).toBe(201)
+      expect(sendSpy).toHaveBeenCalledTimes(1)
+    })
+
     test('新規ユーザー登録ができる', async () => {
       const email = createRandomEmail()
       const credential = await handleRegisterByFirebase(email, 'password')
@@ -196,6 +227,7 @@ describe('User API Endpoints', () => {
         data: {
           userId: expect.any(String),
           name: 'テストユーザー',
+          notificationEmail: expect.any(String),
         },
         message: expect.any(String),
       })
