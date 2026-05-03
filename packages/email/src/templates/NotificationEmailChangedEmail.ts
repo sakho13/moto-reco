@@ -18,6 +18,12 @@ export class NotificationEmailChangedEmail {
         <p>このメールアドレス（<strong>${this._payload.to}</strong>）がMotoRecoの通知メールアドレスとして設定されました。</p>
         <p>今後、MotoRecoからの通知はこのアドレスに送信されます。</p>
         <p>このメールに心当たりがない場合は、MotoRecoアプリの設定からご確認ください。</p>
+        <div style="margin-top: 24px;">
+          <a href="https://moto-reco.com/app/login"
+             style="display: inline-block; padding: 12px 24px; background-color: #111827; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            MotoRecoにログイン
+          </a>
+        </div>
       </div>
       `.trim(),
     }

@@ -19,6 +19,12 @@ export class WelcomeEmail {
           <li>メンテナンス履歴の蓄積</li>
         </ul>
         <p>ぜひ日々のバイクライフの記録にご活用ください！</p>
+        <div style="margin-top: 24px;">
+          <a href="https://moto-reco.com/app/login"
+             style="display: inline-block; padding: 12px 24px; background-color: #111827; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            MotoRecoにログイン
+          </a>
+        </div>
       </div>
       `.trim(),
     }
