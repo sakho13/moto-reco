@@ -8,7 +8,6 @@ import {
 } from '../../helpers/firebaseTestToken'
 import { app } from '@/lib/api/server/app'
 
-
 afterEach(() => {
   vi.unstubAllEnvs()
   vi.restoreAllMocks()
@@ -183,9 +182,11 @@ describe('User API Endpoints', () => {
 
     test('新規ユーザー登録時にWelcomeメールを送信する', async () => {
       vi.stubEnv('RESEND_API_KEY', 'test-key')
-      const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response(JSON.stringify({ id: 'email-id' }), { status: 200 })
-      )
+      const fetchMock = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValue(
+          new Response(JSON.stringify({ id: 'email-id' }), { status: 200 })
+        )
 
       const email = createRandomEmail()
       const credential = await handleRegisterByFirebase(email, 'password')

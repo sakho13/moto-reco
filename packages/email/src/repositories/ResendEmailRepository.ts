@@ -1,27 +1,27 @@
+import { Resend } from 'resend'
 import type { EmailMessage } from '../domain/email'
 import type { EmailRepository } from '../interfaces/EmailRepository'
 
 export class ResendEmailRepository implements EmailRepository {
+  private readonly _client: Resend | null
+
   constructor(
-    private readonly apiKey: string | undefined,
-    private readonly from: string = 'MotoReco <no-reply@motoreco.app>'
-  ) {}
+    apiKey: string | undefined,
+    private readonly _from: string = 'MotoReco <no-reply@motoreco.app>'
+  ) {
+    this._client = apiKey && apiKey !== 'dummy' ? new Resend(apiKey) : null
+  }
 
   async send(email: EmailMessage): Promise<void> {
-    if (!this.apiKey || this.apiKey === 'dummy') return
+    if (!this._client) return
 
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: this.from,
-        to: [email.to],
-        subject: email.subject,
-        html: email.html,
-      }),
+    const { error } = await this._client.emails.send({
+      from: this._from,
+      to: [email.to],
+      subject: email.subject,
+      html: email.html,
     })
+
+    if (error) throw new Error(error.message)
   }
 }

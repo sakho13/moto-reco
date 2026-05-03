@@ -10,7 +10,9 @@ export class EmailService {
     payload: EmailPayloadByType[T]
   ): Promise<void> {
     if (type === EmailType.WELCOME) {
-      const message = new WelcomeEmail(payload as EmailPayloadByType['WELCOME']).build()
+      const message = new WelcomeEmail(
+        payload as EmailPayloadByType['WELCOME']
+      ).build()
       await this.emailRepository.send(message)
       return
     }
