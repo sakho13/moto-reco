@@ -29,8 +29,9 @@ model MAuthProvider {
 }
 
 model MUser {
-  id   String @id @default(cuid(2))
-  name String
+  id                String  @id @default(cuid(2))
+  name              String
+  notificationEmail String? @map("notification_email")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

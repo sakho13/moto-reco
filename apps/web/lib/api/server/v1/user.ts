@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import {
   ApiResponseUserProfile,
   ApiResponseUserQuit,
@@ -20,7 +21,6 @@ import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitReposito
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
 import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
-import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 
 const user = new Hono()
 
@@ -39,6 +39,7 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
     data: {
       userId: user.id,
       name: user.name,
+      notificationEmail: user.notificationEmail,
     },
     message: 'プロフィール取得成功',
   })
@@ -68,18 +69,45 @@ user.post(
       throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
     }
 
+    const prevNotificationEmail = user.notificationEmail
+
     if (body.name) {
       user.name = body.name
+    }
+    if (body.notificationEmail !== undefined) {
+      user.notificationEmail = body.notificationEmail ?? null
     }
 
     // プロフィール更新
     const updatedUser = await userRepo.updateUser(user)
+
+    // 通知メールアドレスが新規設定または変更された場合に通知メールを送信
+    const newNotificationEmail = updatedUser.notificationEmail
+    if (
+      newNotificationEmail &&
+      newNotificationEmail !== prevNotificationEmail
+    ) {
+      const emailRepository = new ResendEmailRepository(
+        process.env.RESEND_API_KEY,
+        process.env.RESEND_FROM_EMAIL
+      )
+      const emailService = new EmailService(emailRepository)
+      emailService
+        .sendByType(EmailType.NOTIFICATION_EMAIL_CHANGED, {
+          to: newNotificationEmail,
+          userName: updatedUser.name,
+        })
+        .catch((error: unknown) => {
+          console.error('通知メールアドレス変更メール送信に失敗しました', error)
+        })
+    }
 
     return c.json<SuccessResponse<ApiResponseUserProfile>>({
       status: 'success',
       data: {
         userId: updatedUser.id,
         name: updatedUser.name,
+        notificationEmail: updatedUser.notificationEmail,
       },
       message: 'プロフィール更新成功',
     })
@@ -135,7 +163,7 @@ user.post(
       return user
     })
 
-    if (authProvider.metadata?.email) {
+    if (user.notificationEmail) {
       const emailRepository = new ResendEmailRepository(
         process.env.RESEND_API_KEY,
         process.env.RESEND_FROM_EMAIL
@@ -144,7 +172,7 @@ user.post(
 
       emailService
         .sendByType(EmailType.WELCOME, {
-          to: authProvider.metadata.email,
+          to: user.notificationEmail,
           userName: user.name,
         })
         .catch((error: unknown) => {
@@ -158,6 +186,7 @@ user.post(
         data: {
           userId: user.id,
           name: user.name,
+          notificationEmail: user.notificationEmail,
         },
         message: 'ユーザー登録成功',
       },
@@ -313,6 +342,7 @@ user.post(
         data: {
           userId: guestUser.id,
           name: guestUser.name,
+          notificationEmail: guestUser.notificationEmail,
         },
         message: 'ゲストユーザー登録成功',
       },

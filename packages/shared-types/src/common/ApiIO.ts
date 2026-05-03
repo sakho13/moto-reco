@@ -47,6 +47,7 @@ export function getHttpStatusFromErrorCode(errorCode: ErrorCode): number {
 export type ApiResponseUserProfile = {
   userId: string
   name: string
+  notificationEmail: string | null
 }
 
 export type ApiResponseUserQuit = {

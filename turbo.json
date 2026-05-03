@@ -23,7 +23,9 @@
         "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID",
         "NEXT_PUBLIC_USE_FIREBASE_EMULATOR",
         "MICRO_CMS_API_KEY",
-        "MICRO_CMS_SERVICE_DOMAIN"
+        "MICRO_CMS_SERVICE_DOMAIN",
+        "RESEND_API_KEY",
+        "RESEND_FROM_EMAIL"
       ]
     },
     "lint": {
@@ -53,7 +55,9 @@
         "WEB_PORT",
         "DOCS_PORT",
         "MICRO_CMS_API_KEY",
-        "MICRO_CMS_SERVICE_DOMAIN"
+        "MICRO_CMS_SERVICE_DOMAIN",
+        "RESEND_API_KEY",
+        "RESEND_FROM_EMAIL"
       ]
     },
     "db:generate": {
