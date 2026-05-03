@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'ブログ記事が見つかりません' }
   }
 
-  const title = blog.seoTitle ?? blog.title
+  const title = blog.seoTitle || blog.title
   const keywords = blog.tags
     ? blog.tags.split(',').map((v) => v.trim())
     : undefined
