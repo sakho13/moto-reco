@@ -153,7 +153,7 @@ user.post(
 
     const body = c.req.valid('json')
 
-    const user = await prisma.$transaction(async (t) => {
+    const { user, status } = await prisma.$transaction(async (t) => {
       const userRepo = new PrismaUserRepository(t)
       const service = new UserService(userRepo)
 
@@ -163,7 +163,7 @@ user.post(
       return user
     })
 
-    if (user.notificationEmail) {
+    if (status === 'CREATED' && user.notificationEmail) {
       const emailRepository = new ResendEmailRepository(
         process.env.RESEND_API_KEY,
         process.env.RESEND_FROM_EMAIL

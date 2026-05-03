@@ -15,12 +15,18 @@ export class UserService {
     user: {
       name: string
     }
-  ): Promise<UserEntity> {
+  ): Promise<{
+    status: 'EXISTS' | 'CREATED'
+    user: UserEntity
+  }> {
     const createdUser =
       await this._userRepository.findByAuthProvider(authProvider)
 
     if (createdUser) {
-      return createdUser
+      return {
+        status: 'EXISTS',
+        user: createdUser,
+      }
     }
 
     const newUser = await this._userRepository.createUser(
@@ -33,7 +39,10 @@ export class UserService {
       }),
       authProvider
     )
-    return newUser
+    return {
+      status: 'CREATED',
+      user: newUser,
+    }
   }
 
   /**
