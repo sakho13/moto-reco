@@ -2,7 +2,6 @@ import {
   createFuelLogId,
   createHistoryId,
   createMyUserBikeId,
-  createPostId,
   createTouringId,
   createUserId,
 } from '@repo/shared-types'
@@ -25,7 +24,6 @@ export class PrismaHistoryRepository
         occurredAt: params.occurredAt,
         fuelLogId: params.fuelLogId ?? null,
         touringId: params.touringId ?? null,
-        postId: params.postId ?? null,
       },
     })
 
@@ -39,7 +37,6 @@ export class PrismaHistoryRepository
       occurredAt: record.occurredAt,
       fuelLogId: record.fuelLogId ? createFuelLogId(record.fuelLogId) : null,
       touringId: record.touringId ? createTouringId(record.touringId) : null,
-      postId: record.postId ? createPostId(record.postId) : null,
     })
   }
 
@@ -59,16 +56,6 @@ export class PrismaHistoryRepository
   ): Promise<void> {
     await this.connection.tUserMyBikeHistory.updateMany({
       where: { touringId },
-      data: { occurredAt },
-    })
-  }
-
-  public async updateOccurredAtByPostId(
-    postId: Parameters<IHistoryRepository['updateOccurredAtByPostId']>[0],
-    occurredAt: Parameters<IHistoryRepository['updateOccurredAtByPostId']>[1]
-  ): Promise<void> {
-    await this.connection.tUserMyBikeHistory.updateMany({
-      where: { postId },
       data: { occurredAt },
     })
   }
@@ -97,7 +84,6 @@ export class PrismaHistoryRepository
           touringId: record.touringId
             ? createTouringId(record.touringId)
             : null,
-          postId: record.postId ? createPostId(record.postId) : null,
         })
     )
   }

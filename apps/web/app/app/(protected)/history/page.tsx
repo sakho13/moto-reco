@@ -97,7 +97,7 @@ function HistoryPage() {
           <div className={styles.historyList}>
             {historyItems.map((item) => (
               <HistoryItemCard
-                key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.type === 'TOURING' ? item.touring.touringId : item.post.postId}`}
+                key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.touring.touringId}`}
                 item={item}
                 onClick={
                   item.type === 'FUEL_LOG'

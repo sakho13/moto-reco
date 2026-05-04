@@ -22,6 +22,7 @@ import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
+import { TouringPhotosCard } from '@/components/photo/TouringPhotosCard'
 import { SortableSpotItem } from '@/components/spot/SortableSpotItem'
 import { SpotAddModal } from '@/components/spot/SpotAddModal'
 import { SpotEditModal } from '@/components/spot/SpotEditModal'
@@ -552,12 +553,24 @@ function TouringDetailPage() {
           <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
             {touringInfoCard}
             {spotsCard}
+            <TouringPhotosCard
+              touringId={touringId}
+              cardClassName={styles.card}
+              mutedTextClassName={styles.mutedText}
+              editButtonClassName={styles.editButton}
+            />
           </div>
         </div>
       ) : (
         <div className="w-full max-w-md space-y-4">
           {touringInfoCard}
           {spotsCard}
+          <TouringPhotosCard
+            touringId={touringId}
+            cardClassName={styles.card}
+            mutedTextClassName={styles.mutedText}
+            editButtonClassName={styles.editButton}
+          />
         </div>
       )}
 
