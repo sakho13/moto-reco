@@ -11,22 +11,37 @@ export const ALLOWED_PHOTO_CONTENT_TYPES = [
 export type AllowedPhotoContentType =
   (typeof ALLOWED_PHOTO_CONTENT_TYPES)[number]
 
-/**
- * アップロードURL取得リクエストのバリデーションスキーマ
- */
-export const PhotoUploadUrlRequestSchema = z.object({
+const UploadFileItemSchema = z.object({
   contentType: z.enum(ALLOWED_PHOTO_CONTENT_TYPES, {
     required_error: 'コンテントタイプは必須です',
     invalid_type_error: '対応していないコンテントタイプです',
   }),
-  count: z
+  fileName: z.string({
+    required_error: 'ファイル名は必須です',
+    invalid_type_error: 'ファイル名は文字列で指定してください',
+  }),
+  fileSize: z
     .number({
-      required_error: '枚数は必須です',
-      invalid_type_error: '枚数は数値で指定してください',
+      required_error: 'ファイルサイズは必須です',
+      invalid_type_error: 'ファイルサイズは数値で指定してください',
     })
-    .int('枚数は整数で指定してください')
-    .min(1, '枚数は1以上で指定してください')
-    .max(PHOTO_MAX_COUNT, `枚数は${PHOTO_MAX_COUNT}以内で指定してください`),
+    .int('ファイルサイズは整数で指定してください')
+    .positive('ファイルサイズは1以上で指定してください'),
+})
+
+/**
+ * アップロードURL取得リクエストのバリデーションスキーマ
+ * ファイルごとに contentType / fileName / fileSize を指定することで
+ * 異なる形式を混在してアップロード可能
+ */
+export const PhotoUploadUrlRequestSchema = z.object({
+  files: z
+    .array(UploadFileItemSchema, {
+      required_error: 'ファイル一覧は必須です',
+      invalid_type_error: 'ファイル一覧は配列で指定してください',
+    })
+    .min(1, '1件以上のファイルを指定してください')
+    .max(PHOTO_MAX_COUNT, `${PHOTO_MAX_COUNT}件以内で指定してください`),
 })
 
 export type PhotoUploadUrlRequest = z.infer<typeof PhotoUploadUrlRequestSchema>

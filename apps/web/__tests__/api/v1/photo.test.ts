@@ -41,19 +41,23 @@ describe('Photo API Endpoints', () => {
 
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
       await testAuthRequired('/api/v1/photo/upload-url', 'POST', {
-        contentType: 'image/jpeg',
-        count: 1,
+        files: [{ contentType: 'image/jpeg', fileName: 'a.jpg', fileSize: 1000 }],
       })
     })
 
-    test('count=2 で2件の署名付きURLを返す', async () => {
+    test('files=2件で2件の署名付きURLを返す', async () => {
       const res = await app.request('/api/v1/photo/upload-url', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ contentType: 'image/jpeg', count: 2 }),
+        body: JSON.stringify({
+          files: [
+            { contentType: 'image/jpeg', fileName: 'a.jpg', fileSize: 1000 },
+            { contentType: 'image/png', fileName: 'b.png', fileSize: 2000 },
+          ],
+        }),
       })
 
       const json = await res.json()
@@ -73,33 +77,41 @@ describe('Photo API Endpoints', () => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ contentType: 'image/gif', count: 1 }),
+        body: JSON.stringify({
+          files: [{ contentType: 'image/gif', fileName: 'a.gif', fileSize: 1000 }],
+        }),
       })
 
       expect(res.status).toBe(400)
     })
 
-    test('count=0 はバリデーションエラーになる', async () => {
+    test('filesが空配列はバリデーションエラーになる', async () => {
       const res = await app.request('/api/v1/photo/upload-url', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ contentType: 'image/jpeg', count: 0 }),
+        body: JSON.stringify({ files: [] }),
       })
 
       expect(res.status).toBe(400)
     })
 
-    test('count=11（上限超過）はバリデーションエラーになる', async () => {
+    test('files=11件（上限超過）はバリデーションエラーになる', async () => {
       const res = await app.request('/api/v1/photo/upload-url', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ contentType: 'image/jpeg', count: 11 }),
+        body: JSON.stringify({
+          files: Array.from({ length: 11 }, (_, i) => ({
+            contentType: 'image/jpeg',
+            fileName: `file${i}.jpg`,
+            fileSize: 1000,
+          })),
+        }),
       })
 
       expect(res.status).toBe(400)

@@ -50,8 +50,9 @@ export function TouringPhotosCard({
   const handleFileChange = async (files: FileList) => {
     if (files.length === 0) return
 
-    const file = files[0]!
-    if (!isAcceptedType(file.type)) {
+    const fileArray = Array.from(files)
+    const invalidFile = fileArray.find((f) => !isAcceptedType(f.type))
+    if (invalidFile) {
       toast.error('JPEG・PNG・WebP のみアップロードできます')
       return
     }
@@ -62,7 +63,13 @@ export function TouringPhotosCard({
       const urlRes = await authenticatedFetch('/api/v1/photo/upload-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contentType: file.type, count: files.length }),
+        body: JSON.stringify({
+          files: fileArray.map((f) => ({
+            contentType: f.type,
+            fileName: f.name,
+            fileSize: f.size,
+          })),
+        }),
       })
       if (!urlRes.ok) throw new Error('URL取得失敗')
       const urlJson =

@@ -13,6 +13,7 @@ import {
   PhotoRegisterForSpotRequestSchema,
   PhotoRegisterForTouringRequest,
   PhotoRegisterForTouringRequestSchema,
+  PhotoUploadUrlRequest,
   PhotoUploadUrlRequestSchema,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -74,16 +75,16 @@ photo.post(
   zodValidateJson(PhotoUploadUrlRequestSchema),
   async (c) => {
     const { userId } = c.var.user!
-    const { contentType, count } = c.req.valid('json')
+    const { files } = c.req.valid('json') as PhotoUploadUrlRequest
 
-    const ext = CONTENT_TYPE_TO_EXT[contentType] ?? 'jpg'
     const storage = getFirebaseAdminStorage()
     const bucketName = getStorageBucketName()
     const bucket = storage.bucket(bucketName)
 
     const urls: ApiResponsePhotoUploadUrl = []
 
-    for (let i = 0; i < count; i++) {
+    for (const fileItem of files) {
+      const ext = CONTENT_TYPE_TO_EXT[fileItem.contentType] ?? 'jpg'
       const filename = `${crypto.randomUUID()}.${ext}`
       const photoPath = `users/${userId}/photos/${filename}`
       const file = bucket.file(photoPath)
@@ -92,7 +93,7 @@ photo.post(
         version: 'v4',
         action: 'write',
         expires: Date.now() + SIGNED_URL_EXPIRY_MS,
-        contentType,
+        contentType: fileItem.contentType,
       })
 
       urls.push({ signedUploadUrl: signedUrl, photoPath })

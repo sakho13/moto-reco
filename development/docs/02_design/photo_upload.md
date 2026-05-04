@@ -73,9 +73,12 @@
 ```json
 // Request
 {
-  "contentType": "image/jpeg",  // "image/jpeg" | "image/png" | "image/webp"
-  "count": 3                    // 1〜10
+  "files": [
+    { "contentType": "image/jpeg", "fileName": "photo1.jpg", "fileSize": 1024000 },
+    { "contentType": "image/png",  "fileName": "photo2.png", "fileSize": 512000  }
+  ]
 }
+// files: 1〜10件。contentType は "image/jpeg" | "image/png" | "image/webp"
 
 // Response 200
 {
