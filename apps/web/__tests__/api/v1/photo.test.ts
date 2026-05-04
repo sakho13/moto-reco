@@ -1,10 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
 import { app } from '@/lib/api/server/app'
-import {
-  createTestUser,
-  testAuthRequired,
-} from '../../helpers/authHelper'
+import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { getTestBikeId, createTestUserBike } from '../../helpers/bikeHelper'
 import {
   createTestTouringPhoto,
@@ -133,41 +130,34 @@ describe('Photo API Endpoints', () => {
     })
 
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
-      await testAuthRequired(
-        `/api/v1/photo/touring/${touringId}`,
-        'POST',
-        {
-          photos: [
-            {
-              photoPath: `users/${userId}/photos/test.jpg`,
-              takenAt: '2024-06-01T10:00:00.000Z',
-            },
-          ],
-        }
-      )
+      await testAuthRequired(`/api/v1/photo/touring/${touringId}`, 'POST', {
+        photos: [
+          {
+            photoPath: `users/${userId}/photos/test.jpg`,
+            takenAt: '2024-06-01T10:00:00.000Z',
+          },
+        ],
+      })
     })
 
     test('1枚の写真を登録するとDBにレコードが作成される', async () => {
       const photoPath = `users/${userId}/photos/test.jpg`
 
-      const res = await app.request(
-        `/api/v1/photo/touring/${touringId}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photos: [
-              {
-                photoPath,
-                takenAt: '2024-06-01T10:00:00.000Z',
-              },
-            ],
-          }),
-        }
-      )
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
 
       const json = await res.json()
       expect(res.status).toBe(201)
@@ -186,32 +176,29 @@ describe('Photo API Endpoints', () => {
     })
 
     test('複数枚登録でorderIndexが0から連番になる', async () => {
-      const res = await app.request(
-        `/api/v1/photo/touring/${touringId}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photos: [
-              {
-                photoPath: `users/${userId}/photos/a.jpg`,
-                takenAt: '2024-06-01T10:00:00.000Z',
-              },
-              {
-                photoPath: `users/${userId}/photos/b.jpg`,
-                takenAt: '2024-06-01T11:00:00.000Z',
-              },
-              {
-                photoPath: `users/${userId}/photos/c.jpg`,
-                takenAt: '2024-06-01T12:00:00.000Z',
-              },
-            ],
-          }),
-        }
-      )
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath: `users/${userId}/photos/a.jpg`,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+            {
+              photoPath: `users/${userId}/photos/b.jpg`,
+              takenAt: '2024-06-01T11:00:00.000Z',
+            },
+            {
+              photoPath: `users/${userId}/photos/c.jpg`,
+              takenAt: '2024-06-01T12:00:00.000Z',
+            },
+          ],
+        }),
+      })
 
       const json = await res.json()
       expect(res.status).toBe(201)
@@ -224,24 +211,21 @@ describe('Photo API Endpoints', () => {
       await createTestTouringPhoto({ userId, touringId, orderIndex: 0 })
       await createTestTouringPhoto({ userId, touringId, orderIndex: 1 })
 
-      const res = await app.request(
-        `/api/v1/photo/touring/${touringId}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photos: [
-              {
-                photoPath: `users/${userId}/photos/new.jpg`,
-                takenAt: '2024-06-01T13:00:00.000Z',
-              },
-            ],
-          }),
-        }
-      )
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath: `users/${userId}/photos/new.jpg`,
+              takenAt: '2024-06-01T13:00:00.000Z',
+            },
+          ],
+        }),
+      })
 
       const json = await res.json()
       expect(res.status).toBe(201)
@@ -249,24 +233,21 @@ describe('Photo API Endpoints', () => {
     })
 
     test('存在しないtouringIdは404になる', async () => {
-      const res = await app.request(
-        '/api/v1/photo/touring/non-existent-id',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photos: [
-              {
-                photoPath: `users/${userId}/photos/test.jpg`,
-                takenAt: '2024-06-01T10:00:00.000Z',
-              },
-            ],
-          }),
-        }
-      )
+      const res = await app.request('/api/v1/photo/touring/non-existent-id', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath: `users/${userId}/photos/test.jpg`,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
 
       expect(res.status).toBe(404)
     })
@@ -287,24 +268,21 @@ describe('Photo API Endpoints', () => {
         }
       )
 
-      const res = await app.request(
-        `/api/v1/photo/touring/${otherTouringId}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photos: [
-              {
-                photoPath: `users/${userId}/photos/test.jpg`,
-                takenAt: '2024-06-01T10:00:00.000Z',
-              },
-            ],
-          }),
-        }
-      )
+      const res = await app.request(`/api/v1/photo/touring/${otherTouringId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath: `users/${userId}/photos/test.jpg`,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
 
       expect(res.status).toBe(404)
     })
@@ -312,24 +290,21 @@ describe('Photo API Endpoints', () => {
     test('他ユーザーのphotoPathは400になる', async () => {
       const otherUser = await createTestUser()
 
-      const res = await app.request(
-        `/api/v1/photo/touring/${touringId}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photos: [
-              {
-                photoPath: `users/${otherUser.userId}/photos/test.jpg`,
-                takenAt: '2024-06-01T10:00:00.000Z',
-              },
-            ],
-          }),
-        }
-      )
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath: `users/${otherUser.userId}/photos/test.jpg`,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
 
       expect(res.status).toBe(400)
     })
@@ -359,20 +334,14 @@ describe('Photo API Endpoints', () => {
     })
 
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
-      await testAuthRequired(
-        `/api/v1/photo/touring/${touringId}`,
-        'GET'
-      )
+      await testAuthRequired(`/api/v1/photo/touring/${touringId}`, 'GET')
     })
 
     test('写真がない場合は空配列を返す', async () => {
-      const res = await app.request(
-        `/api/v1/photo/touring/${touringId}`,
-        {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
       const json = await res.json()
       expect(res.status).toBe(200)
@@ -385,13 +354,10 @@ describe('Photo API Endpoints', () => {
       await createTestTouringPhoto({ userId, touringId, orderIndex: 1 })
       await createTestTouringPhoto({ userId, touringId, orderIndex: 2 })
 
-      const res = await app.request(
-        `/api/v1/photo/touring/${touringId}`,
-        {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
       const json = await res.json()
       expect(res.status).toBe(200)
@@ -417,13 +383,10 @@ describe('Photo API Endpoints', () => {
         }
       )
 
-      const res = await app.request(
-        `/api/v1/photo/touring/${otherTouringId}`,
-        {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
+      const res = await app.request(`/api/v1/photo/touring/${otherTouringId}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
       expect(res.status).toBe(404)
     })
@@ -549,24 +512,21 @@ describe('Photo API Endpoints', () => {
         }
       )
 
-      const res = await app.request(
-        `/api/v1/photo/spot/${otherSpotId}`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            photos: [
-              {
-                photoPath: `users/${userId}/photos/test.jpg`,
-                takenAt: '2024-06-01T11:00:00.000Z',
-              },
-            ],
-          }),
-        }
-      )
+      const res = await app.request(`/api/v1/photo/spot/${otherSpotId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath: `users/${userId}/photos/test.jpg`,
+              takenAt: '2024-06-01T11:00:00.000Z',
+            },
+          ],
+        }),
+      })
 
       expect(res.status).toBe(404)
     })
@@ -681,13 +641,10 @@ describe('Photo API Endpoints', () => {
         }
       )
 
-      const res = await app.request(
-        `/api/v1/photo/spot/${otherSpotId}`,
-        {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
+      const res = await app.request(`/api/v1/photo/spot/${otherSpotId}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
       expect(res.status).toBe(404)
     })
