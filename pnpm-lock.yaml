@@ -138,8 +138,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@scalar/nextjs-api-reference':
-        specifier: 0.10.13
-        version: 0.10.13(next@16.0.7(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)
+        specifier: 0.10.14
+        version: 0.10.14(next@16.0.7(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)
       date-fns:
         specifier: 4.1.0
         version: 4.1.0
@@ -1871,23 +1871,23 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@scalar/client-side-rendering@0.1.6':
-    resolution: {integrity: sha512-ooc5RKyi83EvBuxB2N8H00ZE2CF4oKynuUToSCaoqxkjv+oJ6B3+OYsb0HVixznsyWhUDdtQZm4/xOb0kxBaaA==}
+  '@scalar/client-side-rendering@0.1.7':
+    resolution: {integrity: sha512-IDzjKF93jrOljlvKBsLHXT1FPWgz56jFrMPC+iLihREp1qH8wF92mG8Zpakw8cURkEuw5WijRk0xNBP2moGyuw==}
     engines: {node: '>=22'}
 
-  '@scalar/helpers@0.5.5':
-    resolution: {integrity: sha512-TqbErkqGijJJW6Ad8lpswHFTmlJaYFt9oolaWF1/Nn9171xdkK9ZDAk3pCaOCWs8WpwvcbUSxIVD8JxdBg0MFg==}
+  '@scalar/helpers@0.6.0':
+    resolution: {integrity: sha512-pfSamAgBxqFeE8IpEG6uGkHlnPhY1CLeOTttV9+vKQbrBk5b7vvyTsUXv0Hz4kNU1TFrxcTTPE+Akn5S+jlTtQ==}
     engines: {node: '>=22'}
 
-  '@scalar/nextjs-api-reference@0.10.13':
-    resolution: {integrity: sha512-kgTwito3/qFD7V15Tf1tovF933bSQ3/AsUaNWzy4e9XQUQYS5mguxYrTMa80Oul8Wz8ts6bwAYHZmZnS3Rw6XQ==}
+  '@scalar/nextjs-api-reference@0.10.14':
+    resolution: {integrity: sha512-edoeo53DUmRqojbXB0K8Jbnih0i7IejUXRZqRnwuv2acgORL2WwCmw4SILcDS4Frh4UrvdVla1R3vnt34JKitg==}
     engines: {node: '>=22'}
     peerDependencies:
       next: ^15.0.0 || ^16.0.0
       react: ^19.0.0
 
-  '@scalar/types@0.9.5':
-    resolution: {integrity: sha512-joen5nuqgmGzgXK5XIqkGs0JmCZ16djaw+pgC24sfb+p3sSPVfKQTNTil/RuvHMNsmA/dFcQ6GI0Y3HhTlUQrg==}
+  '@scalar/types@0.9.6':
+    resolution: {integrity: sha512-UaCQQcscFTJdxZREE8KhUdSJgaDlc44TZbmWcZffs4m1hzqOvEI7lEBS13iBpLq7/cxUXFgyJdecywvNqJ0PkA==}
     engines: {node: '>=22'}
 
   '@selderee/plugin-htmlparser2@0.11.0':
@@ -5055,8 +5055,8 @@ packages:
   zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
-  zod@4.4.1:
-    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
 
@@ -6468,24 +6468,24 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.53.3':
     optional: true
 
-  '@scalar/client-side-rendering@0.1.6':
+  '@scalar/client-side-rendering@0.1.7':
     dependencies:
-      '@scalar/types': 0.9.5
+      '@scalar/types': 0.9.6
 
-  '@scalar/helpers@0.5.5': {}
+  '@scalar/helpers@0.6.0': {}
 
-  '@scalar/nextjs-api-reference@0.10.13(next@16.0.7(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)':
+  '@scalar/nextjs-api-reference@0.10.14(next@16.0.7(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)':
     dependencies:
-      '@scalar/client-side-rendering': 0.1.6
+      '@scalar/client-side-rendering': 0.1.7
       next: 16.0.7(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react: 19.2.1
 
-  '@scalar/types@0.9.5':
+  '@scalar/types@0.9.6':
     dependencies:
-      '@scalar/helpers': 0.5.5
+      '@scalar/helpers': 0.6.0
       nanoid: 5.1.11
       type-fest: 5.6.0
-      zod: 4.4.1
+      zod: 4.4.3
 
   '@selderee/plugin-htmlparser2@0.11.0':
     dependencies:
@@ -10106,4 +10106,4 @@ snapshots:
 
   zod@3.23.8: {}
 
-  zod@4.4.1: {}
+  zod@4.4.3: {}
