@@ -41,7 +41,9 @@ describe('Photo API Endpoints', () => {
 
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
       await testAuthRequired('/api/v1/photo/upload-url', 'POST', {
-        files: [{ contentType: 'image/jpeg', fileName: 'a.jpg', fileSize: 1000 }],
+        files: [
+          { contentType: 'image/jpeg', fileName: 'a.jpg', fileSize: 1000 },
+        ],
       })
     })
 
@@ -78,7 +80,9 @@ describe('Photo API Endpoints', () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          files: [{ contentType: 'image/gif', fileName: 'a.gif', fileSize: 1000 }],
+          files: [
+            { contentType: 'image/gif', fileName: 'a.gif', fileSize: 1000 },
+          ],
         }),
       })
 
