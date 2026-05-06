@@ -10,7 +10,7 @@ import {
   UserAuthRecoverRequestSchema,
   UserAuthQuitRequestSchema,
   UserAuthRegisterRequestSchema,
-  UserProfileUpdateRequestSchema,
+  UserProfilePatchRequestSchema,
 } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -46,20 +46,21 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
 })
 
 /**
- * ユーザープロフィール更新エンドポイント
+ * ユーザープロフィール部分更新エンドポイント
  *
  * @remarks
  * - 認証必須（honoAuthMiddleware）
  * - リクエストボディのバリデーション（zodValidateJson）
- * - nameフィールド: 1文字以上50文字以下
+ * - nameフィールド: 指定時は1文字以上50文字以下
+ * - 少なくとも1フィールドの指定が必須
  */
-user.post(
+user.patch(
   '/profile',
   honoAuthMiddleware,
-  zodValidateJson(UserProfileUpdateRequestSchema),
+  zodValidateJson(UserProfilePatchRequestSchema),
   async (c) => {
     const { userId } = c.var.user!
-    const body = c.req.valid('json') // 型安全に UserProfileUpdateRequest として取得
+    const body = c.req.valid('json')
 
     const userRepo = new PrismaUserRepository(prisma)
 
@@ -71,7 +72,7 @@ user.post(
 
     const prevNotificationEmail = user.notificationEmail
 
-    if (body.name) {
+    if (body.name !== undefined) {
       user.name = body.name
     }
     if (body.notificationEmail !== undefined) {
