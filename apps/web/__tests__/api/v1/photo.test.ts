@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
-import { app } from '@/lib/api/server/app'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { getTestBikeId, createTestUserBike } from '../../helpers/bikeHelper'
 import {
@@ -8,6 +7,7 @@ import {
   createTestSpotPhoto,
 } from '../../helpers/photoHelper'
 import { createTestTouring, createTestSpot } from '../../helpers/touringHelper'
+import { app } from '@/lib/api/server/app'
 
 vi.mock('@/lib/firebase/adminStorage', () => ({
   getFirebaseAdminStorage: () => ({
