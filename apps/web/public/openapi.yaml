@@ -50,8 +50,8 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
-    post:
-      summary: ユーザプロフィールの更新
+    patch:
+      summary: ユーザプロフィールの部分更新
       tags:
         - user
       requestBody:
@@ -1305,11 +1305,18 @@ components:
           maxLength: 50
     UserUpdateProfile:
       type: object
+      description: 少なくとも1フィールドの指定が必須
       properties:
         name:
           type: string
           minLength: 1
           maxLength: 50
+          description: ユーザー名（1-50文字）
+        notificationEmail:
+          type: string
+          format: email
+          nullable: true
+          description: 通知用メールアドレス（nullで削除）
     UserRegister:
       type: object
       required:

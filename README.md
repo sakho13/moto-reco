@@ -35,9 +35,9 @@
 
 すべてのパッケージとアプリは [TypeScript](https://www.typescriptlang.org/) で書かれています。
 
-### インフラ (AWS CDK)
+### インフラ (GCP)
 
-- **`infra`**: AWS CDK v2 を用いた IaC 環境。詳細なセットアップやコマンドは [`infra/README.md`](infra/README.md) を参照してください。
+- GCP Cloud Run を使用したコンテナデプロイを実施している
 
 ## 技術スタック
 

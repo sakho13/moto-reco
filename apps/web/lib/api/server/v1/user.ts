@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import {
   ApiResponseUserProfile,
   ApiResponseUserQuit,
@@ -9,7 +10,7 @@ import {
   UserAuthRecoverRequestSchema,
   UserAuthQuitRequestSchema,
   UserAuthRegisterRequestSchema,
-  UserProfileUpdateRequestSchema,
+  UserProfilePatchRequestSchema,
 } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -38,26 +39,28 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
     data: {
       userId: user.id,
       name: user.name,
+      notificationEmail: user.notificationEmail,
     },
     message: 'プロフィール取得成功',
   })
 })
 
 /**
- * ユーザープロフィール更新エンドポイント
+ * ユーザープロフィール部分更新エンドポイント
  *
  * @remarks
  * - 認証必須（honoAuthMiddleware）
  * - リクエストボディのバリデーション（zodValidateJson）
- * - nameフィールド: 1文字以上50文字以下
+ * - nameフィールド: 指定時は1文字以上50文字以下
+ * - 少なくとも1フィールドの指定が必須
  */
-user.post(
+user.patch(
   '/profile',
   honoAuthMiddleware,
-  zodValidateJson(UserProfileUpdateRequestSchema),
+  zodValidateJson(UserProfilePatchRequestSchema),
   async (c) => {
     const { userId } = c.var.user!
-    const body = c.req.valid('json') // 型安全に UserProfileUpdateRequest として取得
+    const body = c.req.valid('json')
 
     const userRepo = new PrismaUserRepository(prisma)
 
@@ -67,18 +70,45 @@ user.post(
       throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
     }
 
-    if (body.name) {
+    const prevNotificationEmail = user.notificationEmail
+
+    if (body.name !== undefined) {
       user.name = body.name
+    }
+    if (body.notificationEmail !== undefined) {
+      user.notificationEmail = body.notificationEmail ?? null
     }
 
     // プロフィール更新
     const updatedUser = await userRepo.updateUser(user)
+
+    // 通知メールアドレスが新規設定または変更された場合に通知メールを送信
+    const newNotificationEmail = updatedUser.notificationEmail
+    if (
+      newNotificationEmail &&
+      newNotificationEmail !== prevNotificationEmail
+    ) {
+      const emailRepository = new ResendEmailRepository(
+        process.env.RESEND_API_KEY,
+        process.env.RESEND_FROM_EMAIL
+      )
+      const emailService = new EmailService(emailRepository)
+      emailService
+        .sendByType(EmailType.NOTIFICATION_EMAIL_CHANGED, {
+          to: newNotificationEmail,
+          userName: updatedUser.name,
+        })
+        .catch((error: unknown) => {
+          console.error('通知メールアドレス変更メール送信に失敗しました', error)
+        })
+    }
 
     return c.json<SuccessResponse<ApiResponseUserProfile>>({
       status: 'success',
       data: {
         userId: updatedUser.id,
         name: updatedUser.name,
+        notificationEmail: updatedUser.notificationEmail,
       },
       message: 'プロフィール更新成功',
     })
@@ -124,7 +154,7 @@ user.post(
 
     const body = c.req.valid('json')
 
-    const user = await prisma.$transaction(async (t) => {
+    const { user, status } = await prisma.$transaction(async (t) => {
       const userRepo = new PrismaUserRepository(t)
       const service = new UserService(userRepo)
 
@@ -134,12 +164,30 @@ user.post(
       return user
     })
 
+    if (status === 'CREATED' && user.notificationEmail) {
+      const emailRepository = new ResendEmailRepository(
+        process.env.RESEND_API_KEY,
+        process.env.RESEND_FROM_EMAIL
+      )
+      const emailService = new EmailService(emailRepository)
+
+      emailService
+        .sendByType(EmailType.WELCOME, {
+          to: user.notificationEmail,
+          userName: user.name,
+        })
+        .catch((error: unknown) => {
+          console.error('Welcomeメール送信に失敗しました', error)
+        })
+    }
+
     return c.json<SuccessResponse<ApiResponseUserProfile>>(
       {
         status: 'success',
         data: {
           userId: user.id,
           name: user.name,
+          notificationEmail: user.notificationEmail,
         },
         message: 'ユーザー登録成功',
       },
@@ -295,6 +343,7 @@ user.post(
         data: {
           userId: guestUser.id,
           name: guestUser.name,
+          notificationEmail: guestUser.notificationEmail,
         },
         message: 'ゲストユーザー登録成功',
       },

@@ -42,15 +42,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'ブログ記事が見つかりません' }
   }
 
+  const title = blog.seoTitle || blog.title
+  const keywords = blog.tags
+    ? blog.tags.split(',').map((v) => v.trim())
+    : undefined
+
   return {
-    title: blog.title,
+    title,
+    description: blog.seoDescription ?? undefined,
+    keywords,
     openGraph: {
       url: `${SITE_URL}/blog/${slug}`,
-      title: `${blog.title} | ${APP_NAME}`,
+      title: `${title} | ${APP_NAME}`,
       images: blog.eyecatch ? [blog.eyecatch.url] : ['/top_image_1.png'],
     },
     twitter: {
-      title: `${blog.title} | ${APP_NAME}`,
+      title: `${title} | ${APP_NAME}`,
       images: blog.eyecatch ? [blog.eyecatch.url] : ['/top_image_1.png'],
     },
     metadataBase: new URL(SITE_URL),

@@ -27,6 +27,7 @@ export function FooterCard() {
         >
           ご意見・ご要望はこちら
         </Link>
+
         <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
           <p className="m-0 text-sm">Created by SaKho</p>
           <p className="m-0 text-sm">@2025 MotoReco</p>

@@ -1,0 +1,17 @@
+{
+  "name": "@repo/email",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "resend": "6.12.2"
+  }
+}

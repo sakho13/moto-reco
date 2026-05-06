@@ -81,3 +81,66 @@ DOCKER_LOCALSTACK_SERVICES_END=4559   # LocalStack Services Range End
 | DOCKER_LOCALSTACK_SERVICES_END   | 4559           | 4659       | 4759       |
 
 **注意**: ポートを変更した場合、`DATABASE_URL`や`FIREBASE_AUTH_EMULATOR_HOST`なども更新してください。
+
+## LAN端末（iPhone等）からのFirebase Emulator接続
+
+iPhoneなど同一LAN上のデバイスでアプリを確認する際、Firebase Auth Emulatorへの接続に追加設定が必要です。
+
+### なぜ設定が必要か
+
+Firebase Auth SDK はサーバーではなく**ブラウザ（iPhoneのブラウザ）から直接** Emulator へ接続します。
+そのため `localhost:9099` ではiPhone側からは到達できず、WindowsホストのLAN IPを通じたポートフォワーディングが必要です。
+
+### ⚠️ 重要: Dockerポートとの競合
+
+`netsh interface portproxy` でポートをフォワーディングすると、**Dockerが同じポートをバインドできなくなります**。
+LAN接続を設定する場合は、Dockerコンテナ側のFirebase Auth ポートを別のポートに変更してください。
+
+例: `.env.local` で `DOCKER_FIREBASE_AUTH_PORT=9199` に変更してからコンテナを再起動する。
+
+### 設定手順
+
+**PowerShell（管理者権限）で実行：**
+
+```powershell
+# 1. WSL2のIPアドレスを確認
+wsl hostname -I
+# → 例: 172.x.x.x が表示される。このIPを以下の <WSL2_IP> に使用する
+
+# 2. Windowsファイアウォールでポートを許可（<PORT> は DOCKER_FIREBASE_AUTH_PORT の値）
+netsh advfirewall firewall add rule name="Firebase Emulator <PORT>" dir=in action=allow protocol=TCP localport=<PORT>
+
+# 3. ポートフォワーディングを設定
+netsh interface portproxy add v4tov4 listenport=<PORT> listenaddress=0.0.0.0 connectport=<PORT> connectaddress=<WSL2_IP>
+```
+
+設定後、iPhoneのブラウザから `http://<WindowsのLAN IP>:<PORT>` へアクセスし、Firebase Emulator UIが表示されることを確認してください。
+
+> **注意**: WSL2を再起動するとWSL2のIPが変わります。再起動後はportproxyルールを更新する必要があります。
+
+### 設定の確認
+
+```powershell
+netsh interface portproxy show all
+```
+
+### 解除手順
+
+LAN接続が不要になったら必ず解除してください（解除しないとDockerがポートを使用できません）。
+
+**PowerShell（管理者権限）で実行：**
+
+```powershell
+# portproxyルールを削除
+netsh interface portproxy delete v4tov4 listenport=<PORT> listenaddress=0.0.0.0
+
+# ファイアウォールルールを削除（任意）
+netsh advfirewall firewall delete rule name="Firebase Emulator <PORT>"
+```
+
+解除後、Dockerコンテナを再起動してポートを復元してください。
+
+```bash
+docker compose down firebase_emulator
+docker compose up -d firebase_emulator
+```

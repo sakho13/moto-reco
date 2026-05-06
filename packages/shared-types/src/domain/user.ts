@@ -6,4 +6,5 @@ export type User = {
   name: string
   role: 'USER' | 'ADMIN' | 'GUEST'
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+  notificationEmail: string | null
 }
