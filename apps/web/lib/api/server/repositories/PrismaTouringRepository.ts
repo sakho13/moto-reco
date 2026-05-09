@@ -204,7 +204,7 @@ export class PrismaTouringRepository
     myUserBikeId: MyUserBikeId
   ): Promise<PublicTouringDetail[]> {
     const bike = await this.connection.tUserMyBike.findFirst({
-      where: { id: myUserBikeId, isPublic: true, ownStatus: 'OWN' },
+      where: { id: myUserBikeId, ownStatus: 'OWN' },
       select: { id: true },
     })
 

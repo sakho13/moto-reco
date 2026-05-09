@@ -133,7 +133,6 @@ export type ApiResponseUserBikeList = {
     totalMileage: number
     displacement: number
     modelYear: number | null
-    isPublic: boolean
     createdAt: string
     updatedAt: string
     fuelLogCount: number
@@ -154,7 +153,6 @@ export type ApiResponseUserBikeDetail = {
   totalMileage: number
   displacement: number
   modelYear: number | null
-  isPublic: boolean
   createdAt: string
   updatedAt: string
   fuelLogCount: number

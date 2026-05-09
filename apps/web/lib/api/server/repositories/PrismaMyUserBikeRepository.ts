@@ -31,7 +31,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: myUserBike.purchaseDate,
         purchasePrice: myUserBike.purchasePrice,
         purchaseMileage: myUserBike.purchaseMileage,
-        isPublic: myUserBike.isPublic,
         ownedAt: myUserBike.ownedAt,
         soldAt: myUserBike.soldAt,
         ownStatus: myUserBike.ownStatus,
@@ -44,7 +43,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: true,
         purchasePrice: true,
         purchaseMileage: true,
-        isPublic: true,
         ownedAt: true,
         soldAt: true,
         ownStatus: true,
@@ -73,7 +71,6 @@ export class PrismaMyUserBikeRepository
       purchaseDate: created.purchaseDate,
       purchasePrice: created.purchasePrice,
       purchaseMileage: created.purchaseMileage,
-      isPublic: created.isPublic,
       ownedAt: created.ownedAt,
       soldAt: created.soldAt,
       ownStatus: created.ownStatus,
@@ -133,7 +130,6 @@ export class PrismaMyUserBikeRepository
         myUserBike.userBike.bike?.displacement ??
         myUserBike.userBike.displacement,
       modelYear: myUserBike.userBike.bike?.modelYear ?? null,
-      isPublic: myUserBike.isPublic,
       createdAt: myUserBike.createdAt,
       updatedAt: myUserBike.updatedAt,
       fuelLogCount: myUserBike._count.fuelLogs,
@@ -146,7 +142,7 @@ export class PrismaMyUserBikeRepository
     limit: number
   ): Promise<PublicMyUserBikeDetail[]> {
     const myUserBikes = await this.connection.tUserMyBike.findMany({
-      where: { userId, isPublic: true, ownStatus: 'OWN' },
+      where: { userId, ownStatus: 'OWN' },
       include: {
         userBike: {
           select: {
@@ -180,7 +176,7 @@ export class PrismaMyUserBikeRepository
 
   async findPublicBikes(): Promise<PublicMyUserBikeDetail[]> {
     const myUserBikes = await this.connection.tUserMyBike.findMany({
-      where: { isPublic: true, ownStatus: 'OWN' },
+      where: { ownStatus: 'OWN' },
       include: {
         userBike: {
           select: {
@@ -217,7 +213,7 @@ export class PrismaMyUserBikeRepository
     myUserBikeId: MyUserBikeId
   ): Promise<PublicMyUserBikeDetail | null> {
     const myUserBike = await this.connection.tUserMyBike.findFirst({
-      where: { id: myUserBikeId, isPublic: true, ownStatus: 'OWN' },
+      where: { id: myUserBikeId, ownStatus: 'OWN' },
       include: {
         userBike: {
           select: {
@@ -265,7 +261,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: true,
         purchasePrice: true,
         purchaseMileage: true,
-        isPublic: true,
         ownedAt: true,
         soldAt: true,
         ownStatus: true,
@@ -298,7 +293,6 @@ export class PrismaMyUserBikeRepository
       purchaseDate: myUserBike.purchaseDate,
       purchasePrice: myUserBike.purchasePrice,
       purchaseMileage: myUserBike.purchaseMileage,
-      isPublic: myUserBike.isPublic,
       ownedAt: myUserBike.ownedAt,
       soldAt: myUserBike.soldAt,
       ownStatus: myUserBike.ownStatus,
@@ -317,7 +311,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: myUserBike.purchaseDate,
         purchasePrice: myUserBike.purchasePrice,
         purchaseMileage: myUserBike.purchaseMileage,
-        isPublic: myUserBike.isPublic,
         ownedAt: myUserBike.ownedAt,
         soldAt: myUserBike.soldAt,
         ownStatus: myUserBike.ownStatus,
@@ -330,7 +323,6 @@ export class PrismaMyUserBikeRepository
         purchaseDate: true,
         purchasePrice: true,
         purchaseMileage: true,
-        isPublic: true,
         ownedAt: true,
         soldAt: true,
         ownStatus: true,
@@ -359,7 +351,6 @@ export class PrismaMyUserBikeRepository
       purchaseDate: updated.purchaseDate,
       purchasePrice: updated.purchasePrice,
       purchaseMileage: updated.purchaseMileage,
-      isPublic: updated.isPublic,
       ownedAt: updated.ownedAt,
       soldAt: updated.soldAt,
       ownStatus: updated.ownStatus,
@@ -425,7 +416,6 @@ export class PrismaMyUserBikeRepository
         myUserBike.userBike.bike?.displacement ??
         myUserBike.userBike.displacement,
       modelYear: myUserBike.userBike.bike?.modelYear ?? null,
-      isPublic: myUserBike.isPublic,
       createdAt: myUserBike.createdAt,
       updatedAt: myUserBike.updatedAt,
       fuelLogCount: myUserBike._count.fuelLogs,

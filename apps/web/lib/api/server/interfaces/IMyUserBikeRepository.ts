@@ -15,7 +15,6 @@ export type MyUserBikeDetail = {
   totalMileage: number
   displacement: number
   modelYear: number | null
-  isPublic: boolean
   createdAt: Date
   updatedAt: Date
   fuelLogCount: number
