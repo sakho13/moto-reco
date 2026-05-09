@@ -40,6 +40,10 @@ export interface IMyUserBikeRepository {
     searchParams: UserBikeSearchParams
   ): Promise<MyUserBikeDetail[]>
   findPublicBikes(): Promise<PublicMyUserBikeDetail[]>
+  findPublicBikesByUserId(
+    userId: UserId,
+    limit: number
+  ): Promise<PublicMyUserBikeDetail[]>
   findMyUserBikeById(
     myUserBikeId: MyUserBikeId,
     userId: UserId

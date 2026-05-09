@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import useSWR from 'swr'
 import { BaseCard } from '@repo/ui/baseCard'
@@ -67,10 +68,29 @@ export function ProfileCard() {
           </Button>
         }
       >
-        <div>
-          <p>名前: {data?.name || '未設定'}</p>
-          <p>通知メールアドレス: {data?.notificationEmail || '未設定'}</p>
-          <p>プロフィール公開: {data?.isProfilePublic ? '公開' : '非公開'}</p>
+        <div className="flex flex-col gap-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-500">名前</span>
+            <span>{data?.name || '未設定'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">通知メールアドレス</span>
+            <span>{data?.notificationEmail || '未設定'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">プロフィール公開</span>
+            <span>{data?.isProfilePublic ? '公開' : '非公開'}</span>
+          </div>
+          {data?.userId && (
+            <div className="pt-1">
+              <Link
+                href={`/app/users/${data.userId}`}
+                className="text-blue-500 hover:underline"
+              >
+                自分の公開ページを見る →
+              </Link>
+            </div>
+          )}
         </div>
       </BaseCard>
 

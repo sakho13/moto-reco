@@ -141,6 +141,43 @@ export class PrismaMyUserBikeRepository
     }))
   }
 
+  async findPublicBikesByUserId(
+    userId: UserId,
+    limit: number
+  ): Promise<PublicMyUserBikeDetail[]> {
+    const myUserBikes = await this.connection.tUserMyBike.findMany({
+      where: { userId, isPublic: true, ownStatus: 'OWN' },
+      include: {
+        userBike: {
+          select: {
+            displacement: true,
+            totalMileage: true,
+            bike: {
+              include: {
+                manufacturer: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: limit,
+    })
+
+    return myUserBikes.map((myUserBike) => ({
+      myUserBikeId: createMyUserBikeId(myUserBike.id),
+      manufacturerName: myUserBike.userBike.bike?.manufacturer.name ?? null,
+      modelName: myUserBike.userBike.bike?.modelName ?? null,
+      nickname: myUserBike.nickname,
+      displacement:
+        myUserBike.userBike.bike?.displacement ??
+        myUserBike.userBike.displacement,
+      modelYear: myUserBike.userBike.bike?.modelYear ?? null,
+      totalMileage: myUserBike.userBike.totalMileage,
+      updatedAt: myUserBike.updatedAt,
+    }))
+  }
+
   async findPublicBikes(): Promise<PublicMyUserBikeDetail[]> {
     const myUserBikes = await this.connection.tUserMyBike.findMany({
       where: { isPublic: true, ownStatus: 'OWN' },

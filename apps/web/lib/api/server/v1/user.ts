@@ -17,10 +17,15 @@ import {
   createUserId,
 } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
-import { honoAuthMiddleware } from '../middlewares/honoAuth'
+import {
+  honoAuthMiddleware,
+  honoOptionalAuthMiddleware,
+} from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
+import { PrismaHistoryRepository } from '../repositories/PrismaHistoryRepository'
+import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
@@ -126,13 +131,15 @@ user.patch(
   }
 )
 
-user.get('/:userId/page', honoAuthMiddleware, async (c) => {
+user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
   const userId = c.req.param('userId')
   const requesterId = c.var.user?.userId
   const targetUserId = createUserId(userId)
 
   const userRepo = new PrismaUserRepository(prisma)
   const followRepo = new PrismaUserFollowRepository(prisma)
+  const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+  const historyRepo = new PrismaHistoryRepository(prisma)
   const targetUser = await userRepo.findById(targetUserId)
 
   if (!targetUser || !targetUser.isProfilePublic) {
@@ -141,41 +148,8 @@ user.get('/:userId/page', honoAuthMiddleware, async (c) => {
 
   const [bikes, histories, followerCount, followingCount, isFollowing] =
     await Promise.all([
-      prisma.tUserMyBike.findMany({
-        where: { userId, ownStatus: 'OWN', isPublic: true },
-        orderBy: { updatedAt: 'desc' },
-        select: {
-          id: true,
-          nickname: true,
-          updatedAt: true,
-          userBike: {
-            select: {
-              bike: {
-                select: {
-                  modelName: true,
-                  manufacturer: { select: { name: true } },
-                },
-              },
-            },
-          },
-        },
-        take: 8,
-      }),
-      prisma.tUserMyBikeHistory.findMany({
-        where: { userId },
-        orderBy: { occurredAt: 'desc' },
-        take: 30,
-        include: {
-          userMyBike: {
-            select: {
-              nickname: true,
-              userBike: { select: { bike: { select: { modelName: true } } } },
-            },
-          },
-          fuelLog: true,
-          touring: true,
-        },
-      }),
+      myUserBikeRepo.findPublicBikesByUserId(targetUserId, 8),
+      historyRepo.findPublicHistoriesByUserId(targetUserId, 30),
       followRepo.countFollowers(targetUserId),
       followRepo.countFollowing(targetUserId),
       requesterId
@@ -192,9 +166,9 @@ user.get('/:userId/page', honoAuthMiddleware, async (c) => {
       followingCount,
       isFollowing,
       bikes: bikes.map((bike) => ({
-        myUserBikeId: bike.id,
-        manufacturerName: bike.userBike.bike?.manufacturer.name ?? null,
-        modelName: bike.userBike.bike?.modelName ?? null,
+        myUserBikeId: bike.myUserBikeId,
+        manufacturerName: bike.manufacturerName,
+        modelName: bike.modelName,
         nickname: bike.nickname,
         updatedAt: bike.updatedAt.toISOString(),
       })),
@@ -287,7 +261,7 @@ user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
   })
 })
 
-user.get('/:userId/followers', honoAuthMiddleware, async (c) => {
+user.get('/:userId/followers', async (c) => {
   const userId = createUserId(c.req.param('userId'))
   const page = Number(c.req.query('page') ?? '1')
 
@@ -308,7 +282,7 @@ user.get('/:userId/followers', honoAuthMiddleware, async (c) => {
   })
 })
 
-user.get('/:userId/following', honoAuthMiddleware, async (c) => {
+user.get('/:userId/following', async (c) => {
   const userId = createUserId(c.req.param('userId'))
   const page = Number(c.req.query('page') ?? '1')
 
