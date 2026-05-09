@@ -674,6 +674,185 @@ describe('User API Endpoints', () => {
     })
   })
 
+  describe('POST /api/v1/user/:userId/follow', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/dummy-id/follow', 'POST')
+    })
+
+    test('他ユーザーをフォローできる', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      const res = await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.status).toBe('success')
+    })
+
+    test('自分自身をフォローしようとするとエラーとなる', async () => {
+      const user = await createTestUser()
+
+      const res = await app.request(`/api/v1/user/${user.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+
+      expect(res.status).toBe(400)
+      const json = await res.json()
+      expect(json.errorCode).toBe('INVALID_REQUEST')
+    })
+
+    test('重複フォローは冪等に処理される', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      const res = await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      expect(res.status).toBe(200)
+    })
+  })
+
+  describe('DELETE /api/v1/user/:userId/follow', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/dummy-id/follow', 'DELETE')
+    })
+
+    test('フォロー解除できる', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      const res = await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      expect(res.status).toBe(200)
+    })
+  })
+
+  describe('GET /api/v1/user/:userId/followers', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/dummy-id/followers', 'GET')
+    })
+
+    test('フォロワー一覧が取得できる', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      const res = await app.request(`/api/v1/user/${target.userId}/followers`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${target.token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.total).toBeGreaterThanOrEqual(1)
+      expect(json.data.users[0]).toMatchObject({
+        userId: follower.userId,
+        name: expect.any(String),
+      })
+    })
+  })
+
+  describe('GET /api/v1/user/:userId/following', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/dummy-id/following', 'GET')
+    })
+
+    test('フォロー中一覧が取得できる', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      const res = await app.request(
+        `/api/v1/user/${follower.userId}/following`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${follower.token}` },
+        }
+      )
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.total).toBeGreaterThanOrEqual(1)
+      expect(json.data.users[0]).toMatchObject({
+        userId: target.userId,
+        name: expect.any(String),
+      })
+    })
+  })
+
+  describe('GET /api/v1/user/search', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/search?q=test', 'GET')
+    })
+
+    test('ユーザー名で検索できる', async () => {
+      const unique = `search_${Date.now()}`
+      const { token } = await createTestUser()
+
+      const target = await createTestUser()
+      await prisma.mUser.update({
+        where: { id: target.userId },
+        data: { name: `test_${unique}` },
+      })
+
+      const res = await app.request(`/api/v1/user/search?q=${unique}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.users.length).toBeGreaterThanOrEqual(1)
+      expect(json.data.users[0]).toMatchObject({
+        userId: expect.any(String),
+        name: expect.any(String),
+        isFollowing: expect.any(Boolean),
+      })
+    })
+
+    test('空文字クエリで空リストが返る', async () => {
+      const { token } = await createTestUser()
+
+      const res = await app.request('/api/v1/user/search?q=', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.users).toEqual([])
+      expect(json.data.total).toBe(0)
+    })
+  })
+
   describe('POST /api/v1/user/auth/guest/register', () => {
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
       const res = await app.request('/api/v1/user/auth/guest/register', {

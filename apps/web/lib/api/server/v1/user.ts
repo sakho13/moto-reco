@@ -2,10 +2,12 @@ import { Hono } from 'hono'
 import { prisma } from '@repo/database'
 import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import {
+  ApiResponseUserFollowList,
   ApiResponseUserProfile,
   ApiResponsePublicUserPage,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
+  ApiResponseUserSearch,
   GuestRegisterRequestSchema,
   SuccessResponse,
   UserAuthRecoverRequestSchema,
@@ -19,8 +21,10 @@ import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
+import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
+import { UserFollowService } from '../services/UserFollowService'
 import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
 
@@ -124,59 +128,69 @@ user.patch(
 
 user.get('/:userId/page', honoAuthMiddleware, async (c) => {
   const userId = c.req.param('userId')
+  const requesterId = c.var.user?.userId
+  const targetUserId = createUserId(userId)
+
   const userRepo = new PrismaUserRepository(prisma)
-  const targetUser = await userRepo.findById(createUserId(userId))
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const targetUser = await userRepo.findById(targetUserId)
 
   if (!targetUser || !targetUser.isProfilePublic) {
     throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
   }
 
-  const bikes = await prisma.tUserMyBike.findMany({
-    where: {
-      userId,
-      ownStatus: 'OWN',
-      isPublic: true,
-    },
-    orderBy: { updatedAt: 'desc' },
-    select: {
-      id: true,
-      nickname: true,
-      updatedAt: true,
-      userBike: {
+  const [bikes, histories, followerCount, followingCount, isFollowing] =
+    await Promise.all([
+      prisma.tUserMyBike.findMany({
+        where: { userId, ownStatus: 'OWN', isPublic: true },
+        orderBy: { updatedAt: 'desc' },
         select: {
-          bike: {
+          id: true,
+          nickname: true,
+          updatedAt: true,
+          userBike: {
             select: {
-              modelName: true,
-              manufacturer: { select: { name: true } },
+              bike: {
+                select: {
+                  modelName: true,
+                  manufacturer: { select: { name: true } },
+                },
+              },
             },
           },
         },
-      },
-    },
-    take: 8,
-  })
-
-  const histories = await prisma.tUserMyBikeHistory.findMany({
-    where: { userId },
-    orderBy: { occurredAt: 'desc' },
-    take: 30,
-    include: {
-      userMyBike: {
-        select: {
-          nickname: true,
-          userBike: { select: { bike: { select: { modelName: true } } } },
+        take: 8,
+      }),
+      prisma.tUserMyBikeHistory.findMany({
+        where: { userId },
+        orderBy: { occurredAt: 'desc' },
+        take: 30,
+        include: {
+          userMyBike: {
+            select: {
+              nickname: true,
+              userBike: { select: { bike: { select: { modelName: true } } } },
+            },
+          },
+          fuelLog: true,
+          touring: true,
         },
-      },
-      fuelLog: true,
-      touring: true,
-    },
-  })
+      }),
+      followRepo.countFollowers(targetUserId),
+      followRepo.countFollowing(targetUserId),
+      requesterId
+        ? followRepo.isFollowing(requesterId, targetUserId)
+        : Promise.resolve(false),
+    ])
 
   return c.json<SuccessResponse<ApiResponsePublicUserPage>>({
     status: 'success',
     data: {
       userId: targetUser.id,
       name: targetUser.name,
+      followerCount,
+      followingCount,
+      isFollowing,
       bikes: bikes.map((bike) => ({
         myUserBikeId: bike.id,
         manufacturerName: bike.userBike.bike?.manufacturer.name ?? null,
@@ -238,6 +252,105 @@ user.get('/:userId/page', honoAuthMiddleware, async (c) => {
         .filter((v): v is NonNullable<typeof v> => v !== null),
     },
     message: '公開プロフィール取得成功',
+  })
+})
+
+user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
+  const { userId: followerId } = c.var.user!
+  const followingId = createUserId(c.req.param('userId'))
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(userRepo, followRepo)
+  await service.followUser(followerId, followingId)
+
+  return c.json<SuccessResponse<Record<string, never>>>({
+    status: 'success',
+    data: {},
+    message: 'フォローしました',
+  })
+})
+
+user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
+  const { userId: followerId } = c.var.user!
+  const followingId = createUserId(c.req.param('userId'))
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(userRepo, followRepo)
+  await service.unfollowUser(followerId, followingId)
+
+  return c.json<SuccessResponse<Record<string, never>>>({
+    status: 'success',
+    data: {},
+    message: 'フォロー解除しました',
+  })
+})
+
+user.get('/:userId/followers', honoAuthMiddleware, async (c) => {
+  const userId = createUserId(c.req.param('userId'))
+  const page = Number(c.req.query('page') ?? '1')
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const targetUser = await userRepo.findById(userId)
+  if (!targetUser || !targetUser.isProfilePublic) {
+    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
+  }
+
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(userRepo, followRepo)
+  const result = await service.getFollowers(userId, page)
+
+  return c.json<SuccessResponse<ApiResponseUserFollowList>>({
+    status: 'success',
+    data: result,
+    message: 'フォロワー一覧取得成功',
+  })
+})
+
+user.get('/:userId/following', honoAuthMiddleware, async (c) => {
+  const userId = createUserId(c.req.param('userId'))
+  const page = Number(c.req.query('page') ?? '1')
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const targetUser = await userRepo.findById(userId)
+  if (!targetUser || !targetUser.isProfilePublic) {
+    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
+  }
+
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(userRepo, followRepo)
+  const result = await service.getFollowing(userId, page)
+
+  return c.json<SuccessResponse<ApiResponseUserFollowList>>({
+    status: 'success',
+    data: result,
+    message: 'フォロー中一覧取得成功',
+  })
+})
+
+user.get('/search', honoAuthMiddleware, async (c) => {
+  const { userId: requesterId } = c.var.user!
+  const query = c.req.query('q') ?? ''
+  const page = Number(c.req.query('page') ?? '1')
+
+  if (query.trim().length === 0) {
+    return c.json<SuccessResponse<ApiResponseUserSearch>>({
+      status: 'success',
+      data: { users: [], total: 0, page },
+      message: 'ユーザー検索成功',
+    })
+  }
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(userRepo, followRepo)
+  const result = await service.searchUsers(query.trim(), requesterId, page)
+
+  return c.json<SuccessResponse<ApiResponseUserSearch>>({
+    status: 'success',
+    data: result,
+    message: 'ユーザー検索成功',
   })
 })
 

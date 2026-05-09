@@ -44,6 +44,8 @@ model MUser {
   myBikes       TUserMyBike[]
   histories     TUserMyBikeHistory[]
   userQuit      TUserQuit?
+  followers     TUserFollow[] @relation("UserFollowing")
+  following     TUserFollow[] @relation("UserFollowers")
 }
 
 model MManufacturer {
@@ -285,6 +287,21 @@ model TUserQuit {
 
   @@unique([userId])
   @@index([status])
+}
+
+model TUserFollow {
+  id          String @id @default(cuid(2))
+  followerId  String @map("follower_id")
+  followingId String @map("following_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  follower  MUser @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following MUser @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }
 
 // Enums

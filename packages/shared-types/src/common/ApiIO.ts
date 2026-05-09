@@ -54,6 +54,9 @@ export type ApiResponseUserProfile = {
 export type ApiResponsePublicUserPage = {
   userId: string
   name: string
+  followerCount: number
+  followingCount: number
+  isFollowing: boolean
   bikes: {
     myUserBikeId: string
     manufacturerName: string | null
@@ -62,6 +65,25 @@ export type ApiResponsePublicUserPage = {
     updatedAt: string
   }[]
   histories: ApiResponseAllBikesHistoryList
+}
+
+export type ApiResponseUserFollowList = {
+  users: {
+    userId: string
+    name: string
+  }[]
+  total: number
+  page: number
+}
+
+export type ApiResponseUserSearch = {
+  users: {
+    userId: string
+    name: string
+    isFollowing: boolean
+  }[]
+  total: number
+  page: number
 }
 
 export type ApiResponseUserQuit = {
