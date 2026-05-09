@@ -38,12 +38,12 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
 
   return c.json<SuccessResponse<ApiResponseUserProfile>>({
     status: 'success',
-      data: {
-        userId: user.id,
-        name: user.name,
-        notificationEmail: user.notificationEmail,
-        isProfilePublic: user.isProfilePublic,
-      },
+    data: {
+      userId: user.id,
+      name: user.name,
+      notificationEmail: user.notificationEmail,
+      isProfilePublic: user.isProfilePublic,
+    },
     message: 'プロフィール取得成功',
   })
 })
@@ -116,7 +116,7 @@ user.patch(
         name: updatedUser.name,
         notificationEmail: updatedUser.notificationEmail,
         isProfilePublic: updatedUser.isProfilePublic,
-        },
+      },
       message: 'プロフィール更新成功',
     })
   }

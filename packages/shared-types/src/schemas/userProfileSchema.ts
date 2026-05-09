@@ -78,7 +78,7 @@ export const UserProfilePatchRequestSchema = z
     (data) =>
       data.name !== undefined ||
       data.notificationEmail !== undefined ||
-      data.isProfilePublic !== undefined ||
+      data.isProfilePublic !== undefined,
     { message: '少なくとも1つのフィールドを指定してください' }
   )
 

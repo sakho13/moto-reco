@@ -187,6 +187,7 @@ describe('User API Endpoints', () => {
           userId: expect.any(String),
           name: '更新後の名前',
           notificationEmail: expect.any(String),
+          isProfilePublic: expect.any(Boolean),
         },
         message: expect.any(String),
       })
@@ -227,6 +228,7 @@ describe('User API Endpoints', () => {
           userId: expect.any(String),
           name: 'test_通知メールアドレスのみ更新できる',
           notificationEmail,
+          isProfilePublic: expect.any(Boolean),
         },
         message: expect.any(String),
       })
@@ -301,6 +303,7 @@ describe('User API Endpoints', () => {
           userId: expect.any(String),
           name: 'テストユーザー',
           notificationEmail: expect.any(String),
+          isProfilePublic: expect.any(Boolean),
         },
         message: expect.any(String),
       })

@@ -18,7 +18,7 @@ interface ProfileEditModalProps {
     name: string
     notificationEmail: string | null
     isProfilePublic: boolean
-    }) => void
+  }) => void
 }
 
 export function ProfileEditModal({
