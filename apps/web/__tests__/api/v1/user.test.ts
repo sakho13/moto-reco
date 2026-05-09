@@ -234,6 +234,127 @@ describe('User API Endpoints', () => {
       })
       expect(res.status).toBe(200)
     })
+
+    test('isProfilePublicのみfalseに更新できる', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+      const registeredRes = await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'test_isProfilePublicのみfalseに更新できる',
+        }),
+      })
+      expect(registeredRes.status).toBe(201)
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: false }),
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          userId: expect.any(String),
+          name: 'test_isProfilePublicのみfalseに更新できる',
+          notificationEmail: expect.any(String),
+          isProfilePublic: false,
+        },
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(200)
+    })
+
+    test('isProfilePublicのみtrueに更新できる', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+      await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'test_isProfilePublicのみtrueに更新できる',
+        }),
+      })
+
+      // 前提: まず false に変更
+      await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: false }),
+      })
+
+      // true に戻す
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: true }),
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          userId: expect.any(String),
+          name: 'test_isProfilePublicのみtrueに更新できる',
+          notificationEmail: expect.any(String),
+          isProfilePublic: true,
+        },
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(200)
+    })
+
+    test('isProfilePublicに文字列を指定した場合にバリデーションエラーとなる', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+      await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'test_isProfilePublicに文字列を指定した場合にバリデーションエラーとなる',
+        }),
+      })
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: 'true' }),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'VALIDATION_ERROR',
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(400)
+    })
   })
 
   describe('POST /api/v1/user/auth/register', () => {
