@@ -1,0 +1,140 @@
+.followStats {
+  display: flex;
+  gap: var(--spacing-5);
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.followStatButton {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-inkLight);
+  font-size: var(--font-size-sm);
+  transition: opacity var(--transition-base);
+}
+
+.followStatButton:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+.followStatCount {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+.tabNav {
+  display: flex;
+  border-bottom: 1px solid var(--color-cloud);
+  margin: 0 calc(-1 * var(--spacing-6)) var(--spacing-4);
+}
+
+.tabButton {
+  flex: 1;
+  padding: var(--spacing-2) 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  color: var(--color-inkLight);
+  transition: color var(--transition-base);
+  margin-bottom: -1px;
+}
+
+.tabButton:hover {
+  color: var(--color-ink);
+}
+
+.tabButtonActive {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ink);
+}
+
+.tabCount {
+  margin-left: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  margin: 0 calc(-1 * var(--spacing-6));
+}
+
+.tabItem {
+  padding: var(--spacing-3) var(--spacing-6);
+  border-bottom: 1px solid var(--color-cloud);
+}
+
+.tabItem:last-child {
+  border-bottom: none;
+}
+
+.emptyMessage {
+  padding: var(--spacing-6);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.loadingMessage {
+  padding: var(--spacing-6);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+  opacity: 0.6;
+}
+
+.bikeName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ink);
+}
+
+.bikeManufacturer {
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.userLink {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-6);
+  border-bottom: 1px solid var(--color-cloud);
+  text-decoration: none;
+  color: var(--color-ink);
+  transition: background-color var(--transition-base);
+}
+
+.userLink:last-child {
+  border-bottom: none;
+}
+
+.userLink:hover {
+  background-color: var(--color-cloud);
+}
+
+.userAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-cloud);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-inkLight);
+  flex-shrink: 0;
+}
+
+.userName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ink);
+}
