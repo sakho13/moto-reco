@@ -36,6 +36,7 @@ export class UserService {
         role: 'USER',
         status: 'ACTIVE',
         notificationEmail: (authProvider.metadata?.email as string) ?? null,
+        isProfilePublic: true,
       }),
       authProvider
     )
@@ -69,6 +70,7 @@ export class UserService {
         role: 'GUEST',
         status: 'ACTIVE',
         notificationEmail: null,
+        isProfilePublic: true,
       }),
       authProvider
     )

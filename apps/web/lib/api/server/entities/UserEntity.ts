@@ -26,6 +26,9 @@ export class UserEntity {
   public get notificationEmail(): string | null {
     return this._value.notificationEmail
   }
+  public get isProfilePublic(): boolean {
+    return this._value.isProfilePublic
+  }
 
   public set name(name: string) {
     if (!name || name.length === 0 || name.length > 50) {
@@ -36,6 +39,9 @@ export class UserEntity {
 
   public set notificationEmail(email: string | null) {
     this._value.notificationEmail = email
+  }
+  public set isProfilePublic(isProfilePublic: boolean) {
+    this._value.isProfilePublic = isProfilePublic
   }
 
   public toJson(): User {

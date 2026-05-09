@@ -16,6 +16,7 @@ export class PrismaUserRepository
         status: true,
         role: true,
         notificationEmail: true,
+        isProfilePublic: true,
       },
       where: {
         id: userId,
@@ -30,6 +31,7 @@ export class PrismaUserRepository
           role: user.role,
           status: user.status,
           notificationEmail: user.notificationEmail,
+          isProfilePublic: user.isProfilePublic,
         })
       : null
   }
@@ -42,6 +44,7 @@ export class PrismaUserRepository
         status: true,
         role: true,
         notificationEmail: true,
+        isProfilePublic: true,
       },
       where: {
         id: userId,
@@ -55,6 +58,7 @@ export class PrismaUserRepository
           role: user.role,
           status: user.status,
           notificationEmail: user.notificationEmail,
+          isProfilePublic: user.isProfilePublic,
         })
       : null
   }
@@ -69,6 +73,7 @@ export class PrismaUserRepository
         status: true,
         role: true,
         notificationEmail: true,
+        isProfilePublic: true,
       },
       where: {
         authProviders: {
@@ -88,6 +93,7 @@ export class PrismaUserRepository
           role: user.role,
           status: user.status,
           notificationEmail: user.notificationEmail,
+          isProfilePublic: user.isProfilePublic,
         })
       : null
   }
@@ -102,6 +108,7 @@ export class PrismaUserRepository
         status: 'ACTIVE',
         role: 'USER',
         notificationEmail: user.notificationEmail,
+        isProfilePublic: user.isProfilePublic,
         authProviders: {
           create: [
             {
@@ -118,6 +125,7 @@ export class PrismaUserRepository
         status: true,
         role: true,
         notificationEmail: true,
+        isProfilePublic: true,
       },
     })
 
@@ -127,6 +135,7 @@ export class PrismaUserRepository
       role: createdUser.role,
       status: createdUser.status,
       notificationEmail: createdUser.notificationEmail,
+      isProfilePublic: createdUser.isProfilePublic,
     })
   }
 
@@ -139,6 +148,7 @@ export class PrismaUserRepository
       data: {
         name: user.name,
         notificationEmail: user.notificationEmail,
+        isProfilePublic: user.isProfilePublic,
       },
       select: {
         id: true,
@@ -146,6 +156,7 @@ export class PrismaUserRepository
         status: true,
         role: true,
         notificationEmail: true,
+        isProfilePublic: true,
       },
     })
 
@@ -155,6 +166,7 @@ export class PrismaUserRepository
       role: updatedUser.role,
       status: updatedUser.status,
       notificationEmail: updatedUser.notificationEmail,
+      isProfilePublic: updatedUser.isProfilePublic,
     })
   }
 
@@ -207,6 +219,7 @@ export class PrismaUserRepository
         status: true,
         role: true,
         notificationEmail: true,
+        isProfilePublic: true,
       },
     })
 
@@ -216,6 +229,7 @@ export class PrismaUserRepository
       role: createdUser.role,
       status: createdUser.status,
       notificationEmail: createdUser.notificationEmail,
+      isProfilePublic: createdUser.isProfilePublic,
     })
   }
 }

@@ -32,6 +32,7 @@ model MUser {
   id                String  @id @default(cuid(2))
   name              String
   notificationEmail String? @map("notification_email")
+  isProfilePublic  Boolean @default(true) @map("is_profile_public")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

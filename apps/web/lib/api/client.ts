@@ -9,6 +9,7 @@ import {
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
   ApiResponseUserQuit,
+  ApiResponsePublicUserPage,
   ApiResponseFuelInsight,
   ApiResponseTouringDetail,
   ApiResponseTouringList,
@@ -200,6 +201,10 @@ type API_EP = {
   }
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
+  }
+} & {
+  [key: `/api/v1/user/${string}/page`]: {
+    GET: SuccessResponse<ApiResponsePublicUserPage>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-logs`]: {

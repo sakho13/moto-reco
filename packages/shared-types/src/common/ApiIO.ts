@@ -48,6 +48,20 @@ export type ApiResponseUserProfile = {
   userId: string
   name: string
   notificationEmail: string | null
+  isProfilePublic: boolean
+}
+
+export type ApiResponsePublicUserPage = {
+  userId: string
+  name: string
+  bikes: {
+    myUserBikeId: string
+    manufacturerName: string | null
+    modelName: string | null
+    nickname: string | null
+    updatedAt: string
+  }[]
+  histories: ApiResponseAllBikesHistoryList
 }
 
 export type ApiResponseUserQuit = {

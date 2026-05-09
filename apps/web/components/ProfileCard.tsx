@@ -70,6 +70,7 @@ export function ProfileCard() {
         <div>
           <p>名前: {data?.name || '未設定'}</p>
           <p>通知メールアドレス: {data?.notificationEmail || '未設定'}</p>
+          <p>プロフィール公開: {data?.isProfilePublic ? '公開' : '非公開'}</p>
         </div>
       </BaseCard>
 
@@ -77,6 +78,7 @@ export function ProfileCard() {
         <ProfileEditModal
           initialName={data.name}
           initialNotificationEmail={data.notificationEmail}
+          initialIsProfilePublic={data.isProfilePublic}
           onClose={() => setIsModalOpen(false)}
           onSuccess={(updated) => {
             mutate({ ...data, ...updated })

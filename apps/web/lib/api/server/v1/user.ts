@@ -3,6 +3,7 @@ import { prisma } from '@repo/database'
 import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import {
   ApiResponseUserProfile,
+  ApiResponsePublicUserPage,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
   GuestRegisterRequestSchema,
@@ -11,6 +12,7 @@ import {
   UserAuthQuitRequestSchema,
   UserAuthRegisterRequestSchema,
   UserProfilePatchRequestSchema,
+  createUserId,
 } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -36,11 +38,12 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
 
   return c.json<SuccessResponse<ApiResponseUserProfile>>({
     status: 'success',
-    data: {
-      userId: user.id,
-      name: user.name,
-      notificationEmail: user.notificationEmail,
-    },
+      data: {
+        userId: user.id,
+        name: user.name,
+        notificationEmail: user.notificationEmail,
+        isProfilePublic: user.isProfilePublic,
+      },
     message: 'プロフィール取得成功',
   })
 })
@@ -78,6 +81,9 @@ user.patch(
     if (body.notificationEmail !== undefined) {
       user.notificationEmail = body.notificationEmail ?? null
     }
+    if (body.isProfilePublic !== undefined) {
+      user.isProfilePublic = body.isProfilePublic
+    }
 
     // プロフィール更新
     const updatedUser = await userRepo.updateUser(user)
@@ -109,11 +115,131 @@ user.patch(
         userId: updatedUser.id,
         name: updatedUser.name,
         notificationEmail: updatedUser.notificationEmail,
-      },
+        isProfilePublic: updatedUser.isProfilePublic,
+        },
       message: 'プロフィール更新成功',
     })
   }
 )
+
+user.get('/:userId/page', honoAuthMiddleware, async (c) => {
+  const userId = c.req.param('userId')
+  const userRepo = new PrismaUserRepository(prisma)
+  const targetUser = await userRepo.findById(createUserId(userId))
+
+  if (!targetUser || !targetUser.isProfilePublic) {
+    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
+  }
+
+  const bikes = await prisma.tUserMyBike.findMany({
+    where: {
+      userId,
+      ownStatus: 'OWN',
+      isPublic: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+    select: {
+      id: true,
+      nickname: true,
+      updatedAt: true,
+      userBike: {
+        select: {
+          bike: {
+            select: {
+              modelName: true,
+              manufacturer: { select: { name: true } },
+            },
+          },
+        },
+      },
+    },
+    take: 8,
+  })
+
+  const histories = await prisma.tUserMyBikeHistory.findMany({
+    where: { userId },
+    orderBy: { occurredAt: 'desc' },
+    take: 30,
+    include: {
+      userMyBike: {
+        select: {
+          nickname: true,
+          userBike: { select: { bike: { select: { modelName: true } } } },
+        },
+      },
+      fuelLog: true,
+      touring: true,
+    },
+  })
+
+  return c.json<SuccessResponse<ApiResponsePublicUserPage>>({
+    status: 'success',
+    data: {
+      userId: targetUser.id,
+      name: targetUser.name,
+      bikes: bikes.map((bike) => ({
+        myUserBikeId: bike.id,
+        manufacturerName: bike.userBike.bike?.manufacturer.name ?? null,
+        modelName: bike.userBike.bike?.modelName ?? null,
+        nickname: bike.nickname,
+        updatedAt: bike.updatedAt.toISOString(),
+      })),
+      histories: histories
+        .map((item) => {
+          const bikeName =
+            item.userMyBike?.nickname ??
+            item.userMyBike?.userBike.bike?.modelName ??
+            'バイク'
+          if (item.type === 'FUEL_LOG' && item.fuelLog) {
+            return {
+              bikeId: item.userMyBikeId ?? '',
+              bikeName,
+              type: 'FUEL_LOG' as const,
+              occurredAt: item.occurredAt.toISOString(),
+              fuelLog: {
+                fuelLogId: item.fuelLog.id,
+                refueledAt: item.fuelLog.refueledAt.toISOString(),
+                mileage: item.fuelLog.mileage,
+                previousMileage: item.fuelLog.previousMileage,
+                amount: item.fuelLog.amount,
+                totalPrice: item.fuelLog.price,
+                memo: item.fuelLog.memo,
+                fuelEfficiency: null,
+                pricePerLiter: null,
+                touringId: item.fuelLog.touringId,
+                touringTitle: null,
+              },
+            }
+          }
+          if (item.type === 'TOURING' && item.touring) {
+            return {
+              bikeId: item.userMyBikeId ?? '',
+              bikeName,
+              type: 'TOURING' as const,
+              occurredAt: item.occurredAt.toISOString(),
+              touring: {
+                touringId: item.touring.id,
+                title: item.touring.title,
+                startDate: item.touring.startDate.toISOString(),
+                endDate: item.touring.endDate.toISOString(),
+                startMileage: item.touring.startMileage,
+                endMileage: item.touring.endMileage,
+                startLatitude: null,
+                startLongitude: null,
+                endLatitude: null,
+                endLongitude: null,
+                status: item.touring.status,
+                fuelLogIds: [],
+              },
+            }
+          }
+          return null
+        })
+        .filter((v): v is NonNullable<typeof v> => v !== null),
+    },
+    message: '公開プロフィール取得成功',
+  })
+})
 
 /**
  * ユーザー認証登録エンドポイント
@@ -188,6 +314,7 @@ user.post(
           userId: user.id,
           name: user.name,
           notificationEmail: user.notificationEmail,
+          isProfilePublic: user.isProfilePublic,
         },
         message: 'ユーザー登録成功',
       },
@@ -344,6 +471,7 @@ user.post(
           userId: guestUser.id,
           name: guestUser.name,
           notificationEmail: guestUser.notificationEmail,
+          isProfilePublic: guestUser.isProfilePublic,
         },
         message: 'ゲストユーザー登録成功',
       },
