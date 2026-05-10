@@ -5,10 +5,7 @@ import {
   TouringId,
 } from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
-import {
-  ITouringRepository,
-  PublicTouringDetail,
-} from '../interfaces/ITouringRepository'
+import { ITouringRepository } from '../interfaces/ITouringRepository'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
@@ -198,41 +195,6 @@ export class PrismaTouringRepository
         userMyBikeId: myUserBikeId,
       },
     })
-  }
-
-  async findPublicTouringsByBikeId(
-    myUserBikeId: MyUserBikeId
-  ): Promise<PublicTouringDetail[]> {
-    const bike = await this.connection.tUserMyBike.findFirst({
-      where: { id: myUserBikeId, ownStatus: 'OWN' },
-      select: { id: true },
-    })
-
-    if (!bike) return []
-
-    const tourings = await this.connection.tUserMyBikeTouring.findMany({
-      where: { userMyBikeId: myUserBikeId },
-      select: {
-        id: true,
-        title: true,
-        startDate: true,
-        endDate: true,
-        startMileage: true,
-        endMileage: true,
-        status: true,
-      },
-      orderBy: { startDate: 'desc' },
-    })
-
-    return tourings.map((t) => ({
-      touringId: createTouringId(t.id),
-      title: t.title,
-      startDate: t.startDate,
-      endDate: t.endDate,
-      startMileage: t.startMileage,
-      endMileage: t.endMileage,
-      status: t.status,
-    }))
   }
 
   async countTourings(myUserBikeId: MyUserBikeId): Promise<number> {
