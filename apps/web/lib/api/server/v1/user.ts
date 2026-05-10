@@ -264,7 +264,7 @@ user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
   })
 })
 
-user.get('/:userId/followers', async (c) => {
+user.get('/:userId/followers', honoAuthMiddleware, async (c) => {
   const userId = createUserId(c.req.param('userId'))
   const page = Number(c.req.query('page') ?? '1')
 
@@ -285,7 +285,7 @@ user.get('/:userId/followers', async (c) => {
   })
 })
 
-user.get('/:userId/following', async (c) => {
+user.get('/:userId/following', honoAuthMiddleware, async (c) => {
   const userId = createUserId(c.req.param('userId'))
   const page = Number(c.req.query('page') ?? '1')
 
