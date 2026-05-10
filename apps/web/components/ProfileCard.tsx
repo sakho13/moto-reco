@@ -81,7 +81,7 @@ export function ProfileCard() {
             <span className="text-gray-500">プロフィール公開</span>
             <span>{data?.isProfilePublic ? '公開' : '非公開'}</span>
           </div>
-          {data?.userId && (
+          {data?.isProfilePublic && (
             <div className="pt-1">
               <Link
                 href={`/app/users/${data.userId}`}
