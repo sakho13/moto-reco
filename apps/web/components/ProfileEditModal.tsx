@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@repo/ui/button'
+import { Checkbox } from '@repo/ui/checkbox'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { ModalBase } from '@/components/common/ModalBase'
@@ -11,16 +12,21 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 interface ProfileEditModalProps {
   initialName: string
   initialNotificationEmail: string | null
+  initialIsProfilePublic: boolean
+  isGuest?: boolean
   onClose: () => void
   onSuccess: (updated: {
     name: string
     notificationEmail: string | null
+    isProfilePublic: boolean
   }) => void
 }
 
 export function ProfileEditModal({
   initialName,
   initialNotificationEmail,
+  initialIsProfilePublic,
+  isGuest = false,
   onClose,
   onSuccess,
 }: ProfileEditModalProps) {
@@ -29,6 +35,7 @@ export function ProfileEditModal({
     initialNotificationEmail ?? ''
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isProfilePublic, setIsProfilePublic] = useState(initialIsProfilePublic)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,10 +53,12 @@ export function ProfileEditModal({
       const response = await apiPatch('/api/v1/user/profile', {
         name: trimmedName,
         notificationEmail: notificationEmail.trim() || null,
+        isProfilePublic,
       })
       onSuccess({
         name: response.data.name,
         notificationEmail: response.data.notificationEmail,
+        isProfilePublic: response.data.isProfilePublic,
       })
     } catch (err) {
       setError(
@@ -86,6 +95,15 @@ export function ProfileEditModal({
             autoFocus
           />
         </FormField>
+        <FormField label="公開設定" htmlFor="modal-profile-public">
+          <Checkbox
+            id="modal-profile-public"
+            label="プロフィールを公開する"
+            checked={isProfilePublic}
+            onChange={(e) => setIsProfilePublic(e.target.checked)}
+            disabled={isSubmitting || isGuest}
+          />
+        </FormField>
 
         <FormField
           label="通知メールアドレス"
@@ -97,7 +115,7 @@ export function ProfileEditModal({
             placeholder="通知用メールアドレスを入力"
             value={notificationEmail}
             onChange={(e) => setNotificationEmail(e.target.value)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGuest}
             autoComplete="email"
           />
         </FormField>

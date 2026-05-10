@@ -246,19 +246,7 @@ export const TouringStartEndSection = () => {
   }
 
   if (bikes.length === 0) {
-    return (
-      <div className={styles.container} data-testid="touring-section">
-        <div className={styles.header}>
-          <h2 className={styles.title}>ツーリング</h2>
-        </div>
-        <div className={styles.emptyState}>
-          <p>バイクを登録してください</p>
-          <Button onClick={() => router.push('/app/bike/register')} size="sm">
-            バイクを登録
-          </Button>
-        </div>
-      </div>
-    )
+    return null
   }
 
   // ツーリング中のバイクがある場合: 大きなカードを表示

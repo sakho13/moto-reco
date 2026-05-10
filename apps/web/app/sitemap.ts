@@ -1,6 +1,4 @@
 import type { MetadataRoute } from 'next'
-import { prisma } from '@repo/database'
-import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
 import { microCMSClient } from '@/lib/microcms/config'
 import type { Blog } from '@/lib/microcms/types'
 import { SITE_URL } from '@/lib/statics'
@@ -14,12 +12,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 1,
-    },
-    {
-      url: `${SITE_URL}/bikes`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.9,
     },
     {
       url: `${SITE_URL}/about`,
@@ -59,12 +51,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  const [bikePages, blogPages] = await Promise.all([
-    fetchPublicBikes(),
-    fetchBlogPages(),
-  ])
+  const [blogPages] = await Promise.all([fetchBlogPages()])
 
-  return [...staticPages, ...bikePages, ...blogPages]
+  return [...staticPages, ...blogPages]
 }
 
 async function fetchBlogPages() {
@@ -92,29 +81,6 @@ async function fetchBlogPages() {
     }))
   } catch (error) {
     console.error('[sitemap] ブログ記事取得失敗', {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    })
-    return []
-  }
-}
-
-async function fetchPublicBikes() {
-  try {
-    const repo = new PrismaMyUserBikeRepository(prisma)
-    const bikes = await repo.findPublicBikes()
-    console.log(`[sitemap] 公開バイク取得: ${bikes.length}件`)
-
-    const bikesPages: MetadataRoute.Sitemap = bikes.map((bike) => ({
-      url: `${SITE_URL}/bikes/${bike.myUserBikeId.toString()}`,
-      lastModified: bike.updatedAt,
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    }))
-
-    return bikesPages
-  } catch (error) {
-    console.error('[sitemap] 公開バイク取得失敗', {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     })

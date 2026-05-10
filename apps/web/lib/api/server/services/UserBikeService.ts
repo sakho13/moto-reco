@@ -27,7 +27,6 @@ type RegisterUserBikeParams = {
   purchasePrice?: number
   purchaseMileage?: number
   totalMileage?: number
-  isPublic?: boolean
 }
 
 type UpdateMyUserBikeParams = {
@@ -40,7 +39,6 @@ type UpdateMyUserBikeParams = {
   purchaseMileage?: number | null
   displacement?: number
   totalMileage?: number | null
-  isPublic?: boolean
 }
 
 export class UserBikeService {
@@ -101,10 +99,6 @@ export class UserBikeService {
       })
     )
 
-    // ゲストアカウントはバイクを公開できない
-    const isPublic =
-      params.role === 'GUEST' ? false : (params.isPublic ?? false)
-
     const myUserBike = await this.myUserBikeRepository.createMyUserBike(
       new MyUserBikeEntity({
         bikeId: userBike.bikeId,
@@ -118,7 +112,6 @@ export class UserBikeService {
         purchaseDate: params.purchaseDate ?? null,
         purchasePrice: params.purchasePrice ?? null,
         purchaseMileage: params.purchaseMileage ?? null,
-        isPublic,
         ownedAt: params.purchaseDate ?? new Date(),
         soldAt: null,
         ownStatus: 'OWN',
@@ -189,13 +182,6 @@ export class UserBikeService {
         params.purchaseMileage !== undefined
           ? params.purchaseMileage
           : current.purchaseMileage,
-      // ゲストアカウントはバイクを公開できない
-      isPublic:
-        params.role === 'GUEST'
-          ? false
-          : params.isPublic !== undefined
-            ? params.isPublic
-            : current.isPublic,
     })
 
     await this.myUserBikeRepository.updateMyUserBike(updatedEntity)
