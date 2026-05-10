@@ -206,6 +206,7 @@ export class PrismaMyUserBikeRepository
         myUserBike.userBike.displacement,
       modelYear: myUserBike.userBike.bike?.modelYear ?? null,
       totalMileage: myUserBike.userBike.totalMileage,
+      ownedAt: myUserBike.ownedAt,
       updatedAt: myUserBike.updatedAt,
     }))
   }
@@ -244,6 +245,7 @@ export class PrismaMyUserBikeRepository
         myUserBike.userBike.displacement,
       modelYear: myUserBike.userBike.bike?.modelYear ?? null,
       totalMileage: myUserBike.userBike.totalMileage,
+      ownedAt: myUserBike.ownedAt,
       updatedAt: myUserBike.updatedAt,
     }
   }

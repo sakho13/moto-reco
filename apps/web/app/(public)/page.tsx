@@ -3,6 +3,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { APP_NAME, APP_VERSION, SITE_URL } from '@/lib/statics'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 
 export const metadata: Metadata = {
   title: `バイクメンテナンス・給油記録管理アプリ`,
@@ -57,6 +64,12 @@ const features = [
       '作業内容・費用・メモ・写真を記録し、次回の交換時期をリマインド。履歴は共有にも活用できます。',
     image: '/images/featureMaintenance.svg',
   },
+  {
+    title: '公開プロフィール・フレンド機能',
+    description:
+      'プロフィールを公開してバイク仲間と繋がれます。気になるライダーをフォローして、愛車や走行履歴を確認しましょう。',
+    image: '/images/featureFriend.svg',
+  },
 ]
 
 export default function Home() {
@@ -92,24 +105,38 @@ export default function Home() {
             <h2>主要機能の紹介</h2>
             <p>日々のメンテナンスを支える中核機能をピックアップしています。</p>
           </div>
-          <div className={styles.cardGrid}>
-            {features.map((feature) => (
-              <article key={feature.title} className={styles.card}>
-                <Image
-                  className={styles.cardImage}
-                  src={feature.image}
-                  alt={`${feature.title}のスクリーンショット`}
-                  width={800}
-                  height={480}
-                  unoptimized
-                />
-                <div className={styles.cardBody}>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.description}</p>
-                </div>
-              </article>
-            ))}
-          </div>
+          <Carousel
+            opts={{ align: 'start', loop: true }}
+            className={styles.carousel}
+          >
+            <CarouselContent className={styles.carouselContent}>
+              {features.map((feature) => (
+                <CarouselItem
+                  key={feature.title}
+                  className="md:basis-1/2 lg:basis-1/3"
+                >
+                  <div className={styles.carouselItemInner}>
+                    <article className={styles.card}>
+                      <Image
+                        className={styles.cardImage}
+                        src={feature.image}
+                        alt={`${feature.title}のスクリーンショット`}
+                        width={800}
+                        height={480}
+                        unoptimized
+                      />
+                      <div className={styles.cardBody}>
+                        <h3>{feature.title}</h3>
+                        <p>{feature.description}</p>
+                      </div>
+                    </article>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className={styles.carouselPrevious} />
+            <CarouselNext className={styles.carouselNext} />
+          </Carousel>
         </section>
 
         <section className={styles.sectionAlt}>
@@ -140,6 +167,14 @@ export default function Home() {
                 <li>作業内容、日付、費用、メモ、写真を保存</li>
                 <li>次回メンテナンスの予定を登録して通知</li>
                 <li>部品・工具情報へのリンクで準備を効率化</li>
+              </ul>
+            </div>
+            <div className={styles.detailItem}>
+              <h3>公開プロフィール・フレンド</h3>
+              <ul>
+                <li>プロフィールを公開してユーザー検索で見つけてもらう</li>
+                <li>気になるライダーをフォローしてバイク・履歴を確認</li>
+                <li>フォロワー・フォロー中の一覧をプロフィールページで管理</li>
               </ul>
             </div>
           </div>
