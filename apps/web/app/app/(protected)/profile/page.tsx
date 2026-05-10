@@ -1,7 +1,6 @@
 'use client'
 
 import { BaseCard } from '@repo/ui/baseCard'
-import { FollowCard } from '@/components/FollowCard'
 import { FooterCard } from '@/components/FooterCard'
 import { LogoutButton } from '@/components/Navigation/LogoutButton'
 import { ProfileCard } from '@/components/ProfileCard'
@@ -25,8 +24,6 @@ function ProfileEditPage() {
   return (
     <div className="w-full max-w-md flex flex-col gap-4">
       <ProfileCard />
-
-      <FollowCard />
 
       <BaseCard title="アカウント認証">
         <div className="flex flex-col gap-2 text-sm">

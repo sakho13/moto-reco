@@ -6,6 +6,7 @@ import useSWR from 'swr'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
+import styles from './ProfileCard.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { ProfileEditModal } from '@/components/ProfileEditModal'
 import { apiGet } from '@/lib/api/client'
@@ -19,6 +20,19 @@ export function ProfileCard() {
       return response.data
     }
   )
+
+  const { data: pageData } = useSWR(
+    data?.userId ? ['publicPage', data.userId] : null,
+    async () => {
+      const res = await apiGet(
+        `/api/v1/user/${data!.userId}/page` as `/api/v1/user/${string}/page`
+      )
+      return res.data
+    }
+  )
+
+  const followerCount = pageData?.followerCount ?? '--'
+  const followingCount = pageData?.followingCount ?? '--'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -91,6 +105,17 @@ export function ProfileCard() {
               </Link>
             </div>
           )}
+        </div>
+        <hr className="divider" />
+        <div className={styles.followSection}>
+          <div className={styles.followItem}>
+            <span className={styles.followCount}>{followerCount}</span>
+            <span className={styles.followLabel}>フォロワー</span>
+          </div>
+          <div className={styles.followItem}>
+            <span className={styles.followCount}>{followingCount}</span>
+            <span className={styles.followLabel}>フォロー中</span>
+          </div>
         </div>
       </BaseCard>
 
