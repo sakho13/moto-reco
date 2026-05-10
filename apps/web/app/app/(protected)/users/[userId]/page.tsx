@@ -10,6 +10,7 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import styles from './page.module.css'
 import { HistoryItemCard } from '@/components/history/HistoryItemCard'
 import { apiDelete, apiGet, apiPost } from '@/lib/api/client'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 type Tab = 'timeline' | 'bikes' | 'followers' | 'following'
 
@@ -26,16 +27,24 @@ function UserPageContent() {
   const searchParams = useSearchParams()
   const activeTab = toTab(searchParams.get('tab'))
   const [followLoading, setFollowLoading] = useState(false)
+  const { user, loading: authLoading } = useAuth()
 
-  const { data, error, isLoading, mutate } = useSWR(
-    `/api/v1/user/${userId}/page`,
+  const {
+    data,
+    error,
+    isLoading: swrLoading,
+    mutate,
+  } = useSWR(
+    user ? `/api/v1/user/${userId}/page` : null,
     async (url) => (await apiGet(url as `/api/v1/user/${string}/page`)).data
   )
 
   const { data: myProfile } = useSWR(
-    '/api/v1/user/profile',
+    user ? '/api/v1/user/profile' : null,
     async (url) => (await apiGet(url)).data
   )
+
+  const isLoading = authLoading || swrLoading
 
   const { data: followersData } = useSWR(
     activeTab === 'followers' ? ['followers', userId] : null,
