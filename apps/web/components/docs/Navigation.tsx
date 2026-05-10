@@ -17,7 +17,6 @@ const NAV_LINKS: NavLink[] = [
   { href: '/release-note', label: 'リリースノート' },
   { href: '/faq', label: 'FAQ' },
   { href: '/pricing', label: '料金プラン' },
-  { href: '/bikes', label: 'みんなのバイク' },
 ]
 
 export function Navigation() {

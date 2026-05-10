@@ -48,6 +48,45 @@ export type ApiResponseUserProfile = {
   userId: string
   name: string
   notificationEmail: string | null
+  isProfilePublic: boolean
+}
+
+export type ApiResponsePublicUserPage = {
+  userId: string
+  name: string
+  followerCount: number
+  followingCount: number
+  isFollowing: boolean
+  bikes: {
+    myUserBikeId: string
+    manufacturerName: string | null
+    modelName: string | null
+    nickname: string | null
+    displacement: number
+    totalMileage: number
+    ownedAt: string
+    updatedAt: string
+  }[]
+  histories: ApiResponseAllBikesHistoryList
+}
+
+export type ApiResponseUserFollowList = {
+  users: {
+    userId: string
+    name: string
+  }[]
+  total: number
+  page: number
+}
+
+export type ApiResponseUserSearch = {
+  users: {
+    userId: string
+    name: string
+    isFollowing: boolean
+  }[]
+  total: number
+  page: number
 }
 
 export type ApiResponseUserQuit = {
@@ -97,7 +136,6 @@ export type ApiResponseUserBikeList = {
     totalMileage: number
     displacement: number
     modelYear: number | null
-    isPublic: boolean
     createdAt: string
     updatedAt: string
     fuelLogCount: number
@@ -118,7 +156,6 @@ export type ApiResponseUserBikeDetail = {
   totalMileage: number
   displacement: number
   modelYear: number | null
-  isPublic: boolean
   createdAt: string
   updatedAt: string
   fuelLogCount: number

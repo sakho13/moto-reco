@@ -15,7 +15,6 @@ export type MyUserBikeDetail = {
   totalMileage: number
   displacement: number
   modelYear: number | null
-  isPublic: boolean
   createdAt: Date
   updatedAt: Date
   fuelLogCount: number
@@ -30,6 +29,7 @@ export type PublicMyUserBikeDetail = {
   displacement: number
   modelYear: number | null
   totalMileage: number
+  ownedAt: Date
   updatedAt: Date
 }
 
@@ -39,7 +39,10 @@ export interface IMyUserBikeRepository {
     userId: UserId,
     searchParams: UserBikeSearchParams
   ): Promise<MyUserBikeDetail[]>
-  findPublicBikes(): Promise<PublicMyUserBikeDetail[]>
+  findPublicBikesByUserId(
+    userId: UserId,
+    limit: number
+  ): Promise<PublicMyUserBikeDetail[]>
   findMyUserBikeById(
     myUserBikeId: MyUserBikeId,
     userId: UserId

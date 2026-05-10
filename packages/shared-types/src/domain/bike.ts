@@ -36,7 +36,6 @@ export type MyUserBike = UserBike & {
   purchaseDate: Date | null
   purchasePrice: number | null
   purchaseMileage: number | null
-  isPublic: boolean
 
   ownedAt: Date
   soldAt: Date | null

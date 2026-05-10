@@ -13,10 +13,11 @@ const PROVIDER_LABEL: Record<string, string> = {
 }
 
 function ProfileEditPage() {
-  const { user } = useAuth()
+  const { user, isGuest } = useAuth()
 
-  const providerLabel =
-    user?.providerData[0]?.providerId != null
+  const providerLabel = isGuest
+    ? 'ゲスト'
+    : user?.providerData[0]?.providerId != null
       ? (PROVIDER_LABEL[user.providerData[0].providerId] ??
         user.providerData[0].providerId)
       : '-'

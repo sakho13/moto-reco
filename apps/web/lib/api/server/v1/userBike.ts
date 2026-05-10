@@ -56,7 +56,6 @@ const toApiResponseUserBikeDetail = (
   totalMileage: detail.totalMileage,
   displacement: detail.displacement,
   modelYear: detail.modelYear,
-  isPublic: detail.isPublic,
   createdAt: detail.createdAt.toISOString(),
   updatedAt: detail.updatedAt.toISOString(),
   fuelLogCount: detail.fuelLogCount,
@@ -92,7 +91,6 @@ userBike.post(
         purchasePrice: body.purchasePrice,
         purchaseMileage: body.purchaseMileage,
         totalMileage: body.totalMileage,
-        isPublic: body.isPublic,
       })
 
       return service.getMyUserBikeDetail(
@@ -272,7 +270,6 @@ userBike.patch(
         purchaseMileage: body.purchaseMileage,
         displacement: body.displacement,
         totalMileage: body.totalMileage,
-        isPublic: body.isPublic,
       })
     })
 

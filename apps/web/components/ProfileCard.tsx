@@ -1,16 +1,21 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import useSWR from 'swr'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
+import styles from './ProfileCard.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { ProfileEditModal } from '@/components/ProfileEditModal'
 import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 export function ProfileCard() {
+  const { isGuest } = useAuth()
+
   const { data, error, isLoading, mutate } = useSWR(
     '/api/v1/user/profile',
     async (url) => {
@@ -18,6 +23,19 @@ export function ProfileCard() {
       return response.data
     }
   )
+
+  const { data: pageData } = useSWR(
+    data?.userId && data?.isProfilePublic ? ['publicPage', data.userId] : null,
+    async () => {
+      const res = await apiGet(
+        `/api/v1/user/${data!.userId}/page` as `/api/v1/user/${string}/page`
+      )
+      return res.data
+    }
+  )
+
+  const followerCount = pageData?.followerCount ?? '--'
+  const followingCount = pageData?.followingCount ?? '--'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -67,16 +85,53 @@ export function ProfileCard() {
           </Button>
         }
       >
-        <div>
-          <p>名前: {data?.name || '未設定'}</p>
-          <p>通知メールアドレス: {data?.notificationEmail || '未設定'}</p>
+        <div className="flex flex-col gap-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-gray-500">名前</span>
+            <span>{data?.name || '未設定'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">通知メールアドレス</span>
+            <span>{data?.notificationEmail || '未設定'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">プロフィール公開</span>
+            <span>{data?.isProfilePublic ? '公開' : '非公開'}</span>
+          </div>
+          {data?.isProfilePublic && (
+            <div className="pt-1">
+              <Link
+                href={`/app/users/${data.userId}`}
+                className="text-blue-500 hover:underline"
+              >
+                自分の公開ページを見る →
+              </Link>
+            </div>
+          )}
         </div>
+        {!isGuest && (
+          <>
+            <hr className="divider" />
+            <div className={styles.followSection}>
+              <div className={styles.followItem}>
+                <span className={styles.followCount}>{followerCount}</span>
+                <span className={styles.followLabel}>フォロワー</span>
+              </div>
+              <div className={styles.followItem}>
+                <span className={styles.followCount}>{followingCount}</span>
+                <span className={styles.followLabel}>フォロー中</span>
+              </div>
+            </div>
+          </>
+        )}
       </BaseCard>
 
       {isModalOpen && data && (
         <ProfileEditModal
           initialName={data.name}
           initialNotificationEmail={data.notificationEmail}
+          initialIsProfilePublic={data.isProfilePublic}
+          isGuest={isGuest}
           onClose={() => setIsModalOpen(false)}
           onSuccess={(updated) => {
             mutate({ ...data, ...updated })

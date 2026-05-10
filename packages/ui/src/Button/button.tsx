@@ -23,6 +23,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
    */
   loading?: boolean
   /**
+   * アウトライン表示（透明背景＋ボーダー）
+   * @default false
+   */
+  outline?: boolean
+  /**
    * フル幅表示
    * @default false
    */
@@ -53,6 +58,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'primary',
       size = 'md',
       loading = false,
+      outline = false,
       fullWidth = false,
       className,
       children,
@@ -65,6 +71,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       styles.button,
       styles[variant],
       styles[size],
+      outline && styles.outline,
       fullWidth && styles.fullWidth,
       loading && styles.loading,
       className,

@@ -28,6 +28,7 @@ export function LogoutButton() {
     <Button
       onClick={handleLogout}
       variant="danger"
+      outline
       fullWidth
       disabled={isLoading}
     >

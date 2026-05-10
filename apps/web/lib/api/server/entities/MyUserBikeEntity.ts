@@ -37,7 +37,6 @@ export class MyUserBikeEntity extends UserBikeEntity {
       purchaseDate: myUserBike.purchaseDate,
       purchasePrice: myUserBike.purchasePrice,
       purchaseMileage: myUserBike.purchaseMileage,
-      isPublic: myUserBike.isPublic,
       ownedAt: myUserBike.ownedAt,
       soldAt: myUserBike.soldAt,
       ownStatus: myUserBike.ownStatus,
@@ -73,10 +72,6 @@ export class MyUserBikeEntity extends UserBikeEntity {
 
   public get purchaseMileage(): number | null {
     return this._myValue.purchaseMileage
-  }
-
-  public get isPublic(): boolean {
-    return this._myValue.isPublic
   }
 
   public get ownedAt(): Date {
