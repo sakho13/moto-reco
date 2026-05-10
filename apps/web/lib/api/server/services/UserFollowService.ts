@@ -11,7 +11,18 @@ export class UserFollowService {
     private readonly _followRepository: IUserFollowRepository
   ) {}
 
-  async followUser(followerId: UserId, followingId: UserId): Promise<void> {
+  async followUser(
+    followerId: UserId,
+    followingId: UserId,
+    followerRole: string
+  ): Promise<void> {
+    if (followerRole === 'GUEST') {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        'ゲストアカウントはフォローできません'
+      )
+    }
+
     if (followerId === followingId) {
       throw new ApiV1Error(
         'INVALID_REQUEST',

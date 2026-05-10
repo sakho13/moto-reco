@@ -11,8 +11,11 @@ import { EditIcon } from '@/components/icons/EditIcon'
 import { ProfileEditModal } from '@/components/ProfileEditModal'
 import { apiGet } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 export function ProfileCard() {
+  const { isGuest } = useAuth()
+
   const { data, error, isLoading, mutate } = useSWR(
     '/api/v1/user/profile',
     async (url) => {
@@ -22,7 +25,7 @@ export function ProfileCard() {
   )
 
   const { data: pageData } = useSWR(
-    data?.userId ? ['publicPage', data.userId] : null,
+    data?.userId && data?.isProfilePublic ? ['publicPage', data.userId] : null,
     async () => {
       const res = await apiGet(
         `/api/v1/user/${data!.userId}/page` as `/api/v1/user/${string}/page`
@@ -106,17 +109,21 @@ export function ProfileCard() {
             </div>
           )}
         </div>
-        <hr className="divider" />
-        <div className={styles.followSection}>
-          <div className={styles.followItem}>
-            <span className={styles.followCount}>{followerCount}</span>
-            <span className={styles.followLabel}>フォロワー</span>
-          </div>
-          <div className={styles.followItem}>
-            <span className={styles.followCount}>{followingCount}</span>
-            <span className={styles.followLabel}>フォロー中</span>
-          </div>
-        </div>
+        {!isGuest && (
+          <>
+            <hr className="divider" />
+            <div className={styles.followSection}>
+              <div className={styles.followItem}>
+                <span className={styles.followCount}>{followerCount}</span>
+                <span className={styles.followLabel}>フォロワー</span>
+              </div>
+              <div className={styles.followItem}>
+                <span className={styles.followCount}>{followingCount}</span>
+                <span className={styles.followLabel}>フォロー中</span>
+              </div>
+            </div>
+          </>
+        )}
       </BaseCard>
 
       {isModalOpen && data && (
@@ -124,6 +131,7 @@ export function ProfileCard() {
           initialName={data.name}
           initialNotificationEmail={data.notificationEmail}
           initialIsProfilePublic={data.isProfilePublic}
+          isGuest={isGuest}
           onClose={() => setIsModalOpen(false)}
           onSuccess={(updated) => {
             mutate({ ...data, ...updated })

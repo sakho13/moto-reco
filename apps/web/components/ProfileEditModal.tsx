@@ -13,6 +13,7 @@ interface ProfileEditModalProps {
   initialName: string
   initialNotificationEmail: string | null
   initialIsProfilePublic: boolean
+  isGuest?: boolean
   onClose: () => void
   onSuccess: (updated: {
     name: string
@@ -25,6 +26,7 @@ export function ProfileEditModal({
   initialName,
   initialNotificationEmail,
   initialIsProfilePublic,
+  isGuest = false,
   onClose,
   onSuccess,
 }: ProfileEditModalProps) {
@@ -99,7 +101,7 @@ export function ProfileEditModal({
             label="プロフィールを公開する"
             checked={isProfilePublic}
             onChange={(e) => setIsProfilePublic(e.target.checked)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGuest}
           />
         </FormField>
 
@@ -113,7 +115,7 @@ export function ProfileEditModal({
             placeholder="通知用メールアドレスを入力"
             value={notificationEmail}
             onChange={(e) => setNotificationEmail(e.target.value)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isGuest}
             autoComplete="email"
           />
         </FormField>

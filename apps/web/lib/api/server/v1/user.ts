@@ -239,13 +239,13 @@ user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
 })
 
 user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
-  const { userId: followerId } = c.var.user!
+  const { userId: followerId, role } = c.var.user!
   const followingId = createUserId(c.req.param('userId'))
 
   const userRepo = new PrismaUserRepository(prisma)
   const followRepo = new PrismaUserFollowRepository(prisma)
   const service = new UserFollowService(userRepo, followRepo)
-  await service.followUser(followerId, followingId)
+  await service.followUser(followerId, followingId, role)
 
   return c.json<SuccessResponse<Record<string, never>>>({
     status: 'success',

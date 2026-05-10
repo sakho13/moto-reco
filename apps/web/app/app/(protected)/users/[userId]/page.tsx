@@ -27,7 +27,7 @@ function UserPageContent() {
   const searchParams = useSearchParams()
   const activeTab = toTab(searchParams.get('tab'))
   const [followLoading, setFollowLoading] = useState(false)
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, isGuest } = useAuth()
 
   const {
     data,
@@ -111,7 +111,7 @@ function UserPageContent() {
       <BaseCard
         title={data.name}
         headerAction={
-          !isOwnProfile && myProfile ? (
+          !isOwnProfile && myProfile && !isGuest ? (
             <Button
               variant={data.isFollowing ? 'cloud' : 'primary'}
               size="sm"
