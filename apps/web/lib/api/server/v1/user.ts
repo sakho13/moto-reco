@@ -71,7 +71,7 @@ user.patch(
   honoAuthMiddleware,
   zodValidateJson(UserProfilePatchRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const body = c.req.valid('json')
 
     const userRepo = new PrismaUserRepository(prisma)
@@ -91,6 +91,12 @@ user.patch(
       user.notificationEmail = body.notificationEmail ?? null
     }
     if (body.isProfilePublic !== undefined) {
+      if (role === 'GUEST' && body.isProfilePublic === true) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          'ゲストアカウントはプロフィールを公開できません'
+        )
+      }
       user.isProfilePublic = body.isProfilePublic
     }
 

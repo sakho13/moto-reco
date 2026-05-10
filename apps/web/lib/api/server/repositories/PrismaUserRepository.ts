@@ -203,6 +203,7 @@ export class PrismaUserRepository
         name: user.name,
         status: 'ACTIVE',
         role: 'GUEST',
+        isProfilePublic: user.isProfilePublic,
         authProviders: {
           create: [
             {

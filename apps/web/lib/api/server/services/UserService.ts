@@ -70,7 +70,7 @@ export class UserService {
         role: 'GUEST',
         status: 'ACTIVE',
         notificationEmail: null,
-        isProfilePublic: true,
+        isProfilePublic: false,
       }),
       authProvider
     )

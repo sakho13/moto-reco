@@ -143,6 +143,7 @@ export class PrismaUserFollowRepository
           name: { contains: query, mode: 'insensitive' },
           isProfilePublic: true,
           status: 'ACTIVE',
+          role: { not: 'GUEST' },
         },
         orderBy: { name: 'asc' },
         skip,
@@ -161,6 +162,7 @@ export class PrismaUserFollowRepository
           name: { contains: query, mode: 'insensitive' },
           isProfilePublic: true,
           status: 'ACTIVE',
+          role: { not: 'GUEST' },
         },
       }),
     ])

@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
 import { ResendEmailRepository } from '@repo/email'
-import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
+import {
+  createGuestUser,
+  createTestUser,
+  testAuthRequired,
+} from '../../helpers/authHelper'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import {
   handleAnonymousSignInByFirebase,
@@ -354,6 +358,44 @@ describe('User API Endpoints', () => {
         message: expect.any(String),
       })
       expect(res.status).toBe(400)
+    })
+
+    test('ゲストアカウントがisProfilePublicをtrueに設定しようとするとエラーになる', async () => {
+      const { token } = await createGuestUser()
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: true }),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'INVALID_REQUEST',
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    test('ゲストアカウントはisProfilePublicをfalseに設定できる', async () => {
+      const { token } = await createGuestUser()
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: false }),
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.isProfilePublic).toBe(false)
     })
   })
 
@@ -850,6 +892,27 @@ describe('User API Endpoints', () => {
       const json = await res.json()
       expect(json.data.users).toEqual([])
       expect(json.data.total).toBe(0)
+    })
+
+    test('ゲストアカウントは検索結果に表示されない', async () => {
+      const unique = `guest_search_${Date.now()}`
+      const { token } = await createTestUser()
+      const { userId: guestUserId } = await createGuestUser()
+
+      await prisma.mUser.update({
+        where: { id: guestUserId },
+        data: { name: `test_${unique}` },
+      })
+
+      const res = await app.request(`/api/v1/user/search?q=${unique}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      const foundIds = json.data.users.map((u: { userId: string }) => u.userId)
+      expect(foundIds).not.toContain(guestUserId)
     })
   })
 
