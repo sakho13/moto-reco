@@ -168,7 +168,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -196,8 +196,11 @@ jobs:
           PLAYWRIGHT_BASE_URL=http://localhost:3000
           EOF
 
+      - name: Copy .env to web app
+        run: cp .env apps/web/.env.local
+
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: ./package.json
           cache: "pnpm"
@@ -231,21 +234,12 @@ jobs:
             --export-on-exit &
           npx wait-on tcp:9099 tcp:4000
 
-      - name: Build web app
-        working-directory: ./
-        run: NODE_ENV=production pnpm build --filter @apps/web
-
-      - name: Start Next.js server (バックグラウンド)
-        working-directory: ./apps/web
-        run: |
-          pnpm start &
-          npx wait-on http://localhost:3000
-
       - name: Run E2E tests
         working-directory: ./apps/e2e
         run: pnpm test:e2e
         env:
           CI: true
+          FIREBASE_AUTH_EMULATOR_URL: http://localhost:9099
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

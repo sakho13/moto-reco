@@ -33,8 +33,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // ローカルでは起動済みの pnpm dev を再利用し、CIでは pnpm start (本番ビルド) を起動
-    command: 'pnpm --filter @apps/web start',
+    // ローカルでは起動済みの pnpm dev を再利用し、CIでは pnpm dev を起動
+    command: 'pnpm --filter @apps/web dev',
     url: BASE_URL,
     reuseExistingServer: !process.env['CI'],
     timeout: 120_000,
