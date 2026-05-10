@@ -29,6 +29,7 @@ export type PublicMyUserBikeDetail = {
   displacement: number
   modelYear: number | null
   totalMileage: number
+  ownedAt: Date
   updatedAt: Date
 }
 

@@ -178,12 +178,34 @@ function UserPageContent() {
             ) : (
               data.bikes.map((bike) => (
                 <div key={bike.myUserBikeId} className={styles.tabItem}>
-                  <p className={styles.bikeName}>
-                    {bike.nickname || bike.modelName || 'バイク'}
-                  </p>
-                  <p className={styles.bikeManufacturer}>
-                    {bike.manufacturerName || 'メーカー不明'}
-                  </p>
+                  <div className={styles.bikeCard}>
+                    <div className={styles.bikeCardHeader}>
+                      <div className={styles.bikeCardBadges}>
+                        {bike.displacement > 0 && (
+                          <span className={styles.bikeCardBadgeDisplacement}>
+                            {bike.displacement}cc
+                          </span>
+                        )}
+                        <span className={styles.bikeCardManufacturer}>
+                          {bike.manufacturerName || 'メーカー不明'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={styles.bikeCardDetail}>
+                      <div>{bike.nickname || bike.modelName || 'バイク'}</div>
+                      <div className={styles.bikeCardMeta}>
+                        <span>
+                          {new Date(bike.ownedAt).toLocaleDateString('ja-JP', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                          })}
+                          〜
+                        </span>
+                        <span>{bike.totalMileage.toLocaleString()} km</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))
             )}

@@ -62,6 +62,9 @@ export type ApiResponsePublicUserPage = {
     manufacturerName: string | null
     modelName: string | null
     nickname: string | null
+    displacement: number
+    totalMileage: number
+    ownedAt: string
     updatedAt: string
   }[]
   histories: ApiResponseAllBikesHistoryList

@@ -90,13 +90,50 @@
   opacity: 0.6;
 }
 
-.bikeName {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-ink);
+.bikeCard {
+  border: 1px solid var(--color-cloud);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--color-background);
 }
 
-.bikeManufacturer {
-  font-size: var(--font-size-sm);
+.bikeCardHeader {
+  margin-bottom: 4px;
+}
+
+.bikeCardBadges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bikeCardBadgeDisplacement {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: var(--color-cloud);
+  color: var(--color-inkLight);
+}
+
+.bikeCardManufacturer {
+  font-size: 12px;
+  color: var(--color-inkLight);
+}
+
+.bikeCardDetail {
+  color: var(--color-ink);
+  font-size: 14px;
+}
+
+.bikeCardMeta {
+  display: flex;
+  gap: var(--spacing-3);
+  margin-top: 2px;
+  font-size: 12px;
   color: var(--color-inkLight);
 }
 

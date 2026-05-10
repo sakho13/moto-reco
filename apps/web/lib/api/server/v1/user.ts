@@ -170,6 +170,9 @@ user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
         manufacturerName: bike.manufacturerName,
         modelName: bike.modelName,
         nickname: bike.nickname,
+        displacement: bike.displacement,
+        totalMileage: bike.totalMileage,
+        ownedAt: bike.ownedAt.toISOString(),
         updatedAt: bike.updatedAt.toISOString(),
       })),
       histories: histories
