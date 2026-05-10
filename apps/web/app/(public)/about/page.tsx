@@ -26,21 +26,42 @@ export const metadata: Metadata = {
   },
 }
 
-const features = [
+const featureDetails = [
   {
-    title: 'バイク管理',
-    description:
-      'メーカー・モデル・年式・走行距離などの基本情報を登録。複数台のバイクを一覧で切り替えて管理できます。',
+    id: 'feature-garage',
+    title: 'バイク登録とガレージ管理',
+    items: [
+      'メーカー・モデル・年式・走行距離などの基本情報を保存',
+      '複数台のバイクを切り替えて管理',
+      '共有用のメンテナンス履歴としても活用',
+    ],
   },
   {
-    title: '給油・燃費記録',
-    description:
-      '給油日、給油量、走行距離をワンステップで記録。燃費の推移をグラフで確認できます。',
+    id: 'feature-fuel',
+    title: '給油・燃費の記録',
+    items: [
+      '給油日、走行距離、給油量、燃費をまとめて記録',
+      '燃費の推移をグラフで確認',
+      'オフライン時も記録して後で同期',
+    ],
   },
   {
-    title: 'メンテナンス履歴',
-    description:
-      '作業内容・費用・メモを保存し、次回メンテナンスのリマインドを設定できます。履歴は共有にも活用できます。',
+    id: 'feature-maintenance',
+    title: 'メンテナンス履歴と通知',
+    items: [
+      '作業内容、日付、費用、メモ、写真を保存',
+      '次回メンテナンスの予定を登録して通知',
+      '部品・工具情報へのリンクで準備を効率化',
+    ],
+  },
+  {
+    id: 'feature-friend',
+    title: '公開プロフィール・フレンド機能',
+    items: [
+      'プロフィールを公開してユーザー検索で見つけてもらう',
+      '気になるライダーをフォローしてバイク・履歴を確認',
+      'フォロワー・フォロー中の一覧をプロフィールページで管理',
+    ],
   },
 ]
 
@@ -64,16 +85,24 @@ export default function AboutPage() {
 
       <section className={styles.featuresSection}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>できること</h2>
+          <h2 className={styles.sectionTitle}>機能詳細</h2>
           <p className={styles.sectionDescription}>
-            日々のバイクライフを支える主要機能を紹介します。
+            各機能の操作の流れと記録できる情報を紹介します。
           </p>
         </div>
-        <div className={styles.featureGrid}>
-          {features.map((feature) => (
-            <div key={feature.title} className={styles.featureCard}>
-              <h3 className={styles.featureTitle}>{feature.title}</h3>
-              <p className={styles.featureDescription}>{feature.description}</p>
+        <div className={styles.featureDetailGrid}>
+          {featureDetails.map((feature) => (
+            <div
+              key={feature.id}
+              id={feature.id}
+              className={styles.featureDetail}
+            >
+              <h3 className={styles.featureDetailTitle}>{feature.title}</h3>
+              <ul className={styles.featureDetailItems}>
+                {feature.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
