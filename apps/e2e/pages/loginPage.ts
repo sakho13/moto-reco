@@ -22,7 +22,9 @@ export class LoginPage {
     this.emailInput = page.locator('#email')
     this.passwordInput = page.locator('#password')
     this.submitButton = page.locator('button[type="submit"]')
-    this.errorMessage = page.locator('[role="alert"]')
+    this.errorMessage = page.locator(
+      '[role="alert"]:not(#__next-route-announcer__)'
+    )
   }
 
   /** ログインページへ遷移する */

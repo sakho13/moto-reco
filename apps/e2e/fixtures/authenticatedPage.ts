@@ -38,6 +38,7 @@ export const test = base.extend<AuthenticatedFixtures>({
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ name: `E2Eテストユーザー` }),
+      signal: AbortSignal.timeout(30_000),
     })
     if (!registerRes.ok) {
       throw new Error(

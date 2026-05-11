@@ -25,6 +25,7 @@ test.describe('ログインフロー', () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ name: 'E2Eテストユーザー' }),
+      signal: AbortSignal.timeout(30_000),
     })
     if (!res.ok) {
       throw new Error(`ユーザー登録失敗: ${res.status}`)

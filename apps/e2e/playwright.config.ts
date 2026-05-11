@@ -8,15 +8,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.resolve(__dirname, '../../.env.local') })
 
 const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000'
+const isCI = !!process.env['CI']
 
 export default defineConfig({
   testDir: './tests',
   // DBステートが共有されるためテストは直列実行
   fullyParallel: false,
-  forbidOnly: !!process.env['CI'],
-  retries: process.env['CI'] ? 2 : 0,
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
   // CIでは1ワーカー（DB競合防止）、ローカルはデフォルト
-  workers: process.env['CI'] ? 1 : undefined,
+  workers: isCI ? 1 : undefined,
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     ['list'],
@@ -33,10 +34,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // ローカルでは起動済みの pnpm dev を再利用し、CIでは pnpm dev を起動
-    command: 'pnpm --filter @apps/web dev',
+    // CI・ローカル共通: pnpm dev（ローカルは reuseExistingServer: true なので既存サーバーがあれば起動しない）
+    command: 'pnpm dev',
+    cwd: path.resolve(__dirname, '../web'),
     url: BASE_URL,
-    reuseExistingServer: !process.env['CI'],
+    reuseExistingServer: !isCI,
     timeout: 120_000,
     env: {
       NEXT_PUBLIC_USE_FIREBASE_EMULATOR: 'true',

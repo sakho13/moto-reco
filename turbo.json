@@ -66,7 +66,6 @@
     },
     "db:migrate": {
       "cache": false,
-      "persistent": true,
       "env": ["DATABASE_URL", "NODE_ENV"]
     },
     "db:deploy": {
@@ -91,6 +90,7 @@
       "outputs": ["playwright-report/**", "test-results/**"],
       "cache": false,
       "env": [
+        "CI",
         "NODE_ENV",
         "DATABASE_URL",
         "PLAYWRIGHT_BASE_URL",
