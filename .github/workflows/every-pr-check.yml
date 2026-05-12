@@ -194,7 +194,7 @@ jobs:
           DATABASE_URL="postgres://motoreco_user:motoreco_password@localhost:5432/motoreco_db"
           # Playwright用の環境変数
           FIREBASE_AUTH_EMULATOR_URL=http://localhost:9099
-          PLAYWRIGHT_BASE_URL=http://localhost:3000
+          PLAYWRIGHT_BASE_URL=http://localhost:3333
           EOF
 
       - name: Copy .env to web app
@@ -234,6 +234,14 @@ jobs:
             --import ./init-data \
             --export-on-exit &
           npx wait-on tcp:9099 tcp:4000
+
+      - name: Start web server (バックグラウンド)
+        working-directory: ./apps/web
+        env:
+          WEB_PORT: '3333'
+        run: |
+          pnpm dev > /tmp/next-dev.log 2>&1 &
+          npx wait-on http://localhost:3333 --timeout 120000 || (cat /tmp/next-dev.log && exit 1)
 
       - name: Run E2E tests
         working-directory: ./apps/e2e

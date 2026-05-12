@@ -7,7 +7,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env.local') })
 
-const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000'
+const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3333'
+// worker プロセスにも同じ BASE_URL を継承させる
+process.env['PLAYWRIGHT_BASE_URL'] = BASE_URL
 const isCI = !!process.env['CI']
 
 export default defineConfig({
@@ -38,10 +40,11 @@ export default defineConfig({
     command: 'pnpm dev',
     cwd: path.resolve(__dirname, '../web'),
     url: BASE_URL,
-    reuseExistingServer: !isCI,
+    reuseExistingServer: true,
     timeout: 120_000,
     env: {
       NEXT_PUBLIC_USE_FIREBASE_EMULATOR: 'true',
+      WEB_PORT: '3333',
     },
   },
 })

@@ -86,7 +86,7 @@
       "persistent": true
     },
     "test:e2e": {
-      "dependsOn": ["@apps/web#build"],
+      "dependsOn": [],
       "outputs": ["playwright-report/**", "test-results/**"],
       "cache": false,
       "env": [
