@@ -2967,6 +2967,94 @@ describe('UserBike API Endpoints', () => {
       expect(json.data.endLongitude).toBeCloseTo(135.5023)
     })
 
+    test('開始地点を更新しても終了地点はリセットされない', async () => {
+      // まず開始・終了位置を両方設定
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: 35.6895,
+            startLongitude: 139.6917,
+            endLatitude: 34.6937,
+            endLongitude: 135.5023,
+          }),
+        }
+      )
+
+      // 開始地点のみ更新
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: 36.0,
+            startLongitude: 140.0,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.startLatitude).toBeCloseTo(36.0)
+      expect(json.data.startLongitude).toBeCloseTo(140.0)
+      // 終了地点はリセットされず保持される
+      expect(json.data.endLatitude).toBeCloseTo(34.6937)
+      expect(json.data.endLongitude).toBeCloseTo(135.5023)
+    })
+
+    test('終了地点を更新しても開始地点はリセットされない', async () => {
+      // まず開始・終了位置を両方設定
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            startLatitude: 35.6895,
+            startLongitude: 139.6917,
+            endLatitude: 34.6937,
+            endLongitude: 135.5023,
+          }),
+        }
+      )
+
+      // 終了地点のみ更新
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            endLatitude: 33.0,
+            endLongitude: 130.0,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      // 開始地点はリセットされず保持される
+      expect(json.data.startLatitude).toBeCloseTo(35.6895)
+      expect(json.data.startLongitude).toBeCloseTo(139.6917)
+      expect(json.data.endLatitude).toBeCloseTo(33.0)
+      expect(json.data.endLongitude).toBeCloseTo(130.0)
+    })
+
     test('位置情報をnullで削除できる', async () => {
       // まず位置情報を設定
       await app.request(
@@ -4094,65 +4182,6 @@ describe('UserBike API Endpoints', () => {
           errorCode: 'INVALID_REQUEST',
           message: 'ゲストアカウントはバイクを1台まで登録できます',
         })
-      })
-
-      test('ゲストのバイクは isPublic が false に強制される', async () => {
-        const { token } = await createGuestUser()
-
-        const res = await app.request('/api/v1/user-bike/register', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            displacement: 250,
-            nickname: 'ゲストバイク',
-            isPublic: true,
-          }),
-        })
-
-        expect(res.status).toBe(201)
-        const json = await res.json()
-        const myUserBikeId = json.data.myUserBikeId
-
-        const record = await prisma.tUserMyBike.findUnique({
-          where: { id: myUserBikeId },
-          select: { isPublic: true },
-        })
-        expect(record?.isPublic).toBe(false)
-      })
-
-      test('ゲストは PATCH でも isPublic が false に強制される', async () => {
-        const { token } = await createGuestUser()
-        const { myUserBikeId } = await createTestUserBike(token, {
-          displacement: 250,
-          nickname: 'ゲストバイク',
-        })
-
-        const res = await app.request(
-          `/api/v1/user-bike/bike/${myUserBikeId}`,
-          {
-            method: 'PATCH',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              isPublic: true,
-            }),
-          }
-        )
-
-        expect(res.status).toBe(200)
-        const json = await res.json()
-        expect(json.data.isPublic).toBe(false)
-
-        const record = await prisma.tUserMyBike.findUnique({
-          where: { id: myUserBikeId },
-          select: { isPublic: true },
-        })
-        expect(record?.isPublic).toBe(false)
       })
     })
 

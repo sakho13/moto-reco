@@ -7,4 +7,5 @@ export type User = {
   role: 'USER' | 'ADMIN' | 'GUEST'
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
   notificationEmail: string | null
+  isProfilePublic: boolean
 }

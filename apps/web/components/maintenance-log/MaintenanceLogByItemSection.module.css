@@ -100,7 +100,13 @@
   opacity: 0.6;
 }
 
-.nextInfo {
+.remainingMileage {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+}
+
+.recommendedInterval {
   font-size: var(--font-size-xs);
   color: var(--color-ink);
   opacity: 0.5;

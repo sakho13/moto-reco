@@ -346,20 +346,20 @@ export class TouringService {
         startMileage: params.startMileage ?? existingTouring.startMileage,
         endMileage: params.endMileage ?? existingTouring.endMileage,
         startLatitude:
-          'startLatitude' in params
-            ? (params.startLatitude ?? null)
+          params.startLatitude !== undefined
+            ? params.startLatitude
             : existingTouring.startLatitude,
         startLongitude:
-          'startLongitude' in params
-            ? (params.startLongitude ?? null)
+          params.startLongitude !== undefined
+            ? params.startLongitude
             : existingTouring.startLongitude,
         endLatitude:
-          'endLatitude' in params
-            ? (params.endLatitude ?? null)
+          params.endLatitude !== undefined
+            ? params.endLatitude
             : existingTouring.endLatitude,
         endLongitude:
-          'endLongitude' in params
-            ? (params.endLongitude ?? null)
+          params.endLongitude !== undefined
+            ? params.endLongitude
             : existingTouring.endLongitude,
         status: newStatus,
       })

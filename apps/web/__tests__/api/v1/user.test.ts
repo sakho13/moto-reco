@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
 import { ResendEmailRepository } from '@repo/email'
-import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
+import {
+  createGuestUser,
+  createTestUser,
+  testAuthRequired,
+} from '../../helpers/authHelper'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import {
   handleAnonymousSignInByFirebase,
@@ -15,10 +19,10 @@ afterEach(() => {
 })
 
 describe('User API Endpoints', () => {
-  describe('POST /api/v1/user/profile', () => {
+  describe('PATCH /api/v1/user/profile', () => {
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
       const res = await app.request('/api/v1/user/profile', {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -53,7 +57,7 @@ describe('User API Endpoints', () => {
       expect(registeredRes.status).toBe(201)
 
       const res = await app.request('/api/v1/user/profile', {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -95,7 +99,7 @@ describe('User API Endpoints', () => {
       expect(registeredRes.status).toBe(201)
 
       const res = await app.request('/api/v1/user/profile', {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -120,7 +124,40 @@ describe('User API Endpoints', () => {
       expect(res.status).toBe(400)
     })
 
-    test('ユーザ名が更新できる', async () => {
+    test('フィールドが1つも指定されない場合にエラーとなる', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+      await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'test_フィールドが1つも指定されない場合にエラーとなる',
+        }),
+      })
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'VALIDATION_ERROR',
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    test('ユーザ名のみ更新できる', async () => {
       const email = createRandomEmail()
       const credential = await handleRegisterByFirebase(email, 'password')
       const token = await credential.user.getIdToken()
@@ -131,13 +168,13 @@ describe('User API Endpoints', () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: 'test_ユーザ名が更新できる',
+          name: 'test_ユーザ名のみ更新できる',
         }),
       })
       expect(registeredRes.status).toBe(201)
 
       const res = await app.request('/api/v1/user/profile', {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -154,10 +191,211 @@ describe('User API Endpoints', () => {
           userId: expect.any(String),
           name: '更新後の名前',
           notificationEmail: expect.any(String),
+          isProfilePublic: expect.any(Boolean),
         },
         message: expect.any(String),
       })
       expect(res.status).toBe(200)
+    })
+
+    test('通知メールアドレスのみ更新できる', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+      await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'test_通知メールアドレスのみ更新できる',
+        }),
+      })
+
+      const notificationEmail = createRandomEmail()
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          notificationEmail,
+        }),
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          userId: expect.any(String),
+          name: 'test_通知メールアドレスのみ更新できる',
+          notificationEmail,
+          isProfilePublic: expect.any(Boolean),
+        },
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(200)
+    })
+
+    test('isProfilePublicのみfalseに更新できる', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+      const registeredRes = await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'test_isProfilePublicのみfalseに更新できる',
+        }),
+      })
+      expect(registeredRes.status).toBe(201)
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: false }),
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          userId: expect.any(String),
+          name: 'test_isProfilePublicのみfalseに更新できる',
+          notificationEmail: expect.any(String),
+          isProfilePublic: false,
+        },
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(200)
+    })
+
+    test('isProfilePublicのみtrueに更新できる', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+      await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'test_isProfilePublicのみtrueに更新できる',
+        }),
+      })
+
+      // 前提: まず false に変更
+      await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: false }),
+      })
+
+      // true に戻す
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: true }),
+      })
+
+      const json = await res.json()
+      expect(json).toEqual({
+        status: 'success',
+        data: {
+          userId: expect.any(String),
+          name: 'test_isProfilePublicのみtrueに更新できる',
+          notificationEmail: expect.any(String),
+          isProfilePublic: true,
+        },
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(200)
+    })
+
+    test('isProfilePublicに文字列を指定した場合にバリデーションエラーとなる', async () => {
+      const email = createRandomEmail()
+      const credential = await handleRegisterByFirebase(email, 'password')
+      const token = await credential.user.getIdToken()
+      await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'test_isProfilePublicに文字列を指定した場合にバリデーションエラーとなる',
+        }),
+      })
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: 'true' }),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'VALIDATION_ERROR',
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    test('ゲストアカウントがisProfilePublicをtrueに設定しようとするとエラーになる', async () => {
+      const { token } = await createGuestUser()
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: true }),
+      })
+
+      const json = await res.json()
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'INVALID_REQUEST',
+        message: expect.any(String),
+      })
+      expect(res.status).toBe(400)
+    })
+
+    test('ゲストアカウントはisProfilePublicをfalseに設定できる', async () => {
+      const { token } = await createGuestUser()
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isProfilePublic: false }),
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.isProfilePublic).toBe(false)
     })
   })
 
@@ -228,6 +466,7 @@ describe('User API Endpoints', () => {
           userId: expect.any(String),
           name: 'テストユーザー',
           notificationEmail: expect.any(String),
+          isProfilePublic: expect.any(Boolean),
         },
         message: expect.any(String),
       })
@@ -474,6 +713,206 @@ describe('User API Endpoints', () => {
       expect(
         authProviders.every((provider) => provider.isActive === true)
       ).toBe(true)
+    })
+  })
+
+  describe('POST /api/v1/user/:userId/follow', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/dummy-id/follow', 'POST')
+    })
+
+    test('他ユーザーをフォローできる', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      const res = await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.status).toBe('success')
+    })
+
+    test('自分自身をフォローしようとするとエラーとなる', async () => {
+      const user = await createTestUser()
+
+      const res = await app.request(`/api/v1/user/${user.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+
+      expect(res.status).toBe(400)
+      const json = await res.json()
+      expect(json.errorCode).toBe('INVALID_REQUEST')
+    })
+
+    test('重複フォローは冪等に処理される', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      const res = await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      expect(res.status).toBe(200)
+    })
+  })
+
+  describe('DELETE /api/v1/user/:userId/follow', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/dummy-id/follow', 'DELETE')
+    })
+
+    test('フォロー解除できる', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      const res = await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      expect(res.status).toBe(200)
+    })
+  })
+
+  describe('GET /api/v1/user/:userId/followers', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/dummy-id/followers', 'GET')
+    })
+
+    test('フォロワー一覧が取得できる', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      const res = await app.request(`/api/v1/user/${target.userId}/followers`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${target.token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.total).toBeGreaterThanOrEqual(1)
+      expect(json.data.users[0]).toMatchObject({
+        userId: follower.userId,
+        name: expect.any(String),
+      })
+    })
+  })
+
+  describe('GET /api/v1/user/:userId/following', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/dummy-id/following', 'GET')
+    })
+
+    test('フォロー中一覧が取得できる', async () => {
+      const follower = await createTestUser()
+      const target = await createTestUser()
+
+      await app.request(`/api/v1/user/${target.userId}/follow`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${follower.token}` },
+      })
+
+      const res = await app.request(
+        `/api/v1/user/${follower.userId}/following`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${follower.token}` },
+        }
+      )
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.total).toBeGreaterThanOrEqual(1)
+      expect(json.data.users[0]).toMatchObject({
+        userId: target.userId,
+        name: expect.any(String),
+      })
+    })
+  })
+
+  describe('GET /api/v1/user/search', () => {
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired('/api/v1/user/search?q=test', 'GET')
+    })
+
+    test('ユーザー名で検索できる', async () => {
+      const unique = `search_${Date.now()}`
+      const { token } = await createTestUser()
+
+      const target = await createTestUser()
+      await prisma.mUser.update({
+        where: { id: target.userId },
+        data: { name: `test_${unique}` },
+      })
+
+      const res = await app.request(`/api/v1/user/search?q=${unique}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.users.length).toBeGreaterThanOrEqual(1)
+      expect(json.data.users[0]).toMatchObject({
+        userId: expect.any(String),
+        name: expect.any(String),
+        isFollowing: expect.any(Boolean),
+      })
+    })
+
+    test('空文字クエリで空リストが返る', async () => {
+      const { token } = await createTestUser()
+
+      const res = await app.request('/api/v1/user/search?q=', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.data.users).toEqual([])
+      expect(json.data.total).toBe(0)
+    })
+
+    test('ゲストアカウントは検索結果に表示されない', async () => {
+      const unique = `guest_search_${Date.now()}`
+      const { token } = await createTestUser()
+      const { userId: guestUserId } = await createGuestUser()
+
+      await prisma.mUser.update({
+        where: { id: guestUserId },
+        data: { name: `test_${unique}` },
+      })
+
+      const res = await app.request(`/api/v1/user/search?q=${unique}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      const foundIds = json.data.users.map((u: { userId: string }) => u.userId)
+      expect(foundIds).not.toContain(guestUserId)
     })
   })
 

@@ -15,13 +15,11 @@ import { StepIndicator } from '@/components/bike/StepIndicator'
 import { apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
-import { useAuth } from '@/lib/hooks/useAuth'
 
 type Step = 1 | 2 | 3
 
 function BikeRegisterPage() {
   const router = useRouter()
-  const { isGuest } = useAuth()
   const [step, setStep] = useState<Step>(1)
   const [selectedBike, setSelectedBike] = useState<{
     modelName: string
@@ -53,7 +51,6 @@ function BikeRegisterPage() {
           ? Number(formData.purchaseMileage)
           : null,
         totalMileage: Number(formData.totalMileage) || 0,
-        isPublic: formData.isPublic,
       })
 
       await mutate('/api/v1/user-bike/bikes')
@@ -188,7 +185,6 @@ function BikeRegisterPage() {
             onSubmit={handleFormSubmit}
             isSubmitting={isSubmitting}
             error={error}
-            isGuest={isGuest}
           />
         )}
       </div>

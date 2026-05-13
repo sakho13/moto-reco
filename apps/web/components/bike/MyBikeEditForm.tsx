@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@repo/ui/button'
-import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -12,7 +11,6 @@ export interface MyBikeEditFormData {
   nickname: string
   totalMileage: string
   displacement: string
-  isPublic: boolean
 }
 
 export interface MyBikeEditFormProps {
@@ -21,7 +19,6 @@ export interface MyBikeEditFormProps {
   onSubmit: (data: MyBikeEditFormData) => Promise<void>
   isSubmitting: boolean
   error: string
-  isGuest?: boolean
 }
 
 export const MyBikeEditForm = ({
@@ -30,7 +27,6 @@ export const MyBikeEditForm = ({
   onSubmit,
   isSubmitting,
   error,
-  isGuest,
 }: MyBikeEditFormProps) => {
   const [formData, setFormData] = useState<MyBikeEditFormData>(initialData)
 
@@ -103,23 +99,6 @@ export const MyBikeEditForm = ({
           required
           disabled={isSubmitting || !isDisplacementEditable}
           placeholder="例: 400"
-        />
-      </FormField>
-
-      <FormField label="公開設定" htmlFor="isPublic">
-        <Checkbox
-          id="isPublic"
-          checked={formData.isPublic}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, isPublic: e.target.checked }))
-          }
-          disabled={isSubmitting || (isGuest ?? false)}
-          label="このバイクを公開する"
-          helperText={
-            isGuest
-              ? 'ゲストアカウントはバイクを公開できません。'
-              : '公開したバイクは、公開ページに情報が掲載されます。'
-          }
         />
       </FormField>
 

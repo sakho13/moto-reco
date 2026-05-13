@@ -32,6 +32,7 @@ model MUser {
   id                String  @id @default(cuid(2))
   name              String
   notificationEmail String? @map("notification_email")
+  isProfilePublic  Boolean @default(true) @map("is_profile_public")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -43,6 +44,8 @@ model MUser {
   myBikes       TUserMyBike[]
   histories     TUserMyBikeHistory[]
   userQuit      TUserQuit?
+  followers     TUserFollow[] @relation("UserFollowing")
+  following     TUserFollow[] @relation("UserFollowers")
 }
 
 model MManufacturer {
@@ -121,6 +124,7 @@ model TUserMyBike {
   purchaseDate    DateTime? @map("purchase_date")
   purchasePrice   Int?      @map("purchase_price")
   purchaseMileage Int?      @map("purchase_mileage")
+  // 未使用: バイクの公開設定はフレンド機能追加（isProfilePublic）に伴い廃止
   isPublic        Boolean   @default(false) @map("is_public")
 
   // 所有状態
@@ -141,6 +145,7 @@ model TUserMyBike {
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
+  // 未使用: バイクの公開設定廃止に伴いこのインデックスも未使用
   @@index([isPublic, ownStatus, updatedAt(sort: Desc)], name: "idx_public_bikes")
 }
 
@@ -284,6 +289,21 @@ model TUserQuit {
 
   @@unique([userId])
   @@index([status])
+}
+
+model TUserFollow {
+  id          String @id @default(cuid(2))
+  followerId  String @map("follower_id")
+  followingId String @map("following_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  follower  MUser @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following MUser @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
 }
 
 // Enums

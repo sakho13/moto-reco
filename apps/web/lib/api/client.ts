@@ -9,6 +9,9 @@ import {
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
   ApiResponseUserQuit,
+  ApiResponsePublicUserPage,
+  ApiResponseUserFollowList,
+  ApiResponseUserSearch,
   ApiResponseFuelInsight,
   ApiResponseTouringDetail,
   ApiResponseTouringList,
@@ -178,7 +181,7 @@ export const apiDelete = async <U extends keyof API_EP>(
 type API_EP = {
   '/api/v1/user/profile': {
     GET: SuccessResponse<ApiResponseUserProfile>
-    POST: SuccessResponse<ApiResponseUserProfile>
+    PATCH: SuccessResponse<ApiResponseUserProfile>
   }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
@@ -200,6 +203,27 @@ type API_EP = {
   }
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
+  }
+} & {
+  '/api/v1/user/search': {
+    GET: SuccessResponse<ApiResponseUserSearch>
+  }
+} & {
+  [key: `/api/v1/user/${string}/page`]: {
+    GET: SuccessResponse<ApiResponsePublicUserPage>
+  }
+} & {
+  [key: `/api/v1/user/${string}/follow`]: {
+    POST: SuccessResponse<Record<string, never>>
+    DELETE: SuccessResponse<Record<string, never>>
+  }
+} & {
+  [key: `/api/v1/user/${string}/followers`]: {
+    GET: SuccessResponse<ApiResponseUserFollowList>
+  }
+} & {
+  [key: `/api/v1/user/${string}/following`]: {
+    GET: SuccessResponse<ApiResponseUserFollowList>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-logs`]: {
