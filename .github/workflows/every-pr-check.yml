@@ -82,21 +82,6 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      # localstack:
-      #   image: localstack/localstack:latest
-      #   ports:
-      #     - "4566:4566"
-      #     - "4510-4559:4510-4559"
-      #   env:
-      #     SERVICES: s3,ssm,secretsmanager,events,sqs,lambda,sts,iam
-      #     AWS_DEFAULT_REGION: us-east-1
-      #     AWS_ACCESS_KEY_ID: test
-      #     AWS_SECRET_ACCESS_KEY: test
-      #     DEBUG: "1"
-      #     LOCALSTACK_DATA_DIR: /var/lib/localstack
-      #     LS_LOG: trace
-      #     LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: "1"
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -213,9 +198,7 @@ jobs:
 
       - name: Run E2E tests
         working-directory: ./apps/e2e
-        run: |
-          set -a; source ../../.env; set +a
-          pnpm test:e2e
+        run: pnpm test:e2e
         env:
           CI: true
 
