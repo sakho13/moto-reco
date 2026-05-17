@@ -196,13 +196,6 @@ jobs:
             --export-on-exit &
           npx wait-on tcp:9099 tcp:4000
 
-      - name: Start web server (バックグラウンド)
-        working-directory: ./apps/web
-        run: |
-          set -a; source ../../.env; set +a
-          pnpm dev > /tmp/next-dev.log 2>&1 &
-          npx wait-on http://localhost:3000 --timeout 120000 || (cat /tmp/next-dev.log && exit 1)
-
       - name: Run E2E tests
         working-directory: ./apps/e2e
         run: pnpm test:e2e
