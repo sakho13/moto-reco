@@ -22,6 +22,11 @@ export function MyBikeEditModal({
   onClose,
   onSuccess,
 }: MyBikeEditModalProps) {
+  const toDateInputValue = (date: string | null): string => {
+    if (!date) return ''
+    return date.slice(0, 10)
+  }
+
   const [initialData, setInitialData] = useState<MyBikeEditFormData | null>(
     null
   )
@@ -50,6 +55,7 @@ export function MyBikeEditModal({
     if (!data) return
     setInitialData({
       nickname: data.nickname ?? '',
+      purchaseDate: toDateInputValue(data.purchaseDate),
       totalMileage: data.totalMileage.toString(),
       displacement: data.displacement.toString(),
     })
@@ -63,6 +69,9 @@ export function MyBikeEditModal({
     try {
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}`, {
         nickname: formData.nickname.trim() ? formData.nickname.trim() : null,
+        purchaseDate: formData.purchaseDate
+          ? new Date(formData.purchaseDate)
+          : null,
         totalMileage: Number(formData.totalMileage),
         ...(isDisplacementEditable
           ? { displacement: Number(formData.displacement) }
