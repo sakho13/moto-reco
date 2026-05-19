@@ -203,10 +203,10 @@ jobs:
 
       - name: Start web server (バックグラウンド)
         run: |
-          cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
-          cp -r apps/web/public apps/web/.next/standalone/public
+          cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
+          cp -r apps/web/public apps/web/.next/standalone/apps/web/public
           set -a; source .env; set +a
-          PORT=3000 HOSTNAME=0.0.0.0 node apps/web/.next/standalone/server.js > /tmp/next-start.log 2>&1 &
+          PORT=3000 HOSTNAME=0.0.0.0 node apps/web/.next/standalone/apps/web/server.js > /tmp/next-start.log 2>&1 &
           npx wait-on http://localhost:3000 --timeout 60000 || (cat /tmp/next-start.log && exit 1)
 
       - name: Run E2E tests
