@@ -33,15 +33,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    // CI・ローカル共通: pnpm dev（ローカルは reuseExistingServer: true なので既存サーバーがあれば起動しない）
-    command: 'pnpm dev',
-    cwd: path.resolve(__dirname, '../web'),
-    url: BASE_URL,
-    reuseExistingServer: true,
-    timeout: 120_000,
-    env: {
-      NEXT_PUBLIC_USE_FIREBASE_EMULATOR: 'true',
-    },
-  },
+  // CIではwebServerを無効化（CI側でstandaloneサーバーを別途起動するため）
+  webServer: isCI
+    ? undefined
+    : {
+        command: 'pnpm dev',
+        cwd: path.resolve(__dirname, '../web'),
+        url: BASE_URL,
+        reuseExistingServer: true,
+        timeout: 120_000,
+        env: {
+          NEXT_PUBLIC_USE_FIREBASE_EMULATOR: 'true',
+        },
+      },
 })
