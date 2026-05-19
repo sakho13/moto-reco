@@ -161,11 +161,59 @@ EOF
 
 gitmojiの目安: バグ修正は🐛、改善・リファクタは✨または🔧
 
-### ステップ8: 修正の動作確認
+### ステップ8: テストコードの作成（必須）
+
+**このステップは省略禁止です。** 今回操作したシナリオに対するPlaywrightテストコードを必ず作成してください。
+
+テストファイルの配置先は `apps/e2e/` 配下の既存ディレクトリ構成に従ってください:
+
+```bash
+# 既存のテスト構成を確認する
+find apps/e2e -name "*.spec.ts" | head -20 | cat
+cat apps/e2e/playwright.config.ts 2>/dev/null || cat apps/e2e/playwright.config.js 2>/dev/null | cat
+```
+
+テストコードに含めるべき内容:
+- 今回操作したシナリオの正常系（成功するケース）
+- 発見した不具合の修正を検証する回帰テスト（同じバグが再発しないことを確認するケース）
+- 改善余地があった箇所の期待動作を確認するテスト（該当する場合）
+
+テスト作成例（`apps/e2e/tests/{機能名}.spec.ts`）:
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('{機能名}', () => {
+  test('正常系: {シナリオ名}', async ({ page }) => {
+    // 操作手順
+  });
+
+  test('回帰: {不具合タイトル}', async ({ page }) => {
+    // 不具合が再発しないことを確認
+  });
+});
+```
+
+テストコード作成後、コミットしてください:
+
+```bash
+git add apps/e2e/tests/{テストファイル名}
+git commit -m "$(cat <<'EOF'
+✅ {シナリオ名}のE2Eテストを追加
+
+{テスト内容の説明}
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+EOF
+)"
+```
+
+### ステップ9: 修正の動作確認
 
 Playwrightで同じ操作シナリオを再実行し、不具合が解消・改善されていることを確認してください。
+可能であれば `pnpm test` または `pnpm playwright test` でテストが通ることも確認してください。
 
-### ステップ9: PR の作成
+### ステップ10: PR の作成
 
 ブランチをプッシュしたあと、`.claude/commands/create-pr.md` のコマンド定義に従ってPRを作成してください。
 Issue番号を引数として渡してください（複数ある場合はカンマ区切りで指定）。
@@ -179,7 +227,7 @@ PRの作成手順は `create-pr` コマンドの定義（`.claude/commands/creat
 - ベースブランチは `develop`
 - `Closes #XX` にはこのフローで起票したIssue番号をすべて含める
 
-### ステップ10: 完了報告
+### ステップ11: 完了報告
 
 作成したIssueとPRのURLをユーザーに日本語で報告してください。
 
@@ -189,4 +237,5 @@ PRの作成手順は `create-pr` コマンドの定義（`.claude/commands/creat
 - 不具合が複数ある場合はIssue・ブランチ・PRをそれぞれ個別に作成する
 - `test-e2e@example.com` アカウントが既存の場合はログインフローを使う
 - ベースブランチは常に `develop` にする
-- コミットメッセージのプレフィックスはgitmojiを使う（バグ修正は🐛）
+- コミットメッセージのプレフィックスはgitmojiを使う（バグ修正は🐛、テスト追加は✅）
+- **テストコードの作成は絶対に省略しない。** 操作したシナリオと発見した不具合に対するPlaywrightテストを必ず `apps/e2e/` に作成してコミットすること
