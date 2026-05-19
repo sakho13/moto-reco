@@ -197,18 +197,16 @@ jobs:
           npx wait-on tcp:9099 tcp:4000
 
       - name: Build web app
-        working-directory: ./apps/web
         run: |
-          set -a; source ../../.env; set +a
-          pnpm build
+          set -a; source .env; set +a
+          NODE_ENV=production pnpm turbo build --filter=@apps/web
 
       - name: Start web server (バックグラウンド)
-        working-directory: ./apps/web
         run: |
-          cp -r .next/static .next/standalone/.next/static
-          cp -r public .next/standalone/public
-          set -a; source ../../.env; set +a
-          PORT=3000 HOSTNAME=0.0.0.0 node .next/standalone/server.js > /tmp/next-start.log 2>&1 &
+          cp -r apps/web/.next/static apps/web/.next/standalone/.next/static
+          cp -r apps/web/public apps/web/.next/standalone/public
+          set -a; source .env; set +a
+          PORT=3000 HOSTNAME=0.0.0.0 node apps/web/.next/standalone/server.js > /tmp/next-start.log 2>&1 &
           npx wait-on http://localhost:3000 --timeout 60000 || (cat /tmp/next-start.log && exit 1)
 
       - name: Run E2E tests
