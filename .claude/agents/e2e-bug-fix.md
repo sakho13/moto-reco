@@ -227,9 +227,52 @@ PRの作成手順は `create-pr` コマンドの定義（`.claude/commands/creat
 - ベースブランチは `develop`
 - `Closes #XX` にはこのフローで起票したIssue番号をすべて含める
 
-### ステップ11: 完了報告
+### ステップ11: ProjectのIssueステータスを更新
 
-作成したIssueとPRのURLをユーザーに日本語で報告してください。
+PR作成後、MotoRecoプロジェクト上のIssueステータスを **In review** に更新してください。
+
+まずIssueがプロジェクトに登録されているか・現在のステータスを確認します:
+
+```bash
+gh api graphql -f query='
+{
+  user(login: "sakho13") {
+    projectsV2(first: 10) {
+      nodes { id title number }
+    }
+  }
+}'
+```
+
+MotoRecoプロジェクト（ID: `PVT_kwHOA14Nf84BJ59U`）のIssueアイテムIDとStatusフィールド情報を取得し、以下のmutationでステータスを更新してください:
+
+```bash
+gh api graphql -f query='
+mutation {
+  updateProjectV2ItemFieldValue(input: {
+    projectId: "PVT_kwHOA14Nf84BJ59U"
+    itemId: "{アイテムID}"
+    fieldId: "PVTSSF_lAHOA14Nf84BJ59Uzg57ml0"
+    value: { singleSelectOptionId: "df73e18b" }
+  }) {
+    projectV2Item { id }
+  }
+}'
+```
+
+Statusフィールドの選択肢ID:
+- `f75ad846` = Backlog
+- `61e4505c` = Ready
+- `47fc9ee4` = In progress
+- `df73e18b` = In review
+- `98236657` = Done
+
+IssueがプロジェクトにまだないはIssueのURLをユーザーに伝え、手動でプロジェクトへの追加を依頼してください。
+GraphQL APIのアクセスに失敗する場合（tokenの権限不足など）はユーザーに手動更新を依頼してください。
+
+### ステップ12: 完了報告
+
+作成したIssueとPRのURL、更新したProjectステータスをユーザーに日本語で報告してください。
 
 ## 注意事項
 
