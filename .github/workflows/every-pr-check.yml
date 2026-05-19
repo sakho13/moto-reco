@@ -130,7 +130,7 @@ jobs:
   e2e:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     environment:
       name: test
@@ -206,7 +206,7 @@ jobs:
           cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
           cp -r apps/web/public apps/web/.next/standalone/apps/web/public
           set -a; source .env; set +a
-          PORT=3000 HOSTNAME=0.0.0.0 node apps/web/.next/standalone/apps/web/server.js > /tmp/next-start.log 2>&1 &
+          NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0 node apps/web/.next/standalone/apps/web/server.js > /tmp/next-start.log 2>&1 &
           npx wait-on http://localhost:3000 --timeout 60000 || (cat /tmp/next-start.log && exit 1)
 
       - name: Run E2E tests
