@@ -10,6 +10,8 @@ type AuthenticatedFixtures = {
   authenticatedPage: Page
   /** テストユーザーのメールアドレス */
   testUserEmail: string
+  /** テストユーザーの Firebase ID トークン */
+  authToken: string
 }
 
 /**
@@ -26,15 +28,17 @@ export const test = base.extend<AuthenticatedFixtures>({
     await use(email)
   },
 
-  authenticatedPage: async ({ page, testUserEmail }, use) => {
-    // 1. Firebase Emulator でテストユーザーを作成し ID トークンを取得
+  authToken: async ({ testUserEmail }, use) => {
     const token = await createTestUserAndGetToken(testUserEmail, TEST_PASSWORD)
+    await use(token)
+  },
 
-    // 2. アプリにユーザーを登録
+  authenticatedPage: async ({ page, testUserEmail, authToken }, use) => {
+    // 1. アプリにユーザーを登録
     const registerRes = await fetch(`${BASE_URL}/api/v1/user/auth/register`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ name: `E2Eテストユーザー` }),
@@ -46,7 +50,7 @@ export const test = base.extend<AuthenticatedFixtures>({
       )
     }
 
-    // 3. UIログインフローで認証済みページを取得
+    // 2. UIログインフローで認証済みページを取得
     await page.goto('/app/login')
     await page.locator('#email').fill(testUserEmail)
     await page.locator('#password').fill(TEST_PASSWORD)

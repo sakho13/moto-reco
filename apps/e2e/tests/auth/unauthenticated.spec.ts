@@ -29,6 +29,27 @@ test.describe('未認証アクセスのリダイレクト', () => {
     await expect(page).toHaveURL(/\/app\/login/, { timeout: 10_000 })
   })
 
+  test('ヒストリーページへ未認証でアクセスするとログインへリダイレクトされる', async ({
+    page,
+  }) => {
+    await page.goto('/app/history')
+    await expect(page).toHaveURL(/\/app\/login/, { timeout: 10_000 })
+  })
+
+  test('バイク登録ページへ未認証でアクセスするとログインへリダイレクトされる', async ({
+    page,
+  }) => {
+    await page.goto('/app/bike/register')
+    await expect(page).toHaveURL(/\/app\/login/, { timeout: 10_000 })
+  })
+
+  test('検索ページへ未認証でアクセスするとログインへリダイレクトされる', async ({
+    page,
+  }) => {
+    await page.goto('/app/search')
+    await expect(page).toHaveURL(/\/app\/login/, { timeout: 10_000 })
+  })
+
   test('ログインページは未認証でアクセスできる', async ({ page }) => {
     await page.goto('/app/login')
     await expect(page).toHaveURL(/\/app\/login/)
