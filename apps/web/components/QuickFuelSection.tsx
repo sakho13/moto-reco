@@ -42,7 +42,7 @@ export const QuickFuelSection = () => {
       error instanceof ApiV1Error && error.errorCode === 'USER_NOT_REGISTERED'
 
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid="fuel-section">
         <div className={styles.header}>
           <h2 className={styles.title}>給油を登録する</h2>
         </div>
@@ -74,7 +74,7 @@ export const QuickFuelSection = () => {
 
   if (isLoading) {
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid="fuel-section">
         <div className={styles.header}>
           <h2 className={styles.title}>給油を登録する</h2>
         </div>
@@ -87,7 +87,7 @@ export const QuickFuelSection = () => {
 
   if (bikes.length === 0) {
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid="fuel-section">
         <div className={styles.header}>
           <h2 className={styles.title}>給油を登録する</h2>
         </div>
@@ -111,7 +111,7 @@ export const QuickFuelSection = () => {
         />
       )}
 
-      <div className={styles.container}>
+      <div className={styles.container} data-testid="fuel-section">
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <FuelIcon />

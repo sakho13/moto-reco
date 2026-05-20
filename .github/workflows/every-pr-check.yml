@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -29,7 +29,6 @@ jobs:
           FIREBASE_CLIENT_EMAIL=motoreco@example.com
           FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----\n"
           NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true
-          NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true
           NEXT_PUBLIC_FIREBASE_API_KEY=12345678TPeQdHphdbGQ7oXXlP9_XXXXX_X_XXX
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=motoreco.firebaseapp.com
           NEXT_PUBLIC_FIREBASE_PROJECT_ID=motoreco
@@ -42,7 +41,7 @@ jobs:
           EOF
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: ./package.json
           cache: "pnpm"
@@ -83,24 +82,9 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-      # localstack:
-      #   image: localstack/localstack:latest
-      #   ports:
-      #     - "4566:4566"
-      #     - "4510-4559:4510-4559"
-      #   env:
-      #     SERVICES: s3,ssm,secretsmanager,events,sqs,lambda,sts,iam
-      #     AWS_DEFAULT_REGION: us-east-1
-      #     AWS_ACCESS_KEY_ID: test
-      #     AWS_SECRET_ACCESS_KEY: test
-      #     DEBUG: "1"
-      #     LOCALSTACK_DATA_DIR: /var/lib/localstack
-      #     LS_LOG: trace
-      #     LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: "1"
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -109,7 +93,7 @@ jobs:
         run: cp .env.local .env
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: ./package.json
           cache: "pnpm"
@@ -142,3 +126,4 @@ jobs:
       - name: Run tests
         working-directory: ./
         run: pnpm test
+
