@@ -40,11 +40,13 @@ export const UserBikeRegisterRequestSchema = z
       .number({ invalid_type_error: '購入価格は数値で指定してください' })
       .int('購入価格は整数で指定してください')
       .nonnegative('購入価格は0以上で指定してください')
+      .nullable()
       .optional(),
     purchaseMileage: z
       .number({ invalid_type_error: '購入時走行距離は数値で指定してください' })
       .int('購入時走行距離は整数で指定してください')
       .nonnegative('購入時走行距離は0以上で指定してください')
+      .nullable()
       .optional(),
     totalMileage: z
       .number({ invalid_type_error: '総走行距離は数値で指定してください' })
