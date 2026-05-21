@@ -202,7 +202,7 @@ export const TouringStartEndSection = () => {
       bikesError.errorCode === 'USER_NOT_REGISTERED'
 
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid="touring-section">
         <div className={styles.header}>
           <h2 className={styles.title}>ツーリング</h2>
         </div>
@@ -234,7 +234,7 @@ export const TouringStartEndSection = () => {
 
   if (bikesLoading) {
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid="touring-section">
         <div className={styles.header}>
           <h2 className={styles.title}>ツーリング</h2>
         </div>
@@ -252,7 +252,7 @@ export const TouringStartEndSection = () => {
   // ツーリング中のバイクがある場合: 大きなカードを表示
   if (activeBike?.ongoingTouring) {
     return (
-      <div className={styles.container}>
+      <div className={styles.container} data-testid="touring-section">
         <ActiveTouringCard
           bike={activeBike}
           touring={activeBike.ongoingTouring}
@@ -271,7 +271,7 @@ export const TouringStartEndSection = () => {
 
   // 非ツーリング中: バイク選択グリッド
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-testid="touring-section">
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <TouringIcon />
