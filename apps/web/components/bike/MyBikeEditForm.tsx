@@ -9,6 +9,7 @@ import { InfoBox } from './InfoBox'
 
 export interface MyBikeEditFormData {
   nickname: string
+  purchaseDate: string
   totalMileage: string
   displacement: string
 }
@@ -54,7 +55,7 @@ export const MyBikeEditForm = ({
         </InfoBox>
       )}
 
-      <FormField label="ニックネーム" htmlFor="nickname">
+      <FormField label="ニックネーム" htmlFor="nickname" required>
         <Input
           id="nickname"
           type="text"
@@ -63,8 +64,9 @@ export const MyBikeEditForm = ({
             setFormData((prev) => ({ ...prev, nickname: e.target.value }))
           }
           maxLength={50}
+          required
           disabled={isSubmitting}
-          placeholder="バイクの愛称（任意）"
+          placeholder="バイクの愛称"
         />
       </FormField>
 
@@ -82,6 +84,18 @@ export const MyBikeEditForm = ({
           required
           disabled={isSubmitting}
           placeholder="km"
+        />
+      </FormField>
+
+      <FormField label="購入日" htmlFor="purchaseDate">
+        <Input
+          id="purchaseDate"
+          type="date"
+          value={formData.purchaseDate}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, purchaseDate: e.target.value }))
+          }
+          disabled={isSubmitting}
         />
       </FormField>
 
