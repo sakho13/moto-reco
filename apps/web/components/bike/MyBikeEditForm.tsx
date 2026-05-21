@@ -55,7 +55,7 @@ export const MyBikeEditForm = ({
         </InfoBox>
       )}
 
-      <FormField label="ニックネーム" htmlFor="nickname">
+      <FormField label="ニックネーム" htmlFor="nickname" required>
         <Input
           id="nickname"
           type="text"
@@ -64,8 +64,9 @@ export const MyBikeEditForm = ({
             setFormData((prev) => ({ ...prev, nickname: e.target.value }))
           }
           maxLength={50}
+          required
           disabled={isSubmitting}
-          placeholder="バイクの愛称（任意）"
+          placeholder="バイクの愛称"
         />
       </FormField>
 
