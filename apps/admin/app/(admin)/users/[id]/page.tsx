@@ -2,7 +2,7 @@
 
 import { DateField, Show, TextField } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
-import { Tag, Typography } from 'antd'
+import { Table, Tag, Typography } from 'antd'
 
 const statusColor: Record<string, string> = {
   ACTIVE: 'green',
@@ -16,10 +16,33 @@ const roleColor: Record<string, string> = {
   GUEST: 'default',
 }
 
+const ownStatusColor: Record<string, string> = {
+  OWN: 'green',
+  SOLD: 'default',
+}
+
+type MyBike = {
+  id: string
+  nickname: string | null
+  ownStatus: string
+  ownedAt: string | null
+  soldAt: string | null
+  userBike: {
+    totalMileage: number | null
+    bike: {
+      modelName: string
+      modelYear: number | null
+      manufacturer: { id: string; name: string }
+    }
+  }
+}
+
 export default function UserShowPage() {
   const { query } = useShow()
   const { data, isLoading } = query
   const record = data?.data
+
+  const myBikes: MyBike[] = (record?.myBikes ?? []) as MyBike[]
 
   return (
     <Show isLoading={isLoading}>
@@ -48,6 +71,63 @@ export default function UserShowPage() {
 
       <Typography.Title level={5}>更新日</Typography.Title>
       <DateField value={record?.updatedAt} format="YYYY/MM/DD HH:mm" />
+
+      <Typography.Title level={4} style={{ marginTop: 32 }}>
+        所有バイク一覧
+      </Typography.Title>
+      <Table<MyBike>
+        dataSource={myBikes}
+        rowKey="id"
+        pagination={false}
+        scroll={{ x: true }}
+      >
+        <Table.Column
+          title="ニックネーム"
+          dataIndex="nickname"
+          render={(v: string | null) => v ?? '—'}
+        />
+        <Table.Column
+          title="メーカー"
+          render={(_: unknown, row: MyBike) => row.userBike.bike.manufacturer.name}
+        />
+        <Table.Column
+          title="モデル名"
+          render={(_: unknown, row: MyBike) => row.userBike.bike.modelName}
+        />
+        <Table.Column
+          title="年式"
+          render={(_: unknown, row: MyBike) => row.userBike.bike.modelYear ?? '—'}
+        />
+        <Table.Column
+          title="総走行距離 (km)"
+          render={(_: unknown, row: MyBike) =>
+            row.userBike.totalMileage != null
+              ? row.userBike.totalMileage.toLocaleString()
+              : '—'
+          }
+        />
+        <Table.Column
+          title="ステータス"
+          dataIndex="ownStatus"
+          render={(v: string) => (
+            <Tag color={ownStatusColor[v] ?? 'default'}>{v}</Tag>
+          )}
+        />
+        <Table.Column
+          title="所有開始日"
+          dataIndex="ownedAt"
+          render={(v: string | null) =>
+            v ? <DateField value={v} format="YYYY/MM/DD" /> : '—'
+          }
+        />
+        <Table.Column
+          title="売却日"
+          dataIndex="soldAt"
+          render={(v: string | null) =>
+            v ? <DateField value={v} format="YYYY/MM/DD" /> : '—'
+          }
+        />
+      </Table>
     </Show>
   )
 }

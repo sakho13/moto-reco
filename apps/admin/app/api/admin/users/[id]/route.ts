@@ -13,6 +13,18 @@ export async function GET(request: NextRequest, { params }: Params) {
     where: { id },
     include: {
       authProviders: { select: { providerType: true, externalId: true } },
+      myBikes: {
+        include: {
+          userBike: {
+            include: {
+              bike: {
+                include: { manufacturer: { select: { id: true, name: true } } },
+              },
+            },
+          },
+        },
+        orderBy: { ownedAt: 'desc' },
+      },
     },
   })
 
