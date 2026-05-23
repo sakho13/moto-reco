@@ -1,37 +1,15 @@
 'use client'
 
-import {
-  AuthPage,
-  useNotificationProvider,
-  RefineThemes,
-} from '@refinedev/antd'
-import { Refine } from '@refinedev/core'
-import routerProvider from '@refinedev/nextjs-router'
+import { RefineThemes } from '@refinedev/antd'
 import { App as AntdApp, ConfigProvider } from 'antd'
 import jaJP from 'antd/locale/ja_JP'
-import { authProvider } from '@/providers/auth-provider'
-import { dataProvider } from '@/providers/data-provider'
+import dynamic from 'next/dynamic'
 
-function LoginContent() {
-  const notificationProvider = useNotificationProvider()
-
-  return (
-    <Refine
-      routerProvider={routerProvider}
-      dataProvider={dataProvider}
-      authProvider={authProvider}
-      notificationProvider={notificationProvider}
-      resources={[]}
-      options={{ syncWithLocation: false }}
-    >
-      <AuthPage
-        type="login"
-        title="Motoreco 管理画面"
-        formProps={{ initialValues: {} }}
-      />
-    </Refine>
-  )
-}
+// Refine の useLogin 等がプリレンダリング中にルーターコンテキスト不足で失敗するため SSR 無効
+const LoginContent = dynamic(
+  () => import('@/components/LoginContent').then((m) => ({ default: m.LoginContent })),
+  { ssr: false, loading: () => null },
+)
 
 export default function LoginPage() {
   return (
