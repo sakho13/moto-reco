@@ -7,8 +7,11 @@ import dynamic from 'next/dynamic'
 
 // Refine の useLogin 等がプリレンダリング中にルーターコンテキスト不足で失敗するため SSR 無効
 const LoginContent = dynamic(
-  () => import('@/components/LoginContent').then((m) => ({ default: m.LoginContent })),
-  { ssr: false, loading: () => null },
+  () =>
+    import('@/components/LoginContent').then((m) => ({
+      default: m.LoginContent,
+    })),
+  { ssr: false, loading: () => null }
 )
 
 export default function LoginPage() {
