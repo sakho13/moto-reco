@@ -12,7 +12,9 @@ export async function GET(request: NextRequest, { params }: Params) {
   const user = await prisma.mUser.findUnique({
     where: { id },
     include: {
-      authProviders: { select: { providerType: true, externalId: true } },
+      authProviders: {
+        select: { providerType: true, externalId: true, isActive: true },
+      },
       myBikes: {
         include: {
           userBike: {

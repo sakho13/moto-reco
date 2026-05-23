@@ -22,6 +22,18 @@ const ownStatusColor: Record<string, string> = {
   SOLD: 'default',
 }
 
+const providerLabel: Record<string, string> = {
+  FIREBASE_EMAIL: 'メール',
+  FIREBASE_GOOGLE: 'Google',
+  FIREBASE_ANONYMOUS: '匿名',
+}
+
+type AuthProvider = {
+  providerType: string
+  externalId: string
+  isActive: boolean
+}
+
 type MyBike = {
   id: string
   nickname: string | null
@@ -43,6 +55,8 @@ export default function UserShowPage() {
   const { data, isLoading } = query
   const record = data?.data
 
+  const authProviders: AuthProvider[] = (record?.authProviders ??
+    []) as AuthProvider[]
   const myBikes: MyBike[] = (record?.myBikes ?? []) as MyBike[]
 
   return (
@@ -74,8 +88,30 @@ export default function UserShowPage() {
       <DateField value={record?.updatedAt} format="YYYY/MM/DD HH:mm" />
 
       <Typography.Title level={4} style={{ marginTop: 32 }}>
-        所有バイク一覧
+        認証プロバイダー
       </Typography.Title>
+      <Table<AuthProvider>
+        dataSource={authProviders}
+        rowKey="externalId"
+        pagination={false}
+        style={{ marginBottom: 32 }}
+      >
+        <Table.Column
+          title="プロバイダー"
+          dataIndex="providerType"
+          render={(v: string) => <Tag>{providerLabel[v] ?? v}</Tag>}
+        />
+        <Table.Column title="外部ID" dataIndex="externalId" />
+        <Table.Column
+          title="有効"
+          dataIndex="isActive"
+          render={(v: boolean) => (
+            <Tag color={v ? 'green' : 'default'}>{v ? '有効' : '無効'}</Tag>
+          )}
+        />
+      </Table>
+
+      <Typography.Title level={4}>所有バイク一覧</Typography.Title>
       <Table<MyBike>
         dataSource={myBikes}
         rowKey="id"
