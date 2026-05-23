@@ -1,5 +1,6 @@
 'use client'
 
+import { SearchOutlined } from '@ant-design/icons'
 import {
   CreateButton,
   DateField,
@@ -10,21 +11,29 @@ import {
   useSelect,
   useTable,
 } from '@refinedev/antd'
-import { Button, Form, Input, Select, Space, Table, Tag } from 'antd'
-import { SearchOutlined } from '@ant-design/icons'
-import Link from 'next/link'
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
+import { Button, Form, Input, Select, Space, Table, Tag } from 'antd'
+import Link from 'next/link'
 
 type SearchForm = { q: string; manufacturerId: string }
 
 export default function BikeListPage() {
-  const { tableProps, searchFormProps } = useTable<BaseRecord, never, SearchForm>({
+  const { tableProps, searchFormProps } = useTable<
+    BaseRecord,
+    never,
+    SearchForm
+  >({
     syncWithLocation: true,
     resource: 'bikes',
     onSearch: ({ q, manufacturerId }) => {
       const filters: CrudFilters = []
       if (q) filters.push({ field: 'q', operator: 'eq', value: q })
-      if (manufacturerId) filters.push({ field: 'manufacturerId', operator: 'eq', value: manufacturerId })
+      if (manufacturerId)
+        filters.push({
+          field: 'manufacturerId',
+          operator: 'eq',
+          value: manufacturerId,
+        })
       return filters
     },
   })
@@ -51,14 +60,18 @@ export default function BikeListPage() {
           <Input placeholder="モデル名で検索" allowClear />
         </Form.Item>
         <Form.Item>
-          <Button htmlType="submit" icon={<SearchOutlined />}>検索</Button>
+          <Button htmlType="submit" icon={<SearchOutlined />}>
+            検索
+          </Button>
         </Form.Item>
       </Form>
       <Table {...tableProps} rowKey="id" scroll={{ x: true }}>
         <Table.Column
           title="メーカー"
           render={(_, record: BaseRecord) => {
-            const manufacturer = record.manufacturer as { id: string; name: string } | undefined
+            const manufacturer = record.manufacturer as
+              | { id: string; name: string }
+              | undefined
             if (!manufacturer) return '—'
             return (
               <Link href={`/manufacturers/${manufacturer.id}`}>

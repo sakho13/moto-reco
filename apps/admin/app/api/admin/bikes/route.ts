@@ -1,5 +1,5 @@
-import { prisma } from '@repo/database'
 import { type NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@repo/database'
 import { parsePaginationParams, requireAdmin } from '@/lib/api/auth'
 
 export async function GET(request: NextRequest) {
@@ -7,7 +7,8 @@ export async function GET(request: NextRequest) {
   if ('error' in auth) return auth.error
 
   const { skip, take, sort, order, q } = parsePaginationParams(request)
-  const manufacturerId = request.nextUrl.searchParams.get('manufacturerId') ?? ''
+  const manufacturerId =
+    request.nextUrl.searchParams.get('manufacturerId') ?? ''
 
   const where = {
     ...(q ? { modelName: { contains: q } } : {}),

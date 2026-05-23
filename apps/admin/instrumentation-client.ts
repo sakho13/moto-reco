@@ -4,7 +4,7 @@ if (typeof performance !== 'undefined') {
   performance.measure = (
     name: string,
     startOrOptions?: string | PerformanceMeasureOptions,
-    endMark?: string,
+    endMark?: string
   ): PerformanceMeasure => {
     try {
       return originalMeasure(name, startOrOptions as string, endMark as string)

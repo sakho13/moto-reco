@@ -1,16 +1,15 @@
 'use client'
 
+import { SearchOutlined } from '@ant-design/icons'
 import {
   DateField,
-  DeleteButton,
   EditButton,
   List,
   ShowButton,
   useTable,
 } from '@refinedev/antd'
-import { Button, Form, Input, Space, Table, Tag } from 'antd'
-import { SearchOutlined } from '@ant-design/icons'
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
+import { Button, Form, Input, Space, Table, Tag } from 'antd'
 
 const statusColor: Record<string, string> = {
   ACTIVE: 'green',
@@ -27,7 +26,11 @@ const roleColor: Record<string, string> = {
 type SearchForm = { q: string }
 
 export default function UserListPage() {
-  const { tableProps, searchFormProps } = useTable<BaseRecord, never, SearchForm>({
+  const { tableProps, searchFormProps } = useTable<
+    BaseRecord,
+    never,
+    SearchForm
+  >({
     syncWithLocation: true,
     resource: 'users',
     onSearch: ({ q }) => {
@@ -44,7 +47,9 @@ export default function UserListPage() {
           <Input placeholder="名前・メールで検索" allowClear />
         </Form.Item>
         <Form.Item>
-          <Button htmlType="submit" icon={<SearchOutlined />}>検索</Button>
+          <Button htmlType="submit" icon={<SearchOutlined />}>
+            検索
+          </Button>
         </Form.Item>
       </Form>
       <Table {...tableProps} rowKey="id" scroll={{ x: true }}>

@@ -1,5 +1,6 @@
 'use client'
 
+import { SearchOutlined } from '@ant-design/icons'
 import {
   CreateButton,
   DateField,
@@ -9,14 +10,17 @@ import {
   ShowButton,
   useTable,
 } from '@refinedev/antd'
-import { Button, Form, Input, Space, Table, Tag } from 'antd'
-import { SearchOutlined } from '@ant-design/icons'
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
+import { Button, Form, Input, Space, Table, Tag } from 'antd'
 
 type SearchForm = { q: string }
 
 export default function ManufacturerListPage() {
-  const { tableProps, searchFormProps } = useTable<BaseRecord, never, SearchForm>({
+  const { tableProps, searchFormProps } = useTable<
+    BaseRecord,
+    never,
+    SearchForm
+  >({
     syncWithLocation: true,
     resource: 'manufacturers',
     onSearch: ({ q }) => {
@@ -33,7 +37,9 @@ export default function ManufacturerListPage() {
           <Input placeholder="メーカー名・英語名で検索" allowClear />
         </Form.Item>
         <Form.Item>
-          <Button htmlType="submit" icon={<SearchOutlined />}>検索</Button>
+          <Button htmlType="submit" icon={<SearchOutlined />}>
+            検索
+          </Button>
         </Form.Item>
       </Form>
       <Table {...tableProps} rowKey="id" scroll={{ x: true }}>
