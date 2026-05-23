@@ -7,12 +7,12 @@ export async function GET(request: NextRequest) {
   if ('error' in auth) return auth.error
 
   const { skip, take, sort, order, q } = parsePaginationParams(request)
+  const role = request.nextUrl.searchParams.get('role') ?? ''
 
-  const where = q
-    ? {
-        OR: [{ name: { contains: q } }, { notificationEmail: { contains: q } }],
-      }
-    : {}
+  const where = {
+    ...(q ? { OR: [{ name: { contains: q } }, { notificationEmail: { contains: q } }] } : {}),
+    ...(role ? { role: role as 'ADMIN' | 'USER' | 'GUEST' } : {}),
+  }
 
   const [data, total] = await Promise.all([
     prisma.mUser.findMany({

@@ -9,7 +9,7 @@ import {
   useTable,
 } from '@refinedev/antd'
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
-import { Button, Form, Input, Space, Table, Tag } from 'antd'
+import { Button, Form, Input, Select, Space, Table, Tag } from 'antd'
 
 const statusColor: Record<string, string> = {
   ACTIVE: 'green',
@@ -23,7 +23,13 @@ const roleColor: Record<string, string> = {
   GUEST: 'default',
 }
 
-type SearchForm = { q: string }
+const roleOptions = [
+  { label: 'ADMIN', value: 'ADMIN' },
+  { label: 'USER', value: 'USER' },
+  { label: 'GUEST', value: 'GUEST' },
+]
+
+type SearchForm = { q: string; role: string }
 
 export default function UserListPage() {
   const { tableProps, searchFormProps } = useTable<
@@ -33,9 +39,10 @@ export default function UserListPage() {
   >({
     syncWithLocation: true,
     resource: 'users',
-    onSearch: ({ q }) => {
+    onSearch: ({ q, role }) => {
       const filters: CrudFilters = []
       if (q) filters.push({ field: 'q', operator: 'eq', value: q })
+      if (role) filters.push({ field: 'role', operator: 'eq', value: role })
       return filters
     },
   })
@@ -43,6 +50,14 @@ export default function UserListPage() {
   return (
     <List>
       <Form {...searchFormProps} layout="inline" style={{ marginBottom: 16 }}>
+        <Form.Item name="role">
+          <Select
+            options={roleOptions}
+            placeholder="ロールで絞り込み"
+            allowClear
+            style={{ minWidth: 160 }}
+          />
+        </Form.Item>
         <Form.Item name="q">
           <Input placeholder="名前・メールで検索" allowClear />
         </Form.Item>
@@ -52,22 +67,30 @@ export default function UserListPage() {
           </Button>
         </Form.Item>
       </Form>
-      <Table {...tableProps} rowKey="id" scroll={{ x: true }}>
+      <Table
+        {...tableProps}
+        rowKey="id"
+        scroll={{ x: true }}
+        rowClassName={(record: BaseRecord) =>
+          record.role === 'ADMIN' ? 'ant-table-row-admin' : ''
+        }
+      >
         <Table.Column dataIndex="id" title="ID" width={180} ellipsis />
         <Table.Column dataIndex="name" title="名前" />
         <Table.Column dataIndex="notificationEmail" title="メール" />
-        <Table.Column
-          dataIndex="status"
-          title="ステータス"
-          render={(v: string) => (
-            <Tag color={statusColor[v] ?? 'default'}>{v}</Tag>
-          )}
-        />
         <Table.Column
           dataIndex="role"
           title="ロール"
           render={(v: string) => (
             <Tag color={roleColor[v] ?? 'default'}>{v}</Tag>
+          )}
+          onCell={() => ({ style: { fontWeight: 600 } })}
+        />
+        <Table.Column
+          dataIndex="status"
+          title="ステータス"
+          render={(v: string) => (
+            <Tag color={statusColor[v] ?? 'default'}>{v}</Tag>
           )}
         />
         <Table.Column
