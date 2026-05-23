@@ -36,6 +36,11 @@ const resources = [
     show: '/manufacturers/:id',
     meta: { label: 'メーカー' },
   },
+  {
+    name: 'my-bikes',
+    show: '/my-bikes/:id',
+    meta: { hide: true },
+  },
 ]
 
 function AdminLayout({ children }: { children: React.ReactNode }) {

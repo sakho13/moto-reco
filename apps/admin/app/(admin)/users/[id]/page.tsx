@@ -3,6 +3,7 @@
 import { DateField, Show, TextField } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
 import { Table, Tag, Typography } from 'antd'
+import Link from 'next/link'
 
 const statusColor: Record<string, string> = {
   ACTIVE: 'green',
@@ -83,8 +84,9 @@ export default function UserShowPage() {
       >
         <Table.Column
           title="ニックネーム"
-          dataIndex="nickname"
-          render={(v: string | null) => v ?? '—'}
+          render={(_: unknown, row: MyBike) => (
+            <Link href={`/my-bikes/${row.id}`}>{row.nickname ?? '—'}</Link>
+          )}
         />
         <Table.Column
           title="メーカー"
