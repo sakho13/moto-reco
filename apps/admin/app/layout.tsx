@@ -14,6 +14,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
+      <head>
+        {/* antd React 19 互換性警告を JS モジュール評価前に抑制 */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          var _ce = console.error.bind(console);
+          console.error = function() {
+            var msg = typeof arguments[0] === 'string' ? arguments[0] : '';
+            if (msg.indexOf('antd v5 support React is 16') !== -1) return;
+            _ce.apply(console, arguments);
+          };
+        `}} />
+      </head>
       <body>{children}</body>
     </html>
   )
