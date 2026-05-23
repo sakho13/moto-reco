@@ -1,6 +1,6 @@
-import { getFirebaseAdminAuthClient } from '@repo/firebase-auth-server'
-import { prisma } from '@repo/database'
 import { type NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@repo/database'
+import { getFirebaseAdminAuthClient } from '@repo/firebase-auth-server'
 
 export type AdminContext = {
   uid: string

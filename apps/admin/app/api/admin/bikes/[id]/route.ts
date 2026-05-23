@@ -1,5 +1,5 @@
-import { prisma } from '@repo/database'
 import { type NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@repo/database'
 import { requireAdmin } from '@/lib/api/auth'
 
 type Params = { params: Promise<{ id: string }> }

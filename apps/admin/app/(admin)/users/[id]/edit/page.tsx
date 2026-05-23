@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, useForm, useSelect } from '@refinedev/antd'
+import { Edit, useForm } from '@refinedev/antd'
 import { Form, Select } from 'antd'
 
 export default function UserEditPage() {

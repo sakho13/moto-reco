@@ -1,5 +1,5 @@
-import { prisma } from '@repo/database'
 import { type NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@repo/database'
 import { parsePaginationParams, requireAdmin } from '@/lib/api/auth'
 
 export async function GET(request: NextRequest) {
