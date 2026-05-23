@@ -1,0 +1,99 @@
+name: Deploy Admin to GCP
+
+on:
+  push:
+    tags:
+      - "gcp-admin-release/*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCP_REGION: asia-northeast1
+  GCP_PROJECT_ID: motoreco-8ce2a
+  ARTIFACT_REGISTRY: asia-northeast1-docker.pkg.dev
+  ADMIN_REPOSITORY: motoreco-admin
+  CLOUD_RUN_SERVICE: motoreco-admin
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.ARTIFACT_REGISTRY }}
+
+      - name: Build and push Docker image
+        run: |
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-admin-release\///')
+          ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin"
+
+          docker build -f apps/admin/Dockerfile \
+            --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.PROD_FIREBASE_API_KEY }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.PROD_FIREBASE_AUTH_DOMAIN }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.PROD_FIREBASE_PROJECT_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.PROD_FIREBASE_STORAGE_BUCKET }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PROD_FIREBASE_MESSAGING_SENDER_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.PROD_FIREBASE_APP_ID }} \
+            -t ${ADMIN_IMAGE}:${APP_VERSION} \
+            -t ${ADMIN_IMAGE}:latest .
+
+          docker push ${ADMIN_IMAGE}:${APP_VERSION}
+          docker push ${ADMIN_IMAGE}:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-admin-release\///')
+          ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin:${APP_VERSION}"
+
+          # 手動トリガー時は latest を使用
+          if [ -z "$APP_VERSION" ] || [ "$APP_VERSION" = "${{ github.ref_name }}" ]; then
+            ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin:latest"
+          fi
+
+          gcloud run deploy ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --image=${ADMIN_IMAGE} \
+            --platform=managed \
+            --no-allow-unauthenticated \
+            --port=3001 \
+            --set-env-vars=NODE_ENV=production,ADMIN_PORT=3001,NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false \
+            --set-secrets=DATABASE_URL=database-url:latest,FIREBASE_PRIVATE_KEY=firebase-private-key:latest,FIREBASE_PROJECT_ID=firebase-project-id:latest,FIREBASE_CLIENT_EMAIL=firebase-client-email:latest \
+            --set-secrets=ALLOWED_IPS=admin-allowed-ips:latest \
+            --quiet
+
+      - name: Display service URL
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format='value(status.url)')
+
+          echo ""
+          echo "=========================================="
+          echo "✅ Admin deployment completed"
+          echo "=========================================="
+          echo ""
+          echo "🌐 Service URL: ${SERVICE_URL}"
+          echo ""
+          echo "⚠️  --no-allow-unauthenticated が有効なため、"
+          echo "   IAM 認証または Identity-Aware Proxy 経由でアクセスしてください。"
+          echo ""
+          echo "   IP制限は ALLOWED_IPS シークレットで管理します（カンマ区切り）。"
+          echo ""
