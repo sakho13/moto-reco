@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import '@refinedev/antd/dist/reset.css'
 
 export const metadata: Metadata = {
   title: 'Motoreco 管理画面',

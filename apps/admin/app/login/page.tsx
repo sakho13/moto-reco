@@ -1,13 +1,14 @@
 'use client'
 
-import { AuthPage } from '@refinedev/antd'
+import {
+  AuthPage,
+  useNotificationProvider,
+  RefineThemes,
+} from '@refinedev/antd'
 import { Refine } from '@refinedev/core'
-import { useNotificationProvider, RefineThemes } from '@refinedev/antd'
 import routerProvider from '@refinedev/nextjs-router'
 import { App as AntdApp, ConfigProvider } from 'antd'
 import jaJP from 'antd/locale/ja_JP'
-import '@refinedev/antd/dist/reset.css'
-
 import { authProvider } from '@/providers/auth-provider'
 import { dataProvider } from '@/providers/data-provider'
 
@@ -34,7 +35,11 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <ConfigProvider theme={RefineThemes.Blue} locale={jaJP} warning={{ strict: false }}>
+    <ConfigProvider
+      theme={RefineThemes.Blue}
+      locale={jaJP}
+      warning={{ strict: false }}
+    >
       <AntdApp>
         <LoginContent />
       </AntdApp>
