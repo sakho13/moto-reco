@@ -33,7 +33,7 @@ type MyBike = {
       modelName: string
       modelYear: number | null
       manufacturer: { id: string; name: string }
-    }
+    } | null
   }
 }
 
@@ -88,15 +88,21 @@ export default function UserShowPage() {
         />
         <Table.Column
           title="メーカー"
-          render={(_: unknown, row: MyBike) => row.userBike.bike.manufacturer.name}
+          render={(_: unknown, row: MyBike) =>
+            row.userBike.bike?.manufacturer.name ?? '—'
+          }
         />
         <Table.Column
           title="モデル名"
-          render={(_: unknown, row: MyBike) => row.userBike.bike.modelName}
+          render={(_: unknown, row: MyBike) =>
+            row.userBike.bike?.modelName ?? '—'
+          }
         />
         <Table.Column
           title="年式"
-          render={(_: unknown, row: MyBike) => row.userBike.bike.modelYear ?? '—'}
+          render={(_: unknown, row: MyBike) =>
+            row.userBike.bike?.modelYear ?? '—'
+          }
         />
         <Table.Column
           title="総走行距離 (km)"
