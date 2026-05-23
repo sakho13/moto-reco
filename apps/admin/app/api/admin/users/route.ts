@@ -1,5 +1,5 @@
-import { prisma } from '@repo/database'
 import { type NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@repo/database'
 import { parsePaginationParams, requireAdmin } from '@/lib/api/auth'
 
 export async function GET(request: NextRequest) {
@@ -10,7 +10,14 @@ export async function GET(request: NextRequest) {
   const role = request.nextUrl.searchParams.get('role') ?? ''
 
   const where = {
-    ...(q ? { OR: [{ name: { contains: q } }, { notificationEmail: { contains: q } }] } : {}),
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q } },
+            { notificationEmail: { contains: q } },
+          ],
+        }
+      : {}),
     ...(role ? { role: role as 'ADMIN' | 'USER' | 'GUEST' } : {}),
   }
 
