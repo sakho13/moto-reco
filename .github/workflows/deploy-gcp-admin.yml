@@ -1,9 +1,6 @@
 name: Deploy Admin to GCP
 
 on:
-  push:
-    tags:
-      - "gcp-admin-release/*"
   workflow_dispatch:
 
 permissions:
