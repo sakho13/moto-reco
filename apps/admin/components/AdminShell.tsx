@@ -53,7 +53,13 @@ function AdminLayout({ children }: { children: React.ReactNode }) {
       authProvider={authProvider}
       notificationProvider={notificationProvider}
       resources={resources}
-      options={{ syncWithLocation: true, warnWhenUnsavedChanges: true }}
+      options={{
+        syncWithLocation: true,
+        warnWhenUnsavedChanges: true,
+        title: {
+          text: 'MotoReco',
+        },
+      }}
     >
       <ThemedLayout>{children}</ThemedLayout>
     </Refine>
