@@ -15,7 +15,7 @@ export default function Layout({ children }: Props) {
       <DesktopSidebar />
       <MobileNavigation />
 
-      <div className="min-h-screen w-full flex flex-col items-center p-4 gap-6 pt-16 pb-20 sm:pt-4 sm:pb-4">
+      <div className="min-h-screen w-full flex flex-col items-center p-4 gap-6 pt-16 pb-20 sm:pt-4 sm:pb-4 sm:pl-24">
         <BreadcrumbNav />
         <GuestBanner />
         {children}
