@@ -4,6 +4,10 @@ import { useEffect } from 'react'
 import styles from './ModalBase.module.css'
 import { XIcon } from '@/components/icons/XIcon'
 
+// ネストしたモーダルで scroll lock が解除されないようカウンタで管理する
+let scrollLockCount = 0
+let savedScrollY = 0
+
 interface ModalBaseProps {
   title: string
   onClose: () => void
@@ -18,17 +22,21 @@ export function ModalBase({
   size = 'md',
 }: ModalBaseProps) {
   useEffect(() => {
-    // iOS Safari では overflow:hidden だけではスクロールが止まらないため
-    // position:fixed + top で完全にスクロールをロックする
-    const scrollY = window.scrollY
-    document.body.style.position = 'fixed'
-    document.body.style.top = `-${scrollY}px`
-    document.body.style.width = '100%'
+    if (scrollLockCount === 0) {
+      savedScrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${savedScrollY}px`
+      document.body.style.width = '100%'
+    }
+    scrollLockCount++
     return () => {
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
-      window.scrollTo(0, scrollY)
+      scrollLockCount--
+      if (scrollLockCount === 0) {
+        document.body.style.position = ''
+        document.body.style.top = ''
+        document.body.style.width = ''
+        window.scrollTo(0, savedScrollY)
+      }
     }
   }, [])
 
