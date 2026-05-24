@@ -122,7 +122,7 @@ export const BikeRegisterForm = ({
           </FormField>
         )}
 
-        <FormField label="ニックネーム" htmlFor="nickname">
+        <FormField label="ニックネーム" htmlFor="nickname" required>
           <Input
             id="nickname"
             type="text"
@@ -134,8 +134,9 @@ export const BikeRegisterForm = ({
               }))
             }
             maxLength={50}
+            required
             disabled={isSubmitting}
-            placeholder="バイクの愛称（任意）"
+            placeholder="バイクの愛称"
           />
         </FormField>
 

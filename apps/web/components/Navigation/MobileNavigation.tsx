@@ -16,6 +16,7 @@ export function MobileNavigation() {
           href={item.href}
           label={item.label}
           icon={item.icon}
+          showLabel
         />
       ))}
     </nav>

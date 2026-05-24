@@ -17,8 +17,10 @@ env:
   ARTIFACT_REGISTRY: asia-northeast1-docker.pkg.dev
   WEB_REPOSITORY: motoreco-web
   MIGRATION_REPOSITORY: motoreco-migration
+  ADMIN_REPOSITORY: motoreco-admin
   CLOUD_RUN_SERVICE: motoreco-web
   CLOUD_RUN_JOB: motoreco-migration
+  ADMIN_CLOUD_RUN_SERVICE: motoreco-admin
 
 jobs:
   deploy:
@@ -303,3 +305,85 @@ jobs:
 
           # PR作成失敗でもJobは成功させる
           exit 0
+
+  deploy-admin:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.ARTIFACT_REGISTRY }}
+
+      - name: Build and push Admin Docker image
+        run: |
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin"
+
+          docker build -f apps/admin/Dockerfile \
+            --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=${{ secrets.PROD_FIREBASE_API_KEY }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${{ secrets.PROD_FIREBASE_AUTH_DOMAIN }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=${{ secrets.PROD_FIREBASE_PROJECT_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ secrets.PROD_FIREBASE_STORAGE_BUCKET }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PROD_FIREBASE_MESSAGING_SENDER_ID }} \
+            --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.PROD_FIREBASE_APP_ID }} \
+            -t ${ADMIN_IMAGE}:${APP_VERSION} \
+            -t ${ADMIN_IMAGE}:latest .
+
+          docker push ${ADMIN_IMAGE}:${APP_VERSION}
+          docker push ${ADMIN_IMAGE}:latest
+
+      - name: Deploy Admin to Cloud Run
+        run: |
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin:${APP_VERSION}"
+
+          APP_VERSION_LABEL=$(echo "$APP_VERSION" | sed 's/\./-/g' | tr '[:upper:]' '[:lower:]' | cut -c1-63)
+
+          if [ -z "$APP_VERSION" ] || [ "$APP_VERSION" = "${{ github.ref_name }}" ]; then
+            ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin:latest"
+            APP_VERSION_LABEL="manual-$(date +%Y%m%d-%H%M%S)"
+          fi
+
+          gcloud run deploy ${{ env.ADMIN_CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --image=${ADMIN_IMAGE} \
+            --platform=managed \
+            --allow-unauthenticated \
+            --port=3001 \
+            --tag=v${APP_VERSION_LABEL} \
+            --update-labels=app-version=${APP_VERSION_LABEL} \
+            --set-env-vars=NODE_ENV=production,ADMIN_PORT=3001,NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false \
+            --set-secrets=DATABASE_URL=database-url:latest,FIREBASE_PRIVATE_KEY=firebase-private-key:latest,FIREBASE_PROJECT_ID=firebase-project-id:latest,FIREBASE_CLIENT_EMAIL=firebase-client-email:latest \
+            --set-secrets=ALLOWED_IPS=admin-allowed-ips:latest \
+            --quiet
+
+      - name: Display Admin service URL
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.ADMIN_CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format='value(status.url)')
+
+          echo ""
+          echo "=========================================="
+          echo "✅ Admin deployment completed"
+          echo "=========================================="
+          echo ""
+          echo "🌐 Admin URL: ${SERVICE_URL}"
+          echo ""

@@ -1,17 +1,19 @@
 .bottomNavigation {
   position: fixed;
-  left: 50%;
-  bottom: 1rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-3);
-  background-color: var(--color-cloud);
-  border: 1px solid var(--color-cloudHover);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  justify-content: space-around;
+  padding: var(--spacing-1) var(--spacing-2);
+  padding-bottom: max(var(--spacing-2), env(safe-area-inset-bottom));
+  height: 4rem;
+  background-color: color-mix(in srgb, var(--color-background) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid color-mix(in srgb, var(--color-cloudHover) 50%, transparent);
 }
 
 @media (min-width: 640px) {

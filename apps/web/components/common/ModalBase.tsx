@@ -4,6 +4,10 @@ import { useEffect } from 'react'
 import styles from './ModalBase.module.css'
 import { XIcon } from '@/components/icons/XIcon'
 
+// ネストしたモーダルで scroll lock が解除されないようカウンタで管理する
+let scrollLockCount = 0
+let savedScrollY = 0
+
 interface ModalBaseProps {
   title: string
   onClose: () => void
@@ -18,13 +22,21 @@ export function ModalBase({
   size = 'md',
 }: ModalBaseProps) {
   useEffect(() => {
-    const originalBodyOverflow = document.body.style.overflow
-    const originalHtmlOverflow = document.documentElement.style.overflow
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
+    if (scrollLockCount === 0) {
+      savedScrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${savedScrollY}px`
+      document.body.style.width = '100%'
+    }
+    scrollLockCount++
     return () => {
-      document.body.style.overflow = originalBodyOverflow
-      document.documentElement.style.overflow = originalHtmlOverflow
+      scrollLockCount--
+      if (scrollLockCount === 0) {
+        document.body.style.position = ''
+        document.body.style.top = ''
+        document.body.style.width = ''
+        window.scrollTo(0, savedScrollY)
+      }
     }
   }, [])
 
