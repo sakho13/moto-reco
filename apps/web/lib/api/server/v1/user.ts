@@ -26,6 +26,7 @@ import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
 import { PrismaHistoryRepository } from '../repositories/PrismaHistoryRepository'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
+import { PrismaNotificationRepository } from '../repositories/PrismaNotificationRepository'
 import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
@@ -244,7 +245,8 @@ user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
 
   const userRepo = new PrismaUserRepository(prisma)
   const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(userRepo, followRepo)
+  const notifRepo = new PrismaNotificationRepository(prisma)
+  const service = new UserFollowService(userRepo, followRepo, notifRepo)
   await service.followUser(followerId, followingId, role)
 
   return c.json<SuccessResponse<Record<string, never>>>({
@@ -260,7 +262,7 @@ user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
 
   const userRepo = new PrismaUserRepository(prisma)
   const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(userRepo, followRepo)
+  const service = new UserFollowService(userRepo, followRepo, new PrismaNotificationRepository(prisma))
   await service.unfollowUser(followerId, followingId)
 
   return c.json<SuccessResponse<Record<string, never>>>({
@@ -281,7 +283,7 @@ user.get('/:userId/followers', honoAuthMiddleware, async (c) => {
   }
 
   const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(userRepo, followRepo)
+  const service = new UserFollowService(userRepo, followRepo, new PrismaNotificationRepository(prisma))
   const result = await service.getFollowers(userId, page)
 
   return c.json<SuccessResponse<ApiResponseUserFollowList>>({
@@ -302,7 +304,7 @@ user.get('/:userId/following', honoAuthMiddleware, async (c) => {
   }
 
   const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(userRepo, followRepo)
+  const service = new UserFollowService(userRepo, followRepo, new PrismaNotificationRepository(prisma))
   const result = await service.getFollowing(userId, page)
 
   return c.json<SuccessResponse<ApiResponseUserFollowList>>({
@@ -327,7 +329,7 @@ user.get('/search', honoAuthMiddleware, async (c) => {
 
   const userRepo = new PrismaUserRepository(prisma)
   const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(userRepo, followRepo)
+  const service = new UserFollowService(userRepo, followRepo, new PrismaNotificationRepository(prisma))
   const result = await service.searchUsers(query.trim(), requesterId, page)
 
   return c.json<SuccessResponse<ApiResponseUserSearch>>({
