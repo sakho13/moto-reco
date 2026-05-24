@@ -25,7 +25,8 @@
         "MICRO_CMS_API_KEY",
         "MICRO_CMS_SERVICE_DOMAIN",
         "RESEND_API_KEY",
-        "RESEND_FROM_EMAIL"
+        "RESEND_FROM_EMAIL",
+        "ALLOWED_IPS"
       ]
     },
     "lint": {
@@ -57,7 +58,9 @@
         "MICRO_CMS_API_KEY",
         "MICRO_CMS_SERVICE_DOMAIN",
         "RESEND_API_KEY",
-        "RESEND_FROM_EMAIL"
+        "RESEND_FROM_EMAIL",
+        "ALLOWED_IPS",
+        "ADMIN_PORT"
       ]
     },
     "db:generate": {
