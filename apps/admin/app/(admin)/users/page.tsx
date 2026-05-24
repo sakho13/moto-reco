@@ -11,6 +11,12 @@ import {
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
 import { Button, Form, Input, Select, Space, Table, Tag } from 'antd'
 
+const providerLabel: Record<string, string> = {
+  FIREBASE_EMAIL: 'メール',
+  FIREBASE_GOOGLE: 'Google',
+  FIREBASE_ANONYMOUS: '匿名',
+}
+
 const statusColor: Record<string, string> = {
   ACTIVE: 'green',
   INACTIVE: 'default',
@@ -77,7 +83,21 @@ export default function UserListPage() {
       >
         <Table.Column dataIndex="id" title="ID" width={180} ellipsis />
         <Table.Column dataIndex="name" title="名前" />
-        <Table.Column dataIndex="notificationEmail" title="メール" />
+        <Table.Column
+          dataIndex="notificationEmail"
+          title="通知先メールアドレス"
+        />
+        <Table.Column
+          dataIndex="authProviders"
+          title="認証方式"
+          render={(providers: { providerType: string }[]) =>
+            providers?.map((p) => (
+              <Tag key={p.providerType}>
+                {providerLabel[p.providerType] ?? p.providerType}
+              </Tag>
+            ))
+          }
+        />
         <Table.Column
           dataIndex="role"
           title="ロール"
