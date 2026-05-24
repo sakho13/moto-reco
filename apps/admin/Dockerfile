@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # pnpm インストール
-RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 
 # package.json と pnpm-workspace.yaml をコピー
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -59,7 +59,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/apps/admin/public ./apps/admin/public 2>/dev/null || true
 COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
 
