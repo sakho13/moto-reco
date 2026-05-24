@@ -17,6 +17,7 @@ export const ErrorCodeMap = {
   INVALID_REQUEST: 'INVALID_REQUEST',
   VALIDATION_ERROR: 'VALIDATION_ERROR',
   AUTH_FAILED: 'AUTH_FAILED',
+  FORBIDDEN: 'FORBIDDEN',
   USER_NOT_REGISTERED: 'USER_NOT_REGISTERED',
   GUEST_EXPIRED: 'GUEST_EXPIRED',
   NOT_FOUND: 'NOT_FOUND',
@@ -30,6 +31,7 @@ export const ErrorCodeToHttpStatus = {
   INVALID_REQUEST: 400,
   VALIDATION_ERROR: 400,
   AUTH_FAILED: 401,
+  FORBIDDEN: 403,
   USER_NOT_REGISTERED: 403,
   GUEST_EXPIRED: 401,
   NOT_FOUND: 404,
@@ -306,3 +308,69 @@ export type ApiResponseFuelInsight = {
   minPricePerLiter: number | null
   maxPricePerLiter: number | null
 }
+
+// 通知タイプ
+export type NotificationType = 'FOLLOWED'
+
+// アナウンスタイプ
+export type AnnouncementType = 'SYSTEM_MAINTENANCE'
+
+// アナウンスステータス
+export type AnnouncementStatus = 'DRAFT' | 'PUBLISHED' | 'EXPIRED'
+
+// ユーザー個別通知
+export type ApiResponseNotificationItem = {
+  notificationId: string
+  type: NotificationType
+  title: string
+  body: string
+  metadata: Record<string, unknown> | null
+  isRead: boolean
+  readAt: string | null
+  createdAt: string
+}
+
+export type ApiResponseNotificationList = {
+  notifications: ApiResponseNotificationItem[]
+  total: number
+  page: number
+}
+
+export type ApiResponseNotificationUnreadCount = {
+  count: number
+}
+
+// システムアナウンス (一般ユーザー向け)
+export type ApiResponseAnnouncementItem = {
+  announcementId: string
+  type: AnnouncementType
+  title: string
+  body: string
+  publishedAt: string
+  isRead: boolean
+}
+
+export type ApiResponseAnnouncementList = {
+  announcements: ApiResponseAnnouncementItem[]
+}
+
+// システムアナウンス (管理者向け)
+export type ApiResponseAdminAnnouncementItem = {
+  announcementId: string
+  type: AnnouncementType
+  title: string
+  body: string
+  status: AnnouncementStatus
+  scheduledAt: string | null
+  publishedAt: string | null
+  readCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type ApiResponseAdminAnnouncementList = {
+  announcements: ApiResponseAdminAnnouncementItem[]
+}
+
+export type ApiResponseAdminAnnouncementDetail =
+  ApiResponseAdminAnnouncementItem
