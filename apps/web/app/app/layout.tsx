@@ -26,7 +26,8 @@ export default function RootLayout({
   return (
     <>
       <Providers>
-        <div className="fixed top-4 right-4 z-50">
+        {/* デスクトップのみ: モバイルは MobileHeader が担当 */}
+        <div className="hidden sm:block fixed top-4 right-4 z-50">
           <ThemeToggleButton />
         </div>
         {children}

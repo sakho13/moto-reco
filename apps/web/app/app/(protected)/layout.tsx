@@ -1,6 +1,7 @@
 import { GuestBanner } from '@/components/GuestBanner'
 import { BreadcrumbNav } from '@/components/Navigation/BreadcrumbNav'
 import { DesktopSidebar } from '@/components/Navigation/DesktopSidebar'
+import { MobileHeader } from '@/components/Navigation/MobileHeader'
 import { MobileNavigation } from '@/components/Navigation/MobileNavigation'
 
 type Props = {
@@ -10,10 +11,11 @@ type Props = {
 export default function Layout({ children }: Props) {
   return (
     <>
+      <MobileHeader />
       <DesktopSidebar />
       <MobileNavigation />
 
-      <div className="min-h-screen w-full flex flex-col items-center p-4 gap-6 pb-24 sm:pb-4">
+      <div className="min-h-screen w-full flex flex-col items-center p-4 gap-6 pt-16 pb-20 sm:pt-4 sm:pb-4 sm:pl-24">
         <BreadcrumbNav />
         <GuestBanner />
         {children}
