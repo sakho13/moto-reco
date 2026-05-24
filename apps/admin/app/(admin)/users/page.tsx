@@ -10,6 +10,7 @@ import {
 } from '@refinedev/antd'
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
 import { Button, Form, Input, Select, Space, Table, Tag } from 'antd'
+import Link from 'next/link'
 
 const providerLabel: Record<string, string> = {
   FIREBASE_EMAIL: 'メール',
@@ -82,7 +83,13 @@ export default function UserListPage() {
         }
       >
         <Table.Column dataIndex="id" title="ID" width={180} ellipsis />
-        <Table.Column dataIndex="name" title="名前" />
+        <Table.Column
+          dataIndex="name"
+          title="名前"
+          render={(v: string, record: BaseRecord) => (
+            <Link href={`/users/${record.id as string}`}>{v}</Link>
+          )}
+        />
         <Table.Column
           dataIndex="notificationEmail"
           title="通知先メールアドレス"
@@ -122,8 +129,8 @@ export default function UserListPage() {
           title="操作"
           render={(_, record: BaseRecord) => (
             <Space>
-              <ShowButton hideText size="small" recordItemId={record.id} />
-              <EditButton hideText size="small" recordItemId={record.id} />
+              <ShowButton hideText size="middle" recordItemId={record.id} />
+              <EditButton hideText size="middle" recordItemId={record.id} />
             </Space>
           )}
         />

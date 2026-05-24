@@ -3,6 +3,11 @@
 import { Edit, useForm, useSelect } from '@refinedev/antd'
 import { Form, Input, InputNumber, Select } from 'antd'
 
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => ({
+  value: i + 1,
+  label: `${i + 1}月`,
+}))
+
 export default function BikeEditPage() {
   const { formProps, saveButtonProps } = useForm()
 
@@ -58,7 +63,7 @@ export default function BikeEditPage() {
           name="releaseMonth"
           rules={[{ required: true }]}
         >
-          <InputNumber min={1} max={12} style={{ width: '100%' }} />
+          <Select options={MONTH_OPTIONS} style={{ width: '100%' }} />
         </Form.Item>
         <Form.Item label="ステータス" name="settingStatus">
           <Select

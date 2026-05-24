@@ -23,6 +23,9 @@ export default function ManufacturerShowPage() {
       <Typography.Title level={5}>公式サイト</Typography.Title>
       <TextField value={record?.websiteUrl ?? '—'} />
 
+      <Typography.Title level={5}>ロゴ URL</Typography.Title>
+      <TextField value={record?.logoUrl ?? '—'} />
+
       <Typography.Title level={5}>有効</Typography.Title>
       <Tag color={record?.isActive ? 'green' : 'default'}>
         {record?.isActive ? '有効' : '無効'}

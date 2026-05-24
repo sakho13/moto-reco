@@ -12,6 +12,7 @@ import {
 } from '@refinedev/antd'
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
 import { Button, Form, Input, Space, Table, Tag } from 'antd'
+import Link from 'next/link'
 
 type SearchForm = { q: string }
 
@@ -43,7 +44,13 @@ export default function ManufacturerListPage() {
         </Form.Item>
       </Form>
       <Table {...tableProps} rowKey="id" scroll={{ x: true }}>
-        <Table.Column dataIndex="name" title="メーカー名" />
+        <Table.Column
+          dataIndex="name"
+          title="メーカー名"
+          render={(v: string, record: BaseRecord) => (
+            <Link href={`/manufacturers/${record.id as string}`}>{v}</Link>
+          )}
+        />
         <Table.Column dataIndex="nameEn" title="英語名" />
         <Table.Column dataIndex="country" title="国" />
         <Table.Column
@@ -62,9 +69,9 @@ export default function ManufacturerListPage() {
           title="操作"
           render={(_, record: BaseRecord) => (
             <Space>
-              <ShowButton hideText size="small" recordItemId={record.id} />
-              <EditButton hideText size="small" recordItemId={record.id} />
-              <DeleteButton hideText size="small" recordItemId={record.id} />
+              <ShowButton hideText size="middle" recordItemId={record.id} />
+              <EditButton hideText size="middle" recordItemId={record.id} />
+              <DeleteButton hideText size="middle" recordItemId={record.id} />
             </Space>
           )}
         />

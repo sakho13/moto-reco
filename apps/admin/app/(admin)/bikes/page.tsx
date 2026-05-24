@@ -106,9 +106,9 @@ export default function BikeListPage() {
           title="操作"
           render={(_, record: BaseRecord) => (
             <Space>
-              <ShowButton hideText size="small" recordItemId={record.id} />
-              <EditButton hideText size="small" recordItemId={record.id} />
-              <DeleteButton hideText size="small" recordItemId={record.id} />
+              <ShowButton hideText size="middle" recordItemId={record.id} />
+              <EditButton hideText size="middle" recordItemId={record.id} />
+              <DeleteButton hideText size="middle" recordItemId={record.id} />
             </Space>
           )}
         />
