@@ -10,9 +10,10 @@
   padding: var(--spacing-1) var(--spacing-2);
   padding-bottom: max(var(--spacing-2), env(safe-area-inset-bottom));
   height: 4rem;
-  background-color: var(--color-cloud);
-  border-top: 1px solid var(--color-cloudHover);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  background-color: color-mix(in srgb, var(--color-background) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid color-mix(in srgb, var(--color-cloudHover) 50%, transparent);
 }
 
 @media (min-width: 640px) {
