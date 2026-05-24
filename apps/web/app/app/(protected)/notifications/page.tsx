@@ -71,9 +71,17 @@ function NotificationsPage() {
   }, [])
 
   async function handleMarkAllRead() {
-    await authenticatedFetch('/api/v1/notifications/read-all', {
-      method: 'PATCH',
-    })
+    const unreadAnnouncements = items.filter(
+      (i) => i.kind === 'announcement' && !i.isRead
+    )
+    await Promise.all([
+      authenticatedFetch('/api/v1/notifications/read-all', { method: 'PATCH' }),
+      ...unreadAnnouncements.map((a) =>
+        authenticatedFetch(`/api/v1/announcements/${a.id}/read`, {
+          method: 'PATCH',
+        })
+      ),
+    ])
     setItems((prev) => prev.map((i) => ({ ...i, isRead: true })))
     mutate()
   }
