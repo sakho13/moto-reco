@@ -73,7 +73,11 @@ describe('Admin Announcements API Endpoints', () => {
           Authorization: `Bearer ${admin.token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type: 'SYSTEM_MAINTENANCE', title: '', body: 'test' }),
+        body: JSON.stringify({
+          type: 'SYSTEM_MAINTENANCE',
+          title: '',
+          body: 'test',
+        }),
       })
 
       expect(res.status).toBe(400)

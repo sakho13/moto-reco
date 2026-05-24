@@ -42,15 +42,16 @@ export function NotificationDropdown({ onClose }: Props) {
         const announceJson =
           (await announceRes.json()) as SuccessResponse<ApiResponseAnnouncementList>
 
-        const notifItems: NotificationItem[] =
-          notifJson.data.notifications.map((n) => ({
+        const notifItems: NotificationItem[] = notifJson.data.notifications.map(
+          (n) => ({
             id: n.notificationId,
             title: n.title,
             body: n.body,
             isRead: n.isRead,
             createdAt: n.createdAt,
             kind: 'notification',
-          }))
+          })
+        )
 
         const announceItems: NotificationItem[] =
           announceJson.data.announcements.map((a) => ({
@@ -104,9 +105,7 @@ export function NotificationDropdown({ onClose }: Props) {
       </div>
 
       <div className={styles.list}>
-        {loading && (
-          <p className={styles.empty}>読み込み中...</p>
-        )}
+        {loading && <p className={styles.empty}>読み込み中...</p>}
         {!loading && items.length === 0 && (
           <p className={styles.empty}>通知はありません</p>
         )}

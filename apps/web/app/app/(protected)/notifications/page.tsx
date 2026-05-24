@@ -140,7 +140,9 @@ function NotificationsPage() {
                   })}
                 </p>
               </div>
-              {!item.isRead && <span className={styles.dot} aria-hidden="true" />}
+              {!item.isRead && (
+                <span className={styles.dot} aria-hidden="true" />
+              )}
             </button>
           ))}
       </BaseCard>

@@ -1,4 +1,8 @@
-import type { AnnouncementStatus, AnnouncementType, UserId } from '@repo/shared-types'
+import type {
+  AnnouncementStatus,
+  AnnouncementType,
+  UserId,
+} from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import type {
   CreateAnnouncementInput,

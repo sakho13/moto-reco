@@ -77,13 +77,10 @@ describe('Notifications API Endpoints', () => {
         isRead: false,
       })
 
-      const res = await app.request(
-        `/api/v1/notifications/${notifId}/read`,
-        {
-          method: 'PATCH',
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      )
+      const res = await app.request(`/api/v1/notifications/${notifId}/read`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
 
       expect(res.status).toBe(200)
     })
@@ -96,13 +93,10 @@ describe('Notifications API Endpoints', () => {
       })
 
       // user1 が user2 の通知を既読にしようとしても 200 (updateMany で 0件更新)
-      const res = await app.request(
-        `/api/v1/notifications/${notifId}/read`,
-        {
-          method: 'PATCH',
-          headers: { Authorization: `Bearer ${user1.token}` },
-        }
-      )
+      const res = await app.request(`/api/v1/notifications/${notifId}/read`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${user1.token}` },
+      })
 
       expect(res.status).toBe(200)
     })
@@ -126,10 +120,9 @@ describe('Notifications API Endpoints', () => {
       expect(res.status).toBe(200)
 
       // 未読数が 0 になる
-      const countRes = await app.request(
-        '/api/v1/notifications/unread-count',
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      )
+      const countRes = await app.request('/api/v1/notifications/unread-count', {
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
       const countJson = await countRes.json()
       // アナウンス未読は別途管理されるため通知分のみ0になれば良い
       expect(countJson.status).toBe('success')

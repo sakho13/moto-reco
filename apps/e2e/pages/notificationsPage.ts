@@ -40,7 +40,10 @@ export class NotificationsPage {
   /** ベルボタンをクリックしてドロップダウンを開く */
   async openDropdown(): Promise<void> {
     await this.bellButton.click()
-    await this.notificationDropdown.waitFor({ state: 'visible', timeout: 5_000 })
+    await this.notificationDropdown.waitFor({
+      state: 'visible',
+      timeout: 5_000,
+    })
   }
 
   /** 「すべての通知を見る」をクリックして通知ページへ遷移する */

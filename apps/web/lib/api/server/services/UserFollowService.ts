@@ -64,9 +64,7 @@ export class UserFollowService {
           followerName: followerUser?.name ?? '',
         },
       })
-      .catch((err) =>
-        console.error('[UserFollowService] 通知生成エラー:', err)
-      )
+      .catch((err) => console.error('[UserFollowService] 通知生成エラー:', err))
   }
 
   async unfollowUser(followerId: UserId, followingId: UserId): Promise<void> {

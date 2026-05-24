@@ -29,13 +29,10 @@ describe('Announcements API Endpoints (一般ユーザー)', () => {
       const publishedId = await createTestAnnouncement(admin.token, {
         title: '公開済み',
       })
-      await app.request(
-        `/api/v1/admin/announcements/${publishedId}/publish`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${admin.token}` },
-        }
-      )
+      await app.request(`/api/v1/admin/announcements/${publishedId}/publish`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${admin.token}` },
+      })
 
       const user = await createTestUser()
       const res = await app.request('/api/v1/announcements', {

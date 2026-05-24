@@ -90,7 +90,9 @@ function AdminAnnouncementsPage() {
             <div key={a.announcementId} className={styles.row}>
               <div className={styles.rowMain}>
                 <div className={styles.rowHeader}>
-                  <span className={`${styles.status} ${STATUS_CLASS[a.status] ?? ''}`}>
+                  <span
+                    className={`${styles.status} ${STATUS_CLASS[a.status] ?? ''}`}
+                  >
                     {STATUS_LABEL[a.status] ?? a.status}
                   </span>
                   <span className={styles.rowTitle}>{a.title}</span>
