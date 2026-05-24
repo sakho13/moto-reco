@@ -354,16 +354,21 @@ jobs:
           APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
           ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin:${APP_VERSION}"
 
+          APP_VERSION_LABEL=$(echo "$APP_VERSION" | sed 's/\./-/g' | tr '[:upper:]' '[:lower:]' | cut -c1-63)
+
           if [ -z "$APP_VERSION" ] || [ "$APP_VERSION" = "${{ github.ref_name }}" ]; then
             ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin:latest"
+            APP_VERSION_LABEL="manual-$(date +%Y%m%d-%H%M%S)"
           fi
 
           gcloud run deploy ${{ env.ADMIN_CLOUD_RUN_SERVICE }} \
             --region=${{ env.GCP_REGION }} \
             --image=${ADMIN_IMAGE} \
             --platform=managed \
-            --no-allow-unauthenticated \
+            --allow-unauthenticated \
             --port=3001 \
+            --tag=v${APP_VERSION_LABEL} \
+            --update-labels=app-version=${APP_VERSION_LABEL} \
             --set-env-vars=NODE_ENV=production,ADMIN_PORT=3001,NEXT_PUBLIC_USE_FIREBASE_EMULATOR=false \
             --set-secrets=DATABASE_URL=database-url:latest,FIREBASE_PRIVATE_KEY=firebase-private-key:latest,FIREBASE_PROJECT_ID=firebase-project-id:latest,FIREBASE_CLIENT_EMAIL=firebase-client-email:latest \
             --set-secrets=ALLOWED_IPS=admin-allowed-ips:latest \

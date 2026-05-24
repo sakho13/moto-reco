@@ -5,7 +5,7 @@ const ALLOWED_IPS = (process.env.ALLOWED_IPS ?? '')
   .map((ip) => ip.trim())
   .filter(Boolean)
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   // ALLOWED_IPS 未設定時は制限なし（ローカル開発用）
   if (ALLOWED_IPS.length === 0) return NextResponse.next()
 
