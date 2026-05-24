@@ -16,6 +16,14 @@
   --warning-text: var(--color-warningActive);
 }
 
+/* モバイル: bottom-bar の高さ分 Toast を上にずらす */
+/* Sonner はモバイル時に --mobile-offset-bottom をインラインスタイルで設定するため !important が必要 */
+@media (max-width: 639px) {
+  [data-sonner-toaster][data-y-position='bottom'] {
+    bottom: calc(4rem + 0.75rem) !important;
+  }
+}
+
 /* ダークモード対応 */
 html[data-theme-mode='dark'] [data-sonner-toaster] {
   /* ダークモードでは背景色の透明度を少し上げる */

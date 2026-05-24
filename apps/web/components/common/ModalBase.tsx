@@ -18,13 +18,17 @@ export function ModalBase({
   size = 'md',
 }: ModalBaseProps) {
   useEffect(() => {
-    const originalBodyOverflow = document.body.style.overflow
-    const originalHtmlOverflow = document.documentElement.style.overflow
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
+    // iOS Safari では overflow:hidden だけではスクロールが止まらないため
+    // position:fixed + top で完全にスクロールをロックする
+    const scrollY = window.scrollY
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
     return () => {
-      document.body.style.overflow = originalBodyOverflow
-      document.documentElement.style.overflow = originalHtmlOverflow
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      window.scrollTo(0, scrollY)
     }
   }, [])
 

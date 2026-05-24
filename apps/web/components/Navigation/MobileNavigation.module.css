@@ -1,17 +1,18 @@
 .bottomNavigation {
   position: fixed;
-  left: 50%;
-  bottom: 1rem;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-3);
+  justify-content: space-around;
+  padding: var(--spacing-1) var(--spacing-2);
+  padding-bottom: max(var(--spacing-2), env(safe-area-inset-bottom));
+  height: 4rem;
   background-color: var(--color-cloud);
-  border: 1px solid var(--color-cloudHover);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  border-top: 1px solid var(--color-cloudHover);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
 }
 
 @media (min-width: 640px) {
