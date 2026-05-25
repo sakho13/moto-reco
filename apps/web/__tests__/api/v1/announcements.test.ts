@@ -23,11 +23,11 @@ describe('Announcements API Endpoints (一般ユーザー)', () => {
       await createAdminUser(admin.token, admin.userId)
 
       // DRAFT 作成
-      const draftId = await createTestAnnouncement(admin.token, {
+      const draftId = await createTestAnnouncement(admin.userId, {
         title: 'ドラフト',
       })
       // PUBLISHED 作成
-      const publishedId = await createTestAnnouncement(admin.token, {
+      const publishedId = await createTestAnnouncement(admin.userId, {
         title: '公開済み',
       })
       await publishTestAnnouncement(publishedId)
@@ -49,7 +49,7 @@ describe('Announcements API Endpoints (一般ユーザー)', () => {
     test('自分の既読状態が返る', async () => {
       const admin = await createTestUser()
       await createAdminUser(admin.token, admin.userId)
-      const announcementId = await createTestAnnouncement(admin.token)
+      const announcementId = await createTestAnnouncement(admin.userId)
       await publishTestAnnouncement(announcementId)
 
       const user = await createTestUser()
@@ -90,7 +90,7 @@ describe('Announcements API Endpoints (一般ユーザー)', () => {
     test('既読記録が冪等である (2回呼んでもエラーにならない)', async () => {
       const admin = await createTestUser()
       await createAdminUser(admin.token, admin.userId)
-      const announcementId = await createTestAnnouncement(admin.token)
+      const announcementId = await createTestAnnouncement(admin.userId)
       await publishTestAnnouncement(announcementId)
 
       const user = await createTestUser()
@@ -116,7 +116,7 @@ describe('Announcements API Endpoints (一般ユーザー)', () => {
     test('PUBLISHED でないアナウンスの既読はエラーになる', async () => {
       const admin = await createTestUser()
       await createAdminUser(admin.token, admin.userId)
-      const draftId = await createTestAnnouncement(admin.token)
+      const draftId = await createTestAnnouncement(admin.userId)
 
       const user = await createTestUser()
       const res = await app.request(`/api/v1/announcements/${draftId}/read`, {

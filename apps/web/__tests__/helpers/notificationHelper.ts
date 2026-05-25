@@ -53,7 +53,7 @@ export async function publishTestAnnouncement(id: string): Promise<void> {
  * システムアナウンスをDBに直接作成する
  */
 export async function createTestAnnouncement(
-  _token: string,
+  adminUserId: string,
   options: {
     type?: string
     title?: string
@@ -65,7 +65,7 @@ export async function createTestAnnouncement(
       type: (options.type ?? 'SYSTEM_MAINTENANCE') as never,
       title: options.title ?? 'テストアナウンス',
       body: options.body ?? 'テストアナウンスの本文',
-      createdBy: 'test-admin',
+      createdBy: adminUserId,
     },
   })
   return record.id
