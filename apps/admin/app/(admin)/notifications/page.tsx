@@ -54,7 +54,13 @@ export default function NotificationListPage() {
             <Tag color={TYPE_COLOR[v] ?? 'default'}>{TYPE_LABEL[v] ?? v}</Tag>
           )}
         />
-        <Table.Column dataIndex="title" title="タイトル" />
+        <Table.Column
+          dataIndex="title"
+          title="タイトル"
+          render={(v: string, record: NotificationRow) => (
+            <Link href={`/notifications/${record.id}`}>{v}</Link>
+          )}
+        />
         <Table.Column
           dataIndex="isRead"
           title="既読"
