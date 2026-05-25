@@ -53,6 +53,7 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
       name: user.name,
       notificationEmail: user.notificationEmail,
       isProfilePublic: user.isProfilePublic,
+      role: user.role as import('@repo/shared-types').UserRole,
     },
     message: 'プロフィール取得成功',
   })
@@ -132,6 +133,7 @@ user.patch(
         name: updatedUser.name,
         notificationEmail: updatedUser.notificationEmail,
         isProfilePublic: updatedUser.isProfilePublic,
+        role: updatedUser.role as import('@repo/shared-types').UserRole,
       },
       message: 'プロフィール更新成功',
     })
@@ -429,6 +431,7 @@ user.post(
           name: user.name,
           notificationEmail: user.notificationEmail,
           isProfilePublic: user.isProfilePublic,
+          role: user.role as import('@repo/shared-types').UserRole,
         },
         message: 'ユーザー登録成功',
       },
@@ -586,6 +589,7 @@ user.post(
           name: guestUser.name,
           notificationEmail: guestUser.notificationEmail,
           isProfilePublic: guestUser.isProfilePublic,
+          role: guestUser.role as import('@repo/shared-types').UserRole,
         },
         message: 'ゲストユーザー登録成功',
       },

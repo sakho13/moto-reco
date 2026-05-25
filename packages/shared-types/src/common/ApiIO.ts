@@ -46,11 +46,14 @@ export function getHttpStatusFromErrorCode(errorCode: ErrorCode): number {
   return ErrorCodeToHttpStatus[errorCode]
 }
 
+export type UserRole = 'ADMIN' | 'USER' | 'GUEST'
+
 export type ApiResponseUserProfile = {
   userId: string
   name: string
   notificationEmail: string | null
   isProfilePublic: boolean
+  role: UserRole
 }
 
 export type ApiResponsePublicUserPage = {

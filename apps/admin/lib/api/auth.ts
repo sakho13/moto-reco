@@ -4,6 +4,7 @@ import { getFirebaseAdminAuthClient } from '@repo/firebase-auth-server'
 
 export type AdminContext = {
   uid: string
+  userId: string
 }
 
 export async function requireAdmin(
@@ -36,7 +37,7 @@ export async function requireAdmin(
       }
     }
 
-    return { ctx: { uid: decoded.uid } }
+    return { ctx: { uid: decoded.uid, userId: user.id } }
   } catch {
     return {
       error: NextResponse.json({ message: 'Unauthorized' }, { status: 401 }),
