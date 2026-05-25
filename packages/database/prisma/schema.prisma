@@ -446,6 +446,7 @@ enum BikeHistoryType {
 
 enum NotificationType {
   FOLLOWED
+  ADMIN_MESSAGE
   // 将来追加: BIKE_MAINTENANCE_REMINDER
 }
 
