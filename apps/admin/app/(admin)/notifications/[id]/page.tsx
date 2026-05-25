@@ -2,8 +2,7 @@
 
 import { DateField, Show } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
-import { Descriptions, Tag, Typography } from 'antd'
-import { Button } from 'antd'
+import { Button, Descriptions, Tag, Typography } from 'antd'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
