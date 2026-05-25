@@ -192,6 +192,7 @@ describe('User API Endpoints', () => {
           name: '更新後の名前',
           notificationEmail: expect.any(String),
           isProfilePublic: expect.any(Boolean),
+          role: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -233,6 +234,7 @@ describe('User API Endpoints', () => {
           name: 'test_通知メールアドレスのみ更新できる',
           notificationEmail,
           isProfilePublic: expect.any(Boolean),
+          role: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -272,6 +274,7 @@ describe('User API Endpoints', () => {
           name: 'test_isProfilePublicのみfalseに更新できる',
           notificationEmail: expect.any(String),
           isProfilePublic: false,
+          role: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -321,6 +324,7 @@ describe('User API Endpoints', () => {
           name: 'test_isProfilePublicのみtrueに更新できる',
           notificationEmail: expect.any(String),
           isProfilePublic: true,
+          role: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -467,6 +471,7 @@ describe('User API Endpoints', () => {
           name: 'テストユーザー',
           notificationEmail: expect.any(String),
           isProfilePublic: expect.any(Boolean),
+          role: expect.any(String),
         },
         message: expect.any(String),
       })

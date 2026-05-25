@@ -4,6 +4,7 @@ import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import {
   createAdminUser,
   createTestAnnouncement,
+  publishTestAnnouncement,
 } from '../../helpers/notificationHelper'
 import { app } from '@/lib/api/server/app'
 
@@ -29,10 +30,7 @@ describe('Announcements API Endpoints (一般ユーザー)', () => {
       const publishedId = await createTestAnnouncement(admin.token, {
         title: '公開済み',
       })
-      await app.request(`/api/v1/admin/announcements/${publishedId}/publish`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${admin.token}` },
-      })
+      await publishTestAnnouncement(publishedId)
 
       const user = await createTestUser()
       const res = await app.request('/api/v1/announcements', {
@@ -52,13 +50,7 @@ describe('Announcements API Endpoints (一般ユーザー)', () => {
       const admin = await createTestUser()
       await createAdminUser(admin.token, admin.userId)
       const announcementId = await createTestAnnouncement(admin.token)
-      await app.request(
-        `/api/v1/admin/announcements/${announcementId}/publish`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${admin.token}` },
-        }
-      )
+      await publishTestAnnouncement(announcementId)
 
       const user = await createTestUser()
 
@@ -99,13 +91,7 @@ describe('Announcements API Endpoints (一般ユーザー)', () => {
       const admin = await createTestUser()
       await createAdminUser(admin.token, admin.userId)
       const announcementId = await createTestAnnouncement(admin.token)
-      await app.request(
-        `/api/v1/admin/announcements/${announcementId}/publish`,
-        {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${admin.token}` },
-        }
-      )
+      await publishTestAnnouncement(announcementId)
 
       const user = await createTestUser()
       const req = () =>

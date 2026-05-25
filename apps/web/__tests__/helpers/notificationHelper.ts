@@ -1,5 +1,4 @@
 import { prisma } from '@repo/database'
-import { app } from '@/lib/api/server/app'
 
 /**
  * テストユーザーの TNotification を直接DBに作成する
@@ -41,28 +40,33 @@ export async function createAdminUser(
 }
 
 /**
- * システムアナウンスを管理者APIで作成する
+ * システムアナウンスをDBで直接公開する
+ */
+export async function publishTestAnnouncement(id: string): Promise<void> {
+  await prisma.mSystemAnnouncement.update({
+    where: { id },
+    data: { status: 'PUBLISHED', publishedAt: new Date() },
+  })
+}
+
+/**
+ * システムアナウンスをDBに直接作成する
  */
 export async function createTestAnnouncement(
-  token: string,
+  _token: string,
   options: {
     type?: string
     title?: string
     body?: string
   } = {}
 ): Promise<string> {
-  const res = await app.request('/api/v1/admin/announcements', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      type: options.type ?? 'SYSTEM_MAINTENANCE',
+  const record = await prisma.mSystemAnnouncement.create({
+    data: {
+      type: (options.type ?? 'SYSTEM_MAINTENANCE') as never,
       title: options.title ?? 'テストアナウンス',
       body: options.body ?? 'テストアナウンスの本文',
-    }),
+      createdBy: 'test-admin',
+    },
   })
-  const json = await res.json()
-  return json.data.announcementId
+  return record.id
 }
