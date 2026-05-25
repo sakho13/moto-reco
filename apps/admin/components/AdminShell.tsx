@@ -49,11 +49,6 @@ const resources = [
     show: '/announcements/:id',
     meta: { label: 'アナウンス' },
   },
-  {
-    name: 'notifications',
-    list: '/notifications',
-    meta: { label: '通知管理' },
-  },
 ]
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
