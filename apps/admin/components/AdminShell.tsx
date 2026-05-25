@@ -53,7 +53,7 @@ const resources = [
     name: 'notifications',
     list: '/notifications',
     show: '/notifications/:id',
-    meta: { label: '通知一覧' },
+    meta: { label: 'ユーザー通知' },
   },
 ]
 
