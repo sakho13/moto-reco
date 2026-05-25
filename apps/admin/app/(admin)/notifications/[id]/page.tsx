@@ -83,6 +83,24 @@ export default function NotificationShowPage() {
             '—'
           )}
         </Descriptions.Item>
+        <Descriptions.Item label="メタデータ">
+          {record?.metadata ? (
+            <pre
+              style={{
+                margin: 0,
+                padding: '8px 12px',
+                background: '#f5f5f5',
+                borderRadius: 4,
+                fontSize: 12,
+                overflowX: 'auto',
+              }}
+            >
+              {JSON.stringify(record.metadata, null, 2)}
+            </pre>
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
       </Descriptions>
     </Show>
   )

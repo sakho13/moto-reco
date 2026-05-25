@@ -32,6 +32,7 @@ export async function GET(
     body: n.body,
     isRead: n.isRead,
     readAt: n.readAt,
+    metadata: n.metadata,
     createdAt: n.createdAt,
   })
 }
