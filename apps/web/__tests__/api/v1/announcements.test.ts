@@ -8,8 +8,10 @@ import {
 } from '../../helpers/notificationHelper'
 import { app } from '@/lib/api/server/app'
 
-afterEach(() => {
+afterEach(async () => {
   vi.restoreAllMocks()
+  await prisma.tSystemAnnouncementRead.deleteMany()
+  await prisma.mSystemAnnouncement.deleteMany()
 })
 
 describe('Announcements API Endpoints (一般ユーザー)', () => {
