@@ -27,6 +27,9 @@ export function NotificationDropdown({ onClose }: Props) {
   const router = useRouter()
   const [items, setItems] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedItem, setSelectedItem] = useState<NotificationItem | null>(
+    null
+  )
 
   useEffect(() => {
     async function load() {
@@ -78,6 +81,22 @@ export function NotificationDropdown({ onClose }: Props) {
     load()
   }, [])
 
+  async function handleItemClick(item: NotificationItem) {
+    if (!item.isRead) {
+      const endpoint =
+        item.kind === 'notification'
+          ? `/api/v1/notifications/${item.id}/read`
+          : `/api/v1/announcements/${item.id}/read`
+      await authenticatedFetch(endpoint, { method: 'PATCH' })
+      setItems((prev) =>
+        prev.map((i) =>
+          i.kind === item.kind && i.id === item.id ? { ...i, isRead: true } : i
+        )
+      )
+    }
+    setSelectedItem({ ...item, isRead: true })
+  }
+
   async function handleMarkAllRead() {
     await Promise.all([
       authenticatedFetch('/api/v1/notifications/read-all', { method: 'PATCH' }),
@@ -95,43 +114,68 @@ export function NotificationDropdown({ onClose }: Props) {
   return (
     <div className={styles.dropdown} role="dialog" aria-label="通知">
       <div className={styles.header}>
-        <span className={styles.title}>通知</span>
-        <button
-          type="button"
-          className={styles.readAllButton}
-          onClick={handleMarkAllRead}
-        >
-          全既読
-        </button>
-      </div>
-
-      <div className={styles.list}>
-        {loading && <p className={styles.empty}>読み込み中...</p>}
-        {!loading && items.length === 0 && (
-          <p className={styles.empty}>通知はありません</p>
+        {selectedItem ? (
+          <button
+            type="button"
+            className={styles.backButton}
+            onClick={() => setSelectedItem(null)}
+          >
+            ← 戻る
+          </button>
+        ) : (
+          <span className={styles.title}>通知</span>
         )}
-        {!loading &&
-          items.map((item) => (
-            <div
-              key={`${item.kind}-${item.id}`}
-              className={`${styles.item} ${item.isRead ? styles.read : styles.unread}`}
-            >
-              <p className={styles.itemTitle}>{item.title}</p>
-              <p className={styles.itemBody}>{item.body}</p>
-              <p className={styles.itemTime}>
-                {formatRelativeTime(item.createdAt)}
-              </p>
-            </div>
-          ))}
+        {!selectedItem && (
+          <button
+            type="button"
+            className={styles.readAllButton}
+            onClick={handleMarkAllRead}
+          >
+            全既読
+          </button>
+        )}
       </div>
 
-      <button
-        type="button"
-        className={styles.viewAllButton}
-        onClick={handleViewAll}
-      >
-        すべての通知を見る
-      </button>
+      {selectedItem ? (
+        <div className={styles.detail}>
+          <p className={styles.detailTitle}>{selectedItem.title}</p>
+          <p className={styles.detailTime}>
+            {formatRelativeTime(selectedItem.createdAt)}
+          </p>
+          <p className={styles.detailBody}>{selectedItem.body}</p>
+        </div>
+      ) : (
+        <>
+          <div className={styles.list}>
+            {loading && <p className={styles.empty}>読み込み中...</p>}
+            {!loading && items.length === 0 && (
+              <p className={styles.empty}>通知はありません</p>
+            )}
+            {!loading &&
+              items.map((item) => (
+                <button
+                  key={`${item.kind}-${item.id}`}
+                  type="button"
+                  className={`${styles.item} ${item.isRead ? styles.read : styles.unread}`}
+                  onClick={() => handleItemClick(item)}
+                >
+                  <p className={styles.itemTitle}>{item.title}</p>
+                  <p className={styles.itemBody}>{item.body}</p>
+                  <p className={styles.itemTime}>
+                    {formatRelativeTime(item.createdAt)}
+                  </p>
+                </button>
+              ))}
+          </div>
+          <button
+            type="button"
+            className={styles.viewAllButton}
+            onClick={handleViewAll}
+          >
+            すべての通知を見る
+          </button>
+        </>
+      )}
     </div>
   )
 }
