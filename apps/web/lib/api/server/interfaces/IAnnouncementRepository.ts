@@ -37,5 +37,6 @@ export interface IAnnouncementRepository {
   publish(id: string): Promise<AnnouncementRecord>
   expire(id: string): Promise<AnnouncementRecord>
   markAsRead(announcementId: string, userId: UserId): Promise<void>
+  markAllAsRead(userId: UserId): Promise<void>
   countUnreadByUserId(userId: UserId): Promise<number>
 }

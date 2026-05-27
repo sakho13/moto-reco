@@ -34,7 +34,8 @@ notifications.get('/unread-count', honoAuthMiddleware, async (c) => {
 
 notifications.get('/', honoAuthMiddleware, async (c) => {
   const { userId } = c.var.user!
-  const page = Math.max(1, Number(c.req.query('page') ?? '1'))
+  const pageParam = Number(c.req.query('page') ?? '1')
+  const page = Number.isInteger(pageParam) && pageParam >= 1 ? pageParam : 1
   const service = new NotificationService(
     new PrismaNotificationRepository(prisma)
   )

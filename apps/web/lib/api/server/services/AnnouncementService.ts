@@ -119,6 +119,10 @@ export class AnnouncementService {
     await this._announcementRepository.markAsRead(announcementId, userId)
   }
 
+  async markAllAsRead(userId: UserId): Promise<void> {
+    await this._announcementRepository.markAllAsRead(userId)
+  }
+
   async countUnread(userId: UserId): Promise<number> {
     return this._announcementRepository.countUnreadByUserId(userId)
   }

@@ -83,6 +83,17 @@ export class PrismaAnnouncementRepository
     })
   }
 
+  async markAllAsRead(userId: UserId): Promise<void> {
+    const published = await this.connection.mSystemAnnouncement.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { id: true },
+    })
+    await this.connection.tSystemAnnouncementRead.createMany({
+      data: published.map((a) => ({ announcementId: a.id, userId })),
+      skipDuplicates: true,
+    })
+  }
+
   async countUnreadByUserId(userId: UserId): Promise<number> {
     const [total, readCount] = await Promise.all([
       this.connection.mSystemAnnouncement.count({

@@ -23,6 +23,19 @@ announcements.get('/', honoAuthMiddleware, async (c) => {
   })
 })
 
+announcements.patch('/read-all', honoAuthMiddleware, async (c) => {
+  const { userId } = c.var.user!
+  const service = new AnnouncementService(
+    new PrismaAnnouncementRepository(prisma)
+  )
+  await service.markAllAsRead(userId)
+  return c.json<SuccessResponse<null>>({
+    status: 'success',
+    data: null,
+    message: '全て既読にしました',
+  })
+})
+
 announcements.patch('/:id/read', honoAuthMiddleware, async (c) => {
   const { userId } = c.var.user!
   const id = c.req.param('id')
