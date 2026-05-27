@@ -40,12 +40,15 @@ model MUser {
   status MUserStatus @default(ACTIVE) @map("status")
   role   MUserRole   @default(USER) @map("role")
 
-  authProviders MAuthProvider[]
-  myBikes       TUserMyBike[]
-  histories     TUserMyBikeHistory[]
-  userQuit      TUserQuit?
-  followers     TUserFollow[] @relation("UserFollowing")
-  following     TUserFollow[] @relation("UserFollowers")
+  authProviders        MAuthProvider[]
+  myBikes              TUserMyBike[]
+  histories            TUserMyBikeHistory[]
+  userQuit             TUserQuit?
+  followers            TUserFollow[]             @relation("UserFollowing")
+  following            TUserFollow[]             @relation("UserFollowers")
+  notifications        TNotification[]
+  announcementReads    TSystemAnnouncementRead[]
+  createdAnnouncements MSystemAnnouncement[]
 }
 
 model MManufacturer {
@@ -306,6 +309,57 @@ model TUserFollow {
   @@index([followingId])
 }
 
+// ユーザー個別通知 (フォロー通知・将来のバイクメンテリマインダー等)
+model TNotification {
+  id        String           @id @default(cuid(2))
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  body      String
+  metadata  Json?
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// システム一斉配信アナウンス (管理者が作成)
+model MSystemAnnouncement {
+  id          String             @id @default(cuid(2))
+  type        AnnouncementType
+  title       String
+  body        String
+  status      AnnouncementStatus @default(DRAFT)
+  scheduledAt DateTime?          @map("scheduled_at")
+  publishedAt DateTime?          @map("published_at")
+  createdBy   String             @map("created_by")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  reads         TSystemAnnouncementRead[]
+  createdByUser MUser                    @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([status, scheduledAt])
+  @@index([status, publishedAt(sort: Desc)])
+}
+
+// システムアナウンス既読トラッキング (読んだユーザーだけ記録)
+model TSystemAnnouncementRead {
+  announcementId String   @map("announcement_id")
+  userId         String   @map("user_id")
+  readAt         DateTime @default(now()) @map("read_at")
+
+  announcement MSystemAnnouncement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         MUser               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, userId])
+  @@index([userId])
+}
+
 // Enums
 
 enum MUserStatus {
@@ -388,4 +442,20 @@ enum BikeHistoryType {
   FUEL_LOG
   TOURING
   MAINTENANCE
+}
+
+enum NotificationType {
+  FOLLOWED
+  // 将来追加: BIKE_MAINTENANCE_REMINDER
+}
+
+enum AnnouncementType {
+  SYSTEM_MAINTENANCE
+  // 将来追加: RELEASE_ANNOUNCEMENT
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  PUBLISHED
+  EXPIRED
 }
