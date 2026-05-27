@@ -1,0 +1,41 @@
+.container {
+  position: relative;
+}
+
+.bell {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-cloud);
+  border: 1px solid var(--color-cloudHover);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.bell:hover {
+  background-color: var(--color-cloudHover);
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  line-height: 1;
+}

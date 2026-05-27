@@ -42,6 +42,19 @@ const resources = [
     show: '/my-bikes/:id',
     meta: { hide: true },
   },
+  {
+    name: 'announcements',
+    list: '/announcements',
+    create: '/announcements/create',
+    show: '/announcements/:id',
+    meta: { label: 'アナウンス' },
+  },
+  {
+    name: 'notifications',
+    list: '/notifications',
+    show: '/notifications/:id',
+    meta: { label: 'ユーザー通知' },
+  },
 ]
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
