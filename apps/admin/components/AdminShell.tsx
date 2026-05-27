@@ -1,6 +1,5 @@
 'use client'
 
-import '@ant-design/v5-patch-for-react-19'
 import {
   useNotificationProvider,
   ThemedLayout,
@@ -41,6 +40,19 @@ const resources = [
     name: 'my-bikes',
     show: '/my-bikes/:id',
     meta: { hide: true },
+  },
+  {
+    name: 'announcements',
+    list: '/announcements',
+    create: '/announcements/create',
+    show: '/announcements/:id',
+    meta: { label: 'アナウンス' },
+  },
+  {
+    name: 'notifications',
+    list: '/notifications',
+    show: '/notifications/:id',
+    meta: { label: 'ユーザー通知' },
   },
 ]
 

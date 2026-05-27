@@ -1,5 +1,6 @@
 import type { UserId } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
+import type { INotificationRepository } from '../interfaces/INotificationRepository'
 import type { IUserFollowRepository } from '../interfaces/IUserFollowRepository'
 import type { IUserRepository } from '../interfaces/IUserRepository'
 
@@ -8,7 +9,8 @@ const PAGE_SIZE = 20
 export class UserFollowService {
   constructor(
     private readonly _userRepository: IUserRepository,
-    private readonly _followRepository: IUserFollowRepository
+    private readonly _followRepository: IUserFollowRepository,
+    private readonly _notificationRepository: INotificationRepository
   ) {}
 
   async followUser(
@@ -46,7 +48,23 @@ export class UserFollowService {
       return
     }
 
+    const followerUser = await this._userRepository.findById(followerId)
+
     await this._followRepository.follow(followerId, followingId)
+
+    // フォロー通知を非同期で生成 (メイン処理をブロックしない)
+    this._notificationRepository
+      .create({
+        userId: followingId,
+        type: 'FOLLOWED',
+        title: 'フォローされました',
+        body: `${followerUser?.name ?? 'ユーザー'}さんにフォローされました`,
+        metadata: {
+          followerId,
+          followerName: followerUser?.name ?? '',
+        },
+      })
+      .catch((err) => console.error('[UserFollowService] 通知生成エラー:', err))
   }
 
   async unfollowUser(followerId: UserId, followingId: UserId): Promise<void> {
