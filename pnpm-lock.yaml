@@ -108,8 +108,8 @@ importers:
   apps/admin:
     dependencies:
       '@ant-design/icons':
-        specifier: 5.6.1
-        version: 5.6.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: 6.2.3
+        version: 6.2.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@ant-design/v5-patch-for-react-19':
         specifier: 1.0.3
         version: 1.0.3(antd@6.4.3(date-fns@4.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -1912,8 +1912,8 @@ packages:
       react: '>=16.11.0'
       react-dom: '>=16.11.0'
 
-  '@rc-component/form@1.8.1':
-    resolution: {integrity: sha512-8O7TB55Fi2mWIGvSnwZjk8jFqVNYyKDAswglwGShcbndxqzKz4cHwNtNaLjZlAeRge9wcB0LL8IWsC/Bl18raQ==}
+  '@rc-component/form@1.8.2':
+    resolution: {integrity: sha512-ZidCvOLmM9Xr+3vzk4UAoR7Aj1W/5IHyrzlBB7sNkygpTeRVrohQSo4TN7W/nARTH+nt8zSAPsn4BEl4zLEO2g==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=16.9.0'
@@ -2071,15 +2071,15 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
-  '@rc-component/table@1.10.0':
-    resolution: {integrity: sha512-SjtpcCf+rL7dDc62GKT3rXTdERjVuJvRiqjpU7g0Jc/ewCifXynHc7Nm3Em1XsD+WhGrgQtxNDScI/0+Lpfr0w==}
+  '@rc-component/table@1.10.2':
+    resolution: {integrity: sha512-b3PjqB9Gp25p5t/zq+9QrbXbodkptT8/zvLmwgd2FNPUUtaYyDnQqfxeD5a7ao8E8lpinLHsi2u2vdfPhyNvAw==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  '@rc-component/tabs@1.9.0':
-    resolution: {integrity: sha512-tn1slmbbaTyt8mgwyWJcT8jo/qNiYUs6u1H7OgGQt9faYO06BJIkU5cTmMqORzIrNmSEeeUY6pD5i+JlqSHYhg==}
+  '@rc-component/tabs@1.9.1':
+    resolution: {integrity: sha512-6mY08Fce6aNOHuGsxbzT+f2ekgL9mg1cGGHkittMlVGymjGg+kGupu5v90sRxcUd/paRU9jclLLXtF/PkK1FUA==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=16.9.0'
@@ -2118,8 +2118,8 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  '@rc-component/upload@1.1.0':
-    resolution: {integrity: sha512-LIBV90mAnUE6VK5N4QvForoxZc4XqEYZimcp7fk+lkE4XwHHyJWxpIXQQwMU8hJM+YwBbsoZkGksL1sISWHQxw==}
+  '@rc-component/upload@1.1.1':
+    resolution: {integrity: sha512-GvYWSKeaJTOxxC5p6+nOSadzfvXA1h8C/iHFPFZX+szH3JUXrvs+DLiW8YUTBgvMh8m63mJeHrlYlJzAlg+pDA==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
@@ -3462,9 +3462,6 @@ packages:
 
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
-
-  csstype@3.2.3:
-    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -6032,7 +6029,7 @@ snapshots:
 
   '@ant-design/cssinjs@1.24.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.28.4
       '@emotion/hash': 0.8.0
       '@emotion/unitless': 0.7.5
       classnames: 2.5.1
@@ -6049,14 +6046,14 @@ snapshots:
       '@emotion/unitless': 0.7.5
       '@rc-component/util': 1.11.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       clsx: 2.1.1
-      csstype: 3.2.3
+      csstype: 3.1.3
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       stylis: 4.4.0
 
   '@ant-design/fast-color@2.0.6':
     dependencies:
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.28.4
 
   '@ant-design/fast-color@3.0.1': {}
 
@@ -6105,7 +6102,7 @@ snapshots:
   '@ant-design/pro-provider@2.16.2(antd@6.4.3(date-fns@4.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@ant-design/cssinjs': 1.24.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.28.4
       '@ctrl/tinycolor': 3.6.1
       antd: 6.4.3(date-fns@4.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       dayjs: 1.11.20
@@ -6118,7 +6115,7 @@ snapshots:
     dependencies:
       '@ant-design/icons': 5.6.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@ant-design/pro-provider': 2.16.2(antd@6.4.3(date-fns@4.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.28.4
       antd: 6.4.3(date-fns@4.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       classnames: 2.5.1
       dayjs: 1.11.20
@@ -7485,7 +7482,7 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
-  '@rc-component/form@1.8.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@rc-component/form@1.8.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@rc-component/async-validator': 5.1.0
       '@rc-component/util': 1.11.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -7665,7 +7662,7 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
-  '@rc-component/table@1.10.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@rc-component/table@1.10.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@rc-component/context': 2.0.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/resize-observer': 1.1.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -7675,7 +7672,7 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
-  '@rc-component/tabs@1.9.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@rc-component/tabs@1.9.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@rc-component/dropdown': 1.0.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/menu': 1.3.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -7731,7 +7728,7 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
-  '@rc-component/upload@1.1.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@rc-component/upload@1.1.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@rc-component/util': 1.11.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       clsx: 2.1.1
@@ -8325,7 +8322,7 @@ snapshots:
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.27.1
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.28.4
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
@@ -8856,7 +8853,7 @@ snapshots:
       '@rc-component/dialog': 1.9.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/drawer': 1.4.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/dropdown': 1.0.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@rc-component/form': 1.8.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@rc-component/form': 1.8.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/image': 1.9.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/input': 1.3.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/input-number': 1.6.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -8876,14 +8873,14 @@ snapshots:
       '@rc-component/slider': 1.0.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/steps': 1.2.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/switch': 1.0.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@rc-component/table': 1.10.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@rc-component/tabs': 1.9.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@rc-component/table': 1.10.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@rc-component/tabs': 1.9.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/tooltip': 1.4.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/tour': 2.4.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/tree': 1.3.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/tree-select': 1.9.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/trigger': 3.9.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@rc-component/upload': 1.1.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@rc-component/upload': 1.1.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/util': 1.11.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       clsx: 2.1.1
       dayjs: 1.11.20
@@ -9174,8 +9171,6 @@ snapshots:
   css.escape@1.5.1: {}
 
   csstype@3.1.3: {}
-
-  csstype@3.2.3: {}
 
   d3-array@3.2.4:
     dependencies:
@@ -10937,7 +10932,7 @@ snapshots:
 
   polished@4.3.1:
     dependencies:
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.28.4
 
   possible-typed-array-names@1.1.0: {}
 
@@ -11058,7 +11053,7 @@ snapshots:
 
   rc-resize-observer@1.4.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
-      '@babel/runtime': 7.29.7
+      '@babel/runtime': 7.28.4
       classnames: 2.5.1
       rc-util: 5.44.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react: 19.2.1
