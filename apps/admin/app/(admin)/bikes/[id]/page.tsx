@@ -1,8 +1,8 @@
 'use client'
 
-import { DateField, Show, TextField } from '@refinedev/antd'
+import { DateField, Show } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
-import { Tag, Typography } from 'antd'
+import { Descriptions, Tag } from 'antd'
 
 export default function BikeShowPage() {
   const { query } = useShow()
@@ -11,33 +11,41 @@ export default function BikeShowPage() {
 
   return (
     <Show isLoading={isLoading}>
-      <Typography.Title level={5}>メーカー</Typography.Title>
-      <TextField
-        value={(record?.manufacturer as { name: string })?.name ?? '—'}
-      />
-
-      <Typography.Title level={5}>モデル名</Typography.Title>
-      <TextField value={record?.modelName} />
-
-      <Typography.Title level={5}>排気量 (cc)</Typography.Title>
-      <TextField value={record?.displacement} />
-
-      <Typography.Title level={5}>年式</Typography.Title>
-      <TextField value={record?.modelYear} />
-
-      <Typography.Title level={5}>型式指定番号</Typography.Title>
-      <TextField value={record?.modelCode} />
-
-      <Typography.Title level={5}>発売年月</Typography.Title>
-      <TextField value={`${record?.releaseYear}年${record?.releaseMonth}月`} />
-
-      <Typography.Title level={5}>ステータス</Typography.Title>
-      <Tag color={record?.settingStatus === 'ACTIVE' ? 'green' : 'default'}>
-        {record?.settingStatus}
-      </Tag>
-
-      <Typography.Title level={5}>登録日</Typography.Title>
-      <DateField value={record?.createdAt} format="YYYY/MM/DD HH:mm" />
+      <Descriptions bordered column={1}>
+        <Descriptions.Item label="メーカー">
+          {(record?.manufacturer as { name: string })?.name ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="モデル名">
+          {record?.modelName as string}
+        </Descriptions.Item>
+        <Descriptions.Item label="排気量 (cc)">
+          {record?.displacement as number}
+        </Descriptions.Item>
+        <Descriptions.Item label="年式">
+          {record?.modelYear as number}
+        </Descriptions.Item>
+        <Descriptions.Item label="型式指定番号">
+          {record?.modelCode as string}
+        </Descriptions.Item>
+        <Descriptions.Item label="発売年月">
+          {`${record?.releaseYear}年${record?.releaseMonth}月`}
+        </Descriptions.Item>
+        <Descriptions.Item label="ステータス">
+          <Tag color={record?.settingStatus === 'ACTIVE' ? 'green' : 'default'}>
+            {record?.settingStatus as string}
+          </Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="登録日">
+          {record?.createdAt ? (
+            <DateField
+              value={record.createdAt as string}
+              format="YYYY/MM/DD HH:mm"
+            />
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
+      </Descriptions>
     </Show>
   )
 }
