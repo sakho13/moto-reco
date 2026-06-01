@@ -1,8 +1,8 @@
 'use client'
 
-import { DateField, Show, TextField } from '@refinedev/antd'
+import { DateField, Show } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
-import { Tag, Typography } from 'antd'
+import { Descriptions, Tag } from 'antd'
 
 export default function ManufacturerShowPage() {
   const { query } = useShow()
@@ -11,28 +11,38 @@ export default function ManufacturerShowPage() {
 
   return (
     <Show isLoading={isLoading}>
-      <Typography.Title level={5}>メーカー名</Typography.Title>
-      <TextField value={record?.name} />
-
-      <Typography.Title level={5}>英語名</Typography.Title>
-      <TextField value={record?.nameEn ?? '—'} />
-
-      <Typography.Title level={5}>国</Typography.Title>
-      <TextField value={record?.country ?? '—'} />
-
-      <Typography.Title level={5}>公式サイト</Typography.Title>
-      <TextField value={record?.websiteUrl ?? '—'} />
-
-      <Typography.Title level={5}>ロゴ URL</Typography.Title>
-      <TextField value={record?.logoUrl ?? '—'} />
-
-      <Typography.Title level={5}>有効</Typography.Title>
-      <Tag color={record?.isActive ? 'green' : 'default'}>
-        {record?.isActive ? '有効' : '無効'}
-      </Tag>
-
-      <Typography.Title level={5}>登録日</Typography.Title>
-      <DateField value={record?.createdAt} format="YYYY/MM/DD HH:mm" />
+      <Descriptions bordered column={1}>
+        <Descriptions.Item label="メーカー名">
+          {record?.name as string}
+        </Descriptions.Item>
+        <Descriptions.Item label="英語名">
+          {(record?.nameEn as string) ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="国">
+          {(record?.country as string) ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="公式サイト">
+          {(record?.websiteUrl as string) ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="ロゴ URL">
+          {(record?.logoUrl as string) ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="有効">
+          <Tag color={record?.isActive ? 'green' : 'default'}>
+            {record?.isActive ? '有効' : '無効'}
+          </Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="登録日">
+          {record?.createdAt ? (
+            <DateField
+              value={record.createdAt as string}
+              format="YYYY/MM/DD HH:mm"
+            />
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
+      </Descriptions>
     </Show>
   )
 }

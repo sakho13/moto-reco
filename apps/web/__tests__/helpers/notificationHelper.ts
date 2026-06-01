@@ -1,4 +1,4 @@
-import { prisma } from '@repo/database'
+import { Prisma, prisma } from '@repo/database'
 
 /**
  * テストユーザーの TNotification を直接DBに作成する
@@ -10,7 +10,7 @@ export async function createTestNotification(
     title?: string
     body?: string
     isRead?: boolean
-    metadata?: Record<string, unknown>
+    metadata?: Prisma.InputJsonObject
   } = {}
 ): Promise<string> {
   const record = await prisma.tNotification.create({

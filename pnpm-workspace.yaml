@@ -1,11 +1,13 @@
+minimumReleaseAge: 0
+
 packages:
   - 'apps/*'
   - 'packages/*'
   - 'infra'
 
 catalog:
-  typescript: 5.9.2
-  tsx: 4.20.6
+  typescript: 6.0.3
+  tsx: 4.22.4
   '@eslint/js': 10.0.1
   eslint: 9.39.4
   dotenv: 17.2.3
@@ -34,3 +36,12 @@ catalog:
   '@vitest/ui': 2.1.8
 
   '@playwright/test': 1.52.0
+
+allowBuilds:
+  '@firebase/util': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true

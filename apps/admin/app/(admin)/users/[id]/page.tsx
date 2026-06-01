@@ -1,8 +1,8 @@
 'use client'
 
-import { DateField, Show, TextField } from '@refinedev/antd'
+import { DateField, Show } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
-import { Table, Tag, Typography } from 'antd'
+import { Descriptions, Table, Tag, Typography } from 'antd'
 import Link from 'next/link'
 
 const statusColor: Record<string, string> = {
@@ -61,31 +61,48 @@ export default function UserShowPage() {
 
   return (
     <Show isLoading={isLoading}>
-      <Typography.Title level={5}>ID</Typography.Title>
-      <TextField value={record?.id} />
-
-      <Typography.Title level={5}>名前</Typography.Title>
-      <TextField value={record?.name} />
-
-      <Typography.Title level={5}>通知メール</Typography.Title>
-      <TextField value={record?.notificationEmail ?? '未設定'} />
-
-      <Typography.Title level={5}>ステータス</Typography.Title>
-      <Tag color={statusColor[record?.status] ?? 'default'}>
-        {record?.status}
-      </Tag>
-
-      <Typography.Title level={5}>ロール</Typography.Title>
-      <Tag color={roleColor[record?.role] ?? 'default'}>{record?.role}</Tag>
-
-      <Typography.Title level={5}>プロフィール公開</Typography.Title>
-      <TextField value={record?.isProfilePublic ? '公開' : '非公開'} />
-
-      <Typography.Title level={5}>登録日</Typography.Title>
-      <DateField value={record?.createdAt} format="YYYY/MM/DD HH:mm" />
-
-      <Typography.Title level={5}>更新日</Typography.Title>
-      <DateField value={record?.updatedAt} format="YYYY/MM/DD HH:mm" />
+      <Descriptions bordered column={1} style={{ marginBottom: 24 }}>
+        <Descriptions.Item label="ID">{record?.id as string}</Descriptions.Item>
+        <Descriptions.Item label="名前">
+          {record?.name as string}
+        </Descriptions.Item>
+        <Descriptions.Item label="通知メール">
+          {(record?.notificationEmail as string) ?? '未設定'}
+        </Descriptions.Item>
+        <Descriptions.Item label="ステータス">
+          <Tag color={statusColor[record?.status as string] ?? 'default'}>
+            {record?.status as string}
+          </Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="ロール">
+          <Tag color={roleColor[record?.role as string] ?? 'default'}>
+            {record?.role as string}
+          </Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="プロフィール公開">
+          {record?.isProfilePublic ? '公開' : '非公開'}
+        </Descriptions.Item>
+        <Descriptions.Item label="登録日">
+          {record?.createdAt ? (
+            <DateField
+              value={record.createdAt as string}
+              format="YYYY/MM/DD HH:mm"
+            />
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
+        <Descriptions.Item label="更新日">
+          {record?.updatedAt ? (
+            <DateField
+              value={record.updatedAt as string}
+              format="YYYY/MM/DD HH:mm"
+            />
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
+      </Descriptions>
 
       <Typography.Title level={4} style={{ marginTop: 32 }}>
         認証プロバイダー
