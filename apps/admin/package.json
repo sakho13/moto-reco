@@ -11,7 +11,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@ant-design/icons": "6.2.3",
+    "@ant-design/icons": "6.2.5",
     "@ant-design/v5-patch-for-react-19": "1.0.3",
     "@refinedev/antd": "6.0.3",
     "@refinedev/core": "5.0.12",
