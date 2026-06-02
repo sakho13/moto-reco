@@ -146,8 +146,7 @@ export function SpotEditForm({
           name: formState.name !== '' ? formState.name : null,
           memo: formState.memo !== '' ? formState.memo : null,
           visitedAt: new Date(formState.visitedAt),
-          endAt:
-            formState.endAt !== '' ? new Date(formState.endAt) : null,
+          endAt: formState.endAt !== '' ? new Date(formState.endAt) : null,
         }
       )
 

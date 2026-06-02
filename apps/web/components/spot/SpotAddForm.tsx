@@ -90,8 +90,7 @@ export function SpotAddForm({
           name: formState.name !== '' ? formState.name : undefined,
           memo: formState.memo !== '' ? formState.memo : undefined,
           visitedAt: new Date(formState.visitedAt),
-          endAt:
-            formState.endAt !== '' ? new Date(formState.endAt) : undefined,
+          endAt: formState.endAt !== '' ? new Date(formState.endAt) : undefined,
           latitude: location?.lat,
           longitude: location?.lng,
         }
