@@ -8,6 +8,7 @@ interface SpotEditModalProps {
   bikeId: string
   touringId: string
   spot: ApiResponseSpotDetail
+  touringStatus?: 'PLANNED' | 'STARTED' | 'COMPLETED'
   onClose: () => void
   onSuccess: () => void
   onDelete?: () => void
@@ -20,6 +21,7 @@ export function SpotEditModal({
   bikeId,
   touringId,
   spot,
+  touringStatus,
   onClose,
   onSuccess,
   onDelete,
@@ -32,6 +34,7 @@ export function SpotEditModal({
         bikeId={bikeId}
         touringId={touringId}
         spot={spot}
+        touringStatus={touringStatus}
         onSuccess={onSuccess}
         onDelete={onDelete}
       />

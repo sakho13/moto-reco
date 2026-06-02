@@ -8,6 +8,7 @@ type SpotAddModalProps = {
   touringId: string
   initialType?: 'SPOT' | 'BREAK'
   initialLocation?: { lat: number; lng: number } | null
+  touringStatus?: 'PLANNED' | 'STARTED' | 'COMPLETED'
   onClose: () => void
   onSuccess: () => void
 }
@@ -20,6 +21,7 @@ export function SpotAddModal({
   touringId,
   initialType = 'SPOT',
   initialLocation = null,
+  touringStatus,
   onClose,
   onSuccess,
 }: SpotAddModalProps) {
@@ -32,6 +34,7 @@ export function SpotAddModal({
         touringId={touringId}
         initialType={initialType}
         initialLocation={initialLocation}
+        touringStatus={touringStatus}
         onSuccess={onSuccess}
       />
     </ModalBase>

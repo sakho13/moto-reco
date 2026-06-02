@@ -181,9 +181,21 @@
 
 @media (min-width: 768px) {
   .mapContainerLarge {
-    height: calc(100vh - 12rem);
+    height: calc(100vh - 10rem);
     min-height: 400px;
-    max-height: 700px;
+    max-height: 720px;
+  }
+}
+
+.spotsListScroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 768px) {
+  .spotsListScroll {
+    max-height: calc(100vh - 18rem);
+    padding-right: 0.125rem;
   }
 }
 

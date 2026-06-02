@@ -434,7 +434,8 @@ function TouringDetailPage() {
       {spotsLoading ? (
         <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
       ) : (
-        <div className="space-y-3">
+        <div className={styles.spotsListScroll}>
+          <div className="space-y-3">
           {/* 出発地 */}
           <div className={styles.spotItem}>
             <div className={styles.startBadge}>出</div>
@@ -525,6 +526,7 @@ function TouringDetailPage() {
               </div>
             </div>
           )}
+          </div>
         </div>
       )}
     </div>
@@ -546,7 +548,7 @@ function TouringDetailPage() {
   return (
     <>
       <div
-        className={`w-full flex flex-row items-start gap-3 ${hasMap ? 'max-w-5xl' : 'max-w-md'}`}
+        className={`w-full flex flex-row items-start gap-3 mb-4 ${hasMap ? 'max-w-5xl' : 'max-w-md'}`}
       >
         <div className="shrink-0 pt-0.5">
           <Button
@@ -666,6 +668,7 @@ function TouringDetailPage() {
           bikeId={bikeId}
           touringId={touringId}
           spot={editingSpot}
+          touringStatus={touring?.status}
           onClose={() => setEditingSpot(null)}
           onSuccess={handleSpotEditSuccess}
           onDelete={handleSpotDeleteSuccess}
@@ -678,6 +681,7 @@ function TouringDetailPage() {
           touringId={touringId}
           initialType={addModalType}
           initialLocation={mapClickLocation}
+          touringStatus={touring?.status}
           onClose={() => {
             setAddModalType(null)
             setMapClickLocation(null)
