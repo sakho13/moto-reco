@@ -15,6 +15,7 @@ type SpotAddFormProps = {
   bikeId: string
   touringId: string
   initialType?: 'SPOT' | 'BREAK'
+  initialLocation?: { lat: number; lng: number } | null
   onSuccess: () => void
 }
 
@@ -39,13 +40,14 @@ export function SpotAddForm({
   bikeId,
   touringId,
   initialType = 'SPOT',
+  initialLocation = null,
   onSuccess,
 }: SpotAddFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    null
+    initialLocation
   )
   const [formState, setFormState] = useState<SpotFormState>({
     type: initialType,

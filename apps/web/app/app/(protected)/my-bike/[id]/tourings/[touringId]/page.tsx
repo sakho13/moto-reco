@@ -70,6 +70,10 @@ function TouringDetailPage() {
   const [addModalType, setAddModalType] = useState<'SPOT' | 'BREAK' | null>(
     null
   )
+  const [mapClickLocation, setMapClickLocation] = useState<{
+    lat: number
+    lng: number
+  } | null>(null)
   const [localSpots, setLocalSpots] = useState<ApiResponseSpotDetail[]>([])
   const [isBreakLoading, setIsBreakLoading] = useState(false)
 
@@ -316,6 +320,12 @@ function TouringDetailPage() {
   const handleSpotAddSuccess = async () => {
     await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
     setAddModalType(null)
+    setMapClickLocation(null)
+  }
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setMapClickLocation({ lat, lng })
+    setAddModalType('SPOT')
   }
 
   const handleSpotDeleteSuccess = async () => {
@@ -367,7 +377,7 @@ function TouringDetailPage() {
     }
   }
 
-  const hasMap = mapPoints.length > 0
+  const hasMap = mapPoints.length > 0 || touring?.status === 'PLANNED'
   const googleMapsUrl = buildGoogleMapsUrl(mapPoints)
 
   const startLocation =
@@ -379,55 +389,6 @@ function TouringDetailPage() {
     touring?.endLatitude != null && touring?.endLongitude != null
       ? { lat: touring.endLatitude, lng: touring.endLongitude }
       : null
-
-  const touringInfoCard = (
-    <div className={styles.card}>
-      <div className="flex items-start justify-between gap-2 mb-4">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <h1 className="text-xl font-bold truncate">{touring?.title}</h1>
-          <span
-            className={
-              touring?.status === 'PLANNED'
-                ? styles.statusPlanned
-                : touring?.status === 'STARTED'
-                  ? styles.statusStarted
-                  : styles.statusCompleted
-            }
-          >
-            {touring?.status === 'PLANNED'
-              ? 'プラン'
-              : touring?.status === 'STARTED'
-                ? '進行中'
-                : '完了'}
-          </span>
-        </div>
-        <button
-          onClick={() => setIsEditModalOpen(true)}
-          className={styles.editButton}
-          aria-label="編集"
-        >
-          <EditIcon />
-        </button>
-      </div>
-
-      <div className={`space-y-2 text-sm ${styles.bodyText}`}>
-        <div>
-          <span className="font-medium">開始: </span>
-          {touring?.startDate ? formatDate(touring.startDate) : '-'}
-        </div>
-        <div>
-          <span className="font-medium">終了: </span>
-          {touring?.endDate ? formatDate(touring.endDate) : '-'}
-        </div>
-        {distance !== null && (
-          <div>
-            <span className="font-medium">走行距離: </span>
-            {distance.toLocaleString()}km
-          </div>
-        )}
-      </div>
-    </div>
-  )
 
   const spotsCard = (
     <div className={styles.card}>
@@ -521,6 +482,7 @@ function TouringDetailPage() {
                       mutedTextClassName={styles.mutedText}
                       dimTextClassName={styles.dimText}
                       formatVisitedAt={formatVisitedAt}
+                      touringStatus={touring?.status}
                       onEdit={setEditingSpot}
                     />
                   ))}
@@ -568,37 +530,81 @@ function TouringDetailPage() {
     </div>
   )
 
+  const statusLabel =
+    touring?.status === 'PLANNED'
+      ? 'プラン'
+      : touring?.status === 'STARTED'
+        ? '進行中'
+        : '完了'
+  const statusBadgeClass =
+    touring?.status === 'PLANNED'
+      ? styles.statusPlanned
+      : touring?.status === 'STARTED'
+        ? styles.statusStarted
+        : styles.statusCompleted
+
   return (
     <>
       <div
-        className={`w-full flex flex-row gap-2 mb-4 ${hasMap ? 'max-w-5xl' : 'max-w-md'}`}
+        className={`w-full flex flex-row items-start gap-3 ${hasMap ? 'max-w-5xl' : 'max-w-md'}`}
       >
-        <Button
-          onClick={() => router.push(`/app/my-bike/${bikeId}/tourings`)}
-          variant="cloud"
-        >
-          ← 戻る
-        </Button>
+        <div className="shrink-0 pt-0.5">
+          <Button
+            onClick={() => router.push(`/app/my-bike/${bikeId}/tourings`)}
+            variant="cloud"
+          >
+            ← 戻る
+          </Button>
+        </div>
+        {touring && (
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl font-bold truncate">{touring.title}</h1>
+              <span className={statusBadgeClass}>{statusLabel}</span>
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className={styles.editButton}
+                aria-label="編集"
+              >
+                <EditIcon />
+              </button>
+            </div>
+            <p className={`text-xs mt-1 ${styles.mutedText}`}>
+              {formatDate(touring.startDate)} → {formatDate(touring.endDate)}
+              {distance !== null && ` · ${distance.toLocaleString()}km`}
+            </p>
+          </div>
+        )}
       </div>
 
       {hasMap ? (
         <div className="w-full max-w-5xl flex flex-col md:flex-row md:gap-6 md:items-start gap-4">
           <div className="md:flex-1 min-w-0">
-            <div className={`${styles.card} h-full`}>
-              <div className={styles.mapWrapper}>
-                <TouringRouteMap
-                  points={mapPoints}
-                  containerClassName={styles.mapContainerLarge}
-                />
-                {googleMapsUrl && (
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.googleMapsLink}
-                  >
-                    Googleマップで経路を表示
-                  </a>
+            <div className={styles.mapStickyWrapper}>
+              <div className={styles.card}>
+                <div className={styles.mapWrapper}>
+                  <TouringRouteMap
+                    points={mapPoints}
+                    containerClassName={styles.mapContainerLarge}
+                    onMapClick={
+                      touring?.status === 'PLANNED' ? handleMapClick : undefined
+                    }
+                  />
+                  {googleMapsUrl && (
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.googleMapsLink}
+                    >
+                      Googleマップで経路を表示
+                    </a>
+                  )}
+                </div>
+                {touring?.status === 'PLANNED' && (
+                  <p className={styles.mapClickHint}>
+                    地図をタップしてスポットを追加
+                  </p>
                 )}
               </div>
             </div>
@@ -614,7 +620,6 @@ function TouringDetailPage() {
                 {isStarting ? '開始中...' : 'ツーリングを開始する'}
               </Button>
             )}
-            {touringInfoCard}
             {spotsCard}
           </div>
         </div>
@@ -630,7 +635,6 @@ function TouringDetailPage() {
               {isStarting ? '開始中...' : 'ツーリングを開始する'}
             </Button>
           )}
-          {touringInfoCard}
           {spotsCard}
         </div>
       )}
@@ -673,7 +677,11 @@ function TouringDetailPage() {
           bikeId={bikeId}
           touringId={touringId}
           initialType={addModalType}
-          onClose={() => setAddModalType(null)}
+          initialLocation={mapClickLocation}
+          onClose={() => {
+            setAddModalType(null)
+            setMapClickLocation(null)
+          }}
           onSuccess={handleSpotAddSuccess}
         />
       )}

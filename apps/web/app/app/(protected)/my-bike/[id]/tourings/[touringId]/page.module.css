@@ -162,6 +162,17 @@
   opacity: 0.85;
 }
 
+.mapStickyWrapper {
+  /* モバイルは通常フロー */
+}
+
+@media (min-width: 768px) {
+  .mapStickyWrapper {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
 .mapContainerLarge {
   height: 400px;
   border-radius: var(--radius-md);
@@ -170,9 +181,18 @@
 
 @media (min-width: 768px) {
   .mapContainerLarge {
-    height: 100%;
-    min-height: 500px;
+    height: calc(100vh - 12rem);
+    min-height: 400px;
+    max-height: 700px;
   }
+}
+
+.mapClickHint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--color-ink);
+  opacity: 0.45;
 }
 
 .breakBanner {

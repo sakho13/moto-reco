@@ -15,15 +15,17 @@ type SortableSpotItemProps = {
   mutedTextClassName: string | undefined
   dimTextClassName: string | undefined
   formatVisitedAt: (dateString: string) => string
+  touringStatus?: 'PLANNED' | 'STARTED' | 'COMPLETED'
   onEdit: (spot: ApiResponseSpotDetail) => void
 }
+
+const pad = (n: number) => String(n).padStart(2, '0')
 
 const formatBreakDuration = (
   visitedAt: string,
   endAt: string | null
 ): string => {
   const start = new Date(visitedAt)
-  const pad = (n: number) => String(n).padStart(2, '0')
   const startStr = `${pad(start.getHours())}:${pad(start.getMinutes())}`
 
   if (!endAt) return `${startStr}〜`
@@ -38,6 +40,11 @@ const formatBreakDuration = (
   return `${startStr}〜${endStr}`
 }
 
+const formatPlannedArrival = (visitedAt: string): string => {
+  const d = new Date(visitedAt)
+  return `${pad(d.getHours())}:${pad(d.getMinutes())} 着予定`
+}
+
 /**
  * ドラッグ可能なスポット・休憩行コンポーネント
  */
@@ -50,6 +57,7 @@ export function SortableSpotItem({
   mutedTextClassName,
   dimTextClassName,
   formatVisitedAt,
+  touringStatus,
   onEdit,
 }: SortableSpotItemProps) {
   const {
@@ -100,8 +108,11 @@ export function SortableSpotItem({
           <div className="flex items-center gap-1 shrink-0">
             <span className={dimTextClassName} style={{ fontSize: '0.75rem' }}>
               {isBreak
-                ? formatBreakDuration(spot.visitedAt, spot.endAt)
-                : formatVisitedAt(spot.visitedAt)}
+                ? (touringStatus === 'PLANNED' ? '予定 ' : '') +
+                  formatBreakDuration(spot.visitedAt, spot.endAt)
+                : touringStatus === 'PLANNED'
+                  ? formatPlannedArrival(spot.visitedAt)
+                  : formatVisitedAt(spot.visitedAt)}
             </span>
             <button
               onClick={() => onEdit(spot)}
