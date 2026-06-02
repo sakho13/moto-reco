@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 import type {
   ApiResponseTouringDetail,
   SuccessResponse,

@@ -50,19 +50,25 @@ export function TouringEditForm({
 
   useEffect(() => {
     if (data) {
-      const startDateStr = new Date(data.startDate).toISOString().split('T')[0]
-      const endDateStr = new Date(data.endDate).toISOString().split('T')[0]
+      const pad = (n: number) => String(n).padStart(2, '0')
+      const toLocalDate = (d: Date) =>
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+      const toLocalTime = (d: Date) =>
+        `${pad(d.getHours())}:${pad(d.getMinutes())}`
 
-      if (startDateStr && endDateStr) {
-        setInitialData({
-          title: data.title,
-          startDate: startDateStr,
-          endDate: endDateStr,
-          startMileage: data.startMileage?.toString() ?? '',
-          endMileage: data.endMileage?.toString() ?? '',
-          mode: data.status === 'PLANNED' ? 'plan' : 'history',
-        })
-      }
+      const start = new Date(data.startDate)
+      const end = new Date(data.endDate)
+
+      setInitialData({
+        title: data.title,
+        startDate: toLocalDate(start),
+        startTime: toLocalTime(start),
+        endDate: toLocalDate(end),
+        endTime: toLocalTime(end),
+        startMileage: data.startMileage?.toString() ?? '',
+        endMileage: data.endMileage?.toString() ?? '',
+        mode: data.status === 'PLANNED' ? 'plan' : 'history',
+      })
     }
   }, [data])
 
@@ -73,8 +79,10 @@ export function TouringEditForm({
     try {
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`, {
         title: formData.title,
-        startDate: new Date(formData.startDate),
-        endDate: new Date(formData.endDate),
+        startDate: new Date(
+          `${formData.startDate}T${formData.startTime || '00:00'}`
+        ),
+        endDate: new Date(`${formData.endDate}T${formData.endTime || '00:00'}`),
         startMileage: formData.startMileage
           ? Number(formData.startMileage)
           : null,

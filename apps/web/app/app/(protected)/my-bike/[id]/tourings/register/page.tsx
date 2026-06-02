@@ -31,8 +31,10 @@ function TouringRegisterPage() {
     try {
       await apiPost(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
         title: formData.title,
-        startDate: new Date(formData.startDate),
-        endDate: new Date(formData.endDate),
+        startDate: new Date(
+          `${formData.startDate}T${formData.startTime || '00:00'}`
+        ),
+        endDate: new Date(`${formData.endDate}T${formData.endTime || '00:00'}`),
         ...(formData.startMileage
           ? { startMileage: Number(formData.startMileage) }
           : {}),

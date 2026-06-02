@@ -11,7 +11,9 @@ export type TouringMode = 'history' | 'plan'
 export interface TouringFormData {
   title: string
   startDate: string
+  startTime: string
   endDate: string
+  endTime: string
   startMileage: string
   endMileage: string
   mode: TouringMode
@@ -47,7 +49,9 @@ export const TouringForm = ({
   const [formData, setFormData] = useState<Omit<TouringFormData, 'mode'>>({
     title: initialData?.title ?? '',
     startDate: initialData?.startDate ?? today,
+    startTime: initialData?.startTime ?? '00:00',
     endDate: initialData?.endDate ?? today,
+    endTime: initialData?.endTime ?? '00:00',
     startMileage: initialData?.startMileage ?? '',
     endMileage: initialData?.endMileage ?? '',
   })
@@ -58,7 +62,9 @@ export const TouringForm = ({
       setFormData({
         title: initialData.title ?? '',
         startDate: initialData.startDate ?? today,
+        startTime: initialData.startTime ?? '00:00',
         endDate: initialData.endDate ?? today,
+        endTime: initialData.endTime ?? '00:00',
         startMileage: initialData.startMileage ?? '',
         endMileage: initialData.endMileage ?? '',
       })
@@ -74,13 +80,15 @@ export const TouringForm = ({
     setValidationError('')
 
     if (formData.startDate && formData.endDate) {
-      const start = new Date(formData.startDate)
-      const end = new Date(formData.endDate)
+      const start = new Date(
+        `${formData.startDate}T${formData.startTime || '00:00'}`
+      )
+      const end = new Date(`${formData.endDate}T${formData.endTime || '00:00'}`)
       if (start > end) {
         setValidationError(
           isPlan
-            ? '出発予定日は帰着予定日より前である必要があります'
-            : '開始日は終了日より前である必要があります'
+            ? '出発予定日時は帰着予定日時より前である必要があります'
+            : '開始日時は終了日時より前である必要があります'
         )
         return false
       }
@@ -191,46 +199,70 @@ export const TouringForm = ({
       </FormField>
 
       <FormField
-        label={isPlan ? '出発予定日' : '開始日'}
+        label={isPlan ? '出発予定日時' : '開始日時'}
         htmlFor="startDate"
         required
       >
-        <Input
-          id="startDate"
-          type="date"
-          value={formData.startDate}
-          onChange={(e) => {
-            const newStart = e.target.value
-            setFormData((prev) => ({
-              ...prev,
-              startDate: newStart,
-              endDate:
-                prev.endDate && newStart > prev.endDate
-                  ? newStart
-                  : prev.endDate,
-            }))
-          }}
-          required
-          disabled={isSubmitting}
-        />
+        <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+          <Input
+            id="startDate"
+            type="date"
+            value={formData.startDate}
+            onChange={(e) => {
+              const newStart = e.target.value
+              setFormData((prev) => ({
+                ...prev,
+                startDate: newStart,
+                endDate:
+                  prev.endDate && newStart > prev.endDate
+                    ? newStart
+                    : prev.endDate,
+              }))
+            }}
+            required
+            disabled={isSubmitting}
+          />
+          <Input
+            id="startTime"
+            type="time"
+            value={formData.startTime}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, startTime: e.target.value }))
+            }
+            disabled={isSubmitting}
+            style={{ width: '9rem', flexShrink: 0 }}
+          />
+        </div>
       </FormField>
 
       <FormField
-        label={isPlan ? '帰着予定日' : '終了日'}
+        label={isPlan ? '帰着予定日時' : '終了日時'}
         htmlFor="endDate"
         required
       >
-        <Input
-          id="endDate"
-          type="date"
-          value={formData.endDate}
-          min={formData.startDate}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, endDate: e.target.value }))
-          }
-          required
-          disabled={isSubmitting}
-        />
+        <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+          <Input
+            id="endDate"
+            type="date"
+            value={formData.endDate}
+            min={formData.startDate}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, endDate: e.target.value }))
+            }
+            required
+            disabled={isSubmitting}
+          />
+          <Input
+            id="endTime"
+            type="time"
+            value={formData.endTime}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, endTime: e.target.value }))
+            }
+            disabled={isSubmitting}
+            style={{ width: '9rem', flexShrink: 0 }}
+          />
+        </div>
       </FormField>
 
       <FormField
