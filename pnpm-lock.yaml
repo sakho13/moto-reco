@@ -238,8 +238,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@scalar/nextjs-api-reference':
-        specifier: 0.10.19
-        version: 0.10.19(next@16.0.7(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)
+        specifier: 0.10.20
+        version: 0.10.20(next@16.0.7(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -2623,27 +2623,27 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@scalar/client-side-rendering@0.1.12':
-    resolution: {integrity: sha512-prwHK4ozTU268BHZ/5OstoKB23JSidDuvddAOp0bVz9c29ZxsyzzxPtPcVgF7X16LiZnS1OzY030FoDCM+iC9Q==}
+  '@scalar/client-side-rendering@0.1.13':
+    resolution: {integrity: sha512-p8V4HgEWjaCpqsnhclg1pTfjE9JA0AWRr0ocBQHexoHo+pqnSs1d83Mv9rjH7R0FZJrlCSandZZeY3DMX2gYXQ==}
     engines: {node: '>=22'}
 
-  '@scalar/helpers@0.8.0':
-    resolution: {integrity: sha512-gmOC6VravNB9VDl6wnt/GOj4K/hn48tj5bpW4AM4MhH8Ubil6uu7g1DSoKHwltu8Ks79KEtR6JmOrROi9R7jaQ==}
+  '@scalar/helpers@0.8.1':
+    resolution: {integrity: sha512-yuiuBCadP5bjAnIv23QvifVN/NaMi9xBF6b8Wdk4QOzwzLPJmp699MAdf33J0A5i2qKcvnu32iz/VkEJmQRe5g==}
     engines: {node: '>=22'}
 
-  '@scalar/nextjs-api-reference@0.10.19':
-    resolution: {integrity: sha512-+8e20fM+vPCg0sQfpJJVfB2QT2rSli1XPPpwVqyP2NyOqKskZx33ixdh5/I1VhlRPECgy8M+qSwVu0E6v5iV1w==}
+  '@scalar/nextjs-api-reference@0.10.20':
+    resolution: {integrity: sha512-2PN7de5Ilxw/hDT0VsI1B0+12c5/N23Td1nPZADU0oLOPnMY1UMktd+R0Y4rcs72tNyimVCReU0p53DpYW27pw==}
     engines: {node: '>=22'}
     peerDependencies:
       next: ^15.0.0 || ^16.0.0
       react: ^19.0.0
 
-  '@scalar/schemas@0.3.2':
-    resolution: {integrity: sha512-iadXBgJ02XUU5C5s6/xh/PmGLzUPd7X8upXIvPWBXDcQ4FHACNgkG8PPZ/beYM8UPDDkTUPM3ygEs0G6jKwGjQ==}
+  '@scalar/schemas@0.3.3':
+    resolution: {integrity: sha512-qDcgFu6ta5Z90L9D2P6DFKzYesU+FW5+m55SGmdI4iRMRCwj5umHpec2Y2W/SJcCF6bbUZawMxuOH2Ja6rUNpQ==}
     engines: {node: '>=22'}
 
-  '@scalar/types@0.12.2':
-    resolution: {integrity: sha512-EzLkubCb7xioiTm9eYnmn/032akaq4kkrrdclgV2uezwtniR8ErQICjhMl2AjBWL6nstHiFZ9RnPZm2Z2/KM0Q==}
+  '@scalar/types@0.12.3':
+    resolution: {integrity: sha512-7zaXafbgTFmsJ/9AwYeExUWzXoZNyKOL0SEVAUWRaOndcjxpFCtwzuPrc1elMEWdHopWbY1Qe5pWKbE2aqG2HA==}
     engines: {node: '>=22'}
 
   '@scalar/validation@0.6.0':
@@ -5813,8 +5813,8 @@ packages:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
 
-  type-fest@5.6.0:
-    resolution: {integrity: sha512-8ZiHFm91orbSAe2PSAiSVBVko18pbhbiB3U9GglSzF/zCGkR+rxpHx6sEMCUm4kxY4LjDIUGgCfUMtwfZfjfUA==}
+  type-fest@5.7.0:
+    resolution: {integrity: sha512-1URUxUqfHFM1c+zfSPsa3gnkO7Aq21qyH75SIduNYz4SzY964rn1X2vCMQaHSHhktiw+0kPa2iyb6PUpXqB6Vg==}
     engines: {node: '>=20'}
 
   typed-array-buffer@1.0.3:
@@ -8204,30 +8204,30 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.53.3':
     optional: true
 
-  '@scalar/client-side-rendering@0.1.12':
+  '@scalar/client-side-rendering@0.1.13':
     dependencies:
-      '@scalar/schemas': 0.3.2
-      '@scalar/types': 0.12.2
+      '@scalar/schemas': 0.3.3
+      '@scalar/types': 0.12.3
       '@scalar/validation': 0.6.0
 
-  '@scalar/helpers@0.8.0': {}
+  '@scalar/helpers@0.8.1': {}
 
-  '@scalar/nextjs-api-reference@0.10.19(next@16.0.7(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)':
+  '@scalar/nextjs-api-reference@0.10.20(next@16.0.7(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)':
     dependencies:
-      '@scalar/client-side-rendering': 0.1.12
+      '@scalar/client-side-rendering': 0.1.13
       next: 16.0.7(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react: 19.2.1
 
-  '@scalar/schemas@0.3.2':
+  '@scalar/schemas@0.3.3':
     dependencies:
-      '@scalar/helpers': 0.8.0
+      '@scalar/helpers': 0.8.1
       '@scalar/validation': 0.6.0
 
-  '@scalar/types@0.12.2':
+  '@scalar/types@0.12.3':
     dependencies:
-      '@scalar/helpers': 0.8.0
+      '@scalar/helpers': 0.8.1
       nanoid: 5.1.11
-      type-fest: 5.6.0
+      type-fest: 5.7.0
       zod: 4.4.3
 
   '@scalar/validation@0.6.0': {}
@@ -11896,7 +11896,7 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
 
-  type-fest@5.6.0:
+  type-fest@5.7.0:
     dependencies:
       tagged-tag: 1.0.0
 
