@@ -29,8 +29,7 @@ import { TouringEditModal } from '@/components/touring/TouringEditModal'
 import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
-import { TouringDeleteConfirmModal } from '@/components/touring/TouringDeleteConfirmModal'
-import { apiGet, apiDelete, apiPatch, apiPost } from '@/lib/api/client'
+import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -263,22 +262,6 @@ function TouringDetailPage() {
     }
   }
 
-  const handleConfirmDelete = async () => {
-    try {
-      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
-        touringId,
-      })
-      await mutate(
-        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
-      )
-      router.push(`/app/my-bike/${bikeId}/tourings`)
-    } catch (err) {
-      toast.error(
-        err instanceof ApiV1Error ? err.message : '削除に失敗しました'
-      )
-    }
-  }
-
   const handleStartFromPlan = async () => {
     setIsStarting(true)
     try {
@@ -436,87 +419,24 @@ function TouringDetailPage() {
       ) : (
         <div className={styles.spotsListScroll}>
           <div className="space-y-3">
-          {/* 出発地 */}
-          <div className={styles.spotItem}>
-            <div className={styles.startBadge}>出</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-medium text-sm">出発地</p>
-                <button
-                  onClick={() => setEditingLocationTarget('start')}
-                  className={styles.editButton}
-                  aria-label="出発地を編集"
-                >
-                  <EditIcon />
-                </button>
-              </div>
-              {startLocation ? (
-                <p className={`text-xs mt-1 ${styles.mutedText}`}>
-                  {startLocation.lat.toFixed(5)}, {startLocation.lng.toFixed(5)}
-                </p>
-              ) : (
-                <p className={`text-xs mt-1 ${styles.mutedText}`}>位置未設定</p>
-              )}
-            </div>
-          </div>
-
-          {/* 立ち寄りスポット（DnD） */}
-          {localSpots && localSpots.length > 0 && (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={localSpots.map((s) => s.spotId)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="space-y-3">
-                  {localSpots.map((spot, index) => (
-                    <SortableSpotItem
-                      key={spot.spotId}
-                      spot={spot}
-                      index={index}
-                      editButtonClassName={styles.editButton}
-                      spotItemClassName={styles.spotItem}
-                      spotBadgeClassName={styles.spotBadge}
-                      mutedTextClassName={styles.mutedText}
-                      dimTextClassName={styles.dimText}
-                      formatVisitedAt={formatVisitedAt}
-                      touringStatus={touring?.status}
-                      onEdit={setEditingSpot}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          )}
-
-          {/* スポットがない場合のメッセージ */}
-          {(!localSpots || localSpots.length === 0) && (
-            <p className={`text-sm ${styles.mutedText}`}>
-              スポットはまだ記録されていません
-            </p>
-          )}
-
-          {/* 終着地（COMPLETEDの場合のみ表示） */}
-          {touring?.status === 'COMPLETED' && (
+            {/* 出発地 */}
             <div className={styles.spotItem}>
-              <div className={styles.endBadge}>着</div>
+              <div className={styles.startBadge}>出</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium text-sm">終着地</p>
+                  <p className="font-medium text-sm">出発地</p>
                   <button
-                    onClick={() => setEditingLocationTarget('end')}
+                    onClick={() => setEditingLocationTarget('start')}
                     className={styles.editButton}
-                    aria-label="終着地を編集"
+                    aria-label="出発地を編集"
                   >
                     <EditIcon />
                   </button>
                 </div>
-                {endLocation ? (
+                {startLocation ? (
                   <p className={`text-xs mt-1 ${styles.mutedText}`}>
-                    {endLocation.lat.toFixed(5)}, {endLocation.lng.toFixed(5)}
+                    {startLocation.lat.toFixed(5)},{' '}
+                    {startLocation.lng.toFixed(5)}
                   </p>
                 ) : (
                   <p className={`text-xs mt-1 ${styles.mutedText}`}>
@@ -525,7 +445,73 @@ function TouringDetailPage() {
                 )}
               </div>
             </div>
-          )}
+
+            {/* 立ち寄りスポット（DnD） */}
+            {localSpots && localSpots.length > 0 && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={localSpots.map((s) => s.spotId)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-3">
+                    {localSpots.map((spot, index) => (
+                      <SortableSpotItem
+                        key={spot.spotId}
+                        spot={spot}
+                        index={index}
+                        editButtonClassName={styles.editButton}
+                        spotItemClassName={styles.spotItem}
+                        spotBadgeClassName={styles.spotBadge}
+                        mutedTextClassName={styles.mutedText}
+                        dimTextClassName={styles.dimText}
+                        formatVisitedAt={formatVisitedAt}
+                        touringStatus={touring?.status}
+                        onEdit={setEditingSpot}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+
+            {/* スポットがない場合のメッセージ */}
+            {(!localSpots || localSpots.length === 0) && (
+              <p className={`text-sm ${styles.mutedText}`}>
+                スポットはまだ記録されていません
+              </p>
+            )}
+
+            {/* 終着地（COMPLETEDの場合のみ表示） */}
+            {touring?.status === 'COMPLETED' && (
+              <div className={styles.spotItem}>
+                <div className={styles.endBadge}>着</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium text-sm">終着地</p>
+                    <button
+                      onClick={() => setEditingLocationTarget('end')}
+                      className={styles.editButton}
+                      aria-label="終着地を編集"
+                    >
+                      <EditIcon />
+                    </button>
+                  </div>
+                  {endLocation ? (
+                    <p className={`text-xs mt-1 ${styles.mutedText}`}>
+                      {endLocation.lat.toFixed(5)}, {endLocation.lng.toFixed(5)}
+                    </p>
+                  ) : (
+                    <p className={`text-xs mt-1 ${styles.mutedText}`}>
+                      位置未設定
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
