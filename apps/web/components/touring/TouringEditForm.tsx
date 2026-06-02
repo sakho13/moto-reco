@@ -6,12 +6,13 @@ import type {
   ApiResponseTouringDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import {
   TouringForm,
   type TouringFormData,
 } from '@/components/touring/TouringForm'
-import { authenticatedFetch, apiPatch } from '@/lib/api/client'
+import { authenticatedFetch, apiPatch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 interface TouringEditFormProps {
@@ -26,6 +27,8 @@ export function TouringEditForm({
   onSuccess,
 }: TouringEditFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [error, setError] = useState('')
   const [initialData, setInitialData] = useState<TouringFormData | undefined>()
 
@@ -57,6 +60,7 @@ export function TouringEditForm({
           endDate: endDateStr,
           startMileage: data.startMileage?.toString() ?? '',
           endMileage: data.endMileage?.toString() ?? '',
+          mode: data.status === 'PLANNED' ? 'plan' : 'history',
         })
       }
     }
@@ -75,19 +79,39 @@ export function TouringEditForm({
           ? Number(formData.startMileage)
           : null,
         endMileage: formData.endMileage ? Number(formData.endMileage) : null,
-        status: 'COMPLETED',
+        status: formData.mode === 'plan' ? 'PLANNED' : 'COMPLETED',
       })
 
       await mutate(
-        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=end-date&sort-order=desc`
+        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
       )
       await mutate(detailUrl)
-      toast.success('ツーリング履歴を更新しました')
+      toast.success('更新しました')
       onSuccess('update')
     } catch (err) {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
+        touringId,
+      })
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
+      )
+      onSuccess('delete')
+    } catch (err) {
+      toast.error(
+        err instanceof ApiV1Error ? err.message : '削除に失敗しました'
+      )
+      setConfirmingDelete(false)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -102,12 +126,71 @@ export function TouringEditForm({
   if (!initialData) return null
 
   return (
-    <TouringForm
-      initialData={initialData}
-      onSubmit={handleFormSubmit}
-      isSubmitting={isSubmitting}
-      error={error}
-      isEdit
-    />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--spacing-4)',
+      }}
+    >
+      <TouringForm
+        initialData={initialData}
+        onSubmit={handleFormSubmit}
+        isSubmitting={isSubmitting}
+        error={error}
+        isEdit
+      />
+
+      <hr style={{ borderColor: 'var(--color-cloud)', margin: '0' }} />
+
+      {confirmingDelete ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--spacing-2)',
+          }}
+        >
+          <p
+            style={{
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--color-ink)',
+            }}
+          >
+            このツーリングを削除しますか？この操作は取り消せません。
+          </p>
+          <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+            <Button
+              onClick={() => setConfirmingDelete(false)}
+              variant="cloud"
+              size="sm"
+              disabled={isDeleting}
+              fullWidth
+            >
+              キャンセル
+            </Button>
+            <Button
+              onClick={handleDelete}
+              variant="danger"
+              size="sm"
+              disabled={isDeleting}
+              loading={isDeleting}
+              fullWidth
+            >
+              {isDeleting ? '削除中...' : '削除する'}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button
+          onClick={() => setConfirmingDelete(true)}
+          variant="danger"
+          size="sm"
+          disabled={isSubmitting}
+        >
+          削除
+        </Button>
+      )}
+    </div>
   )
 }

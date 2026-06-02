@@ -26,24 +26,37 @@ function TouringRegisterPage() {
     setError('')
     setIsSubmitting(true)
 
+    const isPlan = formData.mode === 'plan'
+
     try {
       await apiPost(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
         title: formData.title,
         startDate: new Date(formData.startDate),
         endDate: new Date(formData.endDate),
-        startMileage: formData.startMileage
-          ? Number(formData.startMileage)
-          : null,
-        endMileage: formData.endMileage ? Number(formData.endMileage) : null,
-        status: 'COMPLETED',
+        ...(formData.startMileage
+          ? { startMileage: Number(formData.startMileage) }
+          : {}),
+        ...(!isPlan && formData.endMileage
+          ? { endMileage: Number(formData.endMileage) }
+          : {}),
+        status: isPlan ? 'PLANNED' : 'COMPLETED',
       })
 
-      await mutate(
-        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=end-date&sort-order=desc`
+      await Promise.all([
+        mutate(
+          `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=end-date&sort-order=desc`
+        ),
+        mutate(
+          `/api/v1/user-bike/bike/${bikeId}/tourings?status=PLANNED&sort-by=start-date&sort-order=asc`
+        ),
+      ])
+
+      toast.success(
+        isPlan
+          ? 'ツーリングプランを保存しました'
+          : 'ツーリング履歴を登録しました',
+        { description: 'ツーリング一覧へ移動します。' }
       )
-      toast.success('ツーリング履歴を登録しました', {
-        description: 'ツーリング履歴一覧へ移動します。',
-      })
       router.push(`/app/my-bike/${bikeId}/tourings`)
     } catch (err) {
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
@@ -63,7 +76,7 @@ function TouringRegisterPage() {
         </Button>
       </div>
 
-      <BaseCard title="ツーリング履歴を登録">
+      <BaseCard title="ツーリングを登録">
         <TouringForm
           onSubmit={handleFormSubmit}
           isSubmitting={isSubmitting}

@@ -21,6 +21,16 @@
   opacity: 0.4;
 }
 
+.statusPlanned {
+  background-color: #6366f1;
+  color: white;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
 .statusStarted {
   background-color: #10b981;
   color: white;

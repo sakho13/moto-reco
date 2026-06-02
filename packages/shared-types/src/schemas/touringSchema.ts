@@ -36,9 +36,9 @@ export const TouringRegisterRequestSchema = z
       .nonnegative('終了時の総走行距離は0以上で指定してください')
       .optional(),
     status: z
-      .enum(['STARTED', 'COMPLETED'], {
+      .enum(['PLANNED', 'STARTED', 'COMPLETED'], {
         invalid_type_error:
-          'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
+          'ステータスはPLANNED、STARTEDまたはCOMPLETEDで指定してください',
       })
       .default('COMPLETED')
       .optional(),
@@ -100,9 +100,9 @@ export const TouringUpdateRequestSchema = z
       .nonnegative('終了時の総走行距離は0以上で指定してください')
       .optional(),
     status: z
-      .enum(['STARTED', 'COMPLETED'], {
+      .enum(['PLANNED', 'STARTED', 'COMPLETED'], {
         invalid_type_error:
-          'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
+          'ステータスはPLANNED、STARTEDまたはCOMPLETEDで指定してください',
       })
       .optional(),
     fuelLogIds: z
@@ -194,6 +194,12 @@ const TouringStartRequestSchema = z.object({
   action: z.literal('start', {
     required_error: '操作は必須です',
   }),
+  touringPlanId: z
+    .string({
+      invalid_type_error: 'ツーリングプランIDは文字列で指定してください',
+    })
+    .min(1, 'ツーリングプランIDは1文字以上で指定してください')
+    .optional(),
   title: z
     .string({
       invalid_type_error: 'タイトルは文字列で指定してください',
@@ -283,6 +289,7 @@ export type TouringStartEndRequest = z.infer<
 export const TouringListQuerySchema = z.object({
   'sort-by': z.enum(['start-date', 'end-date']).optional(),
   'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+  status: z.enum(['PLANNED', 'STARTED', 'COMPLETED']).optional(),
 })
 
 export type TouringListQuery = z.infer<typeof TouringListQuerySchema>
@@ -291,9 +298,10 @@ export type TouringListQuery = z.infer<typeof TouringListQuerySchema>
  * ツーリングステータス更新リクエストのバリデーションスキーマ
  */
 export const TouringStatusUpdateRequestSchema = z.object({
-  status: z.enum(['STARTED', 'COMPLETED'], {
+  status: z.enum(['PLANNED', 'STARTED', 'COMPLETED'], {
     required_error: 'ステータスは必須です',
-    invalid_type_error: 'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
+    invalid_type_error:
+      'ステータスはPLANNED、STARTEDまたはCOMPLETEDで指定してください',
   }),
 })
 

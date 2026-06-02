@@ -3,7 +3,7 @@ import { MyUserBikeId } from './bike'
 export type TouringId = string & { readonly __brand: unique symbol }
 export const createTouringId = (id: string): TouringId => id as TouringId
 
-export type TouringStatus = 'STARTED' | 'COMPLETED'
+export type TouringStatus = 'PLANNED' | 'STARTED' | 'COMPLETED'
 
 export type Touring = {
   touringId: TouringId

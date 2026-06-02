@@ -3,6 +3,7 @@ import {
   createTouringId,
   MyUserBikeId,
   TouringId,
+  TouringStatus,
 } from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
@@ -36,7 +37,7 @@ type TouringRow = {
   startLongitude: number | null
   endLatitude: number | null
   endLongitude: number | null
-  status: 'STARTED' | 'COMPLETED'
+  status: TouringStatus
 }
 
 const toTouringEntity = (row: TouringRow): TouringEntity =>
@@ -121,6 +122,9 @@ export class PrismaTouringRepository
     const tourings = await this.connection.tUserMyBikeTouring.findMany({
       where: {
         userMyBikeId: myUserBikeId,
+        ...(searchParams.status !== undefined
+          ? { status: searchParams.status }
+          : {}),
       },
       select: touringSelect,
       orderBy,
@@ -169,7 +173,7 @@ export class PrismaTouringRepository
   async updateTouringStatus(
     touringId: TouringId,
     myUserBikeId: MyUserBikeId,
-    status: 'STARTED' | 'COMPLETED'
+    status: TouringStatus
   ): Promise<TouringEntity> {
     const updated = await this.connection.tUserMyBikeTouring.update({
       where: {

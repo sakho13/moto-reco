@@ -29,9 +29,11 @@ import { TouringEditModal } from '@/components/touring/TouringEditModal'
 import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
-import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
+import { TouringDeleteConfirmModal } from '@/components/touring/TouringDeleteConfirmModal'
+import { apiGet, apiDelete, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
+import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
 function buildGoogleMapsUrl(points: MapPoint[]): string | null {
   const first = points[0]
@@ -57,6 +59,8 @@ function TouringDetailPage() {
   const bikeId = params.id as string
   const touringId = params.touringId as string
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isStarting, setIsStarting] = useState(false)
+  const { getCurrentPosition } = useGeolocation()
   const [editingLocationTarget, setEditingLocationTarget] = useState<
     'start' | 'end' | null
   >(null)
@@ -255,6 +259,50 @@ function TouringDetailPage() {
     }
   }
 
+  const handleConfirmDelete = async () => {
+    try {
+      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
+        touringId,
+      })
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
+      )
+      router.push(`/app/my-bike/${bikeId}/tourings`)
+    } catch (err) {
+      toast.error(
+        err instanceof ApiV1Error ? err.message : '削除に失敗しました'
+      )
+    }
+  }
+
+  const handleStartFromPlan = async () => {
+    setIsStarting(true)
+    try {
+      const { position } = await getCurrentPosition()
+      await apiPost(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/start-end` as const,
+        {
+          action: 'start',
+          touringPlanId: touringId,
+          startDate: new Date().toISOString(),
+          startLatitude: position?.latitude,
+          startLongitude: position?.longitude,
+        }
+      )
+      toast.success('ツーリングを開始しました')
+      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
+      router.push('/app/home')
+    } catch (err) {
+      toast.error(
+        err instanceof ApiV1Error
+          ? err.message
+          : 'ツーリングの開始に失敗しました'
+      )
+    } finally {
+      setIsStarting(false)
+    }
+  }
+
   const handleLocationEditSuccess = async () => {
     await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`)
     setEditingLocationTarget(null)
@@ -339,12 +387,18 @@ function TouringDetailPage() {
           <h1 className="text-xl font-bold truncate">{touring?.title}</h1>
           <span
             className={
-              touring?.status === 'STARTED'
-                ? styles.statusStarted
-                : styles.statusCompleted
+              touring?.status === 'PLANNED'
+                ? styles.statusPlanned
+                : touring?.status === 'STARTED'
+                  ? styles.statusStarted
+                  : styles.statusCompleted
             }
           >
-            {touring?.status === 'STARTED' ? '進行中' : '完了'}
+            {touring?.status === 'PLANNED'
+              ? 'プラン'
+              : touring?.status === 'STARTED'
+                ? '進行中'
+                : '完了'}
           </span>
         </div>
         <button
@@ -550,12 +604,32 @@ function TouringDetailPage() {
             </div>
           </div>
           <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
+            {touring?.status === 'PLANNED' && (
+              <Button
+                onClick={handleStartFromPlan}
+                variant="primary"
+                fullWidth
+                disabled={isStarting}
+              >
+                {isStarting ? '開始中...' : 'ツーリングを開始する'}
+              </Button>
+            )}
             {touringInfoCard}
             {spotsCard}
           </div>
         </div>
       ) : (
         <div className="w-full max-w-md space-y-4">
+          {touring?.status === 'PLANNED' && (
+            <Button
+              onClick={handleStartFromPlan}
+              variant="primary"
+              fullWidth
+              disabled={isStarting}
+            >
+              {isStarting ? '開始中...' : 'ツーリングを開始する'}
+            </Button>
+          )}
           {touringInfoCard}
           {spotsCard}
         </div>
