@@ -55,7 +55,7 @@ export function SpotAddForm({
     type: initialType,
     name: '',
     memo: '',
-    visitedAt: getNowLocalString(),
+    visitedAt: touringStatus === 'PLANNED' ? '' : getNowLocalString(),
     endAt: '',
   })
 
@@ -80,6 +80,16 @@ export function SpotAddForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    if (!formState.visitedAt) {
+      setError(
+        isPlanned
+          ? '到着予定時間を入力してください'
+          : '訪問日時を入力してください'
+      )
+      return
+    }
+
     setIsSubmitting(true)
 
     try {

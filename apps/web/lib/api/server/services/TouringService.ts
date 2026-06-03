@@ -217,7 +217,7 @@ export class TouringService {
             myUserBikeId: plan.myUserBikeId,
             title: params.title ?? plan.title,
             startDate,
-            endDate: startDate,
+            endDate: plan.endDate,
             startMileage: startMileage ?? plan.startMileage,
             endMileage: null,
             startLatitude: params.startLatitude ?? plan.startLatitude,

@@ -21,6 +21,7 @@ import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
+import { ModalBase } from '@/components/common/ModalBase'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { SortableSpotItem } from '@/components/spot/SortableSpotItem'
 import { SpotAddModal } from '@/components/spot/SpotAddModal'
@@ -45,6 +46,7 @@ function TouringDetailPage() {
   const touringId = params.touringId as string
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isStarting, setIsStarting] = useState(false)
+  const [isStartConfirmOpen, setIsStartConfirmOpen] = useState(false)
   const { getCurrentPosition } = useGeolocation()
   const [editingLocationTarget, setEditingLocationTarget] = useState<
     'start' | 'end' | null
@@ -346,6 +348,13 @@ function TouringDetailPage() {
     }
   }
 
+  const lastPlannedSpot =
+    touring?.status === 'PLANNED' && localSpots.length > 0
+      ? ([...localSpots].reverse().find((s) => s.type === 'SPOT') ??
+        localSpots.at(-1) ??
+        null)
+      : null
+
   const hasMap = mapPoints.length > 0 || touring?.status === 'PLANNED'
   const googleMapsUrl = buildGoogleMapsRouteUrl(mapPoints)
 
@@ -609,6 +618,13 @@ function TouringDetailPage() {
               {formatDate(touring.startDate)} → {formatDate(touring.endDate)}
               {distance !== null && ` · ${distance.toLocaleString()}km`}
             </p>
+            {lastPlannedSpot && (
+              <p className={`text-xs mt-0.5 ${styles.mutedText}`}>
+                最終スポット到着予定:{' '}
+                {lastPlannedSpot.name ? `${lastPlannedSpot.name} ` : ''}
+                {formatVisitedAt(lastPlannedSpot.visitedAt)}
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -648,7 +664,7 @@ function TouringDetailPage() {
           <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
             {touring?.status === 'PLANNED' && (
               <Button
-                onClick={handleStartFromPlan}
+                onClick={() => setIsStartConfirmOpen(true)}
                 variant="primary"
                 fullWidth
                 disabled={isStarting}
@@ -663,7 +679,7 @@ function TouringDetailPage() {
         <div className="w-full max-w-md space-y-4">
           {touring?.status === 'PLANNED' && (
             <Button
-              onClick={handleStartFromPlan}
+              onClick={() => setIsStartConfirmOpen(true)}
               variant="primary"
               fullWidth
               disabled={isStarting}
@@ -722,6 +738,52 @@ function TouringDetailPage() {
           }}
           onSuccess={handleSpotAddSuccess}
         />
+      )}
+
+      {isStartConfirmOpen && touring && (
+        <ModalBase
+          title="ツーリングを開始する"
+          onClose={() => setIsStartConfirmOpen(false)}
+          size="sm"
+        >
+          <div className="space-y-4">
+            <p className="text-sm">
+              予定日:{' '}
+              <strong>
+                {new Date(touring.startDate).toLocaleDateString('ja-JP', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </strong>
+            </p>
+            <p className="text-sm opacity-60">
+              今すぐ開始すると、現在地と現在時刻でツーリングが記録されます。
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="cloud"
+                fullWidth
+                onClick={() => setIsStartConfirmOpen(false)}
+                disabled={isStarting}
+              >
+                キャンセル
+              </Button>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={async () => {
+                  setIsStartConfirmOpen(false)
+                  await handleStartFromPlan()
+                }}
+                disabled={isStarting}
+                loading={isStarting}
+              >
+                開始する
+              </Button>
+            </div>
+          </div>
+        </ModalBase>
       )}
     </>
   )

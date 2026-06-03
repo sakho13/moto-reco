@@ -79,7 +79,7 @@ export const TouringForm = ({
   const validateForm = (): boolean => {
     setValidationError('')
 
-    if (formData.startDate && formData.endDate) {
+    if (!isPlan && formData.startDate && formData.endDate) {
       const start = new Date(
         `${formData.startDate}T${formData.startTime || '00:00'}`
       )
@@ -112,7 +112,12 @@ export const TouringForm = ({
     e.preventDefault()
     setValidationError('')
     if (!validateForm()) return
-    await onSubmit({ ...formData, mode })
+    await onSubmit({
+      ...formData,
+      endDate: isPlan ? formData.startDate : formData.endDate,
+      endTime: isPlan ? formData.startTime : formData.endTime,
+      mode,
+    })
   }
 
   return (
@@ -235,35 +240,33 @@ export const TouringForm = ({
         </div>
       </FormField>
 
-      <FormField
-        label={isPlan ? '帰着予定日時' : '終了日時'}
-        htmlFor="endDate"
-        required
-      >
-        <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
-          <Input
-            id="endDate"
-            type="date"
-            value={formData.endDate}
-            min={formData.startDate}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, endDate: e.target.value }))
-            }
-            required
-            disabled={isSubmitting}
-          />
-          <Input
-            id="endTime"
-            type="time"
-            value={formData.endTime}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, endTime: e.target.value }))
-            }
-            disabled={isSubmitting}
-            style={{ width: '9rem', flexShrink: 0 }}
-          />
-        </div>
-      </FormField>
+      {!isPlan && (
+        <FormField label="終了日時" htmlFor="endDate" required>
+          <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+            <Input
+              id="endDate"
+              type="date"
+              value={formData.endDate}
+              min={formData.startDate}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, endDate: e.target.value }))
+              }
+              required
+              disabled={isSubmitting}
+            />
+            <Input
+              id="endTime"
+              type="time"
+              value={formData.endTime}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, endTime: e.target.value }))
+              }
+              disabled={isSubmitting}
+              style={{ width: '9rem', flexShrink: 0 }}
+            />
+          </div>
+        </FormField>
+      )}
 
       <FormField
         label={isPlan ? '出発時走行距離 (km)（任意）' : '開始時走行距離 (km)'}
