@@ -15,7 +15,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import useSWR, { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
@@ -33,24 +33,10 @@ import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
-
-function buildGoogleMapsUrl(points: MapPoint[]): string | null {
-  const first = points[0]
-  const last = points[points.length - 1]
-  if (!first) return null
-  if (points.length === 1) {
-    return `https://www.google.com/maps/search/?api=1&query=${first.lat},${first.lng}`
-  }
-  if (!last) return null
-  const origin = `${first.lat},${first.lng}`
-  const destination = `${last.lat},${last.lng}`
-  const waypoints = points
-    .slice(1, -1)
-    .map((p) => `${p.lat},${p.lng}`)
-    .join('|')
-  const base = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`
-  return waypoints ? `${base}&waypoints=${encodeURIComponent(waypoints)}` : base
-}
+import {
+  buildGoogleMapsRouteUrl,
+  buildGoogleMapsTwoPointUrl,
+} from '@/lib/utils/googleMaps'
 
 function TouringDetailPage() {
   const params = useParams()
@@ -361,7 +347,7 @@ function TouringDetailPage() {
   }
 
   const hasMap = mapPoints.length > 0 || touring?.status === 'PLANNED'
-  const googleMapsUrl = buildGoogleMapsUrl(mapPoints)
+  const googleMapsUrl = buildGoogleMapsRouteUrl(mapPoints)
 
   const startLocation =
     touring?.startLatitude != null && touring?.startLongitude != null
@@ -446,6 +432,23 @@ function TouringDetailPage() {
               </div>
             </div>
 
+            {/* 出発地 → スポット1 ルートリンク */}
+            {startLocation != null &&
+              localSpots[0]?.latitude != null &&
+              localSpots[0]?.longitude != null && (
+                <a
+                  href={buildGoogleMapsTwoPointUrl(startLocation, {
+                    lat: localSpots[0]!.latitude!,
+                    lng: localSpots[0]!.longitude!,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.routeLink}
+                >
+                  ↓ Googleマップで経路確認
+                </a>
+              )}
+
             {/* 立ち寄りスポット（DnD） */}
             {localSpots && localSpots.length > 0 && (
               <DndContext
@@ -458,21 +461,45 @@ function TouringDetailPage() {
                   strategy={verticalListSortingStrategy}
                 >
                   <div className="space-y-3">
-                    {localSpots.map((spot, index) => (
-                      <SortableSpotItem
-                        key={spot.spotId}
-                        spot={spot}
-                        index={index}
-                        editButtonClassName={styles.editButton}
-                        spotItemClassName={styles.spotItem}
-                        spotBadgeClassName={styles.spotBadge}
-                        mutedTextClassName={styles.mutedText}
-                        dimTextClassName={styles.dimText}
-                        formatVisitedAt={formatVisitedAt}
-                        touringStatus={touring?.status}
-                        onEdit={setEditingSpot}
-                      />
-                    ))}
+                    {localSpots.map((spot, index) => {
+                      const nextSpot = localSpots[index + 1]
+                      return (
+                        <Fragment key={spot.spotId}>
+                          <SortableSpotItem
+                            spot={spot}
+                            index={index}
+                            editButtonClassName={styles.editButton}
+                            spotItemClassName={styles.spotItem}
+                            spotBadgeClassName={styles.spotBadge}
+                            mutedTextClassName={styles.mutedText}
+                            dimTextClassName={styles.dimText}
+                            formatVisitedAt={formatVisitedAt}
+                            touringStatus={touring?.status}
+                            onEdit={setEditingSpot}
+                          />
+                          {nextSpot &&
+                            spot.latitude != null &&
+                            spot.longitude != null &&
+                            nextSpot.latitude != null &&
+                            nextSpot.longitude != null && (
+                              <a
+                                href={buildGoogleMapsTwoPointUrl(
+                                  { lat: spot.latitude, lng: spot.longitude },
+                                  {
+                                    lat: nextSpot.latitude,
+                                    lng: nextSpot.longitude,
+                                  }
+                                )}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.routeLink}
+                              >
+                                ↓ Googleマップで経路確認
+                              </a>
+                            )}
+                        </Fragment>
+                      )
+                    })}
                   </div>
                 </SortableContext>
               </DndContext>
@@ -484,6 +511,27 @@ function TouringDetailPage() {
                 スポットはまだ記録されていません
               </p>
             )}
+
+            {/* 最終スポット → 終着地 ルートリンク */}
+            {touring?.status === 'COMPLETED' &&
+              endLocation != null &&
+              localSpots.at(-1)?.latitude != null &&
+              localSpots.at(-1)?.longitude != null && (
+                <a
+                  href={buildGoogleMapsTwoPointUrl(
+                    {
+                      lat: localSpots.at(-1)!.latitude!,
+                      lng: localSpots.at(-1)!.longitude!,
+                    },
+                    endLocation
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.routeLink}
+                >
+                  ↓ Googleマップで経路確認
+                </a>
+              )}
 
             {/* 終着地（COMPLETEDの場合のみ表示） */}
             {touring?.status === 'COMPLETED' && (

@@ -113,6 +113,21 @@
   opacity: 0.8;
 }
 
+.routeLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  color: var(--color-product);
+  text-decoration: none;
+  opacity: 0.75;
+}
+
+.routeLink:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 .editButton {
   flex-shrink: 0;
   display: flex;
