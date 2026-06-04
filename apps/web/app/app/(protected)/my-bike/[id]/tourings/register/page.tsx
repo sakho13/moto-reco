@@ -13,11 +13,13 @@ import {
 import { apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 function TouringRegisterPage() {
   const router = useRouter()
   const params = useParams()
   const bikeId = params.id as string
+  const { isGuest } = useAuth()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -83,6 +85,7 @@ function TouringRegisterPage() {
           onSubmit={handleFormSubmit}
           isSubmitting={isSubmitting}
           error={error}
+          disablePlanMode={isGuest}
         />
       </BaseCard>
     </>

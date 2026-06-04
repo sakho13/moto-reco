@@ -26,6 +26,7 @@ export interface TouringFormProps {
   error: string
   isEdit?: boolean
   hideModeSelector?: boolean
+  disablePlanMode?: boolean
 }
 
 export const TouringForm = ({
@@ -35,6 +36,7 @@ export const TouringForm = ({
   error,
   isEdit = false,
   hideModeSelector = false,
+  disablePlanMode = false,
 }: TouringFormProps) => {
   const getTodayDateString = () => {
     const today = new Date()
@@ -163,22 +165,33 @@ export const TouringForm = ({
           </button>
           <button
             type="button"
-            onClick={() => setMode('plan')}
-            disabled={isSubmitting}
+            onClick={() => !disablePlanMode && setMode('plan')}
+            disabled={isSubmitting || disablePlanMode}
+            title={
+              disablePlanMode
+                ? 'ゲストアカウントはプランを作成できません'
+                : undefined
+            }
             style={{
               flex: 1,
               padding: 'var(--spacing-2)',
               background:
                 mode === 'plan' ? 'var(--color-product)' : 'var(--color-cloud)',
-              color: mode === 'plan' ? 'white' : 'var(--color-ink)',
+              color: disablePlanMode
+                ? 'var(--color-muted-foreground)'
+                : mode === 'plan'
+                  ? 'white'
+                  : 'var(--color-ink)',
               border: 'none',
               borderLeft: '1px solid var(--color-cloudHover)',
-              cursor: isSubmitting ? 'not-allowed' : 'pointer',
+              cursor:
+                isSubmitting || disablePlanMode ? 'not-allowed' : 'pointer',
               fontWeight:
                 mode === 'plan'
                   ? 'var(--font-weight-semibold)'
                   : 'var(--font-weight-normal)',
               fontSize: 'var(--font-size-sm)',
+              opacity: disablePlanMode ? 0.5 : 1,
             }}
           >
             プランを作成

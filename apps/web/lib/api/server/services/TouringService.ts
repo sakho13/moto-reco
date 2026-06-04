@@ -89,6 +89,14 @@ export class TouringService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
+    // ゲストアカウントのプランモード制限
+    if (params.role === 'GUEST' && params.status === 'PLANNED') {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        'ゲストアカウントはツーリングプランを使用できません'
+      )
+    }
+
     // ゲストアカウントのツーリング登録数チェック
     if (params.role === 'GUEST') {
       const count = await this.touringRepository.countTourings(
@@ -156,8 +164,8 @@ export class TouringService {
 
     try {
       if (params.action === 'start') {
-        // ゲストアカウントのツーリング登録数チェック
-        if (params.role === 'GUEST') {
+        // ゲストアカウントのツーリング登録数チェック（プランから開始する場合は新規作成ではないためスキップ）
+        if (params.role === 'GUEST' && params.touringPlanId === undefined) {
           const count = await this.touringRepository.countTourings(
             params.myUserBikeId
           )

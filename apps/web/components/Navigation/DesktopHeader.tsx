@@ -1,13 +1,13 @@
 'use client'
 
 import { BreadcrumbNav } from './BreadcrumbNav'
-import styles from './MobileHeader.module.css'
+import styles from './DesktopHeader.module.css'
 import { BellButton } from '@/components/notification/BellButton'
 import { ThemeToggleButton } from '@/components/ThemeToggleButton'
 
-export function MobileHeader() {
+export function DesktopHeader() {
   return (
-    <header className={styles.header} aria-label="モバイルヘッダー">
+    <header className={styles.header} aria-label="ヘッダー">
       <BreadcrumbNav />
       <div className={styles.actions}>
         <BellButton />
