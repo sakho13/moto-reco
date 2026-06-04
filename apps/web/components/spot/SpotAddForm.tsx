@@ -17,6 +17,7 @@ type SpotAddFormProps = {
   initialType?: 'SPOT' | 'BREAK'
   initialLocation?: { lat: number; lng: number } | null
   touringStatus?: 'PLANNED' | 'STARTED' | 'COMPLETED'
+  prevSpotVisitedAt?: string
   onSuccess: () => void
 }
 
@@ -28,11 +29,12 @@ type SpotFormState = {
   endAt: string
 }
 
-const getNowLocalString = () => {
-  const now = new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`
-}
+const pad = (n: number) => String(n).padStart(2, '0')
+
+const toLocalDateTimeString = (date: Date): string =>
+  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+
+const getNowLocalString = () => toLocalDateTimeString(new Date())
 
 /**
  * スポット・休憩追加フォーム
@@ -43,6 +45,7 @@ export function SpotAddForm({
   initialType = 'SPOT',
   initialLocation = null,
   touringStatus,
+  prevSpotVisitedAt,
   onSuccess,
 }: SpotAddFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -55,7 +58,12 @@ export function SpotAddForm({
     type: initialType,
     name: '',
     memo: '',
-    visitedAt: touringStatus === 'PLANNED' ? '' : getNowLocalString(),
+    visitedAt:
+      touringStatus === 'PLANNED'
+        ? prevSpotVisitedAt
+          ? toLocalDateTimeString(new Date(prevSpotVisitedAt))
+          : ''
+        : getNowLocalString(),
     endAt: '',
   })
 

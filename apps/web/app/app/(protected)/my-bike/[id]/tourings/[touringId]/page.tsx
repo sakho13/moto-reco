@@ -283,13 +283,20 @@ function TouringDetailPage() {
     setEditingLocationTarget(null)
   }
 
+  const _mutateTouringAndSpots = async () => {
+    await Promise.all([
+      mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`),
+      mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`),
+    ])
+  }
+
   const handleSpotEditSuccess = async () => {
-    await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
+    await _mutateTouringAndSpots()
     setEditingSpot(null)
   }
 
   const handleSpotAddSuccess = async () => {
-    await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
+    await _mutateTouringAndSpots()
     setAddModalType(null)
     setMapClickLocation(null)
   }
@@ -300,7 +307,7 @@ function TouringDetailPage() {
   }
 
   const handleSpotDeleteSuccess = async () => {
-    await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`)
+    await _mutateTouringAndSpots()
     setEditingSpot(null)
   }
 
@@ -347,13 +354,6 @@ function TouringDetailPage() {
       setIsBreakLoading(false)
     }
   }
-
-  const lastPlannedSpot =
-    touring?.status === 'PLANNED' && localSpots.length > 0
-      ? ([...localSpots].reverse().find((s) => s.type === 'SPOT') ??
-        localSpots.at(-1) ??
-        null)
-      : null
 
   const hasMap = mapPoints.length > 0 || touring?.status === 'PLANNED'
   const googleMapsUrl = buildGoogleMapsRouteUrl(mapPoints)
@@ -618,13 +618,6 @@ function TouringDetailPage() {
               {formatDate(touring.startDate)} → {formatDate(touring.endDate)}
               {distance !== null && ` · ${distance.toLocaleString()}km`}
             </p>
-            {lastPlannedSpot && (
-              <p className={`text-xs mt-0.5 ${styles.mutedText}`}>
-                最終スポット到着予定:{' '}
-                {lastPlannedSpot.name ? `${lastPlannedSpot.name} ` : ''}
-                {formatVisitedAt(lastPlannedSpot.visitedAt)}
-              </p>
-            )}
           </div>
         )}
       </div>
@@ -732,6 +725,11 @@ function TouringDetailPage() {
           initialType={addModalType}
           initialLocation={mapClickLocation}
           touringStatus={touring?.status}
+          prevSpotVisitedAt={
+            touring?.status === 'PLANNED' && localSpots.length > 0
+              ? (localSpots.at(-1)!.endAt ?? localSpots.at(-1)!.visitedAt)
+              : undefined
+          }
           onClose={() => {
             setAddModalType(null)
             setMapClickLocation(null)

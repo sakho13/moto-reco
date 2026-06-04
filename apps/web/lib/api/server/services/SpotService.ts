@@ -8,6 +8,7 @@ import {
 } from '@repo/shared-types'
 import type { SpotReorderRequest } from '@repo/shared-types'
 import { SpotEntity } from '../entities/SpotEntity'
+import { TouringEntity } from '../entities/TouringEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ISpotRepository } from '../interfaces/ISpotRepository'
@@ -79,7 +80,9 @@ export class SpotService {
         sortOrder: 0, // createSpot でカウントして末尾に設定される
       })
 
-      return await this.spotRepository.createSpot(spot)
+      const created = await this.spotRepository.createSpot(spot)
+      await this._syncPlanEndDate(params.touringId, touring)
+      return created
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -162,7 +165,9 @@ export class SpotService {
         sortOrder: existingSpot.sortOrder,
       })
 
-      return await this.spotRepository.updateSpot(updatedSpot)
+      const updated = await this.spotRepository.updateSpot(updatedSpot)
+      await this._syncPlanEndDate(params.touringId, touring)
+      return updated
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -205,6 +210,7 @@ export class SpotService {
     }
 
     await this.spotRepository.deleteSpot(spotId, touringId)
+    await this._syncPlanEndDate(touringId, touring)
   }
 
   public async reorderSpots(
@@ -234,6 +240,25 @@ export class SpotService {
     await this.spotRepository.reorderSpots(
       spotIds.map((id) => createSpotId(id)),
       touringId
+    )
+  }
+
+  private async _syncPlanEndDate(
+    touringId: TouringId,
+    touring: TouringEntity
+  ): Promise<void> {
+    if (touring.status !== 'PLANNED') return
+
+    const spots = await this.spotRepository.findSpotsByTouringId(touringId)
+    const newEndDate =
+      spots.length > 0
+        ? new Date(Math.max(...spots.map((s) => s.visitedAt.getTime())))
+        : touring.startDate
+
+    if (newEndDate.getTime() === touring.endDate.getTime()) return
+
+    await this.touringRepository.updateTouring(
+      new TouringEntity({ ...touring.toJson(), endDate: newEndDate })
     )
   }
 }
