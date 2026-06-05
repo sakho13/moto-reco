@@ -47,26 +47,42 @@ export const TouringForm = ({
   }
   const today = getTodayDateString()
 
+  const getCurrentTime = () => {
+    const now = new Date()
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  }
+
+  const getDefaultStartTime = (m: TouringMode) =>
+    m === 'plan' ? '09:00' : getCurrentTime()
+  const getDefaultEndTime = (m: TouringMode) =>
+    m === 'plan' ? '17:00' : getCurrentTime()
+
   const [mode, setMode] = useState<TouringMode>(initialData?.mode ?? 'history')
-  const [formData, setFormData] = useState<Omit<TouringFormData, 'mode'>>({
-    title: initialData?.title ?? '',
-    startDate: initialData?.startDate ?? today,
-    startTime: initialData?.startTime ?? '00:00',
-    endDate: initialData?.endDate ?? today,
-    endTime: initialData?.endTime ?? '00:00',
-    startMileage: initialData?.startMileage ?? '',
-    endMileage: initialData?.endMileage ?? '',
-  })
+  const [formData, setFormData] = useState<Omit<TouringFormData, 'mode'>>(
+    () => {
+      const initialMode = initialData?.mode ?? 'history'
+      return {
+        title: initialData?.title ?? '',
+        startDate: initialData?.startDate ?? today,
+        startTime: initialData?.startTime ?? getDefaultStartTime(initialMode),
+        endDate: initialData?.endDate ?? today,
+        endTime: initialData?.endTime ?? getDefaultEndTime(initialMode),
+        startMileage: initialData?.startMileage ?? '',
+        endMileage: initialData?.endMileage ?? '',
+      }
+    }
+  )
   const [validationError, setValidationError] = useState('')
 
   useEffect(() => {
     if (initialData) {
+      const updatedMode = initialData.mode ?? mode
       setFormData({
         title: initialData.title ?? '',
         startDate: initialData.startDate ?? today,
-        startTime: initialData.startTime ?? '00:00',
+        startTime: initialData.startTime ?? getDefaultStartTime(updatedMode),
         endDate: initialData.endDate ?? today,
-        endTime: initialData.endTime ?? '00:00',
+        endTime: initialData.endTime ?? getDefaultEndTime(updatedMode),
         startMileage: initialData.startMileage ?? '',
         endMileage: initialData.endMileage ?? '',
       })

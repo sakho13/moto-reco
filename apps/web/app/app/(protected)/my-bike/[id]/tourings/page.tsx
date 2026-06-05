@@ -61,8 +61,8 @@ function TouringsPage() {
     router.push(`/app/my-bike/${bikeId}/tourings/${touringId}`)
   }
 
-  const handleRegister = () => {
-    router.push(`/app/my-bike/${bikeId}/tourings/register`)
+  const handleRegisterHistory = () => {
+    router.push(`/app/my-bike/${bikeId}/tourings/register?mode=history`)
   }
 
   if (isLoading) {
@@ -110,8 +110,8 @@ function TouringsPage() {
         >
           ← 戻る
         </Button>
-        <Button onClick={handleRegister} variant="primary">
-          登録する
+        <Button onClick={handleRegisterHistory} variant="primary">
+          ツーリングを作成
         </Button>
       </div>
 
@@ -123,7 +123,7 @@ function TouringsPage() {
         <TouringListSection
           tourings={sortedTourings}
           onDetail={handleDetail}
-          onRegister={handleRegister}
+          onRegister={handleRegisterHistory}
         />
       </div>
     </>

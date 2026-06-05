@@ -1,6 +1,6 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { mutate } from 'swr'
 import { BaseCard } from '@repo/ui/baseCard'
@@ -18,8 +18,12 @@ import { useAuth } from '@/lib/hooks/useAuth'
 function TouringRegisterPage() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const bikeId = params.id as string
   const { isGuest } = useAuth()
+
+  const modeParam = searchParams.get('mode')
+  const initialMode = modeParam === 'plan' ? 'plan' : 'history'
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -82,6 +86,7 @@ function TouringRegisterPage() {
 
       <BaseCard title="ツーリングを登録">
         <TouringForm
+          initialData={{ mode: initialMode }}
           onSubmit={handleFormSubmit}
           isSubmitting={isSubmitting}
           error={error}

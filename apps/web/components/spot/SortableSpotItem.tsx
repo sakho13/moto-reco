@@ -115,7 +115,10 @@ export function SortableSpotItem({
                     formatBreakDuration(spot.visitedAt, spot.endAt)
                   : touringStatus === 'PLANNED'
                     ? formatPlannedArrival(spot.visitedAt)
-                    : formatVisitedAt(spot.visitedAt)}
+                    : touringStatus === 'STARTED' &&
+                        new Date(spot.visitedAt) > new Date()
+                      ? `${formatVisitedAt(spot.visitedAt)} 訪問予定`
+                      : formatVisitedAt(spot.visitedAt)}
             </span>
             <button
               onClick={() => onEdit(spot)}

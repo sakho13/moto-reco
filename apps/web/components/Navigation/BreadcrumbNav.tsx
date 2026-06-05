@@ -16,7 +16,7 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return [{ label: 'ホーム' }]
   }
 
-  const items: BreadcrumbItem[] = [{ label: 'ホーム', href: '/app/home' }]
+  const items: BreadcrumbItem[] = []
 
   if (segments[1] === 'my-bike') {
     items.push({ label: 'マイバイク', href: '/app/my-bike' })
@@ -78,7 +78,7 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return items
   }
 
-  return [{ label: 'ホーム', href: '/app/home' }, { label: 'ページ' }]
+  return [{ label: 'ページ' }]
 }
 
 export function BreadcrumbNav() {
