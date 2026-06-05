@@ -50,9 +50,9 @@ test.describe('ツーリングプラン 終着地登録', () => {
     await page.goto(`/app/my-bike/${myUserBikeId}/tourings/${touringId}`)
 
     // PLANNEDステータスのバッジが表示されている（タイトルと区別するため exact + first）
-    await expect(
-      page.getByText('プラン', { exact: true }).first()
-    ).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('プラン', { exact: true }).first()).toBeVisible(
+      { timeout: 10_000 }
+    )
 
     // 終着地セクションが表示される（修正前は COMPLETED のみ）
     await expect(page.getByText('終着地', { exact: true })).toBeVisible({
@@ -75,9 +75,9 @@ test.describe('ツーリングプラン 終着地登録', () => {
     )
 
     await page.goto(`/app/my-bike/${myUserBikeId}/tourings/${touringId}`)
-    await expect(
-      page.getByText('プラン', { exact: true }).first()
-    ).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('プラン', { exact: true }).first()).toBeVisible(
+      { timeout: 10_000 }
+    )
 
     // 終着地の編集ボタン（aria-label="終着地を編集"）が存在する
     await expect(
@@ -100,9 +100,9 @@ test.describe('ツーリングプラン 終着地登録', () => {
     )
 
     await page.goto(`/app/my-bike/${myUserBikeId}/tourings/${touringId}`)
-    await expect(
-      page.getByText('プラン', { exact: true }).first()
-    ).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('プラン', { exact: true }).first()).toBeVisible(
+      { timeout: 10_000 }
+    )
 
     // 終着地の編集ボタンをクリック
     await page.getByRole('button', { name: '終着地を編集' }).click()
