@@ -1,0 +1,40 @@
+.widget {
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-md);
+  color: white;
+}
+
+.header {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: var(--spacing-2);
+}
+
+.etaText {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+}
+
+.subText {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 0.125rem;
+}
+
+.hint {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.loading {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.error {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.5);
+}
