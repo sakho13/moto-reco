@@ -226,7 +226,7 @@ function TouringDetailPage() {
   }
 
   if (
-    touring?.status === 'COMPLETED' &&
+    (touring?.status === 'COMPLETED' || touring?.status === 'PLANNED') &&
     touring?.endLatitude != null &&
     touring?.endLongitude != null
   ) {
@@ -522,7 +522,8 @@ function TouringDetailPage() {
             )}
 
             {/* 最終スポット → 終着地 ルートリンク */}
-            {touring?.status === 'COMPLETED' &&
+            {(touring?.status === 'COMPLETED' ||
+              touring?.status === 'PLANNED') &&
               endLocation != null &&
               localSpots.at(-1)?.latitude != null &&
               localSpots.at(-1)?.longitude != null && (
@@ -542,8 +543,9 @@ function TouringDetailPage() {
                 </a>
               )}
 
-            {/* 終着地（COMPLETEDの場合のみ表示） */}
-            {touring?.status === 'COMPLETED' && (
+            {/* 終着地（COMPLETED・PLANNEDの場合に表示） */}
+            {(touring?.status === 'COMPLETED' ||
+              touring?.status === 'PLANNED') && (
               <div className={styles.spotItem}>
                 <div className={styles.endBadge}>着</div>
                 <div className="flex-1 min-w-0">
