@@ -1,0 +1,413 @@
+/* ========================================
+   アニメーション定義
+   ======================================== */
+
+@keyframes roadDash {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+@keyframes bikeMove {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes cardGlow {
+  0%,
+  100% {
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: var(--shadow-lg), 0 0 30px rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* ========================================
+   全画面コンテナ
+   ======================================== */
+
+.container {
+  position: relative;
+  width: 100%;
+  min-height: calc(100dvh - 10rem);
+  padding: var(--spacing-6);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: var(--radius-lg);
+  animation: cardGlow 3s ease-in-out infinite;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ルート風の背景デザイン */
+.routeVisual {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.roadDash {
+  position: absolute;
+  bottom: 30%;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-image: repeating-linear-gradient(
+    to right,
+    white 0px,
+    white 20px,
+    transparent 20px,
+    transparent 40px
+  );
+  animation: roadDash 1.5s linear infinite;
+}
+
+/* ========================================
+   上部エリア（バイク名・タイトル・経過時間・休憩）
+   ======================================== */
+
+.topArea {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.breakCornerArea {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.breakCornerButton {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--radius-md);
+  background-color: rgba(251, 191, 36, 0.28);
+  border: 1px solid rgba(251, 191, 36, 0.65);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.breakCornerButton:hover:not(:disabled) {
+  background-color: rgba(251, 191, 36, 0.45);
+}
+
+.breakCornerButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.breakCornerEndButton {
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  border-radius: var(--radius-md);
+  background-color: rgba(251, 191, 36, 0.55);
+  border: 1px solid rgba(251, 191, 36, 0.9);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.breakCornerEndButton:hover:not(:disabled) {
+  background-color: rgba(251, 191, 36, 0.7);
+}
+
+.breakCornerEndButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.breakCornerStatus {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: right;
+}
+
+.bikeInfoArea {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding-right: 8rem;
+}
+
+.animatedBikeIcon {
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  color: white;
+  animation: bikeMove 2s ease-in-out infinite;
+}
+
+.bikeNameLarge {
+  flex: 1;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  line-height: var(--line-height-tight);
+  word-break: break-word;
+}
+
+.touringTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: rgba(255, 255, 255, 0.9);
+  word-break: break-word;
+  margin-bottom: var(--spacing-1);
+}
+
+.elapsedTime {
+  font-size: 3rem;
+  font-weight: var(--font-weight-bold);
+  color: white;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: var(--spacing-1);
+}
+
+.startDateTime {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.startMileageInfo {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: var(--spacing-1);
+}
+
+/* ========================================
+   中部エリア（天気・ETA ウィジェット）
+   ======================================== */
+
+.middleArea {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.noDestinationHint {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ========================================
+   下部エリア（アクションボタン）
+   ======================================== */
+
+.bottomArea {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-top: auto;
+}
+
+.spotButton {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+}
+
+.spotButton:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.endButton {
+  width: 100%;
+}
+
+/* ========================================
+   モーダル（スポット・走行距離）
+   ======================================== */
+
+.spotModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  padding: var(--spacing-4);
+}
+
+@media (min-width: 641px) {
+  .spotModalOverlay {
+    align-items: center;
+  }
+}
+
+.spotModal {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-lg);
+}
+
+.spotModalTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.spotModalField {
+  margin-bottom: var(--spacing-3);
+}
+
+.spotModalLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-1);
+}
+
+.spotModalInput {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-base);
+}
+
+.spotModalInput:focus {
+  border-color: var(--color-product);
+}
+
+.spotModalTextarea {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color var(--transition-base);
+}
+
+.spotModalTextarea:focus {
+  border-color: var(--color-product);
+}
+
+.spotMapArea {
+  height: 180px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-cloud);
+  margin-bottom: var(--spacing-4);
+}
+
+.spotMap {
+  width: 100%;
+  height: 100%;
+}
+
+.spotMapMessage {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  opacity: 0.5;
+  text-align: center;
+  padding: var(--spacing-4);
+}
+
+.spotModalActions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.spotModalActions > * {
+  flex: 1;
+}
+
+.mileageModalHint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-3);
+}
+
+.mileageModalError {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  margin-top: var(--spacing-1);
+}
+
+/* ========================================
+   レスポンシブ
+   ======================================== */
+
+@media (max-width: 640px) {
+  .container {
+    padding: var(--spacing-4);
+  }
+
+  .animatedBikeIcon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .bikeNameLarge {
+    font-size: var(--font-size-lg);
+  }
+
+  .elapsedTime {
+    font-size: 2.5rem;
+  }
+
+  .touringTitle {
+    font-size: var(--font-size-base);
+  }
+}
