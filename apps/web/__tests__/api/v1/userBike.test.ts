@@ -2334,6 +2334,127 @@ describe('UserBike API Endpoints', () => {
         expect(json.data.startMileage).toBe(2000)
       })
     })
+
+    describe('プランからツーリングを開始', () => {
+      test('PLANNEDプランを指定してツーリングを開始できる（新規作成されず既存プランがSTARTEDに更新される）', async () => {
+        // PLANNEDプランを作成
+        const planRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: '北海道ツーリング計画',
+              startDate: '2024-07-01T06:00:00.000Z',
+              endDate: '2024-07-05T18:00:00.000Z',
+              status: 'PLANNED',
+            }),
+          }
+        )
+        expect(planRes.status).toBe(201)
+        const planJson = await planRes.json()
+        const touringPlanId = planJson.data.touringId
+        expect(planJson.data.status).toBe('PLANNED')
+
+        // プランから開始
+        const startRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              touringPlanId,
+              startDate: '2024-07-01T06:00:00.000Z',
+              startMileage: 5000,
+            }),
+          }
+        )
+
+        const startJson = await startRes.json()
+        expect(startRes.status).toBe(201)
+        // 既存プランのIDと同じであることを確認（新規作成ではない）
+        expect(startJson.data.touringId).toBe(touringPlanId)
+        expect(startJson.data.status).toBe('STARTED')
+        expect(startJson.data.title).toBe('北海道ツーリング計画')
+        // プランの終了日時が保持されている
+        expect(startJson.data.endDate).toBe('2024-07-05T18:00:00.000Z')
+      })
+
+      test('存在しないtouringPlanIdを指定した場合は404となる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              touringPlanId: randomUUID(),
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expect(json).toMatchObject({
+          status: 'error',
+          errorCode: 'INVALID_REQUEST',
+          message: '指定されたツーリングプランが見つかりません',
+        })
+      })
+
+      test('PLANNEDではないツーリングIDをtouringPlanIdに指定した場合はエラーとなる', async () => {
+        // COMPLETEDのツーリングを作成
+        const completedRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: '完了したツーリング',
+              startDate: '2024-05-01T09:00:00.000Z',
+              endDate: '2024-05-01T18:00:00.000Z',
+            }),
+          }
+        )
+        const completedId = (await completedRes.json()).data.touringId
+
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              touringPlanId: completedId,
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expect(json).toMatchObject({
+          status: 'error',
+          errorCode: 'INVALID_REQUEST',
+          message: '指定されたツーリングはプラン状態ではありません',
+        })
+      })
+    })
   })
 
   describe('POST /api/v1/user-bike/bike/:myUserBikeId/tourings', () => {
@@ -4329,6 +4450,111 @@ describe('UserBike API Endpoints', () => {
           status: 'error',
           errorCode: 'INVALID_REQUEST',
           message: 'ゲストアカウントはツーリング履歴を2件まで登録できます',
+        })
+      })
+    })
+
+    describe('ツーリングプランモード制限', () => {
+      test('ゲストはPLANNEDステータスのツーリングを登録できない', async () => {
+        const { token } = await createGuestUser()
+        const { myUserBikeId } = await createTestUserBike(token, {
+          displacement: 250,
+        })
+
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: 'ゲストプラン',
+              startDate: '2024-06-01T09:00:00.000Z',
+              endDate: '2024-06-03T18:00:00.000Z',
+              status: 'PLANNED',
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expect(json).toMatchObject({
+          status: 'error',
+          errorCode: 'INVALID_REQUEST',
+          message: 'ゲストアカウントはツーリングプランを使用できません',
+        })
+      })
+
+      test('ゲストは通常ユーザーと同様にCOMPLETEDステータスのツーリングを登録できる', async () => {
+        const { token } = await createGuestUser()
+        const { myUserBikeId } = await createTestUserBike(token, {
+          displacement: 250,
+        })
+
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: 'ゲスト履歴',
+              startDate: '2024-06-01T09:00:00.000Z',
+              endDate: '2024-06-01T18:00:00.000Z',
+            }),
+          }
+        )
+
+        expect(res.status).toBe(201)
+        const json = await res.json()
+        expect(json.data.status).toBe('COMPLETED')
+      })
+
+      test('ゲストは2件のCOMPLETED登録後にPLANNEDを登録しようとした場合もプランエラーが返る', async () => {
+        const { token } = await createGuestUser()
+        const { myUserBikeId } = await createTestUserBike(token, {
+          displacement: 250,
+        })
+
+        // 2件登録
+        await createMultipleTourings(
+          token,
+          myUserBikeId,
+          Array.from({ length: 2 }, (_, i) => ({
+            title: `ゲストツーリング${i + 1}`,
+            startDate: `2024-01-0${i + 1}T09:00:00.000Z`,
+            endDate: `2024-01-0${i + 1}T18:00:00.000Z`,
+          }))
+        )
+
+        // PLANNEDで登録（プラン制限エラーが先に返る）
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: 'ゲストプラン',
+              startDate: '2024-06-01T09:00:00.000Z',
+              endDate: '2024-06-03T18:00:00.000Z',
+              status: 'PLANNED',
+            }),
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expect(json).toMatchObject({
+          status: 'error',
+          errorCode: 'INVALID_REQUEST',
+          message: 'ゲストアカウントはツーリングプランを使用できません',
         })
       })
     })

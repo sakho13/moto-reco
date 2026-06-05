@@ -1,20 +1,16 @@
 'use client'
 
 import type { ApiResponseTouringDetail } from '@repo/shared-types'
-import { Button } from '@repo/ui/button'
 import styles from './TouringListItem.module.css'
-import { TrashIcon } from '@/components/icons/TrashIcon'
 
 export interface TouringListItemProps {
   touring: ApiResponseTouringDetail
   onDetail?: (touringId: string) => void
-  onDelete?: (touringId: string) => void
 }
 
 export const TouringListItem = ({
   touring,
   onDetail,
-  onDelete,
 }: TouringListItemProps) => {
   const formatDate = (dateString: string) => {
     try {
@@ -38,52 +34,51 @@ export const TouringListItem = ({
   const distance = calculateDistance()
 
   return (
-    <div className={styles.item}>
-      {/* 行1: タイトル・ステータス・編集 */}
+    <div
+      className={`${styles.item} ${onDetail ? styles.itemClickable : ''}`}
+      onClick={() => onDetail?.(touring.touringId)}
+      role={onDetail ? 'button' : undefined}
+      tabIndex={onDetail ? 0 : undefined}
+      onKeyDown={
+        onDetail
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onDetail(touring.touringId)
+              }
+            }
+          : undefined
+      }
+    >
       <div className={styles.mainRow}>
         <div className={styles.titleSection}>
           <h3 className={styles.title}>{touring.title}</h3>
           <span
             className={
-              touring.status === 'STARTED'
-                ? styles.statusBadgeStarted
-                : styles.statusBadgeCompleted
+              touring.status === 'PLANNED'
+                ? styles.statusBadgePlanned
+                : touring.status === 'STARTED'
+                  ? styles.statusBadgeStarted
+                  : styles.statusBadgeCompleted
             }
           >
-            {touring.status === 'STARTED' ? '進行中' : '完了'}
+            {touring.status === 'PLANNED'
+              ? 'プラン'
+              : touring.status === 'STARTED'
+                ? '進行中'
+                : '完了'}
           </span>
         </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {onDetail && (
-            <Button
-              onClick={() => onDetail(touring.touringId)}
-              variant="cloud"
-              size="sm"
-            >
-              詳細
-            </Button>
-          )}
-          {onDelete && (
-            <Button
-              onClick={() => onDelete(touring.touringId)}
-              variant="danger"
-              size="sm"
-            >
-              <TrashIcon />
-            </Button>
-          )}
-        </div>
+        <span className={styles.chevron}>›</span>
       </div>
 
-      {/* 行2: 期間 */}
       <div className={styles.periodRow}>
         <span>
+          {touring.status === 'PLANNED' ? '予定: ' : ''}
           {formatDate(touring.startDate)} 〜 {formatDate(touring.endDate)}
         </span>
       </div>
 
-      {/* 行3: 走行距離情報 */}
       {distance !== null && (
         <div className={styles.detailsRow}>
           <span>走行距離: {distance.toLocaleString()}km</span>

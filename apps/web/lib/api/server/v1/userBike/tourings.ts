@@ -48,6 +48,7 @@ userBikeTourings.get(
     const searchParams = new TouringSearchParams({
       sortBy: query['sort-by'] === 'end-date' ? 'endDate' : 'startDate',
       sortOrder: query['sort-order'],
+      status: query['status'],
     })
 
     const touringRepo = new PrismaTouringRepository(prisma)
@@ -115,16 +116,20 @@ userBikeTourings.post(
         endDate: body.endDate,
         startMileage: body.startMileage,
         endMileage: body.endMileage,
+        status: body.status,
       })
 
-      const historyRepo = new PrismaHistoryRepository(t)
-      await historyRepo.createHistory({
-        userId: createUserId(userId),
-        userMyBikeId: createMyUserBikeId(myUserBikeId),
-        type: 'TOURING',
-        occurredAt: touring.endDate,
-        touringId: touring.id,
-      })
+      // PLANNEDのときはまだツーリングが完了していないので履歴を作成しない
+      if (touring.status !== 'PLANNED') {
+        const historyRepo = new PrismaHistoryRepository(t)
+        await historyRepo.createHistory({
+          userId: createUserId(userId),
+          userMyBikeId: createMyUserBikeId(myUserBikeId),
+          type: 'TOURING',
+          occurredAt: touring.endDate,
+          touringId: touring.id,
+        })
+      }
 
       return touring
     })
@@ -215,6 +220,7 @@ userBikeTourings.post(
           myUserBikeId: createMyUserBikeId(myUserBikeId),
           userId: createUserId(userId),
           role,
+          touringPlanId: body.touringPlanId,
           title: body.title,
           startDate: body.startDate,
           startMileage: body.startMileage,

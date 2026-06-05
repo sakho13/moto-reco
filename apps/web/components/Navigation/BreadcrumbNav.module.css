@@ -1,12 +1,6 @@
 .wrapper {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  width: 100%;
-  max-width: 40rem;
-  background-color: var(--color-background);
-  padding-block: 0.5rem;
-  margin-block: -0.5rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .list {
@@ -26,6 +20,7 @@
   align-items: center;
   gap: 0.25rem;
   min-width: 0;
+  white-space: nowrap;
 }
 
 .link {

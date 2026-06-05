@@ -429,6 +429,7 @@ enum UserQuitStatus {
 }
 
 enum TouringStatus {
+  PLANNED
   STARTED
   COMPLETED
 }

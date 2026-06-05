@@ -32,6 +32,7 @@ type StartTouringParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
   role: 'USER' | 'ADMIN' | 'GUEST'
+  touringPlanId?: string
   title?: string
   startDate?: Date
   startMileage?: number
@@ -88,6 +89,14 @@ export class TouringService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
+    // ゲストアカウントのプランモード制限
+    if (params.role === 'GUEST' && params.status === 'PLANNED') {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        'ゲストアカウントはツーリングプランを使用できません'
+      )
+    }
+
     // ゲストアカウントのツーリング登録数チェック
     if (params.role === 'GUEST') {
       const count = await this.touringRepository.countTourings(
@@ -103,7 +112,7 @@ export class TouringService {
 
     const status = params.status ?? 'COMPLETED'
 
-    // STARTEDで登録する場合は、既に進行中のツーリングがないかチェック
+    // STARTEDで登録する場合は、既に進行中のツーリングがないかチェック（PLANNEDは複数登録可能）
     if (status === 'STARTED') {
       const ongoingTouring = await this.touringRepository.findOngoingTouring(
         params.myUserBikeId
@@ -155,8 +164,8 @@ export class TouringService {
 
     try {
       if (params.action === 'start') {
-        // ゲストアカウントのツーリング登録数チェック
-        if (params.role === 'GUEST') {
+        // ゲストアカウントのツーリング登録数チェック（プランから開始する場合は新規作成ではないためスキップ）
+        if (params.role === 'GUEST' && params.touringPlanId === undefined) {
           const count = await this.touringRepository.countTourings(
             params.myUserBikeId
           )
@@ -191,6 +200,44 @@ export class TouringService {
         }
 
         const startDate = params.startDate ?? new Date()
+
+        // プランから開始する場合は既存の PLANNED ツーリングを STARTED に更新
+        if (params.touringPlanId !== undefined) {
+          const plan = await this.touringRepository.findTouringById(
+            createTouringId(params.touringPlanId),
+            params.myUserBikeId
+          )
+          if (!plan) {
+            throw new ApiV1Error(
+              'NOT_FOUND',
+              '指定されたツーリングプランが見つかりません'
+            )
+          }
+          if (plan.status !== 'PLANNED') {
+            throw new ApiV1Error(
+              'INVALID_REQUEST',
+              '指定されたツーリングはプラン状態ではありません'
+            )
+          }
+
+          const updatedPlan = new TouringEntity({
+            touringId: plan.id,
+            myUserBikeId: plan.myUserBikeId,
+            title: params.title ?? plan.title,
+            startDate,
+            endDate: plan.endDate,
+            startMileage: startMileage ?? plan.startMileage,
+            endMileage: null,
+            startLatitude: params.startLatitude ?? plan.startLatitude,
+            startLongitude: params.startLongitude ?? plan.startLongitude,
+            endLatitude: null,
+            endLongitude: null,
+            status: 'STARTED',
+          })
+
+          return await this.touringRepository.updateTouring(updatedPlan)
+        }
+
         const title = params.title ?? 'ツーリング'
         const touring = new TouringEntity({
           touringId: createTouringId(''),
@@ -322,7 +369,7 @@ export class TouringService {
       throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
     }
 
-    // ステータスをSTARTEDに変更する場合、既に進行中のツーリングがないかチェック
+    // ステータスをSTARTEDに変更する場合、既に進行中のツーリングがないかチェック（PLANNEDからの遷移も含む）
     const newStatus = params.status ?? existingTouring.status
     if (newStatus === 'STARTED' && existingTouring.status !== 'STARTED') {
       const ongoingTouring = await this.touringRepository.findOngoingTouring(

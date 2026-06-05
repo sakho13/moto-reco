@@ -42,7 +42,7 @@ export type PublicHistoryDetail = {
     endDate: Date
     startMileage: number | null
     endMileage: number | null
-    status: 'STARTED' | 'COMPLETED'
+    status: 'PLANNED' | 'STARTED' | 'COMPLETED'
   } | null
 }
 
