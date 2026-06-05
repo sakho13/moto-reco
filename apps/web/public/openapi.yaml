@@ -1020,6 +1020,15 @@ paths:
               - desc
             default: desc
             description: ソート順序
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - PLANNED
+              - STARTED
+              - COMPLETED
+          description: ステータスでフィルタリング
       responses:
         '200':
           description: ツーリング一覧取得成功
@@ -1087,6 +1096,50 @@ paths:
                   message:
                     type: string
                     example: ツーリング登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      summary: ユーザー所有バイクのツーリング削除
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeTouringDeleteDetail'
+      responses:
+        '200':
+          description: ツーリング削除成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: ツーリング削除成功
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -1253,6 +1306,270 @@ paths:
                   message:
                     type: string
                     example: ツーリング更新成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/tourings/{touring-id}/spots:
+    get:
+      summary: ツーリングのスポット一覧取得
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      responses:
+        '200':
+          description: スポット一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MyUserBikeTouringSpotDetail'
+                  message:
+                    type: string
+                    example: スポット一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    post:
+      summary: ツーリングのスポット登録
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeTouringSpotRegisterDetail'
+      responses:
+        '201':
+          description: スポット登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringSpotDetail'
+                  message:
+                    type: string
+                    example: スポット登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/tourings/{touring-id}/spots/reorder:
+    patch:
+      summary: ツーリングのスポット並び替え
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeTouringSpotReorderDetail'
+      responses:
+        '200':
+          description: スポット並び替え成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: スポット並び替え成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/user-bike/bike/{my-user-bike-id}/tourings/{touring-id}/spots/{spot-id}:
+    patch:
+      summary: ツーリングのスポット更新
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+        - in: path
+          name: spot-id
+          required: true
+          schema:
+            type: string
+          description: スポットID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyUserBikeTouringSpotUpdateDetail'
+      responses:
+        '200':
+          description: スポット更新成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: '#/components/schemas/MyUserBikeTouringSpotDetail'
+                  message:
+                    type: string
+                    example: スポット更新成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      summary: ツーリングのスポット削除
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+        - in: path
+          name: spot-id
+          required: true
+          schema:
+            type: string
+          description: スポットID
+      responses:
+        '200':
+          description: スポット削除成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: スポット削除成功
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -1731,6 +2048,38 @@ components:
           type: integer
           nullable: true
           description: 終了時の総走行距離（km）
+        startLatitude:
+          type: number
+          format: float
+          nullable: true
+          description: 開始地点の緯度
+        startLongitude:
+          type: number
+          format: float
+          nullable: true
+          description: 開始地点の経度
+        endLatitude:
+          type: number
+          format: float
+          nullable: true
+          description: 終了地点の緯度
+        endLongitude:
+          type: number
+          format: float
+          nullable: true
+          description: 終了地点の経度
+        status:
+          type: string
+          enum:
+            - PLANNED
+            - STARTED
+            - COMPLETED
+          description: ステータス
+        fuelLogIds:
+          type: array
+          items:
+            type: string
+          description: 紐づく給油履歴IDの一覧
     MyUserBikeTouringRegisterDetail:
       type: object
       required:
@@ -1756,9 +2105,18 @@ components:
           type: integer
           nullable: true
           description: 終了時の総走行距離（km）
+        status:
+          type: string
+          enum:
+            - PLANNED
+            - STARTED
+            - COMPLETED
+          default: COMPLETED
+          description: ステータス（省略時はCOMPLETED）
 
     MyUserBikeTouringUpdateDetail:
       type: object
+      description: いずれかのフィールドの指定が必須
       properties:
         title:
           type: string
@@ -1778,8 +2136,55 @@ components:
           type: integer
           nullable: true
           description: 終了時の総走行距離（km）
+        status:
+          type: string
+          enum:
+            - PLANNED
+            - STARTED
+            - COMPLETED
+          description: ステータス
+        fuelLogIds:
+          type: array
+          items:
+            type: string
+          description: 紐づける給油履歴IDの一覧
+        startLatitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+          nullable: true
+          description: 開始地点の緯度
+        startLongitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+          nullable: true
+          description: 開始地点の経度
+        endLatitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+          nullable: true
+          description: 終了地点の緯度
+        endLongitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+          nullable: true
+          description: 終了地点の経度
 
     MyUserBikeTouringStartEndDetail:
+      oneOf:
+        - $ref: '#/components/schemas/MyUserBikeTouringStartDetail'
+        - $ref: '#/components/schemas/MyUserBikeTouringEndDetail'
+      discriminator:
+        propertyName: action
+
+    MyUserBikeTouringStartDetail:
       type: object
       required:
         - action
@@ -1788,30 +2193,66 @@ components:
           type: string
           enum:
             - start
-            - end
-          description: 操作種別
-        touringId:
+          description: 操作種別（開始）
+        touringPlanId:
           type: string
-          description: ツーリングID（終了時に必須）
+          description: プランから開始する場合のツーリングプランID（任意）
         title:
           type: string
           minLength: 1
           maxLength: 100
-          description: タイトル（開始時の任意）
+          description: タイトル（任意）
         startDate:
           type: string
-          description: 開始日（ISO 8601形式）
-        endDate:
-          type: string
-          description: 終了日（ISO 8601形式）
+          description: 開始日（ISO 8601形式、任意）
         startMileage:
           type: integer
-          nullable: true
-          description: 開始時の総走行距離（km）
+          description: 開始時の総走行距離（km、任意）
+        startLatitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+          description: 開始地点の緯度（任意）
+        startLongitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+          description: 開始地点の経度（任意）
+
+    MyUserBikeTouringEndDetail:
+      type: object
+      required:
+        - action
+        - touringId
+      properties:
+        action:
+          type: string
+          enum:
+            - end
+          description: 操作種別（終了）
+        touringId:
+          type: string
+          description: ツーリングID（終了時に必須）
+        endDate:
+          type: string
+          description: 終了日（ISO 8601形式、任意）
         endMileage:
           type: integer
-          nullable: true
-          description: 終了時の総走行距離（km）
+          description: 終了時の総走行距離（km、任意）
+        endLatitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+          description: 終了地点の緯度（任意）
+        endLongitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+          description: 終了地点の経度（任意）
 
     MyUserBikeFuelInsightDetail:
       type: object
@@ -1862,13 +2303,153 @@ components:
           nullable: true
           description: 詳細情報（任意）
 
+    MyUserBikeTouringDeleteDetail:
+      type: object
+      required:
+        - touringId
+      properties:
+        touringId:
+          type: string
+          description: ツーリングID
+
+    MyUserBikeTouringSpotDetail:
+      type: object
+      properties:
+        spotId:
+          type: string
+        touringId:
+          type: string
+        type:
+          type: string
+          enum:
+            - SPOT
+            - BREAK
+          description: スポット種別（SPOT=観光地など、BREAK=休憩）
+        name:
+          type: string
+          nullable: true
+          maxLength: 100
+          description: スポット名
+        memo:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: メモ
+        latitude:
+          type: number
+          format: float
+          nullable: true
+          description: 緯度
+        longitude:
+          type: number
+          format: float
+          nullable: true
+          description: 経度
+        visitedAt:
+          type: string
+          description: 訪問日時（ISO 8601形式）
+        endAt:
+          type: string
+          nullable: true
+          description: 終了日時（ISO 8601形式）
+        sortOrder:
+          type: integer
+          description: 並び順
+
+    MyUserBikeTouringSpotRegisterDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - SPOT
+            - BREAK
+          default: SPOT
+          description: スポット種別
+        name:
+          type: string
+          maxLength: 100
+          description: スポット名
+        memo:
+          type: string
+          maxLength: 500
+          description: メモ
+        latitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+          description: 緯度
+        longitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+          description: 経度
+        visitedAt:
+          type: string
+          description: 訪問日時（ISO 8601形式）
+        endAt:
+          type: string
+          description: 終了日時（ISO 8601形式）
+
+    MyUserBikeTouringSpotUpdateDetail:
+      type: object
+      description: いずれかのフィールドの指定が必須
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: スポット名
+        memo:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: メモ
+        latitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+          nullable: true
+          description: 緯度
+        longitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+          nullable: true
+          description: 経度
+        visitedAt:
+          type: string
+          description: 訪問日時（ISO 8601形式）
+        endAt:
+          type: string
+          nullable: true
+          description: 終了日時（ISO 8601形式）
+
+    MyUserBikeTouringSpotReorderDetail:
+      type: object
+      required:
+        - spotIds
+      properties:
+        spotIds:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          description: 並び替え後のスポットIDの順序
+
     ErrorCode:
       type: string
       enum:
         - INVALID_REQUEST
         - VALIDATION_ERROR
         - AUTH_FAILED
+        - FORBIDDEN
         - USER_NOT_REGISTERED
+        - GUEST_EXPIRED
         - NOT_FOUND
         - SERVER_ERROR
 
