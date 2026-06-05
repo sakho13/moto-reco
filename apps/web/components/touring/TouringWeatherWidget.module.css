@@ -1,0 +1,57 @@
+.widget {
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-md);
+  color: white;
+}
+
+.header {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: var(--spacing-2);
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.weatherIcon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.temperature {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.subInfo {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.loading {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.error {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.5);
+}
