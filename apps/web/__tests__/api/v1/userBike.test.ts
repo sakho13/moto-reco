@@ -2454,6 +2454,124 @@ describe('UserBike API Endpoints', () => {
           message: '指定されたツーリングはプラン状態ではありません',
         })
       })
+
+      test('終着地座標が設定されたプランからツーリングを開始した場合、終着地座標が保持される', async () => {
+        // PLANNEDプランを作成
+        const planRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: '終着地あり北海道ツーリング計画',
+              startDate: '2024-08-01T06:00:00.000Z',
+              endDate: '2024-08-05T18:00:00.000Z',
+              status: 'PLANNED',
+            }),
+          }
+        )
+        expect(planRes.status).toBe(201)
+        const planJson = await planRes.json()
+        const touringPlanId = planJson.data.touringId
+
+        // PATCHで終着地座標を設定
+        const patchRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringPlanId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              endLatitude: 43.0618,
+              endLongitude: 141.3545,
+            }),
+          }
+        )
+        expect(patchRes.status).toBe(200)
+        const patchJson = await patchRes.json()
+        expect(patchJson.data.endLatitude).toBeCloseTo(43.0618)
+        expect(patchJson.data.endLongitude).toBeCloseTo(141.3545)
+
+        // プランからツーリング開始
+        const startRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              touringPlanId,
+              startDate: '2024-08-01T06:00:00.000Z',
+            }),
+          }
+        )
+
+        const startJson = await startRes.json()
+        expect(startRes.status).toBe(201)
+        expect(startJson.data.touringId).toBe(touringPlanId)
+        expect(startJson.data.status).toBe('STARTED')
+        // 終着地座標がプランから引き継がれていることを確認
+        expect(startJson.data.endLatitude).toBeCloseTo(43.0618)
+        expect(startJson.data.endLongitude).toBeCloseTo(141.3545)
+      })
+
+      test('終着地座標が設定されていないプランからツーリングを開始した場合、終着地座標はnullになる', async () => {
+        // 終着地座標なしのPLANNEDプランを作成
+        const planRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: '終着地なしツーリング計画',
+              startDate: '2024-09-01T06:00:00.000Z',
+              endDate: '2024-09-01T18:00:00.000Z',
+              status: 'PLANNED',
+            }),
+          }
+        )
+        expect(planRes.status).toBe(201)
+        const planJson = await planRes.json()
+        const touringPlanId = planJson.data.touringId
+        expect(planJson.data.endLatitude).toBeNull()
+        expect(planJson.data.endLongitude).toBeNull()
+
+        // プランからツーリング開始
+        const startRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              touringPlanId,
+              startDate: '2024-09-01T06:00:00.000Z',
+            }),
+          }
+        )
+
+        const startJson = await startRes.json()
+        expect(startRes.status).toBe(201)
+        expect(startJson.data.touringId).toBe(touringPlanId)
+        expect(startJson.data.status).toBe('STARTED')
+        // 終着地座標がnullであることを確認
+        expect(startJson.data.endLatitude).toBeNull()
+        expect(startJson.data.endLongitude).toBeNull()
+      })
     })
   })
 

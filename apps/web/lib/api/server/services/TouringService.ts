@@ -230,8 +230,8 @@ export class TouringService {
             endMileage: null,
             startLatitude: params.startLatitude ?? plan.startLatitude,
             startLongitude: params.startLongitude ?? plan.startLongitude,
-            endLatitude: null,
-            endLongitude: null,
+            endLatitude: plan.endLatitude,
+            endLongitude: plan.endLongitude,
             status: 'STARTED',
           })
 
