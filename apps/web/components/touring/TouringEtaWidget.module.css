@@ -51,3 +51,29 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-product);
 }
+
+.arrivalButton {
+  margin-top: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--card-text-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.arrivalButton:hover:not(:disabled) {
+  background-color: var(--color-cloudHover);
+  border-color: var(--color-cloudActive);
+}
+
+.arrivalButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

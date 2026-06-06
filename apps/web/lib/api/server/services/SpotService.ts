@@ -25,6 +25,8 @@ type RegisterSpotParams = {
   longitude?: number
   visitedAt?: Date
   endAt?: Date
+  plannedAt?: Date | null
+  plannedDepartAt?: Date | null
 }
 
 type UpdateSpotParams = {
@@ -36,8 +38,10 @@ type UpdateSpotParams = {
   memo?: string | null
   latitude?: number | null
   longitude?: number | null
-  visitedAt?: Date
+  visitedAt?: Date | null
   endAt?: Date | null
+  plannedAt?: Date | null
+  plannedDepartAt?: Date | null
 }
 
 export class SpotService {
@@ -67,6 +71,14 @@ export class SpotService {
     }
 
     try {
+      // PLANNED ツーリングはスポット計画なので visitedAt は null、STARTED は実訪問なので now()
+      const visitedAt =
+        params.visitedAt !== undefined
+          ? params.visitedAt
+          : touring.status === 'PLANNED'
+            ? null
+            : new Date()
+
       const spot = new SpotEntity({
         spotId: createSpotId(''),
         touringId: params.touringId,
@@ -75,9 +87,11 @@ export class SpotService {
         memo: params.memo ?? null,
         latitude: params.latitude ?? null,
         longitude: params.longitude ?? null,
-        visitedAt: params.visitedAt ?? new Date(),
+        visitedAt,
         endAt: params.endAt ?? null,
         sortOrder: 0, // createSpot でカウントして末尾に設定される
+        plannedAt: params.plannedAt ?? null,
+        plannedDepartAt: params.plannedDepartAt ?? null,
       })
 
       const created = await this.spotRepository.createSpot(spot)
@@ -160,9 +174,20 @@ export class SpotService {
           params.longitude !== undefined
             ? params.longitude
             : existingSpot.longitude,
-        visitedAt: params.visitedAt ?? existingSpot.visitedAt,
+        visitedAt:
+          params.visitedAt !== undefined
+            ? params.visitedAt
+            : existingSpot.visitedAt,
         endAt: params.endAt !== undefined ? params.endAt : existingSpot.endAt,
         sortOrder: existingSpot.sortOrder,
+        plannedAt:
+          params.plannedAt !== undefined
+            ? params.plannedAt
+            : existingSpot.plannedAt,
+        plannedDepartAt:
+          params.plannedDepartAt !== undefined
+            ? params.plannedDepartAt
+            : existingSpot.plannedDepartAt,
       })
 
       const updated = await this.spotRepository.updateSpot(updatedSpot)
@@ -250,9 +275,12 @@ export class SpotService {
     if (touring.status !== 'PLANNED') return
 
     const spots = await this.spotRepository.findSpotsByTouringId(touringId)
+    const plannedTimes = spots
+      .map((s) => s.plannedAt ?? s.visitedAt)
+      .filter((d): d is Date => d !== null)
     const newEndDate =
-      spots.length > 0
-        ? new Date(Math.max(...spots.map((s) => s.visitedAt.getTime())))
+      plannedTimes.length > 0
+        ? new Date(Math.max(...plannedTimes.map((d) => d.getTime())))
         : touring.startDate
 
     if (newEndDate.getTime() === touring.endDate.getTime()) return

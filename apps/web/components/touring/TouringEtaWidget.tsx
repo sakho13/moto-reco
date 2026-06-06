@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import styles from './TouringEtaWidget.module.css'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -13,10 +13,12 @@ type RoutingData = {
 type TouringEtaWidgetProps = {
   endLatitude: number
   endLongitude: number
-  /** 目的地に到着したとみなす距離（メートル）。デフォルト 300m */
-  arrivalThresholdMeters?: number
-  /** 到着を検出したときに一度だけ呼ばれるコールバック */
-  onArrival?: () => void
+  /** 目的地に到着済みかどうか（スポットデータから導出して親が渡す） */
+  hasArrived: boolean
+  /** 「到着した」ボタン押下時に呼ぶコールバック */
+  onArrival: () => Promise<void>
+  /** 到着記録中の読み込み状態 */
+  isArrivalLoading?: boolean
 }
 
 type CurrentPosition = {
@@ -30,20 +32,20 @@ type CurrentPosition = {
  * @remarks
  * ブラウザの Geolocation API で現在地を取得し、5分ごとに ETA を再計算する。
  * GPS が許可されていない場合は案内メッセージを表示する。
+ * 到着状態は親から hasArrived として受け取る（スポットテーブルで永続化）。
  */
 const TouringEtaWidget = ({
   endLatitude,
   endLongitude,
-  arrivalThresholdMeters = 300,
+  hasArrived,
   onArrival,
+  isArrivalLoading = false,
 }: TouringEtaWidgetProps) => {
   const { getCurrentPosition } = useGeolocation()
   const [currentPosition, setCurrentPosition] = useState<CurrentPosition>(null)
   const [geoStatus, setGeoStatus] = useState<
     'idle' | 'loading' | 'success' | 'denied' | 'error'
   >('idle')
-  const [hasArrived, setHasArrived] = useState(false)
-  const arrivedFiredRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -81,8 +83,9 @@ const TouringEtaWidget = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 到着済みの場合はルーティングAPIを呼ばない
   const routingKey =
-    currentPosition !== null
+    currentPosition !== null && !hasArrived
       ? `/api/routing?fromLat=${currentPosition.latitude}&fromLng=${currentPosition.longitude}&toLat=${endLatitude}&toLng=${endLongitude}`
       : null
 
@@ -95,20 +98,6 @@ const TouringEtaWidget = ({
     },
     { refreshInterval: 300_000 }
   )
-
-  useEffect(() => {
-    if (
-      !arrivedFiredRef.current &&
-      data &&
-      data.distanceMeters < arrivalThresholdMeters
-    ) {
-      arrivedFiredRef.current = true
-      setHasArrived(true)
-      onArrival?.()
-    }
-    // arrivalThresholdMeters と onArrival は到着判定後は不要なため deps から除外
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data])
 
   const formatDuration = (seconds: number): string => {
     const minutes = Math.round(seconds / 60)
@@ -171,6 +160,14 @@ const TouringEtaWidget = ({
               </p>
             </>
           )}
+
+          <button
+            className={styles.arrivalButton}
+            onClick={onArrival}
+            disabled={isArrivalLoading}
+          >
+            {isArrivalLoading ? '記録中...' : '到着した'}
+          </button>
         </>
       )}
     </div>

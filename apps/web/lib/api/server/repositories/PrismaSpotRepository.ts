@@ -21,6 +21,8 @@ const spotSelect = {
   visitedAt: true,
   endAt: true,
   sortOrder: true,
+  plannedAt: true,
+  plannedDepartAt: true,
 } as const
 
 type SpotRow = {
@@ -31,9 +33,11 @@ type SpotRow = {
   memo: string | null
   latitude: number | null
   longitude: number | null
-  visitedAt: Date
+  visitedAt: Date | null
   endAt: Date | null
   sortOrder: number
+  plannedAt: Date | null
+  plannedDepartAt: Date | null
 }
 
 const toSpotEntity = (row: SpotRow): SpotEntity =>
@@ -48,6 +52,8 @@ const toSpotEntity = (row: SpotRow): SpotEntity =>
     visitedAt: row.visitedAt,
     endAt: row.endAt,
     sortOrder: row.sortOrder,
+    plannedAt: row.plannedAt,
+    plannedDepartAt: row.plannedDepartAt,
   })
 
 export class PrismaSpotRepository
@@ -70,6 +76,8 @@ export class PrismaSpotRepository
         visitedAt: spot.visitedAt,
         endAt: spot.endAt,
         sortOrder: count,
+        plannedAt: spot.plannedAt,
+        plannedDepartAt: spot.plannedDepartAt,
       },
       select: spotSelect,
     })
@@ -111,6 +119,8 @@ export class PrismaSpotRepository
         longitude: spot.longitude,
         visitedAt: spot.visitedAt,
         endAt: spot.endAt,
+        plannedAt: spot.plannedAt,
+        plannedDepartAt: spot.plannedDepartAt,
       },
       select: spotSelect,
     })

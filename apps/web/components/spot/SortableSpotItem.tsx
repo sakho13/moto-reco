@@ -22,9 +22,10 @@ type SortableSpotItemProps = {
 const pad = (n: number) => String(n).padStart(2, '0')
 
 const formatBreakDuration = (
-  visitedAt: string,
+  visitedAt: string | null,
   endAt: string | null
 ): string => {
+  if (!visitedAt) return '—'
   const start = new Date(visitedAt)
   const startStr = `${pad(start.getHours())}:${pad(start.getMinutes())}`
 
@@ -40,8 +41,9 @@ const formatBreakDuration = (
   return `${startStr}〜${endStr}`
 }
 
-const formatPlannedArrival = (visitedAt: string): string => {
-  const d = new Date(visitedAt)
+const formatPlannedArrival = (dateString: string | null): string => {
+  if (!dateString) return '—'
+  const d = new Date(dateString)
   return `${pad(d.getHours())}:${pad(d.getMinutes())} 着予定`
 }
 
@@ -114,11 +116,13 @@ export function SortableSpotItem({
                   ? (touringStatus === 'PLANNED' ? '予定 ' : '') +
                     formatBreakDuration(spot.visitedAt, spot.endAt)
                   : touringStatus === 'PLANNED'
-                    ? formatPlannedArrival(spot.visitedAt)
-                    : touringStatus === 'STARTED' &&
-                        new Date(spot.visitedAt) > new Date()
-                      ? `${formatVisitedAt(spot.visitedAt)} 訪問予定`
-                      : formatVisitedAt(spot.visitedAt)}
+                    ? formatPlannedArrival(spot.plannedAt)
+                    : spot.visitedAt === null
+                      ? '未到着'
+                      : touringStatus === 'STARTED' &&
+                          new Date(spot.visitedAt) > new Date()
+                        ? `${formatVisitedAt(spot.visitedAt)} 訪問予定`
+                        : formatVisitedAt(spot.visitedAt)}
             </span>
             <button
               onClick={() => onEdit(spot)}

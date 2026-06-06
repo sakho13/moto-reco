@@ -15,7 +15,11 @@ export class SpotEntity {
       throw new Error('経度は-180以上180以下である必要があります')
     }
 
-    if (spot.endAt !== null && spot.visitedAt > spot.endAt) {
+    if (
+      spot.visitedAt !== null &&
+      spot.endAt !== null &&
+      spot.visitedAt > spot.endAt
+    ) {
       throw new Error('開始日時は終了日時以前である必要があります')
     }
 
@@ -50,7 +54,7 @@ export class SpotEntity {
     return this._value.longitude
   }
 
-  public get visitedAt(): Date {
+  public get visitedAt(): Date | null {
     return this._value.visitedAt
   }
 
@@ -60,6 +64,14 @@ export class SpotEntity {
 
   public get sortOrder(): number {
     return this._value.sortOrder
+  }
+
+  public get plannedAt(): Date | null {
+    return this._value.plannedAt
+  }
+
+  public get plannedDepartAt(): Date | null {
+    return this._value.plannedDepartAt
   }
 
   public toJson(): Spot {

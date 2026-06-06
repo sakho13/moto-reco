@@ -81,7 +81,7 @@ export function SpotEditForm({
     setFormState({
       name: spot.name ?? '',
       memo: spot.memo ?? '',
-      visitedAt: toLocalDateTimeString(spot.visitedAt),
+      visitedAt: spot.visitedAt ? toLocalDateTimeString(spot.visitedAt) : '',
       endAt: spot.endAt ? toLocalDateTimeString(spot.endAt) : '',
     })
 

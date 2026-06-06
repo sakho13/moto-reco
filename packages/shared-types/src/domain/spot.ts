@@ -13,7 +13,9 @@ export type Spot = {
   memo: string | null
   latitude: number | null
   longitude: number | null
-  visitedAt: Date
+  visitedAt: Date | null
   endAt: Date | null
   sortOrder: number
+  plannedAt: Date | null
+  plannedDepartAt: Date | null
 }

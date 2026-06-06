@@ -296,9 +296,11 @@ export type ApiResponseSpotDetail = {
   memo: string | null
   latitude: number | null
   longitude: number | null
-  visitedAt: string
+  visitedAt: string | null
   endAt: string | null
   sortOrder: number
+  plannedAt: string | null
+  plannedDepartAt: string | null
 }
 
 export type ApiResponseSpotList = ApiResponseSpotDetail[]

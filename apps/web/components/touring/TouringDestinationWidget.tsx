@@ -14,7 +14,7 @@ type WeatherData = {
 type TouringDestinationWidgetProps = {
   endLatitude: number
   endLongitude: number
-  plannedEndDate: string
+  plannedEndDate?: string | null
   hasArrived: boolean
   onArrival: () => void | Promise<void>
   isArrivalLoading?: boolean
@@ -32,7 +32,8 @@ function weatherEmoji(code: number): string {
   return '⛈️'
 }
 
-function formatPlannedTime(dateString: string): string {
+function formatPlannedTime(dateString: string | null | undefined): string {
+  if (!dateString) return '—'
   try {
     const date = new Date(dateString)
     return date.toLocaleTimeString('ja-JP', {
@@ -40,7 +41,7 @@ function formatPlannedTime(dateString: string): string {
       minute: '2-digit',
     })
   } catch {
-    return ''
+    return '—'
   }
 }
 

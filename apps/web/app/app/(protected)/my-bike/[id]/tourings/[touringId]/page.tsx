@@ -119,7 +119,8 @@ function TouringDetailPage() {
     }
   }
 
-  const formatVisitedAt = (dateString: string) => {
+  const formatVisitedAt = (dateString: string | null) => {
+    if (!dateString) return '—'
     try {
       return new Date(dateString).toLocaleString('ja-JP', {
         month: 'numeric',
@@ -729,7 +730,10 @@ function TouringDetailPage() {
           touringStatus={touring?.status}
           prevSpotVisitedAt={
             touring?.status === 'PLANNED' && localSpots.length > 0
-              ? (localSpots.at(-1)!.endAt ?? localSpots.at(-1)!.visitedAt)
+              ? (localSpots.at(-1)!.endAt ??
+                localSpots.at(-1)!.plannedAt ??
+                localSpots.at(-1)!.visitedAt ??
+                undefined)
               : undefined
           }
           onClose={() => {

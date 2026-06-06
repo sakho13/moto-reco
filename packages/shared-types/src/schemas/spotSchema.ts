@@ -47,6 +47,18 @@ export const SpotRegisterRequestSchema = z
         invalid_type_error: '終了日時は日付形式で指定してください',
       })
       .optional(),
+    plannedAt: z.coerce
+      .date({
+        invalid_type_error: '到着予定日時は日付形式で指定してください',
+      })
+      .nullable()
+      .optional(),
+    plannedDepartAt: z.coerce
+      .date({
+        invalid_type_error: '出発予定日時は日付形式で指定してください',
+      })
+      .nullable()
+      .optional(),
   })
   .refine(
     (data) =>
@@ -100,10 +112,23 @@ export const SpotUpdateRequestSchema = z
       .date({
         invalid_type_error: '訪問日時は日付形式で指定してください',
       })
+      .nullable()
       .optional(),
     endAt: z.coerce
       .date({
         invalid_type_error: '終了日時は日付形式で指定してください',
+      })
+      .nullable()
+      .optional(),
+    plannedAt: z.coerce
+      .date({
+        invalid_type_error: '到着予定日時は日付形式で指定してください',
+      })
+      .nullable()
+      .optional(),
+    plannedDepartAt: z.coerce
+      .date({
+        invalid_type_error: '出発予定日時は日付形式で指定してください',
       })
       .nullable()
       .optional(),
@@ -115,7 +140,9 @@ export const SpotUpdateRequestSchema = z
       data.latitude !== undefined ||
       data.longitude !== undefined ||
       data.visitedAt !== undefined ||
-      data.endAt !== undefined,
+      data.endAt !== undefined ||
+      data.plannedAt !== undefined ||
+      data.plannedDepartAt !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }
@@ -123,6 +150,7 @@ export const SpotUpdateRequestSchema = z
   .refine(
     (data) =>
       data.visitedAt === undefined ||
+      data.visitedAt === null ||
       data.endAt === undefined ||
       data.endAt === null ||
       data.visitedAt <= data.endAt,

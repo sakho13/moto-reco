@@ -2,7 +2,7 @@
 
 import { Coffee, Fuel, MapPin, Timer } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
@@ -25,7 +25,6 @@ type TouringModeViewProps = {
   startMileage: number | null
   endLatitude: number | null
   endLongitude: number | null
-  destinationArrivedAt: string | null
   isLoading: boolean
   onEnd: (endMileage?: number) => void
 }
@@ -43,11 +42,9 @@ export const TouringModeView = ({
   touringId,
   title,
   startDate,
-  endDate,
   startMileage,
   endLatitude,
   endLongitude,
-  destinationArrivedAt,
   isLoading,
   onEnd,
 }: TouringModeViewProps) => {
@@ -82,7 +79,17 @@ export const TouringModeView = ({
 
   const currentBreak =
     spots?.find((s) => s.type === 'BREAK' && s.endAt === null) ?? null
-  const hasReachedDestination = destinationArrivedAt !== null
+
+  // SPOT タイプのスポットを sortOrder 順に並べ、最初の未到着（visitedAt === null）を次の目的地とする
+  const nextDestinationSpot =
+    spots
+      ?.filter((s) => s.type === 'SPOT')
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .find((s) => s.visitedAt === null) ?? null
+
+  const hasReachedNextDestination =
+    nextDestinationSpot === null &&
+    (spots?.filter((s) => s.type === 'SPOT').length ?? 0) > 0
 
   useEffect(() => {
     const updateElapsedTime = () => {
@@ -124,7 +131,8 @@ export const TouringModeView = ({
     }
   }
 
-  const formatBreakTime = (dateString: string) => {
+  const formatBreakTime = (dateString: string | null) => {
+    if (!dateString) return '—'
     const date = new Date(dateString)
     const h = String(date.getHours()).padStart(2, '0')
     const m = String(date.getMinutes()).padStart(2, '0')
@@ -213,13 +221,14 @@ export const TouringModeView = ({
   }
 
   const handleArrivalRecord = async () => {
+    if (!nextDestinationSpot) return
     try {
       await apiPatch(
-        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}` as const,
-        { destinationArrivedAt: new Date() }
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${nextDestinationSpot.spotId}` as const,
+        { visitedAt: new Date() }
       )
-      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
-      toast.success('目的地への到着を記録しました')
+      await mutateSpots()
+      toast.success('スポットへの到着を記録しました')
     } catch (error) {
       toast.error(
         error instanceof ApiV1Error ? error.message : '到着の記録に失敗しました'
@@ -278,11 +287,11 @@ export const TouringModeView = ({
         {/* タイトル */}
         <h4 className={styles.touringTitle}>{title}</h4>
 
-        {/* 到着バナー */}
-        {hasReachedDestination && (
+        {/* 全スポット到達バナー */}
+        {hasReachedNextDestination && (
           <div className={styles.arrivedBanner}>
             <MapPin size={15} />
-            目的地に到着しました！
+            全スポットに到達しました！
           </div>
         )}
 
@@ -300,20 +309,31 @@ export const TouringModeView = ({
             )}
           </div>
 
-          {hasDestination && (
+          {/* 次の未到着スポットがあればそのウィジェットを表示、なければツーリングマスタの目的地を表示 */}
+          {nextDestinationSpot?.latitude !== null &&
+          nextDestinationSpot?.latitude !== undefined ? (
             <div className={styles.widgetSection}>
               <TouringDestinationWidget
-                endLatitude={endLatitude}
-                endLongitude={endLongitude}
-                plannedEndDate={endDate}
-                hasArrived={hasReachedDestination}
+                endLatitude={nextDestinationSpot.latitude}
+                endLongitude={nextDestinationSpot.longitude!}
+                plannedEndDate={nextDestinationSpot.plannedAt}
+                hasArrived={false}
                 onArrival={handleArrivalRecord}
               />
             </div>
-          )}
+          ) : hasDestination ? (
+            <div className={styles.widgetSection}>
+              <TouringDestinationWidget
+                endLatitude={endLatitude!}
+                endLongitude={endLongitude!}
+                hasArrived={hasReachedNextDestination}
+                onArrival={handleArrivalRecord}
+              />
+            </div>
+          ) : null}
         </div>
 
-        {!hasDestination && (
+        {!nextDestinationSpot && !hasDestination && (
           <p className={styles.noDestinationHint}>
             プランで目的地を設定すると天気・到着予定時間が表示されます
           </p>

@@ -93,7 +93,6 @@ function Page() {
           startMileage={activeTouring.startMileage}
           endLatitude={activeTouring.endLatitude}
           endLongitude={activeTouring.endLongitude}
-          destinationArrivedAt={activeTouring.destinationArrivedAt}
           isLoading={loadingBikeId === activeBikeEntry.myUserBikeId}
           onEnd={(endMileage) =>
             handleEndTouring(

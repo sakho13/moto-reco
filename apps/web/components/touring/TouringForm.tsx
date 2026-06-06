@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@repo/ui/button'
+import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -10,10 +11,8 @@ export type TouringMode = 'history' | 'plan'
 
 export interface TouringFormData {
   title: string
-  startDate: string
-  startTime: string
-  endDate: string
-  endTime: string
+  startDateTime: string // "YYYY-MM-DDTHH:mm"
+  endDateTime: string // "YYYY-MM-DDTHH:mm"
   startMileage: string
   endMileage: string
   mode: TouringMode
@@ -29,6 +28,30 @@ export interface TouringFormProps {
   disablePlanMode?: boolean
 }
 
+const getTodayDateTimeString = (timeStr: string) => {
+  const today = new Date()
+  const y = today.getFullYear()
+  const m = String(today.getMonth() + 1).padStart(2, '0')
+  const d = String(today.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}T${timeStr}`
+}
+
+const getCurrentDateTimeString = () => {
+  const now = new Date()
+  const y = now.getFullYear()
+  const mo = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  const h = String(now.getHours()).padStart(2, '0')
+  const mi = String(now.getMinutes()).padStart(2, '0')
+  return `${y}-${mo}-${d}T${h}:${mi}`
+}
+
+const getDefaultStartDateTime = (m: TouringMode) =>
+  m === 'plan' ? getTodayDateTimeString('09:00') : getCurrentDateTimeString()
+
+const getDefaultEndDateTime = (m: TouringMode) =>
+  m === 'plan' ? getTodayDateTimeString('17:00') : getCurrentDateTimeString()
+
 export const TouringForm = ({
   initialData,
   onSubmit,
@@ -38,35 +61,16 @@ export const TouringForm = ({
   hideModeSelector = false,
   disablePlanMode = false,
 }: TouringFormProps) => {
-  const getTodayDateString = () => {
-    const today = new Date()
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-  const today = getTodayDateString()
-
-  const getCurrentTime = () => {
-    const now = new Date()
-    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-  }
-
-  const getDefaultStartTime = (m: TouringMode) =>
-    m === 'plan' ? '09:00' : getCurrentTime()
-  const getDefaultEndTime = (m: TouringMode) =>
-    m === 'plan' ? '17:00' : getCurrentTime()
-
   const [mode, setMode] = useState<TouringMode>(initialData?.mode ?? 'history')
   const [formData, setFormData] = useState<Omit<TouringFormData, 'mode'>>(
     () => {
       const initialMode = initialData?.mode ?? 'history'
       return {
         title: initialData?.title ?? '',
-        startDate: initialData?.startDate ?? today,
-        startTime: initialData?.startTime ?? getDefaultStartTime(initialMode),
-        endDate: initialData?.endDate ?? today,
-        endTime: initialData?.endTime ?? getDefaultEndTime(initialMode),
+        startDateTime:
+          initialData?.startDateTime ?? getDefaultStartDateTime(initialMode),
+        endDateTime:
+          initialData?.endDateTime ?? getDefaultEndDateTime(initialMode),
         startMileage: initialData?.startMileage ?? '',
         endMileage: initialData?.endMileage ?? '',
       }
@@ -79,10 +83,10 @@ export const TouringForm = ({
       const updatedMode = initialData.mode ?? mode
       setFormData({
         title: initialData.title ?? '',
-        startDate: initialData.startDate ?? today,
-        startTime: initialData.startTime ?? getDefaultStartTime(updatedMode),
-        endDate: initialData.endDate ?? today,
-        endTime: initialData.endTime ?? getDefaultEndTime(updatedMode),
+        startDateTime:
+          initialData.startDateTime ?? getDefaultStartDateTime(updatedMode),
+        endDateTime:
+          initialData.endDateTime ?? getDefaultEndDateTime(updatedMode),
         startMileage: initialData.startMileage ?? '',
         endMileage: initialData.endMileage ?? '',
       })
@@ -97,11 +101,9 @@ export const TouringForm = ({
   const validateForm = (): boolean => {
     setValidationError('')
 
-    if (!isPlan && formData.startDate && formData.endDate) {
-      const start = new Date(
-        `${formData.startDate}T${formData.startTime || '00:00'}`
-      )
-      const end = new Date(`${formData.endDate}T${formData.endTime || '00:00'}`)
+    if (!isPlan && formData.startDateTime && formData.endDateTime) {
+      const start = new Date(formData.startDateTime)
+      const end = new Date(formData.endDateTime)
       if (start > end) {
         setValidationError(
           isPlan
@@ -132,11 +134,14 @@ export const TouringForm = ({
     if (!validateForm()) return
     await onSubmit({
       ...formData,
-      endDate: isPlan ? formData.startDate : formData.endDate,
-      endTime: isPlan ? formData.startTime : formData.endTime,
+      // プランの場合、終了日時は開始日時と同じ（スポット追加で自動更新される）
+      endDateTime: isPlan ? formData.startDateTime : formData.endDateTime,
       mode,
     })
   }
+
+  // プランは5分刻み、履歴は1分刻み
+  const minuteStep = isPlan ? 5 : 1
 
   return (
     <form
@@ -234,66 +239,42 @@ export const TouringForm = ({
 
       <FormField
         label={isPlan ? '出発予定日時' : '開始日時'}
-        htmlFor="startDate"
+        htmlFor="startDateTime"
         required
       >
-        <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
-          <Input
-            id="startDate"
-            type="date"
-            value={formData.startDate}
-            onChange={(e) => {
-              const newStart = e.target.value
-              setFormData((prev) => ({
-                ...prev,
-                startDate: newStart,
-                endDate:
-                  prev.endDate && newStart > prev.endDate
-                    ? newStart
-                    : prev.endDate,
-              }))
-            }}
-            required
-            disabled={isSubmitting}
-          />
-          <Input
-            id="startTime"
-            type="time"
-            value={formData.startTime}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, startTime: e.target.value }))
-            }
-            disabled={isSubmitting}
-            style={{ width: '9rem', flexShrink: 0 }}
-          />
-        </div>
+        <DateTimeInput
+          id="startDateTime"
+          value={formData.startDateTime}
+          minuteStep={minuteStep}
+          onChange={(e) => {
+            const newStart = e.target.value
+            setFormData((prev) => ({
+              ...prev,
+              startDateTime: newStart,
+              endDateTime:
+                prev.endDateTime && newStart > prev.endDateTime
+                  ? newStart
+                  : prev.endDateTime,
+            }))
+          }}
+          required
+          disabled={isSubmitting}
+        />
       </FormField>
 
       {!isPlan && (
-        <FormField label="終了日時" htmlFor="endDate" required>
-          <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
-            <Input
-              id="endDate"
-              type="date"
-              value={formData.endDate}
-              min={formData.startDate}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, endDate: e.target.value }))
-              }
-              required
-              disabled={isSubmitting}
-            />
-            <Input
-              id="endTime"
-              type="time"
-              value={formData.endTime}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, endTime: e.target.value }))
-              }
-              disabled={isSubmitting}
-              style={{ width: '9rem', flexShrink: 0 }}
-            />
-          </div>
+        <FormField label="終了日時" htmlFor="endDateTime" required>
+          <DateTimeInput
+            id="endDateTime"
+            value={formData.endDateTime}
+            minuteStep={minuteStep}
+            min={formData.startDateTime}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, endDateTime: e.target.value }))
+            }
+            required
+            disabled={isSubmitting}
+          />
         </FormField>
       )}
 

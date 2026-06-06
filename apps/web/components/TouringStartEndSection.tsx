@@ -501,7 +501,8 @@ const ActiveTouringCard = ({
     }
   }
 
-  const formatBreakTime = (dateString: string) => {
+  const formatBreakTime = (dateString: string | null) => {
+    if (!dateString) return '—'
     const date = new Date(dateString)
     const h = String(date.getHours()).padStart(2, '0')
     const m = String(date.getMinutes()).padStart(2, '0')
