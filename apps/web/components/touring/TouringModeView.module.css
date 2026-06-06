@@ -27,6 +27,7 @@
 
   position: relative;
   width: 100%;
+  min-height: calc(100svh - 7rem);
   padding: var(--spacing-6);
   background-color: var(--card-bg);
   border-top: 3px solid var(--color-product);
@@ -52,8 +53,8 @@ html[data-theme-mode='dark'] .container {
 
 .endCornerArea {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: var(--spacing-3);
+  right: var(--spacing-4);
   z-index: 2;
 }
 
@@ -195,6 +196,7 @@ html[data-theme-mode='dark'] .container {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
+  margin-top: auto;
 }
 
 .spotButton svg {

@@ -1,17 +1,16 @@
 'use client'
 
+import { Coffee, Fuel, MapPin, Timer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
-import { Coffee, Fuel, MapPin, Timer } from 'lucide-react'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from '../icons/BikeIcon'
 import styles from './TouringModeView.module.css'
 import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal'
-import TouringEtaWidget from '@/components/touring/TouringEtaWidget'
+import TouringDestinationWidget from '@/components/touring/TouringDestinationWidget'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
-import TouringWeatherWidget from '@/components/touring/TouringWeatherWidget'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -22,9 +21,11 @@ type TouringModeViewProps = {
   touringId: string
   title: string
   startDate: string
+  endDate: string
   startMileage: number | null
   endLatitude: number | null
   endLongitude: number | null
+  destinationArrivedAt: string | null
   isLoading: boolean
   onEnd: (endMileage?: number) => void
 }
@@ -42,9 +43,11 @@ export const TouringModeView = ({
   touringId,
   title,
   startDate,
+  endDate,
   startMileage,
   endLatitude,
   endLongitude,
+  destinationArrivedAt,
   isLoading,
   onEnd,
 }: TouringModeViewProps) => {
@@ -65,10 +68,9 @@ export const TouringModeView = ({
   const [endMileageError, setEndMileageError] = useState('')
   const [showFuelLogModal, setShowFuelLogModal] = useState(false)
   const [isBreakLoading, setIsBreakLoading] = useState(false)
-  const [hasReachedDestination, setHasReachedDestination] = useState(false)
   const { getCurrentPosition } = useGeolocation()
 
-  const { data: spots } = useSWR(
+  const { data: spots, mutate: mutateSpots } = useSWR(
     `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
     async (url) => {
       const response = await apiGet(
@@ -80,6 +82,7 @@ export const TouringModeView = ({
 
   const currentBreak =
     spots?.find((s) => s.type === 'BREAK' && s.endAt === null) ?? null
+  const hasReachedDestination = destinationArrivedAt !== null
 
   useEffect(() => {
     const updateElapsedTime = () => {
@@ -179,9 +182,7 @@ export const TouringModeView = ({
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots` as const,
         { type: 'BREAK', visitedAt: new Date() }
       )
-      await mutate(
-        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`
-      )
+      await mutateSpots()
       toast.success('休憩を開始しました')
     } catch (error) {
       toast.error(
@@ -200,9 +201,7 @@ export const TouringModeView = ({
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${currentBreak.spotId}` as const,
         { endAt: new Date() }
       )
-      await mutate(
-        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`
-      )
+      await mutateSpots()
       toast.success('休憩を終了しました')
     } catch (error) {
       toast.error(
@@ -210,6 +209,21 @@ export const TouringModeView = ({
       )
     } finally {
       setIsBreakLoading(false)
+    }
+  }
+
+  const handleArrivalRecord = async () => {
+    try {
+      await apiPatch(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}` as const,
+        { destinationArrivedAt: new Date() }
+      )
+      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
+      toast.success('目的地への到着を記録しました')
+    } catch (error) {
+      toast.error(
+        error instanceof ApiV1Error ? error.message : '到着の記録に失敗しました'
+      )
     }
   }
 
@@ -264,7 +278,15 @@ export const TouringModeView = ({
         {/* タイトル */}
         <h4 className={styles.touringTitle}>{title}</h4>
 
-        {/* 経過時間（左）＋ ウィジェット（右）横並び */}
+        {/* 到着バナー */}
+        {hasReachedDestination && (
+          <div className={styles.arrivedBanner}>
+            <MapPin size={15} />
+            目的地に到着しました！
+          </div>
+        )}
+
+        {/* 経過時間（左）＋ 目的地ウィジェット（右）横並び */}
         <div className={styles.timeRow}>
           <div className={styles.timeInfo}>
             <div className={styles.elapsedTime}>{elapsedTime}</div>
@@ -280,14 +302,12 @@ export const TouringModeView = ({
 
           {hasDestination && (
             <div className={styles.widgetSection}>
-              <TouringWeatherWidget
+              <TouringDestinationWidget
                 endLatitude={endLatitude}
                 endLongitude={endLongitude}
-              />
-              <TouringEtaWidget
-                endLatitude={endLatitude}
-                endLongitude={endLongitude}
-                onArrival={() => setHasReachedDestination(true)}
+                plannedEndDate={endDate}
+                hasArrived={hasReachedDestination}
+                onArrival={handleArrivalRecord}
               />
             </div>
           )}

@@ -1,0 +1,135 @@
+'use client'
+
+import useSWR from 'swr'
+import styles from './TouringDestinationWidget.module.css'
+
+type WeatherData = {
+  temperature: number
+  weatherCode: number
+  description: string
+  precipitationProbability: number | null
+}
+
+type TouringDestinationWidgetProps = {
+  endLatitude: number
+  endLongitude: number
+  plannedEndDate: string
+  hasArrived: boolean
+  onArrival: () => void | Promise<void>
+  isArrivalLoading?: boolean
+}
+
+function weatherEmoji(code: number): string {
+  if (code === 0) return '☀️'
+  if (code <= 2) return '🌤️'
+  if (code === 3) return '☁️'
+  if (code <= 48) return '🌫️'
+  if (code <= 67) return '🌧️'
+  if (code <= 77) return '❄️'
+  if (code <= 82) return '🌦️'
+  if (code <= 86) return '🌨️'
+  return '⛈️'
+}
+
+function formatPlannedTime(dateString: string): string {
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleTimeString('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * 目的地の天気・プラン到着時刻・Googleマップリンクを表示するウィジェット
+ */
+const TouringDestinationWidget = ({
+  endLatitude,
+  endLongitude,
+  plannedEndDate,
+  hasArrived,
+  onArrival,
+  isArrivalLoading = false,
+}: TouringDestinationWidgetProps) => {
+  const { data: weather } = useSWR<WeatherData>(
+    `/api/weather?lat=${endLatitude}&lng=${endLongitude}`,
+    async (url: string) => {
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('天気情報の取得に失敗しました')
+      return res.json() as Promise<WeatherData>
+    },
+    { refreshInterval: 600_000 }
+  )
+
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${endLatitude},${endLongitude}&travelmode=driving`
+
+  return (
+    <div
+      className={`${styles.widget} ${hasArrived ? styles.arrivedWidget : ''}`}
+    >
+      <p className={styles.label}>次のスポット</p>
+
+      {hasArrived ? (
+        <p className={styles.arrivedText}>目的地に到着！</p>
+      ) : (
+        <>
+          <div className={styles.infoRow}>
+            {/* 天気・気温 */}
+            <div className={styles.col}>
+              {weather ? (
+                <>
+                  <span className={styles.weatherEmoji}>
+                    {weatherEmoji(weather.weatherCode)}
+                  </span>
+                  <span className={styles.mainValue}>
+                    {weather.temperature}°C
+                  </span>
+                  <span className={styles.subValue}>{weather.description}</span>
+                  {weather.precipitationProbability !== null && (
+                    <span className={styles.dim}>
+                      降水確率 {weather.precipitationProbability}%
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className={styles.dim}>取得中...</span>
+              )}
+            </div>
+
+            <div className={styles.divider} />
+
+            {/* プラン到着予定時刻 + Googleマップ */}
+            <div className={styles.col}>
+              <span className={styles.etaIcon}>🏁</span>
+              <span className={styles.etaLabel}>到着予定</span>
+              <span className={styles.mainValue}>
+                {formatPlannedTime(plannedEndDate)}
+              </span>
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.mapsLink}
+              >
+                Googleマップ
+              </a>
+            </div>
+          </div>
+
+          <button
+            className={styles.arrivalButton}
+            onClick={onArrival}
+            disabled={isArrivalLoading}
+          >
+            {isArrivalLoading ? '記録中...' : '到着した'}
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default TouringDestinationWidget
