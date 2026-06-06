@@ -40,3 +40,14 @@
   color: var(--card-text-dim);
   opacity: 0.7;
 }
+
+.arrivedWidget {
+  border-color: var(--color-product);
+  background-color: color-mix(in srgb, var(--color-product) 8%, var(--card-surface));
+}
+
+.arrivedText {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-product);
+}

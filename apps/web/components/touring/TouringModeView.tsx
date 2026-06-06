@@ -65,6 +65,7 @@ export const TouringModeView = ({
   const [endMileageError, setEndMileageError] = useState('')
   const [showFuelLogModal, setShowFuelLogModal] = useState(false)
   const [isBreakLoading, setIsBreakLoading] = useState(false)
+  const [hasReachedDestination, setHasReachedDestination] = useState(false)
   const { getCurrentPosition } = useGeolocation()
 
   const { data: spots } = useSWR(
@@ -241,47 +242,44 @@ export const TouringModeView = ({
   return (
     <>
       <div className={styles.container} data-testid="touring-mode-view">
-        {/* ルート風の背景 */}
-        <div className={styles.routeVisual}>
-          <div className={styles.roadDash} />
+        {/* 右上: ツーリング終了ボタン */}
+        <div className={styles.endCornerArea}>
+          <button
+            onClick={handleOpenEndMileageModal}
+            disabled={isLoading}
+            className={styles.endCornerButton}
+          >
+            {isLoading ? '終了中...' : 'ツーリングを終了'}
+          </button>
         </div>
 
-        {/* 上部: バイク名・タイトル・経過時間 */}
-        <div className={styles.topArea}>
-          {/* 右上: ツーリング終了ボタン */}
-          <div className={styles.endCornerArea}>
-            <button
-              onClick={handleOpenEndMileageModal}
-              disabled={isLoading}
-              className={styles.endCornerButton}
-            >
-              {isLoading ? '終了中...' : 'ツーリングを終了'}
-            </button>
+        {/* バイク名 */}
+        <div className={styles.bikeInfoArea}>
+          <div className={styles.animatedBikeIcon}>
+            <BikeIcon />
           </div>
+          <h3 className={styles.bikeNameLarge}>{bikeName}</h3>
+        </div>
 
-          <div className={styles.bikeInfoArea}>
-            <div className={styles.animatedBikeIcon}>
-              <BikeIcon />
-            </div>
-            <h3 className={styles.bikeNameLarge}>{bikeName}</h3>
-          </div>
+        {/* タイトル */}
+        <h4 className={styles.touringTitle}>{title}</h4>
 
-          <h4 className={styles.touringTitle}>{title}</h4>
-          <div className={styles.elapsedTime}>{elapsedTime}</div>
-          <p className={styles.startDateTime}>
-            {formatStartDateTime(startDate)} 開始
-          </p>
-          {startMileage !== null && (
-            <p className={styles.startMileageInfo}>
-              出発時走行距離: {startMileage.toLocaleString()}km
+        {/* 経過時間（左）＋ ウィジェット（右）横並び */}
+        <div className={styles.timeRow}>
+          <div className={styles.timeInfo}>
+            <div className={styles.elapsedTime}>{elapsedTime}</div>
+            <p className={styles.startDateTime}>
+              {formatStartDateTime(startDate)} 開始
             </p>
-          )}
-        </div>
+            {startMileage !== null && (
+              <p className={styles.startMileageInfo}>
+                出発時走行距離: {startMileage.toLocaleString()}km
+              </p>
+            )}
+          </div>
 
-        {/* 中部: 天気・ETAウィジェット（目的地がある場合のみ） */}
-        <div className={styles.middleArea}>
-          {hasDestination ? (
-            <>
+          {hasDestination && (
+            <div className={styles.widgetSection}>
               <TouringWeatherWidget
                 endLatitude={endLatitude}
                 endLongitude={endLongitude}
@@ -289,14 +287,17 @@ export const TouringModeView = ({
               <TouringEtaWidget
                 endLatitude={endLatitude}
                 endLongitude={endLongitude}
+                onArrival={() => setHasReachedDestination(true)}
               />
-            </>
-          ) : (
-            <p className={styles.noDestinationHint}>
-              プランで目的地を設定すると天気・到着予定時間が表示されます
-            </p>
+            </div>
           )}
         </div>
+
+        {!hasDestination && (
+          <p className={styles.noDestinationHint}>
+            プランで目的地を設定すると天気・到着予定時間が表示されます
+          </p>
+        )}
 
         {/* 下部: スポット記録・休憩・終了ボタン */}
         <div className={styles.bottomArea}>
@@ -504,6 +505,7 @@ export const TouringModeView = ({
       {showFuelLogModal && (
         <FuelLogRegisterModal
           bikeId={myUserBikeId}
+          touringId={touringId}
           onClose={() => setShowFuelLogModal(false)}
           onSuccess={() => setShowFuelLogModal(false)}
         />

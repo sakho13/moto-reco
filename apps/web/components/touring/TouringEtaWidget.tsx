@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useSWR from 'swr'
 import styles from './TouringEtaWidget.module.css'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -13,6 +13,10 @@ type RoutingData = {
 type TouringEtaWidgetProps = {
   endLatitude: number
   endLongitude: number
+  /** 目的地に到着したとみなす距離（メートル）。デフォルト 300m */
+  arrivalThresholdMeters?: number
+  /** 到着を検出したときに一度だけ呼ばれるコールバック */
+  onArrival?: () => void
 }
 
 type CurrentPosition = {
@@ -30,12 +34,16 @@ type CurrentPosition = {
 const TouringEtaWidget = ({
   endLatitude,
   endLongitude,
+  arrivalThresholdMeters = 300,
+  onArrival,
 }: TouringEtaWidgetProps) => {
   const { getCurrentPosition } = useGeolocation()
   const [currentPosition, setCurrentPosition] = useState<CurrentPosition>(null)
   const [geoStatus, setGeoStatus] = useState<
     'idle' | 'loading' | 'success' | 'denied' | 'error'
   >('idle')
+  const [hasArrived, setHasArrived] = useState(false)
+  const arrivedFiredRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -88,6 +96,20 @@ const TouringEtaWidget = ({
     { refreshInterval: 300_000 }
   )
 
+  useEffect(() => {
+    if (
+      !arrivedFiredRef.current &&
+      data &&
+      data.distanceMeters < arrivalThresholdMeters
+    ) {
+      arrivedFiredRef.current = true
+      setHasArrived(true)
+      onArrival?.()
+    }
+    // arrivalThresholdMeters と onArrival は到着判定後は不要なため deps から除外
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
+
   const formatDuration = (seconds: number): string => {
     const minutes = Math.round(seconds / 60)
     const hours = Math.floor(minutes / 60)
@@ -106,39 +128,49 @@ const TouringEtaWidget = ({
   }
 
   return (
-    <div className={styles.widget}>
-      <p className={styles.header}>目的地までの到着予定</p>
+    <div
+      className={`${styles.widget} ${hasArrived ? styles.arrivedWidget : ''}`}
+    >
+      <p className={styles.header}>
+        {hasArrived ? '目的地' : '目的地までの到着予定'}
+      </p>
 
-      {geoStatus === 'denied' && (
-        <p className={styles.hint}>
-          位置情報を許可すると到着予定時間が表示されます
-        </p>
-      )}
-
-      {(geoStatus === 'idle' || geoStatus === 'loading') && (
-        <p className={styles.loading}>位置情報を取得中...</p>
-      )}
-
-      {geoStatus === 'error' && (
-        <p className={styles.error}>位置情報を取得できませんでした</p>
-      )}
-
-      {geoStatus === 'success' && isLoading && (
-        <p className={styles.loading}>計算中...</p>
-      )}
-
-      {geoStatus === 'success' && error && (
-        <p className={styles.error}>到着予定時間を取得できませんでした</p>
-      )}
-
-      {geoStatus === 'success' && data && (
+      {hasArrived ? (
+        <p className={styles.arrivedText}>到着！</p>
+      ) : (
         <>
-          <p className={styles.etaText}>
-            {formatDuration(data.durationSeconds)}
-          </p>
-          <p className={styles.subText}>
-            {formatDistance(data.distanceMeters)}
-          </p>
+          {geoStatus === 'denied' && (
+            <p className={styles.hint}>
+              位置情報を許可すると到着予定時間が表示されます
+            </p>
+          )}
+
+          {(geoStatus === 'idle' || geoStatus === 'loading') && (
+            <p className={styles.loading}>位置情報を取得中...</p>
+          )}
+
+          {geoStatus === 'error' && (
+            <p className={styles.error}>位置情報を取得できませんでした</p>
+          )}
+
+          {geoStatus === 'success' && isLoading && (
+            <p className={styles.loading}>計算中...</p>
+          )}
+
+          {geoStatus === 'success' && error && (
+            <p className={styles.error}>到着予定時間を取得できませんでした</p>
+          )}
+
+          {geoStatus === 'success' && data && (
+            <>
+              <p className={styles.etaText}>
+                {formatDuration(data.durationSeconds)}
+              </p>
+              <p className={styles.subText}>
+                {formatDistance(data.distanceMeters)}
+              </p>
+            </>
+          )}
         </>
       )}
     </div>
