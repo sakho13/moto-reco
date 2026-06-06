@@ -1,5 +1,6 @@
 'use client'
 
+import { Flag } from 'lucide-react'
 import useSWR from 'swr'
 import styles from './TouringDestinationWidget.module.css'
 
@@ -103,7 +104,6 @@ const TouringDestinationWidget = ({
 
             {/* プラン到着予定時刻 + Googleマップ */}
             <div className={styles.col}>
-              <span className={styles.etaIcon}>🏁</span>
               <span className={styles.etaLabel}>到着予定</span>
               <span className={styles.mainValue}>
                 {formatPlannedTime(plannedEndDate)}
@@ -124,6 +124,7 @@ const TouringDestinationWidget = ({
             onClick={onArrival}
             disabled={isArrivalLoading}
           >
+            {!isArrivalLoading && <Flag size={15} />}
             {isArrivalLoading ? '記録中...' : '到着した'}
           </button>
         </>

@@ -196,7 +196,7 @@ html[data-theme-mode='dark'] .container {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
-  margin-top: auto;
+  margin-top: clamp(var(--spacing-4), 6vh, var(--spacing-10));
 }
 
 .spotButton svg {

@@ -48,8 +48,7 @@
   flex-shrink: 0;
 }
 
-.weatherEmoji,
-.etaIcon {
+.weatherEmoji {
   font-size: 1.4rem;
   line-height: 1;
   margin-bottom: 0.1rem;
@@ -101,20 +100,23 @@
   width: 100%;
   padding: var(--spacing-3);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   border-radius: var(--radius-md);
-  border: 1.5px solid var(--card-border);
-  background-color: transparent;
-  color: var(--card-text-muted);
+  border: 1.5px solid var(--color-product);
+  background-color: color-mix(in srgb, var(--color-product) 10%, transparent);
+  color: var(--color-product);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
   transition:
     background-color 0.15s,
     border-color 0.15s;
 }
 
 .arrivalButton:hover:not(:disabled) {
-  background-color: var(--color-cloudHover);
-  border-color: var(--color-cloudActive);
+  background-color: color-mix(in srgb, var(--color-product) 20%, transparent);
 }
 
 .arrivalButton:disabled {
