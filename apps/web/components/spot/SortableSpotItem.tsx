@@ -107,32 +107,30 @@ export function SortableSpotItem({
           <p className="font-medium text-sm truncate">
             {isBreak ? (spot.name ?? '休憩') : (spot.name ?? '無名スポット')}
           </p>
-          <div className="flex items-center gap-1 shrink-0">
-            <span className={dimTextClassName} style={{ fontSize: '0.75rem' }}>
-              {isBreak
-                ? (touringStatus === 'PLANNED' ? '予定 ' : '') +
-                  formatBreakDuration(spot.visitedAt, spot.endAt)
-                : spot.endAt
-                  ? (touringStatus === 'PLANNED' ? '予定 ' : '') +
-                    formatBreakDuration(spot.visitedAt, spot.endAt)
-                  : touringStatus === 'PLANNED'
-                    ? formatPlannedArrival(spot.plannedAt)
-                    : spot.visitedAt === null
-                      ? '未到着'
-                      : touringStatus === 'STARTED' &&
-                          new Date(spot.visitedAt) > new Date()
-                        ? `${formatVisitedAt(spot.visitedAt)} 訪問予定`
-                        : formatVisitedAt(spot.visitedAt)}
-            </span>
-            <button
-              onClick={() => onEdit(spot)}
-              className={editButtonClassName}
-              aria-label={isBreak ? '休憩を編集' : 'スポットを編集'}
-            >
-              <EditIcon />
-            </button>
-          </div>
+          <button
+            onClick={() => onEdit(spot)}
+            className={`${editButtonClassName} shrink-0`}
+            aria-label={isBreak ? '休憩を編集' : 'スポットを編集'}
+          >
+            <EditIcon />
+          </button>
         </div>
+        <p className={dimTextClassName} style={{ fontSize: '0.75rem' }}>
+          {isBreak
+            ? (touringStatus === 'PLANNED' ? '予定 ' : '') +
+              formatBreakDuration(spot.visitedAt, spot.endAt)
+            : spot.endAt
+              ? (touringStatus === 'PLANNED' ? '予定 ' : '') +
+                formatBreakDuration(spot.visitedAt, spot.endAt)
+              : touringStatus === 'PLANNED'
+                ? formatPlannedArrival(spot.plannedAt)
+                : spot.visitedAt === null
+                  ? '未到着'
+                  : touringStatus === 'STARTED' &&
+                      new Date(spot.visitedAt) > new Date()
+                    ? `${formatVisitedAt(spot.visitedAt)} 訪問予定`
+                    : formatVisitedAt(spot.visitedAt)}
+        </p>
         {spot.memo && (
           <p className={`text-xs mt-1 wrap-break-word ${mutedTextClassName}`}>
             {spot.memo}
