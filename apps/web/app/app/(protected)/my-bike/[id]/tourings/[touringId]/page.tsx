@@ -133,6 +133,17 @@ function TouringDetailPage() {
     }
   }
 
+  const calcTravelMinutes = (
+    departStr: string | null | undefined,
+    arriveStr: string | null | undefined
+  ): number | null => {
+    if (!departStr || !arriveStr) return null
+    const diff = Math.round(
+      (new Date(arriveStr).getTime() - new Date(departStr).getTime()) / 60000
+    )
+    return diff > 0 ? diff : null
+  }
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
@@ -456,6 +467,13 @@ function TouringDetailPage() {
                   className={styles.routeLink}
                 >
                   ↓ Googleマップで経路確認
+                  {(() => {
+                    const min = calcTravelMinutes(
+                      touring?.startDate,
+                      localSpots[0]?.visitedAt
+                    )
+                    return min !== null ? `（移動 ${min}分）` : ''
+                  })()}
                 </a>
               )}
 
@@ -505,6 +523,13 @@ function TouringDetailPage() {
                                 className={styles.routeLink}
                               >
                                 ↓ Googleマップで経路確認
+                                {(() => {
+                                  const min = calcTravelMinutes(
+                                    spot.endAt,
+                                    nextSpot.visitedAt
+                                  )
+                                  return min !== null ? `（移動 ${min}分）` : ''
+                                })()}
                               </a>
                             )}
                         </Fragment>
@@ -541,6 +566,13 @@ function TouringDetailPage() {
                   className={styles.routeLink}
                 >
                   ↓ Googleマップで経路確認
+                  {(() => {
+                    const min = calcTravelMinutes(
+                      localSpots.at(-1)?.endAt,
+                      touring?.endDate
+                    )
+                    return min !== null ? `（移動 ${min}分）` : ''
+                  })()}
                 </a>
               )}
 
