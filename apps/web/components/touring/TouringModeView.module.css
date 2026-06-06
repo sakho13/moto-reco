@@ -2,15 +2,6 @@
    アニメーション定義
    ======================================== */
 
-@keyframes roadDash {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 40px 0;
-  }
-}
-
 @keyframes bikeMove {
   0%,
   100% {
@@ -21,139 +12,88 @@
   }
 }
 
-@keyframes cardGlow {
-  0%,
-  100% {
-    box-shadow: var(--shadow-lg), 0 0 20px rgba(59, 130, 246, 0.3);
-  }
-  50% {
-    box-shadow: var(--shadow-lg), 0 0 30px rgba(59, 130, 246, 0.5);
-  }
-}
-
 /* ========================================
    全画面コンテナ
    ======================================== */
 
 .container {
+  /* ライトモード: 白カード + グレーサーフェスで階層を明確に */
+  --card-bg: var(--color-background);      /* #FFFFFF */
+  --card-surface: var(--color-cloud);      /* #F7F7F7 — 内側要素の背景 */
+  --card-border: var(--color-cloudActive); /* #CFCFCF — コントラスト強めの境界線 */
+  --card-text: var(--color-inkDark);       /* #0B0C0F — 最大コントラスト */
+  --card-text-muted: var(--color-ink);     /* #324256 — セカンダリ */
+  --card-text-dim: var(--color-inkLight);  /* #4E5C6F — ターシャリ */
+
   position: relative;
   width: 100%;
   min-height: calc(100dvh - 10rem);
   padding: var(--spacing-6);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: var(--card-bg);
+  border-top: 3px solid var(--color-product);
   border-radius: var(--radius-lg);
-  animation: cardGlow 3s ease-in-out infinite;
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
 }
 
-/* ルート風の背景デザイン */
-.routeVisual {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.15;
-  pointer-events: none;
-}
-
-.roadDash {
-  position: absolute;
-  bottom: 30%;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-image: repeating-linear-gradient(
-    to right,
-    white 0px,
-    white 20px,
-    transparent 20px,
-    transparent 40px
-  );
-  animation: roadDash 1.5s linear infinite;
+/* ダークモード: 専用ダークサーフェスで上書き（cloud=#676767は使えないため） */
+html[data-theme-mode='dark'] .container {
+  --card-bg: #1e293b;
+  --card-surface: #273548;
+  --card-border: rgba(255, 255, 255, 0.1);
+  /* --card-text 系は var(--color-ink*) がダーク値に自動切替するためそのまま */
 }
 
 /* ========================================
-   上部エリア（バイク名・タイトル・経過時間・休憩）
+   上部エリア（バイク名・タイトル・経過時間）
    ======================================== */
 
 .topArea {
   position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
 }
 
-.breakCornerArea {
+.endCornerArea {
   position: absolute;
   top: 0;
   right: 0;
   z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.25rem;
 }
 
-.breakCornerButton {
-  font-size: 0.875rem;
-  font-weight: 600;
-  padding: 0.45rem 1.1rem;
+.endCornerButton {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: 0.35rem 0.9rem;
   border-radius: var(--radius-md);
-  background-color: rgba(251, 191, 36, 0.28);
-  border: 1px solid rgba(251, 191, 36, 0.65);
-  color: white;
+  background-color: transparent;
+  border: 1.5px solid var(--color-danger);
+  color: var(--color-danger);
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition:
+    background-color 0.15s,
+    opacity 0.15s;
   white-space: nowrap;
 }
 
-.breakCornerButton:hover:not(:disabled) {
-  background-color: rgba(251, 191, 36, 0.45);
+.endCornerButton:hover:not(:disabled) {
+  background-color: rgba(204, 0, 0, 0.06);
 }
 
-.breakCornerButton:disabled {
-  opacity: 0.5;
+.endCornerButton:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
-}
-
-.breakCornerEndButton {
-  font-size: 0.875rem;
-  font-weight: 600;
-  padding: 0.45rem 1.1rem;
-  border-radius: var(--radius-md);
-  background-color: rgba(251, 191, 36, 0.55);
-  border: 1px solid rgba(251, 191, 36, 0.9);
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.15s;
-  white-space: nowrap;
-}
-
-.breakCornerEndButton:hover:not(:disabled) {
-  background-color: rgba(251, 191, 36, 0.7);
-}
-
-.breakCornerEndButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.breakCornerStatus {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.85);
-  text-align: right;
 }
 
 .bikeInfoArea {
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
-  padding-right: 8rem;
+  padding-right: 7rem;
 }
 
 .animatedBikeIcon {
@@ -163,9 +103,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--card-surface);
+  border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
-  color: white;
+  color: var(--color-product);
   animation: bikeMove 2s ease-in-out infinite;
 }
 
@@ -173,7 +114,7 @@
   flex: 1;
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: white;
+  color: var(--card-text);
   line-height: var(--line-height-tight);
   word-break: break-word;
 }
@@ -181,7 +122,7 @@
 .touringTitle {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--card-text-muted);
   word-break: break-word;
   margin-bottom: var(--spacing-1);
 }
@@ -189,7 +130,7 @@
 .elapsedTime {
   font-size: 3rem;
   font-weight: var(--font-weight-bold);
-  color: white;
+  color: var(--card-text);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   margin-bottom: var(--spacing-1);
@@ -197,12 +138,12 @@
 
 .startDateTime {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--card-text-muted);
 }
 
 .startMileageInfo {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--card-text-dim);
   margin-top: var(--spacing-1);
 }
 
@@ -220,12 +161,12 @@
 
 .noDestinationHint {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--card-text-dim);
   text-align: center;
   padding: var(--spacing-3) var(--spacing-4);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--card-surface);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--card-border);
 }
 
 /* ========================================
@@ -233,27 +174,89 @@
    ======================================== */
 
 .bottomArea {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
   margin-top: auto;
 }
 
-.spotButton {
-  width: 100%;
-  background-color: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  color: white;
+.spotButton svg {
+  /* Tailwind preflight が svg { display: block } を設定するため inline-flex 内で改行される問題を修正 */
+  display: inline-block;
+  vertical-align: middle;
 }
 
-.spotButton:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.3);
+.bottomRow {
+  display: flex;
+  gap: var(--spacing-2);
 }
 
-.endButton {
-  width: 100%;
+.breakButton {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-3) var(--spacing-2);
+  border-radius: var(--radius-md);
+  background-color: var(--card-surface);
+  border: 1.5px solid var(--card-border);
+  color: var(--card-text-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+  min-height: 2.5rem;
+}
+
+.breakButton:hover:not(:disabled) {
+  background-color: var(--color-cloudHover);
+  border-color: var(--color-cloudActive);
+}
+
+.breakButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.breakStatus {
+  font-size: var(--font-size-xs);
+  color: var(--card-text-dim);
+  text-align: center;
+}
+
+.fuelButton {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-3) var(--spacing-2);
+  border-radius: var(--radius-md);
+  background-color: var(--card-surface);
+  border: 1.5px solid var(--card-border);
+  color: var(--card-text-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+  min-height: 2.5rem;
+}
+
+.fuelButton:hover:not(:disabled) {
+  background-color: var(--color-cloudHover);
+  border-color: var(--color-cloudActive);
+}
+
+.fuelButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* ========================================

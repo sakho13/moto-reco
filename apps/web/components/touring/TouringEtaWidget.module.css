@@ -1,40 +1,42 @@
 .widget {
   padding: var(--spacing-3) var(--spacing-4);
-  background-color: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: var(--card-surface);
+  border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
-  color: white;
 }
 
 .header {
   font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--card-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   margin-bottom: var(--spacing-2);
 }
 
 .etaText {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
-  color: white;
+  color: var(--card-text);
 }
 
 .subText {
   font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--card-text-muted);
   margin-top: 0.125rem;
 }
 
 .hint {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--card-text-dim);
 }
 
 .loading {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--card-text-dim);
 }
 
 .error {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--card-text-dim);
+  opacity: 0.7;
 }

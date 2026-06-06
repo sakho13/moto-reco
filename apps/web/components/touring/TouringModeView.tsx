@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
+import { Coffee, Fuel, MapPin, Timer } from 'lucide-react'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from '../icons/BikeIcon'
 import styles from './TouringModeView.module.css'
+import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal'
 import TouringEtaWidget from '@/components/touring/TouringEtaWidget'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import TouringWeatherWidget from '@/components/touring/TouringWeatherWidget'
@@ -61,6 +63,7 @@ export const TouringModeView = ({
   const [showEndMileageModal, setShowEndMileageModal] = useState(false)
   const [endMileageInput, setEndMileageInput] = useState('')
   const [endMileageError, setEndMileageError] = useState('')
+  const [showFuelLogModal, setShowFuelLogModal] = useState(false)
   const [isBreakLoading, setIsBreakLoading] = useState(false)
   const { getCurrentPosition } = useGeolocation()
 
@@ -243,32 +246,17 @@ export const TouringModeView = ({
           <div className={styles.roadDash} />
         </div>
 
-        {/* 上部: バイク名・タイトル・経過時間・休憩ボタン */}
+        {/* 上部: バイク名・タイトル・経過時間 */}
         <div className={styles.topArea}>
-          {/* 右上の休憩ボタン */}
-          <div className={styles.breakCornerArea}>
-            {currentBreak ? (
-              <>
-                <span className={styles.breakCornerStatus}>
-                  休憩中 {formatBreakTime(currentBreak.visitedAt)}〜
-                </span>
-                <button
-                  onClick={handleQuickBreakEnd}
-                  disabled={isBreakLoading || isLoading}
-                  className={styles.breakCornerEndButton}
-                >
-                  {isBreakLoading ? '...' : '休憩終了'}
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={handleQuickBreakStart}
-                disabled={isBreakLoading || isLoading || spotLoading}
-                className={styles.breakCornerButton}
-              >
-                {isBreakLoading ? '...' : '休憩を始める'}
-              </button>
-            )}
+          {/* 右上: ツーリング終了ボタン */}
+          <div className={styles.endCornerArea}>
+            <button
+              onClick={handleOpenEndMileageModal}
+              disabled={isLoading}
+              className={styles.endCornerButton}
+            >
+              {isLoading ? '終了中...' : 'ツーリングを終了'}
+            </button>
           </div>
 
           <div className={styles.bikeInfoArea}>
@@ -310,27 +298,56 @@ export const TouringModeView = ({
           )}
         </div>
 
-        {/* 下部: スポット記録・終了ボタン */}
+        {/* 下部: スポット記録・休憩・終了ボタン */}
         <div className={styles.bottomArea}>
           <Button
             onClick={handleOpenSpotModal}
             disabled={isLoading || spotLoading}
-            variant="cloud"
-            size="sm"
+            variant="primary"
+            size="lg"
+            fullWidth
             className={styles.spotButton}
           >
+            <MapPin size={18} />
             スポットを記録
           </Button>
 
-          <Button
-            onClick={handleOpenEndMileageModal}
-            disabled={isLoading}
-            variant="danger"
-            size="md"
-            className={styles.endButton}
-          >
-            {isLoading ? '終了中...' : 'ツーリングを終了'}
-          </Button>
+          {currentBreak && (
+            <p className={styles.breakStatus}>
+              休憩中 {formatBreakTime(currentBreak.visitedAt)}〜
+            </p>
+          )}
+
+          <div className={styles.bottomRow}>
+            {currentBreak ? (
+              <button
+                onClick={handleQuickBreakEnd}
+                disabled={isBreakLoading || isLoading}
+                className={styles.breakButton}
+              >
+                <Timer size={15} />
+                {isBreakLoading ? '...' : '休憩を終了'}
+              </button>
+            ) : (
+              <button
+                onClick={handleQuickBreakStart}
+                disabled={isBreakLoading || isLoading || spotLoading}
+                className={styles.breakButton}
+              >
+                <Coffee size={15} />
+                {isBreakLoading ? '...' : '休憩を始める'}
+              </button>
+            )}
+
+            <button
+              onClick={() => setShowFuelLogModal(true)}
+              disabled={isLoading}
+              className={styles.fuelButton}
+            >
+              <Fuel size={15} />
+              給油を記録
+            </button>
+          </div>
         </div>
       </div>
 
@@ -482,6 +499,14 @@ export const TouringModeView = ({
             </div>
           </div>
         </div>
+      )}
+
+      {showFuelLogModal && (
+        <FuelLogRegisterModal
+          bikeId={myUserBikeId}
+          onClose={() => setShowFuelLogModal(false)}
+          onSuccess={() => setShowFuelLogModal(false)}
+        />
       )}
     </>
   )
