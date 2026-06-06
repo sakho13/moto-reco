@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
@@ -12,6 +13,7 @@ import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 interface SpotEditFormProps {
   bikeId: string
@@ -27,12 +29,6 @@ type SpotFormState = {
   memo: string
   visitedAt: string
   endAt: string
-}
-
-const toLocalDateTimeString = (dateString: string) => {
-  const d = new Date(dateString)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 /**
@@ -205,9 +201,8 @@ export function SpotEditForm({
           }
           htmlFor="spotVisitedAt"
         >
-          <Input
+          <DateTimeInput
             id="spotVisitedAt"
-            type="datetime-local"
             value={formState.visitedAt}
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, visitedAt: e.target.value }))
@@ -228,9 +223,8 @@ export function SpotEditForm({
           }
           htmlFor="spotEndAt"
         >
-          <Input
+          <DateTimeInput
             id="spotEndAt"
-            type="datetime-local"
             value={formState.endAt}
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, endAt: e.target.value }))

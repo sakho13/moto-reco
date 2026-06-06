@@ -6,6 +6,10 @@ import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import {
+  getNowLocalDateTimeString,
+  getTodayAtTime,
+} from '@/lib/utils/dateUtils'
 
 export type TouringMode = 'history' | 'plan'
 
@@ -28,29 +32,11 @@ export interface TouringFormProps {
   disablePlanMode?: boolean
 }
 
-const getTodayDateTimeString = (timeStr: string) => {
-  const today = new Date()
-  const y = today.getFullYear()
-  const m = String(today.getMonth() + 1).padStart(2, '0')
-  const d = String(today.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}T${timeStr}`
-}
-
-const getCurrentDateTimeString = () => {
-  const now = new Date()
-  const y = now.getFullYear()
-  const mo = String(now.getMonth() + 1).padStart(2, '0')
-  const d = String(now.getDate()).padStart(2, '0')
-  const h = String(now.getHours()).padStart(2, '0')
-  const mi = String(now.getMinutes()).padStart(2, '0')
-  return `${y}-${mo}-${d}T${h}:${mi}`
-}
-
 const getDefaultStartDateTime = (m: TouringMode) =>
-  m === 'plan' ? getTodayDateTimeString('09:00') : getCurrentDateTimeString()
+  m === 'plan' ? getTodayAtTime('09:00') : getNowLocalDateTimeString()
 
 const getDefaultEndDateTime = (m: TouringMode) =>
-  m === 'plan' ? getTodayDateTimeString('17:00') : getCurrentDateTimeString()
+  m === 'plan' ? getTodayAtTime('17:00') : getNowLocalDateTimeString()
 
 export const TouringForm = ({
   initialData,

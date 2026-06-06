@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import type { MaintenanceType } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
+import { DateInput } from '@repo/ui/dateInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
 import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
+import { getTodayDateString } from '@/lib/utils/dateUtils'
 
 export type MaintenanceLogFormData = {
   performedAt: string
@@ -36,14 +38,6 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_ORDER = ['BRAKE', 'ENGINE', 'TRANSMISSION', 'TIRE', 'ELECTRIC']
-
-const getTodayDateString = () => {
-  const today = new Date()
-  const year = today.getFullYear()
-  const month = String(today.getMonth() + 1).padStart(2, '0')
-  const day = String(today.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
 
 export const MaintenanceLogForm = ({
   initialData,
@@ -114,9 +108,8 @@ export const MaintenanceLogForm = ({
       }}
     >
       <FormField label="実施日" htmlFor="performedAt" required>
-        <Input
+        <DateInput
           id="performedAt"
-          type="date"
           value={formData.performedAt}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, performedAt: e.target.value }))

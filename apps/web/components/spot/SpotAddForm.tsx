@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { mutate } from 'swr'
 import { Button } from '@repo/ui/button'
+import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
@@ -10,6 +11,10 @@ import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import {
+  getNowLocalDateTimeString,
+  toLocalDateTimeString,
+} from '@/lib/utils/dateUtils'
 
 type SpotAddFormProps = {
   bikeId: string
@@ -29,12 +34,7 @@ type SpotFormState = {
   endAt: string
 }
 
-const pad = (n: number) => String(n).padStart(2, '0')
-
-const toLocalDateTimeString = (date: Date): string =>
-  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
-
-const getNowLocalString = () => toLocalDateTimeString(new Date())
+const getNowLocalString = () => getNowLocalDateTimeString()
 
 /**
  * スポット・休憩追加フォーム
@@ -200,9 +200,8 @@ export function SpotAddForm({
           }
           htmlFor="spotVisitedAt"
         >
-          <Input
+          <DateTimeInput
             id="spotVisitedAt"
-            type="datetime-local"
             value={formState.visitedAt}
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, visitedAt: e.target.value }))
@@ -223,9 +222,8 @@ export function SpotAddForm({
           }
           htmlFor="spotEndAt"
         >
-          <Input
+          <DateTimeInput
             id="spotEndAt"
-            type="datetime-local"
             value={formState.endAt}
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, endAt: e.target.value }))

@@ -14,6 +14,7 @@ import {
 } from '@/components/touring/TouringForm'
 import { authenticatedFetch, apiPatch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 interface TouringEditFormProps {
   bikeId: string
@@ -50,17 +51,13 @@ export function TouringEditForm({
 
   useEffect(() => {
     if (data) {
-      const pad = (n: number) => String(n).padStart(2, '0')
-      const toLocalDateTime = (d: Date) =>
-        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
-
       const start = new Date(data.startDate)
       const end = new Date(data.endDate)
 
       setInitialData({
         title: data.title,
-        startDateTime: toLocalDateTime(start),
-        endDateTime: toLocalDateTime(end),
+        startDateTime: toLocalDateTimeString(start),
+        endDateTime: toLocalDateTimeString(end),
         startMileage: data.startMileage?.toString() ?? '',
         endMileage: data.endMileage?.toString() ?? '',
         mode: data.status === 'PLANNED' ? 'plan' : 'history',
