@@ -131,7 +131,10 @@ export function SpotAddForm({
           type: formState.type,
           name: formState.name !== '' ? formState.name : undefined,
           memo: formState.memo !== '' ? formState.memo : undefined,
-          visitedAt: new Date(formState.visitedAt),
+          // PLANNED の場合は到着予定日時を plannedAt に保存し visitedAt は null のままにする
+          ...(isPlanned
+            ? { plannedAt: new Date(formState.visitedAt) }
+            : { visitedAt: new Date(formState.visitedAt) }),
           endAt,
           latitude: location?.lat,
           longitude: location?.lng,

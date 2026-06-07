@@ -3,6 +3,7 @@
 import { Flag } from 'lucide-react'
 import useSWR from 'swr'
 import styles from './TouringDestinationWidget.module.css'
+import { weatherEmoji } from '@/lib/utils/weatherUtils'
 
 type WeatherData = {
   temperature: number
@@ -14,22 +15,11 @@ type WeatherData = {
 type TouringDestinationWidgetProps = {
   endLatitude: number
   endLongitude: number
+  spotName?: string | null
   plannedEndDate?: string | null
   hasArrived: boolean
   onArrival: () => void | Promise<void>
   isArrivalLoading?: boolean
-}
-
-function weatherEmoji(code: number): string {
-  if (code === 0) return '☀️'
-  if (code <= 2) return '🌤️'
-  if (code === 3) return '☁️'
-  if (code <= 48) return '🌫️'
-  if (code <= 67) return '🌧️'
-  if (code <= 77) return '❄️'
-  if (code <= 82) return '🌦️'
-  if (code <= 86) return '🌨️'
-  return '⛈️'
 }
 
 function formatPlannedTime(dateString: string | null | undefined): string {
@@ -51,6 +41,7 @@ function formatPlannedTime(dateString: string | null | undefined): string {
 const TouringDestinationWidget = ({
   endLatitude,
   endLongitude,
+  spotName,
   plannedEndDate,
   hasArrived,
   onArrival,
@@ -72,7 +63,9 @@ const TouringDestinationWidget = ({
     <div
       className={`${styles.widget} ${hasArrived ? styles.arrivedWidget : ''}`}
     >
-      <p className={styles.label}>次のスポット</p>
+      <p className={styles.label}>
+        {spotName ? `次のスポット: ${spotName}` : '次のスポット'}
+      </p>
 
       {hasArrived ? (
         <p className={styles.arrivedText}>目的地に到着！</p>

@@ -89,7 +89,6 @@ function Page() {
           touringId={activeTouring.touringId}
           title={activeTouring.title}
           startDate={activeTouring.startDate}
-          endDate={activeTouring.endDate}
           startMileage={activeTouring.startMileage}
           endLatitude={activeTouring.endLatitude}
           endLongitude={activeTouring.endLongitude}

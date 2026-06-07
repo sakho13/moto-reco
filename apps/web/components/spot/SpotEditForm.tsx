@@ -87,6 +87,16 @@ export function SpotEditForm({
 
   useEffect(() => {
     const initialStayMinutes = (() => {
+      if (touringStatus === 'PLANNED') {
+        // PLANNED スポットは plannedAt と plannedDepartAt から計算（旧データは visitedAt/endAt から）
+        const start = spot.plannedAt ?? spot.visitedAt
+        const end = spot.plannedDepartAt ?? spot.endAt
+        if (!start || !end) return ''
+        const diff = Math.round(
+          (new Date(end).getTime() - new Date(start).getTime()) / 60000
+        )
+        return diff > 0 ? String(diff) : ''
+      }
       if (!spot.visitedAt || !spot.endAt) return ''
       const diff = Math.round(
         (new Date(spot.endAt).getTime() - new Date(spot.visitedAt).getTime()) /
@@ -95,10 +105,18 @@ export function SpotEditForm({
       return diff > 0 ? String(diff) : ''
     })()
 
+    // PLANNED の場合は plannedAt を「到着予定日時」として表示（旧データは visitedAt にフォールバック）
+    const plannedVisitedAt =
+      touringStatus === 'PLANNED'
+        ? (spot.plannedAt ?? spot.visitedAt)
+        : spot.visitedAt
+
     setFormState({
       name: spot.name ?? '',
       memo: spot.memo ?? '',
-      visitedAt: spot.visitedAt ? toLocalDateTimeString(spot.visitedAt) : '',
+      visitedAt: plannedVisitedAt
+        ? toLocalDateTimeString(plannedVisitedAt)
+        : '',
       endAt: spot.endAt ? toLocalDateTimeString(spot.endAt) : '',
       stayMinutes: initialStayMinutes,
     })
@@ -106,7 +124,7 @@ export function SpotEditForm({
     if (spot.latitude != null && spot.longitude != null) {
       setCurrentLocation({ lat: spot.latitude, lng: spot.longitude })
     }
-  }, [spot])
+  }, [spot, touringStatus])
 
   const handleLocationSaved = async (lat: number, lng: number) => {
     if (isSavingLocation) return
@@ -175,7 +193,10 @@ export function SpotEditForm({
         {
           name: formState.name !== '' ? formState.name : null,
           memo: formState.memo !== '' ? formState.memo : null,
-          visitedAt: new Date(formState.visitedAt),
+          // PLANNED の場合は到着予定日時を plannedAt に保存し visitedAt を null にリセット
+          ...(isPlanned
+            ? { plannedAt: new Date(formState.visitedAt), visitedAt: null }
+            : { visitedAt: new Date(formState.visitedAt) }),
           endAt,
         }
       )

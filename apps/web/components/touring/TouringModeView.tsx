@@ -21,7 +21,6 @@ type TouringModeViewProps = {
   touringId: string
   title: string
   startDate: string
-  endDate: string
   startMileage: number | null
   endLatitude: number | null
   endLongitude: number | null
@@ -316,6 +315,7 @@ export const TouringModeView = ({
               <TouringDestinationWidget
                 endLatitude={nextDestinationSpot.latitude}
                 endLongitude={nextDestinationSpot.longitude!}
+                spotName={nextDestinationSpot.name}
                 plannedEndDate={nextDestinationSpot.plannedAt}
                 hasArrived={false}
                 onArrival={handleArrivalRecord}
@@ -326,6 +326,7 @@ export const TouringModeView = ({
               <TouringDestinationWidget
                 endLatitude={endLatitude!}
                 endLongitude={endLongitude!}
+                spotName="目的地"
                 hasArrived={hasReachedNextDestination}
                 onArrival={handleArrivalRecord}
               />
