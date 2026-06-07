@@ -220,12 +220,14 @@ export class TouringService {
             )
           }
 
+          const endDate =
+            plan.endDate < startDate ? startDate : plan.endDate
           const updatedPlan = new TouringEntity({
             touringId: plan.id,
             myUserBikeId: plan.myUserBikeId,
             title: params.title ?? plan.title,
             startDate,
-            endDate: plan.endDate,
+            endDate,
             startMileage: startMileage ?? plan.startMileage,
             endMileage: null,
             startLatitude: params.startLatitude ?? plan.startLatitude,

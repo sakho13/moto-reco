@@ -2572,6 +2572,55 @@ describe('UserBike API Endpoints', () => {
         expect(startJson.data.endLatitude).toBeNull()
         expect(startJson.data.endLongitude).toBeNull()
       })
+
+      test('プランの終了日時が過去の場合でも開始できる', async () => {
+        // 過去日時のPLANNEDプランを作成
+        const planRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              title: '過去日程ツーリング計画',
+              startDate: '2020-01-01T06:00:00.000Z',
+              endDate: '2020-01-03T18:00:00.000Z',
+              status: 'PLANNED',
+            }),
+          }
+        )
+        expect(planRes.status).toBe(201)
+        const planJson = await planRes.json()
+        const touringPlanId = planJson.data.touringId
+
+        // startDate が plan.endDate より後になる現在日時で開始
+        const futureStartDate = '2026-06-07T10:00:00.000Z'
+        const startRes = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              action: 'start',
+              touringPlanId,
+              startDate: futureStartDate,
+            }),
+          }
+        )
+
+        const startJson = await startRes.json()
+        expect(startRes.status).toBe(201)
+        expect(startJson.data.touringId).toBe(touringPlanId)
+        expect(startJson.data.status).toBe('STARTED')
+        // endDate は startDate と同じになる（プランの endDate が startDate より過去のため）
+        expect(startJson.data.startDate).toBe(futureStartDate)
+        expect(startJson.data.endDate).toBe(futureStartDate)
+      })
     })
   })
 
