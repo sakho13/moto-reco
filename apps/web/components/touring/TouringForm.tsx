@@ -87,15 +87,11 @@ export const TouringForm = ({
   const validateForm = (): boolean => {
     setValidationError('')
 
-    if (formData.startDateTime && formData.endDateTime) {
+    if (!isPlan && formData.startDateTime && formData.endDateTime) {
       const start = new Date(formData.startDateTime)
       const end = new Date(formData.endDateTime)
       if (start > end) {
-        setValidationError(
-          isPlan
-            ? '出発予定日時は帰着予定日時より前である必要があります'
-            : '開始日時は終了日時より前である必要があります'
-        )
+        setValidationError('開始日時は終了日時より前である必要があります')
         return false
       }
     }
@@ -120,7 +116,8 @@ export const TouringForm = ({
     if (!validateForm()) return
     await onSubmit({
       ...formData,
-      endDateTime: formData.endDateTime,
+      // プランの場合、終了日時は開始日時と同じ（スポット追加で自動更新される）
+      endDateTime: isPlan ? formData.startDateTime : formData.endDateTime,
       mode,
     })
   }
@@ -247,23 +244,21 @@ export const TouringForm = ({
         />
       </FormField>
 
-      <FormField
-        label={isPlan ? '帰着予定日時' : '終了日時'}
-        htmlFor="endDateTime"
-        required
-      >
-        <DateTimeInput
-          id="endDateTime"
-          value={formData.endDateTime}
-          minuteStep={minuteStep}
-          min={formData.startDateTime}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, endDateTime: e.target.value }))
-          }
-          required
-          disabled={isSubmitting}
-        />
-      </FormField>
+      {!isPlan && (
+        <FormField label="終了日時" htmlFor="endDateTime" required>
+          <DateTimeInput
+            id="endDateTime"
+            value={formData.endDateTime}
+            minuteStep={minuteStep}
+            min={formData.startDateTime}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, endDateTime: e.target.value }))
+            }
+            required
+            disabled={isSubmitting}
+          />
+        </FormField>
+      )}
 
       <FormField
         label={isPlan ? '出発時走行距離 (km)（任意）' : '開始時走行距離 (km)'}

@@ -18,4 +18,5 @@ export type Spot = {
   sortOrder: number
   plannedAt: Date | null
   plannedDepartAt: Date | null
+  isSkipped: boolean
 }

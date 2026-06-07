@@ -301,6 +301,7 @@ export type ApiResponseSpotDetail = {
   sortOrder: number
   plannedAt: string | null
   plannedDepartAt: string | null
+  isSkipped: boolean
 }
 
 export type ApiResponseSpotList = ApiResponseSpotDetail[]

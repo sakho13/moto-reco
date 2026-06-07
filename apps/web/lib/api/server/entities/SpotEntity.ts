@@ -74,6 +74,10 @@ export class SpotEntity {
     return this._value.plannedDepartAt
   }
 
+  public get isSkipped(): boolean {
+    return this._value.isSkipped
+  }
+
   public toJson(): Spot {
     return this._value
   }

@@ -23,6 +23,7 @@ const spotSelect = {
   sortOrder: true,
   plannedAt: true,
   plannedDepartAt: true,
+  isSkipped: true,
 } as const
 
 type SpotRow = {
@@ -38,6 +39,7 @@ type SpotRow = {
   sortOrder: number
   plannedAt: Date | null
   plannedDepartAt: Date | null
+  isSkipped: boolean
 }
 
 const toSpotEntity = (row: SpotRow): SpotEntity =>
@@ -54,6 +56,7 @@ const toSpotEntity = (row: SpotRow): SpotEntity =>
     sortOrder: row.sortOrder,
     plannedAt: row.plannedAt,
     plannedDepartAt: row.plannedDepartAt,
+    isSkipped: row.isSkipped,
   })
 
 export class PrismaSpotRepository
@@ -117,6 +120,7 @@ export class PrismaSpotRepository
         endAt: spot.endAt,
         plannedAt: spot.plannedAt,
         plannedDepartAt: spot.plannedDepartAt,
+        isSkipped: spot.isSkipped,
       },
       select: spotSelect,
     })

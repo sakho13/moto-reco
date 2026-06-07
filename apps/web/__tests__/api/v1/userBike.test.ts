@@ -4464,7 +4464,10 @@ describe('UserBike API Endpoints', () => {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name: 'スポットA', plannedAt: '2025-08-01T11:00:00.000Z' }),
+          body: JSON.stringify({
+            name: 'スポットA',
+            plannedAt: '2025-08-01T11:00:00.000Z',
+          }),
         }
       )
 
@@ -4477,7 +4480,10 @@ describe('UserBike API Endpoints', () => {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name: 'スポットB', plannedAt: '2025-08-01T14:00:00.000Z' }),
+          body: JSON.stringify({
+            name: 'スポットB',
+            plannedAt: '2025-08-01T14:00:00.000Z',
+          }),
         }
       )
 

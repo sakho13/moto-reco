@@ -95,6 +95,14 @@ export class FuelLogService {
       } catch (error) {
         console.error('Failed to link touring:', error)
       }
+    } else {
+      const ongoingTouring = await this.touringRepository.findOngoingTouring(
+        params.myUserBikeId
+      )
+      if (ongoingTouring && params.refueledAt >= ongoingTouring.startDate) {
+        touringId = ongoingTouring.id
+        touringTitle = ongoingTouring.title
+      }
     }
 
     const fuelLog = new FuelLogEntity({

@@ -132,6 +132,11 @@ export const SpotUpdateRequestSchema = z
       })
       .nullable()
       .optional(),
+    isSkipped: z
+      .boolean({
+        invalid_type_error: 'スキップフラグは真偽値で指定してください',
+      })
+      .optional(),
   })
   .refine(
     (data) =>
@@ -142,7 +147,8 @@ export const SpotUpdateRequestSchema = z
       data.visitedAt !== undefined ||
       data.endAt !== undefined ||
       data.plannedAt !== undefined ||
-      data.plannedDepartAt !== undefined,
+      data.plannedDepartAt !== undefined ||
+      data.isSkipped !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }

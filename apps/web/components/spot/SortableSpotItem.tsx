@@ -104,9 +104,22 @@ export function SortableSpotItem({
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
-          <p className="font-medium text-sm truncate">
-            {isBreak ? (spot.name ?? '休憩') : (spot.name ?? '無名スポット')}
-          </p>
+          <div className="flex items-center gap-1 min-w-0">
+            <p className="font-medium text-sm truncate">
+              {isBreak ? (spot.name ?? '休憩') : (spot.name ?? '無名スポット')}
+            </p>
+            {spot.isSkipped && (
+              <span
+                className="shrink-0 text-xs px-1 rounded"
+                style={{
+                  background: 'var(--color-gray-200, #e5e7eb)',
+                  color: 'var(--color-gray-500, #6b7280)',
+                }}
+              >
+                スキップ
+              </span>
+            )}
+          </div>
           <button
             onClick={() => onEdit(spot)}
             className={`${editButtonClassName} shrink-0`}

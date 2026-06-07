@@ -463,6 +463,7 @@ userBikeTourings.get('/:touringId/spots', honoAuthMiddleware, async (c) => {
         sortOrder: spot.sortOrder,
         plannedAt: spot.plannedAt?.toISOString() ?? null,
         plannedDepartAt: spot.plannedDepartAt?.toISOString() ?? null,
+        isSkipped: spot.isSkipped,
       })),
       message: 'スポット一覧取得成功',
     },
@@ -517,6 +518,7 @@ userBikeTourings.post(
           sortOrder: spot.sortOrder,
           plannedAt: spot.plannedAt?.toISOString() ?? null,
           plannedDepartAt: spot.plannedDepartAt?.toISOString() ?? null,
+          isSkipped: spot.isSkipped,
         },
         message: 'スポット登録成功',
       },
@@ -589,6 +591,7 @@ userBikeTourings.patch(
       endAt: body.endAt,
       plannedAt: body.plannedAt,
       plannedDepartAt: body.plannedDepartAt,
+      isSkipped: body.isSkipped,
     })
 
     return c.json<SuccessResponse<ApiResponseSpotDetail>>(
@@ -607,6 +610,7 @@ userBikeTourings.patch(
           sortOrder: spot.sortOrder,
           plannedAt: spot.plannedAt?.toISOString() ?? null,
           plannedDepartAt: spot.plannedDepartAt?.toISOString() ?? null,
+          isSkipped: spot.isSkipped,
         },
         message: 'スポット更新成功',
       },

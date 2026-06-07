@@ -42,6 +42,7 @@ type UpdateSpotParams = {
   endAt?: Date | null
   plannedAt?: Date | null
   plannedDepartAt?: Date | null
+  isSkipped?: boolean
 }
 
 export class SpotService {
@@ -115,6 +116,7 @@ export class SpotService {
         sortOrder,
         plannedAt: params.plannedAt ?? null,
         plannedDepartAt: params.plannedDepartAt ?? null,
+        isSkipped: false,
       })
 
       const created = await this.spotRepository.createSpot(spot)
@@ -211,6 +213,10 @@ export class SpotService {
           params.plannedDepartAt !== undefined
             ? params.plannedDepartAt
             : existingSpot.plannedDepartAt,
+        isSkipped:
+          params.isSkipped !== undefined
+            ? params.isSkipped
+            : existingSpot.isSkipped,
       })
 
       const updated = await this.spotRepository.updateSpot(updatedSpot)

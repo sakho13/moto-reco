@@ -243,7 +243,7 @@ export const TouringModeView = ({
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${nextDestinationSpot.spotId}` as const,
-        { visitedAt: new Date() }
+        { visitedAt: new Date(), isSkipped: true }
       )
       await mutateSpots()
       toast.success('スポットをスキップしました')

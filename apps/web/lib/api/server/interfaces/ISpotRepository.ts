@@ -8,5 +8,8 @@ export interface ISpotRepository {
   updateSpot(spot: SpotEntity): Promise<SpotEntity>
   deleteSpot(spotId: SpotId, touringId: TouringId): Promise<void>
   reorderSpots(spotIds: SpotId[], touringId: TouringId): Promise<void>
-  shiftSortOrdersFrom(touringId: TouringId, fromSortOrder: number): Promise<void>
+  shiftSortOrdersFrom(
+    touringId: TouringId,
+    fromSortOrder: number
+  ): Promise<void>
 }
