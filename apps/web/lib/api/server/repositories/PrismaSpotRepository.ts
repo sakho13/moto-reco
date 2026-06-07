@@ -61,10 +61,6 @@ export class PrismaSpotRepository
   implements ISpotRepository
 {
   async createSpot(spot: SpotEntity): Promise<SpotEntity> {
-    const count = await this.connection.tUserMyBikeTouringSpot.count({
-      where: { touringId: spot.touringId },
-    })
-
     const created = await this.connection.tUserMyBikeTouringSpot.create({
       data: {
         touringId: spot.touringId,
@@ -75,7 +71,7 @@ export class PrismaSpotRepository
         longitude: spot.longitude,
         visitedAt: spot.visitedAt,
         endAt: spot.endAt,
-        sortOrder: count,
+        sortOrder: spot.sortOrder,
         plannedAt: spot.plannedAt,
         plannedDepartAt: spot.plannedDepartAt,
       },
@@ -143,5 +139,15 @@ export class PrismaSpotRepository
         })
       )
     )
+  }
+
+  async shiftSortOrdersFrom(
+    touringId: TouringId,
+    fromSortOrder: number
+  ): Promise<void> {
+    await this.connection.tUserMyBikeTouringSpot.updateMany({
+      where: { touringId, sortOrder: { gte: fromSortOrder } },
+      data: { sortOrder: { increment: 1 } },
+    })
   }
 }

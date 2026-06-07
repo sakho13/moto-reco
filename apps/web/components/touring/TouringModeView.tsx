@@ -235,6 +235,27 @@ export const TouringModeView = ({
     }
   }
 
+  const [isSkipLoading, setIsSkipLoading] = useState(false)
+
+  const handleSkipSpot = async () => {
+    if (!nextDestinationSpot) return
+    setIsSkipLoading(true)
+    try {
+      await apiPatch(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${nextDestinationSpot.spotId}` as const,
+        { visitedAt: new Date() }
+      )
+      await mutateSpots()
+      toast.success('スポットをスキップしました')
+    } catch (error) {
+      toast.error(
+        error instanceof ApiV1Error ? error.message : 'スキップに失敗しました'
+      )
+    } finally {
+      setIsSkipLoading(false)
+    }
+  }
+
   const handleOpenEndMileageModal = () => {
     setEndMileageInput('')
     setEndMileageError('')
@@ -319,6 +340,8 @@ export const TouringModeView = ({
                 plannedEndDate={nextDestinationSpot.plannedAt}
                 hasArrived={false}
                 onArrival={handleArrivalRecord}
+                onSkip={handleSkipSpot}
+                isSkipLoading={isSkipLoading}
               />
             </div>
           ) : hasDestination ? (

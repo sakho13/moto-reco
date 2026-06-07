@@ -20,6 +20,8 @@ type TouringDestinationWidgetProps = {
   hasArrived: boolean
   onArrival: () => void | Promise<void>
   isArrivalLoading?: boolean
+  onSkip?: () => void | Promise<void>
+  isSkipLoading?: boolean
 }
 
 function formatPlannedTime(dateString: string | null | undefined): string {
@@ -46,6 +48,8 @@ const TouringDestinationWidget = ({
   hasArrived,
   onArrival,
   isArrivalLoading = false,
+  onSkip,
+  isSkipLoading = false,
 }: TouringDestinationWidgetProps) => {
   const { data: weather } = useSWR<WeatherData>(
     `/api/weather?lat=${endLatitude}&lng=${endLongitude}`,
@@ -116,11 +120,21 @@ const TouringDestinationWidget = ({
           <button
             className={styles.arrivalButton}
             onClick={onArrival}
-            disabled={isArrivalLoading}
+            disabled={isArrivalLoading || isSkipLoading}
           >
             {!isArrivalLoading && <Flag size={15} />}
             {isArrivalLoading ? '記録中...' : '到着した'}
           </button>
+
+          {onSkip && (
+            <button
+              className={styles.skipButton}
+              onClick={onSkip}
+              disabled={isArrivalLoading || isSkipLoading}
+            >
+              {isSkipLoading ? 'スキップ中...' : 'スキップ'}
+            </button>
+          )}
         </>
       )}
     </div>

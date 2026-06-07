@@ -123,3 +123,29 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ---- スキップボタン ---- */
+
+.skipButton {
+  width: 100%;
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-1) 0;
+  font-size: var(--font-size-xs);
+  color: var(--card-text-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.skipButton:hover:not(:disabled) {
+  color: var(--card-text-muted);
+}
+
+.skipButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

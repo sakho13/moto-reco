@@ -79,17 +79,40 @@ export class SpotService {
             ? null
             : new Date()
 
+      const spotType = params.type ?? 'SPOT'
+
+      const existingSpots = await this.spotRepository.findSpotsByTouringId(
+        params.touringId
+      )
+      let sortOrder = existingSpots.length
+
+      // STARTED ツーリングで SPOT を記録する場合、次の未訪問プランスポットの前に挿入する
+      if (touring.status === 'STARTED' && spotType === 'SPOT') {
+        const nextUnvisited =
+          existingSpots
+            .filter((s) => s.type === 'SPOT' && s.visitedAt === null)
+            .sort((a, b) => a.sortOrder - b.sortOrder)[0] ?? null
+
+        if (nextUnvisited !== null) {
+          await this.spotRepository.shiftSortOrdersFrom(
+            params.touringId,
+            nextUnvisited.sortOrder
+          )
+          sortOrder = nextUnvisited.sortOrder
+        }
+      }
+
       const spot = new SpotEntity({
         spotId: createSpotId(''),
         touringId: params.touringId,
-        type: params.type ?? 'SPOT',
+        type: spotType,
         name: params.name ?? null,
         memo: params.memo ?? null,
         latitude: params.latitude ?? null,
         longitude: params.longitude ?? null,
         visitedAt,
         endAt: params.endAt ?? null,
-        sortOrder: 0, // createSpot でカウントして末尾に設定される
+        sortOrder,
         plannedAt: params.plannedAt ?? null,
         plannedDepartAt: params.plannedDepartAt ?? null,
       })

@@ -4419,6 +4419,207 @@ describe('UserBike API Endpoints', () => {
     })
   })
 
+  describe('POST /api/v1/user-bike/bike/:myUserBikeId/tourings/:touringId/spots (挿入位置)', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '挿入位置テスト用バイク',
+        totalMileage: 3000,
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      // PLANNED ツーリングを作成してプランスポットを登録する
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: 'プランツーリング',
+            startDate: '2025-08-01T09:00:00.000Z',
+            endDate: '2025-08-01T18:00:00.000Z',
+            status: 'PLANNED',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      const planId = planJson.data.touringId
+
+      // プランスポット A を登録 (sortOrder=0)
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${planId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: 'スポットA', plannedAt: '2025-08-01T11:00:00.000Z' }),
+        }
+      )
+
+      // プランスポット B を登録 (sortOrder=1)
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${planId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: 'スポットB', plannedAt: '2025-08-01T14:00:00.000Z' }),
+        }
+      )
+
+      // PLANNED → STARTED に変更
+      const startRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'start',
+            touringPlanId: planId,
+            title: 'テストツーリング',
+            startDate: '2025-08-01T09:45:00.000Z',
+          }),
+        }
+      )
+      const startJson = await startRes.json()
+      touringId = startJson.data.touringId
+    })
+
+    test('プランスポットA・Bがあり、A到着後に記録したスポットはBの前に挿入される', async () => {
+      // スポット一覧を取得してAのIDを確認
+      const listRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const listJson = await listRes.json()
+      const spots: {
+        spotId: string
+        name: string | null
+        sortOrder: number
+        visitedAt: string | null
+      }[] = listJson.data
+
+      const spotA = spots.find((s) => s.name === 'スポットA')!
+      const spotB = spots.find((s) => s.name === 'スポットB')!
+      expect(spotA.sortOrder).toBe(0)
+      expect(spotB.sortOrder).toBe(1)
+
+      // スポットAに到着
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spotA.spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ visitedAt: '2025-08-01T11:05:00.000Z' }),
+        }
+      )
+
+      // 新しいスポットを記録（Bの前に挿入されるべき）
+      const newSpotRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: '途中で記録したスポット' }),
+        }
+      )
+      const newSpotJson = await newSpotRes.json()
+      expect(newSpotRes.status).toBe(201)
+
+      // 一覧を再取得してsortOrderを確認
+      const afterRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const afterJson = await afterRes.json()
+      const afterSpots: {
+        spotId: string
+        name: string | null
+        sortOrder: number
+      }[] = afterJson.data
+
+      const newSpotId = newSpotJson.data.spotId
+      const newSpot = afterSpots.find((s) => s.spotId === newSpotId)!
+      const spotBAfter = afterSpots.find((s) => s.name === 'スポットB')!
+
+      expect(newSpot.sortOrder).toBeLessThan(spotBAfter.sortOrder)
+    })
+
+    test('未訪問のプランスポットがない場合は末尾に追加される', async () => {
+      // スポット一覧を取得
+      const listRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const listJson = await listRes.json()
+      const spots: { spotId: string; sortOrder: number }[] = listJson.data
+
+      // 全スポットを訪問済みにする
+      for (const spot of spots) {
+        await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${spot.spotId}`,
+          {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ visitedAt: '2025-08-01T15:00:00.000Z' }),
+          }
+        )
+      }
+
+      // 新しいスポットを記録
+      const newSpotRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: '追加スポット' }),
+        }
+      )
+      const newSpotJson = await newSpotRes.json()
+      expect(newSpotRes.status).toBe(201)
+      // 全スポット数が2なので末尾=sortOrder 2
+      expect(newSpotJson.data.sortOrder).toBe(spots.length)
+    })
+  })
+
   describe('ゲストアカウント制限', () => {
     describe('バイク登録制限（1台まで）', () => {
       test('ゲストは1台目のバイクを登録できる', async () => {
