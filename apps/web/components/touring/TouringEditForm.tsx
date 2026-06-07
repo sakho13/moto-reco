@@ -75,10 +75,7 @@ export function TouringEditForm({
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`, {
         title: formData.title,
         startDate: new Date(formData.startDateTime),
-        // プランの endDate はスポット追加で自動更新されるため編集時は送らない
-        ...(!isPlan && {
-          endDate: new Date(formData.endDateTime),
-        }),
+        endDate: new Date(formData.endDateTime),
         startMileage:
           formData.startMileage !== ''
             ? Number(formData.startMileage)
