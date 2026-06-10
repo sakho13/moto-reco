@@ -21,7 +21,7 @@
     "dotenv-cli": "catalog:",
     "prettier": "catalog:",
     "tailwindcss": "4.2.4",
-    "turbo": "2.9.16",
+    "turbo": "2.9.17",
     "typescript": "catalog:"
   },
   "packageManager": "pnpm@11.5.0",
