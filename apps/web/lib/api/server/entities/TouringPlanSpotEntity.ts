@@ -1,9 +1,17 @@
-import { Spot, SpotId, SpotType, TouringId } from '@repo/shared-types'
+import {
+  TouringPlanId,
+  TouringPlanSpot,
+  TouringPlanSpotId,
+  TouringPlanSpotType,
+} from '@repo/shared-types'
 
-export class SpotEntity {
-  private _value: Spot
+/**
+ * ツーリングプランのロケーション（出発地・経由地・休憩・目的地）を表すエンティティ
+ */
+export class TouringPlanSpotEntity {
+  private _value: TouringPlanSpot
 
-  constructor(spot: Spot) {
+  constructor(spot: TouringPlanSpot) {
     if (spot.latitude !== null && (spot.latitude < -90 || spot.latitude > 90)) {
       throw new Error('緯度は-90以上90以下である必要があります')
     }
@@ -13,14 +21,6 @@ export class SpotEntity {
       (spot.longitude < -180 || spot.longitude > 180)
     ) {
       throw new Error('経度は-180以上180以下である必要があります')
-    }
-
-    if (
-      spot.arrivedAt !== null &&
-      spot.departedAt !== null &&
-      spot.arrivedAt > spot.departedAt
-    ) {
-      throw new Error('到着日時は出発日時以前である必要があります')
     }
 
     if (
@@ -34,15 +34,15 @@ export class SpotEntity {
     this._value = spot
   }
 
-  public get id(): SpotId {
-    return this._value.spotId
+  public get id(): TouringPlanSpotId {
+    return this._value.touringPlanSpotId
   }
 
-  public get touringId(): TouringId {
-    return this._value.touringId
+  public get touringPlanId(): TouringPlanId {
+    return this._value.touringPlanId
   }
 
-  public get type(): SpotType {
+  public get type(): TouringPlanSpotType {
     return this._value.type
   }
 
@@ -70,27 +70,11 @@ export class SpotEntity {
     return this._value.plannedDepartureAt
   }
 
-  public get arrivedAt(): Date | null {
-    return this._value.arrivedAt
-  }
-
-  public get departedAt(): Date | null {
-    return this._value.departedAt
-  }
-
-  public get isSkipped(): boolean {
-    return this._value.isSkipped
-  }
-
-  public get skippedAt(): Date | null {
-    return this._value.skippedAt
-  }
-
   public get sortOrder(): number {
     return this._value.sortOrder
   }
 
-  public toJson(): Spot {
+  public toJson(): TouringPlanSpot {
     return this._value
   }
 }
