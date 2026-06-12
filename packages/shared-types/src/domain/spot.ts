@@ -13,10 +13,13 @@ export type Spot = {
   memo: string | null
   latitude: number | null
   longitude: number | null
-  visitedAt: Date | null
-  endAt: Date | null
-  sortOrder: number
-  plannedAt: Date | null
-  plannedDepartAt: Date | null
+  // プラン由来の参考予定値（プランから開始した場合にコピーされる。常にこの意味）
+  plannedArrivalAt: Date | null
+  plannedDepartureAt: Date | null
+  // 実績（常にこの意味。statusに関わらず固定）
+  arrivedAt: Date | null
+  departedAt: Date | null
   isSkipped: boolean
+  skippedAt: Date | null
+  sortOrder: number
 }

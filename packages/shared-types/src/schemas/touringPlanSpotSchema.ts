@@ -1,20 +1,18 @@
 import { z } from 'zod'
 
 /**
- * スポット登録リクエストのバリデーションスキーマ
+ * ツーリングプランスポット（経由地・休憩）登録リクエストのバリデーションスキーマ
  *
  * @remarks
- * `plannedArrivalAt`/`plannedDepartureAt`（プラン由来の参考予定値）はサーバ側の
- * コピー処理でのみ設定され、APIからは設定不可。
+ * START/DESTINATION は専用エンドポイント（出発地・目的地設定）で扱うため、
+ * ここでは SPOT/BREAK のみを許可する。
  */
-export const SpotRegisterRequestSchema = z
+export const TouringPlanSpotRegisterRequestSchema = z
   .object({
-    type: z
-      .enum(['SPOT', 'BREAK'], {
-        invalid_type_error: 'タイプはSPOTまたはBREAKで指定してください',
-      })
-      .default('SPOT')
-      .optional(),
+    type: z.enum(['SPOT', 'BREAK'], {
+      required_error: 'タイプは必須です',
+      invalid_type_error: 'タイプはSPOTまたはBREAKで指定してください',
+    }),
     name: z
       .string({
         invalid_type_error: 'スポット名は文字列で指定してください',
@@ -41,34 +39,36 @@ export const SpotRegisterRequestSchema = z
       .min(-180, '経度は-180以上で指定してください')
       .max(180, '経度は180以下で指定してください')
       .optional(),
-    arrivedAt: z.coerce
+    plannedArrivalAt: z.coerce
       .date({
-        invalid_type_error: '到着日時は日付形式で指定してください',
+        invalid_type_error: '到着予定日時は日付形式で指定してください',
       })
       .optional(),
-    departedAt: z.coerce
+    plannedDepartureAt: z.coerce
       .date({
-        invalid_type_error: '出発日時は日付形式で指定してください',
+        invalid_type_error: '出発予定日時は日付形式で指定してください',
       })
       .optional(),
   })
   .refine(
     (data) =>
-      data.arrivedAt === undefined ||
-      data.departedAt === undefined ||
-      data.arrivedAt <= data.departedAt,
+      data.plannedArrivalAt === undefined ||
+      data.plannedDepartureAt === undefined ||
+      data.plannedArrivalAt <= data.plannedDepartureAt,
     {
-      message: '到着日時は出発日時以前で指定してください',
-      path: ['arrivedAt'],
+      message: '到着予定日時は出発予定日時以前で指定してください',
+      path: ['plannedArrivalAt'],
     }
   )
 
-export type SpotRegisterRequest = z.infer<typeof SpotRegisterRequestSchema>
+export type TouringPlanSpotRegisterRequest = z.infer<
+  typeof TouringPlanSpotRegisterRequestSchema
+>
 
 /**
- * スポット更新リクエストのバリデーションスキーマ
+ * ツーリングプランスポット（経由地・休憩）更新リクエストのバリデーションスキーマ
  */
-export const SpotUpdateRequestSchema = z
+export const TouringPlanSpotUpdateRequestSchema = z
   .object({
     name: z
       .string({
@@ -100,22 +100,17 @@ export const SpotUpdateRequestSchema = z
       .max(180, '経度は180以下で指定してください')
       .nullable()
       .optional(),
-    arrivedAt: z.coerce
+    plannedArrivalAt: z.coerce
       .date({
-        invalid_type_error: '到着日時は日付形式で指定してください',
+        invalid_type_error: '到着予定日時は日付形式で指定してください',
       })
       .nullable()
       .optional(),
-    departedAt: z.coerce
+    plannedDepartureAt: z.coerce
       .date({
-        invalid_type_error: '出発日時は日付形式で指定してください',
+        invalid_type_error: '出発予定日時は日付形式で指定してください',
       })
       .nullable()
-      .optional(),
-    isSkipped: z
-      .boolean({
-        invalid_type_error: 'スキップフラグは真偽値で指定してください',
-      })
       .optional(),
   })
   .refine(
@@ -124,33 +119,39 @@ export const SpotUpdateRequestSchema = z
       data.memo !== undefined ||
       data.latitude !== undefined ||
       data.longitude !== undefined ||
-      data.arrivedAt !== undefined ||
-      data.departedAt !== undefined ||
-      data.isSkipped !== undefined,
+      data.plannedArrivalAt !== undefined ||
+      data.plannedDepartureAt !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }
   )
   .refine(
     (data) =>
-      data.arrivedAt === undefined ||
-      data.arrivedAt === null ||
-      data.departedAt === undefined ||
-      data.departedAt === null ||
-      data.arrivedAt <= data.departedAt,
+      data.plannedArrivalAt === undefined ||
+      data.plannedArrivalAt === null ||
+      data.plannedDepartureAt === undefined ||
+      data.plannedDepartureAt === null ||
+      data.plannedArrivalAt <= data.plannedDepartureAt,
     {
-      message: '到着日時は出発日時以前で指定してください',
-      path: ['arrivedAt'],
+      message: '到着予定日時は出発予定日時以前で指定してください',
+      path: ['plannedArrivalAt'],
     }
   )
 
-export type SpotUpdateRequest = z.infer<typeof SpotUpdateRequestSchema>
+export type TouringPlanSpotUpdateRequest = z.infer<
+  typeof TouringPlanSpotUpdateRequestSchema
+>
 
 /**
- * スポット並び替えリクエストのバリデーションスキーマ
+ * ツーリングプランスポット並び替えリクエストのバリデーションスキーマ
+ *
+ * @remarks
+ * 並び替え対象は経由地・休憩（SPOT/BREAK）のIDのみ。
  */
-export const SpotReorderRequestSchema = z.object({
+export const TouringPlanSpotReorderRequestSchema = z.object({
   spotIds: z.array(z.string()).min(1, 'スポットIDを1件以上指定してください'),
 })
 
-export type SpotReorderRequest = z.infer<typeof SpotReorderRequestSchema>
+export type TouringPlanSpotReorderRequest = z.infer<
+  typeof TouringPlanSpotReorderRequestSchema
+>
