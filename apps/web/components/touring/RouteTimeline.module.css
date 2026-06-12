@@ -1,0 +1,144 @@
+.spotsListScroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 768px) {
+  .spotsListScroll {
+    max-height: calc(100vh - 18rem);
+    padding-right: 0.125rem;
+  }
+}
+
+.spotItem {
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.placeholderItem {
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border: 1px dashed var(--color-ink);
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.placeholderItem:hover {
+  opacity: 0.9;
+}
+
+.spotBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: var(--color-product);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.startBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: #10b981;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.endBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.breakBadge {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background-color: var(--color-amber-400, #fbbf24);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skippedBadge {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  padding: 0 0.25rem;
+  border-radius: var(--radius-md);
+  background-color: var(--color-gray-200, #e5e7eb);
+  color: var(--color-gray-500, #6b7280);
+}
+
+.editButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  opacity: 0.5;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.editButton:hover {
+  opacity: 1;
+}
+
+.mutedText {
+  color: var(--color-ink);
+  opacity: 0.5;
+}
+
+.dimText {
+  color: var(--color-ink);
+  opacity: 0.4;
+}
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.timeLabel {
+  color: var(--color-ink);
+  opacity: 0.4;
+}
