@@ -3,6 +3,7 @@ import {
   createTouringPlanId,
   createTouringPlanSpotId,
   TouringPlanId,
+  TouringPlanRouteType,
   TouringPlanSpotId,
   TouringPlanSpotType,
 } from '@repo/shared-types'
@@ -23,6 +24,9 @@ const touringPlanSpotSelect = {
   longitude: true,
   plannedArrivalAt: true,
   plannedDepartureAt: true,
+  stayMinutes: true,
+  travelMinutesFromPrev: true,
+  routeTypeFromPrev: true,
   sortOrder: true,
 } as const
 
@@ -36,6 +40,9 @@ type TouringPlanSpotRow = {
   longitude: number | null
   plannedArrivalAt: Date | null
   plannedDepartureAt: Date | null
+  stayMinutes: number | null
+  travelMinutesFromPrev: number | null
+  routeTypeFromPrev: TouringPlanRouteType | null
   sortOrder: number
 }
 
@@ -52,6 +59,9 @@ const toTouringPlanSpotEntity = (
     longitude: row.longitude,
     plannedArrivalAt: row.plannedArrivalAt,
     plannedDepartureAt: row.plannedDepartureAt,
+    stayMinutes: row.stayMinutes,
+    travelMinutesFromPrev: row.travelMinutesFromPrev,
+    routeTypeFromPrev: row.routeTypeFromPrev,
     sortOrder: row.sortOrder,
   })
 
@@ -75,6 +85,9 @@ export class PrismaTouringPlanSpotRepository
         longitude: spot.longitude,
         plannedArrivalAt: spot.plannedArrivalAt,
         plannedDepartureAt: spot.plannedDepartureAt,
+        stayMinutes: spot.stayMinutes,
+        travelMinutesFromPrev: spot.travelMinutesFromPrev,
+        routeTypeFromPrev: spot.routeTypeFromPrev,
         sortOrder: spot.sortOrder,
       },
       select: touringPlanSpotSelect,
@@ -135,6 +148,9 @@ export class PrismaTouringPlanSpotRepository
         longitude: spot.longitude,
         plannedArrivalAt: spot.plannedArrivalAt,
         plannedDepartureAt: spot.plannedDepartureAt,
+        stayMinutes: spot.stayMinutes,
+        travelMinutesFromPrev: spot.travelMinutesFromPrev,
+        routeTypeFromPrev: spot.routeTypeFromPrev,
         sortOrder: spot.sortOrder,
       },
       select: touringPlanSpotSelect,
@@ -205,8 +221,10 @@ export class PrismaTouringPlanSpotRepository
           memo: data.memo,
           latitude: data.latitude,
           longitude: data.longitude,
-          plannedArrivalAt: data.plannedArrivalAt,
-          plannedDepartureAt: data.plannedDepartureAt,
+          plannedArrivalAt: null,
+          plannedDepartureAt: null,
+          travelMinutesFromPrev: data.travelMinutesFromPrev,
+          routeTypeFromPrev: data.routeTypeFromPrev,
         },
         select: touringPlanSpotSelect,
       })
@@ -223,8 +241,10 @@ export class PrismaTouringPlanSpotRepository
         memo: data.memo,
         latitude: data.latitude,
         longitude: data.longitude,
-        plannedArrivalAt: data.plannedArrivalAt,
-        plannedDepartureAt: data.plannedDepartureAt,
+        plannedArrivalAt: null,
+        plannedDepartureAt: null,
+        travelMinutesFromPrev: data.travelMinutesFromPrev,
+        routeTypeFromPrev: data.routeTypeFromPrev,
         sortOrder,
       },
       select: touringPlanSpotSelect,
