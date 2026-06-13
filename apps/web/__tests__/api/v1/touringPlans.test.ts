@@ -1,0 +1,1795 @@
+import { randomUUID } from 'crypto'
+import { beforeEach, describe, expect, test } from 'vitest'
+import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
+import { createTestUserBike } from '../../helpers/bikeHelper'
+import {
+  expectValidationError,
+  expect404Error,
+} from '../../helpers/validationHelper'
+import { app } from '@/lib/api/server/app'
+
+describe('TouringPlans API Endpoints', () => {
+  describe('GET /api/v1/user-bike/bike/:myUserBikeId/touring-plans', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'プラン一覧テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        'GET'
+      )
+    })
+
+    test('プランが存在しない場合は空配列を返す', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toEqual([])
+      expect(json.message).toBe('ツーリングプラン一覧取得成功')
+    })
+
+    test('複数のプランを出発予定日時の昇順で取得できる', async () => {
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '後発プラン',
+            departAt: '2024-08-01T06:00:00.000Z',
+          }),
+        }
+      )
+
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '先発プラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+            destinationLocation: {
+              latitude: 35.1,
+              longitude: 136.9,
+              name: '目的地A',
+            },
+          }),
+        }
+      )
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toHaveLength(2)
+      expect(json.data[0].title).toBe('先発プラン')
+      expect(json.data[1].title).toBe('後発プラン')
+      expect(json.data[0].destination).toMatchObject({
+        name: '目的地A',
+      })
+      expect(json.data[1].destination).toBeNull()
+    })
+  })
+
+  describe('POST /api/v1/user-bike/bike/:myUserBikeId/touring-plans', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'プラン登録テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        'POST',
+        {
+          title: 'テストプラン',
+          departAt: '2024-07-01T06:00:00.000Z',
+        }
+      )
+    })
+
+    test('titleが未指定の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('departAtが未指定の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: 'テストプラン',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('出発地・目的地を指定せずにプランを登録できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '最小構成プラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json).toMatchObject({
+        status: 'success',
+        message: 'ツーリングプラン登録成功',
+        data: {
+          title: '最小構成プラン',
+          departAt: '2024-07-01T06:00:00.000Z',
+          // 目的地未指定のためreturnAtはdepartAtと同一
+          returnAt: '2024-07-01T06:00:00.000Z',
+          startLocation: null,
+          destinationLocation: null,
+          touringIds: [],
+        },
+      })
+      expect(typeof json.data.touringPlanId).toBe('string')
+    })
+
+    test('出発地・目的地を指定してプランを登録できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '出発地目的地ありプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+            startLocation: {
+              latitude: 35.0,
+              longitude: 136.0,
+              name: '出発地',
+              plannedDepartureAt: '2024-07-01T06:30:00.000Z',
+            },
+            destinationLocation: {
+              latitude: 35.5,
+              longitude: 137.0,
+              name: '目的地',
+              plannedArrivalAt: '2024-07-01T12:00:00.000Z',
+            },
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.startLocation).toMatchObject({
+        latitude: 35.0,
+        longitude: 136.0,
+        name: '出発地',
+        memo: null,
+        plannedArrivalAt: null,
+        plannedDepartureAt: '2024-07-01T06:30:00.000Z',
+      })
+      expect(json.data.destinationLocation).toMatchObject({
+        latitude: 35.5,
+        longitude: 137.0,
+        name: '目的地',
+        memo: null,
+        plannedArrivalAt: '2024-07-01T12:00:00.000Z',
+        plannedDepartureAt: null,
+      })
+      expect(typeof json.data.startLocation.touringPlanSpotId).toBe('string')
+      expect(typeof json.data.destinationLocation.touringPlanSpotId).toBe(
+        'string'
+      )
+      // 目的地の到着予定がreturnAtに反映される
+      expect(json.data.returnAt).toBe('2024-07-01T12:00:00.000Z')
+    })
+
+    test('存在しないmyUserBikeIdを指定した場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${randomUUID()}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: 'テストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+
+  describe('GET /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'プラン取得テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '詳細取得テストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        'GET'
+      )
+    })
+
+    test('プラン詳細を取得できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json).toMatchObject({
+        status: 'success',
+        message: 'ツーリングプラン取得成功',
+        data: {
+          touringPlanId,
+          title: '詳細取得テストプラン',
+          departAt: '2024-07-01T06:00:00.000Z',
+          returnAt: '2024-07-01T06:00:00.000Z',
+          startLocation: null,
+          destinationLocation: null,
+          touringIds: [],
+        },
+      })
+    })
+
+    test('存在しないplanIdを指定した場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${randomUUID()}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('開始されたツーリングのIDがtouringIdsに含まれる', async () => {
+      const startRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'start',
+            touringPlanId,
+            startDate: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const startJson = await startRes.json()
+      expect(startRes.status).toBe(201)
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.touringIds).toEqual([startJson.data.touringId])
+    })
+  })
+
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'プラン更新テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '更新前プラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        'PATCH',
+        { title: '更新後プラン' }
+      )
+    })
+
+    test('更新項目が未指定の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('titleのみを更新できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: '更新後プラン' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.title).toBe('更新後プラン')
+      // departAt/returnAtは変更されない
+      expect(json.data.departAt).toBe('2024-07-01T06:00:00.000Z')
+      expect(json.data.returnAt).toBe('2024-07-01T06:00:00.000Z')
+    })
+
+    test('目的地未設定の場合、departAt変更でreturnAtも同じ日時に再計算される（Finding#4）', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ departAt: '2024-07-02T08:00:00.000Z' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.departAt).toBe('2024-07-02T08:00:00.000Z')
+      expect(json.data.returnAt).toBe('2024-07-02T08:00:00.000Z')
+    })
+
+    test('目的地の到着予定が設定済みの場合、departAt変更後もreturnAtは目的地の到着予定が優先される（Finding#4）', async () => {
+      // 目的地の到着予定を設定
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/destination-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 35.5,
+            longitude: 137.0,
+            name: '目的地',
+            plannedArrivalAt: '2024-07-01T18:00:00.000Z',
+          }),
+        }
+      )
+
+      // departAtを変更
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ departAt: '2024-07-01T05:00:00.000Z' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.departAt).toBe('2024-07-01T05:00:00.000Z')
+      // 目的地の到着予定がreturnAtに優先される
+      expect(json.data.returnAt).toBe('2024-07-01T18:00:00.000Z')
+    })
+
+    test('経由地の出発予定がdepartAtより遅い場合、returnAtは経由地の出発予定に合わせて再計算される（Finding#4）', async () => {
+      // 経由地（休憩）を出発予定時刻付きで登録
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            name: '休憩ポイント',
+            plannedArrivalAt: '2024-07-01T09:00:00.000Z',
+            plannedDepartureAt: '2024-07-01T09:30:00.000Z',
+          }),
+        }
+      )
+
+      // departAtを経由地の出発予定より前に変更
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ departAt: '2024-07-01T08:00:00.000Z' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.departAt).toBe('2024-07-01T08:00:00.000Z')
+      // 経由地の出発予定(09:30)がdepartAt(08:00)より遅いため、returnAtは09:30になる
+      expect(json.data.returnAt).toBe('2024-07-01T09:30:00.000Z')
+    })
+
+    test('存在しないplanIdを指定した場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${randomUUID()}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: '更新後プラン' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+
+  describe('DELETE /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'プラン削除テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '削除対象プラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        'DELETE'
+      )
+    })
+
+    test('プランを削除できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.message).toBe('ツーリングプラン削除成功')
+
+      // 削除後は取得できない
+      const getRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      expect(getRes.status).toBe(404)
+    })
+
+    test('存在しないplanIdを指定した場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${randomUUID()}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId/start-location', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '出発地設定テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '出発地設定テストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
+        'PATCH',
+        { latitude: 35.0, longitude: 136.0 }
+      )
+    })
+
+    test('出発地を設定できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 35.0,
+            longitude: 136.0,
+            name: '出発地',
+            plannedDepartureAt: '2024-07-01T06:30:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.message).toBe('出発地設定成功')
+      expect(json.data).toMatchObject({
+        latitude: 35.0,
+        longitude: 136.0,
+        name: '出発地',
+        memo: null,
+        plannedArrivalAt: null,
+        plannedDepartureAt: '2024-07-01T06:30:00.000Z',
+      })
+    })
+
+    test('出発地を更新できる', async () => {
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 35.0,
+            longitude: 136.0,
+            name: '出発地A',
+          }),
+        }
+      )
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 36.0,
+            longitude: 137.0,
+            name: '出発地B',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toMatchObject({
+        latitude: 36.0,
+        longitude: 137.0,
+        name: '出発地B',
+      })
+
+      // プラン詳細でも反映されていることを確認
+      const detailRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const detailJson = await detailRes.json()
+      expect(detailJson.data.startLocation).toMatchObject({
+        latitude: 36.0,
+        longitude: 137.0,
+        name: '出発地B',
+      })
+    })
+
+    test('nullを指定すると出発地を解除できる', async () => {
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 35.0,
+            longitude: 136.0,
+            name: '出発地',
+          }),
+        }
+      )
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(null),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toBeNull()
+
+      const detailRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const detailJson = await detailRes.json()
+      expect(detailJson.data.startLocation).toBeNull()
+    })
+
+    test('緯度が範囲外の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 100,
+            longitude: 136.0,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+  })
+
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId/destination-location', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '目的地設定テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '目的地設定テストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/destination-location`,
+        'PATCH',
+        { latitude: 35.5, longitude: 137.0 }
+      )
+    })
+
+    test('目的地を設定でき、到着予定がreturnAtに反映される（Finding#4）', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/destination-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 35.5,
+            longitude: 137.0,
+            name: '目的地',
+            plannedArrivalAt: '2024-07-01T18:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.message).toBe('目的地設定成功')
+      expect(json.data).toMatchObject({
+        latitude: 35.5,
+        longitude: 137.0,
+        name: '目的地',
+        memo: null,
+        plannedArrivalAt: '2024-07-01T18:00:00.000Z',
+        plannedDepartureAt: null,
+      })
+
+      const detailRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const detailJson = await detailRes.json()
+      expect(detailJson.data.returnAt).toBe('2024-07-01T18:00:00.000Z')
+    })
+
+    test('nullを指定すると目的地を解除でき、returnAtはdepartAtに戻る（Finding#4）', async () => {
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/destination-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 35.5,
+            longitude: 137.0,
+            name: '目的地',
+            plannedArrivalAt: '2024-07-01T18:00:00.000Z',
+          }),
+        }
+      )
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/destination-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(null),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toBeNull()
+
+      const detailRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const detailJson = await detailRes.json()
+      expect(detailJson.data.destinationLocation).toBeNull()
+      expect(detailJson.data.returnAt).toBe('2024-07-01T06:00:00.000Z')
+    })
+
+    test('経度が範囲外の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/destination-location`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: 35.5,
+            longitude: 200,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+  })
+
+  describe('GET /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId/spots', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'スポット一覧テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: 'スポット一覧テストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+            startLocation: {
+              latitude: 35.0,
+              longitude: 136.0,
+              name: '出発地',
+            },
+            destinationLocation: {
+              latitude: 35.5,
+              longitude: 137.0,
+              name: '目的地',
+            },
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        'GET'
+      )
+    })
+
+    test('出発地・経由地・休憩・目的地が統合された順序で取得できる', async () => {
+      // 経由地を追加
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'SPOT',
+            name: '経由地A',
+          }),
+        }
+      )
+
+      // 休憩を追加
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            name: '休憩B',
+          }),
+        }
+      )
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.message).toBe('ツーリングプランスポット一覧取得成功')
+      expect(json.data).toHaveLength(4)
+      expect(json.data.map((s: { type: string }) => s.type)).toEqual([
+        'START',
+        'SPOT',
+        'BREAK',
+        'DESTINATION',
+      ])
+      expect(json.data[0].name).toBe('出発地')
+      expect(json.data[1].name).toBe('経由地A')
+      expect(json.data[2].name).toBe('休憩B')
+      expect(json.data[3].name).toBe('目的地')
+    })
+
+    test('出発地・目的地未設定の場合は経由地のみ返す', async () => {
+      const newPlanRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '出発地目的地なしプラン',
+            departAt: '2024-07-10T06:00:00.000Z',
+          }),
+        }
+      )
+      const newPlanJson = await newPlanRes.json()
+      const newPlanId = newPlanJson.data.touringPlanId
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${newPlanId}/spots`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toEqual([])
+    })
+  })
+
+  describe('POST /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId/spots', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'スポット登録テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: 'スポット登録テストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        'POST',
+        { type: 'SPOT', name: '経由地A' }
+      )
+    })
+
+    test('typeが未指定の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: '経由地A' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('plannedArrivalAtがplannedDepartureAtより後の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            name: '休憩',
+            plannedArrivalAt: '2024-07-01T10:00:00.000Z',
+            plannedDepartureAt: '2024-07-01T09:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('経由地（SPOT）を登録できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'SPOT',
+            name: '経由地A',
+            memo: 'メモA',
+            latitude: 35.2,
+            longitude: 136.5,
+            plannedArrivalAt: '2024-07-01T09:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.message).toBe('ツーリングプランスポット登録成功')
+      expect(json.data).toMatchObject({
+        touringPlanId,
+        type: 'SPOT',
+        name: '経由地A',
+        memo: 'メモA',
+        latitude: 35.2,
+        longitude: 136.5,
+        plannedArrivalAt: '2024-07-01T09:00:00.000Z',
+        plannedDepartureAt: null,
+        sortOrder: 0,
+      })
+      expect(typeof json.data.touringPlanSpotId).toBe('string')
+    })
+
+    test('休憩（BREAK）を登録できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            name: '休憩ポイント',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.type).toBe('BREAK')
+      expect(json.data.name).toBe('休憩ポイント')
+    })
+
+    test('複数登録した場合、sortOrderが連番で採番される', async () => {
+      const res1 = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type: 'SPOT', name: '経由地A' }),
+        }
+      )
+      const json1 = await res1.json()
+
+      const res2 = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type: 'BREAK', name: '休憩B' }),
+        }
+      )
+      const json2 = await res2.json()
+
+      expect(json1.data.sortOrder).toBe(0)
+      expect(json2.data.sortOrder).toBe(1)
+    })
+
+    test('plannedDepartureAtを指定した場合、returnAtが再計算される（Finding#4）', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            name: '休憩ポイント',
+            plannedArrivalAt: '2024-07-01T09:00:00.000Z',
+            plannedDepartureAt: '2024-07-01T09:30:00.000Z',
+          }),
+        }
+      )
+      expect(res.status).toBe(201)
+
+      const detailRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const detailJson = await detailRes.json()
+      // departAt(06:00)より経由地の出発予定(09:30)が遅いためreturnAtは09:30になる
+      expect(detailJson.data.returnAt).toBe('2024-07-01T09:30:00.000Z')
+    })
+
+    test('存在しないplanIdを指定した場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${randomUUID()}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type: 'SPOT', name: '経由地A' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId/spots/reorder', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+    let spotIdA: string
+    let spotIdB: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '並び替えテスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: '並び替えテストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+
+      const spotARes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type: 'SPOT', name: '経由地A' }),
+        }
+      )
+      const spotAJson = await spotARes.json()
+      spotIdA = spotAJson.data.touringPlanSpotId
+
+      const spotBRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type: 'BREAK', name: '休憩B' }),
+        }
+      )
+      const spotBJson = await spotBRes.json()
+      spotIdB = spotBJson.data.touringPlanSpotId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/reorder`,
+        'PATCH',
+        { spotIds: [] }
+      )
+    })
+
+    test('spotIdsが空配列の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/reorder`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ spotIds: [] }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('経由地・休憩の並び順を変更できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/reorder`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ spotIds: [spotIdB, spotIdA] }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.message).toBe('ツーリングプランスポット並び替え成功')
+
+      const spotsRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const spotsJson = await spotsRes.json()
+      expect(
+        spotsJson.data.map(
+          (s: { touringPlanSpotId: string }) => s.touringPlanSpotId
+        )
+      ).toEqual([spotIdB, spotIdA])
+    })
+  })
+
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId/spots/:spotId', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+    let spotId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'スポット更新テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: 'スポット更新テストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+
+      const spotRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'SPOT',
+            name: '更新前経由地',
+          }),
+        }
+      )
+      const spotJson = await spotRes.json()
+      spotId = spotJson.data.touringPlanSpotId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${spotId}`,
+        'PATCH',
+        { name: '更新後経由地' }
+      )
+    })
+
+    test('更新項目が未指定の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('name・memo・座標・予定時刻を更新できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: '更新後経由地',
+            memo: '更新後メモ',
+            latitude: 36.0,
+            longitude: 138.0,
+            plannedArrivalAt: '2024-07-01T10:00:00.000Z',
+            plannedDepartureAt: '2024-07-01T10:30:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.message).toBe('ツーリングプランスポット更新成功')
+      expect(json.data).toMatchObject({
+        touringPlanSpotId: spotId,
+        name: '更新後経由地',
+        memo: '更新後メモ',
+        latitude: 36.0,
+        longitude: 138.0,
+        plannedArrivalAt: '2024-07-01T10:00:00.000Z',
+        plannedDepartureAt: '2024-07-01T10:30:00.000Z',
+      })
+    })
+
+    test('plannedDepartureAtを更新すると、returnAtが再計算される（Finding#4）', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            plannedArrivalAt: '2024-07-01T09:00:00.000Z',
+            plannedDepartureAt: '2024-07-01T09:45:00.000Z',
+          }),
+        }
+      )
+      expect(res.status).toBe(200)
+
+      const detailRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const detailJson = await detailRes.json()
+      expect(detailJson.data.returnAt).toBe('2024-07-01T09:45:00.000Z')
+    })
+
+    test('plannedArrivalAtがplannedDepartureAtより後の場合はバリデーションエラーとなる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${spotId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            plannedArrivalAt: '2024-07-01T10:00:00.000Z',
+            plannedDepartureAt: '2024-07-01T09:00:00.000Z',
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
+    })
+
+    test('存在しないspotIdを指定した場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${randomUUID()}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: '更新後経由地' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+
+  describe('DELETE /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId/spots/:spotId', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringPlanId: string
+    let spotId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'スポット削除テスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: 'スポット削除テストプラン',
+            departAt: '2024-07-01T06:00:00.000Z',
+          }),
+        }
+      )
+      const planJson = await planRes.json()
+      touringPlanId = planJson.data.touringPlanId
+
+      const spotRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'BREAK',
+            name: '削除対象休憩',
+            plannedArrivalAt: '2024-07-01T09:00:00.000Z',
+            plannedDepartureAt: '2024-07-01T09:30:00.000Z',
+          }),
+        }
+      )
+      const spotJson = await spotRes.json()
+      spotId = spotJson.data.touringPlanSpotId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${spotId}`,
+        'DELETE'
+      )
+    })
+
+    test('経由地・休憩を削除できる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${spotId}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.message).toBe('ツーリングプランスポット削除成功')
+
+      const spotsRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const spotsJson = await spotsRes.json()
+      expect(spotsJson.data).toEqual([])
+    })
+
+    test('削除後はreturnAtが再計算される（Finding#4）', async () => {
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${spotId}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const detailRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const detailJson = await detailRes.json()
+      // 経由地削除によりreturnAtはdepartAtに戻る
+      expect(detailJson.data.returnAt).toBe('2024-07-01T06:00:00.000Z')
+    })
+
+    test('存在しないspotIdを指定した場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/${randomUUID()}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+  })
+})

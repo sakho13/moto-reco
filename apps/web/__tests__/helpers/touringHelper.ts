@@ -8,13 +8,13 @@ export async function createTestSpot(
   myUserBikeId: string,
   touringId: string,
   data: {
-    visitedAt: string
+    arrivedAt?: string
     type?: 'SPOT' | 'BREAK'
     name?: string
     memo?: string
     latitude?: number
     longitude?: number
-    endAt?: string
+    departedAt?: string
   }
 ): Promise<string> {
   const res = await app.request(
