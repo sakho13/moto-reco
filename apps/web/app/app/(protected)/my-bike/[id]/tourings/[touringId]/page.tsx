@@ -23,6 +23,7 @@ import { withAuth } from '@/lib/hoc/withAuth'
 import {
   buildGoogleMapsRouteUrl,
   buildGoogleMapsTwoPointUrl,
+  calcTravelMinutes,
 } from '@/lib/utils/googleMaps'
 
 function TouringDetailPage() {
@@ -103,17 +104,6 @@ function TouringDetailPage() {
     } catch {
       return dateString
     }
-  }
-
-  const calcTravelMinutes = (
-    departStr: string | null | undefined,
-    arriveStr: string | null | undefined
-  ): number | null => {
-    if (!departStr || !arriveStr) return null
-    const diff = Math.round(
-      (new Date(arriveStr).getTime() - new Date(departStr).getTime()) / 60000
-    )
-    return diff > 0 ? diff : null
   }
 
   const handleReorder = async (newOrderIds: string[]) => {

@@ -31,3 +31,20 @@ export function buildGoogleMapsTwoPointUrl(
 ): string {
   return `https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lng}&destination=${to.lat},${to.lng}`
 }
+
+/**
+ * 出発・到着の2時刻から移動時間（分）を算出する。
+ *
+ * @remarks
+ * いずれかが未設定、または到着が出発以前の場合は `null` を返す。
+ */
+export function calcTravelMinutes(
+  departStr: string | null | undefined,
+  arriveStr: string | null | undefined
+): number | null {
+  if (!departStr || !arriveStr) return null
+  const diff = Math.round(
+    (new Date(arriveStr).getTime() - new Date(departStr).getTime()) / 60000
+  )
+  return diff > 0 ? diff : null
+}

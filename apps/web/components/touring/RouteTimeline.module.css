@@ -142,3 +142,18 @@
   color: var(--color-ink);
   opacity: 0.4;
 }
+
+.travelLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  color: var(--color-product);
+  text-decoration: none;
+  opacity: 0.75;
+}
+
+.travelLink:hover {
+  opacity: 1;
+  text-decoration: underline;
+}

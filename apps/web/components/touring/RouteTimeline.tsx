@@ -36,7 +36,7 @@ export type RouteTimelineItemType = 'START' | 'SPOT' | 'BREAK' | 'DESTINATION'
  * 時刻表示の1スロット分の情報
  *
  * @remarks
- * `value` が `null` の場合は表示しない。
+ * `value` が `null` の場合は `"{label} 未設定"` と表示する。
  */
 export type RouteTimelineTimeSlot = {
   /** 表示ラベル（例: "予定", "実績", "到着予定"） */
@@ -67,6 +67,8 @@ export type RouteTimelineItem = {
   secondaryTime?: RouteTimelineTimeSlot | null
   /** スキップ済みかどうか */
   isSkipped?: boolean
+  /** この地点から次の地点（経由地が無ければ目的地）へのGoogleマップ経路リンク。未設定/算出不可ならnullまたは省略 */
+  travelLink?: { href: string; minutes: number | null } | null
   /** クリック/編集ボタン押下時のハンドラ。未指定なら編集ボタン非表示 */
   onEdit?: () => void
 }
@@ -103,11 +105,16 @@ const formatTimeValue = (value: string): string => {
 
 /**
  * 時刻スロットを `"{label} {HH:mm}"` 形式に整形する
+ *
+ * @remarks
+ * `slot` が `null`/`undefined` の場合は非表示（`null`を返す）。
+ * `slot.value` が `null` の場合は `"{label} 未設定"` を返す。
  */
 const formatTimeSlot = (
   slot: RouteTimelineTimeSlot | null | undefined
 ): string | null => {
-  if (!slot || slot.value === null) return null
+  if (!slot) return null
+  if (slot.value === null) return `${slot.label} 未設定`
   return `${slot.label} ${formatTimeValue(slot.value)}`
 }
 
@@ -267,13 +274,35 @@ function FixedRow({ item, badgeClassName, badgeLabel }: FixedRowProps) {
   return <TimelineRow item={item} badge={badge} />
 }
 
+type TravelLinkRowProps = {
+  travelLink: { href: string; minutes: number | null } | null | undefined
+}
+
+/**
+ * 地点間のGoogleマップ経路リンクを表示する行
+ */
+function TravelLinkRow({ travelLink }: TravelLinkRowProps) {
+  if (!travelLink) return null
+  return (
+    <a
+      href={travelLink.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.travelLink}
+    >
+      ↓ Googleマップで経路を表示
+      {travelLink.minutes !== null ? `（移動 ${travelLink.minutes}分）` : ''}
+    </a>
+  )
+}
+
 /**
  * 出発地🏁→経由地📍/休憩☕→目的地🏁を縦の時系列ラインで表示する汎用UIコンポーネント
  *
  * @remarks
  * プラン管理画面・ツーリング詳細画面の両方で使用する基盤コンポーネント。
- * 移動時間表示（Googleマップ経路リンク等）はこのコンポーネントの責務外で、
- * 呼び出し側で別途表示する。
+ * 各項目の `travelLink` を設定すると、出発地・各経由地/休憩行の直後に
+ * Googleマップ経路リンクが表示される。
  */
 export function RouteTimeline({
   items,
@@ -336,6 +365,7 @@ export function RouteTimeline({
             ) : (
               <TimelineRow item={item} badge={badge} />
             )}
+            <TravelLinkRow travelLink={item.travelLink} />
           </Fragment>
         )
       })}
@@ -359,6 +389,7 @@ export function RouteTimeline({
             onClick={onStartClick}
           />
         ) : null}
+        <TravelLinkRow travelLink={startItem?.travelLink} />
 
         {draggable ? (
           <DndContext
