@@ -46,6 +46,10 @@ function TouringPlanDetailPage() {
   const [editingSpotId, setEditingSpotId] = useState<string | null>(null)
   const [isStartConfirmOpen, setIsStartConfirmOpen] = useState(false)
   const [isStarting, setIsStarting] = useState(false)
+  const [mapClickLocation, setMapClickLocation] = useState<{
+    lat: number
+    lng: number
+  } | null>(null)
 
   const detailUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}`
   const spotsUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`
@@ -327,6 +331,12 @@ function TouringPlanDetailPage() {
 
   const handleSpotAddSuccess = () => {
     setAddModalType(null)
+    setMapClickLocation(null)
+  }
+
+  const handleMapClick = (lat: number, lng: number) => {
+    setMapClickLocation({ lat, lng })
+    setAddModalType('SPOT')
   }
 
   const handleSpotEditSuccess = () => {
@@ -457,6 +467,7 @@ function TouringPlanDetailPage() {
                   <TouringRouteMap
                     points={mapPoints}
                     containerClassName={styles.mapContainerLarge}
+                    onMapClick={handleMapClick}
                   />
                   {googleMapsUrl && (
                     <a
@@ -468,6 +479,9 @@ function TouringPlanDetailPage() {
                       Googleマップで経路を表示
                     </a>
                   )}
+                  <p className={styles.mapClickHint}>
+                    地図をタップしてスポットを追加
+                  </p>
                 </div>
               </div>
             </div>
@@ -527,7 +541,11 @@ function TouringPlanDetailPage() {
           bikeId={bikeId}
           planId={planId}
           initialType={addModalType}
-          onClose={() => setAddModalType(null)}
+          initialLocation={mapClickLocation}
+          onClose={() => {
+            setAddModalType(null)
+            setMapClickLocation(null)
+          }}
           onSuccess={handleSpotAddSuccess}
         />
       )}
