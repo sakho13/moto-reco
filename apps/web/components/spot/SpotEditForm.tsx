@@ -19,7 +19,6 @@ interface SpotEditFormProps {
   bikeId: string
   touringId: string
   spot: ApiResponseSpotDetail
-  touringStatus?: 'PLANNED' | 'STARTED' | 'COMPLETED'
   onSuccess: () => void
   onDelete?: () => void
 }
@@ -27,19 +26,20 @@ interface SpotEditFormProps {
 type SpotFormState = {
   name: string
   memo: string
-  visitedAt: string
-  endAt: string
-  stayMinutes: string
+  arrivedAt: string
+  departedAt: string
 }
 
 /**
  * スポット・休憩編集フォーム
+ *
+ * @remarks
+ * 実績記録専用フォーム。到着日時(`arrivedAt`)・出発日時(`departedAt`)を編集する。
  */
 export function SpotEditForm({
   bikeId,
   touringId,
   spot,
-  touringStatus,
   onSuccess,
   onDelete,
 }: SpotEditFormProps) {
@@ -56,75 +56,35 @@ export function SpotEditForm({
   const [formState, setFormState] = useState<SpotFormState>({
     name: '',
     memo: '',
-    visitedAt: '',
-    endAt: '',
-    stayMinutes: '',
+    arrivedAt: '',
+    departedAt: '',
   })
 
   const isBreak = spot.type === 'BREAK'
-  const isPlanned = touringStatus === 'PLANNED'
   const label = isBreak ? '休憩' : 'スポット'
 
   const computedStayMinutes = (() => {
-    if (!formState.visitedAt || !formState.endAt) return null
+    if (!formState.arrivedAt || !formState.departedAt) return null
     const diff = Math.round(
-      (new Date(formState.endAt).getTime() -
-        new Date(formState.visitedAt).getTime()) /
+      (new Date(formState.departedAt).getTime() -
+        new Date(formState.arrivedAt).getTime()) /
         60000
     )
     return diff > 0 ? diff : null
   })()
 
-  const plannedDepartureTime = (() => {
-    if (!isPlanned || !formState.visitedAt || !formState.stayMinutes)
-      return null
-    const minutes = parseInt(formState.stayMinutes, 10)
-    if (isNaN(minutes) || minutes <= 0) return null
-    const date = new Date(formState.visitedAt)
-    date.setMinutes(date.getMinutes() + minutes)
-    return date
-  })()
-
   useEffect(() => {
-    const initialStayMinutes = (() => {
-      if (touringStatus === 'PLANNED') {
-        // PLANNED スポットは plannedAt と plannedDepartAt から計算（旧データは visitedAt/endAt から）
-        const start = spot.plannedAt ?? spot.visitedAt
-        const end = spot.plannedDepartAt ?? spot.endAt
-        if (!start || !end) return ''
-        const diff = Math.round(
-          (new Date(end).getTime() - new Date(start).getTime()) / 60000
-        )
-        return diff > 0 ? String(diff) : ''
-      }
-      if (!spot.visitedAt || !spot.endAt) return ''
-      const diff = Math.round(
-        (new Date(spot.endAt).getTime() - new Date(spot.visitedAt).getTime()) /
-          60000
-      )
-      return diff > 0 ? String(diff) : ''
-    })()
-
-    // PLANNED の場合は plannedAt を「到着予定日時」として表示（旧データは visitedAt にフォールバック）
-    const plannedVisitedAt =
-      touringStatus === 'PLANNED'
-        ? (spot.plannedAt ?? spot.visitedAt)
-        : spot.visitedAt
-
     setFormState({
       name: spot.name ?? '',
       memo: spot.memo ?? '',
-      visitedAt: plannedVisitedAt
-        ? toLocalDateTimeString(plannedVisitedAt)
-        : '',
-      endAt: spot.endAt ? toLocalDateTimeString(spot.endAt) : '',
-      stayMinutes: initialStayMinutes,
+      arrivedAt: spot.arrivedAt ? toLocalDateTimeString(spot.arrivedAt) : '',
+      departedAt: spot.departedAt ? toLocalDateTimeString(spot.departedAt) : '',
     })
 
     if (spot.latitude != null && spot.longitude != null) {
       setCurrentLocation({ lat: spot.latitude, lng: spot.longitude })
     }
-  }, [spot, touringStatus])
+  }, [spot])
 
   const handleLocationSaved = async (lat: number, lng: number) => {
     if (isSavingLocation) return
@@ -175,29 +135,16 @@ export function SpotEditForm({
     setError('')
     setIsSubmitting(true)
 
-    const endAt = (() => {
-      if (isPlanned) {
-        if (!formState.stayMinutes || !formState.visitedAt) return null
-        const minutes = parseInt(formState.stayMinutes, 10)
-        if (isNaN(minutes) || minutes <= 0) return null
-        const date = new Date(formState.visitedAt)
-        date.setMinutes(date.getMinutes() + minutes)
-        return date
-      }
-      return formState.endAt !== '' ? new Date(formState.endAt) : null
-    })()
-
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots/${spot.spotId}`,
         {
           name: formState.name !== '' ? formState.name : null,
           memo: formState.memo !== '' ? formState.memo : null,
-          // PLANNED の場合は到着予定日時を plannedAt に保存し visitedAt を null にリセット
-          ...(isPlanned
-            ? { plannedAt: new Date(formState.visitedAt), visitedAt: null }
-            : { visitedAt: new Date(formState.visitedAt) }),
-          endAt,
+          arrivedAt:
+            formState.arrivedAt !== '' ? new Date(formState.arrivedAt) : null,
+          departedAt:
+            formState.departedAt !== '' ? new Date(formState.departedAt) : null,
         }
       )
 
@@ -245,82 +192,40 @@ export function SpotEditForm({
         </FormField>
 
         <FormField
-          label={
-            isBreak
-              ? isPlanned
-                ? '休憩開始予定'
-                : '休憩開始'
-              : isPlanned
-                ? '到着予定'
-                : '訪問日時'
-          }
-          htmlFor="spotVisitedAt"
+          label={isBreak ? '休憩開始' : '訪問日時'}
+          htmlFor="spotArrivedAt"
         >
           <DateTimeInput
-            id="spotVisitedAt"
-            value={formState.visitedAt}
+            id="spotArrivedAt"
+            value={formState.arrivedAt}
             onChange={(e) =>
-              setFormState((prev) => ({ ...prev, visitedAt: e.target.value }))
+              setFormState((prev) => ({ ...prev, arrivedAt: e.target.value }))
             }
             disabled={isSubmitting}
           />
         </FormField>
 
-        {isPlanned ? (
-          <FormField
-            label={isBreak ? '滞在時間（任意）' : '滞在時間（任意）'}
-            htmlFor="spotStayMinutes"
-          >
-            <div className="flex items-center gap-2">
-              <Input
-                id="spotStayMinutes"
-                type="number"
-                min="1"
-                max="1440"
-                value={formState.stayMinutes}
-                onChange={(e) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    stayMinutes: e.target.value,
-                  }))
-                }
-                placeholder="例: 60"
-                disabled={isSubmitting}
-              />
-              <span className="text-sm opacity-60 whitespace-nowrap">分</span>
-            </div>
-            {plannedDepartureTime && (
-              <p className="text-xs opacity-50 mt-1 text-right">
-                出発予定:{' '}
-                {plannedDepartureTime.toLocaleString('ja-JP', {
-                  month: 'numeric',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
-            )}
-          </FormField>
-        ) : (
-          <FormField
-            label={isBreak ? '休憩終了（任意）' : '出発時間（任意）'}
-            htmlFor="spotEndAt"
-          >
-            <DateTimeInput
-              id="spotEndAt"
-              value={formState.endAt}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, endAt: e.target.value }))
-              }
-              disabled={isSubmitting}
-            />
-            {computedStayMinutes !== null && (
-              <p className="text-xs opacity-50 mt-1 text-right">
-                滞在: {computedStayMinutes}分
-              </p>
-            )}
-          </FormField>
-        )}
+        <FormField
+          label={isBreak ? '休憩終了（任意）' : '出発時間（任意）'}
+          htmlFor="spotDepartedAt"
+        >
+          <DateTimeInput
+            id="spotDepartedAt"
+            value={formState.departedAt}
+            onChange={(e) =>
+              setFormState((prev) => ({
+                ...prev,
+                departedAt: e.target.value,
+              }))
+            }
+            disabled={isSubmitting}
+          />
+          {computedStayMinutes !== null && (
+            <p className="text-xs opacity-50 mt-1 text-right">
+              滞在: {computedStayMinutes}分
+            </p>
+          )}
+        </FormField>
 
         <FormField label="位置">
           <div className="flex items-center gap-2">
