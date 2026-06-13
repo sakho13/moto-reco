@@ -93,7 +93,9 @@ export function PlanSpotAddForm({
       )
 
       await Promise.all([
-        mutate(`/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`),
+        mutate(
+          `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`
+        ),
         mutate(detailUrl),
       ])
       toast.success(isBreak ? '休憩を追加しました' : 'スポットを追加しました')
