@@ -4,6 +4,7 @@ import {
   MyUserBikeId,
   TouringId,
   TouringPlanId,
+  TouringPlanRouteType,
   UserId,
 } from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
@@ -14,6 +15,7 @@ import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
+import { recomputeTouringPlanSpotTimes } from './recomputeTouringPlanSpotTimes'
 
 type LocationParams = {
   latitude: number
@@ -27,8 +29,13 @@ type RegisterPlanParams = {
   userId: UserId
   title: string
   departAt: Date
-  startLocation?: (LocationParams & { plannedDepartureAt?: Date }) | null
-  destinationLocation?: (LocationParams & { plannedArrivalAt?: Date }) | null
+  startLocation?: LocationParams | null
+  destinationLocation?:
+    | (LocationParams & {
+        travelMinutesFromPrev?: number
+        routeTypeFromPrev?: TouringPlanRouteType
+      })
+    | null
 }
 
 type UpdatePlanParams = {
@@ -80,16 +87,12 @@ export class TouringPlanService {
     }
 
     try {
-      // returnAtの初期値: 目的地の到着予定があればそれ、なければ出発予定日時
-      const returnAt =
-        params.destinationLocation?.plannedArrivalAt ?? params.departAt
-
       const plan = new TouringPlanEntity({
         touringPlanId: createTouringPlanId(''),
         myUserBikeId: params.myUserBikeId,
         title: params.title,
         departAt: params.departAt,
-        returnAt,
+        returnAt: params.departAt, // 後でrecomputeTouringPlanSpotTimesにより再計算される
       })
 
       const createdPlan = await this.touringPlanRepository.createPlan(plan)
@@ -105,7 +108,10 @@ export class TouringPlanService {
           latitude: params.startLocation.latitude,
           longitude: params.startLocation.longitude,
           plannedArrivalAt: null,
-          plannedDepartureAt: params.startLocation.plannedDepartureAt ?? null,
+          plannedDepartureAt: null,
+          stayMinutes: null,
+          travelMinutesFromPrev: null,
+          routeTypeFromPrev: null,
           sortOrder: 0,
         })
         startSpot = await this.touringPlanSpotRepository.createPlanSpot(spot)
@@ -121,15 +127,27 @@ export class TouringPlanService {
           memo: params.destinationLocation.memo ?? null,
           latitude: params.destinationLocation.latitude,
           longitude: params.destinationLocation.longitude,
-          plannedArrivalAt: params.destinationLocation.plannedArrivalAt ?? null,
+          plannedArrivalAt: null,
           plannedDepartureAt: null,
+          stayMinutes: null,
+          travelMinutesFromPrev:
+            params.destinationLocation.travelMinutesFromPrev ?? null,
+          routeTypeFromPrev:
+            params.destinationLocation.routeTypeFromPrev ?? null,
           sortOrder: 9999,
         })
         destinationSpot =
           await this.touringPlanSpotRepository.createPlanSpot(spot)
       }
 
-      return { plan: createdPlan, startSpot, destinationSpot }
+      const recomputedPlan = await recomputeTouringPlanSpotTimes(
+        this.touringPlanSpotRepository,
+        this.touringPlanRepository,
+        createdPlan.id,
+        createdPlan
+      )
+
+      return { plan: recomputedPlan, startSpot, destinationSpot }
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -224,7 +242,8 @@ export class TouringPlanService {
    * プランのタイトル・出発予定日時を更新する
    *
    * @remarks
-   * `departAt` 変更時は `returnAt` を再計算する（Finding #4）。
+   * `departAt` 変更時は {@link recomputeTouringPlanSpotTimes} により
+   * 各スポットの予定到着・出発時刻と `returnAt` を再計算する。
    * 位置情報の更新は専用エンドポイント
    * (`setStartSpot`/`setDestinationSpot`)経由で行う。
    */
@@ -253,19 +272,36 @@ export class TouringPlanService {
     }
 
     try {
-      const departAt = params.departAt ?? existingPlan.departAt
-
-      let returnAt = existingPlan.returnAt
       if (params.departAt !== undefined) {
-        returnAt = await this._calculateReturnAt(params.planId, departAt)
+        // returnAtは一旦departAtで仮置きする
+        // （existingPlan.returnAtのままだと departAt > returnAt となり
+        //   エンティティのバリデーションに違反する可能性があるため）。
+        // 直後のrecomputeTouringPlanSpotTimesで正しい値に再計算される。
+        const updatedPlan = new TouringPlanEntity({
+          touringPlanId: existingPlan.id,
+          myUserBikeId: existingPlan.myUserBikeId,
+          title: params.title ?? existingPlan.title,
+          departAt: params.departAt,
+          returnAt: params.departAt,
+        })
+
+        const savedPlan =
+          await this.touringPlanRepository.updatePlan(updatedPlan)
+
+        return await recomputeTouringPlanSpotTimes(
+          this.touringPlanSpotRepository,
+          this.touringPlanRepository,
+          params.planId,
+          savedPlan
+        )
       }
 
       const updatedPlan = new TouringPlanEntity({
         touringPlanId: existingPlan.id,
         myUserBikeId: existingPlan.myUserBikeId,
         title: params.title ?? existingPlan.title,
-        departAt,
-        returnAt,
+        departAt: existingPlan.departAt,
+        returnAt: existingPlan.returnAt,
       })
 
       return await this.touringPlanRepository.updatePlan(updatedPlan)
@@ -307,47 +343,5 @@ export class TouringPlanService {
     }
 
     await this.touringPlanRepository.deletePlan(planId, myUserBikeId)
-  }
-
-  /**
-   * `departAt` 変更時の `returnAt` 再計算（Finding #4）
-   *
-   * @remarks
-   * ```
-   * destinationSpot = spots.find(s => s.type === 'DESTINATION')
-   * waypointTimes = spots
-   *   .filter(s => s.type === 'SPOT' || s.type === 'BREAK')
-   *   .map(s => s.plannedDepartureAt ?? s.plannedArrivalAt)
-   *   .filter(notNull)
-   * newReturnAt = destinationSpot?.plannedArrivalAt
-   *   ?? (waypointTimes.length > 0
-   *         ? max(departAt, ...waypointTimes)
-   *         : departAt)
-   * ```
-   */
-  private async _calculateReturnAt(
-    planId: TouringPlanId,
-    departAt: Date
-  ): Promise<Date> {
-    const spots =
-      await this.touringPlanSpotRepository.findPlanSpotsByPlanId(planId)
-
-    const destinationSpot = spots.find((s) => s.type === 'DESTINATION')
-    if (destinationSpot?.plannedArrivalAt) {
-      return destinationSpot.plannedArrivalAt
-    }
-
-    const waypointTimes = spots
-      .filter((s) => s.type === 'SPOT' || s.type === 'BREAK')
-      .map((s) => s.plannedDepartureAt ?? s.plannedArrivalAt)
-      .filter((d): d is Date => d !== null)
-
-    if (waypointTimes.length > 0) {
-      return new Date(
-        Math.max(departAt.getTime(), ...waypointTimes.map((d) => d.getTime()))
-      )
-    }
-
-    return departAt
   }
 }

@@ -2,6 +2,7 @@ import {
   createTouringPlanSpotId,
   MyUserBikeId,
   TouringPlanId,
+  TouringPlanRouteType,
   TouringPlanSpotId,
   UserId,
 } from '@repo/shared-types'
@@ -12,6 +13,7 @@ import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
+import { recomputeTouringPlanSpotTimes } from './recomputeTouringPlanSpotTimes'
 
 type RegisterPlanSpotParams = {
   planId: TouringPlanId
@@ -22,8 +24,9 @@ type RegisterPlanSpotParams = {
   memo?: string
   latitude?: number
   longitude?: number
-  plannedArrivalAt?: Date
-  plannedDepartureAt?: Date
+  stayMinutes?: number
+  travelMinutesFromPrev?: number
+  routeTypeFromPrev?: TouringPlanRouteType
 }
 
 type UpdatePlanSpotParams = {
@@ -35,8 +38,9 @@ type UpdatePlanSpotParams = {
   memo?: string | null
   latitude?: number | null
   longitude?: number | null
-  plannedArrivalAt?: Date | null
-  plannedDepartureAt?: Date | null
+  stayMinutes?: number | null
+  travelMinutesFromPrev?: number | null
+  routeTypeFromPrev?: TouringPlanRouteType | null
 }
 
 /**
@@ -81,13 +85,21 @@ export class TouringPlanSpotService {
         memo: params.memo ?? null,
         latitude: params.latitude ?? null,
         longitude: params.longitude ?? null,
-        plannedArrivalAt: params.plannedArrivalAt ?? null,
-        plannedDepartureAt: params.plannedDepartureAt ?? null,
+        plannedArrivalAt: null,
+        plannedDepartureAt: null,
+        stayMinutes: params.stayMinutes ?? null,
+        travelMinutesFromPrev: params.travelMinutesFromPrev ?? null,
+        routeTypeFromPrev: params.routeTypeFromPrev ?? null,
         sortOrder: waypointCount,
       })
 
       const created = await this.touringPlanSpotRepository.createPlanSpot(spot)
-      await this._syncPlanReturnAt(params.planId, plan)
+      await recomputeTouringPlanSpotTimes(
+        this.touringPlanSpotRepository,
+        this.touringPlanRepository,
+        params.planId,
+        plan
+      )
       return created
     } catch (error) {
       if (error instanceof Error) {
@@ -166,20 +178,31 @@ export class TouringPlanSpotService {
           params.longitude !== undefined
             ? params.longitude
             : existingSpot.longitude,
-        plannedArrivalAt:
-          params.plannedArrivalAt !== undefined
-            ? params.plannedArrivalAt
-            : existingSpot.plannedArrivalAt,
-        plannedDepartureAt:
-          params.plannedDepartureAt !== undefined
-            ? params.plannedDepartureAt
-            : existingSpot.plannedDepartureAt,
+        plannedArrivalAt: existingSpot.plannedArrivalAt,
+        plannedDepartureAt: existingSpot.plannedDepartureAt,
+        stayMinutes:
+          params.stayMinutes !== undefined
+            ? params.stayMinutes
+            : existingSpot.stayMinutes,
+        travelMinutesFromPrev:
+          params.travelMinutesFromPrev !== undefined
+            ? params.travelMinutesFromPrev
+            : existingSpot.travelMinutesFromPrev,
+        routeTypeFromPrev:
+          params.routeTypeFromPrev !== undefined
+            ? params.routeTypeFromPrev
+            : existingSpot.routeTypeFromPrev,
         sortOrder: existingSpot.sortOrder,
       })
 
       const updated =
         await this.touringPlanSpotRepository.updatePlanSpot(updatedSpot)
-      await this._syncPlanReturnAt(params.planId, plan)
+      await recomputeTouringPlanSpotTimes(
+        this.touringPlanSpotRepository,
+        this.touringPlanRepository,
+        params.planId,
+        plan
+      )
       return updated
     } catch (error) {
       if (error instanceof Error) {
@@ -217,7 +240,12 @@ export class TouringPlanSpotService {
     }
 
     await this.touringPlanSpotRepository.deletePlanSpot(spotId, planId)
-    await this._syncPlanReturnAt(planId, plan)
+    await recomputeTouringPlanSpotTimes(
+      this.touringPlanSpotRepository,
+      this.touringPlanRepository,
+      planId,
+      plan
+    )
   }
 
   /**
@@ -229,11 +257,18 @@ export class TouringPlanSpotService {
     myUserBikeId: MyUserBikeId,
     userId: UserId
   ): Promise<void> {
-    await this._findPlanOrThrow(planId, myUserBikeId, userId)
+    const plan = await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
     await this.touringPlanSpotRepository.reorderPlanSpots(
       spotIds.map((id) => createTouringPlanSpotId(id)),
       planId
+    )
+
+    await recomputeTouringPlanSpotTimes(
+      this.touringPlanSpotRepository,
+      this.touringPlanRepository,
+      planId,
+      plan
     )
   }
 
@@ -251,7 +286,6 @@ export class TouringPlanSpotService {
       longitude: number
       name?: string | null
       memo?: string | null
-      plannedDepartureAt?: Date | null
     } | null
   ): Promise<TouringPlanSpotEntity | null> {
     const plan = await this._findPlanOrThrow(planId, myUserBikeId, userId)
@@ -267,12 +301,17 @@ export class TouringPlanSpotService {
               memo: params.memo ?? null,
               latitude: params.latitude,
               longitude: params.longitude,
-              plannedArrivalAt: null,
-              plannedDepartureAt: params.plannedDepartureAt ?? null,
+              travelMinutesFromPrev: null,
+              routeTypeFromPrev: null,
             }
       )
 
-      await this._syncPlanReturnAt(planId, plan)
+      await recomputeTouringPlanSpotTimes(
+        this.touringPlanSpotRepository,
+        this.touringPlanRepository,
+        planId,
+        plan
+      )
       return result
     } catch (error) {
       if (error instanceof Error) {
@@ -296,7 +335,8 @@ export class TouringPlanSpotService {
       longitude: number
       name?: string | null
       memo?: string | null
-      plannedArrivalAt?: Date | null
+      travelMinutesFromPrev?: number | null
+      routeTypeFromPrev?: TouringPlanRouteType | null
     } | null
   ): Promise<TouringPlanSpotEntity | null> {
     const plan = await this._findPlanOrThrow(planId, myUserBikeId, userId)
@@ -312,12 +352,17 @@ export class TouringPlanSpotService {
               memo: params.memo ?? null,
               latitude: params.latitude,
               longitude: params.longitude,
-              plannedArrivalAt: params.plannedArrivalAt ?? null,
-              plannedDepartureAt: null,
+              travelMinutesFromPrev: params.travelMinutesFromPrev ?? null,
+              routeTypeFromPrev: params.routeTypeFromPrev ?? null,
             }
       )
 
-      await this._syncPlanReturnAt(planId, plan)
+      await recomputeTouringPlanSpotTimes(
+        this.touringPlanSpotRepository,
+        this.touringPlanRepository,
+        planId,
+        plan
+      )
       return result
     } catch (error) {
       if (error instanceof Error) {
@@ -325,56 +370,6 @@ export class TouringPlanSpotService {
       }
       throw error
     }
-  }
-
-  /**
-   * プランの帰着予定日時（`returnAt`）をスポットの予定情報から再計算する
-   *
-   * @remarks
-   * Finding #4 の修正: `plannedDepartureAt`（経由地・休憩の出発予定）と
-   * `DESTINATION` の到着予定を考慮する。スポットのCRUD後に毎回呼び出す。
-   *
-   * ```
-   * destinationSpot = spots.find(s => s.type === 'DESTINATION')
-   * waypointTimes = spots
-   *   .filter(s => s.type === 'SPOT' || s.type === 'BREAK')
-   *   .map(s => s.plannedDepartureAt ?? s.plannedArrivalAt)
-   *   .filter(notNull)
-   * newReturnAt = destinationSpot?.plannedArrivalAt
-   *   ?? (waypointTimes.length > 0
-   *         ? max(plan.departAt, ...waypointTimes)
-   *         : plan.departAt)
-   * ```
-   */
-  private async _syncPlanReturnAt(
-    planId: TouringPlanId,
-    plan: TouringPlanEntity
-  ): Promise<void> {
-    const spots =
-      await this.touringPlanSpotRepository.findPlanSpotsByPlanId(planId)
-
-    const destinationSpot = spots.find((s) => s.type === 'DESTINATION')
-    const waypointTimes = spots
-      .filter((s) => s.type === 'SPOT' || s.type === 'BREAK')
-      .map((s) => s.plannedDepartureAt ?? s.plannedArrivalAt)
-      .filter((d): d is Date => d !== null)
-
-    const newReturnAt =
-      destinationSpot?.plannedArrivalAt ??
-      (waypointTimes.length > 0
-        ? new Date(
-            Math.max(
-              plan.departAt.getTime(),
-              ...waypointTimes.map((d) => d.getTime())
-            )
-          )
-        : plan.departAt)
-
-    if (newReturnAt.getTime() === plan.returnAt.getTime()) return
-
-    await this.touringPlanRepository.updatePlan(
-      new TouringPlanEntity({ ...plan.toJson(), returnAt: newReturnAt })
-    )
   }
 
   /**

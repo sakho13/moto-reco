@@ -36,10 +36,7 @@ export class TouringPlanSpotEntity {
       throw new Error('滞在時間は0以上である必要があります')
     }
 
-    if (
-      spot.travelMinutesFromPrev !== null &&
-      spot.travelMinutesFromPrev < 0
-    ) {
+    if (spot.travelMinutesFromPrev !== null && spot.travelMinutesFromPrev < 0) {
       throw new Error('前の地点からの移動時間は0以上である必要があります')
     }
 
