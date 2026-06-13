@@ -1,31 +1,18 @@
 'use client'
 
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
-import type { DragEndEvent } from '@dnd-kit/core'
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  arrayMove,
-} from '@dnd-kit/sortable'
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { useState, useEffect, Fragment } from 'react'
+import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
-import { ModalBase } from '@/components/common/ModalBase'
 import { EditIcon } from '@/components/icons/EditIcon'
-import { SortableSpotItem } from '@/components/spot/SortableSpotItem'
 import { SpotAddModal } from '@/components/spot/SpotAddModal'
 import { SpotEditModal } from '@/components/spot/SpotEditModal'
+import { RouteTimeline } from '@/components/touring/RouteTimeline'
+import type { RouteTimelineItem } from '@/components/touring/RouteTimeline'
 import { TouringEditModal } from '@/components/touring/TouringEditModal'
 import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
@@ -33,7 +20,6 @@ import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
-import { useGeolocation } from '@/lib/hooks/useGeolocation'
 import {
   buildGoogleMapsRouteUrl,
   buildGoogleMapsTwoPointUrl,
@@ -45,9 +31,6 @@ function TouringDetailPage() {
   const bikeId = params.id as string
   const touringId = params.touringId as string
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isStarting, setIsStarting] = useState(false)
-  const [isStartConfirmOpen, setIsStartConfirmOpen] = useState(false)
-  const { getCurrentPosition } = useGeolocation()
   const [editingLocationTarget, setEditingLocationTarget] = useState<
     'start' | 'end' | null
   >(null)
@@ -57,19 +40,8 @@ function TouringDetailPage() {
   const [addModalType, setAddModalType] = useState<'SPOT' | 'BREAK' | null>(
     null
   )
-  const [mapClickLocation, setMapClickLocation] = useState<{
-    lat: number
-    lng: number
-  } | null>(null)
   const [localSpots, setLocalSpots] = useState<ApiResponseSpotDetail[]>([])
   const [isBreakLoading, setIsBreakLoading] = useState(false)
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 5 },
-    })
-  )
 
   const {
     data: touring,
@@ -144,15 +116,11 @@ function TouringDetailPage() {
     return diff > 0 ? diff : null
   }
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-
-    const oldIndex = localSpots.findIndex((s) => s.spotId === active.id)
-    const newIndex = localSpots.findIndex((s) => s.spotId === over.id)
-    if (oldIndex === -1 || newIndex === -1) return
-
-    const reordered = arrayMove(localSpots, oldIndex, newIndex)
+  const handleReorder = async (newOrderIds: string[]) => {
+    const previous = localSpots
+    const reordered = newOrderIds
+      .map((id) => localSpots.find((s) => s.spotId === id))
+      .filter((s): s is ApiResponseSpotDetail => s !== undefined)
     setLocalSpots(reordered)
 
     try {
@@ -164,7 +132,7 @@ function TouringDetailPage() {
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
       )
     } catch (err) {
-      setLocalSpots(localSpots)
+      setLocalSpots(previous)
       toast.error(
         err instanceof ApiV1Error ? err.message : '並び替えに失敗しました'
       )
@@ -237,10 +205,12 @@ function TouringDetailPage() {
       })
   }
 
+  const showDestination =
+    touring?.status === 'COMPLETED' ||
+    (touring?.status === 'STARTED' && touring?.endLatitude != null)
+
   if (
-    (touring?.status === 'COMPLETED' ||
-      touring?.status === 'PLANNED' ||
-      (touring?.status === 'STARTED' && touring?.endLatitude != null)) &&
+    showDestination &&
     touring?.endLatitude != null &&
     touring?.endLongitude != null
   ) {
@@ -264,34 +234,6 @@ function TouringDetailPage() {
     }
   }
 
-  const handleStartFromPlan = async () => {
-    setIsStarting(true)
-    try {
-      const { position } = await getCurrentPosition()
-      await apiPost(
-        `/api/v1/user-bike/bike/${bikeId}/tourings/start-end` as const,
-        {
-          action: 'start',
-          touringPlanId: touringId,
-          startDate: new Date().toISOString(),
-          startLatitude: position?.latitude,
-          startLongitude: position?.longitude,
-        }
-      )
-      toast.success('ツーリングを開始しました')
-      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
-      router.push('/app/home')
-    } catch (err) {
-      toast.error(
-        err instanceof ApiV1Error
-          ? err.message
-          : 'ツーリングの開始に失敗しました'
-      )
-    } finally {
-      setIsStarting(false)
-    }
-  }
-
   const handleLocationEditSuccess = async () => {
     await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`)
     setEditingLocationTarget(null)
@@ -312,12 +254,6 @@ function TouringDetailPage() {
   const handleSpotAddSuccess = async () => {
     await _mutateTouringAndSpots()
     setAddModalType(null)
-    setMapClickLocation(null)
-  }
-
-  const handleMapClick = (lat: number, lng: number) => {
-    setMapClickLocation({ lat, lng })
-    setAddModalType('SPOT')
   }
 
   const handleSpotDeleteSuccess = async () => {
@@ -326,14 +262,14 @@ function TouringDetailPage() {
   }
 
   const currentBreak =
-    localSpots.find((s) => s.type === 'BREAK' && s.endAt === null) ?? null
+    localSpots.find((s) => s.type === 'BREAK' && s.departedAt === null) ?? null
 
   const handleQuickBreakStart = async () => {
     setIsBreakLoading(true)
     try {
       await apiPost(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`,
-        { type: 'BREAK', visitedAt: new Date() }
+        { type: 'BREAK', arrivedAt: new Date() }
       )
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
@@ -354,7 +290,7 @@ function TouringDetailPage() {
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots/${currentBreak.spotId}`,
-        { endAt: new Date() }
+        { departedAt: new Date() }
       )
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
@@ -369,7 +305,7 @@ function TouringDetailPage() {
     }
   }
 
-  const hasMap = mapPoints.length > 0 || touring?.status === 'PLANNED'
+  const hasMap = mapPoints.length > 0
   const googleMapsUrl = buildGoogleMapsRouteUrl(mapPoints)
 
   const startLocation =
@@ -381,6 +317,111 @@ function TouringDetailPage() {
     touring?.endLatitude != null && touring?.endLongitude != null
       ? { lat: touring.endLatitude, lng: touring.endLongitude }
       : null
+
+  // RouteTimeline 表示用のアイテム一覧
+  const timelineItems: RouteTimelineItem[] = [
+    {
+      id: 'start',
+      type: 'START',
+      name: '出発地',
+      latitude: touring?.startLatitude,
+      longitude: touring?.startLongitude,
+      onEdit: () => setEditingLocationTarget('start'),
+    },
+    ...localSpots.map((spot): RouteTimelineItem => {
+      const stayInfo =
+        spot.arrivedAt || spot.departedAt
+          ? `実績: 到着 ${spot.arrivedAt ? formatVisitedAt(spot.arrivedAt) : '—'} 〜 出発 ${spot.departedAt ? formatVisitedAt(spot.departedAt) : '—'}`
+          : null
+
+      return {
+        id: spot.spotId,
+        type: spot.type,
+        name: spot.name,
+        memo: stayInfo
+          ? [spot.memo, stayInfo].filter((v) => v !== null).join('\n')
+          : spot.memo,
+        latitude: spot.latitude,
+        longitude: spot.longitude,
+        primaryTime: { label: '予定', value: spot.plannedArrivalAt },
+        secondaryTime: { label: '実績', value: spot.arrivedAt },
+        isSkipped: spot.isSkipped,
+        onEdit: () => setEditingSpot(spot),
+      }
+    }),
+    ...(showDestination
+      ? [
+          {
+            id: 'destination',
+            type: 'DESTINATION' as const,
+            name: '終着地',
+            latitude: touring?.endLatitude,
+            longitude: touring?.endLongitude,
+            onEdit: () => setEditingLocationTarget('end'),
+          },
+        ]
+      : []),
+  ]
+
+  // 出発地・スポット・終着地間の経路リンク一覧
+  const routeLinks: { key: string; href: string; minutes: number | null }[] = []
+
+  if (
+    startLocation != null &&
+    localSpots[0]?.latitude != null &&
+    localSpots[0]?.longitude != null
+  ) {
+    routeLinks.push({
+      key: 'start-to-first',
+      href: buildGoogleMapsTwoPointUrl(startLocation, {
+        lat: localSpots[0]!.latitude!,
+        lng: localSpots[0]!.longitude!,
+      }),
+      minutes: calcTravelMinutes(touring?.startDate, localSpots[0]?.arrivedAt),
+    })
+  }
+
+  localSpots.forEach((spot, index) => {
+    const nextSpot = localSpots[index + 1]
+    if (
+      nextSpot &&
+      spot.latitude != null &&
+      spot.longitude != null &&
+      nextSpot.latitude != null &&
+      nextSpot.longitude != null
+    ) {
+      routeLinks.push({
+        key: `${spot.spotId}-to-${nextSpot.spotId}`,
+        href: buildGoogleMapsTwoPointUrl(
+          { lat: spot.latitude, lng: spot.longitude },
+          { lat: nextSpot.latitude, lng: nextSpot.longitude }
+        ),
+        minutes: calcTravelMinutes(spot.departedAt, nextSpot.arrivedAt),
+      })
+    }
+  })
+
+  if (
+    showDestination &&
+    endLocation != null &&
+    localSpots.at(-1)?.latitude != null &&
+    localSpots.at(-1)?.longitude != null
+  ) {
+    routeLinks.push({
+      key: 'last-to-destination',
+      href: buildGoogleMapsTwoPointUrl(
+        {
+          lat: localSpots.at(-1)!.latitude!,
+          lng: localSpots.at(-1)!.longitude!,
+        },
+        endLocation
+      ),
+      minutes: calcTravelMinutes(
+        localSpots.at(-1)?.departedAt,
+        touring?.endDate
+      ),
+    })
+  }
 
   const spotsCard = (
     <div className={styles.card}>
@@ -401,7 +442,7 @@ function TouringDetailPage() {
           {currentBreak ? (
             <div className={styles.breakBanner}>
               <span className={styles.breakBannerText}>
-                休憩中 {formatVisitedAt(currentBreak.visitedAt)}〜
+                休憩中 {formatVisitedAt(currentBreak.arrivedAt)}〜
               </span>
               <button
                 onClick={handleQuickBreakEnd}
@@ -426,208 +467,38 @@ function TouringDetailPage() {
       {spotsLoading ? (
         <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
       ) : (
-        <div className={styles.spotsListScroll}>
-          <div className="space-y-3">
-            {/* 出発地 */}
-            <div className={styles.spotItem}>
-              <div className={styles.startBadge}>出</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium text-sm">出発地</p>
-                  <button
-                    onClick={() => setEditingLocationTarget('start')}
-                    className={styles.editButton}
-                    aria-label="出発地を編集"
-                  >
-                    <EditIcon />
-                  </button>
-                </div>
-                {startLocation ? (
-                  <p className={`text-xs mt-1 ${styles.mutedText}`}>
-                    {startLocation.lat.toFixed(5)},{' '}
-                    {startLocation.lng.toFixed(5)}
-                  </p>
-                ) : (
-                  <p className={`text-xs mt-1 ${styles.mutedText}`}>
-                    位置未設定
-                  </p>
-                )}
-              </div>
-            </div>
+        <RouteTimeline
+          items={timelineItems}
+          sortableIds={localSpots.map((s) => s.spotId)}
+          onReorder={handleReorder}
+          emptyMessage="スポットはまだ記録されていません"
+        />
+      )}
 
-            {/* 出発地 → スポット1 ルートリンク */}
-            {startLocation != null &&
-              localSpots[0]?.latitude != null &&
-              localSpots[0]?.longitude != null && (
-                <a
-                  href={buildGoogleMapsTwoPointUrl(startLocation, {
-                    lat: localSpots[0]!.latitude!,
-                    lng: localSpots[0]!.longitude!,
-                  })}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.routeLink}
-                >
-                  ↓ Googleマップで経路確認
-                  {(() => {
-                    const min = calcTravelMinutes(
-                      touring?.startDate,
-                      localSpots[0]?.visitedAt
-                    )
-                    return min !== null ? `（移動 ${min}分）` : ''
-                  })()}
-                </a>
-              )}
-
-            {/* 立ち寄りスポット（DnD） */}
-            {localSpots && localSpots.length > 0 && (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={localSpots.map((s) => s.spotId)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-3">
-                    {localSpots.map((spot, index) => {
-                      const nextSpot = localSpots[index + 1]
-                      return (
-                        <Fragment key={spot.spotId}>
-                          <SortableSpotItem
-                            spot={spot}
-                            index={index}
-                            editButtonClassName={styles.editButton}
-                            spotItemClassName={styles.spotItem}
-                            spotBadgeClassName={styles.spotBadge}
-                            mutedTextClassName={styles.mutedText}
-                            dimTextClassName={styles.dimText}
-                            formatVisitedAt={formatVisitedAt}
-                            touringStatus={touring?.status}
-                            onEdit={setEditingSpot}
-                          />
-                          {nextSpot &&
-                            spot.latitude != null &&
-                            spot.longitude != null &&
-                            nextSpot.latitude != null &&
-                            nextSpot.longitude != null && (
-                              <a
-                                href={buildGoogleMapsTwoPointUrl(
-                                  { lat: spot.latitude, lng: spot.longitude },
-                                  {
-                                    lat: nextSpot.latitude,
-                                    lng: nextSpot.longitude,
-                                  }
-                                )}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.routeLink}
-                              >
-                                ↓ Googleマップで経路確認
-                                {(() => {
-                                  const min = calcTravelMinutes(
-                                    spot.endAt,
-                                    nextSpot.visitedAt
-                                  )
-                                  return min !== null ? `（移動 ${min}分）` : ''
-                                })()}
-                              </a>
-                            )}
-                        </Fragment>
-                      )
-                    })}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
-
-            {/* スポットがない場合のメッセージ */}
-            {(!localSpots || localSpots.length === 0) && (
-              <p className={`text-sm ${styles.mutedText}`}>
-                スポットはまだ記録されていません
-              </p>
-            )}
-
-            {/* 最終スポット → 終着地 ルートリンク */}
-            {(touring?.status === 'COMPLETED' ||
-              touring?.status === 'PLANNED' ||
-              (touring?.status === 'STARTED' &&
-                touring?.endLatitude != null)) &&
-              endLocation != null &&
-              localSpots.at(-1)?.latitude != null &&
-              localSpots.at(-1)?.longitude != null && (
-                <a
-                  href={buildGoogleMapsTwoPointUrl(
-                    {
-                      lat: localSpots.at(-1)!.latitude!,
-                      lng: localSpots.at(-1)!.longitude!,
-                    },
-                    endLocation
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.routeLink}
-                >
-                  ↓ Googleマップで経路確認
-                  {(() => {
-                    const min = calcTravelMinutes(
-                      localSpots.at(-1)?.endAt,
-                      touring?.endDate
-                    )
-                    return min !== null ? `（移動 ${min}分）` : ''
-                  })()}
-                </a>
-              )}
-
-            {/* 終着地（COMPLETED・PLANNED・STARTED（プランから開始）の場合に表示） */}
-            {(touring?.status === 'COMPLETED' ||
-              touring?.status === 'PLANNED' ||
-              (touring?.status === 'STARTED' &&
-                touring?.endLatitude != null)) && (
-              <div className={styles.spotItem}>
-                <div className={styles.endBadge}>着</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-medium text-sm">終着地</p>
-                    <button
-                      onClick={() => setEditingLocationTarget('end')}
-                      className={styles.editButton}
-                      aria-label="終着地を編集"
-                    >
-                      <EditIcon />
-                    </button>
-                  </div>
-                  {endLocation ? (
-                    <p className={`text-xs mt-1 ${styles.mutedText}`}>
-                      {endLocation.lat.toFixed(5)}, {endLocation.lng.toFixed(5)}
-                    </p>
-                  ) : (
-                    <p className={`text-xs mt-1 ${styles.mutedText}`}>
-                      位置未設定
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+      {routeLinks.length > 0 && (
+        <div className="mt-3 space-y-1">
+          {routeLinks.map((link) => (
+            <a
+              key={link.key}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.routeLink}
+            >
+              ↓ Googleマップで経路確認
+              {link.minutes !== null ? `（移動 ${link.minutes}分）` : ''}
+            </a>
+          ))}
         </div>
       )}
     </div>
   )
 
-  const statusLabel =
-    touring?.status === 'PLANNED'
-      ? 'プラン'
-      : touring?.status === 'STARTED'
-        ? '進行中'
-        : '完了'
+  const statusLabel = touring?.status === 'STARTED' ? '進行中' : '完了'
   const statusBadgeClass =
-    touring?.status === 'PLANNED'
-      ? styles.statusPlanned
-      : touring?.status === 'STARTED'
-        ? styles.statusStarted
-        : styles.statusCompleted
+    touring?.status === 'STARTED'
+      ? styles.statusStarted
+      : styles.statusCompleted
 
   return (
     <>
@@ -659,6 +530,14 @@ function TouringDetailPage() {
               {formatDate(touring.startDate)} → {formatDate(touring.endDate)}
               {distance !== null && ` · ${distance.toLocaleString()}km`}
             </p>
+            {touring.touringPlanId !== null && (
+              <Link
+                href={`/app/my-bike/${bikeId}/touring-plans/${touring.touringPlanId}`}
+                className={`${styles.routeLink} mt-1`}
+              >
+                このツーリングは元プランから開始されました →
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -672,9 +551,6 @@ function TouringDetailPage() {
                   <TouringRouteMap
                     points={mapPoints}
                     containerClassName={styles.mapContainerLarge}
-                    onMapClick={
-                      touring?.status === 'PLANNED' ? handleMapClick : undefined
-                    }
                   />
                   {googleMapsUrl && (
                     <a
@@ -687,42 +563,13 @@ function TouringDetailPage() {
                     </a>
                   )}
                 </div>
-                {touring?.status === 'PLANNED' && (
-                  <p className={styles.mapClickHint}>
-                    地図をタップしてスポットを追加
-                  </p>
-                )}
               </div>
             </div>
           </div>
-          <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
-            {touring?.status === 'PLANNED' && (
-              <Button
-                onClick={() => setIsStartConfirmOpen(true)}
-                variant="primary"
-                fullWidth
-                disabled={isStarting}
-              >
-                {isStarting ? '開始中...' : 'ツーリングを開始する'}
-              </Button>
-            )}
-            {spotsCard}
-          </div>
+          <div className="md:w-80 lg:w-96 shrink-0 space-y-4">{spotsCard}</div>
         </div>
       ) : (
-        <div className="w-full max-w-md space-y-4">
-          {touring?.status === 'PLANNED' && (
-            <Button
-              onClick={() => setIsStartConfirmOpen(true)}
-              variant="primary"
-              fullWidth
-              disabled={isStarting}
-            >
-              {isStarting ? '開始中...' : 'ツーリングを開始する'}
-            </Button>
-          )}
-          {spotsCard}
-        </div>
+        <div className="w-full max-w-md space-y-4">{spotsCard}</div>
       )}
 
       {isEditModalOpen && (
@@ -752,7 +599,6 @@ function TouringDetailPage() {
           bikeId={bikeId}
           touringId={touringId}
           spot={editingSpot}
-          touringStatus={touring?.status}
           onClose={() => setEditingSpot(null)}
           onSuccess={handleSpotEditSuccess}
           onDelete={handleSpotDeleteSuccess}
@@ -764,68 +610,16 @@ function TouringDetailPage() {
           bikeId={bikeId}
           touringId={touringId}
           initialType={addModalType}
-          initialLocation={mapClickLocation}
-          touringStatus={touring?.status}
-          prevSpotVisitedAt={
-            touring?.status === 'PLANNED' && localSpots.length > 0
-              ? (localSpots.at(-1)!.endAt ??
-                localSpots.at(-1)!.plannedAt ??
-                localSpots.at(-1)!.visitedAt ??
+          prevSpotDepartedAt={
+            localSpots.length > 0
+              ? (localSpots.at(-1)!.departedAt ??
+                localSpots.at(-1)!.arrivedAt ??
                 undefined)
               : undefined
           }
-          onClose={() => {
-            setAddModalType(null)
-            setMapClickLocation(null)
-          }}
+          onClose={() => setAddModalType(null)}
           onSuccess={handleSpotAddSuccess}
         />
-      )}
-
-      {isStartConfirmOpen && touring && (
-        <ModalBase
-          title="ツーリングを開始する"
-          onClose={() => setIsStartConfirmOpen(false)}
-          size="sm"
-        >
-          <div className="space-y-4">
-            <p className="text-sm">
-              予定日:{' '}
-              <strong>
-                {new Date(touring.startDate).toLocaleDateString('ja-JP', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              </strong>
-            </p>
-            <p className="text-sm opacity-60">
-              今すぐ開始すると、現在地と現在時刻でツーリングが記録されます。
-            </p>
-            <div className="flex gap-3">
-              <Button
-                variant="cloud"
-                fullWidth
-                onClick={() => setIsStartConfirmOpen(false)}
-                disabled={isStarting}
-              >
-                キャンセル
-              </Button>
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={async () => {
-                  setIsStartConfirmOpen(false)
-                  await handleStartFromPlan()
-                }}
-                disabled={isStarting}
-                loading={isStarting}
-              >
-                開始する
-              </Button>
-            </div>
-          </div>
-        </ModalBase>
       )}
     </>
   )
