@@ -363,6 +363,59 @@ function TouringPlanDetailPage() {
     }
   }
 
+  const routeAndHistoryCards = (
+    <>
+      <div className={styles.card}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">ルート</h2>
+          <button
+            onClick={() => setAddModalType('SPOT')}
+            className={styles.editButton}
+            aria-label="経由地・休憩を追加"
+            title="経由地・休憩を追加"
+          >
+            ＋
+          </button>
+        </div>
+
+        {spotsLoading ? (
+          <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
+        ) : (
+          <RouteTimeline
+            items={timelineItems}
+            sortableIds={sortableIds}
+            onReorder={handleReorder}
+            onStartClick={() => setEditingLocationTarget('start')}
+            onDestinationClick={() => setEditingLocationTarget('destination')}
+          />
+        )}
+      </div>
+
+      <div className={styles.card}>
+        <h2 className="text-lg font-semibold mb-4">ツーリング実績</h2>
+        {touringIds.length === 0 ? (
+          <p className={styles.historyEmpty}>
+            このプランからのツーリング実績はまだありません
+          </p>
+        ) : touringsLoading ? (
+          <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
+        ) : (
+          <div>
+            {tourings?.map((touring) => (
+              <HistorySummaryCard
+                key={touring.touringId}
+                touring={touring}
+                onClick={(touringId) =>
+                  router.push(`/app/my-bike/${bikeId}/tourings/${touringId}`)
+                }
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  )
+
   return (
     <>
       <div
@@ -420,117 +473,13 @@ function TouringPlanDetailPage() {
             </div>
           </div>
           <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
-            <div className={styles.card}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">ルート</h2>
-                <button
-                  onClick={() => setAddModalType('SPOT')}
-                  className={styles.editButton}
-                  aria-label="経由地・休憩を追加"
-                  title="経由地・休憩を追加"
-                >
-                  ＋
-                </button>
-              </div>
-
-              {spotsLoading ? (
-                <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-              ) : (
-                <RouteTimeline
-                  items={timelineItems}
-                  sortableIds={sortableIds}
-                  onReorder={handleReorder}
-                  onStartClick={() => setEditingLocationTarget('start')}
-                  onDestinationClick={() =>
-                    setEditingLocationTarget('destination')
-                  }
-                />
-              )}
-            </div>
-
-            <div className={styles.card}>
-              <h2 className="text-lg font-semibold mb-4">ツーリング実績</h2>
-              {touringIds.length === 0 ? (
-                <p className={styles.historyEmpty}>
-                  このプランからのツーリング実績はまだありません
-                </p>
-              ) : touringsLoading ? (
-                <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-              ) : (
-                <div>
-                  {tourings?.map((touring) => (
-                    <HistorySummaryCard
-                      key={touring.touringId}
-                      touring={touring}
-                      onClick={(touringId) =>
-                        router.push(
-                          `/app/my-bike/${bikeId}/tourings/${touringId}`
-                        )
-                      }
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
+            {routeAndHistoryCards}
             <div className={styles.fixedFooterSpacer} />
           </div>
         </div>
       ) : (
         <div className="w-full max-w-md space-y-4">
-          <div className={styles.card}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">ルート</h2>
-              <button
-                onClick={() => setAddModalType('SPOT')}
-                className={styles.editButton}
-                aria-label="経由地・休憩を追加"
-                title="経由地・休憩を追加"
-              >
-                ＋
-              </button>
-            </div>
-
-            {spotsLoading ? (
-              <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-            ) : (
-              <RouteTimeline
-                items={timelineItems}
-                sortableIds={sortableIds}
-                onReorder={handleReorder}
-                onStartClick={() => setEditingLocationTarget('start')}
-                onDestinationClick={() =>
-                  setEditingLocationTarget('destination')
-                }
-              />
-            )}
-          </div>
-
-          <div className={styles.card}>
-            <h2 className="text-lg font-semibold mb-4">ツーリング実績</h2>
-            {touringIds.length === 0 ? (
-              <p className={styles.historyEmpty}>
-                このプランからのツーリング実績はまだありません
-              </p>
-            ) : touringsLoading ? (
-              <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-            ) : (
-              <div>
-                {tourings?.map((touring) => (
-                  <HistorySummaryCard
-                    key={touring.touringId}
-                    touring={touring}
-                    onClick={(touringId) =>
-                      router.push(
-                        `/app/my-bike/${bikeId}/tourings/${touringId}`
-                      )
-                    }
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-
+          {routeAndHistoryCards}
           <div className={styles.fixedFooterSpacer} />
         </div>
       )}
