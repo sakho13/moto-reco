@@ -50,20 +50,23 @@ export const TouringPlanRegisterRequestSchema = z.object({
     required_error: '出発予定日時は必須です',
     invalid_type_error: '出発予定日時は日付形式で指定してください',
   }),
-  startLocation: TouringPlanLocationSchema.extend({
-    plannedDepartureAt: z.coerce
-      .date({
-        invalid_type_error: '出発予定時刻は日付形式で指定してください',
-      })
-      .optional(),
-  })
-    .nullable()
-    .optional(),
+  startLocation: TouringPlanLocationSchema.nullable().optional(),
   destinationLocation: TouringPlanLocationSchema.extend({
-    plannedArrivalAt: z.coerce
-      .date({
-        invalid_type_error: '到着予定時刻は日付形式で指定してください',
+    travelMinutesFromPrev: z
+      .number({
+        invalid_type_error: '前の地点からの移動時間は数値で指定してください',
       })
+      .int('前の地点からの移動時間は整数で指定してください')
+      .min(0, '前の地点からの移動時間は0以上で指定してください')
+      .max(1440, '前の地点からの移動時間は1440以下で指定してください')
+      .nullable()
+      .optional(),
+    routeTypeFromPrev: z
+      .enum(['GENERAL', 'HIGHWAY', 'MIXED'], {
+        invalid_type_error:
+          '前の地点からの移動経路はGENERAL・HIGHWAY・MIXEDのいずれかで指定してください',
+      })
+      .nullable()
       .optional(),
   })
     .nullable()
