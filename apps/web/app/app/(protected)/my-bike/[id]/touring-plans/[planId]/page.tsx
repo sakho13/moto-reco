@@ -17,10 +17,17 @@ import {
   RouteTimeline,
   type RouteTimelineItem,
 } from '@/components/touring/RouteTimeline'
+import TouringRouteMap from '@/components/touring/TouringRouteMap'
+import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
+import {
+  buildGoogleMapsRouteUrl,
+  buildGoogleMapsTwoPointUrl,
+  calcTravelMinutes,
+} from '@/lib/utils/googleMaps'
 
 function TouringPlanDetailPage() {
   const params = useParams()
@@ -130,8 +137,99 @@ function TouringPlanDetailPage() {
     )
   }
 
+  // SPOT/BREAKのみに絞った経由地一覧
+  const middleSpots = (spots ?? []).filter(
+    (spot) => spot.type === 'SPOT' || spot.type === 'BREAK'
+  )
+
+  // 地図表示用の地点一覧
+  const mapPoints: MapPoint[] = []
+
+  if (
+    plan.startLocation?.latitude != null &&
+    plan.startLocation.longitude != null
+  ) {
+    mapPoints.push({
+      lat: plan.startLocation.latitude,
+      lng: plan.startLocation.longitude,
+      label: plan.startLocation.name ?? '出発地',
+      type: 'start',
+    })
+  }
+
+  middleSpots
+    .filter((spot) => spot.latitude != null && spot.longitude != null)
+    .forEach((spot, i) => {
+      mapPoints.push({
+        lat: spot.latitude!,
+        lng: spot.longitude!,
+        label:
+          spot.name ??
+          (spot.type === 'BREAK' ? `休憩 ${i + 1}` : `スポット ${i + 1}`),
+        type: spot.type === 'BREAK' ? 'break' : 'spot',
+      })
+    })
+
+  if (
+    plan.destinationLocation?.latitude != null &&
+    plan.destinationLocation.longitude != null
+  ) {
+    mapPoints.push({
+      lat: plan.destinationLocation.latitude,
+      lng: plan.destinationLocation.longitude,
+      label: plan.destinationLocation.name ?? '目的地',
+      type: 'end',
+    })
+  }
+
+  const hasMap = mapPoints.length > 0
+  const googleMapsUrl = buildGoogleMapsRouteUrl(mapPoints)
+
+  // 緯度経度の両方が設定されているか判定する型ガード
+  const hasLatLng = (
+    loc:
+      | { latitude: number | null; longitude: number | null }
+      | null
+      | undefined
+  ): loc is { latitude: number; longitude: number } =>
+    loc != null && loc.latitude != null && loc.longitude != null
+
+  /**
+   * 2地点間のGoogleマップ経路リンクと移動時間を算出する。
+   *
+   * @remarks
+   * いずれかの地点に緯度経度が無い場合は `null` を返す。
+   */
+  const buildTravelLink = (
+    from:
+      | { latitude: number | null; longitude: number | null }
+      | null
+      | undefined,
+    to:
+      | { latitude: number | null; longitude: number | null }
+      | null
+      | undefined,
+    departAt: string | null | undefined,
+    arriveAt: string | null | undefined
+  ): { href: string; minutes: number | null } | null => {
+    if (!hasLatLng(from) || !hasLatLng(to)) return null
+    return {
+      href: buildGoogleMapsTwoPointUrl(
+        { lat: from.latitude, lng: from.longitude },
+        { lat: to.latitude, lng: to.longitude }
+      ),
+      minutes: calcTravelMinutes(departAt, arriveAt),
+    }
+  }
+
   // RouteTimelineItem に変換
   const timelineItems: RouteTimelineItem[] = []
+
+  const firstMiddleSpot = middleSpots[0]
+  const startTravelTarget = firstMiddleSpot ?? plan.destinationLocation
+  const startTravelArriveAt =
+    firstMiddleSpot?.plannedArrivalAt ??
+    plan.destinationLocation?.plannedArrivalAt
 
   timelineItems.push({
     id: 'START',
@@ -144,29 +242,42 @@ function TouringPlanDetailPage() {
       label: '出発予定',
       value: plan.startLocation?.plannedDepartureAt ?? null,
     },
+    travelLink: buildTravelLink(
+      plan.startLocation,
+      startTravelTarget,
+      plan.startLocation?.plannedDepartureAt,
+      startTravelArriveAt
+    ),
     onEdit: () => setEditingLocationTarget('start'),
   })
 
-  if (spots) {
-    spots
-      .filter((spot) => spot.type === 'SPOT' || spot.type === 'BREAK')
-      .forEach((spot) => {
-        timelineItems.push({
-          id: spot.touringPlanSpotId,
-          type: spot.type,
-          name: spot.name,
-          memo: spot.memo,
-          latitude: spot.latitude,
-          longitude: spot.longitude,
-          primaryTime: { label: '到着予定', value: spot.plannedArrivalAt },
-          secondaryTime: {
-            label: '出発予定',
-            value: spot.plannedDepartureAt,
-          },
-          onEdit: () => setEditingSpotId(spot.touringPlanSpotId),
-        })
-      })
-  }
+  middleSpots.forEach((spot, index) => {
+    const nextSpot = middleSpots[index + 1]
+    const travelTarget = nextSpot ?? plan.destinationLocation
+    const travelArriveAt =
+      nextSpot?.plannedArrivalAt ?? plan.destinationLocation?.plannedArrivalAt
+
+    timelineItems.push({
+      id: spot.touringPlanSpotId,
+      type: spot.type,
+      name: spot.name,
+      memo: spot.memo,
+      latitude: spot.latitude,
+      longitude: spot.longitude,
+      primaryTime: { label: '到着予定', value: spot.plannedArrivalAt },
+      secondaryTime: {
+        label: '出発予定',
+        value: spot.plannedDepartureAt,
+      },
+      travelLink: buildTravelLink(
+        spot,
+        travelTarget,
+        spot.plannedDepartureAt,
+        travelArriveAt
+      ),
+      onEdit: () => setEditingSpotId(spot.touringPlanSpotId),
+    })
+  })
 
   timelineItems.push({
     id: 'DESTINATION',
@@ -182,9 +293,7 @@ function TouringPlanDetailPage() {
     onEdit: () => setEditingLocationTarget('destination'),
   })
 
-  const sortableIds = (spots ?? [])
-    .filter((spot) => spot.type === 'SPOT' || spot.type === 'BREAK')
-    .map((spot) => spot.touringPlanSpotId)
+  const sortableIds = middleSpots.map((spot) => spot.touringPlanSpotId)
 
   const editingSpot = spots?.find(
     (spot) => spot.touringPlanSpotId === editingSpotId
@@ -256,7 +365,9 @@ function TouringPlanDetailPage() {
 
   return (
     <>
-      <div className="w-full max-w-md flex flex-row items-start gap-3 mb-4">
+      <div
+        className={`w-full flex flex-row items-start gap-3 mb-4 ${hasMap ? 'max-w-5xl' : 'max-w-md'}`}
+      >
         <div className="shrink-0 pt-0.5">
           <Button
             onClick={() => router.push(`/app/my-bike/${bikeId}/touring-plans`)}
@@ -284,58 +395,145 @@ function TouringPlanDetailPage() {
         </div>
       </div>
 
-      <div className="w-full max-w-md space-y-4">
-        <div className={styles.card}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">ルート</h2>
-            <button
-              onClick={() => setAddModalType('SPOT')}
-              className={styles.editButton}
-              aria-label="経由地・休憩を追加"
-              title="経由地・休憩を追加"
-            >
-              ＋
-            </button>
+      {hasMap ? (
+        <div className="w-full max-w-5xl flex flex-col md:flex-row md:gap-6 md:items-start gap-4">
+          <div className="md:flex-1 min-w-0">
+            <div className={styles.mapStickyWrapper}>
+              <div className={styles.card}>
+                <div className={styles.mapWrapper}>
+                  <TouringRouteMap
+                    points={mapPoints}
+                    containerClassName={styles.mapContainerLarge}
+                  />
+                  {googleMapsUrl && (
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.googleMapsLink}
+                    >
+                      Googleマップで経路を表示
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
+          <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
+            <div className={styles.card}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold">ルート</h2>
+                <button
+                  onClick={() => setAddModalType('SPOT')}
+                  className={styles.editButton}
+                  aria-label="経由地・休憩を追加"
+                  title="経由地・休憩を追加"
+                >
+                  ＋
+                </button>
+              </div>
 
-          {spotsLoading ? (
-            <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-          ) : (
-            <RouteTimeline
-              items={timelineItems}
-              sortableIds={sortableIds}
-              onReorder={handleReorder}
-              onStartClick={() => setEditingLocationTarget('start')}
-              onDestinationClick={() => setEditingLocationTarget('destination')}
-            />
-          )}
-        </div>
-
-        <div className={styles.card}>
-          <h2 className="text-lg font-semibold mb-4">ツーリング実績</h2>
-          {touringIds.length === 0 ? (
-            <p className={styles.historyEmpty}>
-              このプランからのツーリング実績はまだありません
-            </p>
-          ) : touringsLoading ? (
-            <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-          ) : (
-            <div>
-              {tourings?.map((touring) => (
-                <HistorySummaryCard
-                  key={touring.touringId}
-                  touring={touring}
-                  onClick={(touringId) =>
-                    router.push(`/app/my-bike/${bikeId}/tourings/${touringId}`)
+              {spotsLoading ? (
+                <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
+              ) : (
+                <RouteTimeline
+                  items={timelineItems}
+                  sortableIds={sortableIds}
+                  onReorder={handleReorder}
+                  onStartClick={() => setEditingLocationTarget('start')}
+                  onDestinationClick={() =>
+                    setEditingLocationTarget('destination')
                   }
                 />
-              ))}
+              )}
             </div>
-          )}
-        </div>
 
-        <div className={styles.fixedFooterSpacer} />
-      </div>
+            <div className={styles.card}>
+              <h2 className="text-lg font-semibold mb-4">ツーリング実績</h2>
+              {touringIds.length === 0 ? (
+                <p className={styles.historyEmpty}>
+                  このプランからのツーリング実績はまだありません
+                </p>
+              ) : touringsLoading ? (
+                <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
+              ) : (
+                <div>
+                  {tourings?.map((touring) => (
+                    <HistorySummaryCard
+                      key={touring.touringId}
+                      touring={touring}
+                      onClick={(touringId) =>
+                        router.push(
+                          `/app/my-bike/${bikeId}/tourings/${touringId}`
+                        )
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.fixedFooterSpacer} />
+          </div>
+        </div>
+      ) : (
+        <div className="w-full max-w-md space-y-4">
+          <div className={styles.card}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">ルート</h2>
+              <button
+                onClick={() => setAddModalType('SPOT')}
+                className={styles.editButton}
+                aria-label="経由地・休憩を追加"
+                title="経由地・休憩を追加"
+              >
+                ＋
+              </button>
+            </div>
+
+            {spotsLoading ? (
+              <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
+            ) : (
+              <RouteTimeline
+                items={timelineItems}
+                sortableIds={sortableIds}
+                onReorder={handleReorder}
+                onStartClick={() => setEditingLocationTarget('start')}
+                onDestinationClick={() =>
+                  setEditingLocationTarget('destination')
+                }
+              />
+            )}
+          </div>
+
+          <div className={styles.card}>
+            <h2 className="text-lg font-semibold mb-4">ツーリング実績</h2>
+            {touringIds.length === 0 ? (
+              <p className={styles.historyEmpty}>
+                このプランからのツーリング実績はまだありません
+              </p>
+            ) : touringsLoading ? (
+              <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
+            ) : (
+              <div>
+                {tourings?.map((touring) => (
+                  <HistorySummaryCard
+                    key={touring.touringId}
+                    touring={touring}
+                    onClick={(touringId) =>
+                      router.push(
+                        `/app/my-bike/${bikeId}/tourings/${touringId}`
+                      )
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.fixedFooterSpacer} />
+        </div>
+      )}
 
       <div className={styles.fixedFooter}>
         <div className={styles.fixedFooterInner}>
