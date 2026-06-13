@@ -310,6 +310,76 @@ function TouringDetailPage() {
       ? { lat: touring.endLatitude, lng: touring.endLongitude }
       : null
 
+  // 出発地・スポット・終着地間の経路リンク一覧
+  const travelLinks = new Map<
+    string,
+    { href: string; minutes: number | null }
+  >()
+
+  if (
+    startLocation != null &&
+    localSpots[0]?.latitude != null &&
+    localSpots[0]?.longitude != null
+  ) {
+    travelLinks.set('start', {
+      href: buildGoogleMapsTwoPointUrl(startLocation, {
+        lat: localSpots[0]!.latitude!,
+        lng: localSpots[0]!.longitude!,
+      }),
+      minutes: calcTravelMinutes(touring?.startDate, localSpots[0]?.arrivedAt),
+    })
+  } else if (
+    localSpots.length === 0 &&
+    startLocation != null &&
+    showDestination &&
+    endLocation != null
+  ) {
+    travelLinks.set('start', {
+      href: buildGoogleMapsTwoPointUrl(startLocation, endLocation),
+      minutes: calcTravelMinutes(touring?.startDate, touring?.endDate),
+    })
+  }
+
+  localSpots.forEach((spot, index) => {
+    const nextSpot = localSpots[index + 1]
+    if (
+      nextSpot &&
+      spot.latitude != null &&
+      spot.longitude != null &&
+      nextSpot.latitude != null &&
+      nextSpot.longitude != null
+    ) {
+      travelLinks.set(spot.spotId, {
+        href: buildGoogleMapsTwoPointUrl(
+          { lat: spot.latitude, lng: spot.longitude },
+          { lat: nextSpot.latitude, lng: nextSpot.longitude }
+        ),
+        minutes: calcTravelMinutes(spot.departedAt, nextSpot.arrivedAt),
+      })
+    }
+  })
+
+  if (
+    showDestination &&
+    endLocation != null &&
+    localSpots.at(-1)?.latitude != null &&
+    localSpots.at(-1)?.longitude != null
+  ) {
+    travelLinks.set(localSpots.at(-1)!.spotId, {
+      href: buildGoogleMapsTwoPointUrl(
+        {
+          lat: localSpots.at(-1)!.latitude!,
+          lng: localSpots.at(-1)!.longitude!,
+        },
+        endLocation
+      ),
+      minutes: calcTravelMinutes(
+        localSpots.at(-1)?.departedAt,
+        touring?.endDate
+      ),
+    })
+  }
+
   // RouteTimeline 表示用のアイテム一覧
   const timelineItems: RouteTimelineItem[] = [
     {
@@ -318,6 +388,7 @@ function TouringDetailPage() {
       name: '出発地',
       latitude: touring?.startLatitude,
       longitude: touring?.startLongitude,
+      travelLink: travelLinks.get('start') ?? null,
       onEdit: () => setEditingLocationTarget('start'),
     },
     ...localSpots.map((spot): RouteTimelineItem => {
@@ -338,6 +409,7 @@ function TouringDetailPage() {
         primaryTime: { label: '予定', value: spot.plannedArrivalAt },
         secondaryTime: { label: '実績', value: spot.arrivedAt },
         isSkipped: spot.isSkipped,
+        travelLink: travelLinks.get(spot.spotId) ?? null,
         onEdit: () => setEditingSpot(spot),
       }
     }),
@@ -354,66 +426,6 @@ function TouringDetailPage() {
         ]
       : []),
   ]
-
-  // 出発地・スポット・終着地間の経路リンク一覧
-  const routeLinks: { key: string; href: string; minutes: number | null }[] = []
-
-  if (
-    startLocation != null &&
-    localSpots[0]?.latitude != null &&
-    localSpots[0]?.longitude != null
-  ) {
-    routeLinks.push({
-      key: 'start-to-first',
-      href: buildGoogleMapsTwoPointUrl(startLocation, {
-        lat: localSpots[0]!.latitude!,
-        lng: localSpots[0]!.longitude!,
-      }),
-      minutes: calcTravelMinutes(touring?.startDate, localSpots[0]?.arrivedAt),
-    })
-  }
-
-  localSpots.forEach((spot, index) => {
-    const nextSpot = localSpots[index + 1]
-    if (
-      nextSpot &&
-      spot.latitude != null &&
-      spot.longitude != null &&
-      nextSpot.latitude != null &&
-      nextSpot.longitude != null
-    ) {
-      routeLinks.push({
-        key: `${spot.spotId}-to-${nextSpot.spotId}`,
-        href: buildGoogleMapsTwoPointUrl(
-          { lat: spot.latitude, lng: spot.longitude },
-          { lat: nextSpot.latitude, lng: nextSpot.longitude }
-        ),
-        minutes: calcTravelMinutes(spot.departedAt, nextSpot.arrivedAt),
-      })
-    }
-  })
-
-  if (
-    showDestination &&
-    endLocation != null &&
-    localSpots.at(-1)?.latitude != null &&
-    localSpots.at(-1)?.longitude != null
-  ) {
-    routeLinks.push({
-      key: 'last-to-destination',
-      href: buildGoogleMapsTwoPointUrl(
-        {
-          lat: localSpots.at(-1)!.latitude!,
-          lng: localSpots.at(-1)!.longitude!,
-        },
-        endLocation
-      ),
-      minutes: calcTravelMinutes(
-        localSpots.at(-1)?.departedAt,
-        touring?.endDate
-      ),
-    })
-  }
 
   const spotsCard = (
     <div className={styles.card}>
@@ -465,23 +477,6 @@ function TouringDetailPage() {
           onReorder={handleReorder}
           emptyMessage="スポットはまだ記録されていません"
         />
-      )}
-
-      {routeLinks.length > 0 && (
-        <div className="mt-3 space-y-1">
-          {routeLinks.map((link) => (
-            <a
-              key={link.key}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.routeLink}
-            >
-              ↓ Googleマップで経路確認
-              {link.minutes !== null ? `（移動 ${link.minutes}分）` : ''}
-            </a>
-          ))}
-        </div>
       )}
     </div>
   )
