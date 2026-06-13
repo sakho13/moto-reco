@@ -1,5 +1,8 @@
 import type { MaintenanceLogItem } from '../domain/maintenanceLog'
-import type { TouringPlanSpotType } from '../domain/touringPlanSpot'
+import type {
+  TouringPlanRouteType,
+  TouringPlanSpotType,
+} from '../domain/touringPlanSpot'
 
 export type SuccessResponse<T> = {
   status: 'success'
@@ -320,6 +323,9 @@ export type ApiResponseTouringPlanLocation = {
   memo: string | null
   plannedArrivalAt: string | null
   plannedDepartureAt: string | null
+  stayMinutes: number | null
+  travelMinutesFromPrev: number | null
+  routeTypeFromPrev: TouringPlanRouteType | null
 }
 
 export type ApiResponseTouringPlanDetail = {
@@ -357,6 +363,9 @@ export type ApiResponseTouringPlanSpotDetail = {
   longitude: number | null
   plannedArrivalAt: string | null
   plannedDepartureAt: string | null
+  stayMinutes: number | null
+  travelMinutesFromPrev: number | null
+  routeTypeFromPrev: TouringPlanRouteType | null
   sortOrder: number
 }
 

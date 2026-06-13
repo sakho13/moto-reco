@@ -6,6 +6,8 @@ export const createTouringPlanSpotId = (id: string): TouringPlanSpotId =>
 
 export type TouringPlanSpotType = 'START' | 'SPOT' | 'BREAK' | 'DESTINATION'
 
+export type TouringPlanRouteType = 'GENERAL' | 'HIGHWAY' | 'MIXED'
+
 export type TouringPlanSpot = {
   touringPlanSpotId: TouringPlanSpotId
   touringPlanId: TouringPlanId
@@ -16,5 +18,8 @@ export type TouringPlanSpot = {
   longitude: number | null
   plannedArrivalAt: Date | null
   plannedDepartureAt: Date | null
+  stayMinutes: number | null
+  travelMinutesFromPrev: number | null
+  routeTypeFromPrev: TouringPlanRouteType | null
   sortOrder: number
 }
