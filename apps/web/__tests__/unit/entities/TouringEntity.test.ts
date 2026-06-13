@@ -83,9 +83,9 @@ describe('TouringEntity', () => {
   })
 
   test('開始時の総走行距離が負の場合はエラーになる', () => {
-    expect(
-      () => new TouringEntity(baseProps({ startMileage: -1 }))
-    ).toThrow('開始時の総走行距離は0以上である必要があります')
+    expect(() => new TouringEntity(baseProps({ startMileage: -1 }))).toThrow(
+      '開始時の総走行距離は0以上である必要があります'
+    )
   })
 
   test('終了時の総走行距離が負の場合はエラーになる', () => {
@@ -97,18 +97,14 @@ describe('TouringEntity', () => {
   test('開始時の総走行距離が終了時の総走行距離より大きい場合はエラーになる', () => {
     expect(
       () =>
-        new TouringEntity(
-          baseProps({ startMileage: 1500, endMileage: 1000 })
-        )
-    ).toThrow(
-      '開始時の総走行距離は終了時の総走行距離以下である必要があります'
-    )
+        new TouringEntity(baseProps({ startMileage: 1500, endMileage: 1000 }))
+    ).toThrow('開始時の総走行距離は終了時の総走行距離以下である必要があります')
   })
 
   test('開始地点の緯度が範囲外の場合はエラーになる', () => {
-    expect(
-      () => new TouringEntity(baseProps({ startLatitude: 90.1 }))
-    ).toThrow('開始地点の緯度は-90以上90以下である必要があります')
+    expect(() => new TouringEntity(baseProps({ startLatitude: 90.1 }))).toThrow(
+      '開始地点の緯度は-90以上90以下である必要があります'
+    )
   })
 
   test('開始地点の経度が範囲外の場合はエラーになる', () => {
@@ -118,9 +114,9 @@ describe('TouringEntity', () => {
   })
 
   test('終了地点の緯度が範囲外の場合はエラーになる', () => {
-    expect(
-      () => new TouringEntity(baseProps({ endLatitude: -90.1 }))
-    ).toThrow('終了地点の緯度は-90以上90以下である必要があります')
+    expect(() => new TouringEntity(baseProps({ endLatitude: -90.1 }))).toThrow(
+      '終了地点の緯度は-90以上90以下である必要があります'
+    )
   })
 
   test('終了地点の経度が範囲外の場合はエラーになる', () => {

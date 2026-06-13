@@ -162,9 +162,9 @@ describe('TouringPlanSpotService', () => {
         sortOrder: 9999,
       })
 
-      vi.mocked(touringPlanSpotRepository.findPlanSpotsByPlanId).mockResolvedValue(
-        [waypoint2, start, destination, waypoint1]
-      )
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([waypoint2, start, destination, waypoint1])
 
       const result = await service.getPlanSpots(planId, myUserBikeId, userId)
 
@@ -240,14 +240,14 @@ describe('TouringPlanSpotService', () => {
         async (s) => s
       )
       const newPlannedDepartureAt = new Date('2026-07-02T12:00:00.000Z')
-      vi.mocked(touringPlanSpotRepository.findPlanSpotsByPlanId).mockResolvedValue(
-        [
-          new TouringPlanSpotEntity({
-            ...spot.toJson(),
-            plannedDepartureAt: newPlannedDepartureAt,
-          }),
-        ]
-      )
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([
+        new TouringPlanSpotEntity({
+          ...spot.toJson(),
+          plannedDepartureAt: newPlannedDepartureAt,
+        }),
+      ])
 
       await service.updatePlanSpot({
         spotId: spot.id,
@@ -280,9 +280,9 @@ describe('TouringPlanSpotService', () => {
       vi.mocked(touringPlanSpotRepository.findPlanSpotById).mockResolvedValue(
         spot
       )
-      vi.mocked(touringPlanSpotRepository.findPlanSpotsByPlanId).mockResolvedValue(
-        []
-      )
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([])
 
       await service.deletePlanSpot(spot.id, planId, myUserBikeId, userId)
 
@@ -300,9 +300,9 @@ describe('TouringPlanSpotService', () => {
         latitude: 35.6812,
         longitude: 139.7671,
       })
-      vi.mocked(touringPlanSpotRepository.upsertSingletonSpot).mockResolvedValue(
-        startSpot
-      )
+      vi.mocked(
+        touringPlanSpotRepository.upsertSingletonSpot
+      ).mockResolvedValue(startSpot)
 
       const result = await service.setStartSpot(planId, myUserBikeId, userId, {
         latitude: 35.6812,
@@ -310,7 +310,9 @@ describe('TouringPlanSpotService', () => {
       })
 
       expect(result).toBe(startSpot)
-      expect(touringPlanSpotRepository.upsertSingletonSpot).toHaveBeenCalledWith(
+      expect(
+        touringPlanSpotRepository.upsertSingletonSpot
+      ).toHaveBeenCalledWith(
         planId,
         'START',
         expect.objectContaining({ latitude: 35.6812, longitude: 139.7671 })
@@ -318,9 +320,9 @@ describe('TouringPlanSpotService', () => {
     })
 
     test('nullを指定すると出発地を解除できる', async () => {
-      vi.mocked(touringPlanSpotRepository.upsertSingletonSpot).mockResolvedValue(
-        null
-      )
+      vi.mocked(
+        touringPlanSpotRepository.upsertSingletonSpot
+      ).mockResolvedValue(null)
 
       const result = await service.setStartSpot(
         planId,
@@ -330,11 +332,9 @@ describe('TouringPlanSpotService', () => {
       )
 
       expect(result).toBeNull()
-      expect(touringPlanSpotRepository.upsertSingletonSpot).toHaveBeenCalledWith(
-        planId,
-        'START',
-        null
-      )
+      expect(
+        touringPlanSpotRepository.upsertSingletonSpot
+      ).toHaveBeenCalledWith(planId, 'START', null)
     })
   })
 
@@ -347,12 +347,12 @@ describe('TouringPlanSpotService', () => {
         longitude: 139.1069,
         plannedArrivalAt,
       })
-      vi.mocked(touringPlanSpotRepository.upsertSingletonSpot).mockResolvedValue(
-        destinationSpot
-      )
-      vi.mocked(touringPlanSpotRepository.findPlanSpotsByPlanId).mockResolvedValue(
-        [destinationSpot]
-      )
+      vi.mocked(
+        touringPlanSpotRepository.upsertSingletonSpot
+      ).mockResolvedValue(destinationSpot)
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([destinationSpot])
 
       await service.setDestinationSpot(planId, myUserBikeId, userId, {
         latitude: 35.2323,

@@ -105,8 +105,7 @@ export class TouringPlanService {
           latitude: params.startLocation.latitude,
           longitude: params.startLocation.longitude,
           plannedArrivalAt: null,
-          plannedDepartureAt:
-            params.startLocation.plannedDepartureAt ?? null,
+          plannedDepartureAt: params.startLocation.plannedDepartureAt ?? null,
           sortOrder: 0,
         })
         startSpot = await this.touringPlanSpotRepository.createPlanSpot(spot)
@@ -122,8 +121,7 @@ export class TouringPlanService {
           memo: params.destinationLocation.memo ?? null,
           latitude: params.destinationLocation.latitude,
           longitude: params.destinationLocation.longitude,
-          plannedArrivalAt:
-            params.destinationLocation.plannedArrivalAt ?? null,
+          plannedArrivalAt: params.destinationLocation.plannedArrivalAt ?? null,
           plannedDepartureAt: null,
           sortOrder: 9999,
         })
@@ -210,10 +208,7 @@ export class TouringPlanService {
 
     const [startSpot, destinationSpot, tourings] = await Promise.all([
       this.touringPlanSpotRepository.findPlanSpotByType(planId, 'START'),
-      this.touringPlanSpotRepository.findPlanSpotByType(
-        planId,
-        'DESTINATION'
-      ),
+      this.touringPlanSpotRepository.findPlanSpotByType(planId, 'DESTINATION'),
       this.touringRepository.findTouringsByPlanId(planId),
     ])
 
@@ -233,7 +228,9 @@ export class TouringPlanService {
    * 位置情報の更新は専用エンドポイント
    * (`setStartSpot`/`setDestinationSpot`)経由で行う。
    */
-  public async updatePlan(params: UpdatePlanParams): Promise<TouringPlanEntity> {
+  public async updatePlan(
+    params: UpdatePlanParams
+  ): Promise<TouringPlanEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
       params.userId
@@ -332,9 +329,8 @@ export class TouringPlanService {
     planId: TouringPlanId,
     departAt: Date
   ): Promise<Date> {
-    const spots = await this.touringPlanSpotRepository.findPlanSpotsByPlanId(
-      planId
-    )
+    const spots =
+      await this.touringPlanSpotRepository.findPlanSpotsByPlanId(planId)
 
     const destinationSpot = spots.find((s) => s.type === 'DESTINATION')
     if (destinationSpot?.plannedArrivalAt) {

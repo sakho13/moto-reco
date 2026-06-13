@@ -232,9 +232,9 @@ describe('TouringService', () => {
     })
 
     test('startMileage未指定の場合は現在の総走行距離が使用される', async () => {
-      vi.mocked(myUserBikeRepository.findMyUserBikeTotalMileage).mockResolvedValue(
-        12345
-      )
+      vi.mocked(
+        myUserBikeRepository.findMyUserBikeTotalMileage
+      ).mockResolvedValue(12345)
 
       const result = await service.handleTouringAction({
         action: 'start',
@@ -255,9 +255,9 @@ describe('TouringService', () => {
         returnAt: new Date('2026-07-01T18:00:00.000Z'),
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
-      vi.mocked(touringPlanSpotRepository.findPlanSpotsByPlanId).mockResolvedValue(
-        []
-      )
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([])
 
       const result = await service.handleTouringAction({
         action: 'start',
@@ -280,9 +280,9 @@ describe('TouringService', () => {
         returnAt: new Date('2026-07-01T18:00:00.000Z'),
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
-      vi.mocked(touringPlanSpotRepository.findPlanSpotsByPlanId).mockResolvedValue(
-        []
-      )
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([])
 
       const result = await service.handleTouringAction({
         action: 'start',
@@ -319,9 +319,9 @@ describe('TouringService', () => {
         sortOrder: 9999,
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
-      vi.mocked(touringPlanSpotRepository.findPlanSpotsByPlanId).mockResolvedValue(
-        [startSpot, destinationSpot]
-      )
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([startSpot, destinationSpot])
 
       const result = await service.handleTouringAction({
         action: 'start',
@@ -358,9 +358,9 @@ describe('TouringService', () => {
         sortOrder: 1,
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
-      vi.mocked(touringPlanSpotRepository.findPlanSpotsByPlanId).mockResolvedValue(
-        [waypoint2, waypoint1]
-      )
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([waypoint2, waypoint1])
 
       await service.handleTouringAction({
         action: 'start',
@@ -457,9 +457,9 @@ describe('TouringService', () => {
     test('endMileage未指定の場合は現在の総走行距離が使用される', async () => {
       const existing = buildTouring()
       vi.mocked(touringRepository.findTouringById).mockResolvedValue(existing)
-      vi.mocked(myUserBikeRepository.findMyUserBikeTotalMileage).mockResolvedValue(
-        2000
-      )
+      vi.mocked(
+        myUserBikeRepository.findMyUserBikeTotalMileage
+      ).mockResolvedValue(2000)
 
       const result = await service.handleTouringAction({
         action: 'end',

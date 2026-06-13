@@ -86,9 +86,7 @@ export class TouringPlanSpotService {
         sortOrder: waypointCount,
       })
 
-      const created = await this.touringPlanSpotRepository.createPlanSpot(
-        spot
-      )
+      const created = await this.touringPlanSpotRepository.createPlanSpot(spot)
       await this._syncPlanReturnAt(params.planId, plan)
       return created
     } catch (error) {
@@ -109,9 +107,8 @@ export class TouringPlanSpotService {
   ): Promise<TouringPlanSpotEntity[]> {
     await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
-    const spots = await this.touringPlanSpotRepository.findPlanSpotsByPlanId(
-      planId
-    )
+    const spots =
+      await this.touringPlanSpotRepository.findPlanSpotsByPlanId(planId)
 
     const startSpot = spots.find((s) => s.type === 'START')
     const destinationSpot = spots.find((s) => s.type === 'DESTINATION')
@@ -180,9 +177,8 @@ export class TouringPlanSpotService {
         sortOrder: existingSpot.sortOrder,
       })
 
-      const updated = await this.touringPlanSpotRepository.updatePlanSpot(
-        updatedSpot
-      )
+      const updated =
+        await this.touringPlanSpotRepository.updatePlanSpot(updatedSpot)
       await this._syncPlanReturnAt(params.planId, plan)
       return updated
     } catch (error) {
@@ -354,9 +350,8 @@ export class TouringPlanSpotService {
     planId: TouringPlanId,
     plan: TouringPlanEntity
   ): Promise<void> {
-    const spots = await this.touringPlanSpotRepository.findPlanSpotsByPlanId(
-      planId
-    )
+    const spots =
+      await this.touringPlanSpotRepository.findPlanSpotsByPlanId(planId)
 
     const destinationSpot = spots.find((s) => s.type === 'DESTINATION')
     const waypointTimes = spots

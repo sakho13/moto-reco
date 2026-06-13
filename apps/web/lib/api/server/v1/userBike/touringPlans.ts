@@ -242,10 +242,7 @@ userBikeTouringPlans.patch(
 
       const [startSpot, destinationSpot, tourings] = await Promise.all([
         touringPlanSpotRepo.findPlanSpotByType(updatedPlan.id, 'START'),
-        touringPlanSpotRepo.findPlanSpotByType(
-          updatedPlan.id,
-          'DESTINATION'
-        ),
+        touringPlanSpotRepo.findPlanSpotByType(updatedPlan.id, 'DESTINATION'),
         touringRepo.findTouringsByPlanId(updatedPlan.id),
       ])
 

@@ -229,9 +229,7 @@ export class TouringService {
           }
 
           const planSpots =
-            await this.touringPlanSpotRepository.findPlanSpotsByPlanId(
-              plan.id
-            )
+            await this.touringPlanSpotRepository.findPlanSpotsByPlanId(plan.id)
           const startSpot = planSpots.find((s) => s.type === 'START')
           const destinationSpot = planSpots.find(
             (s) => s.type === 'DESTINATION'
@@ -250,8 +248,7 @@ export class TouringService {
             endDate: startDate,
             startMileage: startMileage ?? null,
             endMileage: null,
-            startLatitude:
-              params.startLatitude ?? startSpot?.latitude ?? null,
+            startLatitude: params.startLatitude ?? startSpot?.latitude ?? null,
             startLongitude:
               params.startLongitude ?? startSpot?.longitude ?? null,
             endLatitude: destinationSpot?.latitude ?? null,
