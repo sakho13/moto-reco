@@ -53,6 +53,9 @@ const buildPlanSpot = (
     longitude: number | null
     plannedArrivalAt: Date | null
     plannedDepartureAt: Date | null
+    stayMinutes: number | null
+    travelMinutesFromPrev: number | null
+    routeTypeFromPrev: 'GENERAL' | 'HIGHWAY' | 'MIXED' | null
     sortOrder: number
   }> = {}
 ) => {
@@ -66,6 +69,9 @@ const buildPlanSpot = (
     longitude: null,
     plannedArrivalAt: null,
     plannedDepartureAt: null,
+    stayMinutes: null,
+    travelMinutesFromPrev: null,
+    routeTypeFromPrev: null,
     sortOrder: 0,
     ...overrides,
   })

@@ -42,6 +42,9 @@ const buildPlanSpot = (
     longitude: number | null
     plannedArrivalAt: Date | null
     plannedDepartureAt: Date | null
+    stayMinutes: number | null
+    travelMinutesFromPrev: number | null
+    routeTypeFromPrev: 'GENERAL' | 'HIGHWAY' | 'MIXED' | null
     sortOrder: number
   }> = {}
 ) => {
@@ -55,6 +58,9 @@ const buildPlanSpot = (
     longitude: null,
     plannedArrivalAt: null,
     plannedDepartureAt: null,
+    stayMinutes: null,
+    travelMinutesFromPrev: null,
+    routeTypeFromPrev: null,
     sortOrder: 0,
     ...overrides,
   })
@@ -154,34 +160,48 @@ describe('TouringPlanService', () => {
       expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T08:00:00.000Z'))
     })
 
-    test('目的地の到着予定が指定された場合returnAtに反映される', async () => {
-      const createdPlan = buildPlan({
-        returnAt: new Date('2026-07-01T18:00:00.000Z'),
-      })
-      vi.mocked(touringPlanRepository.createPlan).mockResolvedValue(createdPlan)
-      vi.mocked(touringPlanSpotRepository.createPlanSpot).mockImplementation(
-        async (spot) => spot
+    test('目的地のtravelMinutesFromPrevが指定された場合returnAtがチェイン計算で反映される', async () => {
+      vi.mocked(touringPlanRepository.createPlan).mockImplementation(
+        async (p) => p
       )
+      vi.mocked(touringPlanRepository.updatePlan).mockImplementation(
+        async (p) => p
+      )
+
+      // createPlanSpotで作成されたスポットを記録し、
+      // recomputeTouringPlanSpotTimes内のfindPlanSpotsByPlanIdから
+      // 作成済みのstartSpot/destinationSpotを返せるようにする
+      const createdSpots: TouringPlanSpotEntity[] = []
+      vi.mocked(touringPlanSpotRepository.createPlanSpot).mockImplementation(
+        async (spot) => {
+          createdSpots.push(spot)
+          return spot
+        }
+      )
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockImplementation(async () => createdSpots)
+
+      const departAt = new Date('2026-07-01T08:00:00.000Z')
 
       const result = await service.registerPlan({
         myUserBikeId,
         userId,
         title: '日帰り箱根ツーリング',
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
+        departAt,
         startLocation: { latitude: 35.6812, longitude: 139.7671 },
         destinationLocation: {
           latitude: 35.2323,
           longitude: 139.1069,
-          plannedArrivalAt: new Date('2026-07-01T18:00:00.000Z'),
+          travelMinutesFromPrev: 600,
         },
       })
 
       expect(result.startSpot?.type).toBe('START')
       expect(result.destinationSpot?.type).toBe('DESTINATION')
 
-      const passedPlan = vi.mocked(touringPlanRepository.createPlan).mock
-        .calls[0]?.[0]
-      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T18:00:00.000Z'))
+      // departAt(08:00) + travelMinutesFromPrev(600分=10時間) = 18:00がreturnAtに反映される
+      expect(result.plan.returnAt).toEqual(new Date('2026-07-01T18:00:00.000Z'))
     })
   })
 
@@ -297,51 +317,67 @@ describe('TouringPlanService', () => {
       expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T18:00:00.000Z'))
     })
 
-    test('departAt変更時、目的地の到着予定があればreturnAtはそれに更新される', async () => {
+    test('departAt変更時、目的地のtravelMinutesFromPrevがあればチェイン計算でreturnAtが更新される', async () => {
       const plan = buildPlan({
         departAt: new Date('2026-07-01T08:00:00.000Z'),
         returnAt: new Date('2026-07-01T18:00:00.000Z'),
       })
+      const startSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
+        type: 'START',
+        sortOrder: 0,
+      })
       const destinationSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('plan-spot-destination'),
         type: 'DESTINATION',
-        plannedArrivalAt: new Date('2026-07-02T20:00:00.000Z'),
+        sortOrder: 9999,
+        travelMinutesFromPrev: 660, // 11時間
       })
 
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
       vi.mocked(
         touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).mockResolvedValue([destinationSpot])
+      ).mockResolvedValue([startSpot, destinationSpot])
       vi.mocked(touringPlanRepository.updatePlan).mockImplementation(
         async (p) => p
       )
 
+      const newDepartAt = new Date('2026-07-02T09:00:00.000Z')
       await service.updatePlan({
         planId: plan.id,
         myUserBikeId,
         userId,
-        departAt: new Date('2026-07-02T09:00:00.000Z'),
+        departAt: newDepartAt,
       })
 
-      const passedPlan = vi.mocked(touringPlanRepository.updatePlan).mock
-        .calls[0]?.[0]
-      expect(passedPlan?.departAt).toEqual(new Date('2026-07-02T09:00:00.000Z'))
+      const updateCalls = vi.mocked(touringPlanRepository.updatePlan).mock.calls
+      const passedPlan = updateCalls[updateCalls.length - 1]?.[0]
+      expect(passedPlan?.departAt).toEqual(newDepartAt)
+      // newDepartAt(09:00) + travelMinutesFromPrev(660分=11時間) = 20:00
       expect(passedPlan?.returnAt).toEqual(new Date('2026-07-02T20:00:00.000Z'))
     })
 
-    test('departAt変更時、目的地未設定で経由地の出発予定がある場合はmaxが採用される', async () => {
+    test('departAt変更時、目的地未設定で経由地の滞在時間がある場合はチェイン計算結果が採用される', async () => {
       const plan = buildPlan({
         departAt: new Date('2026-07-01T08:00:00.000Z'),
         returnAt: new Date('2026-07-01T18:00:00.000Z'),
       })
+      const startSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
+        type: 'START',
+        sortOrder: 0,
+      })
       const waypoint = buildPlanSpot({
         type: 'SPOT',
-        plannedDepartureAt: new Date('2026-07-02T12:00:00.000Z'),
+        sortOrder: 0,
+        stayMinutes: 60,
+        travelMinutesFromPrev: 0,
       })
 
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
       vi.mocked(
         touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).mockResolvedValue([waypoint])
+      ).mockResolvedValue([startSpot, waypoint])
       vi.mocked(touringPlanRepository.updatePlan).mockImplementation(
         async (p) => p
       )
@@ -354,10 +390,10 @@ describe('TouringPlanService', () => {
         departAt: newDepartAt,
       })
 
-      const passedPlan = vi.mocked(touringPlanRepository.updatePlan).mock
-        .calls[0]?.[0]
-      // departAt(15:00) > waypoint.plannedDepartureAt(12:00) のため departAt が採用される
-      expect(passedPlan?.returnAt).toEqual(newDepartAt)
+      const updateCalls = vi.mocked(touringPlanRepository.updatePlan).mock.calls
+      const passedPlan = updateCalls[updateCalls.length - 1]?.[0]
+      // newDepartAt(15:00) + stayMinutes(60分) = 16:00 > newDepartAt のため16:00が採用される
+      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-02T16:00:00.000Z'))
     })
 
     test('departAt変更時、目的地・経由地が未設定の場合はreturnAt=departAtになる', async () => {

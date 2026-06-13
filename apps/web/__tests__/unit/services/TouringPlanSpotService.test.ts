@@ -40,6 +40,9 @@ const buildPlanSpot = (
     longitude: number | null
     plannedArrivalAt: Date | null
     plannedDepartureAt: Date | null
+    stayMinutes: number | null
+    travelMinutesFromPrev: number | null
+    routeTypeFromPrev: 'GENERAL' | 'HIGHWAY' | 'MIXED' | null
     sortOrder: number
   }> = {}
 ) => {
@@ -53,6 +56,9 @@ const buildPlanSpot = (
     longitude: null,
     plannedArrivalAt: null,
     plannedDepartureAt: null,
+    stayMinutes: null,
+    travelMinutesFromPrev: null,
+    routeTypeFromPrev: null,
     sortOrder: 0,
     ...overrides,
   })
@@ -231,35 +237,69 @@ describe('TouringPlanSpotService', () => {
       expect(result.name).toBe('新名称')
     })
 
-    test('plannedDepartureAt更新後はプランのreturnAtが再計算される', async () => {
-      const spot = buildPlanSpot({ type: 'SPOT' })
+    test('travelMinutesFromPrev更新後は各スポットの予定時刻とプランのreturnAtが再計算される', async () => {
+      const startSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
+        type: 'START',
+        sortOrder: 0,
+      })
+      const spot = buildPlanSpot({
+        type: 'SPOT',
+        sortOrder: 0,
+        stayMinutes: 30,
+        travelMinutesFromPrev: null,
+      })
+      const destinationSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('plan-spot-destination'),
+        type: 'DESTINATION',
+        sortOrder: 9999,
+        travelMinutesFromPrev: 60,
+      })
+
       vi.mocked(touringPlanSpotRepository.findPlanSpotById).mockResolvedValue(
         spot
       )
       vi.mocked(touringPlanSpotRepository.updatePlanSpot).mockImplementation(
         async (s) => s
       )
-      const newPlannedDepartureAt = new Date('2026-07-02T12:00:00.000Z')
+
+      // 更新後（travelMinutesFromPrev: 90）のスポット一覧をrecompute用に返す
+      const updatedSpot = new TouringPlanSpotEntity({
+        ...spot.toJson(),
+        travelMinutesFromPrev: 90,
+      })
       vi.mocked(
         touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).mockResolvedValue([
-        new TouringPlanSpotEntity({
-          ...spot.toJson(),
-          plannedDepartureAt: newPlannedDepartureAt,
-        }),
-      ])
+      ).mockResolvedValue([startSpot, updatedSpot, destinationSpot])
 
-      await service.updatePlanSpot({
+      const result = await service.updatePlanSpot({
         spotId: spot.id,
         planId,
         myUserBikeId,
         userId,
-        plannedDepartureAt: newPlannedDepartureAt,
+        travelMinutesFromPrev: 90,
       })
 
+      expect(result.travelMinutesFromPrev).toBe(90)
+
+      // recompute時にspotの予定到着・出発時刻が再計算値で更新される
+      // departAt(08:00) + travelMinutesFromPrev(90分) = 09:30着、stayMinutes(30分)で10:00発
+      const updateCalls = vi.mocked(touringPlanSpotRepository.updatePlanSpot)
+        .mock.calls
+      const recomputedSpotCall = updateCalls.find(
+        ([s]) => s.id === spot.id && s.plannedArrivalAt !== null
+      )
+      expect(recomputedSpotCall?.[0].plannedArrivalAt).toEqual(
+        new Date('2026-07-01T09:30:00.000Z')
+      )
+      expect(recomputedSpotCall?.[0].plannedDepartureAt).toEqual(
+        new Date('2026-07-01T10:00:00.000Z')
+      )
+
+      // DESTINATIONの到着(10:00 + 60分 = 11:00)がreturnAtに反映される
       const passedPlan = vi.mocked(touringPlanRepository.updatePlan).mock
         .calls[0]?.[0]
-      expect(passedPlan?.returnAt).toEqual(newPlannedDepartureAt)
+      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T11:00:00.000Z'))
     })
   })
 
@@ -315,7 +355,12 @@ describe('TouringPlanSpotService', () => {
       ).toHaveBeenCalledWith(
         planId,
         'START',
-        expect.objectContaining({ latitude: 35.6812, longitude: 139.7671 })
+        expect.objectContaining({
+          latitude: 35.6812,
+          longitude: 139.7671,
+          travelMinutesFromPrev: null,
+          routeTypeFromPrev: null,
+        })
       )
     })
 
@@ -339,30 +384,51 @@ describe('TouringPlanSpotService', () => {
   })
 
   describe('setDestinationSpot', () => {
-    test('目的地を新規設定するとプランのreturnAtが到着予定に更新される', async () => {
-      const plannedArrivalAt = new Date('2026-07-01T20:00:00.000Z')
+    test('目的地を新規設定するとtravelMinutesFromPrevに基づきプランのreturnAtが再計算される', async () => {
+      const startSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
+        type: 'START',
+        sortOrder: 0,
+      })
+      const travelMinutesFromPrev = 120
       const destinationSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('plan-spot-destination'),
         type: 'DESTINATION',
+        sortOrder: 9999,
         latitude: 35.2323,
         longitude: 139.1069,
-        plannedArrivalAt,
+        travelMinutesFromPrev,
       })
       vi.mocked(
         touringPlanSpotRepository.upsertSingletonSpot
       ).mockResolvedValue(destinationSpot)
       vi.mocked(
         touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).mockResolvedValue([destinationSpot])
+      ).mockResolvedValue([startSpot, destinationSpot])
 
       await service.setDestinationSpot(planId, myUserBikeId, userId, {
         latitude: 35.2323,
         longitude: 139.1069,
-        plannedArrivalAt,
+        travelMinutesFromPrev,
       })
 
+      expect(
+        touringPlanSpotRepository.upsertSingletonSpot
+      ).toHaveBeenCalledWith(
+        planId,
+        'DESTINATION',
+        expect.objectContaining({
+          latitude: 35.2323,
+          longitude: 139.1069,
+          travelMinutesFromPrev,
+          routeTypeFromPrev: null,
+        })
+      )
+
+      // departAt(08:00) + travelMinutesFromPrev(120分) = 10:00がreturnAtに反映される
       const passedPlan = vi.mocked(touringPlanRepository.updatePlan).mock
         .calls[0]?.[0]
-      expect(passedPlan?.returnAt).toEqual(plannedArrivalAt)
+      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T10:00:00.000Z'))
     })
   })
 })
