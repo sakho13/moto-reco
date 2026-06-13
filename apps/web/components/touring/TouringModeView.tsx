@@ -77,14 +77,14 @@ export const TouringModeView = ({
   )
 
   const currentBreak =
-    spots?.find((s) => s.type === 'BREAK' && s.endAt === null) ?? null
+    spots?.find((s) => s.type === 'BREAK' && s.departedAt === null) ?? null
 
-  // SPOT タイプのスポットを sortOrder 順に並べ、最初の未到着（visitedAt === null）を次の目的地とする
+  // SPOT タイプのスポットを sortOrder 順に並べ、最初の未到着（arrivedAt === null）を次の目的地とする
   const nextDestinationSpot =
     spots
       ?.filter((s) => s.type === 'SPOT')
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .find((s) => s.visitedAt === null) ?? null
+      .find((s) => s.arrivedAt === null) ?? null
 
   const hasReachedNextDestination =
     nextDestinationSpot === null &&
@@ -187,7 +187,7 @@ export const TouringModeView = ({
     try {
       await apiPost(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots` as const,
-        { type: 'BREAK', visitedAt: new Date() }
+        { type: 'BREAK', arrivedAt: new Date() }
       )
       await mutateSpots()
       toast.success('休憩を開始しました')
@@ -206,7 +206,7 @@ export const TouringModeView = ({
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${currentBreak.spotId}` as const,
-        { endAt: new Date() }
+        { departedAt: new Date() }
       )
       await mutateSpots()
       toast.success('休憩を終了しました')
@@ -224,7 +224,7 @@ export const TouringModeView = ({
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${nextDestinationSpot.spotId}` as const,
-        { visitedAt: new Date() }
+        { arrivedAt: new Date() }
       )
       await mutateSpots()
       toast.success('スポットへの到着を記録しました')
@@ -243,7 +243,7 @@ export const TouringModeView = ({
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${nextDestinationSpot.spotId}` as const,
-        { visitedAt: new Date(), isSkipped: true }
+        { isSkipped: true }
       )
       await mutateSpots()
       toast.success('スポットをスキップしました')
@@ -337,7 +337,7 @@ export const TouringModeView = ({
                 endLatitude={nextDestinationSpot.latitude}
                 endLongitude={nextDestinationSpot.longitude!}
                 spotName={nextDestinationSpot.name}
-                plannedEndDate={nextDestinationSpot.plannedAt}
+                plannedEndDate={nextDestinationSpot.plannedArrivalAt}
                 hasArrived={false}
                 onArrival={handleArrivalRecord}
                 onSkip={handleSkipSpot}
@@ -379,7 +379,7 @@ export const TouringModeView = ({
 
           {currentBreak && (
             <p className={styles.breakStatus}>
-              休憩中 {formatBreakTime(currentBreak.visitedAt)}〜
+              休憩中 {formatBreakTime(currentBreak.arrivedAt)}〜
             </p>
           )}
 
