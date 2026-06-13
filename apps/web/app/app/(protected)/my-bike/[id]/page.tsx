@@ -12,7 +12,6 @@ import { Button } from '@repo/ui/button'
 import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
-import { RouteIcon } from '@/components/icons/RouteIcon'
 import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
@@ -155,16 +154,9 @@ function BikeDetailPage() {
 
         <NavigationCard
           href={`/app/my-bike/${id}/tourings`}
-          title="ツーリング履歴"
-          description="ツーリング履歴を確認・管理できます"
+          title="ツーリング"
+          description="ツーリング履歴・プランを確認・管理できます"
           icon={<TouringIcon />}
-        />
-
-        <NavigationCard
-          href={`/app/my-bike/${id}/touring-plans`}
-          title="ツーリングプラン"
-          description="ツーリングプランを確認・管理できます"
-          icon={<RouteIcon />}
         />
 
         <NavigationCard

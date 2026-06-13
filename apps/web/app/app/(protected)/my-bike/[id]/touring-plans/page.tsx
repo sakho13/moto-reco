@@ -84,6 +84,12 @@ function TouringPlansPage() {
         <Button onClick={handleRegister} variant="primary">
           プランを作成
         </Button>
+        <Button
+          onClick={() => router.push(`/app/my-bike/${bikeId}/tourings`)}
+          variant="cloud"
+        >
+          履歴一覧
+        </Button>
       </div>
 
       <div className="w-full max-w-md mt-3">
