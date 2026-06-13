@@ -52,6 +52,8 @@ export function PlanSpotAddForm({
     stayMinutes: '',
   })
 
+  const detailUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}`
+
   const isBreak = formState.type === 'BREAK'
 
   const plannedDepartureTime = (() => {
@@ -90,9 +92,10 @@ export function PlanSpotAddForm({
         }
       )
 
-      await mutate(
-        `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`
-      )
+      await Promise.all([
+        mutate(`/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`),
+        mutate(detailUrl),
+      ])
       toast.success(isBreak ? '休憩を追加しました' : 'スポットを追加しました')
       onSuccess()
     } catch (err) {

@@ -77,7 +77,9 @@ export const TouringModeView = ({
   )
 
   const currentBreak =
-    spots?.find((s) => s.type === 'BREAK' && s.departedAt === null) ?? null
+    spots?.find(
+      (s) => s.type === 'BREAK' && s.arrivedAt !== null && s.departedAt === null
+    ) ?? null
 
   // SPOT タイプのスポットを sortOrder 順に並べ、最初の未到着（arrivedAt === null）を次の目的地とする
   const nextDestinationSpot =

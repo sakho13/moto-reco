@@ -60,6 +60,7 @@ export function PlanSpotEditForm({
   const isBreak = spot.type === 'BREAK'
   const label = isBreak ? '休憩' : 'スポット'
   const spotsUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`
+  const detailUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}`
 
   const plannedDepartureTime = (() => {
     if (!formState.plannedArrivalAt || !formState.stayMinutes) return null
@@ -122,7 +123,7 @@ export function PlanSpotEditForm({
       await apiDelete(
         `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots/${spot.touringPlanSpotId}`
       )
-      await mutate(spotsUrl)
+      await Promise.all([mutate(spotsUrl), mutate(detailUrl)])
       toast.success(`${label}を削除しました`)
       onDelete?.()
     } catch (err) {
@@ -154,7 +155,7 @@ export function PlanSpotEditForm({
         }
       )
 
-      await mutate(spotsUrl)
+      await Promise.all([mutate(spotsUrl), mutate(detailUrl)])
       toast.success(`${label}を更新しました`)
       onSuccess()
     } catch (err) {

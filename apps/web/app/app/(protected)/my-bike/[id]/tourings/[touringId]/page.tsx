@@ -262,7 +262,9 @@ function TouringDetailPage() {
   }
 
   const currentBreak =
-    localSpots.find((s) => s.type === 'BREAK' && s.departedAt === null) ?? null
+    localSpots.find(
+      (s) => s.type === 'BREAK' && s.arrivedAt !== null && s.departedAt === null
+    ) ?? null
 
   const handleQuickBreakStart = async () => {
     setIsBreakLoading(true)
