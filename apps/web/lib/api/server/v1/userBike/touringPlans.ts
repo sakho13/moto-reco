@@ -46,6 +46,9 @@ const toLocationResponse = (
   memo: spot.memo,
   plannedArrivalAt: spot.plannedArrivalAt?.toISOString() ?? null,
   plannedDepartureAt: spot.plannedDepartureAt?.toISOString() ?? null,
+  stayMinutes: spot.stayMinutes,
+  travelMinutesFromPrev: spot.travelMinutesFromPrev,
+  routeTypeFromPrev: spot.routeTypeFromPrev,
 })
 
 /**
@@ -63,6 +66,9 @@ const toPlanSpotResponse = (
   longitude: spot.longitude,
   plannedArrivalAt: spot.plannedArrivalAt?.toISOString() ?? null,
   plannedDepartureAt: spot.plannedDepartureAt?.toISOString() ?? null,
+  stayMinutes: spot.stayMinutes,
+  travelMinutesFromPrev: spot.travelMinutesFromPrev,
+  routeTypeFromPrev: spot.routeTypeFromPrev,
   sortOrder: spot.sortOrder,
 })
 
@@ -137,7 +143,18 @@ userBikeTouringPlans.post(
         title: body.title,
         departAt: body.departAt,
         startLocation: body.startLocation,
-        destinationLocation: body.destinationLocation,
+        destinationLocation: body.destinationLocation
+          ? {
+              latitude: body.destinationLocation.latitude,
+              longitude: body.destinationLocation.longitude,
+              name: body.destinationLocation.name,
+              memo: body.destinationLocation.memo,
+              travelMinutesFromPrev:
+                body.destinationLocation.travelMinutesFromPrev ?? undefined,
+              routeTypeFromPrev:
+                body.destinationLocation.routeTypeFromPrev ?? undefined,
+            }
+          : body.destinationLocation,
       })
     })
 
@@ -338,7 +355,6 @@ userBikeTouringPlans.patch(
               longitude: body.longitude,
               name: body.name ?? null,
               memo: body.memo ?? null,
-              plannedDepartureAt: body.plannedDepartureAt ?? null,
             }
           : null
       )
@@ -386,7 +402,8 @@ userBikeTouringPlans.patch(
               longitude: body.longitude,
               name: body.name ?? null,
               memo: body.memo ?? null,
-              plannedArrivalAt: body.plannedArrivalAt ?? null,
+              travelMinutesFromPrev: body.travelMinutesFromPrev ?? null,
+              routeTypeFromPrev: body.routeTypeFromPrev ?? null,
             }
           : null
       )
@@ -464,8 +481,9 @@ userBikeTouringPlans.post(
         memo: body.memo,
         latitude: body.latitude,
         longitude: body.longitude,
-        plannedArrivalAt: body.plannedArrivalAt,
-        plannedDepartureAt: body.plannedDepartureAt,
+        stayMinutes: body.stayMinutes,
+        travelMinutesFromPrev: body.travelMinutesFromPrev,
+        routeTypeFromPrev: body.routeTypeFromPrev,
       })
     })
 
@@ -549,8 +567,9 @@ userBikeTouringPlans.patch(
         memo: body.memo,
         latitude: body.latitude,
         longitude: body.longitude,
-        plannedArrivalAt: body.plannedArrivalAt,
-        plannedDepartureAt: body.plannedDepartureAt,
+        stayMinutes: body.stayMinutes,
+        travelMinutesFromPrev: body.travelMinutesFromPrev,
+        routeTypeFromPrev: body.routeTypeFromPrev,
       })
     })
 
