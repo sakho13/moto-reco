@@ -1,5 +1,6 @@
 import {
   TouringPlanId,
+  TouringPlanRouteType,
   TouringPlanSpot,
   TouringPlanSpotId,
   TouringPlanSpotType,
@@ -29,6 +30,17 @@ export class TouringPlanSpotEntity {
       spot.plannedArrivalAt > spot.plannedDepartureAt
     ) {
       throw new Error('到着予定日時は出発予定日時以前である必要があります')
+    }
+
+    if (spot.stayMinutes !== null && spot.stayMinutes < 0) {
+      throw new Error('滞在時間は0以上である必要があります')
+    }
+
+    if (
+      spot.travelMinutesFromPrev !== null &&
+      spot.travelMinutesFromPrev < 0
+    ) {
+      throw new Error('前の地点からの移動時間は0以上である必要があります')
     }
 
     this._value = spot
@@ -68,6 +80,18 @@ export class TouringPlanSpotEntity {
 
   public get plannedDepartureAt(): Date | null {
     return this._value.plannedDepartureAt
+  }
+
+  public get stayMinutes(): number | null {
+    return this._value.stayMinutes
+  }
+
+  public get travelMinutesFromPrev(): number | null {
+    return this._value.travelMinutesFromPrev
+  }
+
+  public get routeTypeFromPrev(): TouringPlanRouteType | null {
+    return this._value.routeTypeFromPrev
   }
 
   public get sortOrder(): number {

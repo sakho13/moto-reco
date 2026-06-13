@@ -18,6 +18,9 @@ const baseProps = (
   longitude: 139.7671,
   plannedArrivalAt: new Date('2026-07-01T10:00:00.000Z'),
   plannedDepartureAt: new Date('2026-07-01T10:30:00.000Z'),
+  stayMinutes: null,
+  travelMinutesFromPrev: null,
+  routeTypeFromPrev: null,
   sortOrder: 0,
   ...overrides,
 })
