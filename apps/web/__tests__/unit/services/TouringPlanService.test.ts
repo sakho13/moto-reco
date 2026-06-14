@@ -40,8 +40,8 @@ const buildPlanSpot = (
     memo: string | null
     latitude: number | null
     longitude: number | null
-    plannedArrivalAt: Date | null
-    plannedDepartureAt: Date | null
+    plannedArrivalOffsetMinutes: number | null
+    plannedDepartureOffsetMinutes: number | null
     stayMinutes: number | null
     travelMinutesFromPrev: number | null
     routeTypeFromPrev: 'GENERAL' | 'HIGHWAY' | 'MIXED' | null
@@ -56,8 +56,8 @@ const buildPlanSpot = (
     memo: null,
     latitude: null,
     longitude: null,
-    plannedArrivalAt: null,
-    plannedDepartureAt: null,
+    plannedArrivalOffsetMinutes: null,
+    plannedDepartureOffsetMinutes: null,
     stayMinutes: null,
     travelMinutesFromPrev: null,
     routeTypeFromPrev: null,

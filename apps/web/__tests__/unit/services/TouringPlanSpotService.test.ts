@@ -38,8 +38,8 @@ const buildPlanSpot = (
     memo: string | null
     latitude: number | null
     longitude: number | null
-    plannedArrivalAt: Date | null
-    plannedDepartureAt: Date | null
+    plannedArrivalOffsetMinutes: number | null
+    plannedDepartureOffsetMinutes: number | null
     stayMinutes: number | null
     travelMinutesFromPrev: number | null
     routeTypeFromPrev: 'GENERAL' | 'HIGHWAY' | 'MIXED' | null
@@ -54,8 +54,8 @@ const buildPlanSpot = (
     memo: null,
     latitude: null,
     longitude: null,
-    plannedArrivalAt: null,
-    plannedDepartureAt: null,
+    plannedArrivalOffsetMinutes: null,
+    plannedDepartureOffsetMinutes: null,
     stayMinutes: null,
     travelMinutesFromPrev: null,
     routeTypeFromPrev: null,
@@ -282,28 +282,21 @@ describe('TouringPlanSpotService', () => {
 
       expect(result.travelMinutesFromPrev).toBe(90)
 
-      // recompute時にspotの予定到着・出発時刻が再計算値で更新される
-      // PLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z) + travelMinutesFromPrev(90分)
-      // = 16:30着、stayMinutes(30分)で17:00発
+      // recompute時にspotの予定到着・出発までの経過分数が再計算値で更新される
+      // travelMinutesFromPrev(90分) = 出発から90分後に到着、stayMinutes(30分)で120分後に出発
       const updateCalls = vi.mocked(touringPlanSpotRepository.updatePlanSpot)
         .mock.calls
       const recomputedSpotCall = updateCalls.find(
-        ([s]) => s.id === spot.id && s.plannedArrivalAt !== null
+        ([s]) => s.id === spot.id && s.plannedArrivalOffsetMinutes !== null
       )
-      expect(recomputedSpotCall?.[0].plannedArrivalAt).toEqual(
-        new Date('1999-12-31T16:30:00.000Z')
-      )
-      expect(recomputedSpotCall?.[0].plannedDepartureAt).toEqual(
-        new Date('1999-12-31T17:00:00.000Z')
-      )
+      expect(recomputedSpotCall?.[0].plannedArrivalOffsetMinutes).toBe(90)
+      expect(recomputedSpotCall?.[0].plannedDepartureOffsetMinutes).toBe(120)
 
-      // DESTINATIONの到着(17:00 + 60分 = 18:00)も再計算される
+      // DESTINATIONの到着(120分後 + 60分 = 180分後)も再計算される
       const destinationSpotCall = updateCalls.find(
         ([s]) => s.id === destinationSpot.id
       )
-      expect(destinationSpotCall?.[0].plannedArrivalAt).toEqual(
-        new Date('1999-12-31T18:00:00.000Z')
-      )
+      expect(destinationSpotCall?.[0].plannedArrivalOffsetMinutes).toBe(180)
     })
   })
 
@@ -432,16 +425,14 @@ describe('TouringPlanSpotService', () => {
         })
       )
 
-      // PLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z) + travelMinutesFromPrev(120分)
-      // = 17:00が予定到着時刻として反映される
+      // 出発(0分後) + travelMinutesFromPrev(120分) = 120分後が
+      // 予定到着までの経過分数として反映される
       const updateCalls = vi.mocked(touringPlanSpotRepository.updatePlanSpot)
         .mock.calls
       const destinationSpotCall = updateCalls.find(
         ([s]) => s.id === destinationSpot.id
       )
-      expect(destinationSpotCall?.[0].plannedArrivalAt).toEqual(
-        new Date('1999-12-31T17:00:00.000Z')
-      )
+      expect(destinationSpotCall?.[0].plannedArrivalOffsetMinutes).toBe(120)
     })
   })
 })

@@ -8,13 +8,8 @@ type SpotTimeInput = {
   travelMinutesFromPrev: number | null
 }
 
-const DEPART_AT = new Date('2026-07-01T08:00:00.000Z')
-
-const minutesAfter = (base: Date, minutes: number): Date =>
-  new Date(base.getTime() + minutes * 60 * 1000)
-
 describe('calculateTouringPlanSpotTimes', () => {
-  test('チェイン全体が計算できる場合、各スポットの予定到着・出発時刻が正しく算出される', () => {
+  test('チェイン全体が計算できる場合、各スポットの予定到着・出発までの経過分数が正しく算出される', () => {
     const orderedSpots: SpotTimeInput[] = [
       // START
       { type: 'START', stayMinutes: null, travelMinutesFromPrev: null },
@@ -24,29 +19,26 @@ describe('calculateTouringPlanSpotTimes', () => {
       { type: 'DESTINATION', stayMinutes: null, travelMinutesFromPrev: 90 },
     ]
 
-    const result = calculateTouringPlanSpotTimes(DEPART_AT, orderedSpots)
+    const result = calculateTouringPlanSpotTimes(orderedSpots)
 
     expect(result).toHaveLength(3)
 
-    // START: 到着なし、出発はdepartAt
+    // START: 到着なし、出発は0分後
     expect(result[0]).toEqual({
-      plannedArrivalAt: null,
-      plannedDepartureAt: DEPART_AT,
+      plannedArrivalOffsetMinutes: null,
+      plannedDepartureOffsetMinutes: 0,
     })
 
-    // SPOT: 到着 08:00 + 60分 = 09:00, 出発 09:00 + 30分 = 09:30
-    const spotArrival = minutesAfter(DEPART_AT, 60)
-    const spotDeparture = minutesAfter(spotArrival, 30)
+    // SPOT: 到着 0 + 60分 = 60分後, 出発 60 + 30分 = 90分後
     expect(result[1]).toEqual({
-      plannedArrivalAt: spotArrival,
-      plannedDepartureAt: spotDeparture,
+      plannedArrivalOffsetMinutes: 60,
+      plannedDepartureOffsetMinutes: 90,
     })
 
-    // DESTINATION: 到着 09:30 + 90分 = 11:00, 出発は常にnull
-    const destinationArrival = minutesAfter(spotDeparture, 90)
+    // DESTINATION: 到着 90 + 90分 = 180分後, 出発は常にnull
     expect(result[2]).toEqual({
-      plannedArrivalAt: destinationArrival,
-      plannedDepartureAt: null,
+      plannedArrivalOffsetMinutes: 180,
+      plannedDepartureOffsetMinutes: null,
     })
   })
 
@@ -57,37 +49,35 @@ describe('calculateTouringPlanSpotTimes', () => {
       { type: 'SPOT', stayMinutes: 30, travelMinutesFromPrev: 60 },
       // SPOT2: SPOT1からの移動時間が未入力
       { type: 'SPOT', stayMinutes: 15, travelMinutesFromPrev: null },
-      // DESTINATION: SPOT2からの移動時間は設定されているが、currentTimeがnullなので計算不可
+      // DESTINATION: SPOT2からの移動時間は設定されているが、currentOffsetがnullなので計算不可
       { type: 'DESTINATION', stayMinutes: null, travelMinutesFromPrev: 45 },
     ]
 
-    const result = calculateTouringPlanSpotTimes(DEPART_AT, orderedSpots)
+    const result = calculateTouringPlanSpotTimes(orderedSpots)
 
     expect(result).toHaveLength(4)
 
     // START, SPOT1までは正常に計算される
     expect(result[0]).toEqual({
-      plannedArrivalAt: null,
-      plannedDepartureAt: DEPART_AT,
+      plannedArrivalOffsetMinutes: null,
+      plannedDepartureOffsetMinutes: 0,
     })
-    const spot1Arrival = minutesAfter(DEPART_AT, 60)
-    const spot1Departure = minutesAfter(spot1Arrival, 30)
     expect(result[1]).toEqual({
-      plannedArrivalAt: spot1Arrival,
-      plannedDepartureAt: spot1Departure,
+      plannedArrivalOffsetMinutes: 60,
+      plannedDepartureOffsetMinutes: 90,
     })
 
     // SPOT2: SPOT2自身のtravelMinutesFromPrevがnullのため、
-    // SPOT1の時点でcurrentTimeがnullとなり、SPOT2以降は両方null
+    // SPOT1の時点でcurrentOffsetがnullとなり、SPOT2以降は両方null
     expect(result[2]).toEqual({
-      plannedArrivalAt: null,
-      plannedDepartureAt: null,
+      plannedArrivalOffsetMinutes: null,
+      plannedDepartureOffsetMinutes: null,
     })
 
-    // DESTINATION: currentTimeがnullになっているため両方null
+    // DESTINATION: currentOffsetがnullになっているため両方null
     expect(result[3]).toEqual({
-      plannedArrivalAt: null,
-      plannedDepartureAt: null,
+      plannedArrivalOffsetMinutes: null,
+      plannedDepartureOffsetMinutes: null,
     })
   })
 
@@ -99,14 +89,14 @@ describe('calculateTouringPlanSpotTimes', () => {
       { type: 'DESTINATION', stayMinutes: null, travelMinutesFromPrev: 30 },
     ]
 
-    const result = calculateTouringPlanSpotTimes(DEPART_AT, orderedSpots)
+    const result = calculateTouringPlanSpotTimes(orderedSpots)
 
     const spot = result[1]
-    expect(spot?.plannedArrivalAt).not.toBeNull()
-    expect(spot?.plannedDepartureAt).not.toBeNull()
-    // 滞在時間0分のため到着時刻と出発時刻が一致する
-    expect(spot?.plannedDepartureAt?.getTime()).toBe(
-      spot?.plannedArrivalAt?.getTime()
+    expect(spot?.plannedArrivalOffsetMinutes).not.toBeNull()
+    expect(spot?.plannedDepartureOffsetMinutes).not.toBeNull()
+    // 滞在時間0分のため到着までの経過分数と出発までの経過分数が一致する
+    expect(spot?.plannedDepartureOffsetMinutes).toBe(
+      spot?.plannedArrivalOffsetMinutes
     )
   })
 
@@ -117,16 +107,16 @@ describe('calculateTouringPlanSpotTimes', () => {
         { type: 'DESTINATION', stayMinutes: null, travelMinutesFromPrev: 120 },
       ]
 
-      const result = calculateTouringPlanSpotTimes(DEPART_AT, orderedSpots)
+      const result = calculateTouringPlanSpotTimes(orderedSpots)
 
       expect(result).toHaveLength(2)
       expect(result[0]).toEqual({
-        plannedArrivalAt: null,
-        plannedDepartureAt: DEPART_AT,
+        plannedArrivalOffsetMinutes: null,
+        plannedDepartureOffsetMinutes: 0,
       })
       expect(result[1]).toEqual({
-        plannedArrivalAt: minutesAfter(DEPART_AT, 120),
-        plannedDepartureAt: null,
+        plannedArrivalOffsetMinutes: 120,
+        plannedDepartureOffsetMinutes: null,
       })
     })
 
@@ -136,16 +126,16 @@ describe('calculateTouringPlanSpotTimes', () => {
         { type: 'DESTINATION', stayMinutes: null, travelMinutesFromPrev: null },
       ]
 
-      const result = calculateTouringPlanSpotTimes(DEPART_AT, orderedSpots)
+      const result = calculateTouringPlanSpotTimes(orderedSpots)
 
       expect(result).toHaveLength(2)
       expect(result[0]).toEqual({
-        plannedArrivalAt: null,
-        plannedDepartureAt: DEPART_AT,
+        plannedArrivalOffsetMinutes: null,
+        plannedDepartureOffsetMinutes: 0,
       })
       expect(result[1]).toEqual({
-        plannedArrivalAt: null,
-        plannedDepartureAt: null,
+        plannedArrivalOffsetMinutes: null,
+        plannedDepartureOffsetMinutes: null,
       })
     })
   })
@@ -163,44 +153,38 @@ describe('calculateTouringPlanSpotTimes', () => {
       { type: 'DESTINATION', stayMinutes: null, travelMinutesFromPrev: 25 },
     ]
 
-    const result = calculateTouringPlanSpotTimes(DEPART_AT, orderedSpots)
+    const result = calculateTouringPlanSpotTimes(orderedSpots)
 
     expect(result).toHaveLength(5)
 
     // START
     expect(result[0]).toEqual({
-      plannedArrivalAt: null,
-      plannedDepartureAt: DEPART_AT,
+      plannedArrivalOffsetMinutes: null,
+      plannedDepartureOffsetMinutes: 0,
     })
 
-    // SPOT1: 08:00 + 30分 = 08:30 着, 08:30 + 10分 = 08:40 発
-    const spot1Arrival = minutesAfter(DEPART_AT, 30)
-    const spot1Departure = minutesAfter(spot1Arrival, 10)
+    // SPOT1: 0 + 30分 = 30分後着, 30 + 10分 = 40分後発
     expect(result[1]).toEqual({
-      plannedArrivalAt: spot1Arrival,
-      plannedDepartureAt: spot1Departure,
+      plannedArrivalOffsetMinutes: 30,
+      plannedDepartureOffsetMinutes: 40,
     })
 
-    // BREAK: 08:40 + 20分 = 09:00 着, 09:00 + 15分 = 09:15 発
-    const breakArrival = minutesAfter(spot1Departure, 20)
-    const breakDeparture = minutesAfter(breakArrival, 15)
+    // BREAK: 40 + 20分 = 60分後着, 60 + 15分 = 75分後発
     expect(result[2]).toEqual({
-      plannedArrivalAt: breakArrival,
-      plannedDepartureAt: breakDeparture,
+      plannedArrivalOffsetMinutes: 60,
+      plannedDepartureOffsetMinutes: 75,
     })
 
-    // SPOT2: 09:15 + 40分 = 09:55 着, 09:55 + 5分 = 10:00 発
-    const spot2Arrival = minutesAfter(breakDeparture, 40)
-    const spot2Departure = minutesAfter(spot2Arrival, 5)
+    // SPOT2: 75 + 40分 = 115分後着, 115 + 5分 = 120分後発
     expect(result[3]).toEqual({
-      plannedArrivalAt: spot2Arrival,
-      plannedDepartureAt: spot2Departure,
+      plannedArrivalOffsetMinutes: 115,
+      plannedDepartureOffsetMinutes: 120,
     })
 
-    // DESTINATION: 10:00 + 25分 = 10:25 着, 発はnull
+    // DESTINATION: 120 + 25分 = 145分後着, 発はnull
     expect(result[4]).toEqual({
-      plannedArrivalAt: minutesAfter(spot2Departure, 25),
-      plannedDepartureAt: null,
+      plannedArrivalOffsetMinutes: 145,
+      plannedDepartureOffsetMinutes: null,
     })
   })
 })

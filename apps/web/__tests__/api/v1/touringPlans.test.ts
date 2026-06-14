@@ -233,15 +233,15 @@ describe('TouringPlans API Endpoints', () => {
         }
       )
       const detailJson = await detailRes.json()
-      // plannedDepartureAtはPLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z)が起点
+      // plannedDepartureOffsetMinutesは出発(START)を0分とした経過分数
       expect(detailJson.data.startLocation).toMatchObject({
-        plannedArrivalAt: null,
-        plannedDepartureAt: '1999-12-31T15:00:00.000Z',
+        plannedArrivalOffsetMinutes: null,
+        plannedDepartureOffsetMinutes: 0,
       })
-      // plannedArrivalAtはPLAN_SPOT_TIME_BASE_DATE + 移動時間(6時間) = 21:00
+      // plannedArrivalOffsetMinutesは出発から移動時間(6時間=360分)後
       expect(detailJson.data.destinationLocation).toMatchObject({
-        plannedArrivalAt: '1999-12-31T21:00:00.000Z',
-        plannedDepartureAt: null,
+        plannedArrivalOffsetMinutes: 360,
+        plannedDepartureOffsetMinutes: null,
       })
     })
 
@@ -634,7 +634,7 @@ describe('TouringPlans API Endpoints', () => {
         memo: null,
       })
 
-      // 再取得すると、予定出発時刻がPLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z)で反映されている
+      // 再取得すると、予定出発までの経過分数が0分（出発時）で反映されている
       const detailRes = await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
         {
@@ -644,8 +644,8 @@ describe('TouringPlans API Endpoints', () => {
       )
       const detailJson = await detailRes.json()
       expect(detailJson.data.startLocation).toMatchObject({
-        plannedArrivalAt: null,
-        plannedDepartureAt: '1999-12-31T15:00:00.000Z',
+        plannedArrivalOffsetMinutes: null,
+        plannedDepartureOffsetMinutes: 0,
       })
     })
 
@@ -812,7 +812,7 @@ describe('TouringPlans API Endpoints', () => {
       )
     })
 
-    test('目的地を設定でき、到着予定がPLAN_SPOT_TIME_BASE_DATE起点で反映される', async () => {
+    test('目的地を設定でき、到着予定までの経過分数が反映される', async () => {
       // 出発地を設定（移動時間の起点となる）
       await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
@@ -858,7 +858,7 @@ describe('TouringPlans API Endpoints', () => {
         travelMinutesFromPrev: 720,
       })
 
-      // 再取得すると、予定到着時刻がPLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z) + 移動時間(12時間) = 2000-01-01T03:00:00.000Zで反映されている
+      // 再取得すると、予定到着までの経過分数が移動時間(12時間=720分)で反映されている
       const spotDetailRes = await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
         {
@@ -868,8 +868,8 @@ describe('TouringPlans API Endpoints', () => {
       )
       const spotDetailJson = await spotDetailRes.json()
       expect(spotDetailJson.data.destinationLocation).toMatchObject({
-        plannedArrivalAt: '2000-01-01T03:00:00.000Z',
-        plannedDepartureAt: null,
+        plannedArrivalOffsetMinutes: 720,
+        plannedDepartureOffsetMinutes: null,
       })
     })
 
@@ -1227,10 +1227,10 @@ describe('TouringPlans API Endpoints', () => {
           s.touringPlanSpotId === json.data.touringPlanSpotId
       )
       expect(registeredSpot).toMatchObject({
-        // plannedArrivalAtはPLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z) + 移動時間(3時間) = 18:00
-        plannedArrivalAt: '1999-12-31T18:00:00.000Z',
-        // plannedDepartureAtはplannedArrivalAt(18:00) + 滞在時間(15分) = 18:15
-        plannedDepartureAt: '1999-12-31T18:15:00.000Z',
+        // plannedArrivalOffsetMinutesは出発から移動時間(3時間=180分)後
+        plannedArrivalOffsetMinutes: 180,
+        // plannedDepartureOffsetMinutesはplannedArrivalOffsetMinutes(180分) + 滞在時間(15分) = 195分
+        plannedDepartureOffsetMinutes: 195,
       })
     })
 
@@ -1287,7 +1287,7 @@ describe('TouringPlans API Endpoints', () => {
       expect(json2.data.sortOrder).toBe(1)
     })
 
-    test('travelMinutesFromPrev・stayMinutesを指定した場合、後続スポットのplannedArrivalAt/plannedDepartureAtが再計算される', async () => {
+    test('travelMinutesFromPrev・stayMinutesを指定した場合、後続スポットのplannedArrivalOffsetMinutes/plannedDepartureOffsetMinutesが再計算される', async () => {
       // 出発地を設定（移動時間の起点となる）
       await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
@@ -1354,11 +1354,11 @@ describe('TouringPlans API Endpoints', () => {
         (s: { touringPlanSpotId: string }) =>
           s.touringPlanSpotId === nextJson.data.touringPlanSpotId
       )
-      // 休憩ポイントの出発予定 = PLAN_SPOT_TIME_BASE_DATE(15:00) + 移動時間(3h) + 滞在時間(30分) = 18:30
-      // 経由地Bの到着予定 = 休憩ポイントの出発予定(18:30) + 移動時間(1h) = 19:30
+      // 休憩ポイントの出発予定 = 移動時間(3h=180分) + 滞在時間(30分) = 出発から210分後
+      // 経由地Bの到着予定 = 休憩ポイントの出発予定(210分後) + 移動時間(1h=60分) = 出発から270分後
       expect(nextSpot).toMatchObject({
-        plannedArrivalAt: '1999-12-31T19:30:00.000Z',
-        plannedDepartureAt: '1999-12-31T19:30:00.000Z',
+        plannedArrivalOffsetMinutes: 270,
+        plannedDepartureOffsetMinutes: 270,
       })
     })
 
@@ -1643,14 +1643,14 @@ describe('TouringPlans API Endpoints', () => {
         (s: { touringPlanSpotId: string }) => s.touringPlanSpotId === spotId
       )
       expect(updatedSpot).toMatchObject({
-        // plannedArrivalAtはPLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z) + 移動時間(4h) = 19:00
-        plannedArrivalAt: '1999-12-31T19:00:00.000Z',
-        // plannedDepartureAtはplannedArrivalAt(19:00) + 滞在時間(30分) = 19:30
-        plannedDepartureAt: '1999-12-31T19:30:00.000Z',
+        // plannedArrivalOffsetMinutesは出発から移動時間(4h=240分)後
+        plannedArrivalOffsetMinutes: 240,
+        // plannedDepartureOffsetMinutesはplannedArrivalOffsetMinutes(240分) + 滞在時間(30分) = 270分
+        plannedDepartureOffsetMinutes: 270,
       })
     })
 
-    test('travelMinutesFromPrev・stayMinutesを更新すると、plannedArrivalAt/plannedDepartureAtが再計算される', async () => {
+    test('travelMinutesFromPrev・stayMinutesを更新すると、plannedArrivalOffsetMinutes/plannedDepartureOffsetMinutesが再計算される', async () => {
       // 出発地を設定（移動時間の起点となる）
       await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/start-location`,
@@ -1695,11 +1695,11 @@ describe('TouringPlans API Endpoints', () => {
       const updatedSpot = spotsJson.data.find(
         (s: { touringPlanSpotId: string }) => s.touringPlanSpotId === spotId
       )
-      // plannedArrivalAt = PLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z) + 移動時間(3h) = 18:00
-      // plannedDepartureAt = plannedArrivalAt(18:00) + 滞在時間(45分) = 18:45
+      // plannedArrivalOffsetMinutes = 出発から移動時間(3h=180分)後
+      // plannedDepartureOffsetMinutes = plannedArrivalOffsetMinutes(180分) + 滞在時間(45分) = 225分
       expect(updatedSpot).toMatchObject({
-        plannedArrivalAt: '1999-12-31T18:00:00.000Z',
-        plannedDepartureAt: '1999-12-31T18:45:00.000Z',
+        plannedArrivalOffsetMinutes: 180,
+        plannedDepartureOffsetMinutes: 225,
       })
     })
 
@@ -1825,7 +1825,7 @@ describe('TouringPlans API Endpoints', () => {
       expect(spotsJson.data).toEqual([])
     })
 
-    test('削除後は残存スポットのplannedArrivalAt/plannedDepartureAtが再計算される', async () => {
+    test('削除後は残存スポットのplannedArrivalOffsetMinutes/plannedDepartureOffsetMinutesが再計算される', async () => {
       // 後続の経由地を追加
       const nextRes = await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
@@ -1865,10 +1865,10 @@ describe('TouringPlans API Endpoints', () => {
       const remainingSpot = spotsJson.data.find(
         (s: { touringPlanSpotId: string }) => s.touringPlanSpotId === nextSpotId
       )
-      // 先頭スポットの削除により、残存スポットはPLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z)を起点に再計算される
+      // 先頭スポットの削除により、残存スポットは出発(0分後)を起点に再計算される
       expect(remainingSpot).toMatchObject({
-        plannedArrivalAt: '1999-12-31T15:00:00.000Z',
-        plannedDepartureAt: '1999-12-31T15:10:00.000Z',
+        plannedArrivalOffsetMinutes: 0,
+        plannedDepartureOffsetMinutes: 10,
       })
     })
 

@@ -16,8 +16,8 @@ const baseProps = (
   memo: 'コンビニで小休止',
   latitude: 35.6812,
   longitude: 139.7671,
-  plannedArrivalAt: new Date('2026-07-01T10:00:00.000Z'),
-  plannedDepartureAt: new Date('2026-07-01T10:30:00.000Z'),
+  plannedArrivalOffsetMinutes: 60,
+  plannedDepartureOffsetMinutes: 90,
   stayMinutes: null,
   travelMinutesFromPrev: null,
   routeTypeFromPrev: null,
@@ -36,12 +36,8 @@ describe('TouringPlanSpotEntity', () => {
     expect(entity.memo).toBe('コンビニで小休止')
     expect(entity.latitude).toBe(35.6812)
     expect(entity.longitude).toBe(139.7671)
-    expect(entity.plannedArrivalAt).toEqual(
-      new Date('2026-07-01T10:00:00.000Z')
-    )
-    expect(entity.plannedDepartureAt).toEqual(
-      new Date('2026-07-01T10:30:00.000Z')
-    )
+    expect(entity.plannedArrivalOffsetMinutes).toBe(60)
+    expect(entity.plannedDepartureOffsetMinutes).toBe(90)
     expect(entity.sortOrder).toBe(0)
   })
 
@@ -85,23 +81,26 @@ describe('TouringPlanSpotEntity', () => {
     ).toThrow('経度は-180以上180以下である必要があります')
   })
 
-  test('到着予定日時が出発予定日時より後の場合はエラーになる', () => {
+  test('到着予定までの経過分数が出発予定までの経過分数より後の場合はエラーになる', () => {
     expect(
       () =>
         new TouringPlanSpotEntity(
           baseProps({
-            plannedArrivalAt: new Date('2026-07-01T10:30:00.000Z'),
-            plannedDepartureAt: new Date('2026-07-01T10:00:00.000Z'),
+            plannedArrivalOffsetMinutes: 90,
+            plannedDepartureOffsetMinutes: 60,
           })
         )
-    ).toThrow('到着予定日時は出発予定日時以前である必要があります')
+    ).toThrow('到着予定時刻は出発予定時刻以前である必要があります')
   })
 
-  test('到着予定日時・出発予定日時がnullの場合はエラーにならない', () => {
+  test('到着予定・出発予定までの経過分数がnullの場合はエラーにならない', () => {
     expect(
       () =>
         new TouringPlanSpotEntity(
-          baseProps({ plannedArrivalAt: null, plannedDepartureAt: null })
+          baseProps({
+            plannedArrivalOffsetMinutes: null,
+            plannedDepartureOffsetMinutes: null,
+          })
         )
     ).not.toThrow()
   })
@@ -110,8 +109,8 @@ describe('TouringPlanSpotEntity', () => {
     const entity = new TouringPlanSpotEntity(
       baseProps({
         type: 'START',
-        plannedArrivalAt: null,
-        plannedDepartureAt: new Date('2026-07-01T08:00:00.000Z'),
+        plannedArrivalOffsetMinutes: null,
+        plannedDepartureOffsetMinutes: 0,
         sortOrder: 0,
       })
     )
@@ -123,8 +122,8 @@ describe('TouringPlanSpotEntity', () => {
     const entity = new TouringPlanSpotEntity(
       baseProps({
         type: 'DESTINATION',
-        plannedArrivalAt: new Date('2026-07-01T18:00:00.000Z'),
-        plannedDepartureAt: null,
+        plannedArrivalOffsetMinutes: 600,
+        plannedDepartureOffsetMinutes: null,
         sortOrder: 9999,
       })
     )

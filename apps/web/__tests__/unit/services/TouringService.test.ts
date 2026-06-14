@@ -51,8 +51,8 @@ const buildPlanSpot = (
     memo: string | null
     latitude: number | null
     longitude: number | null
-    plannedArrivalAt: Date | null
-    plannedDepartureAt: Date | null
+    plannedArrivalOffsetMinutes: number | null
+    plannedDepartureOffsetMinutes: number | null
     stayMinutes: number | null
     travelMinutesFromPrev: number | null
     routeTypeFromPrev: 'GENERAL' | 'HIGHWAY' | 'MIXED' | null
@@ -67,8 +67,8 @@ const buildPlanSpot = (
     memo: null,
     latitude: null,
     longitude: null,
-    plannedArrivalAt: null,
-    plannedDepartureAt: null,
+    plannedArrivalOffsetMinutes: null,
+    plannedDepartureOffsetMinutes: null,
     stayMinutes: null,
     travelMinutesFromPrev: null,
     routeTypeFromPrev: null,
@@ -351,23 +351,22 @@ describe('TouringService', () => {
         createdAt: new Date('2024-01-01T00:00:00.000Z'),
         updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       })
-      // PLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z)起点で
-      // waypoint1は+4時間着/+4時間30分発、waypoint2は+5時間着/+5時間15分発
+      // waypoint1は出発から4時間後着/4時間30分後発、waypoint2は5時間後着/5時間15分後発
       const waypoint1 = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-1'),
         type: 'SPOT',
         name: '経由地1',
         sortOrder: 0,
-        plannedArrivalAt: new Date('1999-12-31T19:00:00.000Z'),
-        plannedDepartureAt: new Date('1999-12-31T19:30:00.000Z'),
+        plannedArrivalOffsetMinutes: 240,
+        plannedDepartureOffsetMinutes: 270,
       })
       const waypoint2 = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-2'),
         type: 'BREAK',
         name: '休憩',
         sortOrder: 1,
-        plannedArrivalAt: new Date('1999-12-31T20:00:00.000Z'),
-        plannedDepartureAt: new Date('1999-12-31T20:15:00.000Z'),
+        plannedArrivalOffsetMinutes: 300,
+        plannedDepartureOffsetMinutes: 315,
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
       vi.mocked(
