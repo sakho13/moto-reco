@@ -46,10 +46,6 @@ export const TouringPlanRegisterRequestSchema = z.object({
     .min(1, 'タイトルは1文字以上で指定してください')
     .max(100, 'タイトルは100文字以内で指定してください')
     .trim(),
-  departAt: z.coerce.date({
-    required_error: '出発予定日時は必須です',
-    invalid_type_error: '出発予定日時は日付形式で指定してください',
-  }),
   startLocation: TouringPlanLocationSchema.nullable().optional(),
   destinationLocation: TouringPlanLocationSchema.extend({
     travelMinutesFromPrev: z
@@ -80,25 +76,16 @@ export type TouringPlanRegisterRequest = z.infer<
 /**
  * ツーリングプラン更新リクエストのバリデーションスキーマ
  */
-export const TouringPlanUpdateRequestSchema = z
-  .object({
-    title: z
-      .string({
-        invalid_type_error: 'タイトルは文字列で指定してください',
-      })
-      .min(1, 'タイトルは1文字以上で指定してください')
-      .max(100, 'タイトルは100文字以内で指定してください')
-      .trim()
-      .optional(),
-    departAt: z.coerce
-      .date({
-        invalid_type_error: '出発予定日時は日付形式で指定してください',
-      })
-      .optional(),
-  })
-  .refine((data) => data.title !== undefined || data.departAt !== undefined, {
-    message: 'いずれかの更新項目を指定してください',
-  })
+export const TouringPlanUpdateRequestSchema = z.object({
+  title: z
+    .string({
+      required_error: 'タイトルは必須です',
+      invalid_type_error: 'タイトルは文字列で指定してください',
+    })
+    .min(1, 'タイトルは1文字以上で指定してください')
+    .max(100, 'タイトルは100文字以内で指定してください')
+    .trim(),
+})
 
 export type TouringPlanUpdateRequest = z.infer<
   typeof TouringPlanUpdateRequestSchema
@@ -146,13 +133,3 @@ export const TouringPlanDestinationLocationUpdateRequestSchema =
 export type TouringPlanDestinationLocationUpdateRequest = z.infer<
   typeof TouringPlanDestinationLocationUpdateRequestSchema
 >
-
-/**
- * ツーリングプラン一覧取得クエリパラメータのバリデーションスキーマ
- */
-export const TouringPlanListQuerySchema = z.object({
-  'sort-by': z.enum(['depart-date', 'return-date']).optional(),
-  'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
-})
-
-export type TouringPlanListQuery = z.infer<typeof TouringPlanListQuerySchema>

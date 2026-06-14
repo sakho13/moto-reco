@@ -99,8 +99,8 @@ userBikeTouringPlans.get('/', honoAuthMiddleware, async (c) => {
       data: plans.map(({ plan, destinationSpot }) => ({
         touringPlanId: plan.id,
         title: plan.title,
-        departAt: plan.departAt.toISOString(),
-        returnAt: plan.returnAt.toISOString(),
+        createdAt: plan.createdAt.toISOString(),
+        updatedAt: plan.updatedAt.toISOString(),
         destination: destinationSpot
           ? {
               latitude: destinationSpot.latitude,
@@ -141,7 +141,6 @@ userBikeTouringPlans.post(
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
         title: body.title,
-        departAt: body.departAt,
         startLocation: body.startLocation,
         destinationLocation: body.destinationLocation
           ? {
@@ -164,8 +163,8 @@ userBikeTouringPlans.post(
         data: {
           touringPlanId: result.plan.id,
           title: result.plan.title,
-          departAt: result.plan.departAt.toISOString(),
-          returnAt: result.plan.returnAt.toISOString(),
+          createdAt: result.plan.createdAt.toISOString(),
+          updatedAt: result.plan.updatedAt.toISOString(),
           startLocation: result.startSpot
             ? toLocationResponse(result.startSpot)
             : null,
@@ -210,8 +209,8 @@ userBikeTouringPlans.get('/:planId', honoAuthMiddleware, async (c) => {
       data: {
         touringPlanId: detail.plan.id,
         title: detail.plan.title,
-        departAt: detail.plan.departAt.toISOString(),
-        returnAt: detail.plan.returnAt.toISOString(),
+        createdAt: detail.plan.createdAt.toISOString(),
+        updatedAt: detail.plan.updatedAt.toISOString(),
         startLocation: detail.startSpot
           ? toLocationResponse(detail.startSpot)
           : null,
@@ -226,7 +225,7 @@ userBikeTouringPlans.get('/:planId', honoAuthMiddleware, async (c) => {
   )
 })
 
-// プラン更新（title/departAt）
+// プラン更新（title）
 userBikeTouringPlans.patch(
   '/:planId',
   honoAuthMiddleware,
@@ -254,7 +253,6 @@ userBikeTouringPlans.patch(
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
         title: body.title,
-        departAt: body.departAt,
       })
 
       const [startSpot, destinationSpot, tourings] = await Promise.all([
@@ -272,8 +270,8 @@ userBikeTouringPlans.patch(
         data: {
           touringPlanId: result.plan.id,
           title: result.plan.title,
-          departAt: result.plan.departAt.toISOString(),
-          returnAt: result.plan.returnAt.toISOString(),
+          createdAt: result.plan.createdAt.toISOString(),
+          updatedAt: result.plan.updatedAt.toISOString(),
           startLocation: result.startSpot
             ? toLocationResponse(result.startSpot)
             : null,

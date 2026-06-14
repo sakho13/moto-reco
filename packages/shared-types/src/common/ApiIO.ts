@@ -331,8 +331,8 @@ export type ApiResponseTouringPlanLocation = {
 export type ApiResponseTouringPlanDetail = {
   touringPlanId: string
   title: string
-  departAt: string
-  returnAt: string
+  createdAt: string
+  updatedAt: string
   startLocation: ApiResponseTouringPlanLocation | null
   destinationLocation: ApiResponseTouringPlanLocation | null
   // このプランから開始されたツーリングのID一覧
@@ -342,8 +342,8 @@ export type ApiResponseTouringPlanDetail = {
 export type ApiResponseTouringPlanListItem = {
   touringPlanId: string
   title: string
-  departAt: string
-  returnAt: string
+  createdAt: string
+  updatedAt: string
   destination: {
     latitude: number | null
     longitude: number | null
