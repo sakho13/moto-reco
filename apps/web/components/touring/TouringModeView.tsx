@@ -14,6 +14,7 @@ import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
+import { getCurrentDate } from '@/lib/utils/dateUtils'
 
 type TouringModeViewProps = {
   myUserBikeId: string
@@ -95,7 +96,7 @@ export const TouringModeView = ({
   useEffect(() => {
     const updateElapsedTime = () => {
       const start = new Date(startDate)
-      const now = new Date()
+      const now = getCurrentDate()
       const diff = now.getTime() - start.getTime()
 
       const seconds = Math.floor(diff / 1000)
@@ -189,7 +190,7 @@ export const TouringModeView = ({
     try {
       await apiPost(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots` as const,
-        { type: 'BREAK', arrivedAt: new Date() }
+        { type: 'BREAK', arrivedAt: getCurrentDate() }
       )
       await mutateSpots()
       toast.success('休憩を開始しました')
@@ -208,7 +209,7 @@ export const TouringModeView = ({
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${currentBreak.spotId}` as const,
-        { departedAt: new Date() }
+        { departedAt: getCurrentDate() }
       )
       await mutateSpots()
       toast.success('休憩を終了しました')
@@ -226,7 +227,7 @@ export const TouringModeView = ({
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${nextDestinationSpot.spotId}` as const,
-        { arrivedAt: new Date() }
+        { arrivedAt: getCurrentDate() }
       )
       await mutateSpots()
       toast.success('スポットへの到着を記録しました')

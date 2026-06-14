@@ -13,6 +13,7 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
+import { getCurrentDate } from '@/lib/utils/dateUtils'
 
 type BikeWithTouring = {
   myUserBikeId: string
@@ -68,7 +69,7 @@ export const TouringStartEndSection = () => {
   ) => {
     setLoadingBikeId(myUserBikeId)
     try {
-      const now = new Date()
+      const now = getCurrentDate()
       const defaultTitle = `${bikeName} ${now.toLocaleDateString('ja-JP', {
         month: 'long',
         day: 'numeric',

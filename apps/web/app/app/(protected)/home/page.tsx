@@ -11,6 +11,7 @@ import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
+import { getCurrentDate } from '@/lib/utils/dateUtils'
 
 function Page() {
   const [loadingBikeId, setLoadingBikeId] = useState<string | null>(null)
@@ -59,7 +60,7 @@ function Page() {
         {
           action: 'end',
           touringId,
-          endDate: new Date().toISOString(),
+          endDate: getCurrentDate().toISOString(),
           endLatitude: position?.latitude,
           endLongitude: position?.longitude,
           endMileage,

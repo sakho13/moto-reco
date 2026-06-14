@@ -7,6 +7,7 @@ import {
   UserId,
 } from '@repo/shared-types'
 import type { SpotReorderRequest } from '@repo/shared-types'
+import { getCurrentDate } from '../../../utils/dateUtils'
 import { SpotEntity } from '../entities/SpotEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
@@ -68,7 +69,7 @@ export class SpotService {
 
     try {
       // 到着日時は常に指定値、未指定の場合は現在時刻（実績は常にこの意味）
-      const arrivedAt = params.arrivedAt ?? new Date()
+      const arrivedAt = params.arrivedAt ?? getCurrentDate()
 
       const spotType = params.type ?? 'SPOT'
 
@@ -183,7 +184,7 @@ export class SpotService {
           : existingSpot.isSkipped
       let skippedAt = existingSpot.skippedAt
       if (params.isSkipped !== undefined) {
-        skippedAt = params.isSkipped ? new Date() : null
+        skippedAt = params.isSkipped ? getCurrentDate() : null
       }
 
       const updatedSpot = new SpotEntity({

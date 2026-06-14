@@ -2,6 +2,7 @@ import { Context, Next } from 'hono'
 import { prisma } from '@repo/database'
 import { createUserId } from '@repo/shared-types'
 import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
+import { getCurrentDate } from '../../../utils/dateUtils'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
@@ -51,7 +52,7 @@ export async function honoAuthMiddleware(
       const expiresAt = new Date(
         userInfo.createdAt.getTime() + GUEST_ACCOUNT_LIMITS.TTL_MS
       )
-      if (new Date() > expiresAt) {
+      if (getCurrentDate() > expiresAt) {
         throw new ApiV1Error(
           'GUEST_EXPIRED',
           'ゲストアカウントの有効期限が切れました。本登録を行ってください。'

@@ -9,6 +9,7 @@ import {
 import { HistorySection } from './HistorySection'
 import styles from './page.module.css'
 import { SwipeCardDeck } from './SwipeCardDeck'
+import { getCurrentDate } from '@/lib/utils/dateUtils'
 
 type AnswerMap = Record<string, MopedTestAnswerOption>
 
@@ -125,7 +126,7 @@ export function MopedTestClient() {
 
     const newSession: TestSession = {
       sessionId: Date.now().toString(36),
-      submittedAt: new Date().toISOString(),
+      submittedAt: getCurrentDate().toISOString(),
       score: finalScore,
       totalCount: questionSet.questionCount,
       passScore: questionSet.passScore,

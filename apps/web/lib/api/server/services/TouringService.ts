@@ -9,6 +9,7 @@ import {
   UserId,
 } from '@repo/shared-types'
 import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
+import { getCurrentDate } from '../../../utils/dateUtils'
 import { SpotEntity } from '../entities/SpotEntity'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
@@ -201,7 +202,7 @@ export class TouringService {
           startMileage = totalMileage ?? undefined
         }
 
-        const startDate = params.startDate ?? new Date()
+        const startDate = params.startDate ?? getCurrentDate()
 
         // プランから開始する場合: プラン＋プランスポットを取得してコピーする
         if (params.touringPlanId !== undefined) {
@@ -326,7 +327,7 @@ export class TouringService {
         endMileage = totalMileage ?? undefined
       }
 
-      const endDate = params.endDate ?? new Date()
+      const endDate = params.endDate ?? getCurrentDate()
       const touring = new TouringEntity({
         touringId: existingTouring.id,
         myUserBikeId: existingTouring.myUserBikeId,

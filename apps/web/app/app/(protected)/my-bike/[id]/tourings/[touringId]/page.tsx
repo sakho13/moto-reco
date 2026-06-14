@@ -20,6 +20,7 @@ import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
+import { getCurrentDate } from '@/lib/utils/dateUtils'
 import {
   buildGoogleMapsRouteUrl,
   buildGoogleMapsTwoPointUrl,
@@ -261,7 +262,7 @@ function TouringDetailPage() {
     try {
       await apiPost(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`,
-        { type: 'BREAK', arrivedAt: new Date() }
+        { type: 'BREAK', arrivedAt: getCurrentDate() }
       )
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
@@ -282,7 +283,7 @@ function TouringDetailPage() {
     try {
       await apiPatch(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots/${currentBreak.spotId}`,
-        { departedAt: new Date() }
+        { departedAt: getCurrentDate() }
       )
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`

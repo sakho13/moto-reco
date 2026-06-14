@@ -1,5 +1,6 @@
 import { Prisma } from '@repo/database'
 import type { UserId } from '@repo/shared-types'
+import { getCurrentDate } from '../../../utils/dateUtils'
 import type {
   CreateNotificationInput,
   INotificationRepository,
@@ -52,14 +53,14 @@ export class PrismaNotificationRepository
   async markAsRead(id: string, userId: UserId): Promise<void> {
     await this.connection.tNotification.updateMany({
       where: { id, userId },
-      data: { isRead: true, readAt: new Date() },
+      data: { isRead: true, readAt: getCurrentDate() },
     })
   }
 
   async markAllAsRead(userId: UserId): Promise<void> {
     await this.connection.tNotification.updateMany({
       where: { userId, isRead: false },
-      data: { isRead: true, readAt: new Date() },
+      data: { isRead: true, readAt: getCurrentDate() },
     })
   }
 

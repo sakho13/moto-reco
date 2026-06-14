@@ -24,6 +24,7 @@ import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
+import { getCurrentDate } from '@/lib/utils/dateUtils'
 import {
   buildGoogleMapsRouteUrl,
   buildGoogleMapsTwoPointUrl,
@@ -393,7 +394,7 @@ function TouringPlanDetailPage() {
       await apiPost(`/api/v1/user-bike/bike/${bikeId}/tourings/start-end`, {
         action: 'start',
         touringPlanId: planId,
-        startDate: new Date().toISOString(),
+        startDate: getCurrentDate().toISOString(),
         startLatitude: position?.latitude,
         startLongitude: position?.longitude,
       })
