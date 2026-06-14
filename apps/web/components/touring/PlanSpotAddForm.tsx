@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { mutate } from 'swr'
+import type { TouringPlanRouteType } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -23,15 +24,13 @@ type PlanSpotAddFormProps = {
   onSuccess: () => void
 }
 
-type RouteTypeOption = '' | 'GENERAL' | 'HIGHWAY' | 'MIXED'
-
 type PlanSpotFormState = {
   type: 'SPOT' | 'BREAK'
   name: string
   memo: string
   stayMinutes: string
   travelMinutesFromPrev: string
-  routeTypeFromPrev: RouteTypeOption
+  routeTypeFromPrev: TouringPlanRouteType
 }
 
 const ROUTE_TYPE_OPTIONS = [
@@ -63,7 +62,7 @@ export function PlanSpotAddForm({
     memo: '',
     stayMinutes: '',
     travelMinutesFromPrev: '',
-    routeTypeFromPrev: '',
+    routeTypeFromPrev: 'MIXED',
   })
 
   const detailUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}`
@@ -75,7 +74,7 @@ export function PlanSpotAddForm({
       ? buildGoogleMapsTwoPointUrl(
           prevLocation,
           location,
-          formState.routeTypeFromPrev || null
+          formState.routeTypeFromPrev
         )
       : null
 
@@ -106,10 +105,7 @@ export function PlanSpotAddForm({
             formState.travelMinutesFromPrev !== ''
               ? Number(formState.travelMinutesFromPrev)
               : undefined,
-          routeTypeFromPrev:
-            formState.routeTypeFromPrev !== ''
-              ? formState.routeTypeFromPrev
-              : undefined,
+          routeTypeFromPrev: formState.routeTypeFromPrev,
         }
       )
 
@@ -232,12 +228,11 @@ export function PlanSpotAddForm({
           <Select
             id="planSpotRouteTypeFromPrev"
             options={ROUTE_TYPE_OPTIONS}
-            placeholder="未選択"
             value={formState.routeTypeFromPrev}
             onChange={(e) =>
               setFormState((prev) => ({
                 ...prev,
-                routeTypeFromPrev: e.target.value as RouteTypeOption,
+                routeTypeFromPrev: e.target.value as TouringPlanRouteType,
               }))
             }
             disabled={isSubmitting}

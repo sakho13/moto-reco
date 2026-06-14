@@ -2,7 +2,10 @@
 
 import { useState } from 'react'
 import { mutate } from 'swr'
-import type { ApiResponseTouringPlanLocation } from '@repo/shared-types'
+import type {
+  ApiResponseTouringPlanLocation,
+  TouringPlanRouteType,
+} from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -15,8 +18,6 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
 type LocationType = 'start' | 'destination'
-
-type RouteTypeOption = '' | 'GENERAL' | 'HIGHWAY' | 'MIXED'
 
 const ROUTE_TYPE_OPTIONS = [
   { value: 'GENERAL', label: '下道' },
@@ -62,9 +63,10 @@ export function PlanLocationEditModal({
       ? String(initialLocation.travelMinutesFromPrev)
       : ''
   )
-  const [routeTypeFromPrev, setRouteTypeFromPrev] = useState<RouteTypeOption>(
-    initialLocation?.routeTypeFromPrev ?? ''
-  )
+  const [routeTypeFromPrev, setRouteTypeFromPrev] =
+    useState<TouringPlanRouteType>(
+      initialLocation?.routeTypeFromPrev ?? 'MIXED'
+    )
   const [isSaving, setIsSaving] = useState(false)
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [error, setError] = useState('')
@@ -79,11 +81,7 @@ export function PlanLocationEditModal({
 
   const routeLink =
     !isStart && prevLocation && location
-      ? buildGoogleMapsTwoPointUrl(
-          prevLocation,
-          location,
-          routeTypeFromPrev || null
-        )
+      ? buildGoogleMapsTwoPointUrl(prevLocation, location, routeTypeFromPrev)
       : null
 
   const handleLocationSaved = (lat: number, lng: number) => {
@@ -110,8 +108,7 @@ export function PlanLocationEditModal({
                 travelMinutesFromPrev !== ''
                   ? Number(travelMinutesFromPrev)
                   : null,
-              routeTypeFromPrev:
-                routeTypeFromPrev !== '' ? routeTypeFromPrev : null,
+              routeTypeFromPrev: routeTypeFromPrev,
             }),
       })
       await Promise.all([mutate(detailUrl), mutate(spotsUrl)])
@@ -202,10 +199,9 @@ export function PlanLocationEditModal({
                 <Select
                   id="planLocationRouteTypeFromPrev"
                   options={ROUTE_TYPE_OPTIONS}
-                  placeholder="未選択"
                   value={routeTypeFromPrev}
                   onChange={(e) =>
-                    setRouteTypeFromPrev(e.target.value as RouteTypeOption)
+                    setRouteTypeFromPrev(e.target.value as TouringPlanRouteType)
                   }
                   disabled={isSaving}
                 />

@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
-import type { ApiResponseTouringPlanSpotDetail } from '@repo/shared-types'
+import type {
+  ApiResponseTouringPlanSpotDetail,
+  TouringPlanRouteType,
+} from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -25,14 +28,12 @@ interface PlanSpotEditFormProps {
   onDelete?: () => void
 }
 
-type RouteTypeOption = '' | 'GENERAL' | 'HIGHWAY' | 'MIXED'
-
 type PlanSpotFormState = {
   name: string
   memo: string
   stayMinutes: string
   travelMinutesFromPrev: string
-  routeTypeFromPrev: RouteTypeOption
+  routeTypeFromPrev: TouringPlanRouteType
 }
 
 const ROUTE_TYPE_OPTIONS = [
@@ -87,7 +88,7 @@ export function PlanSpotEditForm({
     memo: '',
     stayMinutes: '',
     travelMinutesFromPrev: '',
-    routeTypeFromPrev: '',
+    routeTypeFromPrev: 'MIXED',
   })
 
   const isBreak = spot.type === 'BREAK'
@@ -100,7 +101,7 @@ export function PlanSpotEditForm({
       ? buildGoogleMapsTwoPointUrl(
           prevLocation,
           currentLocation,
-          formState.routeTypeFromPrev || null
+          formState.routeTypeFromPrev
         )
       : null
 
@@ -113,7 +114,7 @@ export function PlanSpotEditForm({
         spot.travelMinutesFromPrev != null
           ? String(spot.travelMinutesFromPrev)
           : '',
-      routeTypeFromPrev: spot.routeTypeFromPrev ?? '',
+      routeTypeFromPrev: spot.routeTypeFromPrev ?? 'MIXED',
     })
 
     if (spot.latitude != null && spot.longitude != null) {
@@ -178,10 +179,7 @@ export function PlanSpotEditForm({
             formState.travelMinutesFromPrev !== ''
               ? Number(formState.travelMinutesFromPrev)
               : null,
-          routeTypeFromPrev:
-            formState.routeTypeFromPrev !== ''
-              ? formState.routeTypeFromPrev
-              : null,
+          routeTypeFromPrev: formState.routeTypeFromPrev,
         }
       )
 
@@ -278,12 +276,11 @@ export function PlanSpotEditForm({
           <Select
             id="planSpotRouteTypeFromPrev"
             options={ROUTE_TYPE_OPTIONS}
-            placeholder="未選択"
             value={formState.routeTypeFromPrev}
             onChange={(e) =>
               setFormState((prev) => ({
                 ...prev,
-                routeTypeFromPrev: e.target.value as RouteTypeOption,
+                routeTypeFromPrev: e.target.value as TouringPlanRouteType,
               }))
             }
             disabled={isSubmitting}
