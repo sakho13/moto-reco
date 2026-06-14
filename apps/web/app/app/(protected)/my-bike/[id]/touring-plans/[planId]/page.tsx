@@ -24,7 +24,10 @@ import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
+import {
+  formatPlanSpotOffsetMinutes,
+  getCurrentDate,
+} from '@/lib/utils/dateUtils'
 import {
   buildGoogleMapsRouteUrl,
   buildGoogleMapsTwoPointUrl,
@@ -248,7 +251,10 @@ function TouringPlanDetailPage() {
     longitude: plan.startLocation?.longitude ?? null,
     primaryTime: {
       label: '出発予定',
-      value: plan.startLocation?.plannedDepartureAt ?? null,
+      value: null,
+      displayValue: formatPlanSpotOffsetMinutes(
+        plan.startLocation?.plannedDepartureOffsetMinutes ?? null
+      ),
     },
     travelLink: buildTravelLink(
       plan.startLocation,
@@ -270,10 +276,19 @@ function TouringPlanDetailPage() {
       memo: spot.memo,
       latitude: spot.latitude,
       longitude: spot.longitude,
-      primaryTime: { label: '到着予定', value: spot.plannedArrivalAt },
+      primaryTime: {
+        label: '到着予定',
+        value: null,
+        displayValue: formatPlanSpotOffsetMinutes(
+          spot.plannedArrivalOffsetMinutes
+        ),
+      },
       secondaryTime: {
         label: '出発予定',
-        value: spot.plannedDepartureAt,
+        value: null,
+        displayValue: formatPlanSpotOffsetMinutes(
+          spot.plannedDepartureOffsetMinutes
+        ),
       },
       travelLink: buildTravelLink(
         spot,
@@ -294,7 +309,10 @@ function TouringPlanDetailPage() {
     longitude: plan.destinationLocation?.longitude ?? null,
     primaryTime: {
       label: '到着予定',
-      value: plan.destinationLocation?.plannedArrivalAt ?? null,
+      value: null,
+      displayValue: formatPlanSpotOffsetMinutes(
+        plan.destinationLocation?.plannedArrivalOffsetMinutes ?? null
+      ),
     },
     onEdit: () => setEditingLocationTarget('destination'),
   })

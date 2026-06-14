@@ -37,13 +37,23 @@ export type RouteTimelineItemType = 'START' | 'SPOT' | 'BREAK' | 'DESTINATION'
  * 時刻表示の1スロット分の情報
  *
  * @remarks
- * `value` が `null` の場合は `"{label} 未設定"` と表示する。
+ * `displayValue` が指定されている場合はそれを優先して表示する。
+ * 未指定の場合、`value` が `null` なら `"{label} 未設定"`、
+ * それ以外は `value`（ISO日時文字列）を `HH:mm` 形式に整形して表示する。
  */
 export type RouteTimelineTimeSlot = {
   /** 表示ラベル（例: "予定", "実績", "到着予定"） */
   label: string
   /** ISO日時文字列。表示する値が無い場合は `null` */
   value: string | null
+  /**
+   * 表示用に整形済みの値。指定された場合は `value` を無視してそのまま表示する。
+   *
+   * @remarks
+   * ツーリングプラン（経過分数ベース）など、`value` のISO日時パースが
+   * 適さない場合に使用する。
+   */
+  displayValue?: string
 }
 
 /**
@@ -113,12 +123,16 @@ const formatTimeValue = (value: string): string => {
  *
  * @remarks
  * `slot` が `null`/`undefined` の場合は非表示（`null`を返す）。
- * `slot.value` が `null` の場合は `"{label} 未設定"` を返す。
+ * `slot.displayValue` が指定されている場合はそれをそのまま使う。
+ * 未指定の場合、`slot.value` が `null` なら `"{label} 未設定"` を返し、
+ * それ以外は `slot.value`（ISO日時文字列）を`HH:mm`整形して返す。
  */
 const formatTimeSlot = (
   slot: RouteTimelineTimeSlot | null | undefined
 ): string | null => {
   if (!slot) return null
+  if (slot.displayValue !== undefined)
+    return `${slot.label} ${slot.displayValue}`
   if (slot.value === null) return `${slot.label} 未設定`
   return `${slot.label} ${formatTimeValue(slot.value)}`
 }

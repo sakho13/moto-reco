@@ -16,6 +16,7 @@ import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { formatPlanSpotOffsetMinutes } from '@/lib/utils/dateUtils'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
 interface PlanSpotEditFormProps {
@@ -41,26 +42,6 @@ const ROUTE_TYPE_OPTIONS = [
   { value: 'HIGHWAY', label: '高速' },
   { value: 'MIXED', label: '混在' },
 ]
-
-/**
- * 計算済みの予定時刻を `"YYYY/M/D HH:mm"` 形式に整形する。
- *
- * @remarks
- * `value` が `null` の場合は「未設定」を返す。
- */
-const formatPlannedTime = (value: string | null): string => {
-  if (value === null) return '未設定'
-  try {
-    return new Date(value).toLocaleString('ja-JP', {
-      month: 'numeric',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return value
-  }
-}
 
 /**
  * ツーリングプランの経由地・休憩編集フォーム
@@ -228,12 +209,14 @@ export function PlanSpotEditForm({
         </FormField>
 
         <FormField label={isBreak ? '休憩開始予定' : '到着予定'}>
-          <p className="text-sm">{formatPlannedTime(spot.plannedArrivalAt)}</p>
+          <p className="text-sm">
+            {formatPlanSpotOffsetMinutes(spot.plannedArrivalOffsetMinutes)}
+          </p>
         </FormField>
 
         <FormField label={isBreak ? '休憩終了予定' : '出発予定'}>
           <p className="text-sm">
-            {formatPlannedTime(spot.plannedDepartureAt)}
+            {formatPlanSpotOffsetMinutes(spot.plannedDepartureOffsetMinutes)}
           </p>
         </FormField>
 

@@ -33,3 +33,19 @@ export const getNowLocalDateTimeString = (minuteStep = 1): string => {
   }
   return toLocalDateTimeString(now)
 }
+
+/**
+ * 出発からの経過分数を `"出発から{H}時間{M}分後"` 形式の文字列に整形する。
+ *
+ * @remarks
+ * `minutes` が `null` の場合は `"未設定"` を返す。`0`の場合は `"出発時"` を返す。
+ */
+export const formatPlanSpotOffsetMinutes = (minutes: number | null): string => {
+  if (minutes === null) return '未設定'
+  if (minutes === 0) return '出発時'
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  if (hours === 0) return `出発から${mins}分後`
+  if (mins === 0) return `出発から${hours}時間後`
+  return `出発から${hours}時間${mins}分後`
+}
