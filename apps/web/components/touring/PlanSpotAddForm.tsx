@@ -72,7 +72,11 @@ export function PlanSpotAddForm({
 
   const routeLink =
     prevLocation && location
-      ? buildGoogleMapsTwoPointUrl(prevLocation, location)
+      ? buildGoogleMapsTwoPointUrl(
+          prevLocation,
+          location,
+          formState.routeTypeFromPrev || null
+        )
       : null
 
   const handleLocationSaved = (lat: number, lng: number) => {

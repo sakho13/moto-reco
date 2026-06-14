@@ -79,7 +79,11 @@ export function PlanLocationEditModal({
 
   const routeLink =
     !isStart && prevLocation && location
-      ? buildGoogleMapsTwoPointUrl(prevLocation, location)
+      ? buildGoogleMapsTwoPointUrl(
+          prevLocation,
+          location,
+          routeTypeFromPrev || null
+        )
       : null
 
   const handleLocationSaved = (lat: number, lng: number) => {

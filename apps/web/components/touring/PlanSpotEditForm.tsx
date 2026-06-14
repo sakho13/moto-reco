@@ -97,7 +97,11 @@ export function PlanSpotEditForm({
 
   const routeLink =
     prevLocation && currentLocation
-      ? buildGoogleMapsTwoPointUrl(prevLocation, currentLocation)
+      ? buildGoogleMapsTwoPointUrl(
+          prevLocation,
+          currentLocation,
+          formState.routeTypeFromPrev || null
+        )
       : null
 
   useEffect(() => {

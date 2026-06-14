@@ -1,3 +1,5 @@
+import type { TouringPlanRouteType } from '@repo/shared-types'
+
 type GeoPoint = { lat: number; lng: number }
 
 /**
@@ -24,12 +26,20 @@ export function buildGoogleMapsRouteUrl(points: GeoPoint[]): string | null {
 
 /**
  * 2地点間のGoogleマップ経路URLを生成する。
+ *
+ * @param from - 出発地点
+ * @param to - 到着地点
+ * @param routeType - 経路種別。`'GENERAL'`（下道）の場合のみ
+ * `avoid=highways|tolls` を付与し、高速・有料道路を避ける経路にする。
+ * `'HIGHWAY'` / `'MIXED'` / `null` / `undefined` の場合は付与しない。
  */
 export function buildGoogleMapsTwoPointUrl(
   from: GeoPoint,
-  to: GeoPoint
+  to: GeoPoint,
+  routeType?: TouringPlanRouteType | null
 ): string {
-  return `https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lng}&destination=${to.lat},${to.lng}`
+  const base = `https://www.google.com/maps/dir/?api=1&origin=${from.lat},${from.lng}&destination=${to.lat},${to.lng}`
+  return routeType === 'GENERAL' ? `${base}&avoid=highways|tolls` : base
 }
 
 /**

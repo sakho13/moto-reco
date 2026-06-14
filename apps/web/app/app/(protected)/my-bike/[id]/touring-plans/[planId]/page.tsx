@@ -239,7 +239,8 @@ function TouringPlanDetailPage() {
     return {
       href: buildGoogleMapsTwoPointUrl(
         { lat: from.latitude, lng: from.longitude },
-        { lat: to.latitude, lng: to.longitude }
+        { lat: to.latitude, lng: to.longitude },
+        routeType
       ),
       minutes,
       routeType,
