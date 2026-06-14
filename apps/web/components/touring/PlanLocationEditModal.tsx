@@ -4,22 +4,33 @@ import { useState } from 'react'
 import { mutate } from 'swr'
 import type { ApiResponseTouringPlanLocation } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
-import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { FormField } from '@repo/ui/formField'
+import { Input } from '@repo/ui/input'
+import { Select } from '@repo/ui/select'
 import { toast } from '@repo/ui/sonner'
 import { ModalBase } from '@/components/common/ModalBase'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
+import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
 type LocationType = 'start' | 'destination'
+
+type RouteTypeOption = '' | 'GENERAL' | 'HIGHWAY' | 'MIXED'
+
+const ROUTE_TYPE_OPTIONS = [
+  { value: 'GENERAL', label: '下道' },
+  { value: 'HIGHWAY', label: '高速' },
+  { value: 'MIXED', label: '混在' },
+]
 
 interface PlanLocationEditModalProps {
   bikeId: string
   planId: string
   type: LocationType
   initialLocation: ApiResponseTouringPlanLocation | null
+  /** 前の地点（最後の経由地、無ければ出発地）の位置情報。`type === 'destination'`時の経路確認リンクの算出に使う */
+  prevLocation?: { lat: number; lng: number } | null
   onClose: () => void
   onSuccess: () => void
 }
@@ -28,7 +39,8 @@ interface PlanLocationEditModalProps {
  * ツーリングプランの出発地・目的地編集モーダル
  *
  * @remarks
- * 地図で緯度経度を選択し、出発予定時刻（出発地のみ）/到着予定時刻（目的地のみ）も設定する。
+ * 地図で緯度経度を選択する。目的地のみ、前の地点からの移動時間・経路種別も設定する
+ * （出発予定/到着予定はサーバー側で計算されるため入力項目はない）。
  * 「解除」ボタンで出発地・目的地の設定を解除できる。
  */
 export function PlanLocationEditModal({
@@ -36,6 +48,7 @@ export function PlanLocationEditModal({
   planId,
   type,
   initialLocation,
+  prevLocation = null,
   onClose,
   onSuccess,
 }: PlanLocationEditModalProps) {
@@ -44,13 +57,14 @@ export function PlanLocationEditModal({
       ? { lat: initialLocation.latitude, lng: initialLocation.longitude }
       : null
   )
-  const [plannedTime, setPlannedTime] = useState(() => {
-    const value =
-      type === 'start'
-        ? initialLocation?.plannedDepartureAt
-        : initialLocation?.plannedArrivalAt
-    return value ? toLocalDateTimeString(value) : ''
-  })
+  const [travelMinutesFromPrev, setTravelMinutesFromPrev] = useState(
+    initialLocation?.travelMinutesFromPrev != null
+      ? String(initialLocation.travelMinutesFromPrev)
+      : ''
+  )
+  const [routeTypeFromPrev, setRouteTypeFromPrev] = useState<RouteTypeOption>(
+    initialLocation?.routeTypeFromPrev ?? ''
+  )
   const [isSaving, setIsSaving] = useState(false)
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [error, setError] = useState('')
@@ -62,6 +76,11 @@ export function PlanLocationEditModal({
     : (`/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/destination-location` as const)
   const spotsUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`
   const detailUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}`
+
+  const routeLink =
+    !isStart && prevLocation && location
+      ? buildGoogleMapsTwoPointUrl(prevLocation, location)
+      : null
 
   const handleLocationSaved = (lat: number, lng: number) => {
     setLocation({ lat, lng })
@@ -81,13 +100,14 @@ export function PlanLocationEditModal({
         latitude: location.lat,
         longitude: location.lng,
         ...(isStart
-          ? {
-              plannedDepartureAt:
-                plannedTime !== '' ? new Date(plannedTime) : undefined,
-            }
+          ? {}
           : {
-              plannedArrivalAt:
-                plannedTime !== '' ? new Date(plannedTime) : undefined,
+              travelMinutesFromPrev:
+                travelMinutesFromPrev !== ''
+                  ? Number(travelMinutesFromPrev)
+                  : null,
+              routeTypeFromPrev:
+                routeTypeFromPrev !== '' ? routeTypeFromPrev : null,
             }),
       })
       await Promise.all([mutate(detailUrl), mutate(spotsUrl)])
@@ -137,18 +157,57 @@ export function PlanLocationEditModal({
             </div>
           </FormField>
 
-          <FormField
-            label={isStart ? '出発予定時刻（任意）' : '到着予定時刻（任意）'}
-            htmlFor="planLocationPlannedTime"
-          >
-            <DateTimeInput
-              id="planLocationPlannedTime"
-              value={plannedTime}
-              minuteStep={5}
-              onChange={(e) => setPlannedTime(e.target.value)}
-              disabled={isSaving}
-            />
-          </FormField>
+          {!isStart && (
+            <>
+              {routeLink && (
+                <a
+                  href={routeLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 underline"
+                >
+                  Googleマップで経路を確認
+                </a>
+              )}
+
+              <FormField
+                label="前の地点からの移動時間（任意）"
+                htmlFor="planLocationTravelMinutesFromPrev"
+              >
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="planLocationTravelMinutesFromPrev"
+                    type="number"
+                    min="0"
+                    max="1440"
+                    value={travelMinutesFromPrev}
+                    onChange={(e) => setTravelMinutesFromPrev(e.target.value)}
+                    placeholder="例: 30"
+                    disabled={isSaving}
+                  />
+                  <span className="text-sm opacity-60 whitespace-nowrap">
+                    分
+                  </span>
+                </div>
+              </FormField>
+
+              <FormField
+                label="経路種別（任意）"
+                htmlFor="planLocationRouteTypeFromPrev"
+              >
+                <Select
+                  id="planLocationRouteTypeFromPrev"
+                  options={ROUTE_TYPE_OPTIONS}
+                  placeholder="未選択"
+                  value={routeTypeFromPrev}
+                  onChange={(e) =>
+                    setRouteTypeFromPrev(e.target.value as RouteTypeOption)
+                  }
+                  disabled={isSaving}
+                />
+              </FormField>
+            </>
+          )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
