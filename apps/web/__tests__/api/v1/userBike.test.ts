@@ -2650,6 +2650,11 @@ describe('UserBike API Endpoints', () => {
             body: JSON.stringify({
               title: '経由地ありツーリング計画',
               departAt: '2024-10-01T06:00:00.000Z',
+              startLocation: {
+                latitude: 35.0,
+                longitude: 135.0,
+                name: '出発地',
+              },
             }),
           }
         )
@@ -2668,7 +2673,8 @@ describe('UserBike API Endpoints', () => {
             body: JSON.stringify({
               type: 'SPOT',
               name: '経由地A',
-              plannedArrivalAt: '2024-10-01T10:00:00.000Z',
+              // 出発06:00 + 移動240分 = 到着10:00
+              travelMinutesFromPrev: 240,
             }),
           }
         )
@@ -2685,7 +2691,8 @@ describe('UserBike API Endpoints', () => {
             body: JSON.stringify({
               type: 'BREAK',
               name: '休憩ポイントB',
-              plannedArrivalAt: '2024-10-01T12:00:00.000Z',
+              // 経由地A出発10:00（stayMinutes未指定=0分）+ 移動120分 = 到着12:00
+              travelMinutesFromPrev: 120,
             }),
           }
         )
