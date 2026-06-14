@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Button } from '@repo/ui/button'
-import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -23,7 +22,8 @@ export interface TouringPlanFormProps {
  * ツーリングプラン新規作成フォーム
  *
  * @remarks
- * タイトルと出発予定日時のみを入力する。出発地・目的地は詳細画面で別途設定する。
+ * タイトルのみを入力する。出発予定日時は登録時点では当日09:00で自動設定され、
+ * 出発地・目的地と合わせてプラン詳細画面の編集モーダル（`PlanEditModal`）から後で変更できる。
  */
 export const TouringPlanForm = ({
   onSubmit,
@@ -42,11 +42,6 @@ export const TouringPlanForm = ({
 
     if (!formData.title.trim()) {
       setValidationError('タイトルを入力してください')
-      return
-    }
-
-    if (!formData.departAt) {
-      setValidationError('出発予定日時を入力してください')
       return
     }
 
@@ -74,19 +69,6 @@ export const TouringPlanForm = ({
           required
           disabled={isSubmitting}
           placeholder="例: 夏の北海道ツーリング"
-        />
-      </FormField>
-
-      <FormField label="出発予定日時" htmlFor="departAt" required>
-        <DateTimeInput
-          id="departAt"
-          value={formData.departAt}
-          minuteStep={5}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, departAt: e.target.value }))
-          }
-          required
-          disabled={isSubmitting}
         />
       </FormField>
 
