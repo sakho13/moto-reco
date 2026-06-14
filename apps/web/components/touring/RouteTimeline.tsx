@@ -17,6 +17,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Fragment } from 'react'
+import type { TouringPlanRouteType } from '@repo/shared-types'
 import styles from './RouteTimeline.module.css'
 import { DragHandleIcon } from '@/components/icons/DragHandleIcon'
 import { EditIcon } from '@/components/icons/EditIcon'
@@ -68,7 +69,11 @@ export type RouteTimelineItem = {
   /** スキップ済みかどうか */
   isSkipped?: boolean
   /** この地点から次の地点（経由地が無ければ目的地）へのGoogleマップ経路リンク。未設定/算出不可ならnullまたは省略 */
-  travelLink?: { href: string; minutes: number | null } | null
+  travelLink?: {
+    href: string
+    minutes: number | null
+    routeType?: TouringPlanRouteType | null
+  } | null
   /** クリック/編集ボタン押下時のハンドラ。未指定なら編集ボタン非表示 */
   onEdit?: () => void
 }
@@ -275,7 +280,39 @@ function FixedRow({ item, badgeClassName, badgeLabel }: FixedRowProps) {
 }
 
 type TravelLinkRowProps = {
-  travelLink: { href: string; minutes: number | null } | null | undefined
+  travelLink:
+    | {
+        href: string
+        minutes: number | null
+        routeType?: TouringPlanRouteType | null
+      }
+    | null
+    | undefined
+}
+
+/**
+ * 経路種別ごとの表示ラベル
+ */
+const ROUTE_TYPE_LABELS: Record<TouringPlanRouteType, string> = {
+  GENERAL: '下道',
+  HIGHWAY: '高速',
+  MIXED: '混在',
+}
+
+/**
+ * 移動時間・経路種別から括弧内に表示する補足テキストを組み立てる
+ *
+ * @remarks
+ * `minutes`/`routeType`のいずれも無い場合は空文字を返す（括弧自体を表示しない）。
+ */
+const buildTravelDetailText = (
+  minutes: number | null,
+  routeType: TouringPlanRouteType | null | undefined
+): string => {
+  const parts: string[] = []
+  if (minutes !== null) parts.push(`移動 ${minutes}分`)
+  if (routeType) parts.push(ROUTE_TYPE_LABELS[routeType])
+  return parts.length > 0 ? `（${parts.join('・')}）` : ''
 }
 
 /**
@@ -291,7 +328,7 @@ function TravelLinkRow({ travelLink }: TravelLinkRowProps) {
       className={styles.travelLink}
     >
       ↓ Googleマップで経路を表示
-      {travelLink.minutes !== null ? `（移動 ${travelLink.minutes}分）` : ''}
+      {buildTravelDetailText(travelLink.minutes, travelLink.routeType)}
     </a>
   )
 }
