@@ -16,8 +16,6 @@ export type TouringPlanSpot = {
   memo: string | null
   latitude: number | null
   longitude: number | null
-  plannedArrivalOffsetMinutes: number | null
-  plannedDepartureOffsetMinutes: number | null
   stayMinutes: number | null
   travelMinutesFromPrev: number | null
   routeTypeFromPrev: TouringPlanRouteType | null

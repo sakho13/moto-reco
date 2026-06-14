@@ -15,7 +15,10 @@ import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
-import { recomputeTouringPlanSpotTimes } from './recomputeTouringPlanSpotTimes'
+import {
+  computeTouringPlanSpotTimes,
+  TouringPlanSpotWithTimes,
+} from './computeTouringPlanSpotTimes'
 
 type LocationParams = {
   latitude: number
@@ -46,8 +49,8 @@ type UpdatePlanParams = {
 
 export type TouringPlanDetail = {
   plan: TouringPlanEntity
-  startSpot: TouringPlanSpotEntity | null
-  destinationSpot: TouringPlanSpotEntity | null
+  startSpot: TouringPlanSpotWithTimes | null
+  destinationSpot: TouringPlanSpotWithTimes | null
   touringIds: TouringId[]
 }
 
@@ -72,8 +75,8 @@ export class TouringPlanService {
    */
   public async registerPlan(params: RegisterPlanParams): Promise<{
     plan: TouringPlanEntity
-    startSpot: TouringPlanSpotEntity | null
-    destinationSpot: TouringPlanSpotEntity | null
+    startSpot: TouringPlanSpotWithTimes | null
+    destinationSpot: TouringPlanSpotWithTimes | null
   }> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
@@ -96,7 +99,7 @@ export class TouringPlanService {
 
       const createdPlan = await this.touringPlanRepository.createPlan(plan)
 
-      let startSpot: TouringPlanSpotEntity | null = null
+      let createdStartSpot: TouringPlanSpotEntity | null = null
       if (params.startLocation) {
         const spot = new TouringPlanSpotEntity({
           touringPlanSpotId: createTouringPlanSpotId(''),
@@ -106,17 +109,16 @@ export class TouringPlanService {
           memo: params.startLocation.memo ?? null,
           latitude: params.startLocation.latitude,
           longitude: params.startLocation.longitude,
-          plannedArrivalOffsetMinutes: null,
-          plannedDepartureOffsetMinutes: null,
           stayMinutes: null,
           travelMinutesFromPrev: null,
           routeTypeFromPrev: null,
           sortOrder: 0,
         })
-        startSpot = await this.touringPlanSpotRepository.createPlanSpot(spot)
+        createdStartSpot =
+          await this.touringPlanSpotRepository.createPlanSpot(spot)
       }
 
-      let destinationSpot: TouringPlanSpotEntity | null = null
+      let createdDestinationSpot: TouringPlanSpotEntity | null = null
       if (params.destinationLocation) {
         const spot = new TouringPlanSpotEntity({
           touringPlanSpotId: createTouringPlanSpotId(''),
@@ -126,8 +128,6 @@ export class TouringPlanService {
           memo: params.destinationLocation.memo ?? null,
           latitude: params.destinationLocation.latitude,
           longitude: params.destinationLocation.longitude,
-          plannedArrivalOffsetMinutes: null,
-          plannedDepartureOffsetMinutes: null,
           stayMinutes: null,
           travelMinutesFromPrev:
             params.destinationLocation.travelMinutesFromPrev ?? null,
@@ -135,14 +135,21 @@ export class TouringPlanService {
             params.destinationLocation.routeTypeFromPrev ?? null,
           sortOrder: 9999,
         })
-        destinationSpot =
+        createdDestinationSpot =
           await this.touringPlanSpotRepository.createPlanSpot(spot)
       }
 
-      await recomputeTouringPlanSpotTimes(
+      const spotsWithTimes = await computeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
         createdPlan.id
       )
+
+      const startSpot = createdStartSpot
+        ? (spotsWithTimes.find((s) => s.spot.type === 'START') ?? null)
+        : null
+      const destinationSpot = createdDestinationSpot
+        ? (spotsWithTimes.find((s) => s.spot.type === 'DESTINATION') ?? null)
+        : null
 
       return { plan: createdPlan, startSpot, destinationSpot }
     } catch (error) {
@@ -221,11 +228,15 @@ export class TouringPlanService {
       )
     }
 
-    const [startSpot, destinationSpot, tourings] = await Promise.all([
-      this.touringPlanSpotRepository.findPlanSpotByType(planId, 'START'),
-      this.touringPlanSpotRepository.findPlanSpotByType(planId, 'DESTINATION'),
+    const [spotsWithTimes, tourings] = await Promise.all([
+      computeTouringPlanSpotTimes(this.touringPlanSpotRepository, planId),
       this.touringRepository.findTouringsByPlanId(planId),
     ])
+
+    const startSpot =
+      spotsWithTimes.find((s) => s.spot.type === 'START') ?? null
+    const destinationSpot =
+      spotsWithTimes.find((s) => s.spot.type === 'DESTINATION') ?? null
 
     return {
       plan,

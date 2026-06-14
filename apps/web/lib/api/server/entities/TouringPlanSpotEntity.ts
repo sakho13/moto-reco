@@ -24,14 +24,6 @@ export class TouringPlanSpotEntity {
       throw new Error('経度は-180以上180以下である必要があります')
     }
 
-    if (
-      spot.plannedArrivalOffsetMinutes !== null &&
-      spot.plannedDepartureOffsetMinutes !== null &&
-      spot.plannedArrivalOffsetMinutes > spot.plannedDepartureOffsetMinutes
-    ) {
-      throw new Error('到着予定時刻は出発予定時刻以前である必要があります')
-    }
-
     if (spot.stayMinutes !== null && spot.stayMinutes < 0) {
       throw new Error('滞在時間は0以上である必要があります')
     }
@@ -69,14 +61,6 @@ export class TouringPlanSpotEntity {
 
   public get longitude(): number | null {
     return this._value.longitude
-  }
-
-  public get plannedArrivalOffsetMinutes(): number | null {
-    return this._value.plannedArrivalOffsetMinutes
-  }
-
-  public get plannedDepartureOffsetMinutes(): number | null {
-    return this._value.plannedDepartureOffsetMinutes
   }
 
   public get stayMinutes(): number | null {

@@ -16,7 +16,6 @@ import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { formatPlanSpotOffsetMinutes } from '@/lib/utils/dateUtils'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
 interface PlanSpotEditFormProps {
@@ -206,18 +205,6 @@ export function PlanSpotEditForm({
             placeholder="メモ（任意）"
             disabled={isSubmitting}
           />
-        </FormField>
-
-        <FormField label={isBreak ? '休憩開始予定' : '到着予定'}>
-          <p className="text-sm">
-            {formatPlanSpotOffsetMinutes(spot.plannedArrivalOffsetMinutes)}
-          </p>
-        </FormField>
-
-        <FormField label={isBreak ? '休憩終了予定' : '出発予定'}>
-          <p className="text-sm">
-            {formatPlanSpotOffsetMinutes(spot.plannedDepartureOffsetMinutes)}
-          </p>
         </FormField>
 
         {routeLink && (

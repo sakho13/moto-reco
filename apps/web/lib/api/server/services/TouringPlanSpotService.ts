@@ -13,7 +13,10 @@ import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
-import { recomputeTouringPlanSpotTimes } from './recomputeTouringPlanSpotTimes'
+import {
+  computeTouringPlanSpotTimes,
+  TouringPlanSpotWithTimes,
+} from './computeTouringPlanSpotTimes'
 
 type RegisterPlanSpotParams = {
   planId: TouringPlanId
@@ -59,7 +62,7 @@ export class TouringPlanSpotService {
    */
   public async registerPlanSpot(
     params: RegisterPlanSpotParams
-  ): Promise<TouringPlanSpotEntity> {
+  ): Promise<TouringPlanSpotWithTimes> {
     await this._findPlanOrThrow(
       params.planId,
       params.myUserBikeId,
@@ -85,8 +88,6 @@ export class TouringPlanSpotService {
         memo: params.memo ?? null,
         latitude: params.latitude ?? null,
         longitude: params.longitude ?? null,
-        plannedArrivalOffsetMinutes: null,
-        plannedDepartureOffsetMinutes: null,
         stayMinutes: params.stayMinutes ?? null,
         travelMinutesFromPrev: params.travelMinutesFromPrev ?? null,
         routeTypeFromPrev: params.routeTypeFromPrev ?? null,
@@ -94,11 +95,16 @@ export class TouringPlanSpotService {
       })
 
       const created = await this.touringPlanSpotRepository.createPlanSpot(spot)
-      await recomputeTouringPlanSpotTimes(
+
+      const spotsWithTimes = await computeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
         params.planId
       )
-      return created
+      const result = spotsWithTimes.find((s) => s.spot.id === created.id)
+      if (!result) {
+        throw new Error('登録したスポットの取得に失敗しました')
+      }
+      return result
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -114,23 +120,13 @@ export class TouringPlanSpotService {
     planId: TouringPlanId,
     myUserBikeId: MyUserBikeId,
     userId: UserId
-  ): Promise<TouringPlanSpotEntity[]> {
+  ): Promise<TouringPlanSpotWithTimes[]> {
     await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
-    const spots =
-      await this.touringPlanSpotRepository.findPlanSpotsByPlanId(planId)
-
-    const startSpot = spots.find((s) => s.type === 'START')
-    const destinationSpot = spots.find((s) => s.type === 'DESTINATION')
-    const waypoints = spots
-      .filter((s) => s.type === 'SPOT' || s.type === 'BREAK')
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-
-    return [
-      ...(startSpot ? [startSpot] : []),
-      ...waypoints,
-      ...(destinationSpot ? [destinationSpot] : []),
-    ]
+    return await computeTouringPlanSpotTimes(
+      this.touringPlanSpotRepository,
+      planId
+    )
   }
 
   /**
@@ -138,7 +134,7 @@ export class TouringPlanSpotService {
    */
   public async updatePlanSpot(
     params: UpdatePlanSpotParams
-  ): Promise<TouringPlanSpotEntity> {
+  ): Promise<TouringPlanSpotWithTimes> {
     await this._findPlanOrThrow(
       params.planId,
       params.myUserBikeId,
@@ -176,9 +172,6 @@ export class TouringPlanSpotService {
           params.longitude !== undefined
             ? params.longitude
             : existingSpot.longitude,
-        plannedArrivalOffsetMinutes: existingSpot.plannedArrivalOffsetMinutes,
-        plannedDepartureOffsetMinutes:
-          existingSpot.plannedDepartureOffsetMinutes,
         stayMinutes:
           params.stayMinutes !== undefined
             ? params.stayMinutes
@@ -196,11 +189,16 @@ export class TouringPlanSpotService {
 
       const updated =
         await this.touringPlanSpotRepository.updatePlanSpot(updatedSpot)
-      await recomputeTouringPlanSpotTimes(
+
+      const spotsWithTimes = await computeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
         params.planId
       )
-      return updated
+      const result = spotsWithTimes.find((s) => s.spot.id === updated.id)
+      if (!result) {
+        throw new Error('更新したスポットの取得に失敗しました')
+      }
+      return result
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -237,7 +235,6 @@ export class TouringPlanSpotService {
     }
 
     await this.touringPlanSpotRepository.deletePlanSpot(spotId, planId)
-    await recomputeTouringPlanSpotTimes(this.touringPlanSpotRepository, planId)
   }
 
   /**
@@ -255,8 +252,6 @@ export class TouringPlanSpotService {
       spotIds.map((id) => createTouringPlanSpotId(id)),
       planId
     )
-
-    await recomputeTouringPlanSpotTimes(this.touringPlanSpotRepository, planId)
   }
 
   /**
@@ -274,7 +269,7 @@ export class TouringPlanSpotService {
       name?: string | null
       memo?: string | null
     } | null
-  ): Promise<TouringPlanSpotEntity | null> {
+  ): Promise<TouringPlanSpotWithTimes | null> {
     await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
     try {
@@ -293,11 +288,19 @@ export class TouringPlanSpotService {
             }
       )
 
-      await recomputeTouringPlanSpotTimes(
+      if (result === null) return null
+
+      const spotsWithTimes = await computeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
         planId
       )
-      return result
+      const startSpotWithTimes = spotsWithTimes.find(
+        (s) => s.spot.type === 'START'
+      )
+      if (!startSpotWithTimes) {
+        throw new Error('設定した出発地の取得に失敗しました')
+      }
+      return startSpotWithTimes
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -323,7 +326,7 @@ export class TouringPlanSpotService {
       travelMinutesFromPrev?: number | null
       routeTypeFromPrev?: TouringPlanRouteType | null
     } | null
-  ): Promise<TouringPlanSpotEntity | null> {
+  ): Promise<TouringPlanSpotWithTimes | null> {
     await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
     try {
@@ -342,11 +345,19 @@ export class TouringPlanSpotService {
             }
       )
 
-      await recomputeTouringPlanSpotTimes(
+      if (result === null) return null
+
+      const spotsWithTimes = await computeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
         planId
       )
-      return result
+      const destinationSpotWithTimes = spotsWithTimes.find(
+        (s) => s.spot.type === 'DESTINATION'
+      )
+      if (!destinationSpotWithTimes) {
+        throw new Error('設定した目的地の取得に失敗しました')
+      }
+      return destinationSpotWithTimes
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)

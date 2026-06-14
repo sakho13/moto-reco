@@ -21,6 +21,7 @@ import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotReposi
 import { ITouringRepository } from '../interfaces/ITouringRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
+import { computeTouringPlanSpotTimes } from './computeTouringPlanSpotTimes'
 
 type RegisterTouringParams = {
   myUserBikeId: MyUserBikeId
@@ -229,15 +230,19 @@ export class TouringService {
             )
           }
 
-          const planSpots =
-            await this.touringPlanSpotRepository.findPlanSpotsByPlanId(plan.id)
-          const startSpot = planSpots.find((s) => s.type === 'START')
-          const destinationSpot = planSpots.find(
-            (s) => s.type === 'DESTINATION'
+          const planSpotsWithTimes = await computeTouringPlanSpotTimes(
+            this.touringPlanSpotRepository,
+            plan.id
           )
-          const waypointSpots = planSpots
-            .filter((s) => s.type === 'SPOT' || s.type === 'BREAK')
-            .sort((a, b) => a.sortOrder - b.sortOrder)
+          const startSpot = planSpotsWithTimes.find(
+            (s) => s.spot.type === 'START'
+          )?.spot
+          const destinationSpot = planSpotsWithTimes.find(
+            (s) => s.spot.type === 'DESTINATION'
+          )?.spot
+          const waypointSpots = planSpotsWithTimes.filter(
+            (s) => s.spot.type === 'SPOT' || s.spot.type === 'BREAK'
+          )
 
           const touring = new TouringEntity({
             touringId: createTouringId(''),
@@ -273,11 +278,11 @@ export class TouringService {
             const spot = new SpotEntity({
               spotId: createSpotId(''),
               touringId: created.id,
-              type: waypoint.type === 'BREAK' ? 'BREAK' : 'SPOT',
-              name: waypoint.name,
-              memo: waypoint.memo,
-              latitude: waypoint.latitude,
-              longitude: waypoint.longitude,
+              type: waypoint.spot.type === 'BREAK' ? 'BREAK' : 'SPOT',
+              name: waypoint.spot.name,
+              memo: waypoint.spot.memo,
+              latitude: waypoint.spot.latitude,
+              longitude: waypoint.spot.longitude,
               plannedArrivalAt: reanchorPlannedTime(
                 waypoint.plannedArrivalOffsetMinutes
               ),

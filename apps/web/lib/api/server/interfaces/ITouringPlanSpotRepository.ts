@@ -10,8 +10,6 @@ import { TouringPlanSpotEntity } from '../entities/TouringPlanSpotEntity'
  *
  * @remarks
  * `data` に `null` を渡すと該当 `type` のスポットを削除する。
- * `plannedArrivalOffsetMinutes`/`plannedDepartureOffsetMinutes` は常に `null` で
- * 作成・更新され、直後に再計算ヘルパーで上書きされる。
  */
 export type SingletonTouringPlanSpotData = {
   name: string | null

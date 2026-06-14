@@ -19,13 +19,16 @@ import {
   TouringPlanStartLocationUpdateRequestSchema,
   TouringPlanUpdateRequestSchema,
 } from '@repo/shared-types'
-import { TouringPlanSpotEntity } from '../../entities/TouringPlanSpotEntity'
 import { honoAuthMiddleware } from '../../middlewares/honoAuth'
 import { zodValidateJson } from '../../middlewares/zodValidation'
 import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeRepository'
 import { PrismaTouringPlanRepository } from '../../repositories/PrismaTouringPlanRepository'
 import { PrismaTouringPlanSpotRepository } from '../../repositories/PrismaTouringPlanSpotRepository'
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
+import {
+  computeTouringPlanSpotTimes,
+  TouringPlanSpotWithTimes,
+} from '../../services/computeTouringPlanSpotTimes'
 import { TouringPlanService } from '../../services/TouringPlanService'
 import { TouringPlanSpotService } from '../../services/TouringPlanSpotService'
 
@@ -34,43 +37,51 @@ const userBikeTouringPlans = new Hono().basePath(
 )
 
 /**
- * `TouringPlanSpotEntity` を `ApiResponseTouringPlanLocation` 形式に変換する
+ * `TouringPlanSpotWithTimes` を `ApiResponseTouringPlanLocation` 形式に変換する
  */
 const toLocationResponse = (
-  spot: TouringPlanSpotEntity
-): ApiResponseTouringPlanLocation => ({
-  touringPlanSpotId: spot.id,
-  latitude: spot.latitude,
-  longitude: spot.longitude,
-  name: spot.name,
-  memo: spot.memo,
-  plannedArrivalOffsetMinutes: spot.plannedArrivalOffsetMinutes,
-  plannedDepartureOffsetMinutes: spot.plannedDepartureOffsetMinutes,
-  stayMinutes: spot.stayMinutes,
-  travelMinutesFromPrev: spot.travelMinutesFromPrev,
-  routeTypeFromPrev: spot.routeTypeFromPrev,
-})
+  spotWithTimes: TouringPlanSpotWithTimes
+): ApiResponseTouringPlanLocation => {
+  const { spot, plannedArrivalOffsetMinutes, plannedDepartureOffsetMinutes } =
+    spotWithTimes
+  return {
+    touringPlanSpotId: spot.id,
+    latitude: spot.latitude,
+    longitude: spot.longitude,
+    name: spot.name,
+    memo: spot.memo,
+    plannedArrivalOffsetMinutes,
+    plannedDepartureOffsetMinutes,
+    stayMinutes: spot.stayMinutes,
+    travelMinutesFromPrev: spot.travelMinutesFromPrev,
+    routeTypeFromPrev: spot.routeTypeFromPrev,
+  }
+}
 
 /**
- * `TouringPlanSpotEntity` を `ApiResponseTouringPlanSpotDetail` 形式に変換する
+ * `TouringPlanSpotWithTimes` を `ApiResponseTouringPlanSpotDetail` 形式に変換する
  */
 const toPlanSpotResponse = (
-  spot: TouringPlanSpotEntity
-): ApiResponseTouringPlanSpotDetail => ({
-  touringPlanSpotId: spot.id,
-  touringPlanId: spot.touringPlanId,
-  type: spot.type,
-  name: spot.name,
-  memo: spot.memo,
-  latitude: spot.latitude,
-  longitude: spot.longitude,
-  plannedArrivalOffsetMinutes: spot.plannedArrivalOffsetMinutes,
-  plannedDepartureOffsetMinutes: spot.plannedDepartureOffsetMinutes,
-  stayMinutes: spot.stayMinutes,
-  travelMinutesFromPrev: spot.travelMinutesFromPrev,
-  routeTypeFromPrev: spot.routeTypeFromPrev,
-  sortOrder: spot.sortOrder,
-})
+  spotWithTimes: TouringPlanSpotWithTimes
+): ApiResponseTouringPlanSpotDetail => {
+  const { spot, plannedArrivalOffsetMinutes, plannedDepartureOffsetMinutes } =
+    spotWithTimes
+  return {
+    touringPlanSpotId: spot.id,
+    touringPlanId: spot.touringPlanId,
+    type: spot.type,
+    name: spot.name,
+    memo: spot.memo,
+    latitude: spot.latitude,
+    longitude: spot.longitude,
+    plannedArrivalOffsetMinutes,
+    plannedDepartureOffsetMinutes,
+    stayMinutes: spot.stayMinutes,
+    travelMinutesFromPrev: spot.travelMinutesFromPrev,
+    routeTypeFromPrev: spot.routeTypeFromPrev,
+    sortOrder: spot.sortOrder,
+  }
+}
 
 // プラン一覧取得（目的地情報を含む）
 userBikeTouringPlans.get('/', honoAuthMiddleware, async (c) => {
@@ -255,11 +266,15 @@ userBikeTouringPlans.patch(
         title: body.title,
       })
 
-      const [startSpot, destinationSpot, tourings] = await Promise.all([
-        touringPlanSpotRepo.findPlanSpotByType(updatedPlan.id, 'START'),
-        touringPlanSpotRepo.findPlanSpotByType(updatedPlan.id, 'DESTINATION'),
+      const [spotsWithTimes, tourings] = await Promise.all([
+        computeTouringPlanSpotTimes(touringPlanSpotRepo, updatedPlan.id),
         touringRepo.findTouringsByPlanId(updatedPlan.id),
       ])
+
+      const startSpot =
+        spotsWithTimes.find((s) => s.spot.type === 'START') ?? null
+      const destinationSpot =
+        spotsWithTimes.find((s) => s.spot.type === 'DESTINATION') ?? null
 
       return { plan: updatedPlan, startSpot, destinationSpot, tourings }
     })
