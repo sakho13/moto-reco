@@ -2214,7 +2214,6 @@ describe('UserBike API Endpoints', () => {
           },
           body: JSON.stringify({
             title: '終着地座標保持テストプラン',
-            departAt: '2024-12-01T06:00:00.000Z',
             destinationLocation: {
               latitude: 35.1,
               longitude: 136.9,
@@ -2420,7 +2419,6 @@ describe('UserBike API Endpoints', () => {
             },
             body: JSON.stringify({
               title: '北海道ツーリング計画',
-              departAt: '2024-07-01T06:00:00.000Z',
             }),
           }
         )
@@ -2506,7 +2504,6 @@ describe('UserBike API Endpoints', () => {
             },
             body: JSON.stringify({
               title: '元のプランタイトル',
-              departAt: '2024-07-10T06:00:00.000Z',
             }),
           }
         )
@@ -2547,7 +2544,6 @@ describe('UserBike API Endpoints', () => {
             },
             body: JSON.stringify({
               title: '終着地あり北海道ツーリング計画',
-              departAt: '2024-08-01T06:00:00.000Z',
               destinationLocation: {
                 latitude: 43.0618,
                 longitude: 141.3545,
@@ -2602,7 +2598,6 @@ describe('UserBike API Endpoints', () => {
             },
             body: JSON.stringify({
               title: '終着地なしツーリング計画',
-              departAt: '2024-09-01T06:00:00.000Z',
             }),
           }
         )
@@ -2649,7 +2644,6 @@ describe('UserBike API Endpoints', () => {
             },
             body: JSON.stringify({
               title: '経由地ありツーリング計画',
-              departAt: '2024-10-01T06:00:00.000Z',
               startLocation: {
                 latitude: 35.0,
                 longitude: 135.0,
@@ -4675,7 +4669,6 @@ describe('UserBike API Endpoints', () => {
           },
           body: JSON.stringify({
             title: 'プランツーリング',
-            departAt: '2025-08-01T09:00:00.000Z',
           }),
         }
       )
@@ -5138,7 +5131,6 @@ describe('UserBike API Endpoints', () => {
             },
             body: JSON.stringify({
               title: 'ゲストプラン',
-              departAt: '2024-06-01T09:00:00.000Z',
             }),
           }
         )
@@ -5176,7 +5168,6 @@ describe('UserBike API Endpoints', () => {
             },
             body: JSON.stringify({
               title: 'ゲストプラン',
-              departAt: '2024-06-01T09:00:00.000Z',
             }),
           }
         )
