@@ -20,11 +20,11 @@ describe('buildGoogleMapsTwoPointUrl', () => {
     expect(url).not.toContain('avoid')
   })
 
-  test('routeTypeがGENERALの場合、avoid=highways|tollsが付与される', () => {
+  test('routeTypeがGENERALの場合、avoid=highways,tollsが付与される', () => {
     const url = buildGoogleMapsTwoPointUrl(FROM, TO, 'GENERAL')
 
     expect(url).toBe(
-      `https://www.google.com/maps/dir/?api=1&origin=${FROM.lat},${FROM.lng}&destination=${TO.lat},${TO.lng}&avoid=highways|tolls`
+      `https://www.google.com/maps/dir/?api=1&origin=${FROM.lat},${FROM.lng}&destination=${TO.lat},${TO.lng}&avoid=highways,tolls`
     )
   })
 
