@@ -5,11 +5,9 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
-import { getTodayAtTime } from '@/lib/utils/dateUtils'
 
 export interface TouringPlanFormData {
   title: string
-  departAt: string // "YYYY-MM-DDTHH:mm"
 }
 
 export interface TouringPlanFormProps {
@@ -22,8 +20,8 @@ export interface TouringPlanFormProps {
  * ツーリングプラン新規作成フォーム
  *
  * @remarks
- * タイトルのみを入力する。出発予定日時は登録時点では当日09:00で自動設定され、
- * 出発地・目的地と合わせてプラン詳細画面の編集モーダル（`PlanEditModal`）から後で変更できる。
+ * タイトルのみを入力する。出発地・目的地はプラン詳細画面の編集モーダル
+ * （`PlanEditModal`）や専用UIから後で設定できる。
  */
 export const TouringPlanForm = ({
   onSubmit,
@@ -32,7 +30,6 @@ export const TouringPlanForm = ({
 }: TouringPlanFormProps) => {
   const [formData, setFormData] = useState<TouringPlanFormData>({
     title: '',
-    departAt: getTodayAtTime('09:00'),
   })
   const [validationError, setValidationError] = useState('')
 

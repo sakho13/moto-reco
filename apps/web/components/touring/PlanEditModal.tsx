@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { mutate } from 'swr'
 import type { ApiResponseTouringPlanDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
-import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -12,7 +11,6 @@ import { toast } from '@repo/ui/sonner'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 interface PlanEditModalProps {
   bikeId: string
@@ -23,7 +21,7 @@ interface PlanEditModalProps {
 }
 
 /**
- * ツーリングプランのタイトル・出発予定日時の編集および削除を行うモーダル
+ * ツーリングプランのタイトルの編集および削除を行うモーダル
  */
 export function PlanEditModal({
   bikeId,
@@ -33,7 +31,6 @@ export function PlanEditModal({
   onSuccess,
 }: PlanEditModalProps) {
   const [title, setTitle] = useState(plan.title)
-  const [departAt, setDepartAt] = useState(toLocalDateTimeString(plan.departAt))
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -52,17 +49,10 @@ export function PlanEditModal({
       setError('タイトルを入力してください')
       return
     }
-    if (!departAt) {
-      setError('出発予定日時を入力してください')
-      return
-    }
 
     setIsSubmitting(true)
     try {
-      await apiPatch(detailUrl, {
-        title,
-        departAt: new Date(departAt),
-      })
+      await apiPatch(detailUrl, { title })
       await Promise.all([mutate(detailUrl), mutate(listUrl)])
       toast.success('更新しました')
       onSuccess('update')
@@ -114,17 +104,6 @@ export function PlanEditModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={100}
-              required
-              disabled={isSubmitting}
-            />
-          </FormField>
-
-          <FormField label="出発予定日時" htmlFor="planEditDepartAt" required>
-            <DateTimeInput
-              id="planEditDepartAt"
-              value={departAt}
-              minuteStep={5}
-              onChange={(e) => setDepartAt(e.target.value)}
               required
               disabled={isSubmitting}
             />

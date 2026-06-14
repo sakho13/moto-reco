@@ -33,9 +33,3 @@ export const getNowLocalDateTimeString = (minuteStep = 1): string => {
   }
   return toLocalDateTimeString(now)
 }
-
-/** 今日の日付に指定時刻を組み合わせた YYYY-MM-DDTHH:mm 形式の文字列を返す */
-export const getTodayAtTime = (timeStr: string): string => {
-  const d = getCurrentDate()
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${timeStr}`
-}

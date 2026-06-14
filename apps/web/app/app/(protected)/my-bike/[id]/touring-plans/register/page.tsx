@@ -31,7 +31,6 @@ function TouringPlanRegisterPage() {
         `/api/v1/user-bike/bike/${bikeId}/touring-plans`,
         {
           title: formData.title,
-          departAt: new Date(formData.departAt),
         }
       )
 

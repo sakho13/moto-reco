@@ -12,7 +12,7 @@ export interface PlanCardProps {
  * ツーリングプラン一覧の各アイテムを表示するカード
  *
  * @remarks
- * タイトル・出発予定日時・帰着予定日時・目的地名を表示する。
+ * タイトル・更新日時・目的地名を表示する。
  * `onClick` が指定されている場合はクリック可能なカードとして表示する。
  */
 export const PlanCard = ({ plan, onClick }: PlanCardProps) => {
@@ -53,9 +53,7 @@ export const PlanCard = ({ plan, onClick }: PlanCardProps) => {
       </div>
 
       <div className={styles.periodRow}>
-        <span>
-          {formatDateTime(plan.departAt)} 〜 {formatDateTime(plan.returnAt)}
-        </span>
+        <span>更新: {formatDateTime(plan.updatedAt)}</span>
       </div>
 
       {plan.destination?.name && (
