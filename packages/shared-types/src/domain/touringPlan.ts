@@ -8,6 +8,6 @@ export type TouringPlan = {
   touringPlanId: TouringPlanId
   myUserBikeId: MyUserBikeId
   title: string
-  departAt: Date
-  returnAt: Date
+  createdAt: Date
+  updatedAt: Date
 }

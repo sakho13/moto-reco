@@ -242,9 +242,7 @@ model TUserMyBikeTouringPlan {
   id           String @id @default(cuid(2))
   userMyBikeId String @map("my_bike_id")
 
-  title    String   @map("title")
-  departAt DateTime @map("depart_at")
-  returnAt DateTime @map("return_at")
+  title String @map("title")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -253,7 +251,7 @@ model TUserMyBikeTouringPlan {
   spots      TUserMyBikeTouringPlanSpot[]
   tourings   TUserMyBikeTouring[]
 
-  @@index([userMyBikeId, departAt])
+  @@index([userMyBikeId, createdAt])
 }
 
 model TUserMyBikeTouringPlanSpot {

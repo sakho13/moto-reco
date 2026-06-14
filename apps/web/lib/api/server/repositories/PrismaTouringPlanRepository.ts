@@ -12,16 +12,16 @@ const touringPlanSelect = {
   id: true,
   userMyBikeId: true,
   title: true,
-  departAt: true,
-  returnAt: true,
+  createdAt: true,
+  updatedAt: true,
 } as const
 
 type TouringPlanRow = {
   id: string
   userMyBikeId: string
   title: string
-  departAt: Date
-  returnAt: Date
+  createdAt: Date
+  updatedAt: Date
 }
 
 const toTouringPlanEntity = (row: TouringPlanRow): TouringPlanEntity =>
@@ -29,8 +29,8 @@ const toTouringPlanEntity = (row: TouringPlanRow): TouringPlanEntity =>
     touringPlanId: createTouringPlanId(row.id),
     myUserBikeId: createMyUserBikeId(row.userMyBikeId),
     title: row.title,
-    departAt: row.departAt,
-    returnAt: row.returnAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   })
 
 /**
@@ -45,8 +45,6 @@ export class PrismaTouringPlanRepository
       data: {
         userMyBikeId: plan.myUserBikeId,
         title: plan.title,
-        departAt: plan.departAt,
-        returnAt: plan.returnAt,
       },
       select: touringPlanSelect,
     })
@@ -59,8 +57,6 @@ export class PrismaTouringPlanRepository
       where: { id: plan.id },
       data: {
         title: plan.title,
-        departAt: plan.departAt,
-        returnAt: plan.returnAt,
       },
       select: touringPlanSelect,
     })
@@ -72,7 +68,7 @@ export class PrismaTouringPlanRepository
     const plans = await this.connection.tUserMyBikeTouringPlan.findMany({
       where: { userMyBikeId: myUserBikeId },
       select: touringPlanSelect,
-      orderBy: { departAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
     })
 
     return plans.map(toTouringPlanEntity)

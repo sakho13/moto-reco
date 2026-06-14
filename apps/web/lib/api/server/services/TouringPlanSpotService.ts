@@ -60,7 +60,7 @@ export class TouringPlanSpotService {
   public async registerPlanSpot(
     params: RegisterPlanSpotParams
   ): Promise<TouringPlanSpotEntity> {
-    const plan = await this._findPlanOrThrow(
+    await this._findPlanOrThrow(
       params.planId,
       params.myUserBikeId,
       params.userId
@@ -96,9 +96,7 @@ export class TouringPlanSpotService {
       const created = await this.touringPlanSpotRepository.createPlanSpot(spot)
       await recomputeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
-        this.touringPlanRepository,
-        params.planId,
-        plan
+        params.planId
       )
       return created
     } catch (error) {
@@ -141,7 +139,7 @@ export class TouringPlanSpotService {
   public async updatePlanSpot(
     params: UpdatePlanSpotParams
   ): Promise<TouringPlanSpotEntity> {
-    const plan = await this._findPlanOrThrow(
+    await this._findPlanOrThrow(
       params.planId,
       params.myUserBikeId,
       params.userId
@@ -199,9 +197,7 @@ export class TouringPlanSpotService {
         await this.touringPlanSpotRepository.updatePlanSpot(updatedSpot)
       await recomputeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
-        this.touringPlanRepository,
-        params.planId,
-        plan
+        params.planId
       )
       return updated
     } catch (error) {
@@ -221,7 +217,7 @@ export class TouringPlanSpotService {
     myUserBikeId: MyUserBikeId,
     userId: UserId
   ): Promise<void> {
-    const plan = await this._findPlanOrThrow(planId, myUserBikeId, userId)
+    await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
     const existingSpot = await this.touringPlanSpotRepository.findPlanSpotById(
       spotId,
@@ -240,12 +236,7 @@ export class TouringPlanSpotService {
     }
 
     await this.touringPlanSpotRepository.deletePlanSpot(spotId, planId)
-    await recomputeTouringPlanSpotTimes(
-      this.touringPlanSpotRepository,
-      this.touringPlanRepository,
-      planId,
-      plan
-    )
+    await recomputeTouringPlanSpotTimes(this.touringPlanSpotRepository, planId)
   }
 
   /**
@@ -257,19 +248,14 @@ export class TouringPlanSpotService {
     myUserBikeId: MyUserBikeId,
     userId: UserId
   ): Promise<void> {
-    const plan = await this._findPlanOrThrow(planId, myUserBikeId, userId)
+    await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
     await this.touringPlanSpotRepository.reorderPlanSpots(
       spotIds.map((id) => createTouringPlanSpotId(id)),
       planId
     )
 
-    await recomputeTouringPlanSpotTimes(
-      this.touringPlanSpotRepository,
-      this.touringPlanRepository,
-      planId,
-      plan
-    )
+    await recomputeTouringPlanSpotTimes(this.touringPlanSpotRepository, planId)
   }
 
   /**
@@ -288,7 +274,7 @@ export class TouringPlanSpotService {
       memo?: string | null
     } | null
   ): Promise<TouringPlanSpotEntity | null> {
-    const plan = await this._findPlanOrThrow(planId, myUserBikeId, userId)
+    await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
     try {
       const result = await this.touringPlanSpotRepository.upsertSingletonSpot(
@@ -308,9 +294,7 @@ export class TouringPlanSpotService {
 
       await recomputeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
-        this.touringPlanRepository,
-        planId,
-        plan
+        planId
       )
       return result
     } catch (error) {
@@ -339,7 +323,7 @@ export class TouringPlanSpotService {
       routeTypeFromPrev?: TouringPlanRouteType | null
     } | null
   ): Promise<TouringPlanSpotEntity | null> {
-    const plan = await this._findPlanOrThrow(planId, myUserBikeId, userId)
+    await this._findPlanOrThrow(planId, myUserBikeId, userId)
 
     try {
       const result = await this.touringPlanSpotRepository.upsertSingletonSpot(
@@ -359,9 +343,7 @@ export class TouringPlanSpotService {
 
       await recomputeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
-        this.touringPlanRepository,
-        planId,
-        plan
+        planId
       )
       return result
     } catch (error) {

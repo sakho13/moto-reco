@@ -14,6 +14,17 @@ type SpotTimeResult = {
 }
 
 /**
+ * プランスポットの予定時刻計算における固定の基準時刻。
+ *
+ * @remarks
+ * ツーリングプラン自体は出発予定日時を持たないため、各スポットの
+ * `plannedArrivalAt`/`plannedDepartureAt` はこの基準時刻からの経過時間として
+ * 計算・保存される。「このプランで開始する」操作時には、この基準時刻からの
+ * 経過時間を実際のツーリング開始時刻に再アンカーして実績スポットへコピーする。
+ */
+export const PLAN_SPOT_TIME_BASE_DATE = new Date('2000-01-01T00:00:00+09:00')
+
+/**
  * `departAt` を起点に、各スポットの予定到着時刻・予定出発時刻をチェイン計算する。
  *
  * @remarks
@@ -33,7 +44,9 @@ type SpotTimeResult = {
  *    未設定、または現在の出発時刻が `null` の場合、以降の `currentTime` は `null` となり、
  *    それ以降のすべてのスポットの到着・出発時刻が `null` になる。
  *
- * @param departAt - ツーリングプランの出発予定時刻
+ * @param departAt - 経過時間計算の起点となる時刻（呼び出し元は固定の基準時刻
+ * {@link PLAN_SPOT_TIME_BASE_DATE} を渡すこと）。各スポットの計算結果は
+ * この時刻からの経過時間を表す値になる。
  * @param orderedSpots - `START → SPOT/BREAK → DESTINATION` の順に並んだスポット情報
  * @returns `orderedSpots` と同じ長さ・同じ順序の、予定到着時刻・予定出発時刻の配列
  */

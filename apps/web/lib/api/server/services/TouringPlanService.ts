@@ -28,7 +28,6 @@ type RegisterPlanParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
   title: string
-  departAt: Date
   startLocation?: LocationParams | null
   destinationLocation?:
     | (LocationParams & {
@@ -43,7 +42,6 @@ type UpdatePlanParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
   title?: string
-  departAt?: Date
 }
 
 export type TouringPlanDetail = {
@@ -91,8 +89,9 @@ export class TouringPlanService {
         touringPlanId: createTouringPlanId(''),
         myUserBikeId: params.myUserBikeId,
         title: params.title,
-        departAt: params.departAt,
-        returnAt: params.departAt, // 後でrecomputeTouringPlanSpotTimesにより再計算される
+        // createdAt/updatedAtはプレースホルダー。リポジトリ作成後の戻り値で実値に置き換わる
+        createdAt: new Date(0),
+        updatedAt: new Date(0),
       })
 
       const createdPlan = await this.touringPlanRepository.createPlan(plan)
@@ -140,14 +139,12 @@ export class TouringPlanService {
           await this.touringPlanSpotRepository.createPlanSpot(spot)
       }
 
-      const recomputedPlan = await recomputeTouringPlanSpotTimes(
+      await recomputeTouringPlanSpotTimes(
         this.touringPlanSpotRepository,
-        this.touringPlanRepository,
-        createdPlan.id,
-        createdPlan
+        createdPlan.id
       )
 
-      return { plan: recomputedPlan, startSpot, destinationSpot }
+      return { plan: createdPlan, startSpot, destinationSpot }
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -239,11 +236,9 @@ export class TouringPlanService {
   }
 
   /**
-   * プランのタイトル・出発予定日時を更新する
+   * プランのタイトルを更新する
    *
    * @remarks
-   * `departAt` 変更時は {@link recomputeTouringPlanSpotTimes} により
-   * 各スポットの予定到着・出発時刻と `returnAt` を再計算する。
    * 位置情報の更新は専用エンドポイント
    * (`setStartSpot`/`setDestinationSpot`)経由で行う。
    */
@@ -272,36 +267,12 @@ export class TouringPlanService {
     }
 
     try {
-      if (params.departAt !== undefined) {
-        // returnAtは一旦departAtで仮置きする
-        // （existingPlan.returnAtのままだと departAt > returnAt となり
-        //   エンティティのバリデーションに違反する可能性があるため）。
-        // 直後のrecomputeTouringPlanSpotTimesで正しい値に再計算される。
-        const updatedPlan = new TouringPlanEntity({
-          touringPlanId: existingPlan.id,
-          myUserBikeId: existingPlan.myUserBikeId,
-          title: params.title ?? existingPlan.title,
-          departAt: params.departAt,
-          returnAt: params.departAt,
-        })
-
-        const savedPlan =
-          await this.touringPlanRepository.updatePlan(updatedPlan)
-
-        return await recomputeTouringPlanSpotTimes(
-          this.touringPlanSpotRepository,
-          this.touringPlanRepository,
-          params.planId,
-          savedPlan
-        )
-      }
-
       const updatedPlan = new TouringPlanEntity({
         touringPlanId: existingPlan.id,
         myUserBikeId: existingPlan.myUserBikeId,
         title: params.title ?? existingPlan.title,
-        departAt: existingPlan.departAt,
-        returnAt: existingPlan.returnAt,
+        createdAt: existingPlan.createdAt,
+        updatedAt: existingPlan.updatedAt,
       })
 
       return await this.touringPlanRepository.updatePlan(updatedPlan)

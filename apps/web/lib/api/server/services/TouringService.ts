@@ -21,6 +21,7 @@ import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotReposi
 import { ITouringRepository } from '../interfaces/ITouringRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
+import { PLAN_SPOT_TIME_BASE_DATE } from './calculateTouringPlanSpotTimes'
 
 type RegisterTouringParams = {
   myUserBikeId: MyUserBikeId
@@ -259,6 +260,15 @@ export class TouringService {
 
           const created = await this.touringRepository.createTouring(touring)
 
+          // プランスポットの予定時刻（PLAN_SPOT_TIME_BASE_DATEからの経過時間）を
+          // 実際のツーリング開始時刻(startDate)を基準とした実時刻に再アンカーする
+          const reanchorPlannedTime = (value: Date | null): Date | null => {
+            if (value === null) return null
+            const elapsedMs =
+              value.getTime() - PLAN_SPOT_TIME_BASE_DATE.getTime()
+            return new Date(startDate.getTime() + elapsedMs)
+          }
+
           // プランの経由地・休憩を実績スポットとしてコピーする
           for (const [index, waypoint] of waypointSpots.entries()) {
             const spot = new SpotEntity({
@@ -269,8 +279,10 @@ export class TouringService {
               memo: waypoint.memo,
               latitude: waypoint.latitude,
               longitude: waypoint.longitude,
-              plannedArrivalAt: waypoint.plannedArrivalAt,
-              plannedDepartureAt: waypoint.plannedDepartureAt,
+              plannedArrivalAt: reanchorPlannedTime(waypoint.plannedArrivalAt),
+              plannedDepartureAt: reanchorPlannedTime(
+                waypoint.plannedDepartureAt
+              ),
               arrivedAt: null,
               departedAt: null,
               isSkipped: false,
