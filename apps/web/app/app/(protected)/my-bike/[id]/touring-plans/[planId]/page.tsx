@@ -95,20 +95,6 @@ function TouringPlanDetailPage() {
     }
   )
 
-  const formatDateTime = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    } catch {
-      return dateString
-    }
-  }
-
   if (planLoading) {
     return (
       <div className="w-full max-w-2xl">
@@ -187,7 +173,6 @@ function TouringPlanDetailPage() {
     })
   }
 
-  const hasMap = mapPoints.length > 0
   const googleMapsUrl = buildGoogleMapsRouteUrl(mapPoints)
 
   // 緯度経度の両方が設定されているか判定する型ガード
@@ -468,9 +453,7 @@ function TouringPlanDetailPage() {
 
   return (
     <>
-      <div
-        className={`w-full flex flex-row items-start gap-3 mb-4 ${hasMap ? 'max-w-5xl' : 'max-w-md'}`}
-      >
+      <div className="w-full flex flex-row items-start gap-3 mb-4 max-w-5xl">
         <div className="shrink-0 pt-0.5">
           <Button
             onClick={() => router.push(`/app/my-bike/${bikeId}/touring-plans`)}
@@ -490,53 +473,41 @@ function TouringPlanDetailPage() {
               <EditIcon />
             </button>
           </div>
-          <p className={`text-xs mt-1 ${styles.mutedText}`}>
-            出発予定 {formatDateTime(plan.departAt)}
-            <br />
-            帰着予定 {formatDateTime(plan.returnAt)}
-          </p>
         </div>
       </div>
 
-      {hasMap ? (
-        <div className="w-full max-w-5xl flex flex-col md:flex-row md:gap-6 md:items-start gap-4">
-          <div className="md:flex-1 min-w-0">
-            <div className={styles.mapStickyWrapper}>
-              <div className={styles.card}>
-                <div className={styles.mapWrapper}>
-                  <TouringRouteMap
-                    points={mapPoints}
-                    containerClassName={styles.mapContainerLarge}
-                    onMapClick={handleMapClick}
-                  />
-                  {googleMapsUrl && (
-                    <a
-                      href={googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.googleMapsLink}
-                    >
-                      Googleマップで経路を表示
-                    </a>
-                  )}
-                  <p className={styles.mapClickHint}>
-                    地図をタップしてスポットを追加
-                  </p>
-                </div>
+      <div className="w-full max-w-5xl flex flex-col md:flex-row md:gap-6 md:items-start gap-4">
+        <div className="md:flex-1 min-w-0">
+          <div className={styles.mapStickyWrapper}>
+            <div className={styles.card}>
+              <div className={styles.mapWrapper}>
+                <TouringRouteMap
+                  points={mapPoints}
+                  containerClassName={styles.mapContainerLarge}
+                  onMapClick={handleMapClick}
+                />
+                {googleMapsUrl && (
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.googleMapsLink}
+                  >
+                    Googleマップで経路を表示
+                  </a>
+                )}
+                <p className={styles.mapClickHint}>
+                  地図をタップしてスポットを追加
+                </p>
               </div>
             </div>
           </div>
-          <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
-            {routeAndHistoryCards}
-            <div className={styles.fixedFooterSpacer} />
-          </div>
         </div>
-      ) : (
-        <div className="w-full max-w-md space-y-4">
+        <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
           {routeAndHistoryCards}
           <div className={styles.fixedFooterSpacer} />
         </div>
-      )}
+      </div>
 
       <div className={styles.fixedFooter}>
         <div className={styles.fixedFooterInner}>
