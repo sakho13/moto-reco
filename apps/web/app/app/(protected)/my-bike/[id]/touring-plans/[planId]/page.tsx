@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import type { TouringPlanRouteType } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
@@ -26,7 +27,6 @@ import { useGeolocation } from '@/lib/hooks/useGeolocation'
 import {
   buildGoogleMapsRouteUrl,
   buildGoogleMapsTwoPointUrl,
-  calcTravelMinutes,
 } from '@/lib/utils/googleMaps'
 
 function TouringPlanDetailPage() {
@@ -199,10 +199,25 @@ function TouringPlanDetailPage() {
     loc != null && loc.latitude != null && loc.longitude != null
 
   /**
-   * 2地点間のGoogleマップ経路リンクと移動時間を算出する。
+   * 地点情報を「前の地点」として各モーダルに渡す`{ lat, lng }`形式に変換する。
+   *
+   * @remarks
+   * 緯度経度が無い場合は `null` を返す。
+   */
+  const toPrevLocation = (
+    loc:
+      | { latitude: number | null; longitude: number | null }
+      | null
+      | undefined
+  ): { lat: number; lng: number } | null =>
+    hasLatLng(loc) ? { lat: loc.latitude, lng: loc.longitude } : null
+
+  /**
+   * 2地点間のGoogleマップ経路リンクと移動時間・経路種別を算出する。
    *
    * @remarks
    * いずれかの地点に緯度経度が無い場合は `null` を返す。
+   * 移動時間・経路種別は対象地点（次の地点）の`travelMinutesFromPrev`/`routeTypeFromPrev`をそのまま使う。
    */
   const buildTravelLink = (
     from:
@@ -213,16 +228,21 @@ function TouringPlanDetailPage() {
       | { latitude: number | null; longitude: number | null }
       | null
       | undefined,
-    departAt: string | null | undefined,
-    arriveAt: string | null | undefined
-  ): { href: string; minutes: number | null } | null => {
+    minutes: number | null,
+    routeType: TouringPlanRouteType | null
+  ): {
+    href: string
+    minutes: number | null
+    routeType: TouringPlanRouteType | null
+  } | null => {
     if (!hasLatLng(from) || !hasLatLng(to)) return null
     return {
       href: buildGoogleMapsTwoPointUrl(
         { lat: from.latitude, lng: from.longitude },
         { lat: to.latitude, lng: to.longitude }
       ),
-      minutes: calcTravelMinutes(departAt, arriveAt),
+      minutes,
+      routeType,
     }
   }
 
@@ -231,9 +251,6 @@ function TouringPlanDetailPage() {
 
   const firstMiddleSpot = middleSpots[0]
   const startTravelTarget = firstMiddleSpot ?? plan.destinationLocation
-  const startTravelArriveAt =
-    firstMiddleSpot?.plannedArrivalAt ??
-    plan.destinationLocation?.plannedArrivalAt
 
   timelineItems.push({
     id: 'START',
@@ -249,8 +266,8 @@ function TouringPlanDetailPage() {
     travelLink: buildTravelLink(
       plan.startLocation,
       startTravelTarget,
-      plan.startLocation?.plannedDepartureAt,
-      startTravelArriveAt
+      startTravelTarget?.travelMinutesFromPrev ?? null,
+      startTravelTarget?.routeTypeFromPrev ?? null
     ),
     onEdit: () => setEditingLocationTarget('start'),
   })
@@ -258,8 +275,6 @@ function TouringPlanDetailPage() {
   middleSpots.forEach((spot, index) => {
     const nextSpot = middleSpots[index + 1]
     const travelTarget = nextSpot ?? plan.destinationLocation
-    const travelArriveAt =
-      nextSpot?.plannedArrivalAt ?? plan.destinationLocation?.plannedArrivalAt
 
     timelineItems.push({
       id: spot.touringPlanSpotId,
@@ -276,8 +291,8 @@ function TouringPlanDetailPage() {
       travelLink: buildTravelLink(
         spot,
         travelTarget,
-        spot.plannedDepartureAt,
-        travelArriveAt
+        travelTarget?.travelMinutesFromPrev ?? null,
+        travelTarget?.routeTypeFromPrev ?? null
       ),
       onEdit: () => setEditingSpotId(spot.touringPlanSpotId),
     })
@@ -301,6 +316,29 @@ function TouringPlanDetailPage() {
 
   const editingSpot = spots?.find(
     (spot) => spot.touringPlanSpotId === editingSpotId
+  )
+
+  // PlanSpotAddModal用「前の地点」: 既存の経由地一覧の最後、無ければ出発地
+  const lastMiddleSpot = middleSpots[middleSpots.length - 1]
+  const addSpotPrevLocation = toPrevLocation(
+    lastMiddleSpot ?? plan.startLocation
+  )
+
+  // PlanSpotEditModal用「前の地点」: 編集対象スポットの直前のスポット、無ければ出発地
+  const editingSpotIndex = editingSpot
+    ? middleSpots.findIndex(
+        (spot) => spot.touringPlanSpotId === editingSpot.touringPlanSpotId
+      )
+    : -1
+  const editSpotPrevLocation = toPrevLocation(
+    editingSpotIndex > 0
+      ? middleSpots[editingSpotIndex - 1]
+      : plan.startLocation
+  )
+
+  // PlanLocationEditModal（destination）用「前の地点」: 経由地一覧の最後、無ければ出発地
+  const destinationPrevLocation = toPrevLocation(
+    lastMiddleSpot ?? plan.startLocation
   )
 
   const handleReorder = async (newOrderIds: string[]) => {
@@ -531,6 +569,11 @@ function TouringPlanDetailPage() {
               ? plan.startLocation
               : plan.destinationLocation
           }
+          prevLocation={
+            editingLocationTarget === 'destination'
+              ? destinationPrevLocation
+              : null
+          }
           onClose={() => setEditingLocationTarget(null)}
           onSuccess={handleLocationEditSuccess}
         />
@@ -542,6 +585,7 @@ function TouringPlanDetailPage() {
           planId={planId}
           initialType={addModalType}
           initialLocation={mapClickLocation}
+          prevLocation={addSpotPrevLocation}
           onClose={() => {
             setAddModalType(null)
             setMapClickLocation(null)
@@ -555,6 +599,7 @@ function TouringPlanDetailPage() {
           bikeId={bikeId}
           planId={planId}
           spot={editingSpot}
+          prevLocation={editSpotPrevLocation}
           onClose={() => setEditingSpotId(null)}
           onSuccess={handleSpotEditSuccess}
           onDelete={handleSpotDeleteSuccess}
