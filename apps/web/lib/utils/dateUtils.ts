@@ -1,9 +1,19 @@
 const pad = (n: number) => String(n).padStart(2, '0')
 
+/** 現在日時を取得する唯一の関数 */
+export const getCurrentDate = (): Date => {
+  return new Date()
+}
+
 /** 今日の日付を YYYY-MM-DD 形式で返す */
 export const getTodayDateString = (): string => {
-  const d = new Date()
+  const d = getCurrentDate()
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+/** 現在の年を返す */
+export const getCurrentYear = (): number => {
+  return getCurrentDate().getFullYear()
 }
 
 /** Date または ISO 文字列を YYYY-MM-DDTHH:mm 形式に変換する */
@@ -17,7 +27,7 @@ export const toLocalDateTimeString = (date: Date | string): string => {
  * @param minuteStep - 分を切り捨てる刻み幅（分単位）。デフォルト 1（丸めなし）
  */
 export const getNowLocalDateTimeString = (minuteStep = 1): string => {
-  const now = new Date()
+  const now = getCurrentDate()
   if (minuteStep > 1) {
     now.setMinutes(Math.floor(now.getMinutes() / minuteStep) * minuteStep, 0, 0)
   }
@@ -26,6 +36,6 @@ export const getNowLocalDateTimeString = (minuteStep = 1): string => {
 
 /** 今日の日付に指定時刻を組み合わせた YYYY-MM-DDTHH:mm 形式の文字列を返す */
 export const getTodayAtTime = (timeStr: string): string => {
-  const d = new Date()
+  const d = getCurrentDate()
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${timeStr}`
 }

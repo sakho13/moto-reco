@@ -37,12 +37,13 @@ export type PublicHistoryDetail = {
   } | null
   touring: {
     id: string
+    planId: string | null
     title: string
     startDate: Date
     endDate: Date
     startMileage: number | null
     endMileage: number | null
-    status: 'PLANNED' | 'STARTED' | 'COMPLETED'
+    status: 'STARTED' | 'COMPLETED'
   } | null
 }
 

@@ -5,6 +5,7 @@ import {
   UserId,
 } from '@repo/shared-types'
 import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
+import { getCurrentDate } from '../../../utils/dateUtils'
 import { BikeEntity } from '../entities/BikeEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeEntity } from '../entities/UserBikeEntity'
@@ -112,7 +113,7 @@ export class UserBikeService {
         purchaseDate: params.purchaseDate ?? null,
         purchasePrice: params.purchasePrice ?? null,
         purchaseMileage: params.purchaseMileage ?? null,
-        ownedAt: params.purchaseDate ?? new Date(),
+        ownedAt: params.purchaseDate ?? getCurrentDate(),
         soldAt: null,
         ownStatus: 'OWN',
       })

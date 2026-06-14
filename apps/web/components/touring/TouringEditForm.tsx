@@ -60,7 +60,6 @@ export function TouringEditForm({
         endDateTime: toLocalDateTimeString(end),
         startMileage: data.startMileage?.toString() ?? '',
         endMileage: data.endMileage?.toString() ?? '',
-        mode: data.status === 'PLANNED' ? 'plan' : 'history',
       })
     }
   }, [data])
@@ -69,25 +68,17 @@ export function TouringEditForm({
     setError('')
     setIsSubmitting(true)
 
-    const isPlan = formData.mode === 'plan'
-
     try {
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`, {
         title: formData.title,
         startDate: new Date(formData.startDateTime),
-        // プランの endDate はスポット追加で自動更新されるため編集時は送らない
-        ...(!isPlan && {
-          endDate: new Date(formData.endDateTime),
-        }),
+        endDate: new Date(formData.endDateTime),
         startMileage:
           formData.startMileage !== ''
             ? Number(formData.startMileage)
             : undefined,
         endMileage:
-          !isPlan && formData.endMileage !== ''
-            ? Number(formData.endMileage)
-            : undefined,
-        status: isPlan ? 'PLANNED' : 'COMPLETED',
+          formData.endMileage !== '' ? Number(formData.endMileage) : undefined,
       })
 
       await mutate(

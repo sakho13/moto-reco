@@ -16,21 +16,6 @@
   opacity: 0.5;
 }
 
-.dimText {
-  color: var(--color-ink);
-  opacity: 0.4;
-}
-
-.statusPlanned {
-  background-color: #6366f1;
-  color: white;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  padding: 0.125rem 0.5rem;
-  border-radius: 9999px;
-  white-space: nowrap;
-}
-
 .statusStarted {
   background-color: #10b981;
   color: white;
@@ -50,68 +35,6 @@
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
   white-space: nowrap;
-}
-
-.spotItem {
-  background-color: var(--color-cloud);
-  border-radius: var(--radius-md);
-  padding: 0.75rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.spotBadge {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  background-color: var(--color-product);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.startBadge {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  background-color: #10b981;
-  color: white;
-  font-size: 0.6rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.endBadge {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  background-color: #ef4444;
-  color: white;
-  font-size: 0.6rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.link {
-  color: var(--color-product);
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-  display: inline-block;
-}
-
-.link:hover {
-  opacity: 0.8;
 }
 
 .routeLink {
@@ -146,12 +69,6 @@
 
 .editButton:hover {
   opacity: 1;
-}
-
-.mapContainer {
-  height: 280px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
 }
 
 .mapWrapper {
@@ -201,26 +118,6 @@
     min-height: 400px;
     max-height: 720px;
   }
-}
-
-.spotsListScroll {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-@media (min-width: 768px) {
-  .spotsListScroll {
-    max-height: calc(100vh - 18rem);
-    padding-right: 0.125rem;
-  }
-}
-
-.mapClickHint {
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  text-align: center;
-  color: var(--color-ink);
-  opacity: 0.45;
 }
 
 .breakBanner {

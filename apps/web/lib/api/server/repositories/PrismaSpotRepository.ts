@@ -18,12 +18,13 @@ const spotSelect = {
   memo: true,
   latitude: true,
   longitude: true,
-  visitedAt: true,
-  endAt: true,
-  sortOrder: true,
-  plannedAt: true,
-  plannedDepartAt: true,
+  plannedArrivalAt: true,
+  plannedDepartureAt: true,
+  arrivedAt: true,
+  departedAt: true,
   isSkipped: true,
+  skippedAt: true,
+  sortOrder: true,
 } as const
 
 type SpotRow = {
@@ -34,12 +35,13 @@ type SpotRow = {
   memo: string | null
   latitude: number | null
   longitude: number | null
-  visitedAt: Date | null
-  endAt: Date | null
-  sortOrder: number
-  plannedAt: Date | null
-  plannedDepartAt: Date | null
+  plannedArrivalAt: Date | null
+  plannedDepartureAt: Date | null
+  arrivedAt: Date | null
+  departedAt: Date | null
   isSkipped: boolean
+  skippedAt: Date | null
+  sortOrder: number
 }
 
 const toSpotEntity = (row: SpotRow): SpotEntity =>
@@ -51,12 +53,13 @@ const toSpotEntity = (row: SpotRow): SpotEntity =>
     memo: row.memo,
     latitude: row.latitude,
     longitude: row.longitude,
-    visitedAt: row.visitedAt,
-    endAt: row.endAt,
-    sortOrder: row.sortOrder,
-    plannedAt: row.plannedAt,
-    plannedDepartAt: row.plannedDepartAt,
+    plannedArrivalAt: row.plannedArrivalAt,
+    plannedDepartureAt: row.plannedDepartureAt,
+    arrivedAt: row.arrivedAt,
+    departedAt: row.departedAt,
     isSkipped: row.isSkipped,
+    skippedAt: row.skippedAt,
+    sortOrder: row.sortOrder,
   })
 
 export class PrismaSpotRepository
@@ -72,11 +75,13 @@ export class PrismaSpotRepository
         memo: spot.memo,
         latitude: spot.latitude,
         longitude: spot.longitude,
-        visitedAt: spot.visitedAt,
-        endAt: spot.endAt,
+        plannedArrivalAt: spot.plannedArrivalAt,
+        plannedDepartureAt: spot.plannedDepartureAt,
+        arrivedAt: spot.arrivedAt,
+        departedAt: spot.departedAt,
+        isSkipped: spot.isSkipped,
+        skippedAt: spot.skippedAt,
         sortOrder: spot.sortOrder,
-        plannedAt: spot.plannedAt,
-        plannedDepartAt: spot.plannedDepartAt,
       },
       select: spotSelect,
     })
@@ -116,11 +121,12 @@ export class PrismaSpotRepository
         memo: spot.memo,
         latitude: spot.latitude,
         longitude: spot.longitude,
-        visitedAt: spot.visitedAt,
-        endAt: spot.endAt,
-        plannedAt: spot.plannedAt,
-        plannedDepartAt: spot.plannedDepartAt,
+        plannedArrivalAt: spot.plannedArrivalAt,
+        plannedDepartureAt: spot.plannedDepartureAt,
+        arrivedAt: spot.arrivedAt,
+        departedAt: spot.departedAt,
         isSkipped: spot.isSkipped,
+        skippedAt: spot.skippedAt,
       },
       select: spotSelect,
     })

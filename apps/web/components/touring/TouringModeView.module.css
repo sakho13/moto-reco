@@ -421,6 +421,10 @@ html[data-theme-mode='dark'] .container {
     height: 3rem;
   }
 
+  .bikeInfoArea {
+    padding-right: 5rem;
+  }
+
   .bikeNameLarge {
     font-size: var(--font-size-lg);
   }

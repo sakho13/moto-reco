@@ -98,6 +98,7 @@ export class PrismaHistoryRepository
         touring: {
           select: {
             id: true,
+            planId: true,
             title: true,
             startDate: true,
             endDate: true,

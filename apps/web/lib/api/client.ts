@@ -19,6 +19,11 @@ import {
   ApiResponseBikesOngoingTourings,
   ApiResponseSpotDetail,
   ApiResponseSpotList,
+  ApiResponseTouringPlanDetail,
+  ApiResponseTouringPlanList,
+  ApiResponseTouringPlanLocation,
+  ApiResponseTouringPlanSpotDetail,
+  ApiResponseTouringPlanSpotList,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -274,5 +279,46 @@ type API_EP = {
   [key: `/api/v1/user-bike/bike/${string}`]: {
     GET: SuccessResponse<ApiResponseUserBikeDetail>
     PATCH: SuccessResponse<ApiResponseUserBikeDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/touring-plans`]: {
+    GET: SuccessResponse<ApiResponseTouringPlanList>
+    POST: SuccessResponse<ApiResponseTouringPlanDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}`]: {
+    GET: SuccessResponse<ApiResponseTouringPlanDetail>
+    PATCH: SuccessResponse<ApiResponseTouringPlanDetail>
+    DELETE: SuccessResponse<undefined>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/start-location`
+  ]: {
+    PATCH: SuccessResponse<ApiResponseTouringPlanLocation | null>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/destination-location`
+  ]: {
+    PATCH: SuccessResponse<ApiResponseTouringPlanLocation | null>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots`]: {
+    GET: SuccessResponse<ApiResponseTouringPlanSpotList>
+    POST: SuccessResponse<ApiResponseTouringPlanSpotDetail>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots/reorder`
+  ]: {
+    PATCH: SuccessResponse<undefined>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots/${string}`
+  ]: {
+    PATCH: SuccessResponse<ApiResponseTouringPlanSpotDetail>
+    DELETE: SuccessResponse<undefined>
   }
 }

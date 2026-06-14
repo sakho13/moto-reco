@@ -1,10 +1,10 @@
-'use client'
-
 import Link from 'next/link'
 import { BaseCard } from '@repo/ui/baseCard'
 import { APP_VERSION, GOOGLE_QA_FORM_URL } from '@/lib/statics'
+import { getCurrentYear } from '@/lib/utils/dateUtils'
 
 export function FooterCard() {
+  const year = getCurrentYear()
   return (
     <BaseCard title="MotoReco">
       <div className="flex flex-col items-center gap-3 text-center">
@@ -30,7 +30,7 @@ export function FooterCard() {
 
         <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
           <p className="m-0 text-sm">Created by SaKho</p>
-          <p className="m-0 text-sm">@2025 MotoReco</p>
+          <p className="m-0 text-sm">@{year} MotoReco</p>
           <p className="m-0 text-sm opacity-70">ver {APP_VERSION}</p>
         </div>
       </div>

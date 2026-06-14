@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getCurrentDate } from '@/lib/utils/dateUtils'
 
 type WeatherResponse = {
   temperature: number
@@ -117,7 +118,7 @@ export async function GET(request: NextRequest) {
   // 現在時刻に最も近い時間帯の降水確率を取得
   let precipitationProbability: number | null = null
   if (json.hourly) {
-    const nowIso = new Date().toISOString().slice(0, 13)
+    const nowIso = getCurrentDate().toISOString().slice(0, 13)
     const idx = json.hourly.time.findIndex((t) => t.startsWith(nowIso))
     if (idx !== -1) {
       precipitationProbability =

@@ -29,6 +29,8 @@ import { PrismaFuelLogRepository } from '../../repositories/PrismaFuelLogReposit
 import { PrismaHistoryRepository } from '../../repositories/PrismaHistoryRepository'
 import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeRepository'
 import { PrismaSpotRepository } from '../../repositories/PrismaSpotRepository'
+import { PrismaTouringPlanRepository } from '../../repositories/PrismaTouringPlanRepository'
+import { PrismaTouringPlanSpotRepository } from '../../repositories/PrismaTouringPlanSpotRepository'
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { SpotService } from '../../services/SpotService'
 import { TouringService } from '../../services/TouringService'
@@ -68,6 +70,7 @@ userBikeTourings.get(
         data: tourings.map((touring) => {
           return {
             touringId: touring.id,
+            touringPlanId: touring.touringPlanId,
             title: touring.title,
             startDate: touring.startDate.toISOString(),
             endDate: touring.endDate.toISOString(),
@@ -119,8 +122,8 @@ userBikeTourings.post(
         status: body.status,
       })
 
-      // PLANNEDのときはまだツーリングが完了していないので履歴を作成しない
-      if (touring.status !== 'PLANNED') {
+      // 完了済みツーリングのみ履歴を作成する（STARTEDはまだ完了していない）
+      if (touring.status === 'COMPLETED') {
         const historyRepo = new PrismaHistoryRepository(t)
         await historyRepo.createHistory({
           userId: createUserId(userId),
@@ -139,6 +142,7 @@ userBikeTourings.post(
         status: 'success',
         data: {
           touringId: result.id,
+          touringPlanId: result.touringPlanId,
           title: result.title,
           startDate: result.startDate.toISOString(),
           endDate: result.endDate.toISOString(),
@@ -208,10 +212,16 @@ userBikeTourings.post(
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const touringPlanRepo = new PrismaTouringPlanRepository(t)
+      const touringPlanSpotRepo = new PrismaTouringPlanSpotRepository(t)
+      const spotRepo = new PrismaSpotRepository(t)
       const service = new TouringService(
         touringRepo,
         myUserBikeRepo,
-        fuelLogRepo
+        fuelLogRepo,
+        touringPlanRepo,
+        touringPlanSpotRepo,
+        spotRepo
       )
 
       if (body.action === 'start') {
@@ -275,6 +285,7 @@ userBikeTourings.post(
         status: 'success',
         data: {
           touringId: result.id,
+          touringPlanId: result.touringPlanId,
           title: result.title,
           startDate: result.startDate.toISOString(),
           endDate: result.endDate.toISOString(),
@@ -327,6 +338,7 @@ userBikeTourings.get('/:touringId', honoAuthMiddleware, async (c) => {
       status: 'success',
       data: {
         touringId: touring.id,
+        touringPlanId: touring.touringPlanId,
         title: touring.title,
         startDate: touring.startDate.toISOString(),
         endDate: touring.endDate.toISOString(),
@@ -411,6 +423,7 @@ userBikeTourings.patch(
         status: 'success',
         data: {
           touringId: result.id,
+          touringPlanId: result.touringPlanId,
           title: result.title,
           startDate: result.startDate.toISOString(),
           endDate: result.endDate.toISOString(),
@@ -458,12 +471,13 @@ userBikeTourings.get('/:touringId/spots', honoAuthMiddleware, async (c) => {
         memo: spot.memo,
         latitude: spot.latitude,
         longitude: spot.longitude,
-        visitedAt: spot.visitedAt?.toISOString() ?? null,
-        endAt: spot.endAt?.toISOString() ?? null,
-        sortOrder: spot.sortOrder,
-        plannedAt: spot.plannedAt?.toISOString() ?? null,
-        plannedDepartAt: spot.plannedDepartAt?.toISOString() ?? null,
+        plannedArrivalAt: spot.plannedArrivalAt?.toISOString() ?? null,
+        plannedDepartureAt: spot.plannedDepartureAt?.toISOString() ?? null,
+        arrivedAt: spot.arrivedAt?.toISOString() ?? null,
+        departedAt: spot.departedAt?.toISOString() ?? null,
         isSkipped: spot.isSkipped,
+        skippedAt: spot.skippedAt?.toISOString() ?? null,
+        sortOrder: spot.sortOrder,
       })),
       message: 'スポット一覧取得成功',
     },
@@ -496,10 +510,8 @@ userBikeTourings.post(
       memo: body.memo,
       latitude: body.latitude,
       longitude: body.longitude,
-      visitedAt: body.visitedAt,
-      endAt: body.endAt,
-      plannedAt: body.plannedAt ?? null,
-      plannedDepartAt: body.plannedDepartAt ?? null,
+      arrivedAt: body.arrivedAt,
+      departedAt: body.departedAt,
     })
 
     return c.json<SuccessResponse<ApiResponseSpotDetail>>(
@@ -513,12 +525,13 @@ userBikeTourings.post(
           memo: spot.memo,
           latitude: spot.latitude,
           longitude: spot.longitude,
-          visitedAt: spot.visitedAt?.toISOString() ?? null,
-          endAt: spot.endAt?.toISOString() ?? null,
-          sortOrder: spot.sortOrder,
-          plannedAt: spot.plannedAt?.toISOString() ?? null,
-          plannedDepartAt: spot.plannedDepartAt?.toISOString() ?? null,
+          plannedArrivalAt: spot.plannedArrivalAt?.toISOString() ?? null,
+          plannedDepartureAt: spot.plannedDepartureAt?.toISOString() ?? null,
+          arrivedAt: spot.arrivedAt?.toISOString() ?? null,
+          departedAt: spot.departedAt?.toISOString() ?? null,
           isSkipped: spot.isSkipped,
+          skippedAt: spot.skippedAt?.toISOString() ?? null,
+          sortOrder: spot.sortOrder,
         },
         message: 'スポット登録成功',
       },
@@ -587,10 +600,8 @@ userBikeTourings.patch(
       memo: body.memo,
       latitude: body.latitude,
       longitude: body.longitude,
-      visitedAt: body.visitedAt ?? undefined,
-      endAt: body.endAt,
-      plannedAt: body.plannedAt,
-      plannedDepartAt: body.plannedDepartAt,
+      arrivedAt: body.arrivedAt,
+      departedAt: body.departedAt,
       isSkipped: body.isSkipped,
     })
 
@@ -605,12 +616,13 @@ userBikeTourings.patch(
           memo: spot.memo,
           latitude: spot.latitude,
           longitude: spot.longitude,
-          visitedAt: spot.visitedAt?.toISOString() ?? null,
-          endAt: spot.endAt?.toISOString() ?? null,
-          sortOrder: spot.sortOrder,
-          plannedAt: spot.plannedAt?.toISOString() ?? null,
-          plannedDepartAt: spot.plannedDepartAt?.toISOString() ?? null,
+          plannedArrivalAt: spot.plannedArrivalAt?.toISOString() ?? null,
+          plannedDepartureAt: spot.plannedDepartureAt?.toISOString() ?? null,
+          arrivedAt: spot.arrivedAt?.toISOString() ?? null,
+          departedAt: spot.departedAt?.toISOString() ?? null,
           isSkipped: spot.isSkipped,
+          skippedAt: spot.skippedAt?.toISOString() ?? null,
+          sortOrder: spot.sortOrder,
         },
         message: 'スポット更新成功',
       },

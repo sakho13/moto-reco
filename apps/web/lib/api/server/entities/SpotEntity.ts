@@ -16,11 +16,19 @@ export class SpotEntity {
     }
 
     if (
-      spot.visitedAt !== null &&
-      spot.endAt !== null &&
-      spot.visitedAt > spot.endAt
+      spot.arrivedAt !== null &&
+      spot.departedAt !== null &&
+      spot.arrivedAt > spot.departedAt
     ) {
-      throw new Error('開始日時は終了日時以前である必要があります')
+      throw new Error('到着日時は出発日時以前である必要があります')
+    }
+
+    if (
+      spot.plannedArrivalAt !== null &&
+      spot.plannedDepartureAt !== null &&
+      spot.plannedArrivalAt > spot.plannedDepartureAt
+    ) {
+      throw new Error('到着予定日時は出発予定日時以前である必要があります')
     }
 
     this._value = spot
@@ -54,28 +62,32 @@ export class SpotEntity {
     return this._value.longitude
   }
 
-  public get visitedAt(): Date | null {
-    return this._value.visitedAt
+  public get plannedArrivalAt(): Date | null {
+    return this._value.plannedArrivalAt
   }
 
-  public get endAt(): Date | null {
-    return this._value.endAt
+  public get plannedDepartureAt(): Date | null {
+    return this._value.plannedDepartureAt
   }
 
-  public get sortOrder(): number {
-    return this._value.sortOrder
+  public get arrivedAt(): Date | null {
+    return this._value.arrivedAt
   }
 
-  public get plannedAt(): Date | null {
-    return this._value.plannedAt
-  }
-
-  public get plannedDepartAt(): Date | null {
-    return this._value.plannedDepartAt
+  public get departedAt(): Date | null {
+    return this._value.departedAt
   }
 
   public get isSkipped(): boolean {
     return this._value.isSkipped
+  }
+
+  public get skippedAt(): Date | null {
+    return this._value.skippedAt
+  }
+
+  public get sortOrder(): number {
+    return this._value.sortOrder
   }
 
   public toJson(): Spot {

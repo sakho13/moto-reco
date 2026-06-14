@@ -42,17 +42,12 @@ function TouringsPage() {
     }
   )
 
-  // 表示順: PLANNED (予定日昇順) → STARTED → COMPLETED (開始日降順)
+  // 表示順: STARTED → COMPLETED (開始日降順)
   const sortedTourings = tourings
     ? [...tourings].sort((a, b) => {
-        const order = { PLANNED: 0, STARTED: 1, COMPLETED: 2 }
+        const order = { STARTED: 0, COMPLETED: 1 }
         const statusDiff = order[a.status] - order[b.status]
         if (statusDiff !== 0) return statusDiff
-        if (a.status === 'PLANNED') {
-          return (
-            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-          )
-        }
         return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       })
     : []
@@ -112,6 +107,12 @@ function TouringsPage() {
         </Button>
         <Button onClick={handleRegisterHistory} variant="primary">
           ツーリングを作成
+        </Button>
+        <Button
+          onClick={() => router.push(`/app/my-bike/${bikeId}/touring-plans`)}
+          variant="cloud"
+        >
+          プラン一覧
         </Button>
       </div>
 

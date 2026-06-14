@@ -36,9 +36,9 @@ export const TouringRegisterRequestSchema = z
       .nonnegative('終了時の総走行距離は0以上で指定してください')
       .optional(),
     status: z
-      .enum(['PLANNED', 'STARTED', 'COMPLETED'], {
+      .enum(['STARTED', 'COMPLETED'], {
         invalid_type_error:
-          'ステータスはPLANNED、STARTEDまたはCOMPLETEDで指定してください',
+          'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
       })
       .default('COMPLETED')
       .optional(),
@@ -100,9 +100,9 @@ export const TouringUpdateRequestSchema = z
       .nonnegative('終了時の総走行距離は0以上で指定してください')
       .optional(),
     status: z
-      .enum(['PLANNED', 'STARTED', 'COMPLETED'], {
+      .enum(['STARTED', 'COMPLETED'], {
         invalid_type_error:
-          'ステータスはPLANNED、STARTEDまたはCOMPLETEDで指定してください',
+          'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
       })
       .optional(),
     fuelLogIds: z
@@ -289,7 +289,7 @@ export type TouringStartEndRequest = z.infer<
 export const TouringListQuerySchema = z.object({
   'sort-by': z.enum(['start-date', 'end-date']).optional(),
   'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
-  status: z.enum(['PLANNED', 'STARTED', 'COMPLETED']).optional(),
+  status: z.enum(['STARTED', 'COMPLETED']).optional(),
 })
 
 export type TouringListQuery = z.infer<typeof TouringListQuerySchema>
@@ -298,10 +298,9 @@ export type TouringListQuery = z.infer<typeof TouringListQuerySchema>
  * ツーリングステータス更新リクエストのバリデーションスキーマ
  */
 export const TouringStatusUpdateRequestSchema = z.object({
-  status: z.enum(['PLANNED', 'STARTED', 'COMPLETED'], {
+  status: z.enum(['STARTED', 'COMPLETED'], {
     required_error: 'ステータスは必須です',
-    invalid_type_error:
-      'ステータスはPLANNED、STARTEDまたはCOMPLETEDで指定してください',
+    invalid_type_error: 'ステータスはSTARTEDまたはCOMPLETEDで指定してください',
   }),
 })
 
