@@ -51,8 +51,6 @@ const buildPlanSpot = (
     memo: string | null
     latitude: number | null
     longitude: number | null
-    plannedArrivalOffsetMinutes: number | null
-    plannedDepartureOffsetMinutes: number | null
     stayMinutes: number | null
     travelMinutesFromPrev: number | null
     routeTypeFromPrev: 'GENERAL' | 'HIGHWAY' | 'MIXED' | null
@@ -67,8 +65,6 @@ const buildPlanSpot = (
     memo: null,
     latitude: null,
     longitude: null,
-    plannedArrivalOffsetMinutes: null,
-    plannedDepartureOffsetMinutes: null,
     stayMinutes: null,
     travelMinutesFromPrev: null,
     routeTypeFromPrev: null,
@@ -351,27 +347,35 @@ describe('TouringService', () => {
         createdAt: new Date('2024-01-01T00:00:00.000Z'),
         updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       })
-      // waypoint1は出発から4時間後着/4時間30分後発、waypoint2は5時間後着/5時間15分後発
+      // START(出発=0分後) -> waypoint1(240分後着/270分後発) -> waypoint2(300分後着/315分後発)
+      // となるよう、travelMinutesFromPrev/stayMinutesを設定する
+      const startSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
+        type: 'START',
+        sortOrder: 0,
+      })
       const waypoint1 = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-1'),
         type: 'SPOT',
         name: '経由地1',
         sortOrder: 0,
-        plannedArrivalOffsetMinutes: 240,
-        plannedDepartureOffsetMinutes: 270,
+        // START(0分後発)から240分でwaypoint1に到着し、30分滞在して270分後に出発
+        travelMinutesFromPrev: 240,
+        stayMinutes: 30,
       })
       const waypoint2 = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-2'),
         type: 'BREAK',
         name: '休憩',
         sortOrder: 1,
-        plannedArrivalOffsetMinutes: 300,
-        plannedDepartureOffsetMinutes: 315,
+        // waypoint1(270分後発)から30分でwaypoint2に到着し、15分滞在して315分後に出発
+        travelMinutesFromPrev: 30,
+        stayMinutes: 15,
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
       vi.mocked(
         touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).mockResolvedValue([waypoint2, waypoint1])
+      ).mockResolvedValue([waypoint2, waypoint1, startSpot])
 
       const startDate = new Date('2024-07-01T06:00:00.000Z')
       await service.handleTouringAction({

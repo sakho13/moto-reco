@@ -16,8 +16,6 @@ const baseProps = (
   memo: 'コンビニで小休止',
   latitude: 35.6812,
   longitude: 139.7671,
-  plannedArrivalOffsetMinutes: 60,
-  plannedDepartureOffsetMinutes: 90,
   stayMinutes: null,
   travelMinutesFromPrev: null,
   routeTypeFromPrev: null,
@@ -36,8 +34,6 @@ describe('TouringPlanSpotEntity', () => {
     expect(entity.memo).toBe('コンビニで小休止')
     expect(entity.latitude).toBe(35.6812)
     expect(entity.longitude).toBe(139.7671)
-    expect(entity.plannedArrivalOffsetMinutes).toBe(60)
-    expect(entity.plannedDepartureOffsetMinutes).toBe(90)
     expect(entity.sortOrder).toBe(0)
   })
 
@@ -81,36 +77,10 @@ describe('TouringPlanSpotEntity', () => {
     ).toThrow('経度は-180以上180以下である必要があります')
   })
 
-  test('到着予定までの経過分数が出発予定までの経過分数より後の場合はエラーになる', () => {
-    expect(
-      () =>
-        new TouringPlanSpotEntity(
-          baseProps({
-            plannedArrivalOffsetMinutes: 90,
-            plannedDepartureOffsetMinutes: 60,
-          })
-        )
-    ).toThrow('到着予定時刻は出発予定時刻以前である必要があります')
-  })
-
-  test('到着予定・出発予定までの経過分数がnullの場合はエラーにならない', () => {
-    expect(
-      () =>
-        new TouringPlanSpotEntity(
-          baseProps({
-            plannedArrivalOffsetMinutes: null,
-            plannedDepartureOffsetMinutes: null,
-          })
-        )
-    ).not.toThrow()
-  })
-
   test('START種別で生成できる', () => {
     const entity = new TouringPlanSpotEntity(
       baseProps({
         type: 'START',
-        plannedArrivalOffsetMinutes: null,
-        plannedDepartureOffsetMinutes: 0,
         sortOrder: 0,
       })
     )
@@ -122,8 +92,6 @@ describe('TouringPlanSpotEntity', () => {
     const entity = new TouringPlanSpotEntity(
       baseProps({
         type: 'DESTINATION',
-        plannedArrivalOffsetMinutes: 600,
-        plannedDepartureOffsetMinutes: null,
         sortOrder: 9999,
       })
     )
