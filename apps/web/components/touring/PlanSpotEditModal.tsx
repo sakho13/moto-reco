@@ -8,6 +8,8 @@ interface PlanSpotEditModalProps {
   bikeId: string
   planId: string
   spot: ApiResponseTouringPlanSpotDetail
+  /** 前の地点（編集対象スポットの直前のスポット、無ければ出発地）の位置情報。経路確認リンクの算出に使う */
+  prevLocation?: { lat: number; lng: number } | null
   onClose: () => void
   onSuccess: () => void
   onDelete?: () => void
@@ -20,6 +22,7 @@ export function PlanSpotEditModal({
   bikeId,
   planId,
   spot,
+  prevLocation = null,
   onClose,
   onSuccess,
   onDelete,
@@ -32,6 +35,7 @@ export function PlanSpotEditModal({
         bikeId={bikeId}
         planId={planId}
         spot={spot}
+        prevLocation={prevLocation}
         onSuccess={onSuccess}
         onDelete={onDelete}
       />

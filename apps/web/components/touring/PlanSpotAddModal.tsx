@@ -8,6 +8,8 @@ type PlanSpotAddModalProps = {
   planId: string
   initialType?: 'SPOT' | 'BREAK'
   initialLocation?: { lat: number; lng: number } | null
+  /** 前の地点（最後の経由地、無ければ出発地）の位置情報。経路確認リンクの算出に使う */
+  prevLocation?: { lat: number; lng: number } | null
   onClose: () => void
   onSuccess: () => void
 }
@@ -20,6 +22,7 @@ export function PlanSpotAddModal({
   planId,
   initialType = 'SPOT',
   initialLocation = null,
+  prevLocation = null,
   onClose,
   onSuccess,
 }: PlanSpotAddModalProps) {
@@ -32,6 +35,7 @@ export function PlanSpotAddModal({
         planId={planId}
         initialType={initialType}
         initialLocation={initialLocation}
+        prevLocation={prevLocation}
         onSuccess={onSuccess}
       />
     </ModalBase>

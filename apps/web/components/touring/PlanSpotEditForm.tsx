@@ -4,30 +4,61 @@ import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
 import type { ApiResponseTouringPlanSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
-import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { Select } from '@repo/ui/select'
 import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
+import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
 interface PlanSpotEditFormProps {
   bikeId: string
   planId: string
   spot: ApiResponseTouringPlanSpotDetail
+  /** 前の地点（編集対象スポットの直前のスポット、無ければ出発地）の位置情報。経路確認リンクの算出に使う */
+  prevLocation?: { lat: number; lng: number } | null
   onSuccess: () => void
   onDelete?: () => void
 }
 
+type RouteTypeOption = '' | 'GENERAL' | 'HIGHWAY' | 'MIXED'
+
 type PlanSpotFormState = {
   name: string
   memo: string
-  plannedArrivalAt: string
   stayMinutes: string
+  travelMinutesFromPrev: string
+  routeTypeFromPrev: RouteTypeOption
+}
+
+const ROUTE_TYPE_OPTIONS = [
+  { value: 'GENERAL', label: '下道' },
+  { value: 'HIGHWAY', label: '高速' },
+  { value: 'MIXED', label: '混在' },
+]
+
+/**
+ * 計算済みの予定時刻を `"YYYY/M/D HH:mm"` 形式に整形する。
+ *
+ * @remarks
+ * `value` が `null` の場合は「未設定」を返す。
+ */
+const formatPlannedTime = (value: string | null): string => {
+  if (value === null) return '未設定'
+  try {
+    return new Date(value).toLocaleString('ja-JP', {
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return value
+  }
 }
 
 /**
@@ -37,6 +68,7 @@ export function PlanSpotEditForm({
   bikeId,
   planId,
   spot,
+  prevLocation = null,
   onSuccess,
   onDelete,
 }: PlanSpotEditFormProps) {
@@ -53,8 +85,9 @@ export function PlanSpotEditForm({
   const [formState, setFormState] = useState<PlanSpotFormState>({
     name: '',
     memo: '',
-    plannedArrivalAt: '',
     stayMinutes: '',
+    travelMinutesFromPrev: '',
+    routeTypeFromPrev: '',
   })
 
   const isBreak = spot.type === 'BREAK'
@@ -62,33 +95,21 @@ export function PlanSpotEditForm({
   const spotsUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`
   const detailUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}`
 
-  const plannedDepartureTime = (() => {
-    if (!formState.plannedArrivalAt || !formState.stayMinutes) return null
-    const minutes = parseInt(formState.stayMinutes, 10)
-    if (isNaN(minutes) || minutes <= 0) return null
-    const date = new Date(formState.plannedArrivalAt)
-    date.setMinutes(date.getMinutes() + minutes)
-    return date
-  })()
+  const routeLink =
+    prevLocation && currentLocation
+      ? buildGoogleMapsTwoPointUrl(prevLocation, currentLocation)
+      : null
 
   useEffect(() => {
-    const initialStayMinutes = (() => {
-      if (!spot.plannedArrivalAt || !spot.plannedDepartureAt) return ''
-      const diff = Math.round(
-        (new Date(spot.plannedDepartureAt).getTime() -
-          new Date(spot.plannedArrivalAt).getTime()) /
-          60000
-      )
-      return diff > 0 ? String(diff) : ''
-    })()
-
     setFormState({
       name: spot.name ?? '',
       memo: spot.memo ?? '',
-      plannedArrivalAt: spot.plannedArrivalAt
-        ? toLocalDateTimeString(spot.plannedArrivalAt)
-        : '',
-      stayMinutes: initialStayMinutes,
+      stayMinutes: spot.stayMinutes != null ? String(spot.stayMinutes) : '',
+      travelMinutesFromPrev:
+        spot.travelMinutesFromPrev != null
+          ? String(spot.travelMinutesFromPrev)
+          : '',
+      routeTypeFromPrev: spot.routeTypeFromPrev ?? '',
     })
 
     if (spot.latitude != null && spot.longitude != null) {
@@ -147,11 +168,16 @@ export function PlanSpotEditForm({
         {
           name: formState.name !== '' ? formState.name : null,
           memo: formState.memo !== '' ? formState.memo : null,
-          plannedArrivalAt:
-            formState.plannedArrivalAt !== ''
-              ? new Date(formState.plannedArrivalAt)
+          stayMinutes:
+            formState.stayMinutes !== '' ? Number(formState.stayMinutes) : null,
+          travelMinutesFromPrev:
+            formState.travelMinutesFromPrev !== ''
+              ? Number(formState.travelMinutesFromPrev)
               : null,
-          plannedDepartureAt: plannedDepartureTime ?? null,
+          routeTypeFromPrev:
+            formState.routeTypeFromPrev !== ''
+              ? formState.routeTypeFromPrev
+              : null,
         }
       )
 
@@ -199,18 +225,61 @@ export function PlanSpotEditForm({
           />
         </FormField>
 
+        <FormField label={isBreak ? '休憩開始予定' : '到着予定'}>
+          <p className="text-sm">{formatPlannedTime(spot.plannedArrivalAt)}</p>
+        </FormField>
+
+        <FormField label={isBreak ? '休憩終了予定' : '出発予定'}>
+          <p className="text-sm">
+            {formatPlannedTime(spot.plannedDepartureAt)}
+          </p>
+        </FormField>
+
+        {routeLink && (
+          <a
+            href={routeLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-blue-600 underline"
+          >
+            Googleマップで経路を確認
+          </a>
+        )}
+
         <FormField
-          label={isBreak ? '休憩開始予定（任意）' : '到着予定（任意）'}
-          htmlFor="planSpotPlannedArrivalAt"
+          label="前の地点からの移動時間（任意）"
+          htmlFor="planSpotTravelMinutesFromPrev"
         >
-          <DateTimeInput
-            id="planSpotPlannedArrivalAt"
-            value={formState.plannedArrivalAt}
-            minuteStep={5}
+          <div className="flex items-center gap-2">
+            <Input
+              id="planSpotTravelMinutesFromPrev"
+              type="number"
+              min="0"
+              max="1440"
+              value={formState.travelMinutesFromPrev}
+              onChange={(e) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  travelMinutesFromPrev: e.target.value,
+                }))
+              }
+              placeholder="例: 30"
+              disabled={isSubmitting}
+            />
+            <span className="text-sm opacity-60 whitespace-nowrap">分</span>
+          </div>
+        </FormField>
+
+        <FormField label="経路種別（任意）" htmlFor="planSpotRouteTypeFromPrev">
+          <Select
+            id="planSpotRouteTypeFromPrev"
+            options={ROUTE_TYPE_OPTIONS}
+            placeholder="未選択"
+            value={formState.routeTypeFromPrev}
             onChange={(e) =>
               setFormState((prev) => ({
                 ...prev,
-                plannedArrivalAt: e.target.value,
+                routeTypeFromPrev: e.target.value as RouteTypeOption,
               }))
             }
             disabled={isSubmitting}
@@ -222,7 +291,7 @@ export function PlanSpotEditForm({
             <Input
               id="planSpotStayMinutes"
               type="number"
-              min="1"
+              min="0"
               max="1440"
               value={formState.stayMinutes}
               onChange={(e) =>
@@ -236,17 +305,6 @@ export function PlanSpotEditForm({
             />
             <span className="text-sm opacity-60 whitespace-nowrap">分</span>
           </div>
-          {plannedDepartureTime && (
-            <p className="text-xs opacity-50 mt-1 text-right">
-              出発予定:{' '}
-              {plannedDepartureTime.toLocaleString('ja-JP', {
-                month: 'numeric',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
-          )}
         </FormField>
 
         <FormField label="位置">
