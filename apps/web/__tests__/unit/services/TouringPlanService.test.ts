@@ -26,8 +26,8 @@ const buildPlan = (overrides: Partial<TouringPlan> = {}) => {
     touringPlanId: createTouringPlanId('plan-1'),
     myUserBikeId,
     title: '日帰り箱根ツーリング',
-    departAt: new Date('2026-07-01T08:00:00.000Z'),
-    returnAt: new Date('2026-07-01T08:00:00.000Z'),
+    createdAt: new Date('2026-07-01T08:00:00.000Z'),
+    updatedAt: new Date('2026-07-01T08:00:00.000Z'),
     ...overrides,
   })
 }
@@ -134,7 +134,6 @@ describe('TouringPlanService', () => {
           myUserBikeId,
           userId,
           title: 'プラン',
-          departAt: new Date('2026-07-01T08:00:00.000Z'),
         })
       ).rejects.toThrow(ApiV1Error)
     })
@@ -147,7 +146,6 @@ describe('TouringPlanService', () => {
         myUserBikeId,
         userId,
         title: '日帰り箱根ツーリング',
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
       })
 
       expect(result.plan).toBe(createdPlan)
@@ -157,14 +155,11 @@ describe('TouringPlanService', () => {
 
       const passedPlan = vi.mocked(touringPlanRepository.createPlan).mock
         .calls[0]?.[0]
-      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T08:00:00.000Z'))
+      expect(passedPlan?.title).toBe('日帰り箱根ツーリング')
     })
 
-    test('目的地のtravelMinutesFromPrevが指定された場合returnAtがチェイン計算で反映される', async () => {
+    test('登録後にrecomputeTouringPlanSpotTimesが呼ばれる', async () => {
       vi.mocked(touringPlanRepository.createPlan).mockImplementation(
-        async (p) => p
-      )
-      vi.mocked(touringPlanRepository.updatePlan).mockImplementation(
         async (p) => p
       )
 
@@ -182,13 +177,10 @@ describe('TouringPlanService', () => {
         touringPlanSpotRepository.findPlanSpotsByPlanId
       ).mockImplementation(async () => createdSpots)
 
-      const departAt = new Date('2026-07-01T08:00:00.000Z')
-
       const result = await service.registerPlan({
         myUserBikeId,
         userId,
         title: '日帰り箱根ツーリング',
-        departAt,
         startLocation: { latitude: 35.6812, longitude: 139.7671 },
         destinationLocation: {
           latitude: 35.2323,
@@ -200,8 +192,8 @@ describe('TouringPlanService', () => {
       expect(result.startSpot?.type).toBe('START')
       expect(result.destinationSpot?.type).toBe('DESTINATION')
 
-      // departAt(08:00) + travelMinutesFromPrev(600分=10時間) = 18:00がreturnAtに反映される
-      expect(result.plan.returnAt).toEqual(new Date('2026-07-01T18:00:00.000Z'))
+      // recomputeTouringPlanSpotTimes により、各スポットの予定時刻が更新される
+      expect(touringPlanSpotRepository.updatePlanSpot).toHaveBeenCalled()
     })
   })
 
@@ -292,135 +284,57 @@ describe('TouringPlanService', () => {
       ).rejects.toThrow(ApiV1Error)
     })
 
-    test('タイトルのみ更新する場合returnAtは再計算されない', async () => {
-      const plan = buildPlan({
-        returnAt: new Date('2026-07-01T18:00:00.000Z'),
-      })
+    test('タイトルを更新できる', async () => {
+      const plan = buildPlan()
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
       vi.mocked(touringPlanRepository.updatePlan).mockImplementation(
         async (p) => p
       )
 
-      await service.updatePlan({
+      const result = await service.updatePlan({
         planId: plan.id,
         myUserBikeId,
         userId,
         title: '新しいタイトル',
       })
 
-      expect(
-        touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).not.toHaveBeenCalled()
+      expect(result.title).toBe('新しいタイトル')
       const passedPlan = vi.mocked(touringPlanRepository.updatePlan).mock
         .calls[0]?.[0]
       expect(passedPlan?.title).toBe('新しいタイトル')
-      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T18:00:00.000Z'))
+      expect(passedPlan?.id).toBe(plan.id)
+      expect(touringPlanRepository.updatePlan).toHaveBeenCalledTimes(1)
     })
 
-    test('departAt変更時、目的地のtravelMinutesFromPrevがあればチェイン計算でreturnAtが更新される', async () => {
-      const plan = buildPlan({
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
-        returnAt: new Date('2026-07-01T18:00:00.000Z'),
-      })
-      const startSpot = buildPlanSpot({
-        touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
-        type: 'START',
-        sortOrder: 0,
-      })
-      const destinationSpot = buildPlanSpot({
-        touringPlanSpotId: createTouringPlanSpotId('plan-spot-destination'),
-        type: 'DESTINATION',
-        sortOrder: 9999,
-        travelMinutesFromPrev: 660, // 11時間
-      })
-
+    test('titleを指定しない場合は既存のタイトルが維持される', async () => {
+      const plan = buildPlan({ title: '既存タイトル' })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
-      vi.mocked(
-        touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).mockResolvedValue([startSpot, destinationSpot])
       vi.mocked(touringPlanRepository.updatePlan).mockImplementation(
         async (p) => p
       )
 
-      const newDepartAt = new Date('2026-07-02T09:00:00.000Z')
-      await service.updatePlan({
+      const result = await service.updatePlan({
         planId: plan.id,
         myUserBikeId,
         userId,
-        departAt: newDepartAt,
       })
 
-      const updateCalls = vi.mocked(touringPlanRepository.updatePlan).mock.calls
-      const passedPlan = updateCalls[updateCalls.length - 1]?.[0]
-      expect(passedPlan?.departAt).toEqual(newDepartAt)
-      // newDepartAt(09:00) + travelMinutesFromPrev(660分=11時間) = 20:00
-      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-02T20:00:00.000Z'))
+      expect(result.title).toBe('既存タイトル')
     })
 
-    test('departAt変更時、目的地未設定で経由地の滞在時間がある場合はチェイン計算結果が採用される', async () => {
-      const plan = buildPlan({
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
-        returnAt: new Date('2026-07-01T18:00:00.000Z'),
-      })
-      const startSpot = buildPlanSpot({
-        touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
-        type: 'START',
-        sortOrder: 0,
-      })
-      const waypoint = buildPlanSpot({
-        type: 'SPOT',
-        sortOrder: 0,
-        stayMinutes: 60,
-        travelMinutesFromPrev: 0,
-      })
-
+    test('タイトルが不正な場合はINVALID_REQUESTエラーになる', async () => {
+      const plan = buildPlan()
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
-      vi.mocked(
-        touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).mockResolvedValue([startSpot, waypoint])
-      vi.mocked(touringPlanRepository.updatePlan).mockImplementation(
-        async (p) => p
-      )
 
-      const newDepartAt = new Date('2026-07-02T15:00:00.000Z')
-      await service.updatePlan({
-        planId: plan.id,
-        myUserBikeId,
-        userId,
-        departAt: newDepartAt,
-      })
-
-      const updateCalls = vi.mocked(touringPlanRepository.updatePlan).mock.calls
-      const passedPlan = updateCalls[updateCalls.length - 1]?.[0]
-      // newDepartAt(15:00) + stayMinutes(60分) = 16:00 > newDepartAt のため16:00が採用される
-      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-02T16:00:00.000Z'))
-    })
-
-    test('departAt変更時、目的地・経由地が未設定の場合はreturnAt=departAtになる', async () => {
-      const plan = buildPlan({
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
-        returnAt: new Date('2026-07-01T08:00:00.000Z'),
-      })
-
-      vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
-      vi.mocked(
-        touringPlanSpotRepository.findPlanSpotsByPlanId
-      ).mockResolvedValue([])
-      vi.mocked(touringPlanRepository.updatePlan).mockImplementation(
-        async (p) => p
-      )
-
-      const newDepartAt = new Date('2026-07-03T08:00:00.000Z')
-      await service.updatePlan({
-        planId: plan.id,
-        myUserBikeId,
-        userId,
-        departAt: newDepartAt,
-      })
-
-      const passedPlan = vi.mocked(touringPlanRepository.updatePlan).mock
-        .calls[0]?.[0]
-      expect(passedPlan?.returnAt).toEqual(newDepartAt)
+      await expect(
+        service.updatePlan({
+          planId: plan.id,
+          myUserBikeId,
+          userId,
+          title: '',
+        })
+      ).rejects.toThrow(ApiV1Error)
+      expect(touringPlanRepository.updatePlan).not.toHaveBeenCalled()
     })
   })
 

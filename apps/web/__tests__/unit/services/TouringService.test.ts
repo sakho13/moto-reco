@@ -257,8 +257,8 @@ describe('TouringService', () => {
         touringPlanId: createTouringPlanId('plan-1'),
         myUserBikeId,
         title: 'プランタイトル',
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
-        returnAt: new Date('2026-07-01T18:00:00.000Z'),
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
       vi.mocked(
@@ -282,8 +282,8 @@ describe('TouringService', () => {
         touringPlanId: createTouringPlanId('plan-1'),
         myUserBikeId,
         title: 'プランタイトル',
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
-        returnAt: new Date('2026-07-01T18:00:00.000Z'),
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
       vi.mocked(
@@ -307,8 +307,8 @@ describe('TouringService', () => {
         touringPlanId: createTouringPlanId('plan-1'),
         myUserBikeId,
         title: 'プランタイトル',
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
-        returnAt: new Date('2026-07-01T18:00:00.000Z'),
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       })
       const startSpot = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
@@ -348,32 +348,40 @@ describe('TouringService', () => {
         touringPlanId: createTouringPlanId('plan-1'),
         myUserBikeId,
         title: 'プランタイトル',
-        departAt: new Date('2026-07-01T08:00:00.000Z'),
-        returnAt: new Date('2026-07-01T18:00:00.000Z'),
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2024-01-01T00:00:00.000Z'),
       })
+      // PLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z)起点で
+      // waypoint1は+4時間着/+4時間30分発、waypoint2は+5時間着/+5時間15分発
       const waypoint1 = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-1'),
         type: 'SPOT',
         name: '経由地1',
         sortOrder: 0,
+        plannedArrivalAt: new Date('1999-12-31T19:00:00.000Z'),
+        plannedDepartureAt: new Date('1999-12-31T19:30:00.000Z'),
       })
       const waypoint2 = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-2'),
         type: 'BREAK',
         name: '休憩',
         sortOrder: 1,
+        plannedArrivalAt: new Date('1999-12-31T20:00:00.000Z'),
+        plannedDepartureAt: new Date('1999-12-31T20:15:00.000Z'),
       })
       vi.mocked(touringPlanRepository.findPlanById).mockResolvedValue(plan)
       vi.mocked(
         touringPlanSpotRepository.findPlanSpotsByPlanId
       ).mockResolvedValue([waypoint2, waypoint1])
 
+      const startDate = new Date('2024-07-01T06:00:00.000Z')
       await service.handleTouringAction({
         action: 'start',
         myUserBikeId,
         userId,
         role: 'USER',
         touringPlanId: 'plan-1',
+        startDate,
       })
 
       expect(spotRepository.createSpot).toHaveBeenCalledTimes(2)
@@ -386,10 +394,24 @@ describe('TouringService', () => {
       expect(createdSpots[0]?.type).toBe('SPOT')
       expect(createdSpots[0]?.arrivedAt).toBeNull()
       expect(createdSpots[0]?.isSkipped).toBe(false)
+      // startDate(06:00) + 4時間 = 10:00、+4時間30分 = 10:30に再アンカーされる
+      expect(createdSpots[0]?.plannedArrivalAt).toEqual(
+        new Date('2024-07-01T10:00:00.000Z')
+      )
+      expect(createdSpots[0]?.plannedDepartureAt).toEqual(
+        new Date('2024-07-01T10:30:00.000Z')
+      )
 
       expect(createdSpots[1]?.name).toBe('休憩')
       expect(createdSpots[1]?.sortOrder).toBe(1)
       expect(createdSpots[1]?.type).toBe('BREAK')
+      // startDate(06:00) + 5時間 = 11:00、+5時間15分 = 11:15に再アンカーされる
+      expect(createdSpots[1]?.plannedArrivalAt).toEqual(
+        new Date('2024-07-01T11:00:00.000Z')
+      )
+      expect(createdSpots[1]?.plannedDepartureAt).toEqual(
+        new Date('2024-07-01T11:15:00.000Z')
+      )
     })
 
     test('存在しないプランを指定するとNOT_FOUNDエラーになる', async () => {

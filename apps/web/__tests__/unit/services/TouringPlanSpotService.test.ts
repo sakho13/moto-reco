@@ -24,8 +24,8 @@ const buildPlan = (overrides: Partial<TouringPlan> = {}) => {
     touringPlanId: planId,
     myUserBikeId,
     title: '日帰り箱根ツーリング',
-    departAt: new Date('2026-07-01T08:00:00.000Z'),
-    returnAt: new Date('2026-07-01T08:00:00.000Z'),
+    createdAt: new Date('2026-07-01T08:00:00.000Z'),
+    updatedAt: new Date('2026-07-01T08:00:00.000Z'),
     ...overrides,
   })
 }
@@ -237,7 +237,7 @@ describe('TouringPlanSpotService', () => {
       expect(result.name).toBe('新名称')
     })
 
-    test('travelMinutesFromPrev更新後は各スポットの予定時刻とプランのreturnAtが再計算される', async () => {
+    test('travelMinutesFromPrev更新後は各スポットの予定時刻が再計算される', async () => {
       const startSpot = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
         type: 'START',
@@ -283,23 +283,27 @@ describe('TouringPlanSpotService', () => {
       expect(result.travelMinutesFromPrev).toBe(90)
 
       // recompute時にspotの予定到着・出発時刻が再計算値で更新される
-      // departAt(08:00) + travelMinutesFromPrev(90分) = 09:30着、stayMinutes(30分)で10:00発
+      // PLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z) + travelMinutesFromPrev(90分)
+      // = 16:30着、stayMinutes(30分)で17:00発
       const updateCalls = vi.mocked(touringPlanSpotRepository.updatePlanSpot)
         .mock.calls
       const recomputedSpotCall = updateCalls.find(
         ([s]) => s.id === spot.id && s.plannedArrivalAt !== null
       )
       expect(recomputedSpotCall?.[0].plannedArrivalAt).toEqual(
-        new Date('2026-07-01T09:30:00.000Z')
+        new Date('1999-12-31T16:30:00.000Z')
       )
       expect(recomputedSpotCall?.[0].plannedDepartureAt).toEqual(
-        new Date('2026-07-01T10:00:00.000Z')
+        new Date('1999-12-31T17:00:00.000Z')
       )
 
-      // DESTINATIONの到着(10:00 + 60分 = 11:00)がreturnAtに反映される
-      const passedPlan = vi.mocked(touringPlanRepository.updatePlan).mock
-        .calls[0]?.[0]
-      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T11:00:00.000Z'))
+      // DESTINATIONの到着(17:00 + 60分 = 18:00)も再計算される
+      const destinationSpotCall = updateCalls.find(
+        ([s]) => s.id === destinationSpot.id
+      )
+      expect(destinationSpotCall?.[0].plannedArrivalAt).toEqual(
+        new Date('1999-12-31T18:00:00.000Z')
+      )
     })
   })
 
@@ -384,7 +388,7 @@ describe('TouringPlanSpotService', () => {
   })
 
   describe('setDestinationSpot', () => {
-    test('目的地を新規設定するとtravelMinutesFromPrevに基づきプランのreturnAtが再計算される', async () => {
+    test('目的地を新規設定するとtravelMinutesFromPrevに基づき予定到着時刻が再計算される', async () => {
       const startSpot = buildPlanSpot({
         touringPlanSpotId: createTouringPlanSpotId('plan-spot-start'),
         type: 'START',
@@ -405,6 +409,9 @@ describe('TouringPlanSpotService', () => {
       vi.mocked(
         touringPlanSpotRepository.findPlanSpotsByPlanId
       ).mockResolvedValue([startSpot, destinationSpot])
+      vi.mocked(touringPlanSpotRepository.updatePlanSpot).mockImplementation(
+        async (s) => s
+      )
 
       await service.setDestinationSpot(planId, myUserBikeId, userId, {
         latitude: 35.2323,
@@ -425,10 +432,16 @@ describe('TouringPlanSpotService', () => {
         })
       )
 
-      // departAt(08:00) + travelMinutesFromPrev(120分) = 10:00がreturnAtに反映される
-      const passedPlan = vi.mocked(touringPlanRepository.updatePlan).mock
-        .calls[0]?.[0]
-      expect(passedPlan?.returnAt).toEqual(new Date('2026-07-01T10:00:00.000Z'))
+      // PLAN_SPOT_TIME_BASE_DATE(1999-12-31T15:00:00.000Z) + travelMinutesFromPrev(120分)
+      // = 17:00が予定到着時刻として反映される
+      const updateCalls = vi.mocked(touringPlanSpotRepository.updatePlanSpot)
+        .mock.calls
+      const destinationSpotCall = updateCalls.find(
+        ([s]) => s.id === destinationSpot.id
+      )
+      expect(destinationSpotCall?.[0].plannedArrivalAt).toEqual(
+        new Date('1999-12-31T17:00:00.000Z')
+      )
     })
   })
 })
