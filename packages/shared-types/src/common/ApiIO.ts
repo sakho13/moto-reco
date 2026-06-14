@@ -321,8 +321,8 @@ export type ApiResponseTouringPlanLocation = {
   longitude: number | null
   name: string | null
   memo: string | null
-  plannedArrivalAt: string | null
-  plannedDepartureAt: string | null
+  plannedArrivalOffsetMinutes: number | null
+  plannedDepartureOffsetMinutes: number | null
   stayMinutes: number | null
   travelMinutesFromPrev: number | null
   routeTypeFromPrev: TouringPlanRouteType | null
@@ -361,8 +361,8 @@ export type ApiResponseTouringPlanSpotDetail = {
   memo: string | null
   latitude: number | null
   longitude: number | null
-  plannedArrivalAt: string | null
-  plannedDepartureAt: string | null
+  plannedArrivalOffsetMinutes: number | null
+  plannedDepartureOffsetMinutes: number | null
   stayMinutes: number | null
   travelMinutesFromPrev: number | null
   routeTypeFromPrev: TouringPlanRouteType | null

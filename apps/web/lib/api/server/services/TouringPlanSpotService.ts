@@ -85,8 +85,8 @@ export class TouringPlanSpotService {
         memo: params.memo ?? null,
         latitude: params.latitude ?? null,
         longitude: params.longitude ?? null,
-        plannedArrivalAt: null,
-        plannedDepartureAt: null,
+        plannedArrivalOffsetMinutes: null,
+        plannedDepartureOffsetMinutes: null,
         stayMinutes: params.stayMinutes ?? null,
         travelMinutesFromPrev: params.travelMinutesFromPrev ?? null,
         routeTypeFromPrev: params.routeTypeFromPrev ?? null,
@@ -176,8 +176,9 @@ export class TouringPlanSpotService {
           params.longitude !== undefined
             ? params.longitude
             : existingSpot.longitude,
-        plannedArrivalAt: existingSpot.plannedArrivalAt,
-        plannedDepartureAt: existingSpot.plannedDepartureAt,
+        plannedArrivalOffsetMinutes: existingSpot.plannedArrivalOffsetMinutes,
+        plannedDepartureOffsetMinutes:
+          existingSpot.plannedDepartureOffsetMinutes,
         stayMinutes:
           params.stayMinutes !== undefined
             ? params.stayMinutes

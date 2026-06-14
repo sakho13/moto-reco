@@ -25,11 +25,11 @@ export class TouringPlanSpotEntity {
     }
 
     if (
-      spot.plannedArrivalAt !== null &&
-      spot.plannedDepartureAt !== null &&
-      spot.plannedArrivalAt > spot.plannedDepartureAt
+      spot.plannedArrivalOffsetMinutes !== null &&
+      spot.plannedDepartureOffsetMinutes !== null &&
+      spot.plannedArrivalOffsetMinutes > spot.plannedDepartureOffsetMinutes
     ) {
-      throw new Error('到着予定日時は出発予定日時以前である必要があります')
+      throw new Error('到着予定時刻は出発予定時刻以前である必要があります')
     }
 
     if (spot.stayMinutes !== null && spot.stayMinutes < 0) {
@@ -71,12 +71,12 @@ export class TouringPlanSpotEntity {
     return this._value.longitude
   }
 
-  public get plannedArrivalAt(): Date | null {
-    return this._value.plannedArrivalAt
+  public get plannedArrivalOffsetMinutes(): number | null {
+    return this._value.plannedArrivalOffsetMinutes
   }
 
-  public get plannedDepartureAt(): Date | null {
-    return this._value.plannedDepartureAt
+  public get plannedDepartureOffsetMinutes(): number | null {
+    return this._value.plannedDepartureOffsetMinutes
   }
 
   public get stayMinutes(): number | null {

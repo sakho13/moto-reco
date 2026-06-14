@@ -264,9 +264,11 @@ model TUserMyBikeTouringPlanSpot {
   latitude  Float?              @map("latitude")
   longitude Float?              @map("longitude")
 
-  // サーバー側で計算・永続化する値（直接編集禁止）。SPOT/BREAK: 到着予定・出発予定。START: plannedDepartureAtのみ想定。DESTINATION: plannedArrivalAtのみ想定。
-  plannedArrivalAt   DateTime? @map("planned_arrival_at")
-  plannedDepartureAt DateTime? @map("planned_departure_at")
+  // サーバー側で計算・永続化する値（直接編集禁止）。出発(START)を0分とした経過分数。
+  // SPOT/BREAK: 到着予定・出発予定。START: plannedDepartureOffsetMinutesのみ想定(常に0)。
+  // DESTINATION: plannedArrivalOffsetMinutesのみ想定。
+  plannedArrivalOffsetMinutes   Int? @map("planned_arrival_offset_minutes")
+  plannedDepartureOffsetMinutes Int? @map("planned_departure_offset_minutes")
 
   // 滞在時間（分）。START/DESTINATIONでは未使用想定。
   stayMinutes Int? @map("stay_minutes")
