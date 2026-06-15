@@ -20,7 +20,7 @@
     "dotenv": "catalog:",
     "dotenv-cli": "catalog:",
     "prettier": "catalog:",
-    "tailwindcss": "4.2.4",
+    "tailwindcss": "4.3.1",
     "turbo": "2.9.18",
     "typescript": "catalog:"
   },
