@@ -18,12 +18,14 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 interface FuelLogRegisterModalProps {
   bikeId: string
+  touringId?: string
   onClose: () => void
   onSuccess: () => void
 }
 
 export function FuelLogRegisterModal({
   bikeId,
+  touringId,
   onClose,
   onSuccess,
 }: FuelLogRegisterModalProps) {
@@ -81,6 +83,7 @@ export function FuelLogRegisterModal({
         totalPrice: Number(formData.totalPrice),
         memo: memo.length > 0 ? memo : null,
         updateTotalMileage: formData.updateTotalMileage,
+        touringId: touringId ?? null,
       })
       trackEvent('fuel_log_create', {
         has_memo: memo.length > 0,

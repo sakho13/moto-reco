@@ -37,6 +37,7 @@ export type PublicHistoryDetail = {
   } | null
   touring: {
     id: string
+    planId: string | null
     title: string
     startDate: Date
     endDate: Date

@@ -1,46 +1,22 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 import type {
   ApiResponseTouringDetail,
   SuccessResponse,
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { InfoBox } from '@/components/bike/InfoBox'
-import { TouringDeleteConfirmModal } from '@/components/touring/TouringDeleteConfirmModal'
 import { TouringListSection } from '@/components/touring/TouringListSection'
-import { authenticatedFetch, apiDelete } from '@/lib/api/client'
+import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
-import { useAuth } from '@/lib/hooks/useAuth'
-import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 function TouringsPage() {
   const params = useParams()
   const router = useRouter()
-  const { isGuest } = useAuth()
   const bikeId = params.id as string
-
-  const [pendingDeleteTouringId, setPendingDeleteTouringId] = useState<
-    string | null
-  >(null)
-
-  const fetchTourings = async (url: string) => {
-    const response = await authenticatedFetch(url, { method: 'GET' })
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new ApiV1Error(
-        errorData.errorCode || 'SERVER_ERROR',
-        errorData.message || 'エラーが発生しました'
-      )
-    }
-    const json = (await response.json()) as SuccessResponse<
-      ApiResponseTouringDetail[]
-    >
-    return json.data
-  }
 
   const {
     data: tourings,
@@ -48,41 +24,40 @@ function TouringsPage() {
     isLoading,
   } = useSWR(
     bikeId
-      ? `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=end-date&sort-order=desc`
+      ? `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
       : null,
-    fetchTourings
+    async (url: string) => {
+      const response = await authenticatedFetch(url, { method: 'GET' })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new ApiV1Error(
+          errorData.errorCode || 'SERVER_ERROR',
+          errorData.message || 'エラーが発生しました'
+        )
+      }
+      const json = (await response.json()) as SuccessResponse<
+        ApiResponseTouringDetail[]
+      >
+      return json.data
+    }
   )
 
-  const handleDelete = (touringId: string) => {
-    setPendingDeleteTouringId(touringId)
-  }
-
-  const handleConfirmDelete = async () => {
-    if (!pendingDeleteTouringId) return
-    const touringId = pendingDeleteTouringId
-    setPendingDeleteTouringId(null)
-    try {
-      await apiDelete(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
-        touringId,
+  // 表示順: STARTED → COMPLETED (開始日降順)
+  const sortedTourings = tourings
+    ? [...tourings].sort((a, b) => {
+        const order = { STARTED: 0, COMPLETED: 1 }
+        const statusDiff = order[a.status] - order[b.status]
+        if (statusDiff !== 0) return statusDiff
+        return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       })
-      await mutate(
-        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=end-date&sort-order=desc`
-      )
-    } catch {
-      // エラーは無視（toast通知は不要）
-    }
-  }
-
-  const handleCancelDelete = () => {
-    setPendingDeleteTouringId(null)
-  }
+    : []
 
   const handleDetail = (touringId: string) => {
     router.push(`/app/my-bike/${bikeId}/tourings/${touringId}`)
   }
 
-  const handleRegister = () => {
-    router.push(`/app/my-bike/${bikeId}/tourings/register`)
+  const handleRegisterHistory = () => {
+    router.push(`/app/my-bike/${bikeId}/tourings/register?mode=history`)
   }
 
   if (isLoading) {
@@ -106,7 +81,6 @@ function TouringsPage() {
             ← 戻る
           </Button>
         </div>
-
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
           <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
           <p className="text-gray-700 mb-4">
@@ -122,59 +96,37 @@ function TouringsPage() {
     )
   }
 
-  const isAtGuestTouringLimit =
-    isGuest && (tourings?.length ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
-
   return (
     <>
-      <div className="w-full max-w-md flex flex-col gap-2">
-        <div className="flex flex-row gap-2">
-          <Button
-            onClick={() => router.push(`/app/my-bike/${bikeId}`)}
-            variant="cloud"
-          >
-            ← 戻る
-          </Button>
-
-          <Button
-            onClick={handleRegister}
-            variant="primary"
-            disabled={isAtGuestTouringLimit}
-          >
-            ツーリング履歴を登録
-          </Button>
-        </div>
-        {isGuest && !isLoading && (
-          <InfoBox
-            variant={isAtGuestTouringLimit ? 'warning' : 'info'}
-            className="text-sm"
-          >
-            ゲストアカウントはツーリングを{GUEST_ACCOUNT_LIMITS.TOURING}
-            件まで登録できます（
-            {tourings?.length ?? 0}/{GUEST_ACCOUNT_LIMITS.TOURING}件）
-          </InfoBox>
-        )}
+      <div className="w-full max-w-md flex flex-row gap-2">
+        <Button
+          onClick={() => router.push(`/app/my-bike/${bikeId}`)}
+          variant="cloud"
+        >
+          ← 戻る
+        </Button>
+        <Button onClick={handleRegisterHistory} variant="primary">
+          ツーリングを作成
+        </Button>
+        <Button
+          onClick={() => router.push(`/app/my-bike/${bikeId}/touring-plans`)}
+          variant="cloud"
+        >
+          プラン一覧
+        </Button>
       </div>
 
       <InfoBox variant="info" className="w-full max-w-md mt-3 text-sm">
         開始・終了地点の位置情報は本人のみ閲覧でき、他のユーザーには公開されません。
       </InfoBox>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md mt-3">
         <TouringListSection
-          tourings={tourings || []}
+          tourings={sortedTourings}
           onDetail={handleDetail}
-          onDelete={handleDelete}
-          onRegister={handleRegister}
+          onRegister={handleRegisterHistory}
         />
       </div>
-
-      {pendingDeleteTouringId !== null && (
-        <TouringDeleteConfirmModal
-          onCancel={handleCancelDelete}
-          onConfirm={handleConfirmDelete}
-        />
-      )}
     </>
   )
 }

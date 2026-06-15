@@ -44,6 +44,13 @@ export const FuelLogRegisterRequestSchema = z
       .nullable()
       .optional(),
     updateTotalMileage: z.boolean().default(false),
+    touringId: z
+      .string({
+        invalid_type_error: 'ツーリングIDは文字列で指定してください',
+      })
+      .min(1, 'ツーリングIDは1文字以上で指定してください')
+      .nullable()
+      .optional(),
   })
   .refine((data) => data.previousMileage <= data.mileage, {
     message: '前回走行距離は給油時走行距離以下で指定してください',

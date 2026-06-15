@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
+import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
+import { getNowLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 export interface FuelLogFormData {
   refueledAt: string
@@ -36,16 +38,8 @@ export const FuelLogForm = ({
   isEdit = false,
   totalMileage,
 }: FuelLogFormProps) => {
-  const getTodayDateString = () => {
-    const today = new Date()
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-  const today = getTodayDateString()
   const [formData, setFormData] = useState<FuelLogFormData>({
-    refueledAt: today ?? '',
+    refueledAt: getNowLocalDateTimeString(5),
     mileage: '',
     previousMileage: '',
     amount: '',
@@ -95,17 +89,17 @@ export const FuelLogForm = ({
       }}
     >
       <FormField label="給油日時" htmlFor="refueledAt" required>
-        <Input
+        <DateTimeInput
           id="refueledAt"
-          type="date"
           value={formData.refueledAt}
+          minuteStep={5}
           onChange={(e) =>
             setFormData((prev) => ({
               ...prev,
               refueledAt: e.target.value,
             }))
           }
-          max={today}
+          max={getNowLocalDateTimeString()}
           required
           disabled={isSubmitting}
         />

@@ -25,6 +25,7 @@ type RegisterFuelLogParams = {
   totalPrice: number
   memo?: string | null
   updateTotalMileage: boolean
+  touringId?: string | null
 }
 
 type UpdateFuelLogParams = {
@@ -78,27 +79,30 @@ export class FuelLogService {
       }
     }
 
-    // 進行中ツーリングの自動紐づけ
     let touringId: TouringId | null = null
     let touringTitle: string | null = null
 
-    try {
+    if (params.touringId) {
+      try {
+        const touring = await this.touringRepository.findTouringById(
+          params.touringId as TouringId,
+          params.myUserBikeId
+        )
+        if (touring) {
+          touringId = touring.id
+          touringTitle = touring.title
+        }
+      } catch (error) {
+        console.error('Failed to link touring:', error)
+      }
+    } else {
       const ongoingTouring = await this.touringRepository.findOngoingTouring(
         params.myUserBikeId
       )
-
-      // 給油日時がツーリング期間内であれば自動紐づけ
-      if (
-        ongoingTouring &&
-        params.refueledAt >= ongoingTouring.startDate &&
-        params.refueledAt <= new Date()
-      ) {
+      if (ongoingTouring && params.refueledAt >= ongoingTouring.startDate) {
         touringId = ongoingTouring.id
         touringTitle = ongoingTouring.title
       }
-    } catch (error) {
-      // ツーリング取得エラーが発生しても給油履歴登録は継続
-      console.error('Failed to auto-link touring:', error)
     }
 
     const fuelLog = new FuelLogEntity({

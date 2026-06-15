@@ -1,4 +1,9 @@
-import { MyUserBikeId, TouringId } from '@repo/shared-types'
+import {
+  MyUserBikeId,
+  TouringId,
+  TouringPlanId,
+  TouringStatus,
+} from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 
@@ -17,8 +22,12 @@ export interface ITouringRepository {
   updateTouringStatus(
     touringId: TouringId,
     myUserBikeId: MyUserBikeId,
-    status: 'STARTED' | 'COMPLETED'
+    status: TouringStatus
   ): Promise<TouringEntity>
   deleteTouring(touringId: TouringId, myUserBikeId: MyUserBikeId): Promise<void>
   countTourings(myUserBikeId: MyUserBikeId): Promise<number>
+  /**
+   * 指定したツーリングプランから開始されたツーリング一覧を取得する
+   */
+  findTouringsByPlanId(planId: TouringPlanId): Promise<TouringEntity[]>
 }

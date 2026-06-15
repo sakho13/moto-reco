@@ -7,6 +7,7 @@ import {
   MyUserBikeId,
   TouringId,
 } from '@repo/shared-types'
+import { getCurrentDate } from '../../../utils/dateUtils'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
@@ -66,7 +67,7 @@ export class PrismaFuelLogRepository
       return { startDate, endDate }
     }
 
-    const endDate = new Date()
+    const endDate = getCurrentDate()
     const startDate = this.calculatePeriodStartDate(endDate, period)
 
     if (!startDate) {

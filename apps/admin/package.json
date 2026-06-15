@@ -11,7 +11,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@ant-design/icons": "6.2.3",
+    "@ant-design/icons": "6.2.5",
     "@ant-design/v5-patch-for-react-19": "1.0.3",
     "@refinedev/antd": "6.0.3",
     "@refinedev/core": "5.0.12",
@@ -20,8 +20,8 @@
     "@repo/database": "workspace:*",
     "@repo/firebase-auth-server": "workspace:*",
     "@tanstack/react-query": "5.100.14",
-    "antd": "6.4.3",
-    "axios": "1.16.1",
+    "antd": "6.4.4",
+    "axios": "1.17.0",
     "firebase": "catalog:",
     "firebase-admin": "catalog:",
     "next": "catalog:",

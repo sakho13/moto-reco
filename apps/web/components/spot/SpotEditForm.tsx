@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
@@ -12,6 +13,7 @@ import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 interface SpotEditFormProps {
   bikeId: string
@@ -24,18 +26,15 @@ interface SpotEditFormProps {
 type SpotFormState = {
   name: string
   memo: string
-  visitedAt: string
-  endAt: string
-}
-
-const toLocalDateTimeString = (dateString: string) => {
-  const d = new Date(dateString)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  arrivedAt: string
+  departedAt: string
 }
 
 /**
  * スポット・休憩編集フォーム
+ *
+ * @remarks
+ * 実績記録専用フォーム。到着日時(`arrivedAt`)・出発日時(`departedAt`)を編集する。
  */
 export function SpotEditForm({
   bikeId,
@@ -57,19 +56,29 @@ export function SpotEditForm({
   const [formState, setFormState] = useState<SpotFormState>({
     name: '',
     memo: '',
-    visitedAt: '',
-    endAt: '',
+    arrivedAt: '',
+    departedAt: '',
   })
 
   const isBreak = spot.type === 'BREAK'
   const label = isBreak ? '休憩' : 'スポット'
 
+  const computedStayMinutes = (() => {
+    if (!formState.arrivedAt || !formState.departedAt) return null
+    const diff = Math.round(
+      (new Date(formState.departedAt).getTime() -
+        new Date(formState.arrivedAt).getTime()) /
+        60000
+    )
+    return diff > 0 ? diff : null
+  })()
+
   useEffect(() => {
     setFormState({
       name: spot.name ?? '',
       memo: spot.memo ?? '',
-      visitedAt: toLocalDateTimeString(spot.visitedAt),
-      endAt: spot.endAt ? toLocalDateTimeString(spot.endAt) : '',
+      arrivedAt: spot.arrivedAt ? toLocalDateTimeString(spot.arrivedAt) : '',
+      departedAt: spot.departedAt ? toLocalDateTimeString(spot.departedAt) : '',
     })
 
     if (spot.latitude != null && spot.longitude != null) {
@@ -132,12 +141,10 @@ export function SpotEditForm({
         {
           name: formState.name !== '' ? formState.name : null,
           memo: formState.memo !== '' ? formState.memo : null,
-          visitedAt: new Date(formState.visitedAt),
-          endAt: isBreak
-            ? formState.endAt !== ''
-              ? new Date(formState.endAt)
-              : null
-            : undefined,
+          arrivedAt:
+            formState.arrivedAt !== '' ? new Date(formState.arrivedAt) : null,
+          departedAt:
+            formState.departedAt !== '' ? new Date(formState.departedAt) : null,
         }
       )
 
@@ -186,32 +193,39 @@ export function SpotEditForm({
 
         <FormField
           label={isBreak ? '休憩開始' : '訪問日時'}
-          htmlFor="spotVisitedAt"
+          htmlFor="spotArrivedAt"
         >
-          <Input
-            id="spotVisitedAt"
-            type="datetime-local"
-            value={formState.visitedAt}
+          <DateTimeInput
+            id="spotArrivedAt"
+            value={formState.arrivedAt}
             onChange={(e) =>
-              setFormState((prev) => ({ ...prev, visitedAt: e.target.value }))
+              setFormState((prev) => ({ ...prev, arrivedAt: e.target.value }))
             }
             disabled={isSubmitting}
           />
         </FormField>
 
-        {isBreak && (
-          <FormField label="休憩終了（任意）" htmlFor="spotEndAt">
-            <Input
-              id="spotEndAt"
-              type="datetime-local"
-              value={formState.endAt}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, endAt: e.target.value }))
-              }
-              disabled={isSubmitting}
-            />
-          </FormField>
-        )}
+        <FormField
+          label={isBreak ? '休憩終了（任意）' : '出発時間（任意）'}
+          htmlFor="spotDepartedAt"
+        >
+          <DateTimeInput
+            id="spotDepartedAt"
+            value={formState.departedAt}
+            onChange={(e) =>
+              setFormState((prev) => ({
+                ...prev,
+                departedAt: e.target.value,
+              }))
+            }
+            disabled={isSubmitting}
+          />
+          {computedStayMinutes !== null && (
+            <p className="text-xs opacity-50 mt-1 text-right">
+              滞在: {computedStayMinutes}分
+            </p>
+          )}
+        </FormField>
 
         <FormField label="位置">
           <div className="flex items-center gap-2">

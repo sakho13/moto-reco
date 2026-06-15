@@ -6,7 +6,7 @@ WORKDIR /app
 # ADD https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 /usr/local/bin/cloud_sql_proxy
 # RUN chmod +x /usr/local/bin/cloud_sql_proxy
 
-RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+RUN corepack enable && corepack prepare pnpm@11.5.0 --activate
 
 # 依存関係のインストール
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./

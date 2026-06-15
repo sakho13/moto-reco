@@ -29,6 +29,8 @@ import { PrismaFuelLogRepository } from '../../repositories/PrismaFuelLogReposit
 import { PrismaHistoryRepository } from '../../repositories/PrismaHistoryRepository'
 import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeRepository'
 import { PrismaSpotRepository } from '../../repositories/PrismaSpotRepository'
+import { PrismaTouringPlanRepository } from '../../repositories/PrismaTouringPlanRepository'
+import { PrismaTouringPlanSpotRepository } from '../../repositories/PrismaTouringPlanSpotRepository'
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { SpotService } from '../../services/SpotService'
 import { TouringService } from '../../services/TouringService'
@@ -48,6 +50,7 @@ userBikeTourings.get(
     const searchParams = new TouringSearchParams({
       sortBy: query['sort-by'] === 'end-date' ? 'endDate' : 'startDate',
       sortOrder: query['sort-order'],
+      status: query['status'],
     })
 
     const touringRepo = new PrismaTouringRepository(prisma)
@@ -67,6 +70,7 @@ userBikeTourings.get(
         data: tourings.map((touring) => {
           return {
             touringId: touring.id,
+            touringPlanId: touring.touringPlanId,
             title: touring.title,
             startDate: touring.startDate.toISOString(),
             endDate: touring.endDate.toISOString(),
@@ -115,16 +119,20 @@ userBikeTourings.post(
         endDate: body.endDate,
         startMileage: body.startMileage,
         endMileage: body.endMileage,
+        status: body.status,
       })
 
-      const historyRepo = new PrismaHistoryRepository(t)
-      await historyRepo.createHistory({
-        userId: createUserId(userId),
-        userMyBikeId: createMyUserBikeId(myUserBikeId),
-        type: 'TOURING',
-        occurredAt: touring.endDate,
-        touringId: touring.id,
-      })
+      // 完了済みツーリングのみ履歴を作成する（STARTEDはまだ完了していない）
+      if (touring.status === 'COMPLETED') {
+        const historyRepo = new PrismaHistoryRepository(t)
+        await historyRepo.createHistory({
+          userId: createUserId(userId),
+          userMyBikeId: createMyUserBikeId(myUserBikeId),
+          type: 'TOURING',
+          occurredAt: touring.endDate,
+          touringId: touring.id,
+        })
+      }
 
       return touring
     })
@@ -134,6 +142,7 @@ userBikeTourings.post(
         status: 'success',
         data: {
           touringId: result.id,
+          touringPlanId: result.touringPlanId,
           title: result.title,
           startDate: result.startDate.toISOString(),
           endDate: result.endDate.toISOString(),
@@ -203,10 +212,16 @@ userBikeTourings.post(
       const touringRepo = new PrismaTouringRepository(t)
       const myUserBikeRepo = new PrismaMyUserBikeRepository(t)
       const fuelLogRepo = new PrismaFuelLogRepository(t)
+      const touringPlanRepo = new PrismaTouringPlanRepository(t)
+      const touringPlanSpotRepo = new PrismaTouringPlanSpotRepository(t)
+      const spotRepo = new PrismaSpotRepository(t)
       const service = new TouringService(
         touringRepo,
         myUserBikeRepo,
-        fuelLogRepo
+        fuelLogRepo,
+        touringPlanRepo,
+        touringPlanSpotRepo,
+        spotRepo
       )
 
       if (body.action === 'start') {
@@ -215,6 +230,7 @@ userBikeTourings.post(
           myUserBikeId: createMyUserBikeId(myUserBikeId),
           userId: createUserId(userId),
           role,
+          touringPlanId: body.touringPlanId,
           title: body.title,
           startDate: body.startDate,
           startMileage: body.startMileage,
@@ -269,6 +285,7 @@ userBikeTourings.post(
         status: 'success',
         data: {
           touringId: result.id,
+          touringPlanId: result.touringPlanId,
           title: result.title,
           startDate: result.startDate.toISOString(),
           endDate: result.endDate.toISOString(),
@@ -321,6 +338,7 @@ userBikeTourings.get('/:touringId', honoAuthMiddleware, async (c) => {
       status: 'success',
       data: {
         touringId: touring.id,
+        touringPlanId: touring.touringPlanId,
         title: touring.title,
         startDate: touring.startDate.toISOString(),
         endDate: touring.endDate.toISOString(),
@@ -405,6 +423,7 @@ userBikeTourings.patch(
         status: 'success',
         data: {
           touringId: result.id,
+          touringPlanId: result.touringPlanId,
           title: result.title,
           startDate: result.startDate.toISOString(),
           endDate: result.endDate.toISOString(),
@@ -452,8 +471,12 @@ userBikeTourings.get('/:touringId/spots', honoAuthMiddleware, async (c) => {
         memo: spot.memo,
         latitude: spot.latitude,
         longitude: spot.longitude,
-        visitedAt: spot.visitedAt.toISOString(),
-        endAt: spot.endAt?.toISOString() ?? null,
+        plannedArrivalAt: spot.plannedArrivalAt?.toISOString() ?? null,
+        plannedDepartureAt: spot.plannedDepartureAt?.toISOString() ?? null,
+        arrivedAt: spot.arrivedAt?.toISOString() ?? null,
+        departedAt: spot.departedAt?.toISOString() ?? null,
+        isSkipped: spot.isSkipped,
+        skippedAt: spot.skippedAt?.toISOString() ?? null,
         sortOrder: spot.sortOrder,
       })),
       message: 'スポット一覧取得成功',
@@ -487,8 +510,8 @@ userBikeTourings.post(
       memo: body.memo,
       latitude: body.latitude,
       longitude: body.longitude,
-      visitedAt: body.visitedAt,
-      endAt: body.endAt,
+      arrivedAt: body.arrivedAt,
+      departedAt: body.departedAt,
     })
 
     return c.json<SuccessResponse<ApiResponseSpotDetail>>(
@@ -502,8 +525,12 @@ userBikeTourings.post(
           memo: spot.memo,
           latitude: spot.latitude,
           longitude: spot.longitude,
-          visitedAt: spot.visitedAt.toISOString(),
-          endAt: spot.endAt?.toISOString() ?? null,
+          plannedArrivalAt: spot.plannedArrivalAt?.toISOString() ?? null,
+          plannedDepartureAt: spot.plannedDepartureAt?.toISOString() ?? null,
+          arrivedAt: spot.arrivedAt?.toISOString() ?? null,
+          departedAt: spot.departedAt?.toISOString() ?? null,
+          isSkipped: spot.isSkipped,
+          skippedAt: spot.skippedAt?.toISOString() ?? null,
           sortOrder: spot.sortOrder,
         },
         message: 'スポット登録成功',
@@ -573,8 +600,9 @@ userBikeTourings.patch(
       memo: body.memo,
       latitude: body.latitude,
       longitude: body.longitude,
-      visitedAt: body.visitedAt,
-      endAt: body.endAt,
+      arrivedAt: body.arrivedAt,
+      departedAt: body.departedAt,
+      isSkipped: body.isSkipped,
     })
 
     return c.json<SuccessResponse<ApiResponseSpotDetail>>(
@@ -588,8 +616,12 @@ userBikeTourings.patch(
           memo: spot.memo,
           latitude: spot.latitude,
           longitude: spot.longitude,
-          visitedAt: spot.visitedAt.toISOString(),
-          endAt: spot.endAt?.toISOString() ?? null,
+          plannedArrivalAt: spot.plannedArrivalAt?.toISOString() ?? null,
+          plannedDepartureAt: spot.plannedDepartureAt?.toISOString() ?? null,
+          arrivedAt: spot.arrivedAt?.toISOString() ?? null,
+          departedAt: spot.departedAt?.toISOString() ?? null,
+          isSkipped: spot.isSkipped,
+          skippedAt: spot.skippedAt?.toISOString() ?? null,
           sortOrder: spot.sortOrder,
         },
         message: 'スポット更新成功',

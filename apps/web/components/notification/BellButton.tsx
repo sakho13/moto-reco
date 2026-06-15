@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { Button } from '@repo/ui/button'
 import styles from './BellButton.module.css'
 import { NotificationDropdown } from './NotificationDropdown'
 import { useNotificationUnreadCount } from '@/lib/hooks/useNotifications'
@@ -32,13 +33,15 @@ export function BellButton() {
 
   return (
     <div ref={ref} className={styles.container}>
-      <button
+      <Button
         type="button"
-        className={styles.bell}
+        variant="cloud"
+        size="sm"
         onClick={handleOpen}
         aria-label={`通知${unreadCount > 0 ? `（未読${unreadCount}件）` : ''}`}
         aria-expanded={isOpen}
         aria-haspopup="true"
+        style={{ width: '2rem', padding: 0 }}
       >
         <BellIcon />
         {unreadCount > 0 && (
@@ -46,7 +49,7 @@ export function BellButton() {
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
-      </button>
+      </Button>
 
       {isOpen && <NotificationDropdown onClose={handleClose} />}
     </div>

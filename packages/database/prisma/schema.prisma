@@ -32,7 +32,7 @@ model MUser {
   id                String  @id @default(cuid(2))
   name              String
   notificationEmail String? @map("notification_email")
-  isProfilePublic  Boolean @default(true) @map("is_profile_public")
+  isProfilePublic   Boolean @default(true) @map("is_profile_public")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -104,7 +104,7 @@ model MMaintenanceType {
 }
 
 model TUserBike {
-  id           String @id @default(cuid(2))
+  id           String  @id @default(cuid(2))
   bikeId       String? @map("bike_id")
   serialNumber String? @map("serial_number")
   displacement Float   @map("displacement")
@@ -144,6 +144,7 @@ model TUserMyBike {
   fuelLogs        TUserMyBikeFuelLog[]
   maintenanceLogs TUserMyBikeMaintenance[]
   tourings        TUserMyBikeTouring[]
+  touringPlans    TUserMyBikeTouringPlan[]
   histories       TUserMyBikeHistory[]
 
   @@index([userId, ownStatus])
@@ -186,7 +187,7 @@ model TUserMyBikeMaintenance {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  userMyBike       TUserMyBike                 @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  userMyBike       TUserMyBike                  @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   maintenanceItems TUserMyBikeMaintenanceItem[]
 
   @@index([userMyBikeId, performedAt])
@@ -208,8 +209,9 @@ model TUserMyBikeMaintenanceItem {
 }
 
 model TUserMyBikeTouring {
-  id           String        @id @default(cuid(2))
-  userMyBikeId String        @map("my_bike_id")
+  id           String  @id @default(cuid(2))
+  userMyBikeId String  @map("my_bike_id")
+  planId       String? @map("plan_id")
 
   title          String        @map("title")
   startDate      DateTime      @map("start_date")
@@ -226,12 +228,58 @@ model TUserMyBikeTouring {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   userMyBike TUserMyBike              @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  plan       TUserMyBikeTouringPlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
   fuelLogs   TUserMyBikeFuelLog[]
   spots      TUserMyBikeTouringSpot[]
   history    TUserMyBikeHistory?
 
   @@index([userMyBikeId, startDate])
   @@index([userMyBikeId, status])
+  @@index([planId])
+}
+
+model TUserMyBikeTouringPlan {
+  id           String @id @default(cuid(2))
+  userMyBikeId String @map("my_bike_id")
+
+  title String @map("title")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userMyBike TUserMyBike                  @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  spots      TUserMyBikeTouringPlanSpot[]
+  tourings   TUserMyBikeTouring[]
+
+  @@index([userMyBikeId, createdAt])
+}
+
+model TUserMyBikeTouringPlanSpot {
+  id     String @id @default(cuid(2))
+  planId String @map("plan_id")
+
+  type      TouringPlanSpotType @default(SPOT) @map("type")
+  name      String?             @map("name")
+  memo      String?             @map("memo")
+  latitude  Float?              @map("latitude")
+  longitude Float?              @map("longitude")
+
+  // 滞在時間（分）。START/DESTINATIONでは未使用想定。
+  stayMinutes Int? @map("stay_minutes")
+
+  // 直前の地点からの移動時間（分）・移動経路タイプ。START（最初の地点）では未使用想定。
+  travelMinutesFromPrev Int?                  @map("travel_minutes_from_prev")
+  routeTypeFromPrev     TouringPlanRouteType? @map("route_type_from_prev")
+
+  // SPOT/BREAKの並び順のみで使用（START/DESTINATIONは type により表示位置が固定されるため値は不問）
+  sortOrder Int @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  plan TUserMyBikeTouringPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId, sortOrder])
 }
 
 model TUserMyBikeHistory {
@@ -247,10 +295,10 @@ model TUserMyBikeHistory {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user       MUser                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userMyBike TUserMyBike?         @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
-  fuelLog    TUserMyBikeFuelLog?  @relation(fields: [fuelLogId], references: [id], onDelete: Cascade)
-  touring    TUserMyBikeTouring?  @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  user       MUser               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike?        @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
+  fuelLog    TUserMyBikeFuelLog? @relation(fields: [fuelLogId], references: [id], onDelete: Cascade)
+  touring    TUserMyBikeTouring? @relation(fields: [touringId], references: [id], onDelete: Cascade)
 
   @@index([userId, occurredAt(sort: Desc)])
   @@index([userMyBikeId, occurredAt(sort: Desc)])
@@ -258,16 +306,27 @@ model TUserMyBikeHistory {
 }
 
 model TUserMyBikeTouringSpot {
-  id        String    @id @default(cuid(2))
-  touringId String    @map("touring_id")
-  type      SpotType  @default(SPOT) @map("type")
-  name      String?   @map("name")
-  memo      String?   @map("memo")
-  latitude  Float?    @map("latitude")
-  longitude Float?    @map("longitude")
-  visitedAt DateTime  @default(now()) @map("visited_at")
-  endAt     DateTime? @map("end_at")
-  sortOrder Int       @default(0) @map("sort_order")
+  id        String @id @default(cuid(2))
+  touringId String @map("touring_id")
+
+  type      SpotType @default(SPOT) @map("type")
+  name      String?  @map("name")
+  memo      String?  @map("memo")
+  latitude  Float?   @map("latitude")
+  longitude Float?   @map("longitude")
+
+  // プラン由来の参考予定値（プランから開始した場合にコピーされる。常にこの意味）
+  plannedArrivalAt   DateTime? @map("planned_arrival_at")
+  plannedDepartureAt DateTime? @map("planned_departure_at")
+
+  // 実績（常にこの意味。statusに関わらず固定）
+  arrivedAt  DateTime? @map("arrived_at")
+  departedAt DateTime? @map("departed_at")
+
+  isSkipped Boolean   @default(false) @map("is_skipped")
+  skippedAt DateTime? @map("skipped_at")
+
+  sortOrder Int @default(0) @map("sort_order")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -278,11 +337,11 @@ model TUserMyBikeTouringSpot {
 }
 
 model TUserQuit {
-  id           String @id @default(cuid(2))
-  userId       String @map("user_id")
-  quitAt       DateTime @map("quit_at")
-  quitReason   String @map("quit_reason")
-  recoveryCode String @map("recovery_code")
+  id           String         @id @default(cuid(2))
+  userId       String         @map("user_id")
+  quitAt       DateTime       @map("quit_at")
+  quitReason   String         @map("quit_reason")
+  recoveryCode String         @map("recovery_code")
   status       UserQuitStatus @default(QUIT) @map("status")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -341,7 +400,7 @@ model MSystemAnnouncement {
   updatedAt   DateTime           @updatedAt @map("updated_at")
 
   reads         TSystemAnnouncementRead[]
-  createdByUser MUser                    @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  createdByUser MUser                     @relation(fields: [createdBy], references: [id], onDelete: Restrict)
 
   @@index([status, scheduledAt])
   @@index([status, publishedAt(sort: Desc)])
@@ -436,6 +495,19 @@ enum TouringStatus {
 enum SpotType {
   SPOT
   BREAK
+}
+
+enum TouringPlanSpotType {
+  START // 出発地（プランにつき最大1件）
+  SPOT // 経由地
+  BREAK // 休憩
+  DESTINATION // 目的地（プランにつき最大1件）
+}
+
+enum TouringPlanRouteType {
+  GENERAL // 下道
+  HIGHWAY // 高速
+  MIXED // 混在
 }
 
 enum BikeHistoryType {
