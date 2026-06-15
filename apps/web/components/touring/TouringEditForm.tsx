@@ -14,6 +14,7 @@ import {
 } from '@/components/touring/TouringForm'
 import { authenticatedFetch, apiPatch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 interface TouringEditFormProps {
   bikeId: string
@@ -50,24 +51,15 @@ export function TouringEditForm({
 
   useEffect(() => {
     if (data) {
-      const pad = (n: number) => String(n).padStart(2, '0')
-      const toLocalDate = (d: Date) =>
-        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-      const toLocalTime = (d: Date) =>
-        `${pad(d.getHours())}:${pad(d.getMinutes())}`
-
       const start = new Date(data.startDate)
       const end = new Date(data.endDate)
 
       setInitialData({
         title: data.title,
-        startDate: toLocalDate(start),
-        startTime: toLocalTime(start),
-        endDate: toLocalDate(end),
-        endTime: toLocalTime(end),
+        startDateTime: toLocalDateTimeString(start),
+        endDateTime: toLocalDateTimeString(end),
         startMileage: data.startMileage?.toString() ?? '',
         endMileage: data.endMileage?.toString() ?? '',
-        mode: data.status === 'PLANNED' ? 'plan' : 'history',
       })
     }
   }, [data])
@@ -76,29 +68,17 @@ export function TouringEditForm({
     setError('')
     setIsSubmitting(true)
 
-    const isPlan = formData.mode === 'plan'
-
     try {
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`, {
         title: formData.title,
-        startDate: new Date(
-          `${formData.startDate}T${formData.startTime || '00:00'}`
-        ),
-        // プランの endDate はスポット追加で自動更新されるため編集時は送らない
-        ...(!isPlan && {
-          endDate: new Date(
-            `${formData.endDate}T${formData.endTime || '00:00'}`
-          ),
-        }),
+        startDate: new Date(formData.startDateTime),
+        endDate: new Date(formData.endDateTime),
         startMileage:
           formData.startMileage !== ''
             ? Number(formData.startMileage)
             : undefined,
         endMileage:
-          !isPlan && formData.endMileage !== ''
-            ? Number(formData.endMileage)
-            : undefined,
-        status: isPlan ? 'PLANNED' : 'COMPLETED',
+          formData.endMileage !== '' ? Number(formData.endMileage) : undefined,
       })
 
       await mutate(

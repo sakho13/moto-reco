@@ -13,6 +13,7 @@
       "Bash(cat:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
+      "Bash(tmux:*)",
       "Bash(xargs:*)",
       "Bash(gh issue view:*)",
       "Bash(gh issue comment:*)",

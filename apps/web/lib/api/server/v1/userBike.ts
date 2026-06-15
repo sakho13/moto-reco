@@ -37,6 +37,7 @@ import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 import userBikeFuelLogs from './userBike/fuelLogs'
 import userBikeMaintenanceLogs from './userBike/maintenanceLogs'
+import userBikeTouringPlans from './userBike/touringPlans'
 import userBikeTourings from './userBike/tourings'
 
 const userBike = new Hono()
@@ -195,6 +196,7 @@ userBike.get('/bikes/ongoing-tourings', honoAuthMiddleware, async (c) => {
         myUserBikeId: bike.myUserBikeId,
         ongoingTouring: {
           touringId: ongoingTouring.id,
+          touringPlanId: ongoingTouring.touringPlanId,
           title: ongoingTouring.title,
           startDate: ongoingTouring.startDate.toISOString(),
           endDate: ongoingTouring.endDate.toISOString(),
@@ -379,6 +381,7 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
             bikeName,
             touring: {
               touringId: touring.id,
+              touringPlanId: touring.planId,
               title: touring.title,
               startDate: touring.startDate.toISOString(),
               endDate: touring.endDate.toISOString(),
@@ -472,6 +475,7 @@ userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
             occurredAt: h.occurredAt.toISOString(),
             touring: {
               touringId: touring.id,
+              touringPlanId: touring.planId,
               title: touring.title,
               startDate: touring.startDate.toISOString(),
               endDate: touring.endDate.toISOString(),
@@ -545,5 +549,7 @@ userBike.get(
 userBike.route('/', userBikeMaintenanceLogs)
 
 userBike.route('/', userBikeTourings)
+
+userBike.route('/', userBikeTouringPlans)
 
 export default userBike

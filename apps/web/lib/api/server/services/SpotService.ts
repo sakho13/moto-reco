@@ -7,8 +7,8 @@ import {
   UserId,
 } from '@repo/shared-types'
 import type { SpotReorderRequest } from '@repo/shared-types'
+import { getCurrentDate } from '../../../utils/dateUtils'
 import { SpotEntity } from '../entities/SpotEntity'
-import { TouringEntity } from '../entities/TouringEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ISpotRepository } from '../interfaces/ISpotRepository'
@@ -23,8 +23,8 @@ type RegisterSpotParams = {
   memo?: string
   latitude?: number
   longitude?: number
-  visitedAt?: Date
-  endAt?: Date
+  arrivedAt?: Date
+  departedAt?: Date
 }
 
 type UpdateSpotParams = {
@@ -36,8 +36,9 @@ type UpdateSpotParams = {
   memo?: string | null
   latitude?: number | null
   longitude?: number | null
-  visitedAt?: Date
-  endAt?: Date | null
+  arrivedAt?: Date | null
+  departedAt?: Date | null
+  isSkipped?: boolean
 }
 
 export class SpotService {
@@ -67,22 +68,52 @@ export class SpotService {
     }
 
     try {
+      // 到着日時は常に指定値、未指定の場合は現在時刻（実績は常にこの意味）
+      const arrivedAt = params.arrivedAt ?? getCurrentDate()
+
+      const spotType = params.type ?? 'SPOT'
+
+      const existingSpots = await this.spotRepository.findSpotsByTouringId(
+        params.touringId
+      )
+      let sortOrder = existingSpots.length
+
+      // SPOTを記録する場合、次の未到着スポットの前に挿入する
+      if (spotType === 'SPOT') {
+        const nextUnvisited =
+          existingSpots
+            .filter(
+              (s) => s.type === 'SPOT' && s.arrivedAt === null && !s.isSkipped
+            )
+            .sort((a, b) => a.sortOrder - b.sortOrder)[0] ?? null
+
+        if (nextUnvisited !== null) {
+          await this.spotRepository.shiftSortOrdersFrom(
+            params.touringId,
+            nextUnvisited.sortOrder
+          )
+          sortOrder = nextUnvisited.sortOrder
+        }
+      }
+
       const spot = new SpotEntity({
         spotId: createSpotId(''),
         touringId: params.touringId,
-        type: params.type ?? 'SPOT',
+        type: spotType,
         name: params.name ?? null,
         memo: params.memo ?? null,
         latitude: params.latitude ?? null,
         longitude: params.longitude ?? null,
-        visitedAt: params.visitedAt ?? new Date(),
-        endAt: params.endAt ?? null,
-        sortOrder: 0, // createSpot でカウントして末尾に設定される
+        plannedArrivalAt: null,
+        plannedDepartureAt: null,
+        arrivedAt,
+        departedAt: params.departedAt ?? null,
+        isSkipped: false,
+        skippedAt: null,
+        sortOrder,
       })
 
-      const created = await this.spotRepository.createSpot(spot)
-      await this._syncPlanEndDate(params.touringId, touring)
-      return created
+      return await this.spotRepository.createSpot(spot)
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -146,6 +177,16 @@ export class SpotService {
     }
 
     try {
+      // isSkippedの変更に応じてskippedAtをサーバ側で設定する
+      const isSkipped =
+        params.isSkipped !== undefined
+          ? params.isSkipped
+          : existingSpot.isSkipped
+      let skippedAt = existingSpot.skippedAt
+      if (params.isSkipped !== undefined) {
+        skippedAt = params.isSkipped ? getCurrentDate() : null
+      }
+
       const updatedSpot = new SpotEntity({
         spotId: existingSpot.id,
         touringId: existingSpot.touringId,
@@ -160,14 +201,22 @@ export class SpotService {
           params.longitude !== undefined
             ? params.longitude
             : existingSpot.longitude,
-        visitedAt: params.visitedAt ?? existingSpot.visitedAt,
-        endAt: params.endAt !== undefined ? params.endAt : existingSpot.endAt,
+        plannedArrivalAt: existingSpot.plannedArrivalAt,
+        plannedDepartureAt: existingSpot.plannedDepartureAt,
+        arrivedAt:
+          params.arrivedAt !== undefined
+            ? params.arrivedAt
+            : existingSpot.arrivedAt,
+        departedAt:
+          params.departedAt !== undefined
+            ? params.departedAt
+            : existingSpot.departedAt,
+        isSkipped,
+        skippedAt,
         sortOrder: existingSpot.sortOrder,
       })
 
-      const updated = await this.spotRepository.updateSpot(updatedSpot)
-      await this._syncPlanEndDate(params.touringId, touring)
-      return updated
+      return await this.spotRepository.updateSpot(updatedSpot)
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)
@@ -210,7 +259,6 @@ export class SpotService {
     }
 
     await this.spotRepository.deleteSpot(spotId, touringId)
-    await this._syncPlanEndDate(touringId, touring)
   }
 
   public async reorderSpots(
@@ -240,25 +288,6 @@ export class SpotService {
     await this.spotRepository.reorderSpots(
       spotIds.map((id) => createSpotId(id)),
       touringId
-    )
-  }
-
-  private async _syncPlanEndDate(
-    touringId: TouringId,
-    touring: TouringEntity
-  ): Promise<void> {
-    if (touring.status !== 'PLANNED') return
-
-    const spots = await this.spotRepository.findSpotsByTouringId(touringId)
-    const newEndDate =
-      spots.length > 0
-        ? new Date(Math.max(...spots.map((s) => s.visitedAt.getTime())))
-        : touring.startDate
-
-    if (newEndDate.getTime() === touring.endDate.getTime()) return
-
-    await this.touringRepository.updateTouring(
-      new TouringEntity({ ...touring.toJson(), endDate: newEndDate })
     )
   }
 }

@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { Button } from '@repo/ui/button'
+import { DateInput } from '@repo/ui/dateInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { InfoBox } from './InfoBox'
+import { getTodayDateString } from '@/lib/utils/dateUtils'
 
 export interface BikeFormData {
   nickname: string
@@ -141,9 +143,8 @@ export const BikeRegisterForm = ({
         </FormField>
 
         <FormField label="購入日" htmlFor="purchaseDate">
-          <Input
+          <DateInput
             id="purchaseDate"
-            type="date"
             value={formData.purchaseDate}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -151,7 +152,7 @@ export const BikeRegisterForm = ({
                 purchaseDate: e.target.value,
               }))
             }
-            max={new Date().toISOString().split('T')[0]}
+            max={getTodayDateString()}
             disabled={isSubmitting}
           />
         </FormField>

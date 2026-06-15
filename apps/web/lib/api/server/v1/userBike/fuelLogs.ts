@@ -167,6 +167,7 @@ userBikeFuelLogs.post(
         totalPrice: body.totalPrice,
         memo: body.memo,
         updateTotalMileage: body.updateTotalMileage,
+        touringId: body.touringId,
       })
 
       const historyRepo = new PrismaHistoryRepository(t)

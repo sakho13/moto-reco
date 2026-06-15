@@ -219,6 +219,7 @@ user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
               occurredAt: item.occurredAt.toISOString(),
               touring: {
                 touringId: item.touring.id,
+                touringPlanId: item.touring.planId,
                 title: item.touring.title,
                 startDate: item.touring.startDate.toISOString(),
                 endDate: item.touring.endDate.toISOString(),

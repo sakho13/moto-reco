@@ -13,6 +13,7 @@ import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 interface FuelLogEditModalProps {
   bikeId: string
@@ -50,18 +51,15 @@ export function FuelLogEditModal({
 
   useEffect(() => {
     if (data) {
-      const dateStr = new Date(data.refueledAt).toISOString().split('T')[0]
-      if (dateStr) {
-        setInitialData({
-          refueledAt: dateStr,
-          mileage: data.mileage.toString(),
-          previousMileage: data.previousMileage.toString(),
-          amount: data.amount.toString(),
-          totalPrice: data.totalPrice.toString(),
-          memo: data.memo ?? '',
-          updateTotalMileage: false,
-        })
-      }
+      setInitialData({
+        refueledAt: toLocalDateTimeString(data.refueledAt),
+        mileage: data.mileage.toString(),
+        previousMileage: data.previousMileage.toString(),
+        amount: data.amount.toString(),
+        totalPrice: data.totalPrice.toString(),
+        memo: data.memo ?? '',
+        updateTotalMileage: false,
+      })
     }
   }, [data])
 

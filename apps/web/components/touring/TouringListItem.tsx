@@ -55,18 +55,12 @@ export const TouringListItem = ({
           <h3 className={styles.title}>{touring.title}</h3>
           <span
             className={
-              touring.status === 'PLANNED'
-                ? styles.statusBadgePlanned
-                : touring.status === 'STARTED'
-                  ? styles.statusBadgeStarted
-                  : styles.statusBadgeCompleted
+              touring.status === 'STARTED'
+                ? styles.statusBadgeStarted
+                : styles.statusBadgeCompleted
             }
           >
-            {touring.status === 'PLANNED'
-              ? 'プラン'
-              : touring.status === 'STARTED'
-                ? '進行中'
-                : '完了'}
+            {touring.status === 'STARTED' ? '進行中' : '完了'}
           </span>
         </div>
         <span className={styles.chevron}>›</span>
@@ -74,7 +68,6 @@ export const TouringListItem = ({
 
       <div className={styles.periodRow}>
         <span>
-          {touring.status === 'PLANNED' ? '予定: ' : ''}
           {formatDate(touring.startDate)} 〜 {formatDate(touring.endDate)}
         </span>
       </div>

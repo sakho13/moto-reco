@@ -2,6 +2,10 @@ import { z } from 'zod'
 
 /**
  * スポット登録リクエストのバリデーションスキーマ
+ *
+ * @remarks
+ * `plannedArrivalAt`/`plannedDepartureAt`（プラン由来の参考予定値）はサーバ側の
+ * コピー処理でのみ設定され、APIからは設定不可。
  */
 export const SpotRegisterRequestSchema = z
   .object({
@@ -37,25 +41,25 @@ export const SpotRegisterRequestSchema = z
       .min(-180, '経度は-180以上で指定してください')
       .max(180, '経度は180以下で指定してください')
       .optional(),
-    visitedAt: z.coerce
+    arrivedAt: z.coerce
       .date({
-        invalid_type_error: '訪問日時は日付形式で指定してください',
+        invalid_type_error: '到着日時は日付形式で指定してください',
       })
       .optional(),
-    endAt: z.coerce
+    departedAt: z.coerce
       .date({
-        invalid_type_error: '終了日時は日付形式で指定してください',
+        invalid_type_error: '出発日時は日付形式で指定してください',
       })
       .optional(),
   })
   .refine(
     (data) =>
-      data.visitedAt === undefined ||
-      data.endAt === undefined ||
-      data.visitedAt <= data.endAt,
+      data.arrivedAt === undefined ||
+      data.departedAt === undefined ||
+      data.arrivedAt <= data.departedAt,
     {
-      message: '開始日時は終了日時以前で指定してください',
-      path: ['visitedAt'],
+      message: '到着日時は出発日時以前で指定してください',
+      path: ['arrivedAt'],
     }
   )
 
@@ -96,16 +100,22 @@ export const SpotUpdateRequestSchema = z
       .max(180, '経度は180以下で指定してください')
       .nullable()
       .optional(),
-    visitedAt: z.coerce
+    arrivedAt: z.coerce
       .date({
-        invalid_type_error: '訪問日時は日付形式で指定してください',
-      })
-      .optional(),
-    endAt: z.coerce
-      .date({
-        invalid_type_error: '終了日時は日付形式で指定してください',
+        invalid_type_error: '到着日時は日付形式で指定してください',
       })
       .nullable()
+      .optional(),
+    departedAt: z.coerce
+      .date({
+        invalid_type_error: '出発日時は日付形式で指定してください',
+      })
+      .nullable()
+      .optional(),
+    isSkipped: z
+      .boolean({
+        invalid_type_error: 'スキップフラグは真偽値で指定してください',
+      })
       .optional(),
   })
   .refine(
@@ -114,21 +124,23 @@ export const SpotUpdateRequestSchema = z
       data.memo !== undefined ||
       data.latitude !== undefined ||
       data.longitude !== undefined ||
-      data.visitedAt !== undefined ||
-      data.endAt !== undefined,
+      data.arrivedAt !== undefined ||
+      data.departedAt !== undefined ||
+      data.isSkipped !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }
   )
   .refine(
     (data) =>
-      data.visitedAt === undefined ||
-      data.endAt === undefined ||
-      data.endAt === null ||
-      data.visitedAt <= data.endAt,
+      data.arrivedAt === undefined ||
+      data.arrivedAt === null ||
+      data.departedAt === undefined ||
+      data.departedAt === null ||
+      data.arrivedAt <= data.departedAt,
     {
-      message: '開始日時は終了日時以前で指定してください',
-      path: ['visitedAt'],
+      message: '到着日時は出発日時以前で指定してください',
+      path: ['arrivedAt'],
     }
   )
 

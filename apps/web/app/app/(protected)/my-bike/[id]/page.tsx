@@ -154,8 +154,8 @@ function BikeDetailPage() {
 
         <NavigationCard
           href={`/app/my-bike/${id}/tourings`}
-          title="ツーリング履歴"
-          description="ツーリング履歴を確認・管理できます"
+          title="ツーリング"
+          description="ツーリング履歴・プランを確認・管理できます"
           icon={<TouringIcon />}
         />
 

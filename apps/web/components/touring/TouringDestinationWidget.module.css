@@ -1,0 +1,151 @@
+.widget {
+  padding: var(--spacing-4);
+  background-color: var(--card-surface);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+}
+
+.arrivedWidget {
+  border-color: var(--color-product);
+  background-color: color-mix(in srgb, var(--color-product) 8%, var(--card-surface));
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  color: var(--card-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-3);
+}
+
+.arrivedText {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-product);
+}
+
+/* ---- 情報行（天気 | 到着時刻 横並び） ---- */
+
+.infoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+}
+
+.col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.divider {
+  width: 1px;
+  align-self: stretch;
+  background-color: var(--card-border);
+  flex-shrink: 0;
+}
+
+.weatherEmoji {
+  font-size: 1.4rem;
+  line-height: 1;
+  margin-bottom: 0.1rem;
+}
+
+.mainValue {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--card-text);
+  line-height: 1.2;
+}
+
+.etaLabel {
+  font-size: var(--font-size-xs);
+  color: var(--card-text-dim);
+  margin-bottom: 0.1rem;
+}
+
+.subValue {
+  font-size: var(--font-size-xs);
+  color: var(--card-text-muted);
+}
+
+.dim {
+  font-size: var(--font-size-xs);
+  color: var(--card-text-dim);
+  line-height: 1.4;
+}
+
+/* ---- Googleマップリンク ---- */
+
+.mapsLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-product);
+  text-decoration: none;
+  margin-top: 0.3rem;
+}
+
+.mapsLink:hover {
+  text-decoration: underline;
+}
+
+/* ---- 到着ボタン ---- */
+
+.arrivalButton {
+  width: 100%;
+  padding: var(--spacing-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-product);
+  background-color: color-mix(in srgb, var(--color-product) 10%, transparent);
+  color: var(--color-product);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.arrivalButton:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--color-product) 20%, transparent);
+}
+
+.arrivalButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- スキップボタン ---- */
+
+.skipButton {
+  width: 100%;
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-1) 0;
+  font-size: var(--font-size-xs);
+  color: var(--card-text-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+
+.skipButton:hover:not(:disabled) {
+  color: var(--card-text-muted);
+}
+
+.skipButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

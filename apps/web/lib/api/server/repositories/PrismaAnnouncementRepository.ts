@@ -1,4 +1,5 @@
 import type { UserId } from '@repo/shared-types'
+import { getCurrentDate } from '../../../utils/dateUtils'
 import type {
   AnnouncementRecord,
   AnnouncementWithReadCount,
@@ -62,7 +63,7 @@ export class PrismaAnnouncementRepository
   async publish(id: string): Promise<AnnouncementRecord> {
     const record = await this.connection.mSystemAnnouncement.update({
       where: { id },
-      data: { status: 'PUBLISHED', publishedAt: new Date() },
+      data: { status: 'PUBLISHED', publishedAt: getCurrentDate() },
     })
     return this._toRecord(record)
   }

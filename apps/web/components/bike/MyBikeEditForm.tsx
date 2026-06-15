@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@repo/ui/button'
+import { DateInput } from '@repo/ui/dateInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -88,9 +89,8 @@ export const MyBikeEditForm = ({
       </FormField>
 
       <FormField label="購入日" htmlFor="purchaseDate">
-        <Input
+        <DateInput
           id="purchaseDate"
-          type="date"
           value={formData.purchaseDate}
           onChange={(e) =>
             setFormData((prev) => ({ ...prev, purchaseDate: e.target.value }))

@@ -18,8 +18,12 @@ const spotSelect = {
   memo: true,
   latitude: true,
   longitude: true,
-  visitedAt: true,
-  endAt: true,
+  plannedArrivalAt: true,
+  plannedDepartureAt: true,
+  arrivedAt: true,
+  departedAt: true,
+  isSkipped: true,
+  skippedAt: true,
   sortOrder: true,
 } as const
 
@@ -31,8 +35,12 @@ type SpotRow = {
   memo: string | null
   latitude: number | null
   longitude: number | null
-  visitedAt: Date
-  endAt: Date | null
+  plannedArrivalAt: Date | null
+  plannedDepartureAt: Date | null
+  arrivedAt: Date | null
+  departedAt: Date | null
+  isSkipped: boolean
+  skippedAt: Date | null
   sortOrder: number
 }
 
@@ -45,8 +53,12 @@ const toSpotEntity = (row: SpotRow): SpotEntity =>
     memo: row.memo,
     latitude: row.latitude,
     longitude: row.longitude,
-    visitedAt: row.visitedAt,
-    endAt: row.endAt,
+    plannedArrivalAt: row.plannedArrivalAt,
+    plannedDepartureAt: row.plannedDepartureAt,
+    arrivedAt: row.arrivedAt,
+    departedAt: row.departedAt,
+    isSkipped: row.isSkipped,
+    skippedAt: row.skippedAt,
     sortOrder: row.sortOrder,
   })
 
@@ -55,10 +67,6 @@ export class PrismaSpotRepository
   implements ISpotRepository
 {
   async createSpot(spot: SpotEntity): Promise<SpotEntity> {
-    const count = await this.connection.tUserMyBikeTouringSpot.count({
-      where: { touringId: spot.touringId },
-    })
-
     const created = await this.connection.tUserMyBikeTouringSpot.create({
       data: {
         touringId: spot.touringId,
@@ -67,9 +75,13 @@ export class PrismaSpotRepository
         memo: spot.memo,
         latitude: spot.latitude,
         longitude: spot.longitude,
-        visitedAt: spot.visitedAt,
-        endAt: spot.endAt,
-        sortOrder: count,
+        plannedArrivalAt: spot.plannedArrivalAt,
+        plannedDepartureAt: spot.plannedDepartureAt,
+        arrivedAt: spot.arrivedAt,
+        departedAt: spot.departedAt,
+        isSkipped: spot.isSkipped,
+        skippedAt: spot.skippedAt,
+        sortOrder: spot.sortOrder,
       },
       select: spotSelect,
     })
@@ -109,8 +121,12 @@ export class PrismaSpotRepository
         memo: spot.memo,
         latitude: spot.latitude,
         longitude: spot.longitude,
-        visitedAt: spot.visitedAt,
-        endAt: spot.endAt,
+        plannedArrivalAt: spot.plannedArrivalAt,
+        plannedDepartureAt: spot.plannedDepartureAt,
+        arrivedAt: spot.arrivedAt,
+        departedAt: spot.departedAt,
+        isSkipped: spot.isSkipped,
+        skippedAt: spot.skippedAt,
       },
       select: spotSelect,
     })
@@ -133,5 +149,15 @@ export class PrismaSpotRepository
         })
       )
     )
+  }
+
+  async shiftSortOrdersFrom(
+    touringId: TouringId,
+    fromSortOrder: number
+  ): Promise<void> {
+    await this.connection.tUserMyBikeTouringSpot.updateMany({
+      where: { touringId, sortOrder: { gte: fromSortOrder } },
+      data: { sortOrder: { increment: 1 } },
+    })
   }
 }
