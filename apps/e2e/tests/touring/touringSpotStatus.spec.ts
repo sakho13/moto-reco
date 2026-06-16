@@ -8,7 +8,7 @@ import {
 } from '../../helpers/touringPlanHelper'
 
 test.describe('ツーリング詳細 - スポットのスキップ表示', () => {
-  test('スキップしたスポットは「スキップ」バッジと「実績 未設定」で区別表示される', async ({
+  test('スキップしたスポットは「スキップ」バッジとスキップ時刻で区別表示される', async ({
     authenticatedPage: page,
     authToken,
   }) => {
@@ -34,7 +34,7 @@ test.describe('ツーリング詳細 - スポットのスキップ表示', () =>
       timeout: 10_000,
     })
     await expect(page.getByText('スキップ', { exact: true })).toBeVisible()
-    await expect(page.getByText('実績 未設定')).toBeVisible()
+    await expect(page.getByText(/スキップ \d{2}:\d{2}/)).toBeVisible()
   })
 })
 
