@@ -408,7 +408,9 @@ function TouringDetailPage() {
         latitude: spot.latitude,
         longitude: spot.longitude,
         primaryTime: { label: '予定', value: spot.plannedArrivalAt },
-        secondaryTime: { label: '実績', value: spot.arrivedAt },
+        secondaryTime: spot.isSkipped
+          ? { label: 'スキップ', value: spot.skippedAt }
+          : { label: '実績', value: spot.arrivedAt },
         isSkipped: spot.isSkipped,
         travelLink: travelLinks.get(spot.spotId) ?? null,
         onEdit: () => setEditingSpot(spot),
