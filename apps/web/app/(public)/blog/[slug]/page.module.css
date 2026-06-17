@@ -131,7 +131,49 @@
   margin: 1.5em 0;
   padding: 16px 24px;
   border-left: 4px solid rgba(23, 23, 23, 0.2);
+  background: rgba(23, 23, 23, 0.03);
+  border-radius: 0 8px 8px 0;
   color: rgba(23, 23, 23, 0.65);
+}
+
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5em;
+  font-size: 15px;
+}
+
+.content th,
+.content td {
+  border: 1px solid rgba(23, 23, 23, 0.15);
+  padding: 10px 14px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.content th {
+  background: rgba(23, 23, 23, 0.05);
+  font-weight: 600;
+  font-size: 13px;
+  color: rgba(23, 23, 23, 0.7);
+}
+
+.content tr:nth-child(even) td {
+  background: rgba(23, 23, 23, 0.02);
+}
+
+.content h4 {
+  font-size: clamp(15px, 1.8vw, 18px);
+  font-weight: 600;
+  margin: 1.25em 0 0.4em;
+  color: rgba(23, 23, 23, 0.8);
+}
+
+.content h5 {
+  font-size: clamp(14px, 1.6vw, 16px);
+  font-weight: 600;
+  margin: 1em 0 0.3em;
+  color: rgba(23, 23, 23, 0.7);
 }
 
 html[data-theme-mode='dark'] .date {
@@ -170,5 +212,28 @@ html[data-theme-mode='dark'] .content h3 {
 
 html[data-theme-mode='dark'] .content blockquote {
   border-left-color: rgba(237, 237, 237, 0.2);
+  background: rgba(237, 237, 237, 0.04);
   color: rgba(237, 237, 237, 0.65);
+}
+
+html[data-theme-mode='dark'] .content th,
+html[data-theme-mode='dark'] .content td {
+  border-color: rgba(237, 237, 237, 0.12);
+}
+
+html[data-theme-mode='dark'] .content th {
+  background: rgba(237, 237, 237, 0.06);
+  color: rgba(237, 237, 237, 0.6);
+}
+
+html[data-theme-mode='dark'] .content tr:nth-child(even) td {
+  background: rgba(237, 237, 237, 0.02);
+}
+
+html[data-theme-mode='dark'] .content h4 {
+  color: rgba(237, 237, 237, 0.8);
+}
+
+html[data-theme-mode='dark'] .content h5 {
+  color: rgba(237, 237, 237, 0.7);
 }
