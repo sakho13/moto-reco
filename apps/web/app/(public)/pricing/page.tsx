@@ -75,7 +75,7 @@ export default function PricingPage() {
               <tr>
                 <td>バイク登録</td>
                 <td>{GUEST_ACCOUNT_LIMITS.BIKE}台まで</td>
-                <td>2台まで</td>
+                <td>{FREE_USER_LIMITS.BIKE}台まで</td>
                 <td className={styles.comingSoon}>無制限（予定）</td>
               </tr>
               <tr>

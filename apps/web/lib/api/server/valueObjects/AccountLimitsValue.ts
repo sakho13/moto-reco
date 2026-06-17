@@ -1,4 +1,5 @@
 import { User } from '@repo/shared-types'
+import { FREE_USER_LIMITS, GUEST_ACCOUNT_LIMITS } from '../../../statics'
 
 type Role = User['role']
 
@@ -14,15 +15,15 @@ type LimitMessages = Partial<Record<LimitKey, string>>
 
 const LIMIT_MESSAGES: Partial<Record<Role, LimitMessages>> = {
   GUEST: {
-    bike: 'ゲストアカウントはバイクを1台まで登録できます',
-    fuelLog: 'ゲストアカウントは給油履歴を5件まで登録できます',
-    touring: 'ゲストアカウントはツーリング履歴を2件まで登録できます',
-    touringPlan: 'ゲストアカウントはツーリングプランを2件まで登録できます',
-    maintenanceLog: 'ゲストアカウントはメンテナンス履歴を2件まで登録できます',
+    bike: `ゲストアカウントはバイクを${GUEST_ACCOUNT_LIMITS.BIKE}台まで登録できます`,
+    fuelLog: `ゲストアカウントは給油履歴を${GUEST_ACCOUNT_LIMITS.FUEL_LOG}件まで登録できます`,
+    touring: `ゲストアカウントはツーリング履歴を${GUEST_ACCOUNT_LIMITS.TOURING}件まで登録できます`,
+    touringPlan: `ゲストアカウントはツーリングプランを${GUEST_ACCOUNT_LIMITS.TOURING_PLAN}件まで登録できます`,
+    maintenanceLog: `ゲストアカウントはメンテナンス履歴を${GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG}件まで登録できます`,
   },
   USER: {
-    bike: '無料ユーザーはバイクを2台まで登録できます',
-    touringPlan: '無料ユーザーはツーリングプランを10件まで登録できます',
+    bike: `無料ユーザーはバイクを${FREE_USER_LIMITS.BIKE}台まで登録できます`,
+    touringPlan: `無料ユーザーはツーリングプランを${FREE_USER_LIMITS.TOURING_PLAN}件まで登録できます`,
   },
 }
 
@@ -45,10 +46,24 @@ export class AccountLimitsValue {
    */
   static from(role: Role): AccountLimitsValue {
     if (role === 'GUEST') {
-      return new AccountLimitsValue(role, 1, 5, 2, 2, 2)
+      return new AccountLimitsValue(
+        role,
+        GUEST_ACCOUNT_LIMITS.BIKE,
+        GUEST_ACCOUNT_LIMITS.FUEL_LOG,
+        GUEST_ACCOUNT_LIMITS.TOURING,
+        GUEST_ACCOUNT_LIMITS.TOURING_PLAN,
+        GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG
+      )
     }
     if (role === 'USER') {
-      return new AccountLimitsValue(role, 2, null, null, 10, null)
+      return new AccountLimitsValue(
+        role,
+        FREE_USER_LIMITS.BIKE,
+        null,
+        null,
+        FREE_USER_LIMITS.TOURING_PLAN,
+        null
+      )
     }
     // ADMIN: 全て無制限
     return new AccountLimitsValue(role, null, null, null, null, null)

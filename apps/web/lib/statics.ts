@@ -40,6 +40,8 @@ export const GUEST_ACCOUNT_LIMITS = {
  * 無料ユーザー（USERロール）の各種制限値
  */
 export const FREE_USER_LIMITS = {
+  /** バイク登録上限 */
+  BIKE: 2,
   /** ツーリングプラン登録上限 */
   TOURING_PLAN: 10,
 } as const
