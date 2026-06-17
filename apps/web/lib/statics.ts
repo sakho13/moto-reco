@@ -30,6 +30,8 @@ export const GUEST_ACCOUNT_LIMITS = {
   TOURING: 2,
   /** ツーリングプラン登録上限 */
   TOURING_PLAN: 2,
+  /** メンテナンス履歴登録上限 */
+  MAINTENANCE_LOG: 2,
   /** アカウント有効期間（ミリ秒） */
   TTL_MS: 7 * 24 * 60 * 60 * 1000,
 } as const

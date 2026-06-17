@@ -98,7 +98,7 @@ export default function PricingPage() {
               </tr>
               <tr>
                 <td>メンテナンス記録</td>
-                <td>2件まで / 台</td>
+                <td>{GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG}件まで / 台</td>
                 <td>無制限</td>
                 <td className={styles.comingSoon}>無制限（予定）</td>
               </tr>
