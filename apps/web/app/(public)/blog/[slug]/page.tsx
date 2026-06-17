@@ -79,6 +79,19 @@ export default async function BlogDetailPage({ params }: Props) {
 
   return (
     <div className="public-page-container">
+      {blog.eyecatch && (
+        <div className={styles.eyecatch}>
+          <Image
+            src={blog.eyecatch.url}
+            alt=""
+            fill
+            sizes="(max-width: 900px) 100vw, 960px"
+            style={{ objectFit: 'cover' }}
+            priority
+            unoptimized
+          />
+        </div>
+      )}
       <article className={styles.article}>
         <header className={styles.header}>
           <h1 className={styles.articleTitle}>{blog.title}</h1>
@@ -106,20 +119,6 @@ export default async function BlogDetailPage({ params }: Props) {
               </ul>
             )}
           </div>
-
-          {blog.eyecatch && (
-            <div className={styles.eyecatch}>
-              <Image
-                src={blog.eyecatch.url}
-                alt=""
-                fill
-                sizes="(max-width: 900px) 100vw, 720px"
-                style={{ objectFit: 'cover' }}
-                priority
-                unoptimized
-              />
-            </div>
-          )}
         </header>
 
         <BlogToc headings={headings} />
