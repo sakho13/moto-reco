@@ -52,7 +52,6 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 260px;
   border-radius: 20px;
   overflow: hidden;
   background: rgba(23, 23, 23, 0.05);
