@@ -4,7 +4,6 @@ import {
   createUserBikeId,
   UserId,
 } from '@repo/shared-types'
-import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { getCurrentDate } from '../../../utils/dateUtils'
 import { BikeEntity } from '../entities/BikeEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
@@ -13,16 +12,14 @@ import { ApiV1Error } from '../errors/ApiV1Error'
 import { IBikeRepository } from '../interfaces/IBikeRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
-
-// 無料プランのバイク登録上限
-const FREE_PLAN_BIKE_LIMIT = 2
+import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 
 type RegisterUserBikeParams = {
   bikeId?: BikeId | null
   displacement?: number
   serialNumber?: string | null
   userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
+  limits: AccountLimitsValue
   nickname?: string
   purchaseDate?: Date
   purchasePrice?: number
@@ -33,7 +30,6 @@ type RegisterUserBikeParams = {
 type UpdateMyUserBikeParams = {
   myUserBikeId: ReturnType<typeof createMyUserBikeId>
   userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
   nickname?: string | null
   purchaseDate?: Date | null
   purchasePrice?: number | null
@@ -49,31 +45,18 @@ export class UserBikeService {
     private bikeRepository: IBikeRepository
   ) {}
 
-  /**
-   * バイク登録数の制限をチェック
-   * ゲストは1台、無料プランは2台まで登録可能
-   */
-  private async validateBikeRegistrationLimit(
-    userId: UserId,
-    role: 'USER' | 'ADMIN' | 'GUEST'
-  ): Promise<void> {
-    const currentCount = await this.myUserBikeRepository.countOwnedBikes(userId)
-    const limit =
-      role === 'GUEST' ? GUEST_ACCOUNT_LIMITS.BIKE : FREE_PLAN_BIKE_LIMIT
-
-    if (currentCount >= limit) {
-      throw new ApiV1Error(
-        'INVALID_REQUEST',
-        role === 'GUEST'
-          ? 'ゲストアカウントはバイクを1台まで登録できます'
-          : '無料プランでは2台まで登録可能です'
-      )
-    }
-  }
-
   public async registerUserBike(params: RegisterUserBikeParams) {
-    // バイク登録数制限チェック
-    await this.validateBikeRegistrationLimit(params.userId, params.role)
+    if (params.limits.bike !== null) {
+      const currentCount = await this.myUserBikeRepository.countOwnedBikes(
+        params.userId
+      )
+      if (params.limits.isOver('bike', currentCount)) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          params.limits.limitMessage('bike')
+        )
+      }
+    }
 
     let bike: BikeEntity | null = null
     if (params.bikeId) {

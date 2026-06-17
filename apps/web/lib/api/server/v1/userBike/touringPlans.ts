@@ -31,6 +31,7 @@ import {
 } from '../../services/computeTouringPlanSpotTimes'
 import { TouringPlanService } from '../../services/TouringPlanService'
 import { TouringPlanSpotService } from '../../services/TouringPlanSpotService'
+import { AccountLimitsValue } from '../../valueObjects/AccountLimitsValue'
 
 const userBikeTouringPlans = new Hono().basePath(
   '/bike/:myUserBikeId/touring-plans'
@@ -151,7 +152,7 @@ userBikeTouringPlans.post(
       return service.registerPlan({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
-        role,
+        limits: AccountLimitsValue.from(role),
         title: body.title,
         startLocation: body.startLocation,
         destinationLocation: body.destinationLocation

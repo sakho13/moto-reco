@@ -8,7 +8,6 @@ import {
   TouringStatus,
   UserId,
 } from '@repo/shared-types'
-import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { getCurrentDate } from '../../../utils/dateUtils'
 import { SpotEntity } from '../entities/SpotEntity'
 import { TouringEntity } from '../entities/TouringEntity'
@@ -19,6 +18,7 @@ import { ISpotRepository } from '../interfaces/ISpotRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
+import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { computeTouringPlanSpotTimes } from './computeTouringPlanSpotTimes'
@@ -26,7 +26,7 @@ import { computeTouringPlanSpotTimes } from './computeTouringPlanSpotTimes'
 type RegisterTouringParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
+  limits: AccountLimitsValue
   title: string
   startDate: Date
   endDate: Date
@@ -39,7 +39,7 @@ type StartTouringParams = {
   action: 'start'
   myUserBikeId: MyUserBikeId
   userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
+  limits: AccountLimitsValue
   touringPlanId?: string
   title?: string
   startDate?: Date
@@ -100,15 +100,14 @@ export class TouringService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    // ゲストアカウントのツーリング登録数チェック
-    if (params.role === 'GUEST') {
+    if (params.limits.touring !== null) {
       const count = await this.touringRepository.countTourings(
         params.myUserBikeId
       )
-      if (count >= GUEST_ACCOUNT_LIMITS.TOURING) {
+      if (params.limits.isOver('touring', count)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
-          'ゲストアカウントはツーリング履歴を2件まで登録できます'
+          params.limits.limitMessage('touring')
         )
       }
     }
@@ -168,15 +167,14 @@ export class TouringService {
 
     try {
       if (params.action === 'start') {
-        // ゲストアカウントのツーリング登録数チェック
-        if (params.role === 'GUEST') {
+        if (params.limits.touring !== null) {
           const count = await this.touringRepository.countTourings(
             params.myUserBikeId
           )
-          if (count >= GUEST_ACCOUNT_LIMITS.TOURING) {
+          if (params.limits.isOver('touring', count)) {
             throw new ApiV1Error(
               'INVALID_REQUEST',
-              'ゲストアカウントはツーリング履歴を2件まで登録できます'
+              params.limits.limitMessage('touring')
             )
           }
         }
