@@ -51,10 +51,12 @@
 .eyecatch {
   position: relative;
   width: 100%;
+  max-width: 960px;
   aspect-ratio: 16 / 9;
   border-radius: 20px;
   overflow: hidden;
   background: rgba(23, 23, 23, 0.05);
+  margin-bottom: 40px;
 }
 
 .content {
