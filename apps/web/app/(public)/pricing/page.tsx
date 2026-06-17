@@ -2,7 +2,12 @@ import type { Metadata } from 'next'
 import styles from './page.module.css'
 import { PRICING_PLANS } from './pricingData'
 import { PricingCard } from '@/components/docs/pricing/PricingCard'
-import { APP_NAME, SITE_URL } from '@/lib/statics'
+import {
+  APP_NAME,
+  FREE_USER_LIMITS,
+  GUEST_ACCOUNT_LIMITS,
+  SITE_URL,
+} from '@/lib/statics'
 
 export const metadata: Metadata = {
   title: `料金プラン`,
@@ -53,6 +58,75 @@ export default function PricingPage() {
           />
         ))}
       </div>
+
+      <section className={styles.comparisonSection}>
+        <h2 className={styles.comparisonTitle}>機能・制限一覧</h2>
+        <div className={styles.tableWrapper}>
+          <table className={styles.comparisonTable}>
+            <thead>
+              <tr>
+                <th className={styles.featureCol}>機能</th>
+                <th>ゲストアカウント</th>
+                <th>無料プラン</th>
+                <th className={styles.premiumCol}>プレミアムプラン</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>バイク登録</td>
+                <td>{GUEST_ACCOUNT_LIMITS.BIKE}台まで</td>
+                <td>2台まで</td>
+                <td className={styles.comingSoon}>無制限（予定）</td>
+              </tr>
+              <tr>
+                <td>給油履歴</td>
+                <td>{GUEST_ACCOUNT_LIMITS.FUEL_LOG}件まで / 台</td>
+                <td>無制限</td>
+                <td className={styles.comingSoon}>無制限（予定）</td>
+              </tr>
+              <tr>
+                <td>ツーリング記録</td>
+                <td>{GUEST_ACCOUNT_LIMITS.TOURING}件まで / 台</td>
+                <td>無制限</td>
+                <td className={styles.comingSoon}>無制限（予定）</td>
+              </tr>
+              <tr>
+                <td>ツーリングプラン</td>
+                <td>{GUEST_ACCOUNT_LIMITS.TOURING_PLAN}件まで / 台</td>
+                <td>{FREE_USER_LIMITS.TOURING_PLAN}件まで / 台</td>
+                <td className={styles.comingSoon}>無制限（予定）</td>
+              </tr>
+              <tr>
+                <td>メンテナンス記録</td>
+                <td>2件まで / 台</td>
+                <td>無制限</td>
+                <td className={styles.comingSoon}>無制限（予定）</td>
+              </tr>
+              <tr>
+                <td>メンテナンス通知</td>
+                <td>-</td>
+                <td>○</td>
+                <td className={styles.comingSoon}>○（予定）</td>
+              </tr>
+              <tr>
+                <td>データ自動バックアップ</td>
+                <td>○</td>
+                <td>○</td>
+                <td className={styles.comingSoon}>○（予定）</td>
+              </tr>
+              <tr>
+                <td>マルチデバイス同期</td>
+                <td>○</td>
+                <td>○</td>
+                <td className={styles.comingSoon}>○（予定）</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className={styles.comparisonNote}>
+          ※ゲストアカウントは登録から7日間有効です。
+        </p>
+      </section>
 
       <section className={styles.faqSection}>
         <h2 className={styles.faqTitle}>プランに関する質問</h2>

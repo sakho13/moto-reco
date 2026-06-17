@@ -27,6 +27,77 @@
   margin: 0 auto 96px;
 }
 
+.comparisonSection {
+  max-width: 1200px;
+  margin: 0 auto 96px;
+}
+
+.comparisonTitle {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(23, 23, 23, 0.1);
+}
+
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.comparisonTable th,
+.comparisonTable td {
+  padding: 14px 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(23, 23, 23, 0.08);
+}
+
+.comparisonTable thead th {
+  font-weight: 700;
+  font-size: 14px;
+  background: rgba(23, 23, 23, 0.04);
+}
+
+.comparisonTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.comparisonTable tbody tr:hover {
+  background: rgba(23, 23, 23, 0.02);
+}
+
+.featureCol {
+  text-align: left !important;
+  width: 220px;
+}
+
+.comparisonTable td:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+
+.premiumCol {
+  color: rgba(23, 23, 23, 0.5);
+}
+
+.comingSoon {
+  color: rgba(23, 23, 23, 0.4);
+  font-style: italic;
+}
+
+.comparisonNote {
+  font-size: 13px;
+  color: rgba(23, 23, 23, 0.5);
+  margin-top: 12px;
+  text-align: center;
+}
+
 .faqSection {
   max-width: 1200px;
   margin: 0 auto;
@@ -78,6 +149,25 @@
     margin-bottom: 72px;
   }
 
+  .comparisonSection {
+    margin-bottom: 72px;
+  }
+
+  .comparisonTitle {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .comparisonTable th,
+  .comparisonTable td {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .featureCol {
+    width: 140px;
+  }
+
   .faqTitle {
     font-size: 24px;
     margin-bottom: 24px;
@@ -112,4 +202,33 @@ html[data-theme-mode='dark'] .faqSection {
 
 html[data-theme-mode='dark'] .faqItem {
   background: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme-mode='dark'] .tableWrapper {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme-mode='dark'] .comparisonTable th,
+html[data-theme-mode='dark'] .comparisonTable td {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme-mode='dark'] .comparisonTable thead th {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme-mode='dark'] .comparisonTable tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+html[data-theme-mode='dark'] .premiumCol {
+  color: rgba(237, 237, 237, 0.4);
+}
+
+html[data-theme-mode='dark'] .comingSoon {
+  color: rgba(237, 237, 237, 0.3);
+}
+
+html[data-theme-mode='dark'] .comparisonNote {
+  color: rgba(237, 237, 237, 0.4);
 }
