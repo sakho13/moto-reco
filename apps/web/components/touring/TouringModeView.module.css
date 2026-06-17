@@ -386,6 +386,13 @@ html[data-theme-mode='dark'] .container {
   padding: var(--spacing-4);
 }
 
+.spotMapAccuracyHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  margin-top: calc(var(--spacing-1) * -1);
+  margin-bottom: var(--spacing-3);
+}
+
 .spotModalActions {
   display: flex;
   gap: var(--spacing-3);

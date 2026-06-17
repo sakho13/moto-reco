@@ -56,6 +56,7 @@ export const TouringModeView = ({
   const [geoPosition, setGeoPosition] = useState<{
     lat: number
     lng: number
+    accuracy: number
   } | null>(null)
   const [geoStatus, setGeoStatus] = useState<
     'loading' | 'success' | 'denied' | 'error'
@@ -150,7 +151,11 @@ export const TouringModeView = ({
 
     const { position, denied } = await getCurrentPosition()
     if (position) {
-      setGeoPosition({ lat: position.latitude, lng: position.longitude })
+      setGeoPosition({
+        lat: position.latitude,
+        lng: position.longitude,
+        accuracy: position.accuracy,
+      })
       setGeoStatus('success')
     } else if (denied) {
       setGeoStatus('denied')
@@ -546,6 +551,14 @@ export const TouringModeView = ({
                 />
               )}
             </div>
+            {geoStatus === 'success' &&
+              geoPosition &&
+              geoPosition.accuracy > 100 && (
+                <p className={styles.spotMapAccuracyHint}>
+                  位置精度が低い可能性があります（誤差 約
+                  {Math.round(geoPosition.accuracy)}m）
+                </p>
+              )}
 
             <div className={styles.spotModalActions}>
               <Button
