@@ -28,6 +28,16 @@ export const GUEST_ACCOUNT_LIMITS = {
   FUEL_LOG: 5,
   /** ツーリング履歴登録上限 */
   TOURING: 2,
+  /** ツーリングプラン登録上限 */
+  TOURING_PLAN: 2,
   /** アカウント有効期間（ミリ秒） */
   TTL_MS: 7 * 24 * 60 * 60 * 1000,
+} as const
+
+/**
+ * 無料ユーザー（USERロール）の各種制限値
+ */
+export const FREE_USER_LIMITS = {
+  /** ツーリングプラン登録上限 */
+  TOURING_PLAN: 10,
 } as const

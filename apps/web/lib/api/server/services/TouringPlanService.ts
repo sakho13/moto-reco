@@ -7,6 +7,7 @@ import {
   TouringPlanRouteType,
   UserId,
 } from '@repo/shared-types'
+import { FREE_USER_LIMITS, GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { TouringEntity } from '../entities/TouringEntity'
 import { TouringPlanEntity } from '../entities/TouringPlanEntity'
 import { TouringPlanSpotEntity } from '../entities/TouringPlanSpotEntity'
@@ -30,6 +31,7 @@ type LocationParams = {
 type RegisterPlanParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
+  role: 'USER' | 'ADMIN' | 'GUEST'
   title: string
   startLocation?: LocationParams | null
   destinationLocation?:
@@ -85,6 +87,30 @@ export class TouringPlanService {
 
     if (!myUserBike) {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    if (params.role === 'GUEST') {
+      const count = await this.touringPlanRepository.countPlans(
+        params.myUserBikeId
+      )
+      if (count >= GUEST_ACCOUNT_LIMITS.TOURING_PLAN) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          'ゲストアカウントはツーリングプランを2件まで登録できます'
+        )
+      }
+    }
+
+    if (params.role === 'USER') {
+      const count = await this.touringPlanRepository.countPlans(
+        params.myUserBikeId
+      )
+      if (count >= FREE_USER_LIMITS.TOURING_PLAN) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          '無料ユーザーはツーリングプランを10件まで登録できます'
+        )
+      }
     }
 
     try {

@@ -132,7 +132,7 @@ userBikeTouringPlans.post(
   honoAuthMiddleware,
   zodValidateJson(TouringPlanRegisterRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -151,6 +151,7 @@ userBikeTouringPlans.post(
       return service.registerPlan({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
+        role,
         title: body.title,
         startLocation: body.startLocation,
         destinationLocation: body.destinationLocation
