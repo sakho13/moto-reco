@@ -20,7 +20,7 @@ export function BlogToc({ headings }: Props) {
   }
 
   return (
-    <nav className={styles.toc}>
+    <nav className={styles.toc} data-nosnippet>
       <p className={styles.title}>目次</p>
       <ol className={styles.list}>
         {headings.map(({ id, text, level }) => (
