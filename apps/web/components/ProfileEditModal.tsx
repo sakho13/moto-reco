@@ -5,14 +5,22 @@ import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { Select } from '@repo/ui/select'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
-const TIMEZONE_OPTIONS: string[] =
+const TIMEZONE_LIST: string[] =
   typeof Intl !== 'undefined' && 'supportedValuesOf' in Intl
-    ? (Intl as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf('timeZone')
+    ? (
+        Intl as { supportedValuesOf: (key: string) => string[] }
+      ).supportedValuesOf('timeZone')
     : ['Asia/Tokyo', 'America/New_York', 'Europe/London', 'UTC']
+
+const TIMEZONE_OPTIONS = [
+  { value: '', label: '未設定' },
+  ...TIMEZONE_LIST.map((tz) => ({ value: tz, label: tz })),
+]
 
 interface ProfileEditModalProps {
   initialName: string
@@ -132,20 +140,13 @@ export function ProfileEditModal({
         </FormField>
 
         <FormField label="タイムゾーン" htmlFor="modal-profile-timezone">
-          <select
+          <Select
             id="modal-profile-timezone"
+            options={TIMEZONE_OPTIONS}
             value={timezone}
             onChange={(e) => setTimezone(e.target.value)}
             disabled={isSubmitting}
-            className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-          >
-            <option value="">未設定</option>
-            {TIMEZONE_OPTIONS.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
+          />
         </FormField>
 
         <div className="flex justify-end">
