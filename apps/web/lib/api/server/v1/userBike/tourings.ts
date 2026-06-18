@@ -34,6 +34,7 @@ import { PrismaTouringPlanSpotRepository } from '../../repositories/PrismaTourin
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { SpotService } from '../../services/SpotService'
 import { TouringService } from '../../services/TouringService'
+import { AccountLimitsValue } from '../../valueObjects/AccountLimitsValue'
 import { TouringSearchParams } from '../../valueObjects/TouringSearchParams'
 
 const userBikeTourings = new Hono().basePath('/bike/:myUserBikeId/tourings')
@@ -113,7 +114,7 @@ userBikeTourings.post(
       const touring = await service.registerTouring({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
-        role,
+        limits: AccountLimitsValue.from(role),
         title: body.title,
         startDate: body.startDate,
         endDate: body.endDate,
@@ -229,7 +230,7 @@ userBikeTourings.post(
           action: 'start',
           myUserBikeId: createMyUserBikeId(myUserBikeId),
           userId: createUserId(userId),
-          role,
+          limits: AccountLimitsValue.from(role),
           touringPlanId: body.touringPlanId,
           title: body.title,
           startDate: body.startDate,

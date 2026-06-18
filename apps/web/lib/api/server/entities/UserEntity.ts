@@ -1,4 +1,5 @@
 import { User, UserId } from '@repo/shared-types'
+import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 
 export class UserEntity {
   private _value: User
@@ -17,6 +18,10 @@ export class UserEntity {
 
   public get role(): string {
     return this._value.role
+  }
+
+  public get limits(): AccountLimitsValue {
+    return AccountLimitsValue.from(this._value.role)
   }
 
   public get status(): string {

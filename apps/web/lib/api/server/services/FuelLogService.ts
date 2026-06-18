@@ -5,19 +5,19 @@ import {
   TouringId,
   UserId,
 } from '@repo/shared-types'
-import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
+import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
 type RegisterFuelLogParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
+  limits: AccountLimitsValue
   refueledAt: Date
   mileage: number
   previousMileage: number
@@ -66,15 +66,14 @@ export class FuelLogService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    // ゲストアカウントの給油履歴登録数チェック
-    if (params.role === 'GUEST') {
+    if (params.limits.fuelLog !== null) {
       const count = await this.fuelLogRepository.countFuelLogs(
         params.myUserBikeId
       )
-      if (count >= GUEST_ACCOUNT_LIMITS.FUEL_LOG) {
+      if (params.limits.isOver('fuelLog', count)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
-          'ゲストアカウントは給油履歴を5件まで登録できます'
+          params.limits.limitMessage('fuelLog')
         )
       }
     }

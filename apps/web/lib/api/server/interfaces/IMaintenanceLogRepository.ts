@@ -22,4 +22,5 @@ export interface IMaintenanceLogRepository {
   updateMaintenanceLog(
     maintenanceLog: MaintenanceLogEntity
   ): Promise<MaintenanceLogEntity>
+  countMaintenanceLogs(myUserBikeId: MyUserBikeId): Promise<number>
 }

@@ -7,7 +7,6 @@ import {
   TouringPlanRouteType,
   UserId,
 } from '@repo/shared-types'
-import { FREE_USER_LIMITS, GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { TouringEntity } from '../entities/TouringEntity'
 import { TouringPlanEntity } from '../entities/TouringPlanEntity'
 import { TouringPlanSpotEntity } from '../entities/TouringPlanSpotEntity'
@@ -16,6 +15,7 @@ import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
+import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import {
   computeTouringPlanSpotTimes,
   TouringPlanSpotWithTimes,
@@ -31,7 +31,7 @@ type LocationParams = {
 type RegisterPlanParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
+  limits: AccountLimitsValue
   title: string
   startLocation?: LocationParams | null
   destinationLocation?:
@@ -89,26 +89,14 @@ export class TouringPlanService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    if (params.role === 'GUEST') {
+    if (params.limits.touringPlan !== null) {
       const count = await this.touringPlanRepository.countPlans(
         params.myUserBikeId
       )
-      if (count >= GUEST_ACCOUNT_LIMITS.TOURING_PLAN) {
+      if (params.limits.isOver('touringPlan', count)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
-          'ゲストアカウントはツーリングプランを2件まで登録できます'
-        )
-      }
-    }
-
-    if (params.role === 'USER') {
-      const count = await this.touringPlanRepository.countPlans(
-        params.myUserBikeId
-      )
-      if (count >= FREE_USER_LIMITS.TOURING_PLAN) {
-        throw new ApiV1Error(
-          'INVALID_REQUEST',
-          '無料ユーザーはツーリングプランを10件まで登録できます'
+          params.limits.limitMessage('touringPlan')
         )
       }
     }
