@@ -80,10 +80,9 @@ export class MaintenanceLogService {
     }
 
     if (params.limits.maintenanceLog !== null) {
-      const count =
-        await this.maintenanceLogRepository.countMaintenanceLogs(
-          params.myUserBikeId
-        )
+      const count = await this.maintenanceLogRepository.countMaintenanceLogs(
+        params.myUserBikeId
+      )
       if (params.limits.isOver('maintenanceLog', count)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
