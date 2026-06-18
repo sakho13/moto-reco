@@ -19,8 +19,8 @@ model MAuthProvider {
 
   isActive Boolean @default(true) @map("is_active")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -34,8 +34,8 @@ model MUser {
   notificationEmail String? @map("notification_email")
   isProfilePublic   Boolean @default(true) @map("is_profile_public")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   status MUserStatus @default(ACTIVE) @map("status")
   role   MUserRole   @default(USER) @map("role")
@@ -60,8 +60,8 @@ model MManufacturer {
   country    String? @map("country") // 国
   isActive   Boolean @default(true) @map("is_active") // アクティブフラグ
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   bikes MBike[]
 }
@@ -77,8 +77,8 @@ model MBike {
   releaseYear  Int @map("release_year") // 発売年
   releaseMonth Int @map("release_month") // 発売月
 
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz
   settingStatus BikeStatus @default(INACTIVE) @map("setting_status") // 設定状態
 
   manufacturer         MManufacturer      @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
@@ -110,8 +110,8 @@ model TUserBike {
   displacement Float   @map("displacement")
   totalMileage Int     @default(0) @map("total_mileage") // 総走行距離/km
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   bike    MBike?        @relation(fields: [bikeId], references: [id], onDelete: Restrict)
   myBikes TUserMyBike[]
@@ -124,19 +124,19 @@ model TUserMyBike {
 
   // ユーザー独自の設定
   nickname        String?   @map("nickname") // 愛称
-  purchaseDate    DateTime? @map("purchase_date")
+  purchaseDate    DateTime? @map("purchase_date") @db.Timestamptz
   purchasePrice   Int?      @map("purchase_price")
   purchaseMileage Int?      @map("purchase_mileage")
   // 未使用: バイクの公開設定はフレンド機能追加（isProfilePublic）に伴い廃止
   isPublic        Boolean   @default(false) @map("is_public")
 
   // 所有状態
-  ownedAt   DateTime          @map("owned_at")
-  soldAt    DateTime?         @map("sold_at")
+  ownedAt   DateTime          @map("owned_at") @db.Timestamptz
+  soldAt    DateTime?         @map("sold_at") @db.Timestamptz
   ownStatus UserBikeOwnStatus @default(OWN) @map("own_status")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user     MUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userBike TUserBike @relation(fields: [userBikeId], references: [id], onDelete: Restrict)
@@ -161,12 +161,12 @@ model TUserMyBikeFuelLog {
   price           Int      @map("price") // 給油価格/円
   mileage         Int      @map("mileage") // 給油時総走行距離/km
   previousMileage Int      @map("previous_mileage") // 前回給油時総走行距離/km
-  refueledAt      DateTime @map("refueled_at") // 給油日時
+  refueledAt      DateTime @map("refueled_at") @db.Timestamptz // 給油日時
   memo            String?  @map("memo") // メモ
   touringId       String?  @map("touring_id") // ツーリングID
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   userMyBike TUserMyBike         @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   touring    TUserMyBikeTouring? @relation(fields: [touringId], references: [id], onDelete: SetNull)
@@ -180,12 +180,12 @@ model TUserMyBikeMaintenance {
   id           String @id @default(cuid(2))
   userMyBikeId String @map("my_bike_id")
 
-  performedAt DateTime @map("performed_at") // 実施日時
+  performedAt DateTime @map("performed_at") @db.Timestamptz // 実施日時
   mileage     Int      @map("mileage") // 実施時走行距離/km
   memo        String?  @map("memo") // メモ
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   userMyBike       TUserMyBike                  @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   maintenanceItems TUserMyBikeMaintenanceItem[]
@@ -199,8 +199,8 @@ model TUserMyBikeMaintenanceItem {
   type          MaintenanceType @map("maintenance_type")
   value         Float?          @map("value") // メンテナンス項目の入力値
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   maintenanceLog TUserMyBikeMaintenance @relation(fields: [maintenanceId], references: [id], onDelete: Cascade)
 
@@ -214,8 +214,8 @@ model TUserMyBikeTouring {
   planId       String? @map("plan_id")
 
   title          String        @map("title")
-  startDate      DateTime      @map("start_date")
-  endDate        DateTime      @map("end_date")
+  startDate      DateTime      @map("start_date") @db.Timestamptz
+  endDate        DateTime      @map("end_date") @db.Timestamptz
   startMileage   Int?          @map("start_mileage")
   endMileage     Int?          @map("end_mileage")
   startLatitude  Float?        @map("start_latitude")
@@ -224,8 +224,8 @@ model TUserMyBikeTouring {
   endLongitude   Float?        @map("end_longitude")
   status         TouringStatus @default(COMPLETED) @map("status")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   userMyBike TUserMyBike              @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   plan       TUserMyBikeTouringPlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
@@ -244,8 +244,8 @@ model TUserMyBikeTouringPlan {
 
   title String @map("title")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   userMyBike TUserMyBike                  @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   spots      TUserMyBikeTouringPlanSpot[]
@@ -274,8 +274,8 @@ model TUserMyBikeTouringPlanSpot {
   // SPOT/BREAKの並び順のみで使用（START/DESTINATIONは type により表示位置が固定されるため値は不問）
   sortOrder Int @default(0) @map("sort_order")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   plan TUserMyBikeTouringPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
 
@@ -287,13 +287,13 @@ model TUserMyBikeHistory {
   userId       String          @map("user_id")
   userMyBikeId String?         @map("my_bike_id")
   type         BikeHistoryType @map("type")
-  occurredAt   DateTime        @map("occurred_at")
+  occurredAt   DateTime        @map("occurred_at") @db.Timestamptz
 
   fuelLogId String? @unique @map("fuel_log_id")
   touringId String? @unique @map("touring_id")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user       MUser               @relation(fields: [userId], references: [id], onDelete: Cascade)
   userMyBike TUserMyBike?        @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
@@ -316,20 +316,20 @@ model TUserMyBikeTouringSpot {
   longitude Float?   @map("longitude")
 
   // プラン由来の参考予定値（プランから開始した場合にコピーされる。常にこの意味）
-  plannedArrivalAt   DateTime? @map("planned_arrival_at")
-  plannedDepartureAt DateTime? @map("planned_departure_at")
+  plannedArrivalAt   DateTime? @map("planned_arrival_at") @db.Timestamptz
+  plannedDepartureAt DateTime? @map("planned_departure_at") @db.Timestamptz
 
   // 実績（常にこの意味。statusに関わらず固定）
-  arrivedAt  DateTime? @map("arrived_at")
-  departedAt DateTime? @map("departed_at")
+  arrivedAt  DateTime? @map("arrived_at") @db.Timestamptz
+  departedAt DateTime? @map("departed_at") @db.Timestamptz
 
   isSkipped Boolean   @default(false) @map("is_skipped")
-  skippedAt DateTime? @map("skipped_at")
+  skippedAt DateTime? @map("skipped_at") @db.Timestamptz
 
   sortOrder Int @default(0) @map("sort_order")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   touring TUserMyBikeTouring @relation(fields: [touringId], references: [id], onDelete: Cascade)
 
@@ -339,13 +339,13 @@ model TUserMyBikeTouringSpot {
 model TUserQuit {
   id           String         @id @default(cuid(2))
   userId       String         @map("user_id")
-  quitAt       DateTime       @map("quit_at")
+  quitAt       DateTime       @map("quit_at") @db.Timestamptz
   quitReason   String         @map("quit_reason")
   recoveryCode String         @map("recovery_code")
   status       UserQuitStatus @default(QUIT) @map("status")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -358,7 +358,7 @@ model TUserFollow {
   followerId  String @map("follower_id")
   followingId String @map("following_id")
 
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   follower  MUser @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
   following MUser @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
@@ -377,8 +377,8 @@ model TNotification {
   body      String
   metadata  Json?
   isRead    Boolean          @default(false) @map("is_read")
-  readAt    DateTime?        @map("read_at")
-  createdAt DateTime         @default(now()) @map("created_at")
+  readAt    DateTime?        @map("read_at") @db.Timestamptz
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz
 
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -393,11 +393,11 @@ model MSystemAnnouncement {
   title       String
   body        String
   status      AnnouncementStatus @default(DRAFT)
-  scheduledAt DateTime?          @map("scheduled_at")
-  publishedAt DateTime?          @map("published_at")
+  scheduledAt DateTime?          @map("scheduled_at") @db.Timestamptz
+  publishedAt DateTime?          @map("published_at") @db.Timestamptz
   createdBy   String             @map("created_by")
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @updatedAt @map("updated_at")
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz
 
   reads         TSystemAnnouncementRead[]
   createdByUser MUser                     @relation(fields: [createdBy], references: [id], onDelete: Restrict)
@@ -410,7 +410,7 @@ model MSystemAnnouncement {
 model TSystemAnnouncementRead {
   announcementId String   @map("announcement_id")
   userId         String   @map("user_id")
-  readAt         DateTime @default(now()) @map("read_at")
+  readAt         DateTime @default(now()) @map("read_at") @db.Timestamptz
 
   announcement MSystemAnnouncement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
   user         MUser               @relation(fields: [userId], references: [id], onDelete: Cascade)
