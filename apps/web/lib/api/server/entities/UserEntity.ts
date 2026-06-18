@@ -34,6 +34,9 @@ export class UserEntity {
   public get isProfilePublic(): boolean {
     return this._value.isProfilePublic
   }
+  public get timezone(): string | null {
+    return this._value.timezone
+  }
 
   public set name(name: string) {
     if (!name || name.length === 0 || name.length > 50) {
@@ -47,6 +50,9 @@ export class UserEntity {
   }
   public set isProfilePublic(isProfilePublic: boolean) {
     this._value.isProfilePublic = isProfilePublic
+  }
+  public set timezone(timezone: string | null) {
+    this._value.timezone = timezone
   }
 
   public toJson(): User {

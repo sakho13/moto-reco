@@ -54,6 +54,7 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
       notificationEmail: user.notificationEmail,
       isProfilePublic: user.isProfilePublic,
       role: user.role as import('@repo/shared-types').UserRole,
+      timezone: user.timezone,
     },
     message: 'プロフィール取得成功',
   })
@@ -101,6 +102,9 @@ user.patch(
       }
       user.isProfilePublic = body.isProfilePublic
     }
+    if (body.timezone !== undefined) {
+      user.timezone = body.timezone ?? null
+    }
 
     // プロフィール更新
     const updatedUser = await userRepo.updateUser(user)
@@ -134,6 +138,7 @@ user.patch(
         notificationEmail: updatedUser.notificationEmail,
         isProfilePublic: updatedUser.isProfilePublic,
         role: updatedUser.role as import('@repo/shared-types').UserRole,
+        timezone: updatedUser.timezone,
       },
       message: 'プロフィール更新成功',
     })
@@ -433,6 +438,7 @@ user.post(
           notificationEmail: user.notificationEmail,
           isProfilePublic: user.isProfilePublic,
           role: user.role as import('@repo/shared-types').UserRole,
+          timezone: user.timezone,
         },
         message: 'ユーザー登録成功',
       },
@@ -591,6 +597,7 @@ user.post(
           notificationEmail: guestUser.notificationEmail,
           isProfilePublic: guestUser.isProfilePublic,
           role: guestUser.role as import('@repo/shared-types').UserRole,
+          timezone: guestUser.timezone,
         },
         message: 'ゲストユーザー登録成功',
       },

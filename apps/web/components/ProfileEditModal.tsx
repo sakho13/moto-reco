@@ -9,16 +9,23 @@ import { ModalBase } from '@/components/common/ModalBase'
 import { apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
+const TIMEZONE_OPTIONS: string[] =
+  typeof Intl !== 'undefined' && 'supportedValuesOf' in Intl
+    ? (Intl as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf('timeZone')
+    : ['Asia/Tokyo', 'America/New_York', 'Europe/London', 'UTC']
+
 interface ProfileEditModalProps {
   initialName: string
   initialNotificationEmail: string | null
   initialIsProfilePublic: boolean
+  initialTimezone: string | null
   isGuest?: boolean
   onClose: () => void
   onSuccess: (updated: {
     name: string
     notificationEmail: string | null
     isProfilePublic: boolean
+    timezone: string | null
   }) => void
 }
 
@@ -26,6 +33,7 @@ export function ProfileEditModal({
   initialName,
   initialNotificationEmail,
   initialIsProfilePublic,
+  initialTimezone,
   isGuest = false,
   onClose,
   onSuccess,
@@ -36,6 +44,7 @@ export function ProfileEditModal({
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isProfilePublic, setIsProfilePublic] = useState(initialIsProfilePublic)
+  const [timezone, setTimezone] = useState(initialTimezone ?? '')
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,11 +63,13 @@ export function ProfileEditModal({
         name: trimmedName,
         notificationEmail: notificationEmail.trim() || null,
         isProfilePublic,
+        timezone: timezone || null,
       })
       onSuccess({
         name: response.data.name,
         notificationEmail: response.data.notificationEmail,
         isProfilePublic: response.data.isProfilePublic,
+        timezone: response.data.timezone,
       })
     } catch (err) {
       setError(
@@ -118,6 +129,23 @@ export function ProfileEditModal({
             disabled={isSubmitting || isGuest}
             autoComplete="email"
           />
+        </FormField>
+
+        <FormField label="タイムゾーン" htmlFor="modal-profile-timezone">
+          <select
+            id="modal-profile-timezone"
+            value={timezone}
+            onChange={(e) => setTimezone(e.target.value)}
+            disabled={isSubmitting}
+            className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          >
+            <option value="">未設定</option>
+            {TIMEZONE_OPTIONS.map((tz) => (
+              <option key={tz} value={tz}>
+                {tz}
+              </option>
+            ))}
+          </select>
         </FormField>
 
         <div className="flex justify-end">

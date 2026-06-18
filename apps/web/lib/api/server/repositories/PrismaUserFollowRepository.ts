@@ -56,6 +56,7 @@ export class PrismaUserFollowRepository
               role: true,
               notificationEmail: true,
               isProfilePublic: true,
+              timezone: true,
             },
           },
         },
@@ -72,6 +73,7 @@ export class PrismaUserFollowRepository
           status: r.follower.status,
           notificationEmail: r.follower.notificationEmail,
           isProfilePublic: r.follower.isProfilePublic,
+          timezone: r.follower.timezone,
         })
     )
 
@@ -100,6 +102,7 @@ export class PrismaUserFollowRepository
               role: true,
               notificationEmail: true,
               isProfilePublic: true,
+              timezone: true,
             },
           },
         },
@@ -116,6 +119,7 @@ export class PrismaUserFollowRepository
           status: r.following.status,
           notificationEmail: r.following.notificationEmail,
           isProfilePublic: r.following.isProfilePublic,
+          timezone: r.following.timezone,
         })
     )
 
@@ -155,6 +159,7 @@ export class PrismaUserFollowRepository
           role: true,
           notificationEmail: true,
           isProfilePublic: true,
+          timezone: true,
         },
       }),
       this.connection.mUser.count({
@@ -176,6 +181,7 @@ export class PrismaUserFollowRepository
           status: u.status,
           notificationEmail: u.notificationEmail,
           isProfilePublic: u.isProfilePublic,
+          timezone: u.timezone,
         })
     )
 

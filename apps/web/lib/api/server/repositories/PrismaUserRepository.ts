@@ -17,6 +17,7 @@ export class PrismaUserRepository
         role: true,
         notificationEmail: true,
         isProfilePublic: true,
+        timezone: true,
       },
       where: {
         id: userId,
@@ -32,6 +33,7 @@ export class PrismaUserRepository
           status: user.status,
           notificationEmail: user.notificationEmail,
           isProfilePublic: user.isProfilePublic,
+          timezone: user.timezone,
         })
       : null
   }
@@ -45,6 +47,7 @@ export class PrismaUserRepository
         role: true,
         notificationEmail: true,
         isProfilePublic: true,
+        timezone: true,
       },
       where: {
         id: userId,
@@ -59,6 +62,7 @@ export class PrismaUserRepository
           status: user.status,
           notificationEmail: user.notificationEmail,
           isProfilePublic: user.isProfilePublic,
+          timezone: user.timezone,
         })
       : null
   }
@@ -74,6 +78,7 @@ export class PrismaUserRepository
         role: true,
         notificationEmail: true,
         isProfilePublic: true,
+        timezone: true,
       },
       where: {
         authProviders: {
@@ -94,6 +99,7 @@ export class PrismaUserRepository
           status: user.status,
           notificationEmail: user.notificationEmail,
           isProfilePublic: user.isProfilePublic,
+          timezone: user.timezone,
         })
       : null
   }
@@ -126,6 +132,7 @@ export class PrismaUserRepository
         role: true,
         notificationEmail: true,
         isProfilePublic: true,
+        timezone: true,
       },
     })
 
@@ -136,6 +143,7 @@ export class PrismaUserRepository
       status: createdUser.status,
       notificationEmail: createdUser.notificationEmail,
       isProfilePublic: createdUser.isProfilePublic,
+      timezone: createdUser.timezone,
     })
   }
 
@@ -149,6 +157,7 @@ export class PrismaUserRepository
         name: user.name,
         notificationEmail: user.notificationEmail,
         isProfilePublic: user.isProfilePublic,
+        timezone: user.timezone,
       },
       select: {
         id: true,
@@ -157,6 +166,7 @@ export class PrismaUserRepository
         role: true,
         notificationEmail: true,
         isProfilePublic: true,
+        timezone: true,
       },
     })
 
@@ -167,6 +177,7 @@ export class PrismaUserRepository
       status: updatedUser.status,
       notificationEmail: updatedUser.notificationEmail,
       isProfilePublic: updatedUser.isProfilePublic,
+      timezone: updatedUser.timezone,
     })
   }
 
@@ -221,6 +232,7 @@ export class PrismaUserRepository
         role: true,
         notificationEmail: true,
         isProfilePublic: true,
+        timezone: true,
       },
     })
 
@@ -231,6 +243,7 @@ export class PrismaUserRepository
       status: createdUser.status,
       notificationEmail: createdUser.notificationEmail,
       isProfilePublic: createdUser.isProfilePublic,
+      timezone: createdUser.timezone,
     })
   }
 }

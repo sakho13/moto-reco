@@ -37,6 +37,7 @@ export class UserService {
         status: 'ACTIVE',
         notificationEmail: (authProvider.metadata?.email as string) ?? null,
         isProfilePublic: true,
+        timezone: null,
       }),
       authProvider
     )
@@ -71,6 +72,7 @@ export class UserService {
         status: 'ACTIVE',
         notificationEmail: null,
         isProfilePublic: false,
+        timezone: null,
       }),
       authProvider
     )

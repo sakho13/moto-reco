@@ -8,4 +8,5 @@ export type User = {
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
   notificationEmail: string | null
   isProfilePublic: boolean
+  timezone: string | null
 }

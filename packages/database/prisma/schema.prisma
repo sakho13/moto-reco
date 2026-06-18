@@ -33,6 +33,7 @@ model MUser {
   name              String
   notificationEmail String? @map("notification_email")
   isProfilePublic   Boolean @default(true) @map("is_profile_public")
+  timezone          String? @map("timezone")
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz

@@ -1,17 +1,10 @@
+'use client'
+
 import { ChevronRight, Fuel, MapPin } from 'lucide-react'
 import type { ApiResponseAllBikesHistoryItem } from '@repo/shared-types'
+import { formatInUserTimezone } from '@repo/shared-utils'
 import styles from './HistoryItemCard.module.css'
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+import { useUserTimezone } from '@/lib/hooks/useUserTimezone'
 
 type Props = {
   item: ApiResponseAllBikesHistoryItem
@@ -19,6 +12,15 @@ type Props = {
 }
 
 export const HistoryItemCard = ({ item, onClick }: Props) => {
+  const timezone = useUserTimezone()
+  const formatDate = (dateString: string) => {
+    try {
+      return formatInUserTimezone(dateString, timezone, 'yyyy/MM/dd HH:mm')
+    } catch {
+      return dateString
+    }
+  }
+
   return (
     <div
       className={`${styles.historyItemCard} ${onClick ? styles.clickable : ''}`}
@@ -62,8 +64,8 @@ export const HistoryItemCard = ({ item, onClick }: Props) => {
           <div className={styles.detail}>
             <div>{item.touring.title}</div>
             <div>
-              {new Date(item.touring.startDate).toLocaleDateString('ja-JP')} 〜{' '}
-              {new Date(item.touring.endDate).toLocaleDateString('ja-JP')}
+              {formatDate(item.touring.startDate)} 〜{' '}
+              {formatDate(item.touring.endDate)}
             </div>
           </div>
         )}
