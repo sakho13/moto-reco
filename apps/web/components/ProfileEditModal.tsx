@@ -5,35 +5,20 @@ import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
-import { Select } from '@repo/ui/select'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-
-const TIMEZONE_LIST: string[] =
-  typeof Intl !== 'undefined' && 'supportedValuesOf' in Intl
-    ? (
-        Intl as { supportedValuesOf: (key: string) => string[] }
-      ).supportedValuesOf('timeZone')
-    : ['Asia/Tokyo', 'America/New_York', 'Europe/London', 'UTC']
-
-const TIMEZONE_OPTIONS = [
-  { value: '', label: '未設定' },
-  ...TIMEZONE_LIST.map((tz) => ({ value: tz, label: tz })),
-]
 
 interface ProfileEditModalProps {
   initialName: string
   initialNotificationEmail: string | null
   initialIsProfilePublic: boolean
-  initialTimezone: string | null
   isGuest?: boolean
   onClose: () => void
   onSuccess: (updated: {
     name: string
     notificationEmail: string | null
     isProfilePublic: boolean
-    timezone: string | null
   }) => void
 }
 
@@ -41,7 +26,6 @@ export function ProfileEditModal({
   initialName,
   initialNotificationEmail,
   initialIsProfilePublic,
-  initialTimezone,
   isGuest = false,
   onClose,
   onSuccess,
@@ -52,7 +36,6 @@ export function ProfileEditModal({
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isProfilePublic, setIsProfilePublic] = useState(initialIsProfilePublic)
-  const [timezone, setTimezone] = useState(initialTimezone ?? '')
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,13 +54,11 @@ export function ProfileEditModal({
         name: trimmedName,
         notificationEmail: notificationEmail.trim() || null,
         isProfilePublic,
-        timezone: timezone || null,
       })
       onSuccess({
         name: response.data.name,
         notificationEmail: response.data.notificationEmail,
         isProfilePublic: response.data.isProfilePublic,
-        timezone: response.data.timezone,
       })
     } catch (err) {
       setError(
@@ -136,16 +117,6 @@ export function ProfileEditModal({
             onChange={(e) => setNotificationEmail(e.target.value)}
             disabled={isSubmitting || isGuest}
             autoComplete="email"
-          />
-        </FormField>
-
-        <FormField label="タイムゾーン" htmlFor="modal-profile-timezone">
-          <Select
-            id="modal-profile-timezone"
-            options={TIMEZONE_OPTIONS}
-            value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-            disabled={isSubmitting}
           />
         </FormField>
 

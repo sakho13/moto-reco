@@ -98,10 +98,6 @@ export function ProfileCard() {
             <span className="text-gray-500">プロフィール公開</span>
             <span>{data?.isProfilePublic ? '公開' : '非公開'}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">タイムゾーン</span>
-            <span>{data?.timezone || '未設定'}</span>
-          </div>
           {data?.isProfilePublic && (
             <div className="pt-1">
               <Link
@@ -135,7 +131,6 @@ export function ProfileCard() {
           initialName={data.name}
           initialNotificationEmail={data.notificationEmail}
           initialIsProfilePublic={data.isProfilePublic}
-          initialTimezone={data.timezone ?? null}
           isGuest={isGuest}
           onClose={() => setIsModalOpen(false)}
           onSuccess={(updated) => {

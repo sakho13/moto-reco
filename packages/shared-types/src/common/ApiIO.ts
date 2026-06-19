@@ -58,7 +58,6 @@ export type ApiResponseUserProfile = {
   notificationEmail: string | null
   isProfilePublic: boolean
   role: UserRole
-  timezone: string | null
 }
 
 export type ApiResponsePublicUserPage = {

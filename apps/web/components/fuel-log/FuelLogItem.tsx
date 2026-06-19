@@ -2,10 +2,8 @@
 
 import { Map } from 'lucide-react'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
-import { formatInUserTimezone } from '@repo/shared-utils'
 import styles from './FuelLogItem.module.css'
 import { ClickableListCard } from '@/components/ClickableListCard'
-import { useUserTimezone } from '@/lib/hooks/useUserTimezone'
 
 export interface FuelLogItemProps {
   fuelLog: ApiResponseFuelLogDetail
@@ -13,13 +11,12 @@ export interface FuelLogItemProps {
 }
 
 export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
-  const timezone = useUserTimezone()
   const formatDate = (dateString: string) => {
-    try {
-      return formatInUserTimezone(dateString, timezone, 'yyyy年MM月dd日')
-    } catch {
-      return dateString
-    }
+    return new Date(dateString).toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
   }
 
   return (

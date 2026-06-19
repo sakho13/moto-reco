@@ -1,10 +1,6 @@
-'use client'
-
 import { ChevronRight, Fuel, MapPin } from 'lucide-react'
 import type { ApiResponseAllBikesHistoryItem } from '@repo/shared-types'
-import { formatInUserTimezone } from '@repo/shared-utils'
 import styles from './HistoryItemCard.module.css'
-import { useUserTimezone } from '@/lib/hooks/useUserTimezone'
 
 type Props = {
   item: ApiResponseAllBikesHistoryItem
@@ -12,13 +8,14 @@ type Props = {
 }
 
 export const HistoryItemCard = ({ item, onClick }: Props) => {
-  const timezone = useUserTimezone()
   const formatDate = (dateString: string) => {
-    try {
-      return formatInUserTimezone(dateString, timezone, 'yyyy/MM/dd HH:mm')
-    } catch {
-      return dateString
-    }
+    return new Date(dateString).toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 
   return (

@@ -73,14 +73,12 @@ export const UserProfilePatchRequestSchema = z
       .nullable()
       .optional(),
     isProfilePublic: z.boolean().optional(),
-    timezone: z.string().nullable().optional(),
   })
   .refine(
     (data) =>
       data.name !== undefined ||
       data.notificationEmail !== undefined ||
-      data.isProfilePublic !== undefined ||
-      data.timezone !== undefined,
+      data.isProfilePublic !== undefined,
     { message: '少なくとも1つのフィールドを指定してください' }
   )
 
