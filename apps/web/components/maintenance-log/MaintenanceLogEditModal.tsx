@@ -14,6 +14,7 @@ import {
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
+import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 type MaintenanceLogEditModalProps = {
   bikeId: string
@@ -35,7 +36,7 @@ export function MaintenanceLogEditModal({
   >()
 
   useEffect(() => {
-    const dateStr = new Date(log.performedAt).toISOString().split('T')[0]
+    const dateStr = toLocalDateTimeString(log.performedAt).split('T')[0]
     if (dateStr) {
       setInitialData({
         performedAt: dateStr,
