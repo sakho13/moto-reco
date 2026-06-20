@@ -54,7 +54,6 @@ export const HistoryItemCard = ({ item, onClick }: Props) => {
             <div>
               {formatDate(item.touring.startDate)} 〜{' '}
               {formatDate(item.touring.endDate)}
-
             </div>
           </div>
         )}
