@@ -38,7 +38,8 @@ export default function McpSetupPage() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>1. APIキーを発行する</h2>
           <p className={styles.sectionBody}>
-            アプリのプロフィール画面から「オプション」→「MCP APIキー管理」を開き、
+            アプリのプロフィール画面から「オプション」→「MCP
+            APIキー管理」を開き、
             APIキーを発行してください。キーは発行後に一度だけ表示されます。
           </p>
         </section>
@@ -65,17 +66,26 @@ export default function McpSetupPage() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>3. Claude Desktop に設定する</h2>
           <p className={styles.sectionBody}>
-            <code className={styles.inlineCode}>claude_desktop_config.json</code>{' '}
+            Claude Desktop は HTTP 形式の MCP サーバーを直接サポートしていないため、
+            <code className={styles.inlineCode}>mcp-remote</code>{' '}
+            を介して接続します。Node.js がインストールされている必要があります。
+          </p>
+          <p className={styles.sectionBody}>
+            <code className={styles.inlineCode}>
+              claude_desktop_config.json
+            </code>{' '}
             に以下を追加してください：
           </p>
           <pre className={styles.codeBlock}>{`{
   "mcpServers": {
     "motoreco": {
-      "type": "http",
-      "url": "https://moto-reco.com/api/mcp",
-      "headers": {
-        "Authorization": "Bearer <発行したAPIキー>"
-      }
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://moto-reco.com/api/mcp",
+        "--header",
+        "Authorization: Bearer <発行したAPIキー>"
+      ]
     }
   }
 }`}</pre>
@@ -83,9 +93,7 @@ export default function McpSetupPage() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>利用可能なツール</h2>
-          <p className={styles.sectionBody}>
-            以下のツールが利用できます：
-          </p>
+          <p className={styles.sectionBody}>以下のツールが利用できます：</p>
           <ul>
             <li>
               <strong>list_bikes</strong> — 登録されているマイバイクの一覧を取得
