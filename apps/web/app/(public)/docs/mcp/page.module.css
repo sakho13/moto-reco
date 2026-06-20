@@ -59,6 +59,12 @@
   font-size: 0.9em;
 }
 
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 html[data-theme-mode='dark'] .description,
 html[data-theme-mode='dark'] .sectionBody {
   color: rgba(237, 237, 237, 0.7);

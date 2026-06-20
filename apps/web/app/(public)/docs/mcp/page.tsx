@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Tabs } from '@repo/ui/tabs'
 import styles from './page.module.css'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
@@ -23,6 +24,53 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
+const claudeCodeContent = (
+  <div className={styles.tabContent}>
+    <p className={styles.sectionBody}>
+      <code className={styles.inlineCode}>~/.claude/settings.json</code>{' '}
+      に以下を追加してください：
+    </p>
+    <pre className={styles.codeBlock}>{`{
+  "mcpServers": {
+    "motoreco": {
+      "type": "http",
+      "url": "https://moto-reco.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer <発行したAPIキー>"
+      }
+    }
+  }
+}`}</pre>
+  </div>
+)
+
+const claudeDesktopContent = (
+  <div className={styles.tabContent}>
+    <p className={styles.sectionBody}>
+      Claude Desktop は HTTP 形式の MCP サーバーを直接サポートしていないため、
+      <code className={styles.inlineCode}>mcp-remote</code>{' '}
+      を介して接続します。Node.js がインストールされている必要があります。
+    </p>
+    <p className={styles.sectionBody}>
+      <code className={styles.inlineCode}>claude_desktop_config.json</code>{' '}
+      に以下を追加してください：
+    </p>
+    <pre className={styles.codeBlock}>{`{
+  "mcpServers": {
+    "motoreco": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://moto-reco.com/api/mcp",
+        "--header",
+        "Authorization: Bearer <発行したAPIキー>"
+      ]
+    }
+  }
+}`}</pre>
+  </div>
+)
+
 export default function McpSetupPage() {
   return (
     <div className="public-page-container">
@@ -45,50 +93,21 @@ export default function McpSetupPage() {
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>2. Claude Code に設定する</h2>
-          <p className={styles.sectionBody}>
-            <code className={styles.inlineCode}>~/.claude/settings.json</code>{' '}
-            に以下を追加してください：
-          </p>
-          <pre className={styles.codeBlock}>{`{
-  "mcpServers": {
-    "motoreco": {
-      "type": "http",
-      "url": "https://moto-reco.com/api/mcp",
-      "headers": {
-        "Authorization": "Bearer <発行したAPIキー>"
-      }
-    }
-  }
-}`}</pre>
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>3. Claude Desktop に設定する</h2>
-          <p className={styles.sectionBody}>
-            Claude Desktop は HTTP 形式の MCP サーバーを直接サポートしていないため、
-            <code className={styles.inlineCode}>mcp-remote</code>{' '}
-            を介して接続します。Node.js がインストールされている必要があります。
-          </p>
-          <p className={styles.sectionBody}>
-            <code className={styles.inlineCode}>
-              claude_desktop_config.json
-            </code>{' '}
-            に以下を追加してください：
-          </p>
-          <pre className={styles.codeBlock}>{`{
-  "mcpServers": {
-    "motoreco": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://moto-reco.com/api/mcp",
-        "--header",
-        "Authorization: Bearer <発行したAPIキー>"
-      ]
-    }
-  }
-}`}</pre>
+          <h2 className={styles.sectionTitle}>2. アプリに設定する</h2>
+          <Tabs
+            tabs={[
+              {
+                id: 'claude-code',
+                label: 'Claude Code',
+                content: claudeCodeContent,
+              },
+              {
+                id: 'claude-desktop',
+                label: 'Claude Desktop',
+                content: claudeDesktopContent,
+              },
+            ]}
+          />
         </section>
 
         <section className={styles.section}>
