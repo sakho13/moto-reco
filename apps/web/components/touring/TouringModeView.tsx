@@ -4,6 +4,7 @@ import { Coffee, Fuel, MapPin, Timer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
+import { getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from '../icons/BikeIcon'
@@ -14,7 +15,6 @@ import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
-import { getCurrentDate } from '@repo/shared-utils'
 
 type TouringModeViewProps = {
   myUserBikeId: string

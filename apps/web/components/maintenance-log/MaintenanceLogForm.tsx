@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import type { MaintenanceType } from '@repo/shared-types'
+import { getTodayDateString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
 import { DateInput } from '@repo/ui/dateInput'
@@ -10,7 +11,6 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
 import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
-import { getTodayDateString } from '@repo/shared-utils'
 
 export type MaintenanceLogFormData = {
   performedAt: string

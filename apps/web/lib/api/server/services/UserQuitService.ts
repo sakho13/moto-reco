@@ -5,8 +5,7 @@ import {
   type UserId,
   type UserQuitStatus,
 } from '@repo/shared-types'
-import { generateRandNumberStr } from '@repo/shared-utils'
-import { getCurrentDate } from '@repo/shared-utils'
+import { generateRandNumberStr, getCurrentDate } from '@repo/shared-utils'
 import { UserQuitEntity } from '../entities/UserQuitEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IUserQuitRepository } from '../interfaces/IUserQuitRepository'

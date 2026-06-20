@@ -6,6 +6,7 @@ import type {
   ApiResponseTouringDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { toLocalDateTimeString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import {
@@ -14,7 +15,6 @@ import {
 } from '@/components/touring/TouringForm'
 import { authenticatedFetch, apiPatch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { toLocalDateTimeString } from '@repo/shared-utils'
 
 interface TouringEditFormProps {
   bikeId: string

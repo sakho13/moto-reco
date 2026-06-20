@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getNowLocalDateTimeString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
-import { getNowLocalDateTimeString } from '@repo/shared-utils'
 
 export interface TouringFormData {
   title: string
