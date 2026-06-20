@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
   url.searchParams.set('longitude', String(longitude))
   url.searchParams.set('current_weather', 'true')
   url.searchParams.set('hourly', 'temperature_2m,precipitation_probability')
-  url.searchParams.set('timezone', 'Asia/Tokyo')
+  url.searchParams.set('timezone', 'UTC')
   url.searchParams.set('forecast_days', '1')
 
   const res = await fetch(url.toString(), {
