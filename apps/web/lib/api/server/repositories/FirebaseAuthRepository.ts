@@ -41,42 +41,9 @@ export class FirebaseAuthRepository implements IAuthRepository {
   public async verifyIdToken(token: string): Promise<DecodedIdToken | null> {
     try {
       const authClient = getFirebaseAdminAuthClient()
-      console.log(
-        '[FirebaseAuth] verifyIdToken: calling authClient.verifyIdToken (checkRevoked=true)'
-      )
-      const result = await authClient.verifyIdToken(token, false)
-      console.log('[FirebaseAuth] verifyIdToken: success, uid=', result.uid)
-      return result
+      return await authClient.verifyIdToken(token, true)
     } catch (error) {
-      console.error('[FirebaseAuth] verifyIdToken: error type=', typeof error)
-      if (error instanceof Error) {
-        console.error('[FirebaseAuth] verifyIdToken: name=', error.name)
-        console.error('[FirebaseAuth] verifyIdToken: message=', error.message)
-        console.error(
-          '[FirebaseAuth] verifyIdToken: code=',
-          (error as NodeJS.ErrnoException).code
-        )
-        console.error('[FirebaseAuth] verifyIdToken: stack=', error.stack)
-        const cause = (error as Error & { cause?: unknown }).cause
-        if (cause) {
-          console.error('[FirebaseAuth] verifyIdToken: cause=', cause)
-          if (cause instanceof Error) {
-            console.error(
-              '[FirebaseAuth] verifyIdToken: cause.message=',
-              cause.message
-            )
-            console.error(
-              '[FirebaseAuth] verifyIdToken: cause.stack=',
-              cause.stack
-            )
-          }
-        }
-      } else {
-        console.error(
-          '[FirebaseAuth] verifyIdToken: non-Error thrown=',
-          JSON.stringify(error)
-        )
-      }
+      console.error('Token verification error:', error)
       return null
     }
   }
