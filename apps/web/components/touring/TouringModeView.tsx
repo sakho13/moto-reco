@@ -134,6 +134,7 @@ export const TouringModeView = ({
     }
   }
 
+
   const formatBreakTime = (dateString: string | null) => {
     if (!dateString) return '—'
     const date = new Date(dateString)

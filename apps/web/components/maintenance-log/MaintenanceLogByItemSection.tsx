@@ -40,6 +40,7 @@ const formatDate = (dateString: string) => {
   }
 }
 
+
 const buildItemHistoryMap = (
   logs: ApiResponseMaintenanceLogDetail[]
 ): Map<string, ItemHistory[]> => {
