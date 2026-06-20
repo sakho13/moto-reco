@@ -4,6 +4,7 @@ import { Coffee, Fuel, MapPin, Timer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
+import { getCurrentDate, formatDateTime } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from '../icons/BikeIcon'
@@ -14,7 +15,6 @@ import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
 
 type TouringModeViewProps = {
   myUserBikeId: string
@@ -118,21 +118,6 @@ export const TouringModeView = ({
 
     return () => clearInterval(interval)
   }, [startDate])
-
-  const formatStartDateTime = (dateString: string) => {
-    try {
-      const date = new Date(dateString)
-      return date.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    } catch {
-      return ''
-    }
-  }
 
   const formatBreakTime = (dateString: string | null) => {
     if (!dateString) return '—'
@@ -328,7 +313,7 @@ export const TouringModeView = ({
           <div className={styles.timeInfo}>
             <div className={styles.elapsedTime}>{elapsedTime}</div>
             <p className={styles.startDateTime}>
-              {formatStartDateTime(startDate)} 開始
+              {formatDateTime(startDate)} 開始
             </p>
             {startMileage !== null && (
               <p className={styles.startMileageInfo}>

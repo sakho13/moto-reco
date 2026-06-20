@@ -101,7 +101,6 @@ user.patch(
       }
       user.isProfilePublic = body.isProfilePublic
     }
-
     // プロフィール更新
     const updatedUser = await userRepo.updateUser(user)
 

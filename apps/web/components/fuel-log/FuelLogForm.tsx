@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getNowLocalDateTimeString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
 import { DateTimeInput } from '@repo/ui/dateTimeInput'
@@ -9,7 +10,6 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
-import { getNowLocalDateTimeString } from '@/lib/utils/dateUtils'
 
 export interface FuelLogFormData {
   refueledAt: string

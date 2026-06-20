@@ -1,6 +1,7 @@
 'use client'
 
 import type { ApiResponseTouringDetail } from '@repo/shared-types'
+import { formatDate } from '@repo/shared-utils'
 import styles from './TouringListItem.module.css'
 
 export interface TouringListItemProps {
@@ -12,18 +13,6 @@ export const TouringListItem = ({
   touring,
   onDetail,
 }: TouringListItemProps) => {
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    } catch {
-      return dateString
-    }
-  }
-
   const calculateDistance = () => {
     if (touring.startMileage !== null && touring.endMileage !== null) {
       return touring.endMileage - touring.startMileage

@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { getTodayDateString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { DateInput } from '@repo/ui/dateInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { InfoBox } from './InfoBox'
-import { getTodayDateString } from '@/lib/utils/dateUtils'
 
 export interface BikeFormData {
   nickname: string
