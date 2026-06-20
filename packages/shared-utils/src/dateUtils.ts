@@ -54,6 +54,18 @@ export const formatPlanSpotOffsetMinutes = (minutes: number | null): string => {
   return `出発から${hours}時間${mins}分後`
 }
 
+/** ローカル時刻で `yyyy/mm/dd` 形式に変換する */
+export const formatDate = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`
+}
+
+/** ローカル時刻で `yyyy/mm/dd hh:mm` 形式に変換する */
+export const formatDateTime = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 /**
  * UTC 日時を指定タイムゾーンでフォーマットする
  *

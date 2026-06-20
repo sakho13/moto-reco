@@ -7,4 +7,6 @@ export {
   getNowLocalDateTimeString,
   formatPlanSpotOffsetMinutes,
   formatInUserTimezone,
+  formatDate,
+  formatDateTime,
 } from './dateUtils'

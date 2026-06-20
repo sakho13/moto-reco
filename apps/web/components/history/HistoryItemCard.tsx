@@ -1,5 +1,6 @@
 import { ChevronRight, Fuel, MapPin } from 'lucide-react'
 import type { ApiResponseAllBikesHistoryItem } from '@repo/shared-types'
+import { formatDate, formatDateTime } from '@repo/shared-utils'
 import styles from './HistoryItemCard.module.css'
 
 type Props = {
@@ -8,16 +9,6 @@ type Props = {
 }
 
 export const HistoryItemCard = ({ item, onClick }: Props) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
   return (
     <div
       className={`${styles.historyItemCard} ${onClick ? styles.clickable : ''}`}
@@ -46,7 +37,7 @@ export const HistoryItemCard = ({ item, onClick }: Props) => {
             </span>
             <span className={styles.bikeName}>{item.bikeName}</span>
           </div>
-          <span className={styles.date}>{formatDate(item.occurredAt)}</span>
+          <span className={styles.date}>{formatDateTime(item.occurredAt)}</span>
         </div>
 
         {item.type === 'FUEL_LOG' ? (
@@ -63,6 +54,7 @@ export const HistoryItemCard = ({ item, onClick }: Props) => {
             <div>
               {formatDate(item.touring.startDate)} 〜{' '}
               {formatDate(item.touring.endDate)}
+
             </div>
           </div>
         )}

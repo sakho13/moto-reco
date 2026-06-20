@@ -6,6 +6,7 @@ import type {
   ApiResponseNotificationList,
   SuccessResponse,
 } from '@repo/shared-types'
+import { formatDateTime } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import styles from './page.module.css'
 import { authenticatedFetch } from '@/lib/api/client'
@@ -139,13 +140,7 @@ function NotificationsPage() {
                 <p className={styles.itemTitle}>{item.title}</p>
                 <p className={styles.itemBody}>{item.body}</p>
                 <p className={styles.itemTime}>
-                  {new Date(item.createdAt).toLocaleDateString('ja-JP', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  {formatDateTime(item.createdAt)}
                 </p>
               </div>
               {!item.isRead && (

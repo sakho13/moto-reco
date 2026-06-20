@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
-import { getCurrentDate } from '@repo/shared-utils'
+import { getCurrentDate, formatDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
@@ -78,20 +78,6 @@ function TouringDetailPage() {
       setLocalSpots(spots)
     }
   }, [spots])
-
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    } catch {
-      return dateString
-    }
-  }
 
   const formatVisitedAt = (dateString: string | null) => {
     if (!dateString) return '—'

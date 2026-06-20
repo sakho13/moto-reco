@@ -2,6 +2,7 @@
 
 import { Map } from 'lucide-react'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
+import { formatDate } from '@repo/shared-utils'
 import styles from './FuelLogItem.module.css'
 import { ClickableListCard } from '@/components/ClickableListCard'
 
@@ -11,14 +12,6 @@ export interface FuelLogItemProps {
 }
 
 export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  }
-
   return (
     <ClickableListCard onClick={() => onEdit(fuelLog.fuelLogId)}>
       {/* 行1: メイン情報（燃費・総走行距離・日付） */}
