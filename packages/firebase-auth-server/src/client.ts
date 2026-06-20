@@ -90,12 +90,18 @@ function getFirebaseApp() {
   if (!getApps().length) {
     const projectId = options.projectId
     if (useEmulator) {
-      console.log('[FirebaseAuth] initializeApp: emulator mode, projectId=', projectId)
+      console.log(
+        '[FirebaseAuth] initializeApp: emulator mode, projectId=',
+        projectId
+      )
       initializeApp({ projectId })
       console.log('[FirebaseAuth] initializeApp: emulator done')
     } else {
       const pk = options.privateKey
-      console.log('[FirebaseAuth] initializeApp: production mode, projectId=', projectId)
+      console.log(
+        '[FirebaseAuth] initializeApp: production mode, projectId=',
+        projectId
+      )
       try {
         initializeApp({
           credential: cert({
