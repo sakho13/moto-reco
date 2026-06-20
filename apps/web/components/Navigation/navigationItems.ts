@@ -2,7 +2,6 @@ import { BikeIcon } from '@/components/icons/BikeIcon'
 import { HistoryIcon } from '@/components/icons/HistoryIcon'
 import { HomeIcon } from '@/components/icons/HomeIcon'
 import { ProfileIcon } from '@/components/icons/ProfileIcon'
-import { SettingsIcon } from '@/components/icons/SettingsIcon'
 
 export type NavigationItem = {
   id: string
@@ -25,11 +24,5 @@ export const navigationItems: NavigationItem[] = [
     label: 'プロフィール',
     href: '/app/profile',
     icon: ProfileIcon,
-  },
-  {
-    id: 'settings',
-    label: '設定',
-    href: '/app/settings/api-keys',
-    icon: SettingsIcon,
   },
 ]

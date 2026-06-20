@@ -337,44 +337,25 @@ function ApiKeysSettingsPage() {
         </div>
       </BaseCard>
 
-      {/* 使い方説明 */}
-      <BaseCard title="Claude Code での設定方法">
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--spacing-2)',
-            fontSize: 'var(--font-size-sm)',
-          }}
-        >
-          <p>
-            発行したAPIキーを <code>~/.claude/settings.json</code>{' '}
-            に設定します：
-          </p>
-          <pre
-            style={{
-              backgroundColor: 'var(--color-muted)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--spacing-3)',
-              fontSize: 'var(--font-size-xs)',
-              overflowX: 'auto',
-              whiteSpace: 'pre',
-            }}
-          >
-            {`{
-  "mcpServers": {
-    "motoreco": {
-      "type": "http",
-      "url": "https://moto-reco.com/api/mcp",
-      "headers": {
-        "Authorization": "Bearer <APIキー>"
-      }
-    }
-  }
-}`}
-          </pre>
-        </div>
-      </BaseCard>
+      <a
+        href="/docs/mcp"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: 'var(--spacing-3) var(--spacing-4)',
+          backgroundColor: 'var(--color-muted)',
+          borderRadius: 'var(--radius-md)',
+          fontSize: 'var(--font-size-sm)',
+          color: 'var(--color-foreground)',
+          textDecoration: 'none',
+        }}
+      >
+        <span>設定方法を確認する</span>
+        <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
+      </a>
     </div>
   )
 }

@@ -36,6 +36,18 @@ function ProfileEditPage() {
         </div>
       </BaseCard>
 
+      {!isGuest && (
+        <BaseCard title="オプション">
+          <Link
+            href="/app/settings/api-keys"
+            className="flex justify-between items-center text-sm"
+          >
+            <span>MCP APIキー管理</span>
+            <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
+          </Link>
+        </BaseCard>
+      )}
+
       <LogoutButton />
 
       <FooterCard />
