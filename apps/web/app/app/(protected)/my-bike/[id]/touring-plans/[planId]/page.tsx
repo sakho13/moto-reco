@@ -27,7 +27,7 @@ import { useGeolocation } from '@/lib/hooks/useGeolocation'
 import {
   formatPlanSpotOffsetMinutes,
   getCurrentDate,
-} from '@/lib/utils/dateUtils'
+} from '@repo/shared-utils'
 import {
   buildGoogleMapsRouteUrl,
   buildGoogleMapsTwoPointUrl,

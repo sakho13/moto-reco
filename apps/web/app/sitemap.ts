@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { microCMSClient } from '@/lib/microcms/config'
 import type { Blog } from '@/lib/microcms/types'
 import { SITE_URL } from '@/lib/statics'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 
 export const revalidate = 300
 

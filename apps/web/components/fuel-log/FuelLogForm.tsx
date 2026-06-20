@@ -9,7 +9,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
-import { getNowLocalDateTimeString } from '@/lib/utils/dateUtils'
+import { getNowLocalDateTimeString } from '@repo/shared-utils'
 
 export interface FuelLogFormData {
   refueledAt: string

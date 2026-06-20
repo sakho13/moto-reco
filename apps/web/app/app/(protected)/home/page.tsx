@@ -11,7 +11,7 @@ import { apiGet, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 
 function Page() {
   const [loadingBikeId, setLoadingBikeId] = useState<string | null>(null)

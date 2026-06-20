@@ -20,7 +20,7 @@ import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 import {
   buildGoogleMapsRouteUrl,
   buildGoogleMapsTwoPointUrl,

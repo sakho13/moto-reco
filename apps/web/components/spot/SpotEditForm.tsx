@@ -13,7 +13,7 @@ import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
+import { toLocalDateTimeString } from '@repo/shared-utils'
 
 interface SpotEditFormProps {
   bikeId: string

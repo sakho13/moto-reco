@@ -14,7 +14,7 @@ import {
 } from '@/components/touring/TouringForm'
 import { authenticatedFetch, apiPatch, apiDelete } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
+import { toLocalDateTimeString } from '@repo/shared-utils'
 
 interface TouringEditFormProps {
   bikeId: string

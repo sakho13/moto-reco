@@ -7,7 +7,7 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { InfoBox } from './InfoBox'
-import { getTodayDateString } from '@/lib/utils/dateUtils'
+import { getTodayDateString } from '@repo/shared-utils'
 
 export interface BikeFormData {
   nickname: string

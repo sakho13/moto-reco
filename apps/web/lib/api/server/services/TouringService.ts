@@ -8,7 +8,7 @@ import {
   TouringStatus,
   UserId,
 } from '@repo/shared-types'
-import { getCurrentDate } from '../../../utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 import { SpotEntity } from '../entities/SpotEntity'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'

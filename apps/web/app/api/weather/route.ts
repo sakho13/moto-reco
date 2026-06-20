@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 
 type WeatherResponse = {
   temperature: number

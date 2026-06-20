@@ -13,7 +13,7 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 
 type BikeWithTouring = {
   myUserBikeId: string

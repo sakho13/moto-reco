@@ -13,7 +13,7 @@ import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
+import { toLocalDateTimeString } from '@repo/shared-utils'
 
 interface FuelLogEditModalProps {
   bikeId: string

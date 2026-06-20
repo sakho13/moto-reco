@@ -10,7 +10,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
 import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
-import { getTodayDateString } from '@/lib/utils/dateUtils'
+import { getTodayDateString } from '@repo/shared-utils'
 
 export type MaintenanceLogFormData = {
   performedAt: string

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { BaseCard } from '@repo/ui/baseCard'
 import { APP_VERSION, GOOGLE_QA_FORM_URL } from '@/lib/statics'
-import { getCurrentYear } from '@/lib/utils/dateUtils'
+import { getCurrentYear } from '@repo/shared-utils'
 
 export function FooterCard() {
   const year = getCurrentYear()

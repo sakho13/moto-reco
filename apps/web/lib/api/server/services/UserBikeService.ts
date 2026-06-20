@@ -4,7 +4,7 @@ import {
   createUserBikeId,
   UserId,
 } from '@repo/shared-types'
-import { getCurrentDate } from '../../../utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 import { BikeEntity } from '../entities/BikeEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeEntity } from '../entities/UserBikeEntity'

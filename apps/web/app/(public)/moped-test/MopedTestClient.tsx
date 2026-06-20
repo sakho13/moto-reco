@@ -9,7 +9,7 @@ import {
 import { HistorySection } from './HistorySection'
 import styles from './page.module.css'
 import { SwipeCardDeck } from './SwipeCardDeck'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 
 type AnswerMap = Record<string, MopedTestAnswerOption>
 

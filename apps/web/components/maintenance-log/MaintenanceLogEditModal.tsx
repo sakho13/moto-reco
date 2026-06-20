@@ -14,7 +14,7 @@ import {
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { toLocalDateTimeString } from '@/lib/utils/dateUtils'
+import { toLocalDateTimeString } from '@repo/shared-utils'
 
 type MaintenanceLogEditModalProps = {
   bikeId: string

@@ -14,7 +14,7 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import {
   getNowLocalDateTimeString,
   toLocalDateTimeString,
-} from '@/lib/utils/dateUtils'
+} from '@repo/shared-utils'
 
 type SpotAddFormProps = {
   bikeId: string

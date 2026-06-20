@@ -14,7 +14,7 @@ import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 
 type TouringModeViewProps = {
   myUserBikeId: string

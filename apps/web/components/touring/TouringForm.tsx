@@ -6,7 +6,7 @@ import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
-import { getNowLocalDateTimeString } from '@/lib/utils/dateUtils'
+import { getNowLocalDateTimeString } from '@repo/shared-utils'
 
 export interface TouringFormData {
   title: string
