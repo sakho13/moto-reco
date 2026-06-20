@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { formatDateTime } from '@repo/shared-utils'
 import styles from './page.module.css'
 import { microCMSClient } from '@/lib/microcms/config'
 import type { ReleaseNote } from '@/lib/microcms/types'
@@ -72,13 +73,7 @@ export default async function ReleaseNotePage() {
                   className={styles.date}
                   dateTime={note.releaseDate ?? note.createdAt}
                 >
-                  {new Date(
-                    note.releaseDate ?? note.createdAt
-                  ).toLocaleDateString('ja-JP', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formatDateTime(note.releaseDate ?? note.createdAt)}
                 </time>
               </div>
               <h2 className={styles.itemTitle}>{note.title}</h2>

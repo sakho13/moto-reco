@@ -55,6 +55,17 @@ export const formatPlanSpotOffsetMinutes = (minutes: number | null): string => {
 }
 
 /**
+ * Date または ISO 文字列をブラウザのローカルタイムゾーンで "yyyy/mm/dd hh:mm:ss" 形式に変換する
+ *
+ * @remarks
+ * フロント表示用の統一フォーマット。ローカルタイムゾーンを使用する。
+ */
+export const formatDateTime = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+/**
  * UTC 日時を指定タイムゾーンでフォーマットする
  *
  * @param date - UTC の Date または ISO 文字列

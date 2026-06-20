@@ -1,6 +1,7 @@
 'use client'
 
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
+import { formatDateTime } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import styles from './MaintenanceLogByItemSection.module.css'
@@ -28,17 +29,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   ELECTRIC: '電気装置',
 }
 
-const formatDate = (dateString: string) => {
-  try {
-    return new Date(dateString).toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  } catch {
-    return dateString
-  }
-}
 
 const buildItemHistoryMap = (
   logs: ApiResponseMaintenanceLogDetail[]
@@ -150,7 +140,7 @@ export const MaintenanceLogByItemSection = ({
                         {latest ? (
                           <>
                             <span className={styles.lastDate}>
-                              最終: {formatDate(latest.performedAt)}
+                              最終: {formatDateTime(latest.performedAt)}
                               <span className={styles.lastMileage}>
                                 ({latest.mileage.toLocaleString()}km)
                               </span>

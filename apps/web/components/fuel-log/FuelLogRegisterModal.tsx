@@ -7,6 +7,7 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { formatDateTime } from '@repo/shared-utils'
 import { toast } from '@repo/ui/sonner'
 import { ToggleSection } from '@repo/ui/toggleSection'
 import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
@@ -109,18 +110,6 @@ export function FuelLogRegisterModal({
     }
   }
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    } catch {
-      return dateString
-    }
-  }
-
   return (
     <ModalBase title="給油履歴を登録" onClose={onClose}>
       {previousFuelLog && (
@@ -138,7 +127,7 @@ export function FuelLogRegisterModal({
                 給油日:
               </dt>
               <dd style={{ color: 'var(--color-ink)' }}>
-                {formatDate(previousFuelLog.refueledAt)}
+                {formatDateTime(previousFuelLog.refueledAt)}
               </dd>
               <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
                 走行距離:

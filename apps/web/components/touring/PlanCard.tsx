@@ -1,6 +1,7 @@
 'use client'
 
 import type { ApiResponseTouringPlanListItem } from '@repo/shared-types'
+import { formatDateTime } from '@repo/shared-utils'
 import styles from './PlanCard.module.css'
 
 export interface PlanCardProps {
@@ -16,20 +17,6 @@ export interface PlanCardProps {
  * `onClick` が指定されている場合はクリック可能なカードとして表示する。
  */
 export const PlanCard = ({ plan, onClick }: PlanCardProps) => {
-  const formatDateTime = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    } catch {
-      return dateString
-    }
-  }
-
   return (
     <div
       className={`${styles.item} ${onClick ? styles.itemClickable : ''}`}

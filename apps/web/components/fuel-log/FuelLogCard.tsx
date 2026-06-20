@@ -1,6 +1,7 @@
 'use client'
 
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
+import { formatDateTime } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 
 export interface FuelLogCardProps {
@@ -9,18 +10,6 @@ export interface FuelLogCardProps {
 }
 
 export const FuelLogCard = ({ fuelLog, onEdit }: FuelLogCardProps) => {
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    } catch {
-      return dateString
-    }
-  }
-
   return (
     <div
       style={{
@@ -48,7 +37,7 @@ export const FuelLogCard = ({ fuelLog, onEdit }: FuelLogCardProps) => {
               marginBottom: 'var(--spacing-1)',
             }}
           >
-            {formatDate(fuelLog.refueledAt)}
+            {formatDateTime(fuelLog.refueledAt)}
           </p>
           <p
             style={{
