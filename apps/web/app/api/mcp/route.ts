@@ -61,27 +61,33 @@ function buildMcpServer(userId: string): McpServer {
     version: '1.0.0',
   })
 
-  server.tool('list_bikes', '登録されているマイバイクの一覧を取得します', async () => {
-    const bikes = await prisma.tUserMyBike.findMany({
-      where: { userId, ownStatus: 'OWN' },
-      include: {
-        userBike: {
-          include: { bike: { include: { manufacturer: true } } },
+  server.tool(
+    'list_bikes',
+    '登録されているマイバイクの一覧を取得します',
+    async () => {
+      const bikes = await prisma.tUserMyBike.findMany({
+        where: { userId, ownStatus: 'OWN' },
+        include: {
+          userBike: {
+            include: { bike: { include: { manufacturer: true } } },
+          },
         },
-      },
-      orderBy: { ownedAt: 'desc' },
-    })
-    const data = bikes.map((b) => ({
-      myUserBikeId: b.id,
-      nickname: b.nickname ?? null,
-      manufacturer: b.userBike.bike?.manufacturer.name ?? null,
-      modelName: b.userBike.bike?.modelName ?? null,
-      displacement: b.userBike.displacement,
-      totalMileage: b.userBike.totalMileage,
-      ownedAt: b.ownedAt.toISOString(),
-    }))
-    return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] }
-  })
+        orderBy: { ownedAt: 'desc' },
+      })
+      const data = bikes.map((b) => ({
+        myUserBikeId: b.id,
+        nickname: b.nickname ?? null,
+        manufacturer: b.userBike.bike?.manufacturer.name ?? null,
+        modelName: b.userBike.bike?.modelName ?? null,
+        displacement: b.userBike.displacement,
+        totalMileage: b.userBike.totalMileage,
+        ownedAt: b.ownedAt.toISOString(),
+      }))
+      return {
+        content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+      }
+    }
+  )
 
   server.tool(
     'list_touring_plans',
@@ -111,7 +117,9 @@ function buildMcpServer(userId: string): McpServer {
           : null,
         updatedAt: p.updatedAt.toISOString(),
       }))
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] }
+      return {
+        content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+      }
     }
   )
 
@@ -146,7 +154,9 @@ function buildMcpServer(userId: string): McpServer {
           sortOrder: s.sortOrder,
         })),
       }
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] }
+      return {
+        content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+      }
     }
   )
 
@@ -174,8 +184,10 @@ function buildMcpServer(userId: string): McpServer {
         include: { maintenanceItems: true },
         orderBy: { performedAt: 'desc' },
       })
-      const latestByType: Record<string, { mileage: number; performedAt: Date }> =
-        {}
+      const latestByType: Record<
+        string,
+        { mileage: number; performedAt: Date }
+      > = {}
       for (const log of latestLogs) {
         for (const item of log.maintenanceItems) {
           if (!latestByType[item.type]) {
@@ -187,8 +199,7 @@ function buildMcpServer(userId: string): McpServer {
         }
       }
       const currentMileage = myBike.userBike.totalMileage
-      const maintenanceTypes =
-        myBike.userBike.bike?.bikeMaintenanceTypes ?? []
+      const maintenanceTypes = myBike.userBike.bike?.bikeMaintenanceTypes ?? []
       const items = maintenanceTypes.map((mt) => {
         const last = latestByType[mt.type]
         const nextMileage = last ? last.mileage + mt.recommendedMileage : null
@@ -204,7 +215,9 @@ function buildMcpServer(userId: string): McpServer {
         }
       })
       const data = { myUserBikeId, currentMileage, maintenanceItems: items }
-      return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] }
+      return {
+        content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+      }
     }
   )
 
@@ -217,7 +230,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         jsonrpc: '2.0',
-        error: { code: -32001, message: 'Unauthorized: 有効なAPIキーが必要です' },
+        error: {
+          code: -32001,
+          message: 'Unauthorized: 有効なAPIキーが必要です',
+        },
         id: null,
       },
       { status: 401 }
@@ -229,7 +245,11 @@ export async function POST(request: NextRequest) {
     body = (await request.json()) as JSONRPCMessage
   } catch {
     return NextResponse.json(
-      { jsonrpc: '2.0', error: { code: -32700, message: 'Parse error' }, id: null },
+      {
+        jsonrpc: '2.0',
+        error: { code: -32700, message: 'Parse error' },
+        id: null,
+      },
       { status: 400 }
     )
   }

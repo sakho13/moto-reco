@@ -68,7 +68,6 @@ model MApiKey {
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isActive])
-  @@map("m_api_keys")
 }
 
 model MManufacturer {
