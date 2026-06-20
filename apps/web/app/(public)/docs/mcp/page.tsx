@@ -73,14 +73,14 @@ const claudeDesktopContent = (
 
 export default function McpSetupPage() {
   return (
-    <div className="public-page-container">
-      <header className={styles.header}>
+    <>
+      <div className={styles.header}>
         <h1 className={styles.title}>MCP セットアップ</h1>
         <p className={styles.description}>
           {APP_NAME} の MCP サーバーを Claude Code や Claude Desktop
           から利用するための設定方法です。
         </p>
-      </header>
+      </div>
 
       <div className={styles.content}>
         <section className={styles.section}>
@@ -132,6 +132,6 @@ export default function McpSetupPage() {
           </ul>
         </section>
       </div>
-    </div>
+    </>
   )
 }
