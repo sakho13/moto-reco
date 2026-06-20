@@ -41,7 +41,7 @@ export class FirebaseAuthRepository implements IAuthRepository {
   public async verifyIdToken(token: string): Promise<DecodedIdToken | null> {
     try {
       const authClient = getFirebaseAdminAuthClient()
-      return await authClient.verifyIdToken(token, true)
+      return await authClient.verifyIdToken(token, false)
     } catch (error) {
       console.error('Token verification error:', error)
       return null
