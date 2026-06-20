@@ -78,6 +78,11 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return items
   }
 
+  if (segments[1] === 'settings' && segments[2] === 'api-keys') {
+    items.push({ label: 'APIキー管理' })
+    return items
+  }
+
   return [{ label: 'ページ' }]
 }
 
