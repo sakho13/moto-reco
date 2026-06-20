@@ -188,21 +188,7 @@ function ApiKeysSettingsPage() {
       )}
 
       {/* APIキー一覧 */}
-      <BaseCard
-        title="MCP APIキー管理"
-        headerAction={
-          <p
-            style={{
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-muted-foreground)',
-            }}
-          >
-            Claude Code などのMCPクライアントから
-            <br />
-            バイクデータを参照できます
-          </p>
-        }
-      >
+      <BaseCard title="MCP APIキー管理">
         <div
           style={{
             display: 'flex',
@@ -210,6 +196,14 @@ function ApiKeysSettingsPage() {
             gap: 'var(--spacing-3)',
           }}
         >
+          <p
+            style={{
+              fontSize: 'var(--font-size-xs)',
+              color: 'var(--color-muted-foreground)',
+            }}
+          >
+            Claude Code などのMCPクライアントからバイクデータを参照できます
+          </p>
           {error && (
             <p
               style={{
@@ -281,7 +275,7 @@ function ApiKeysSettingsPage() {
                 </div>
                 <Button
                   variant="danger"
-                  size="icon"
+                  size="sm"
                   onClick={() => handleDelete(key.apiKeyId)}
                   aria-label="削除"
                 >
