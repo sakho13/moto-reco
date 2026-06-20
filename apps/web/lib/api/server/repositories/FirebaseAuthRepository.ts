@@ -44,7 +44,7 @@ export class FirebaseAuthRepository implements IAuthRepository {
       console.log(
         '[FirebaseAuth] verifyIdToken: calling authClient.verifyIdToken (checkRevoked=true)'
       )
-      const result = await authClient.verifyIdToken(token, true)
+      const result = await authClient.verifyIdToken(token, false)
       console.log('[FirebaseAuth] verifyIdToken: success, uid=', result.uid)
       return result
     } catch (error) {
