@@ -7,6 +7,7 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { formatDate } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
@@ -89,11 +90,6 @@ function BikeDetailPage() {
   const displayTitle =
     bike.nickname ||
     `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
-
-  const formatDate = (iso: string) => {
-    const d = new Date(iso)
-    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
-  }
 
   return (
     <>
