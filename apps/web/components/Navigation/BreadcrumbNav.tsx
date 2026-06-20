@@ -74,6 +74,11 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
   }
 
   if (segments[1] === 'profile') {
+    if (segments[2] === 'account') {
+      items.push({ label: 'プロフィール', href: '/app/profile' })
+      items.push({ label: '認証情報' })
+      return items
+    }
     items.push({ label: 'プロフィール' })
     return items
   }

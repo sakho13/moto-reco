@@ -33,20 +33,17 @@ function ProfileEditPage() {
               <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
             </Link>
           )}
+          {!isGuest && (
+            <Link
+              href="/app/settings/api-keys"
+              className="flex justify-between items-center text-sm py-2 border-b last:border-b-0"
+            >
+              <span>MCP APIキー管理</span>
+              <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
+            </Link>
+          )}
         </div>
       </BaseCard>
-
-      {!isGuest && (
-        <BaseCard title="オプション">
-          <Link
-            href="/app/settings/api-keys"
-            className="flex justify-between items-center text-sm"
-          >
-            <span>MCP APIキー管理</span>
-            <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
-          </Link>
-        </BaseCard>
-      )}
 
       <LogoutButton />
 
