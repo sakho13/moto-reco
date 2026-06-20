@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useState } from 'react'
 import useSWR from 'swr'
-import { formatDateTime } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
@@ -205,7 +204,11 @@ function UserPageContent() {
                       <div>{bike.nickname || bike.modelName || 'バイク'}</div>
                       <div className={styles.bikeCardMeta}>
                         <span>
-                          {formatDateTime(bike.ownedAt)}
+                          {new Date(bike.ownedAt).toLocaleDateString('ja-JP', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                          })}
                           〜
                         </span>
                         <span>{bike.totalMileage.toLocaleString()} km</span>

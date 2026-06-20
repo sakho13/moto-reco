@@ -1,7 +1,6 @@
 'use client'
 
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
-import { formatDateTime } from '@repo/shared-utils'
 import styles from './MaintenanceLogItem.module.css'
 import { ClickableListCard } from '@/components/ClickableListCard'
 import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
@@ -22,10 +21,18 @@ export const MaintenanceLogItem = ({
   log,
   onEdit,
 }: MaintenanceLogItemProps) => {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ja-JP', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  }
+
   return (
     <ClickableListCard onClick={() => onEdit(log.maintenanceLogId)}>
       <div className={styles.dateBlock}>
-        <span className={styles.date}>{formatDateTime(log.performedAt)}</span>
+        <span className={styles.date}>{formatDate(log.performedAt)}</span>
         <span className={styles.mileage}>{log.mileage.toLocaleString()}km</span>
       </div>
 

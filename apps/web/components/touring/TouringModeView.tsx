@@ -4,7 +4,7 @@ import { Coffee, Fuel, MapPin, Timer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
-import { formatDateTime, getCurrentDate } from '@repo/shared-utils'
+import { getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from '../icons/BikeIcon'
@@ -119,6 +119,20 @@ export const TouringModeView = ({
     return () => clearInterval(interval)
   }, [startDate])
 
+  const formatStartDateTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } catch {
+      return ''
+    }
+  }
 
   const formatBreakTime = (dateString: string | null) => {
     if (!dateString) return '—'
@@ -314,7 +328,7 @@ export const TouringModeView = ({
           <div className={styles.timeInfo}>
             <div className={styles.elapsedTime}>{elapsedTime}</div>
             <p className={styles.startDateTime}>
-              {formatDateTime(startDate)} 開始
+              {formatStartDateTime(startDate)} 開始
             </p>
             {startMileage !== null && (
               <p className={styles.startMileageInfo}>

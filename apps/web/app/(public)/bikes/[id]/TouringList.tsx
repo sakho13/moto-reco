@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { formatDateTime } from '@repo/shared-utils'
 import styles from './page.module.css'
 import touringStyles from './TouringList.module.css'
 
@@ -34,8 +33,8 @@ export default function TouringList({ tourings }: Props) {
   return (
     <>
       {displayed.map((touring) => {
-        const start = formatDateTime(touring.startDate)
-        const end = formatDateTime(touring.endDate)
+        const start = new Date(touring.startDate).toLocaleDateString('ja-JP')
+        const end = new Date(touring.endDate).toLocaleDateString('ja-JP')
         const mileage =
           touring.startMileage !== null && touring.endMileage !== null
             ? `${(touring.endMileage - touring.startMileage).toLocaleString()} km`

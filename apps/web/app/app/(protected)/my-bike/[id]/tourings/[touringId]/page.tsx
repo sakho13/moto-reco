@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
-import { formatDateTime, getCurrentDate } from '@repo/shared-utils'
+import { getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
@@ -79,9 +79,32 @@ function TouringDetailPage() {
     }
   }, [spots])
 
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } catch {
+      return dateString
+    }
+  }
+
   const formatVisitedAt = (dateString: string | null) => {
     if (!dateString) return '—'
-    return formatDateTime(dateString)
+    try {
+      return new Date(dateString).toLocaleString('ja-JP', {
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    } catch {
+      return dateString
+    }
   }
 
   const handleReorder = async (newOrderIds: string[]) => {
@@ -494,7 +517,7 @@ function TouringDetailPage() {
               </button>
             </div>
             <p className={`text-xs mt-1 ${styles.mutedText}`}>
-              {formatDateTime(touring.startDate)} → {formatDateTime(touring.endDate)}
+              {formatDate(touring.startDate)} → {formatDate(touring.endDate)}
               {distance !== null && ` · ${distance.toLocaleString()}km`}
             </p>
             {touring.touringPlanId !== null && (

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
-import { formatDateTime, getCurrentDate } from '@repo/shared-utils'
+import { getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from './icons/BikeIcon'
@@ -70,7 +70,10 @@ export const TouringStartEndSection = () => {
     setLoadingBikeId(myUserBikeId)
     try {
       const now = getCurrentDate()
-      const defaultTitle = `${bikeName} ${formatDateTime(now)}のツーリング`
+      const defaultTitle = `${bikeName} ${now.toLocaleDateString('ja-JP', {
+        month: 'long',
+        day: 'numeric',
+      })}のツーリング`
 
       const { position } = await getCurrentPosition()
 

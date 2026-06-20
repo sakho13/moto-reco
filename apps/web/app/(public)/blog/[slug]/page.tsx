@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { formatDateTime } from '@repo/shared-utils'
 import { BlogToc } from './BlogToc'
 import styles from './page.module.css'
 import { parseHeadings } from '@/lib/blog/toc'
@@ -101,7 +100,14 @@ export default async function BlogDetailPage({ params }: Props) {
               className={styles.date}
               dateTime={blog.publishedAt ?? blog.createdAt}
             >
-              {formatDateTime(blog.publishedAt ?? blog.createdAt)}
+              {new Date(blog.publishedAt ?? blog.createdAt).toLocaleDateString(
+                'ja-JP',
+                {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                }
+              )}
             </time>
             {blog.keyword.length > 0 && (
               <ul className={styles.keywords}>

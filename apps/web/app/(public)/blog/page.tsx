@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { formatDateTime } from '@repo/shared-utils'
 import styles from './page.module.css'
 import { microCMSClient } from '@/lib/microcms/config'
 import type { Blog } from '@/lib/microcms/types'
@@ -92,7 +91,13 @@ export default async function BlogPage() {
                     className={styles.date}
                     dateTime={blog.publishedAt ?? blog.createdAt}
                   >
-                    {formatDateTime(blog.publishedAt ?? blog.createdAt)}
+                    {new Date(
+                      blog.publishedAt ?? blog.createdAt
+                    ).toLocaleDateString('ja-JP', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
                   </time>
                   {blog.keyword.length > 0 && (
                     <ul className={styles.keywords}>
