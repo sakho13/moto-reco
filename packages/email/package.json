@@ -12,6 +12,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "resend": "6.12.3"
+    "resend": "6.14.0"
   }
 }

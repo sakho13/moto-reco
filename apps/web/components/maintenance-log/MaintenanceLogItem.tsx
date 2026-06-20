@@ -1,6 +1,7 @@
 'use client'
 
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
+import { formatDate } from '@repo/shared-utils'
 import styles from './MaintenanceLogItem.module.css'
 import { ClickableListCard } from '@/components/ClickableListCard'
 import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
@@ -8,18 +9,6 @@ import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenance
 type MaintenanceLogItemProps = {
   log: ApiResponseMaintenanceLogDetail
   onEdit: (maintenanceLogId: string) => void
-}
-
-const formatDate = (dateString: string) => {
-  try {
-    return new Date(dateString).toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    })
-  } catch {
-    return dateString
-  }
 }
 
 const getTypeName = (type: string): string => {

@@ -25,6 +25,7 @@ import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeR
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../../repositories/PrismaUserBikeRepository'
 import { FuelLogService } from '../../services/FuelLogService'
+import { AccountLimitsValue } from '../../valueObjects/AccountLimitsValue'
 import { FuelLogSearchParams } from '../../valueObjects/FuelLogSearchParams'
 
 const userBikeFuelLogs = new Hono().basePath('/bike/:myUserBikeId/fuel-logs')
@@ -159,7 +160,7 @@ userBikeFuelLogs.post(
       const fuelLog = await service.registerFuelLog({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
-        role,
+        limits: AccountLimitsValue.from(role),
         refueledAt: body.refueledAt,
         mileage: body.mileage,
         previousMileage: body.previousMileage,

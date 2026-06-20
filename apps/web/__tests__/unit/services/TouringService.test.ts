@@ -20,6 +20,7 @@ import { ITouringPlanRepository } from '@/lib/api/server/interfaces/ITouringPlan
 import { ITouringPlanSpotRepository } from '@/lib/api/server/interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '@/lib/api/server/interfaces/ITouringRepository'
 import { TouringService } from '@/lib/api/server/services/TouringService'
+import { AccountLimitsValue } from '@/lib/api/server/valueObjects/AccountLimitsValue'
 
 const myUserBikeId = createMyUserBikeId('bike-1')
 const userId = createUserId('user-1')
@@ -160,7 +161,7 @@ describe('TouringService', () => {
       const result = await service.registerTouring({
         myUserBikeId,
         userId,
-        role: 'USER',
+        limits: AccountLimitsValue.from('USER'),
         title: 'ツーリング',
         startDate: new Date('2026-07-01T08:00:00.000Z'),
         endDate: new Date('2026-07-01T18:00:00.000Z'),
@@ -179,7 +180,7 @@ describe('TouringService', () => {
         service.registerTouring({
           myUserBikeId,
           userId,
-          role: 'USER',
+          limits: AccountLimitsValue.from('USER'),
           title: 'ツーリング',
           startDate: new Date('2026-07-01T08:00:00.000Z'),
           endDate: new Date('2026-07-01T18:00:00.000Z'),
@@ -195,7 +196,7 @@ describe('TouringService', () => {
         service.registerTouring({
           myUserBikeId,
           userId,
-          role: 'GUEST',
+          limits: AccountLimitsValue.from('GUEST'),
           title: 'ツーリング',
           startDate: new Date('2026-07-01T08:00:00.000Z'),
           endDate: new Date('2026-07-01T18:00:00.000Z'),
@@ -215,7 +216,7 @@ describe('TouringService', () => {
           action: 'start',
           myUserBikeId,
           userId,
-          role: 'USER',
+          limits: AccountLimitsValue.from('USER'),
         })
       ).rejects.toThrow(ApiV1Error)
     })
@@ -225,7 +226,7 @@ describe('TouringService', () => {
         action: 'start',
         myUserBikeId,
         userId,
-        role: 'USER',
+        limits: AccountLimitsValue.from('USER'),
       })
 
       expect(result.title).toBe('ツーリング')
@@ -242,7 +243,7 @@ describe('TouringService', () => {
         action: 'start',
         myUserBikeId,
         userId,
-        role: 'USER',
+        limits: AccountLimitsValue.from('USER'),
       })
 
       expect(result.startMileage).toBe(12345)
@@ -265,7 +266,7 @@ describe('TouringService', () => {
         action: 'start',
         myUserBikeId,
         userId,
-        role: 'USER',
+        limits: AccountLimitsValue.from('USER'),
         touringPlanId: 'plan-1',
       })
 
@@ -290,7 +291,7 @@ describe('TouringService', () => {
         action: 'start',
         myUserBikeId,
         userId,
-        role: 'USER',
+        limits: AccountLimitsValue.from('USER'),
         touringPlanId: 'plan-1',
         title: '個別タイトル',
       })
@@ -329,7 +330,7 @@ describe('TouringService', () => {
         action: 'start',
         myUserBikeId,
         userId,
-        role: 'USER',
+        limits: AccountLimitsValue.from('USER'),
         touringPlanId: 'plan-1',
       })
 
@@ -382,7 +383,7 @@ describe('TouringService', () => {
         action: 'start',
         myUserBikeId,
         userId,
-        role: 'USER',
+        limits: AccountLimitsValue.from('USER'),
         touringPlanId: 'plan-1',
         startDate,
       })
@@ -425,7 +426,7 @@ describe('TouringService', () => {
           action: 'start',
           myUserBikeId,
           userId,
-          role: 'USER',
+          limits: AccountLimitsValue.from('USER'),
           touringPlanId: 'plan-unknown',
         })
       ).rejects.toThrow(ApiV1Error)

@@ -284,7 +284,7 @@ describe('UserBike API Endpoints', () => {
       expect(json3).toEqual({
         status: 'error',
         errorCode: 'INVALID_REQUEST',
-        message: '無料プランでは2台まで登録可能です',
+        message: '無料ユーザーはバイクを2台まで登録できます',
       })
     })
   })

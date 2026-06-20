@@ -2,6 +2,10 @@
 
 import { useState } from 'react'
 import { mutate } from 'swr'
+import {
+  getNowLocalDateTimeString,
+  toLocalDateTimeString,
+} from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { DateTimeInput } from '@repo/ui/dateTimeInput'
 import { FormField } from '@repo/ui/formField'
@@ -11,10 +15,6 @@ import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { apiPost } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import {
-  getNowLocalDateTimeString,
-  toLocalDateTimeString,
-} from '@/lib/utils/dateUtils'
 
 type SpotAddFormProps = {
   bikeId: string

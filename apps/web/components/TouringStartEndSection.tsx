@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import { getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from './icons/BikeIcon'
@@ -13,7 +14,6 @@ import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
-import { getCurrentDate } from '@/lib/utils/dateUtils'
 
 type BikeWithTouring = {
   myUserBikeId: string

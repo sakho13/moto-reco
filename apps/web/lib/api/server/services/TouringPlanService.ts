@@ -15,6 +15,7 @@ import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
+import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import {
   computeTouringPlanSpotTimes,
   TouringPlanSpotWithTimes,
@@ -30,6 +31,7 @@ type LocationParams = {
 type RegisterPlanParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
+  limits: AccountLimitsValue
   title: string
   startLocation?: LocationParams | null
   destinationLocation?:
@@ -85,6 +87,18 @@ export class TouringPlanService {
 
     if (!myUserBike) {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    if (params.limits.touringPlan !== null) {
+      const count = await this.touringPlanRepository.countPlans(
+        params.myUserBikeId
+      )
+      if (params.limits.isOver('touringPlan', count)) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          params.limits.limitMessage('touringPlan')
+        )
+      }
     }
 
     try {

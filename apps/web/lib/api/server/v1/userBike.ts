@@ -31,6 +31,7 @@ import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeReposito
 import { FuelInsightService } from '../services/FuelInsightService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
+import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
@@ -86,7 +87,7 @@ userBike.post(
         displacement: body.displacement,
         serialNumber: body.serialNumber,
         userId,
-        role,
+        limits: AccountLimitsValue.from(role),
         nickname: body.nickname,
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,
@@ -249,7 +250,7 @@ userBike.patch(
   honoAuthMiddleware,
   zodValidateJson(UserBikeUpdateRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userId } = c.var.user!
     const body = c.req.valid('json')
 
     const detail = await prisma.$transaction((t) => {
@@ -265,7 +266,6 @@ userBike.patch(
       return service.updateMyUserBike({
         myUserBikeId: createMyUserBikeId(c.req.param('myUserBikeId')),
         userId: createUserId(userId),
-        role,
         nickname: body.nickname,
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,

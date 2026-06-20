@@ -1,5 +1,5 @@
 import type { UserId } from '@repo/shared-types'
-import { getCurrentDate } from '../../../utils/dateUtils'
+import { getCurrentDate } from '@repo/shared-utils'
 import type {
   AnnouncementRecord,
   AnnouncementWithReadCount,

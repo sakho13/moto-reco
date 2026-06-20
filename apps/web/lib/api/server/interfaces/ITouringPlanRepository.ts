@@ -13,4 +13,5 @@ export interface ITouringPlanRepository {
     myUserBikeId: MyUserBikeId
   ): Promise<TouringPlanEntity | null>
   deletePlan(planId: TouringPlanId, myUserBikeId: MyUserBikeId): Promise<void>
+  countPlans(myUserBikeId: MyUserBikeId): Promise<number>
 }

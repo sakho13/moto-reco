@@ -31,6 +31,7 @@ import {
 } from '../../services/computeTouringPlanSpotTimes'
 import { TouringPlanService } from '../../services/TouringPlanService'
 import { TouringPlanSpotService } from '../../services/TouringPlanSpotService'
+import { AccountLimitsValue } from '../../valueObjects/AccountLimitsValue'
 
 const userBikeTouringPlans = new Hono().basePath(
   '/bike/:myUserBikeId/touring-plans'
@@ -132,7 +133,7 @@ userBikeTouringPlans.post(
   honoAuthMiddleware,
   zodValidateJson(TouringPlanRegisterRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userId, role } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -151,6 +152,7 @@ userBikeTouringPlans.post(
       return service.registerPlan({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
+        limits: AccountLimitsValue.from(role),
         title: body.title,
         startLocation: body.startLocation,
         destinationLocation: body.destinationLocation

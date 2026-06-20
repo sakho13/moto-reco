@@ -17,6 +17,7 @@ import { ITouringPlanRepository } from '@/lib/api/server/interfaces/ITouringPlan
 import { ITouringPlanSpotRepository } from '@/lib/api/server/interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '@/lib/api/server/interfaces/ITouringRepository'
 import { TouringPlanService } from '@/lib/api/server/services/TouringPlanService'
+import { AccountLimitsValue } from '@/lib/api/server/valueObjects/AccountLimitsValue'
 
 const myUserBikeId = createMyUserBikeId('bike-1')
 const userId = createUserId('user-1')
@@ -76,6 +77,7 @@ describe('TouringPlanService', () => {
       findPlans: vi.fn(),
       findPlanById: vi.fn(),
       deletePlan: vi.fn(),
+      countPlans: vi.fn().mockResolvedValue(0),
     }
     touringPlanSpotRepository = {
       createPlanSpot: vi.fn(),
@@ -129,6 +131,7 @@ describe('TouringPlanService', () => {
         service.registerPlan({
           myUserBikeId,
           userId,
+          limits: AccountLimitsValue.from('USER'),
           title: 'プラン',
         })
       ).rejects.toThrow(ApiV1Error)
@@ -141,6 +144,7 @@ describe('TouringPlanService', () => {
       const result = await service.registerPlan({
         myUserBikeId,
         userId,
+        limits: AccountLimitsValue.from('USER'),
         title: '日帰り箱根ツーリング',
       })
 
@@ -176,6 +180,7 @@ describe('TouringPlanService', () => {
       const result = await service.registerPlan({
         myUserBikeId,
         userId,
+        limits: AccountLimitsValue.from('USER'),
         title: '日帰り箱根ツーリング',
         startLocation: { latitude: 35.6812, longitude: 139.7671 },
         destinationLocation: {

@@ -9,6 +9,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts'
+import { formatDateTime } from '@repo/shared-utils'
 import type { TestSession } from './MopedTestClient'
 import styles from './page.module.css'
 
@@ -84,7 +85,7 @@ export function HistorySection({ history, onClearHistory }: Props) {
       {/* セッション一覧 */}
       <div className={styles.historyList}>
         {history.map((session, index) => {
-          const date = new Date(session.submittedAt).toLocaleString('ja-JP')
+          const date = formatDateTime(session.submittedAt)
           const correctCount = session.answers.filter((a) => a.isCorrect).length
           const incorrectCount = session.answers.filter(
             (a) => !a.isCorrect

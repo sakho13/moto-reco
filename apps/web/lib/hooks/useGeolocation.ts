@@ -3,6 +3,7 @@
 type GeoPosition = {
   latitude: number
   longitude: number
+  accuracy: number
 }
 
 type GeoResult = {
@@ -32,6 +33,7 @@ export const useGeolocation = () => {
             position: {
               latitude: pos.coords.latitude,
               longitude: pos.coords.longitude,
+              accuracy: pos.coords.accuracy,
             },
             denied: false,
           })

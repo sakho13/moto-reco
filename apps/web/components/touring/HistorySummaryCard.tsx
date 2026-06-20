@@ -1,6 +1,7 @@
 'use client'
 
 import type { ApiResponseTouringDetail } from '@repo/shared-types'
+import { formatDate } from '@repo/shared-utils'
 import styles from './HistorySummaryCard.module.css'
 
 export interface HistorySummaryCardProps {
@@ -19,18 +20,6 @@ export const HistorySummaryCard = ({
   touring,
   onClick,
 }: HistorySummaryCardProps) => {
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    } catch {
-      return dateString
-    }
-  }
-
   const distance =
     touring.startMileage !== null && touring.endMileage !== null
       ? touring.endMileage - touring.startMileage

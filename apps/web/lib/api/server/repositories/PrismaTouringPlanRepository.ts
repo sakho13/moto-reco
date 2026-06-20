@@ -96,4 +96,10 @@ export class PrismaTouringPlanRepository
       where: { id: planId, userMyBikeId: myUserBikeId },
     })
   }
+
+  async countPlans(myUserBikeId: MyUserBikeId): Promise<number> {
+    return this.connection.tUserMyBikeTouringPlan.count({
+      where: { userMyBikeId: myUserBikeId },
+    })
+  }
 }
