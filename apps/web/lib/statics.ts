@@ -60,3 +60,13 @@ export const PREMIUM_USER_LIMITS = {
   /** メンテナンス履歴登録上限（無制限） */
   MAINTENANCE_LOG: null,
 } as const
+
+/**
+ * MCPのAPIキー発行上限
+ */
+export const MCP_API_KEY_LIMITS = {
+  /** 無料プランのAPIキー上限 */
+  FREE: 1,
+  /** PREMIUMプランは無制限 */
+  PREMIUM: Infinity,
+} as const

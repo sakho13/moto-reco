@@ -4,8 +4,8 @@ import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 export type ActiveUserInfo = {
   userId: string
   role: 'USER' | 'ADMIN' | 'GUEST'
-  createdAt: Date
   plan: UserPlan | null
+  createdAt: Date
 }
 
 export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
@@ -75,8 +75,8 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
     return {
       userId: authProvider.user.id,
       role: authProvider.user.role as ActiveUserInfo['role'],
-      createdAt: authProvider.user.createdAt,
       plan,
+      createdAt: authProvider.user.createdAt,
     }
   }
 

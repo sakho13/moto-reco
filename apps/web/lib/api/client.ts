@@ -325,4 +325,30 @@ type API_EP = {
     PATCH: SuccessResponse<ApiResponseTouringPlanSpotDetail>
     DELETE: SuccessResponse<undefined>
   }
+} & {
+  '/api/v1/mcp/api-keys': {
+    GET: SuccessResponse<{
+      apiKeys: {
+        apiKeyId: string
+        name: string
+        prefix: string
+        createdAt: string
+      }[]
+    }>
+    POST: SuccessResponse<{
+      apiKeyId: string
+      name: string
+      prefix: string
+      fullKey: string
+      createdAt: string
+    }>
+  }
+} & {
+  [key: `/api/v1/mcp/api-keys/${string}/revoke`]: {
+    PATCH: SuccessResponse<null>
+  }
+} & {
+  [key: `/api/v1/mcp/api-keys/${string}`]: {
+    DELETE: SuccessResponse<null>
+  }
 }

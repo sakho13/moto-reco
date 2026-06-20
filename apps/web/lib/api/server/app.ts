@@ -5,6 +5,7 @@ import { SuccessResponse } from '@repo/shared-types'
 import { ApiV1Error } from './errors/ApiV1Error'
 import { HonoVariables } from './types/hono'
 import ApiV1 from './v1'
+import apiKeys from './v1/apiKeys'
 
 const app = new Hono<{ Variables: HonoVariables }>()
 
@@ -29,6 +30,9 @@ app.get('/api/v1/health', async (c) => {
 
 // v1 APIルート
 app.route('/api/v1', ApiV1)
+
+// MCP APIキー管理 (/api/v1/mcp/api-keys)
+app.route('/api/v1/mcp/api-keys', apiKeys)
 
 // グローバルエラーハンドラ
 app.onError((err, c) => {
