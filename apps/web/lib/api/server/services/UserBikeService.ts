@@ -22,8 +22,8 @@ type RegisterUserBikeParams = {
   limits: AccountLimitsValue
   nickname?: string
   purchaseDate?: Date
-  purchasePrice?: number
-  purchaseMileage?: number
+  purchasePrice?: number | null
+  purchaseMileage?: number | null
   totalMileage?: number
 }
 
