@@ -6,18 +6,17 @@ import {
   UserId,
 } from '@repo/shared-types'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
+import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
-import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
 type RegisterFuelLogParams = {
   myUserBikeId: MyUserBikeId
-  userId: UserId
-  limits: AccountLimitsValue
+  user: UserEntity
   refueledAt: Date
   mileage: number
   previousMileage: number
@@ -59,21 +58,22 @@ export class FuelLogService {
   ): Promise<FuelLogEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
-      params.userId
+      params.user.id
     )
 
     if (!myUserBike) {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    if (params.limits.fuelLog !== null) {
+    const limits = params.user.limits
+    if (limits.fuelLog !== null) {
       const count = await this.fuelLogRepository.countFuelLogs(
         params.myUserBikeId
       )
-      if (params.limits.isOver('fuelLog', count)) {
+      if (limits.isOver('fuelLog', count)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
-          params.limits.limitMessage('fuelLog')
+          limits.limitMessage('fuelLog')
         )
       }
     }

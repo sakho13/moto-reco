@@ -1,8 +1,26 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { createUserId } from '@repo/shared-types'
 import { ApiKeyEntity } from '@/lib/api/server/entities/ApiKeyEntity'
+import { UserEntity } from '@/lib/api/server/entities/UserEntity'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { IApiKeyRepository } from '@/lib/api/server/interfaces/IApiKeyRepository'
 import { ApiKeyService } from '@/lib/api/server/services/ApiKeyService'
+
+const buildUserEntity = (
+  overrides: Partial<{
+    role: 'USER' | 'ADMIN' | 'GUEST'
+    plan: 'FREE' | 'PREMIUM' | 'UNLIMITED'
+  }> = {}
+) =>
+  new UserEntity({
+    id: createUserId('user-1'),
+    name: 'Test User',
+    role: overrides.role ?? 'USER',
+    status: 'ACTIVE',
+    plan: overrides.plan === 'UNLIMITED' ? 'FREE' : (overrides.plan ?? 'FREE'),
+    notificationEmail: null,
+    isProfilePublic: true,
+  })
 
 const buildApiKeyEntity = (
   overrides: Partial<ConstructorParameters<typeof ApiKeyEntity>[0]> = {}
@@ -40,9 +58,7 @@ describe('ApiKeyService.generateApiKey()', () => {
   test('GUEST は plan に関わらず FORBIDDEN エラー', async () => {
     await expect(
       service.generateApiKey({
-        userId: 'user-1',
-        role: 'GUEST',
-        plan: 'FREE',
+        user: buildUserEntity({ role: 'GUEST' }),
         name: 'key',
       })
     ).rejects.toThrow(
@@ -55,9 +71,7 @@ describe('ApiKeyService.generateApiKey()', () => {
     vi.mocked(repository.create).mockResolvedValue(buildApiKeyEntity())
 
     const result = await service.generateApiKey({
-      userId: 'user-1',
-      role: 'USER',
-      plan: 'FREE',
+      user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
       name: 'key',
     })
 
@@ -70,9 +84,7 @@ describe('ApiKeyService.generateApiKey()', () => {
 
     await expect(
       service.generateApiKey({
-        userId: 'user-1',
-        role: 'USER',
-        plan: 'FREE',
+        user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
         name: 'key',
       })
     ).rejects.toThrow(ApiV1Error)
@@ -82,9 +94,7 @@ describe('ApiKeyService.generateApiKey()', () => {
     vi.mocked(repository.create).mockResolvedValue(buildApiKeyEntity())
 
     const result = await service.generateApiKey({
-      userId: 'user-1',
-      role: 'USER',
-      plan: 'PREMIUM',
+      user: buildUserEntity({ role: 'USER', plan: 'PREMIUM' }),
       name: 'key',
     })
 
@@ -96,9 +106,7 @@ describe('ApiKeyService.generateApiKey()', () => {
     vi.mocked(repository.create).mockResolvedValue(buildApiKeyEntity())
 
     const result = await service.generateApiKey({
-      userId: 'user-1',
-      role: 'ADMIN',
-      plan: 'UNLIMITED',
+      user: buildUserEntity({ role: 'ADMIN' }),
       name: 'key',
     })
 
@@ -113,9 +121,7 @@ describe('ApiKeyService.generateApiKey()', () => {
     )
 
     const result = await service.generateApiKey({
-      userId: 'user-1',
-      role: 'USER',
-      plan: 'FREE',
+      user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
       name: 'my key',
     })
 

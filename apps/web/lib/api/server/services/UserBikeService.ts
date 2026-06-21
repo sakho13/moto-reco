@@ -8,18 +8,17 @@ import { getCurrentDate } from '@repo/shared-utils'
 import { BikeEntity } from '../entities/BikeEntity'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeEntity } from '../entities/UserBikeEntity'
+import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IBikeRepository } from '../interfaces/IBikeRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
-import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 
 type RegisterUserBikeParams = {
   bikeId?: BikeId | null
   displacement?: number
   serialNumber?: string | null
-  userId: UserId
-  limits: AccountLimitsValue
+  user: UserEntity
   nickname?: string
   purchaseDate?: Date
   purchasePrice?: number | null
@@ -46,14 +45,15 @@ export class UserBikeService {
   ) {}
 
   public async registerUserBike(params: RegisterUserBikeParams) {
-    if (params.limits.bike !== null) {
+    const limits = params.user.limits
+    if (limits.bike !== null) {
       const currentCount = await this.myUserBikeRepository.countOwnedBikes(
-        params.userId
+        params.user.id
       )
-      if (params.limits.isOver('bike', currentCount)) {
+      if (limits.isOver('bike', currentCount)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
-          params.limits.limitMessage('bike')
+          limits.limitMessage('bike')
         )
       }
     }
@@ -91,7 +91,7 @@ export class UserBikeService {
         totalMileage: userBike.totalMileage,
         serialNumber: userBike.serialNumber,
         myUserBikeId: createMyUserBikeId(''),
-        userId: params.userId,
+        userId: params.user.id,
         nickname: params.nickname ?? null,
         purchaseDate: params.purchaseDate ?? null,
         purchasePrice: params.purchasePrice ?? null,

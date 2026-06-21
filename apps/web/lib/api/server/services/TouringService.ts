@@ -11,6 +11,7 @@ import {
 import { getCurrentDate } from '@repo/shared-utils'
 import { SpotEntity } from '../entities/SpotEntity'
 import { TouringEntity } from '../entities/TouringEntity'
+import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
@@ -18,15 +19,13 @@ import { ISpotRepository } from '../interfaces/ISpotRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
-import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { computeTouringPlanSpotTimes } from './computeTouringPlanSpotTimes'
 
 type RegisterTouringParams = {
   myUserBikeId: MyUserBikeId
-  userId: UserId
-  limits: AccountLimitsValue
+  user: UserEntity
   title: string
   startDate: Date
   endDate: Date
@@ -38,8 +37,7 @@ type RegisterTouringParams = {
 type StartTouringParams = {
   action: 'start'
   myUserBikeId: MyUserBikeId
-  userId: UserId
-  limits: AccountLimitsValue
+  user: UserEntity
   touringPlanId?: string
   title?: string
   startDate?: Date
@@ -51,7 +49,7 @@ type StartTouringParams = {
 type EndTouringParams = {
   action: 'end'
   myUserBikeId: MyUserBikeId
-  userId: UserId
+  user: UserEntity
   touringId: string
   endDate?: Date
   endMileage?: number
@@ -93,21 +91,22 @@ export class TouringService {
   ): Promise<TouringEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
-      params.userId
+      params.user.id
     )
 
     if (!myUserBike) {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    if (params.limits.touring !== null) {
+    const limits = params.user.limits
+    if (limits.touring !== null) {
       const count = await this.touringRepository.countTourings(
         params.myUserBikeId
       )
-      if (params.limits.isOver('touring', count)) {
+      if (limits.isOver('touring', count)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
-          params.limits.limitMessage('touring')
+          limits.limitMessage('touring')
         )
       }
     }
@@ -158,7 +157,7 @@ export class TouringService {
   ): Promise<TouringEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
-      params.userId
+      params.user.id
     )
 
     if (!myUserBike) {
@@ -167,14 +166,15 @@ export class TouringService {
 
     try {
       if (params.action === 'start') {
-        if (params.limits.touring !== null) {
+        const limits = params.user.limits
+        if (limits.touring !== null) {
           const count = await this.touringRepository.countTourings(
             params.myUserBikeId
           )
-          if (params.limits.isOver('touring', count)) {
+          if (limits.isOver('touring', count)) {
             throw new ApiV1Error(
               'INVALID_REQUEST',
-              params.limits.limitMessage('touring')
+              limits.limitMessage('touring')
             )
           }
         }
@@ -196,7 +196,7 @@ export class TouringService {
           const totalMileage =
             await this.myUserBikeRepository.findMyUserBikeTotalMileage(
               params.myUserBikeId,
-              params.userId
+              params.user.id
             )
           startMileage = totalMileage ?? undefined
         }
@@ -338,7 +338,7 @@ export class TouringService {
         const totalMileage =
           await this.myUserBikeRepository.findMyUserBikeTotalMileage(
             params.myUserBikeId,
-            params.userId
+            params.user.id
           )
         endMileage = totalMileage ?? undefined
       }

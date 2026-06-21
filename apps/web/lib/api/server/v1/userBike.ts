@@ -9,7 +9,6 @@ import {
   ApiResponseBikesOngoingTourings,
   createBikeId,
   createMyUserBikeId,
-  createUserId,
   FuelInsightPeriod,
   SuccessResponse,
   UserBikeRegisterRequestSchema,
@@ -31,7 +30,6 @@ import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeReposito
 import { FuelInsightService } from '../services/FuelInsightService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
-import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
@@ -69,7 +67,7 @@ userBike.post(
   honoAuthMiddleware,
   zodValidateJson(UserBikeRegisterRequestSchema),
   async (c) => {
-    const { userId, role, plan } = c.var.user!
+    const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
     const detail = await prisma.$transaction(async (t) => {
@@ -86,8 +84,7 @@ userBike.post(
         bikeId: body.bikeId ? createBikeId(body.bikeId) : null,
         displacement: body.displacement,
         serialNumber: body.serialNumber,
-        userId,
-        limits: AccountLimitsValue.from(role, plan),
+        user: userEntity,
         nickname: body.nickname,
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,
@@ -97,7 +94,7 @@ userBike.post(
 
       return service.getMyUserBikeDetail(
         myUserBike.myUserBikeId,
-        createUserId(userId)
+        userEntity.id
       )
     })
 
@@ -117,7 +114,7 @@ userBike.get(
   honoAuthMiddleware,
   zodValidateQuery(UserBikeListQuerySchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const query = c.req.valid('query')
 
     const searchParams = new UserBikeSearchParams({
@@ -127,7 +124,7 @@ userBike.get(
 
     const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
     const bikes = await myUserBikeRepo.findMyUserBikes(
-      createUserId(userId),
+      userEntity.id,
       searchParams
     )
 
@@ -142,12 +139,12 @@ userBike.get(
 )
 
 userBike.get('/bikes/ongoing-tourings', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
 
   // ユーザーの全バイクを取得
   const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
   const bikes = await myUserBikeRepo.findMyUserBikes(
-    createUserId(userId),
+    userEntity.id,
     new UserBikeSearchParams({ sortBy: 'updatedAt', sortOrder: 'desc' })
   )
 
@@ -167,7 +164,7 @@ userBike.get('/bikes/ongoing-tourings', honoAuthMiddleware, async (c) => {
       // サービス経由で進行中ツーリングを取得
       const tourings = await touringService.getTourings(
         bike.myUserBikeId,
-        createUserId(userId),
+        userEntity.id,
         new TouringSearchParams({ sortBy: 'startDate', sortOrder: 'desc' })
       )
 
@@ -224,7 +221,7 @@ userBike.get('/bikes/ongoing-tourings', honoAuthMiddleware, async (c) => {
 })
 
 userBike.get('/bike/:myUserBikeId', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
 
   const detail = await prisma.$transaction((t) => {
     const userBikeRepo = new PrismaUserBikeRepository(t)
@@ -234,7 +231,7 @@ userBike.get('/bike/:myUserBikeId', honoAuthMiddleware, async (c) => {
 
     return service.getMyUserBikeDetail(
       c.req.param('myUserBikeId'),
-      createUserId(userId)
+      userEntity.id
     )
   })
 
@@ -250,7 +247,7 @@ userBike.patch(
   honoAuthMiddleware,
   zodValidateJson(UserBikeUpdateRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
     const detail = await prisma.$transaction((t) => {
@@ -265,7 +262,7 @@ userBike.patch(
 
       return service.updateMyUserBike({
         myUserBikeId: createMyUserBikeId(c.req.param('myUserBikeId')),
-        userId: createUserId(userId),
+        userId: userEntity.id,
         nickname: body.nickname,
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,
@@ -284,7 +281,7 @@ userBike.patch(
 )
 
 userBike.get('/history', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
 
   const queryResult = HistoryListQuerySchema.safeParse(c.req.query())
   if (!queryResult.success) {
@@ -303,7 +300,7 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
   const take = pageSize
 
   const histories = await prisma.tUserMyBikeHistory.findMany({
-    where: { userId },
+    where: { userId: String(userEntity.id) },
     include: {
       userMyBike: {
         include: {
@@ -410,13 +407,13 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
 })
 
 userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const myUserBikeId = c.req.param('myUserBikeId')
 
   const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
   const myUserBike = await myUserBikeRepo.findMyUserBikeById(
     createMyUserBikeId(myUserBikeId),
-    createUserId(userId)
+    userEntity.id
   )
 
   if (!myUserBike) {
@@ -510,7 +507,7 @@ userBike.get(
   honoAuthMiddleware,
   zodValidateQuery(FuelInsightQuerySchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const query = c.req.valid('query')
 
@@ -527,7 +524,7 @@ userBike.get(
 
     const insight = await fuelInsightService.getFuelInsight(
       createMyUserBikeId(myUserBikeId),
-      createUserId(userId),
+      userEntity.id,
       searchParams.period
     )
 

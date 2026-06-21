@@ -41,10 +41,10 @@ import { UserService } from '../services/UserService'
 const user = new Hono()
 
 user.get('/profile', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
 
   const userRepo = new PrismaUserRepository(prisma)
-  const user = await userRepo.findById(userId)
+  const user = await userRepo.findById(userEntity.id)
 
   if (!user) {
     throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
@@ -78,13 +78,13 @@ user.patch(
   honoAuthMiddleware,
   zodValidateJson(UserProfilePatchRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
     const userRepo = new PrismaUserRepository(prisma)
 
     // ユーザーの存在確認
-    const user = await userRepo.findById(userId)
+    const user = await userRepo.findById(userEntity.id)
     if (!user) {
       throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
     }
@@ -98,7 +98,7 @@ user.patch(
       user.notificationEmail = body.notificationEmail ?? null
     }
     if (body.isProfilePublic !== undefined) {
-      if (role === 'GUEST' && body.isProfilePublic === true) {
+      if (userEntity.role === 'GUEST' && body.isProfilePublic === true) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
           'ゲストアカウントはプロフィールを公開できません'
@@ -147,7 +147,7 @@ user.patch(
 
 user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
   const userId = c.req.param('userId')
-  const requesterId = c.var.user?.userId
+  const requesterId = c.var.user?.userEntity.id
   const targetUserId = createUserId(userId)
 
   const userRepo = new PrismaUserRepository(prisma)
@@ -248,14 +248,14 @@ user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
 })
 
 user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
-  const { userId: followerId, role } = c.var.user!
+  const { userEntity } = c.var.user!
   const followingId = createUserId(c.req.param('userId'))
 
   const userRepo = new PrismaUserRepository(prisma)
   const followRepo = new PrismaUserFollowRepository(prisma)
   const notifRepo = new PrismaNotificationRepository(prisma)
   const service = new UserFollowService(userRepo, followRepo, notifRepo)
-  await service.followUser(followerId, followingId, role)
+  await service.followUser(userEntity.id, followingId, userEntity.role)
 
   return c.json<SuccessResponse<Record<string, never>>>({
     status: 'success',
@@ -265,7 +265,7 @@ user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
 })
 
 user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
-  const { userId: followerId } = c.var.user!
+  const { userEntity } = c.var.user!
   const followingId = createUserId(c.req.param('userId'))
 
   const userRepo = new PrismaUserRepository(prisma)
@@ -275,7 +275,7 @@ user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
     followRepo,
     new PrismaNotificationRepository(prisma)
   )
-  await service.unfollowUser(followerId, followingId)
+  await service.unfollowUser(userEntity.id, followingId)
 
   return c.json<SuccessResponse<Record<string, never>>>({
     status: 'success',
@@ -335,7 +335,7 @@ user.get('/:userId/following', honoAuthMiddleware, async (c) => {
 })
 
 user.get('/search', honoAuthMiddleware, async (c) => {
-  const { userId: requesterId } = c.var.user!
+  const { userEntity } = c.var.user!
   const query = c.req.query('q') ?? ''
   const page = Number(c.req.query('page') ?? '1')
 
@@ -354,7 +354,7 @@ user.get('/search', honoAuthMiddleware, async (c) => {
     followRepo,
     new PrismaNotificationRepository(prisma)
   )
-  const result = await service.searchUsers(query.trim(), requesterId, page)
+  const result = await service.searchUsers(query.trim(), userEntity.id, page)
 
   return c.json<SuccessResponse<ApiResponseUserSearch>>({
     status: 'success',
@@ -460,7 +460,7 @@ user.post(
   honoAuthMiddleware,
   zodValidateJson(UserAuthQuitRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
     const result = await prisma.$transaction(async (t) => {
@@ -474,7 +474,7 @@ user.post(
       )
 
       return service.quitUser({
-        userId,
+        userId: userEntity.id,
         quitReason: body.quitReason,
       })
     })

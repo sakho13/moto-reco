@@ -36,10 +36,10 @@ const GenerateApiKeySchema = z.object({
 
 /** APIキー一覧取得 */
 apiKeys.get('/', honoAuthMiddleware, async (c) => {
-  const { userId, role } = c.var.user!
+  const { userEntity } = c.var.user!
 
   const service = new ApiKeyService(new PrismaApiKeyRepository(prisma))
-  const keys = await service.listApiKeys({ userId: String(userId), role })
+  const keys = await service.listApiKeys({ user: userEntity })
 
   return c.json<SuccessResponse<ApiResponseApiKeyList>>({
     status: 'success',
@@ -61,14 +61,12 @@ apiKeys.post(
   honoAuthMiddleware,
   zodValidateJson(GenerateApiKeySchema),
   async (c) => {
-    const { userId, role, plan } = c.var.user!
+    const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
     const service = new ApiKeyService(new PrismaApiKeyRepository(prisma))
     const { apiKey, fullKey } = await service.generateApiKey({
-      userId: String(userId),
-      role,
-      plan,
+      user: userEntity,
       name: body.name,
     })
 
@@ -91,11 +89,11 @@ apiKeys.post(
 
 /** APIキー失効 */
 apiKeys.patch('/:apiKeyId/revoke', honoAuthMiddleware, async (c) => {
-  const { userId, role } = c.var.user!
+  const { userEntity } = c.var.user!
   const apiKeyId = c.req.param('apiKeyId')
 
   const service = new ApiKeyService(new PrismaApiKeyRepository(prisma))
-  await service.revokeApiKey({ userId: String(userId), role, apiKeyId })
+  await service.revokeApiKey({ user: userEntity, apiKeyId })
 
   return c.json<SuccessResponse<null>>({
     status: 'success',
@@ -106,7 +104,7 @@ apiKeys.patch('/:apiKeyId/revoke', honoAuthMiddleware, async (c) => {
 
 /** APIキー削除 */
 apiKeys.delete('/:apiKeyId', honoAuthMiddleware, async (c) => {
-  const { userId, role } = c.var.user!
+  const { userEntity } = c.var.user!
   const apiKeyId = c.req.param('apiKeyId')
 
   if (!apiKeyId) {
@@ -114,7 +112,7 @@ apiKeys.delete('/:apiKeyId', honoAuthMiddleware, async (c) => {
   }
 
   const service = new ApiKeyService(new PrismaApiKeyRepository(prisma))
-  await service.deleteApiKey({ userId: String(userId), role, apiKeyId })
+  await service.deleteApiKey({ user: userEntity, apiKeyId })
 
   return c.json<SuccessResponse<null>>({
     status: 'success',

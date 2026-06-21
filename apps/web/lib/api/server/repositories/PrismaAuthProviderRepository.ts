@@ -3,8 +3,12 @@ import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export type ActiveUserInfo = {
   userId: string
+  name: string
   role: 'USER' | 'ADMIN' | 'GUEST'
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
   plan: UserPlan | null
+  notificationEmail: string | null
+  isProfilePublic: boolean
   createdAt: Date
 }
 
@@ -36,7 +40,7 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
   }
 
   /**
-   * 外部ID（Firebase UIDなど）からアクティブなユーザー情報（ID・ロール・作成日時）を取得
+   * 外部ID（Firebase UIDなど）からアクティブなユーザー情報を取得
    */
   async findActiveUserInfoByExternalId(
     externalId: string,
@@ -47,7 +51,11 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
         user: {
           select: {
             id: true,
+            name: true,
             role: true,
+            status: true,
+            notificationEmail: true,
+            isProfilePublic: true,
             createdAt: true,
             planHistories: {
               orderBy: { changedAt: 'desc' as const },
@@ -74,8 +82,12 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
 
     return {
       userId: authProvider.user.id,
+      name: authProvider.user.name,
       role: authProvider.user.role as ActiveUserInfo['role'],
+      status: authProvider.user.status as ActiveUserInfo['status'],
       plan,
+      notificationEmail: authProvider.user.notificationEmail,
+      isProfilePublic: authProvider.user.isProfilePublic,
       createdAt: authProvider.user.createdAt,
     }
   }

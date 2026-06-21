@@ -1,9 +1,8 @@
 import { createHash, randomBytes } from 'crypto'
-import type { UserPlan } from '@repo/shared-types'
 import { ApiKeyEntity } from '../entities/ApiKeyEntity'
+import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IApiKeyRepository } from '../interfaces/IApiKeyRepository'
-import { PlanLimitsValue } from '../valueObjects/PlanLimitsValue'
 
 export type GeneratedApiKey = {
   apiKey: ApiKeyEntity
@@ -22,22 +21,20 @@ export class ApiKeyService {
    * fullKey は発行時のみ返すため、呼び出し元で安全に扱うこと。
    */
   async generateApiKey(params: {
-    userId: string
-    role: 'USER' | 'ADMIN' | 'GUEST'
-    plan: UserPlan
+    user: UserEntity
     name: string
   }): Promise<GeneratedApiKey> {
-    if (params.role === 'GUEST') {
+    if (params.user.role === 'GUEST') {
       throw new ApiV1Error(
         'FORBIDDEN',
         'ゲストアカウントはAPIキーを発行できません'
       )
     }
 
-    const planLimits = PlanLimitsValue.from(params.plan)
+    const planLimits = params.user.planLimits
     if (planLimits.apiKey !== null) {
       const count = await this._apiKeyRepository.countActiveByUserId(
-        params.userId
+        String(params.user.id)
       )
       if (planLimits.isOver('apiKey', count)) {
         throw new ApiV1Error(
@@ -53,7 +50,7 @@ export class ApiKeyService {
     const keyHash = createHash('sha256').update(fullKey).digest('hex')
 
     const apiKey = await this._apiKeyRepository.create({
-      userId: params.userId,
+      userId: String(params.user.id),
       name: params.name,
       keyHash,
       prefix,
@@ -66,50 +63,47 @@ export class ApiKeyService {
    * ユーザーのAPIキー一覧を取得
    */
   async listApiKeys(params: {
-    userId: string
-    role: 'USER' | 'ADMIN' | 'GUEST'
+    user: UserEntity
   }): Promise<ApiKeyEntity[]> {
-    if (params.role === 'GUEST') {
+    if (params.user.role === 'GUEST') {
       throw new ApiV1Error(
         'FORBIDDEN',
         'ゲストアカウントはAPIキーを利用できません'
       )
     }
-    return this._apiKeyRepository.findByUserId(params.userId)
+    return this._apiKeyRepository.findByUserId(String(params.user.id))
   }
 
   /**
    * APIキーを失効させる
    */
   async revokeApiKey(params: {
-    userId: string
-    role: 'USER' | 'ADMIN' | 'GUEST'
+    user: UserEntity
     apiKeyId: string
   }): Promise<void> {
-    if (params.role === 'GUEST') {
+    if (params.user.role === 'GUEST') {
       throw new ApiV1Error(
         'FORBIDDEN',
         'ゲストアカウントはAPIキーを利用できません'
       )
     }
-    await this._apiKeyRepository.revoke(params.apiKeyId, params.userId)
+    await this._apiKeyRepository.revoke(params.apiKeyId, String(params.user.id))
   }
 
   /**
    * APIキーを削除する
    */
   async deleteApiKey(params: {
-    userId: string
-    role: 'USER' | 'ADMIN' | 'GUEST'
+    user: UserEntity
     apiKeyId: string
   }): Promise<void> {
-    if (params.role === 'GUEST') {
+    if (params.user.role === 'GUEST') {
       throw new ApiV1Error(
         'FORBIDDEN',
         'ゲストアカウントはAPIキーを利用できません'
       )
     }
-    await this._apiKeyRepository.delete(params.apiKeyId, params.userId)
+    await this._apiKeyRepository.delete(params.apiKeyId, String(params.user.id))
   }
 
   /**
