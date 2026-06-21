@@ -61,12 +61,32 @@ export const PREMIUM_USER_LIMITS = {
   MAINTENANCE_LOG: null,
 } as const
 
+import type { ApiKeyScope, UserPlan } from '@repo/shared-types'
+
 /**
- * MCPのAPIキー発行上限
+ * プラン別制限チェックの対象種別
  */
-export const MCP_API_KEY_LIMITS = {
-  /** 無料プランのAPIキー上限 */
-  FREE: 1,
-  /** PREMIUMプランは無制限 */
-  PREMIUM: Infinity,
-} as const
+export type PlanLimitKey = 'apiKey'
+
+/**
+ * プラン別に許可されるAPIキースコープ
+ */
+export const PLAN_ALLOWED_SCOPES: Record<UserPlan, ApiKeyScope[]> = {
+  FREE: ['READ'],
+  PREMIUM: ['READ', 'WRITE'],
+}
+
+/**
+ * プラン別制限値（null = 無制限）
+ */
+export const PLAN_LIMITS: Record<
+  UserPlan,
+  Record<PlanLimitKey, number | null>
+> = {
+  FREE: {
+    apiKey: 1,
+  },
+  PREMIUM: {
+    apiKey: null,
+  },
+}

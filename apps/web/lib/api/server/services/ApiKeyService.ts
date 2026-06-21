@@ -1,8 +1,9 @@
 import { createHash, randomBytes } from 'crypto'
-import { MCP_API_KEY_LIMITS } from '../../../statics'
+import type { UserPlan } from '@repo/shared-types'
 import { ApiKeyEntity } from '../entities/ApiKeyEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IApiKeyRepository } from '../interfaces/IApiKeyRepository'
+import { PlanLimitsValue } from '../valueObjects/PlanLimitsValue'
 
 export type GeneratedApiKey = {
   apiKey: ApiKeyEntity
@@ -17,13 +18,13 @@ export class ApiKeyService {
    * APIキーを生成して保存する
    *
    * @remarks
-   * GUESTは利用不可。FREEプランは1個まで。PREMIUMは無制限。
+   * GUESTは利用不可。プラン別制限は planLimits で管理する。
    * fullKey は発行時のみ返すため、呼び出し元で安全に扱うこと。
    */
   async generateApiKey(params: {
     userId: string
     role: 'USER' | 'ADMIN' | 'GUEST'
-    plan: 'FREE' | 'PREMIUM'
+    plan: UserPlan
     name: string
   }): Promise<GeneratedApiKey> {
     if (params.role === 'GUEST') {
@@ -33,14 +34,15 @@ export class ApiKeyService {
       )
     }
 
-    if (params.plan === 'FREE') {
+    const planLimits = PlanLimitsValue.from(params.plan)
+    if (planLimits.apiKey !== null) {
       const count = await this._apiKeyRepository.countActiveByUserId(
         params.userId
       )
-      if (count >= MCP_API_KEY_LIMITS.FREE) {
+      if (planLimits.isOver('apiKey', count)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
-          '無料プランはAPIキーを1個まで発行できます'
+          planLimits.limitMessage('apiKey')
         )
       }
     }
