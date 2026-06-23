@@ -31,6 +31,7 @@ const buildApiKeyEntity = (
     name: 'test key',
     keyHash: 'hash',
     prefix: 'mk_abcd1234',
+    scopes: ['READ'],
     isActive: true,
     createdAt: new Date('2026-06-21T00:00:00Z'),
     updatedAt: new Date('2026-06-21T00:00:00Z'),
@@ -60,19 +61,21 @@ describe('ApiKeyService.generateApiKey()', () => {
       service.generateApiKey({
         user: buildUserEntity({ role: 'GUEST' }),
         name: 'key',
+        scopes: ['READ'],
       })
     ).rejects.toThrow(
       new ApiV1Error('FORBIDDEN', 'ゲストアカウントはAPIキーを発行できません')
     )
   })
 
-  test('USER + FREE + 既存0件 → 成功', async () => {
+  test('USER + FREE + 既存0件 + READ → 成功', async () => {
     vi.mocked(repository.countActiveByUserId).mockResolvedValue(0)
     vi.mocked(repository.create).mockResolvedValue(buildApiKeyEntity())
 
     const result = await service.generateApiKey({
       user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
       name: 'key',
+      scopes: ['READ'],
     })
 
     expect(result.apiKey).toBeInstanceOf(ApiKeyEntity)
@@ -86,8 +89,72 @@ describe('ApiKeyService.generateApiKey()', () => {
       service.generateApiKey({
         user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
         name: 'key',
+        scopes: ['READ'],
       })
     ).rejects.toThrow(ApiV1Error)
+  })
+
+  test('USER + FREE + WRITE スコープ → FORBIDDEN エラー', async () => {
+    vi.mocked(repository.countActiveByUserId).mockResolvedValue(0)
+
+    await expect(
+      service.generateApiKey({
+        user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
+        name: 'key',
+        scopes: ['WRITE'],
+      })
+    ).rejects.toThrow(
+      new ApiV1Error(
+        'FORBIDDEN',
+        '選択されたスコープは現在のプランでは使用できません'
+      )
+    )
+  })
+
+  test('USER + FREE + READ+WRITE スコープ → FORBIDDEN エラー', async () => {
+    vi.mocked(repository.countActiveByUserId).mockResolvedValue(0)
+
+    await expect(
+      service.generateApiKey({
+        user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
+        name: 'key',
+        scopes: ['READ', 'WRITE'],
+      })
+    ).rejects.toThrow(
+      new ApiV1Error(
+        'FORBIDDEN',
+        '選択されたスコープは現在のプランでは使用できません'
+      )
+    )
+  })
+
+  test('scopes が空 → INVALID_REQUEST エラー', async () => {
+    vi.mocked(repository.countActiveByUserId).mockResolvedValue(0)
+
+    await expect(
+      service.generateApiKey({
+        user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
+        name: 'key',
+        scopes: [],
+      })
+    ).rejects.toThrow(
+      new ApiV1Error('INVALID_REQUEST', 'スコープを1つ以上選択してください')
+    )
+  })
+
+  test('USER + PREMIUM + READ+WRITE → 成功', async () => {
+    vi.mocked(repository.create).mockResolvedValue(
+      buildApiKeyEntity({ scopes: ['READ', 'WRITE'] })
+    )
+
+    const result = await service.generateApiKey({
+      user: buildUserEntity({ role: 'USER', plan: 'PREMIUM' }),
+      name: 'key',
+      scopes: ['READ', 'WRITE'],
+    })
+
+    expect(result.apiKey).toBeInstanceOf(ApiKeyEntity)
+    expect(repository.countActiveByUserId).not.toHaveBeenCalled()
   })
 
   test('USER + PREMIUM + 既存多数件 → 成功（無制限）', async () => {
@@ -96,6 +163,7 @@ describe('ApiKeyService.generateApiKey()', () => {
     const result = await service.generateApiKey({
       user: buildUserEntity({ role: 'USER', plan: 'PREMIUM' }),
       name: 'key',
+      scopes: ['READ'],
     })
 
     expect(result.apiKey).toBeInstanceOf(ApiKeyEntity)
@@ -108,6 +176,7 @@ describe('ApiKeyService.generateApiKey()', () => {
     const result = await service.generateApiKey({
       user: buildUserEntity({ role: 'ADMIN' }),
       name: 'key',
+      scopes: ['READ'],
     })
 
     expect(result.apiKey).toBeInstanceOf(ApiKeyEntity)
@@ -123,6 +192,7 @@ describe('ApiKeyService.generateApiKey()', () => {
     const result = await service.generateApiKey({
       user: buildUserEntity({ role: 'USER', plan: 'FREE' }),
       name: 'my key',
+      scopes: ['READ'],
     })
 
     expect(result.fullKey).toMatch(/^mk_[0-9a-f]+_/)

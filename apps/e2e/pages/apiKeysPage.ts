@@ -49,7 +49,9 @@ export class ApiKeysPage {
       name: 'APIキーを発行しました',
       level: 2,
     })
-    this.fullKeyDisplay = page.locator('[role="dialog"] code, [role="dialog"] p')
+    this.fullKeyDisplay = page.locator(
+      '[role="dialog"] code, [role="dialog"] p'
+    )
     this.closeButton = page.getByRole('button', { name: '閉じる' })
   }
 

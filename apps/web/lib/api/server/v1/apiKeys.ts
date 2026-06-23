@@ -15,6 +15,7 @@ export type ApiResponseApiKeyItem = {
   apiKeyId: string
   name: string
   prefix: string
+  scopes: string[]
   createdAt: string
 }
 
@@ -26,12 +27,14 @@ export type ApiResponseApiKeyGenerate = {
   apiKeyId: string
   name: string
   prefix: string
+  scopes: string[]
   fullKey: string
   createdAt: string
 }
 
 const GenerateApiKeySchema = z.object({
   name: z.string().min(1).max(50),
+  scopes: z.array(z.enum(['READ', 'WRITE'])).min(1),
 })
 
 /** APIキー一覧取得 */
@@ -48,6 +51,7 @@ apiKeys.get('/', honoAuthMiddleware, async (c) => {
         apiKeyId: k.id,
         name: k.name,
         prefix: k.prefix,
+        scopes: k.scopes,
         createdAt: k.createdAt.toISOString(),
       })),
     },
@@ -68,6 +72,7 @@ apiKeys.post(
     const { apiKey, fullKey } = await service.generateApiKey({
       user: userEntity,
       name: body.name,
+      scopes: body.scopes,
     })
 
     return c.json<SuccessResponse<ApiResponseApiKeyGenerate>>(
@@ -77,6 +82,7 @@ apiKeys.post(
           apiKeyId: apiKey.id,
           name: apiKey.name,
           prefix: apiKey.prefix,
+          scopes: apiKey.scopes,
           fullKey,
           createdAt: apiKey.createdAt.toISOString(),
         },

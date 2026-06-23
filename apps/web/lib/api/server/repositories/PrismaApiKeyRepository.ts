@@ -1,3 +1,4 @@
+import type { ApiKeyScope } from '@repo/shared-types'
 import { ApiKeyEntity } from '../entities/ApiKeyEntity'
 import { IApiKeyRepository } from '../interfaces/IApiKeyRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
@@ -32,6 +33,7 @@ export class PrismaApiKeyRepository
     name: string
     keyHash: string
     prefix: string
+    scopes: ApiKeyScope[]
   }): Promise<ApiKeyEntity> {
     const row = await this.connection.mApiKey.create({
       data: {
@@ -39,6 +41,7 @@ export class PrismaApiKeyRepository
         name: params.name,
         keyHash: params.keyHash,
         prefix: params.prefix,
+        scopes: params.scopes,
       },
     })
     return toEntity(row)
@@ -64,6 +67,7 @@ function toEntity(row: {
   name: string
   keyHash: string
   prefix: string
+  scopes: string[]
   isActive: boolean
   createdAt: Date
   updatedAt: Date
@@ -74,6 +78,7 @@ function toEntity(row: {
     name: row.name,
     keyHash: row.keyHash,
     prefix: row.prefix,
+    scopes: row.scopes as ApiKeyScope[],
     isActive: row.isActive,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,

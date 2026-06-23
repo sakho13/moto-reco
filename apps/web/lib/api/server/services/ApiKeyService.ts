@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'crypto'
+import type { ApiKeyScope } from '@repo/shared-types'
 import { ApiKeyEntity } from '../entities/ApiKeyEntity'
 import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
@@ -23,6 +24,7 @@ export class ApiKeyService {
   async generateApiKey(params: {
     user: UserEntity
     name: string
+    scopes: ApiKeyScope[]
   }): Promise<GeneratedApiKey> {
     if (params.user.role === 'GUEST') {
       throw new ApiV1Error(
@@ -44,6 +46,24 @@ export class ApiKeyService {
       }
     }
 
+    if (params.scopes.length === 0) {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        'スコープを1つ以上選択してください'
+      )
+    }
+
+    const allowedScopes = params.user.planAllowedScopes
+    const invalidScopes = params.scopes.filter(
+      (s) => !allowedScopes.includes(s)
+    )
+    if (invalidScopes.length > 0) {
+      throw new ApiV1Error(
+        'FORBIDDEN',
+        '選択されたスコープは現在のプランでは使用できません'
+      )
+    }
+
     const prefix = `mk_${randomBytes(4).toString('hex')}`
     const secret = randomBytes(32).toString('base64url')
     const fullKey = `${prefix}_${secret}`
@@ -54,6 +74,7 @@ export class ApiKeyService {
       name: params.name,
       keyHash,
       prefix,
+      scopes: params.scopes,
     })
 
     return { apiKey, fullKey }
@@ -62,9 +83,7 @@ export class ApiKeyService {
   /**
    * ユーザーのAPIキー一覧を取得
    */
-  async listApiKeys(params: {
-    user: UserEntity
-  }): Promise<ApiKeyEntity[]> {
+  async listApiKeys(params: { user: UserEntity }): Promise<ApiKeyEntity[]> {
     if (params.user.role === 'GUEST') {
       throw new ApiV1Error(
         'FORBIDDEN',
@@ -111,10 +130,11 @@ export class ApiKeyService {
    */
   async verifyApiKey(fullKey: string): Promise<{
     userId: string
+    scopes: ApiKeyScope[]
   } | null> {
     const keyHash = createHash('sha256').update(fullKey).digest('hex')
     const apiKey = await this._apiKeyRepository.findByKeyHash(keyHash)
     if (!apiKey || !apiKey.isActive) return null
-    return { userId: apiKey.userId }
+    return { userId: apiKey.userId, scopes: apiKey.scopes }
   }
 }

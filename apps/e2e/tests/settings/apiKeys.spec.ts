@@ -38,9 +38,7 @@ test.describe('APIキー管理', () => {
     await apiKeysPage.openAddModal()
 
     // 「アクセス権限」の見出しが表示される
-    await expect(
-      authenticatedPage.getByText('アクセス権限')
-    ).toBeVisible()
+    await expect(authenticatedPage.getByText('アクセス権限')).toBeVisible()
   })
 
   test('READ チェックボックスがチェック済みかつ無効（disabled）になっている', async ({
@@ -91,9 +89,7 @@ test.describe('APIキー管理', () => {
     // 発行完了モーダルが表示され、フルキーが表示される
     await expect(apiKeysPage.issuedModalHeading).toBeVisible()
     // フルキーの先頭プレフィックス形式 mk_ で始まるテキストが存在する
-    await expect(
-      authenticatedPage.getByText(/mk_[0-9a-f]+_/)
-    ).toBeVisible()
+    await expect(authenticatedPage.getByText(/mk_[0-9a-f]+_/)).toBeVisible()
   })
 
   test('発行後に一覧へスコープバッジ「読み取り」が表示される', async ({
@@ -120,6 +116,8 @@ test.describe('APIキー管理', () => {
     const apiKeysPage = new ApiKeysPage(authenticatedPage)
     await apiKeysPage.goto()
 
-    await expect(apiKeysPage.keyListItem('Pre-issued Key via API')).toBeVisible()
+    await expect(
+      apiKeysPage.keyListItem('Pre-issued Key via API')
+    ).toBeVisible()
   })
 })

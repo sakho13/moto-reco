@@ -4,6 +4,7 @@ import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@repo/database'
+import type { ApiKeyScope } from '@repo/shared-types'
 import { PrismaApiKeyRepository } from '@/lib/api/server/repositories/PrismaApiKeyRepository'
 import { ApiKeyService } from '@/lib/api/server/services/ApiKeyService'
 
@@ -47,15 +48,23 @@ class SingleRequestTransport implements Transport {
   }
 }
 
-async function authenticate(request: NextRequest): Promise<string | null> {
+async function authenticate(
+  request: NextRequest
+): Promise<{ userId: string; scopes: ApiKeyScope[] } | null> {
   const authHeader = request.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) return null
   const token = authHeader.slice('Bearer '.length)
   const service = new ApiKeyService(new PrismaApiKeyRepository(prisma))
-  return (await service.verifyApiKey(token))?.userId ?? null
+  return (await service.verifyApiKey(token)) ?? null
 }
 
-function buildMcpServer(userId: string): McpServer {
+function requireScope(scopes: ApiKeyScope[], required: ApiKeyScope): void {
+  if (!scopes.includes(required)) {
+    throw new Error(`このツールには ${required} スコープが必要です`)
+  }
+}
+
+function buildMcpServer(userId: string, scopes: ApiKeyScope[]): McpServer {
   const server = new McpServer({
     name: 'motoreco',
     version: '1.0.0',
@@ -65,6 +74,7 @@ function buildMcpServer(userId: string): McpServer {
     'list_bikes',
     '登録されているマイバイクの一覧を取得します',
     async () => {
+      requireScope(scopes, 'READ')
       const bikes = await prisma.tUserMyBike.findMany({
         where: { userId, ownStatus: 'OWN' },
         include: {
@@ -94,6 +104,7 @@ function buildMcpServer(userId: string): McpServer {
     '指定バイクのツーリングプラン一覧を取得します',
     { myUserBikeId: z.string().describe('マイバイクID') },
     async ({ myUserBikeId }) => {
+      requireScope(scopes, 'READ')
       const plans = await prisma.tUserMyBikeTouringPlan.findMany({
         where: { userMyBikeId: myUserBikeId, userMyBike: { userId } },
         include: {
@@ -128,6 +139,7 @@ function buildMcpServer(userId: string): McpServer {
     'ツーリングプランの詳細（スポット含む）を取得します',
     { touringPlanId: z.string().describe('ツーリングプランID') },
     async ({ touringPlanId }) => {
+      requireScope(scopes, 'READ')
       const plan = await prisma.tUserMyBikeTouringPlan.findFirst({
         where: { id: touringPlanId, userMyBike: { userId } },
         include: { spots: { orderBy: { sortOrder: 'asc' } } },
@@ -165,6 +177,7 @@ function buildMcpServer(userId: string): McpServer {
     'バイクのメンテナンス状況と次回推奨時期を取得します',
     { myUserBikeId: z.string().describe('マイバイクID') },
     async ({ myUserBikeId }) => {
+      requireScope(scopes, 'READ')
       const myBike = await prisma.tUserMyBike.findFirst({
         where: { id: myUserBikeId, userId },
         include: {
@@ -225,8 +238,8 @@ function buildMcpServer(userId: string): McpServer {
 }
 
 export async function POST(request: NextRequest) {
-  const userId = await authenticate(request)
-  if (!userId) {
+  const auth = await authenticate(request)
+  if (!auth) {
     return NextResponse.json(
       {
         jsonrpc: '2.0',
@@ -260,7 +273,7 @@ export async function POST(request: NextRequest) {
   }
 
   const transport = new SingleRequestTransport(body)
-  const server = buildMcpServer(userId)
+  const server = buildMcpServer(auth.userId, auth.scopes)
 
   await server.connect(transport)
   const response = await transport.getResponse()

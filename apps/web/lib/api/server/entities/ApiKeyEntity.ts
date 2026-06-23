@@ -1,3 +1,5 @@
+import type { ApiKeyScope } from '@repo/shared-types'
+
 /**
  * APIキーエンティティ
  *
@@ -11,6 +13,7 @@ export class ApiKeyEntity {
   private _name: string
   private _keyHash: string
   private _prefix: string
+  private _scopes: ApiKeyScope[]
   private _isActive: boolean
   private _createdAt: Date
   private _updatedAt: Date
@@ -21,6 +24,7 @@ export class ApiKeyEntity {
     name: string
     keyHash: string
     prefix: string
+    scopes: ApiKeyScope[]
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -30,6 +34,7 @@ export class ApiKeyEntity {
     this._name = params.name
     this._keyHash = params.keyHash
     this._prefix = params.prefix
+    this._scopes = params.scopes
     this._isActive = params.isActive
     this._createdAt = params.createdAt
     this._updatedAt = params.updatedAt
@@ -53,6 +58,14 @@ export class ApiKeyEntity {
 
   public get prefix(): string {
     return this._prefix
+  }
+
+  public get scopes(): ApiKeyScope[] {
+    return this._scopes
+  }
+
+  public hasScope(scope: ApiKeyScope): boolean {
+    return this._scopes.includes(scope)
   }
 
   public get isActive(): boolean {

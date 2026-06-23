@@ -51,10 +51,7 @@ export class UserBikeService {
         params.user.id
       )
       if (limits.isOver('bike', currentCount)) {
-        throw new ApiV1Error(
-          'INVALID_REQUEST',
-          limits.limitMessage('bike')
-        )
+        throw new ApiV1Error('INVALID_REQUEST', limits.limitMessage('bike'))
       }
     }
 

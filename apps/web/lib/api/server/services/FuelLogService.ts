@@ -71,10 +71,7 @@ export class FuelLogService {
         params.myUserBikeId
       )
       if (limits.isOver('fuelLog', count)) {
-        throw new ApiV1Error(
-          'INVALID_REQUEST',
-          limits.limitMessage('fuelLog')
-        )
+        throw new ApiV1Error('INVALID_REQUEST', limits.limitMessage('fuelLog'))
       }
     }
 

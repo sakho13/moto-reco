@@ -332,6 +332,7 @@ type API_EP = {
         apiKeyId: string
         name: string
         prefix: string
+        scopes: string[]
         createdAt: string
       }[]
     }>
@@ -339,6 +340,7 @@ type API_EP = {
       apiKeyId: string
       name: string
       prefix: string
+      scopes: string[]
       fullKey: string
       createdAt: string
     }>

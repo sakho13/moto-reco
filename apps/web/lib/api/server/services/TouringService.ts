@@ -104,10 +104,7 @@ export class TouringService {
         params.myUserBikeId
       )
       if (limits.isOver('touring', count)) {
-        throw new ApiV1Error(
-          'INVALID_REQUEST',
-          limits.limitMessage('touring')
-        )
+        throw new ApiV1Error('INVALID_REQUEST', limits.limitMessage('touring'))
       }
     }
 

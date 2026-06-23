@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import type { ApiKeyScope } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { Input } from '@repo/ui/input'
@@ -14,6 +15,7 @@ type ApiKeyItem = {
   apiKeyId: string
   name: string
   prefix: string
+  scopes: string[]
   createdAt: string
 }
 
@@ -24,6 +26,33 @@ type GeneratedKey = {
   fullKey: string
 }
 
+const SCOPE_LABELS: Record<ApiKeyScope, string> = {
+  READ: '読み取り',
+  WRITE: '書き込み',
+}
+
+function ScopeBadge({ scope }: { scope: string }) {
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        fontSize: 'var(--font-size-xs)',
+        padding: '1px 6px',
+        borderRadius: 'var(--radius-sm)',
+        backgroundColor:
+          scope === 'WRITE' ? 'var(--color-primary)' : 'var(--color-muted)',
+        color:
+          scope === 'WRITE'
+            ? 'var(--color-primary-foreground)'
+            : 'var(--color-muted-foreground)',
+        marginRight: 'var(--spacing-1)',
+      }}
+    >
+      {SCOPE_LABELS[scope as ApiKeyScope] ?? scope}
+    </span>
+  )
+}
+
 function ApiKeysSettingsPage() {
   const { isGuest } = useAuth()
   const [keys, setKeys] = useState<ApiKeyItem[]>([])
@@ -31,9 +60,13 @@ function ApiKeysSettingsPage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
+  const [selectedScopes, setSelectedScopes] = useState<ApiKeyScope[]>(['READ'])
+  const [userPlan, setUserPlan] = useState<string>('FREE')
   const [generatedKey, setGeneratedKey] = useState<GeneratedKey | null>(null)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const isPremium = userPlan === 'PREMIUM' || userPlan === 'UNLIMITED'
 
   const fetchKeys = useCallback(async () => {
     try {
@@ -49,10 +82,27 @@ function ApiKeysSettingsPage() {
   useEffect(() => {
     if (!isGuest) {
       fetchKeys()
+      apiGet('/api/v1/user/profile')
+        .then((res) => setUserPlan(res.data.plan))
+        .catch(() => {})
     } else {
       setIsLoading(false)
     }
   }, [isGuest, fetchKeys])
+
+  const handleScopeToggle = (scope: ApiKeyScope) => {
+    if (scope === 'READ') return // READ は常に必須
+    setSelectedScopes((prev) =>
+      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
+    )
+  }
+
+  const handleOpenAddModal = () => {
+    setSelectedScopes(['READ'])
+    setNewKeyName('')
+    setError(null)
+    setIsAddModalOpen(true)
+  }
 
   const handleGenerate = async () => {
     if (!newKeyName.trim()) return
@@ -61,6 +111,7 @@ function ApiKeysSettingsPage() {
     try {
       const res = await apiPost('/api/v1/mcp/api-keys', {
         name: newKeyName.trim(),
+        scopes: selectedScopes,
       })
       setGeneratedKey({
         apiKeyId: res.data.apiKeyId,
@@ -69,6 +120,7 @@ function ApiKeysSettingsPage() {
         fullKey: res.data.fullKey,
       })
       setNewKeyName('')
+      setSelectedScopes(['READ'])
       setIsAddModalOpen(false)
       await fetchKeys()
     } catch (e) {
@@ -162,6 +214,58 @@ function ApiKeysSettingsPage() {
               placeholder="キー名（例: My Claude Code）"
               maxLength={50}
             />
+
+            {/* スコープ選択 */}
+            <div>
+              <p
+                style={{
+                  fontSize: 'var(--font-size-sm)',
+                  fontWeight: 600,
+                  marginBottom: 'var(--spacing-2)',
+                }}
+              >
+                アクセス権限
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--spacing-2)',
+                }}
+              >
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--spacing-2)',
+                    fontSize: 'var(--font-size-sm)',
+                    cursor: 'default',
+                  }}
+                >
+                  <input type="checkbox" checked disabled readOnly />
+                  <span>読み取り（READ）— 必須</span>
+                </label>
+                {isPremium && (
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--spacing-2)',
+                      fontSize: 'var(--font-size-sm)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedScopes.includes('WRITE')}
+                      onChange={() => handleScopeToggle('WRITE')}
+                    />
+                    <span>書き込み（WRITE）</span>
+                  </label>
+                )}
+              </div>
+            </div>
+
             <Button
               onClick={handleGenerate}
               loading={isGenerating}
@@ -231,11 +335,7 @@ function ApiKeysSettingsPage() {
       <BaseCard
         title="MCP APIキー管理"
         headerAction={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsAddModalOpen(true)}
-          >
+          <Button variant="primary" size="sm" onClick={handleOpenAddModal}>
             ＋ 追加
           </Button>
         }
@@ -323,10 +423,16 @@ function ApiKeysSettingsPage() {
                     >
                       {key.prefix}_****
                     </p>
+                    <div style={{ marginTop: 'var(--spacing-1)' }}>
+                      {key.scopes.map((s) => (
+                        <ScopeBadge key={s} scope={s} />
+                      ))}
+                    </div>
                     <p
                       style={{
                         fontSize: 'var(--font-size-xs)',
                         color: 'var(--color-muted-foreground)',
+                        marginTop: 'var(--spacing-1)',
                       }}
                     >
                       {new Date(key.createdAt).toLocaleDateString('ja-JP')} 発行

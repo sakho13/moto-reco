@@ -1,3 +1,4 @@
+import type { ApiKeyScope } from '@repo/shared-types'
 import { ApiKeyEntity } from '../entities/ApiKeyEntity'
 
 export interface IApiKeyRepository {
@@ -24,6 +25,7 @@ export interface IApiKeyRepository {
     name: string
     keyHash: string
     prefix: string
+    scopes: ApiKeyScope[]
   }): Promise<ApiKeyEntity>
 
   /**
