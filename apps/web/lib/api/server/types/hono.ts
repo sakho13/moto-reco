@@ -1,4 +1,4 @@
-import { UserId } from '@repo/shared-types'
+import { UserId, UserPlan } from '@repo/shared-types'
 
 // Honoアプリケーション全体で使用する変数の型定義
 export type HonoVariables = {
@@ -8,6 +8,9 @@ export type HonoVariables = {
 
     // ユーザーロール
     role: 'USER' | 'ADMIN' | 'GUEST'
+
+    // 料金プラン（USER ロールのみ。GUEST / ADMIN は null）
+    plan: UserPlan | null
 
     // 認証情報
     email?: string

@@ -9,3 +9,6 @@ export type User = {
   notificationEmail: string | null
   isProfilePublic: boolean
 }
+
+/** 料金プラン。role === 'USER' のユーザーにのみ適用される */
+export type UserPlan = 'FREE' | 'PREMIUM'

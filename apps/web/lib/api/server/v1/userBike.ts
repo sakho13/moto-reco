@@ -69,7 +69,7 @@ userBike.post(
   honoAuthMiddleware,
   zodValidateJson(UserBikeRegisterRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userId, role, plan } = c.var.user!
     const body = c.req.valid('json')
 
     const detail = await prisma.$transaction(async (t) => {
@@ -87,7 +87,7 @@ userBike.post(
         displacement: body.displacement,
         serialNumber: body.serialNumber,
         userId,
-        limits: AccountLimitsValue.from(role),
+        limits: AccountLimitsValue.from(role, plan),
         nickname: body.nickname,
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,

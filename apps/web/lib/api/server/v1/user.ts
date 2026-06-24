@@ -4,10 +4,12 @@ import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import {
   ApiResponseUserFollowList,
   ApiResponseUserProfile,
+  ApiResponseUserPlanHistory,
   ApiResponsePublicUserPage,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
   ApiResponseUserSearch,
+  ChangePlanRequestSchema,
   GuestRegisterRequestSchema,
   SuccessResponse,
   UserAuthRecoverRequestSchema,
@@ -28,9 +30,11 @@ import { PrismaHistoryRepository } from '../repositories/PrismaHistoryRepository
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaNotificationRepository } from '../repositories/PrismaNotificationRepository'
 import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepository'
+import { PrismaUserPlanHistoryRepository } from '../repositories/PrismaUserPlanHistoryRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
 import { UserFollowService } from '../services/UserFollowService'
+import { UserPlanService } from '../services/UserPlanService'
 import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
 
@@ -54,6 +58,7 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
       notificationEmail: user.notificationEmail,
       isProfilePublic: user.isProfilePublic,
       role: user.role as import('@repo/shared-types').UserRole,
+      plan: user.plan,
     },
     message: 'プロフィール取得成功',
   })
@@ -133,6 +138,7 @@ user.patch(
         notificationEmail: updatedUser.notificationEmail,
         isProfilePublic: updatedUser.isProfilePublic,
         role: updatedUser.role as import('@repo/shared-types').UserRole,
+        plan: updatedUser.plan,
       },
       message: 'プロフィール更新成功',
     })
@@ -432,6 +438,7 @@ user.post(
           notificationEmail: user.notificationEmail,
           isProfilePublic: user.isProfilePublic,
           role: user.role as import('@repo/shared-types').UserRole,
+          plan: user.plan,
         },
         message: 'ユーザー登録成功',
       },
@@ -590,11 +597,80 @@ user.post(
           notificationEmail: guestUser.notificationEmail,
           isProfilePublic: guestUser.isProfilePublic,
           role: guestUser.role as import('@repo/shared-types').UserRole,
+          plan: guestUser.plan,
         },
         message: 'ゲストユーザー登録成功',
       },
       201
     )
+  }
+)
+
+/**
+ * 自分のプラン変更履歴を取得するエンドポイント
+ *
+ * @remarks
+ * - 認証必須
+ * - role !== 'USER' の場合は空配列を返す
+ */
+user.get('/plan/histories', honoAuthMiddleware, async (c) => {
+  const { userId } = c.var.user!
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const planHistoryRepo = new PrismaUserPlanHistoryRepository(prisma)
+  const service = new UserPlanService(userRepo, planHistoryRepo)
+
+  const histories = await service.getPlanHistories(userId)
+
+  return c.json<SuccessResponse<ApiResponseUserPlanHistory>>({
+    status: 'success',
+    data: histories.map((h) => ({
+      id: h.id,
+      plan: h.plan,
+      changedAt: h.changedAt.toISOString(),
+      changedByName: '',
+      reason: h.reason,
+    })),
+    message: 'プラン変更履歴取得成功',
+  })
+})
+
+/**
+ * ユーザーのプランを変更するエンドポイント（管理者専用）
+ *
+ * @remarks
+ * - 認証必須・ADMIN ロール限定
+ * - 対象ユーザーの role が USER 以外の場合は 403
+ */
+user.patch(
+  '/admin/plan',
+  honoAuthMiddleware,
+  zodValidateJson(ChangePlanRequestSchema),
+  async (c) => {
+    const { userId: adminUserId, role } = c.var.user!
+
+    if (role !== 'ADMIN') {
+      throw new ApiV1Error('FORBIDDEN', 'この操作は管理者のみ実行できます')
+    }
+
+    const body = c.req.valid('json')
+
+    const userRepo = new PrismaUserRepository(prisma)
+    const planHistoryRepo = new PrismaUserPlanHistoryRepository(prisma)
+    const service = new UserPlanService(userRepo, planHistoryRepo)
+
+    await service.changePlan(
+      createUserId(body.targetUserId),
+      body.plan,
+      adminUserId,
+      body.reason ?? null
+    )
+
+    return c.json<SuccessResponse<Record<string, never>>>({
+      status: 'success',
+      data: {},
+      message: 'プランを変更しました',
+    })
   }
 )
 

@@ -64,6 +64,7 @@ export async function honoAuthMiddleware(
     c.set('user', {
       userId: createUserId(userInfo.userId),
       role: userInfo.role,
+      plan: userInfo.plan,
       email: authProvider.metadata?.email as string | undefined,
       emailVerified: authProvider.metadata?.emailVerified as
         | boolean

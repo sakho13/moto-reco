@@ -71,7 +71,7 @@ userBikeMaintenanceLogs.post(
   honoAuthMiddleware,
   zodValidateJson(MaintenanceLogRegisterRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userId, role, plan } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -86,7 +86,7 @@ userBikeMaintenanceLogs.post(
       return service.registerMaintenanceLog({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
-        limits: AccountLimitsValue.from(role),
+        limits: AccountLimitsValue.from(role, plan),
         performedAt: body.performedAt,
         mileage: body.mileage,
         memo: body.memo,
