@@ -1137,7 +1137,10 @@ describe('User API Endpoints', () => {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ targetUserId: target.userId, plan: 'PREMIUM' }),
+          body: JSON.stringify({
+            targetUserId: target.userId,
+            plan: 'PREMIUM',
+          }),
         })
 
         expect(res.status).toBe(403)
@@ -1185,7 +1188,10 @@ describe('User API Endpoints', () => {
             Authorization: `Bearer ${admin.token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ targetUserId: 'nonexistent-id', plan: 'PREMIUM' }),
+          body: JSON.stringify({
+            targetUserId: 'nonexistent-id',
+            plan: 'PREMIUM',
+          }),
         })
 
         expect(res.status).toBe(404)
@@ -1220,7 +1226,10 @@ describe('User API Endpoints', () => {
             Authorization: `Bearer ${admin.token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ targetUserId: anotherAdmin.userId, plan: 'PREMIUM' }),
+          body: JSON.stringify({
+            targetUserId: anotherAdmin.userId,
+            plan: 'PREMIUM',
+          }),
         })
 
         expect(res.status).toBe(403)

@@ -85,9 +85,14 @@ export default function UserShowPage() {
   const { data, isLoading, refetch } = query
   const record = data?.data
 
-  const authProviders: AuthProvider[] = (record?.authProviders ?? []) as AuthProvider[]
+  const authProviders: AuthProvider[] = (record?.authProviders ??
+    []) as AuthProvider[]
   const myBikes: MyBike[] = (record?.myBikes ?? []) as MyBike[]
-  const currentPlan = record?.currentPlan as 'FREE' | 'PREMIUM' | null | undefined
+  const currentPlan = record?.currentPlan as
+    | 'FREE'
+    | 'PREMIUM'
+    | null
+    | undefined
   const isUser = record?.role === 'USER'
   const userId = record?.id as string | undefined
 
@@ -149,7 +154,9 @@ export default function UserShowPage() {
       {contextHolder}
       <Show isLoading={isLoading}>
         <Descriptions bordered column={1} style={{ marginBottom: 24 }}>
-          <Descriptions.Item label="ID">{record?.id as string}</Descriptions.Item>
+          <Descriptions.Item label="ID">
+            {record?.id as string}
+          </Descriptions.Item>
           <Descriptions.Item label="名前">
             {record?.name as string}
           </Descriptions.Item>
