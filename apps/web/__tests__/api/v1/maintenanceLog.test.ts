@@ -233,4 +233,73 @@ describe('Maintenance Log API Endpoints', () => {
       expectValidationError(json)
     })
   })
+
+  describe('FREEユーザーのメンテナンス履歴制限（5件まで）', () => {
+    test('FREEユーザーは5件まで登録できる', async () => {
+      const user = await createTestUser()
+      const { myUserBikeId: bikeId } = await createTestUserBike(user.token, {
+        displacement: 400,
+        totalMileage: 0,
+      })
+
+      for (let i = 1; i <= 5; i++) {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${bikeId}/maintenance-logs`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              performedAt: `2024-01-${String(i).padStart(2, '0')}T10:00:00.000Z`,
+              mileage: i * 1000,
+              items: [{ maintenanceType: 'ENGINE_OIL', value: 1 }],
+            }),
+          }
+        )
+        expect(res.status).toBe(201)
+      }
+    })
+
+    test('FREEユーザーは6件目のメンテナンス履歴を登録できない', async () => {
+      const user = await createTestUser()
+      const { myUserBikeId: bikeId } = await createTestUserBike(user.token, {
+        displacement: 400,
+        totalMileage: 0,
+      })
+
+      for (let i = 1; i <= 5; i++) {
+        await createTestMaintenanceLog(user.token, bikeId, {
+          performedAt: `2024-01-${String(i).padStart(2, '0')}T10:00:00.000Z`,
+          mileage: i * 1000,
+          items: [{ maintenanceType: 'ENGINE_OIL', value: 1 }],
+        })
+      }
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${bikeId}/maintenance-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            performedAt: '2024-01-06T10:00:00.000Z',
+            mileage: 6000,
+            items: [{ maintenanceType: 'ENGINE_OIL', value: 1 }],
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'INVALID_REQUEST',
+        message: '無料ユーザーはメンテナンス履歴を5件まで登録できます',
+      })
+    })
+  })
 })
