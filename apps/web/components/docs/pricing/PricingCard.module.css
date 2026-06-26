@@ -16,7 +16,7 @@
 }
 
 .popular {
-  border: 2px solid #171717;
+  border: 2px solid #ea580c;
 }
 
 .badge {
@@ -24,7 +24,7 @@
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: #171717;
+  background: #ea580c;
   color: #ffffff;
   padding: 6px 16px;
   border-radius: 999px;
@@ -90,7 +90,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #171717;
+  color: #ea580c;
   margin-top: 2px;
 }
 
@@ -103,21 +103,25 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #171717;
+  background: #ea580c;
   color: #ffffff;
   padding: 14px 24px;
   border-radius: 999px;
   font-size: 16px;
-  font-weight: 600;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 24px rgba(23, 23, 23, 0.2);
+  font-weight: 700;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.35);
   border: none;
   cursor: pointer;
 }
 
 .cta:hover {
+  background: #c2410c;
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(23, 23, 23, 0.3);
+  box-shadow: 0 12px 32px rgba(234, 88, 12, 0.45);
 }
 
 .cta:active {
@@ -163,12 +167,12 @@ html[data-theme-mode='dark'] .card {
 }
 
 html[data-theme-mode='dark'] .popular {
-  border-color: #ededed;
+  border-color: #ea580c;
 }
 
 html[data-theme-mode='dark'] .badge {
-  background: #ededed;
-  color: #0a0a0a;
+  background: #ea580c;
+  color: #ffffff;
 }
 
 html[data-theme-mode='dark'] .period,
@@ -177,14 +181,14 @@ html[data-theme-mode='dark'] .description {
 }
 
 html[data-theme-mode='dark'] .checkIcon {
-  color: #ededed;
+  color: #fb923c;
 }
 
 html[data-theme-mode='dark'] .cta {
-  background: #ededed;
-  color: #0a0a0a;
+  background: #ea580c;
+  color: #ffffff;
 }
 
 html[data-theme-mode='dark'] .ctaDisabled {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
 }
