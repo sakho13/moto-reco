@@ -5,24 +5,15 @@ import { ProfilePage } from '../../pages/profilePage'
  * プロフィールページ E2E テスト
  */
 test.describe('プロフィールページ', () => {
-  test('プロフィールカードとアカウント認証カードが表示される', async ({
+  test('プロフィールカードとオプションカードが表示される', async ({
     authenticatedPage,
   }) => {
     const profilePage = new ProfilePage(authenticatedPage)
     await profilePage.goto()
 
     await expect(profilePage.profileCardHeading).toBeVisible()
-    await expect(profilePage.accountCardHeading).toBeVisible()
-  })
-
-  test('アカウント認証カードにメールアドレスが表示される', async ({
-    authenticatedPage,
-    testUserEmail,
-  }) => {
-    const profilePage = new ProfilePage(authenticatedPage)
-    await profilePage.goto()
-
-    await expect(profilePage.emailText(testUserEmail)).toBeVisible()
+    await expect(profilePage.authInfoLink).toBeVisible()
+    await expect(profilePage.planLink).toBeVisible()
   })
 
   test('ログアウトボタンが表示される', async ({ authenticatedPage }) => {
