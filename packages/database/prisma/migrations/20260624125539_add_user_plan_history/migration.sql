@@ -21,3 +21,14 @@ ALTER TABLE "TUserPlanHistory" ADD CONSTRAINT "TUserPlanHistory_user_id_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "TUserPlanHistory" ADD CONSTRAINT "TUserPlanHistory_changed_by_id_fkey" FOREIGN KEY ("changed_by_id") REFERENCES "MUser"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- Backfill: 既存の USER ロールアカウントに初期 FREE 履歴を挿入する
+INSERT INTO "TUserPlanHistory" ("id", "user_id", "plan", "changed_at", "changed_by_id")
+SELECT
+  gen_random_uuid()::text,
+  "id",
+  'FREE'::"MUserPlan",
+  CURRENT_TIMESTAMP,
+  "id"
+FROM "MUser"
+WHERE "role" = 'USER';

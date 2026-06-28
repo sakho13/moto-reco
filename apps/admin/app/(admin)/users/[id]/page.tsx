@@ -16,6 +16,7 @@ import {
 } from 'antd'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { getFirebaseAuth } from '@/lib/firebase/config'
 
 const statusColor: Record<string, string> = {
   ACTIVE: 'green',
@@ -106,7 +107,11 @@ export default function UserShowPage() {
   const fetchHistories = async (id: string) => {
     setHistoriesLoading(true)
     try {
-      const res = await fetch(`/api/admin/users/${id}/plan/histories`)
+      const token = await getFirebaseAuth().currentUser?.getIdToken()
+      if (!token) return
+      const res = await fetch(`/api/admin/users/${id}/plan/histories`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       if (res.ok) {
         const json = (await res.json()) as PlanHistory[]
         setPlanHistories(json)
@@ -126,9 +131,17 @@ export default function UserShowPage() {
     if (!userId) return
     setSubmitting(true)
     try {
+      const token = await getFirebaseAuth().currentUser?.getIdToken()
+      if (!token) {
+        void messageApi.error('認証情報を取得できませんでした')
+        return
+      }
       const res = await fetch(`/api/admin/users/${userId}/plan`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           plan: values.plan,
           reason: values.reason || null,

@@ -1,4 +1,3 @@
-import { PrismaClient } from '@repo/database'
 import { createUserId, type UserId } from '@repo/shared-types'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 import { UserEntity } from '../entities/UserEntity'
@@ -86,44 +85,40 @@ export class PrismaUserRepository
     user: UserEntity,
     authProvider: AuthProviderEntity
   ): Promise<UserEntity> {
-    const client = this.connection as PrismaClient
-
-    return client.$transaction(async (tx) => {
-      const createdUser = await tx.mUser.create({
-        data: {
-          name: user.name,
-          status: 'ACTIVE',
-          role: 'USER',
-          notificationEmail: user.notificationEmail,
-          isProfilePublic: user.isProfilePublic,
-          authProviders: {
-            create: [
-              {
-                externalId: authProvider.externalId,
-                providerType: authProvider.provider,
-                isActive: true,
-              },
-            ],
-          },
+    const createdUser = await this.connection.mUser.create({
+      data: {
+        name: user.name,
+        status: 'ACTIVE',
+        role: 'USER',
+        notificationEmail: user.notificationEmail,
+        isProfilePublic: user.isProfilePublic,
+        authProviders: {
+          create: [
+            {
+              externalId: authProvider.externalId,
+              providerType: authProvider.provider,
+              isActive: true,
+            },
+          ],
         },
-        select: { id: true },
-      })
-
-      // USER ロールの初回プランを FREE として登録
-      await tx.tUserPlanHistory.create({
-        data: {
-          userId: createdUser.id,
-          plan: 'FREE',
-          changedById: createdUser.id,
-        },
-      })
-
-      const result = await tx.mUser.findFirstOrThrow({
-        select: USER_SELECT,
-        where: { id: createdUser.id },
-      })
-      return toUserEntity(result)
+      },
+      select: { id: true },
     })
+
+    // USER ロールの初回プランを FREE として登録
+    await this.connection.tUserPlanHistory.create({
+      data: {
+        userId: createdUser.id,
+        plan: 'FREE',
+        changedById: createdUser.id,
+      },
+    })
+
+    const result = await this.connection.mUser.findFirstOrThrow({
+      select: USER_SELECT,
+      where: { id: createdUser.id },
+    })
+    return toUserEntity(result)
   }
 
   async updateUser(user: UserEntity): Promise<UserEntity> {
