@@ -2,69 +2,16 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import styles from './page.module.css'
-import { microCMSClient } from '@/lib/microcms/config'
-import type { ReleaseNote } from '@/lib/microcms/types'
+import {
+  getAdjacentReleaseNotes,
+  getReleaseNoteByVersion,
+} from '@/lib/microcms/releaseNote'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const revalidate = 300
 
 type Props = {
   params: Promise<{ version: string }>
-}
-
-type ReleaseNoteSummary = Pick<ReleaseNote, 'version' | 'title'>
-
-async function getReleaseNoteByVersion(
-  version: string
-): Promise<ReleaseNote | null> {
-  try {
-    if (!microCMSClient) return null
-    const data = await microCMSClient.getList<ReleaseNote>({
-      endpoint: 'motoreco-releases',
-      queries: {
-        filters: `version[equals]${version}${
-          process.env.NODE_ENV !== 'development'
-            ? '[and]status[contains]published'
-            : ''
-        }`,
-        limit: 1,
-      },
-    })
-    return data.contents[0] ?? null
-  } catch {
-    return null
-  }
-}
-
-async function getAdjacentReleaseNotes(version: string): Promise<{
-  prev: ReleaseNoteSummary | null
-  next: ReleaseNoteSummary | null
-}> {
-  try {
-    if (!microCMSClient) return { prev: null, next: null }
-    const data = await microCMSClient.getList<ReleaseNoteSummary>({
-      endpoint: 'motoreco-releases',
-      queries: {
-        orders: '-publishedAt',
-        limit: 100,
-        fields: 'version,title',
-        filters:
-          process.env.NODE_ENV !== 'development'
-            ? 'status[contains]published'
-            : undefined,
-      },
-    })
-    const notes = data.contents
-    const index = notes.findIndex((note) => note.version === version)
-    if (index === -1) return { prev: null, next: null }
-
-    return {
-      prev: notes[index + 1] ?? null,
-      next: index > 0 ? (notes[index - 1] ?? null) : null,
-    }
-  } catch {
-    return { prev: null, next: null }
-  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

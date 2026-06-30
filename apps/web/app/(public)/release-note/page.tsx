@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import styles from './page.module.css'
-import { microCMSClient } from '@/lib/microcms/config'
-import type { ReleaseNote } from '@/lib/microcms/types'
+import { getReleaseNotes } from '@/lib/microcms/releaseNote'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const revalidate = 300
@@ -25,26 +24,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/release-note',
   },
-}
-
-async function getReleaseNotes(): Promise<ReleaseNote[]> {
-  try {
-    if (!microCMSClient) return []
-    const data = await microCMSClient.getList<ReleaseNote>({
-      endpoint: 'motoreco-releases',
-      queries: {
-        orders: '-publishedAt',
-        limit: 100,
-        filters:
-          process.env.NODE_ENV !== 'development'
-            ? 'status[contains]published'
-            : undefined,
-      },
-    })
-    return data.contents
-  } catch {
-    return []
-  }
 }
 
 export default async function ReleaseNotePage() {
