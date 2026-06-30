@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern A — Dark Circuit | MotoRepo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060810;--s1:#0D1117;--s2:#141924;--s3:#1C2434;
+  --border:#1E2B3D;--border2:#253345;
+  --orange:#FF6B1A;--orange2:#E55A00;--cyan:#00E5FF;--cyan2:#00B8CC;
+  --text:#E8ECEF;--text2:#6B7A8F;--text3:#3D4D60;
+  --green:#00D084;--red:#FF4757;
+}
+body{font-family:'Inter',sans-serif;background:#111;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;gap:32px;flex-wrap:wrap}
+
+/* ── Phone Frame ── */
+.frame{width:390px;background:var(--bg);border-radius:48px;overflow:hidden;box-shadow:0 0 0 2px #222,0 0 0 10px #111,0 30px 80px rgba(0,0,0,.7);position:relative;flex-shrink:0}
+.frame::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:30px;background:var(--bg);border-radius:0 0 20px 20px;z-index:200}
+.frame-inner{height:812px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.frame-inner::-webkit-scrollbar{display:none}
+
+/* ── BG grid ── */
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;z-index:0}
+/* Corner accent */
+.corner-tl{position:absolute;top:0;left:0;width:80px;height:80px;border-top:2px solid var(--orange);border-left:2px solid var(--orange);border-radius:48px 0 0 0;z-index:1;opacity:.4}
+
+/* ── Header ── */
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:36px 20px 12px;background:linear-gradient(to bottom,var(--bg) 60%,transparent);backdrop-filter:blur(4px)}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:19px;letter-spacing:3px;background:linear-gradient(90deg,var(--orange),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hbtn{width:36px;height:36px;background:var(--s2);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2)}
+.hbtn svg{width:16px;height:16px}
+.hrow{display:flex;gap:8px}
+
+/* ── Main ── */
+main{padding:0 14px 8px;position:relative;z-index:1}
+
+/* ── Section cards ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:10px;position:relative;overflow:hidden}
+.card-top-line{position:absolute;top:0;left:0;right:0;height:2px}
+.card-glow{position:absolute;top:-40px;right:-40px;width:130px;height:130px;border-radius:50%;pointer-events:none}
+
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--orange);margin-bottom:8px}
+.eyebrow::before{content:'';display:block;width:18px;height:1.5px;background:var(--orange)}
+.eyebrow.cyan{color:var(--cyan)}
+.eyebrow.cyan::before{background:var(--cyan)}
+
+.card-title{font-family:'Orbitron',sans-serif;font-size:21px;font-weight:700;color:var(--text);margin-bottom:16px;letter-spacing:-.5px}
+
+/* Bike grid */
+.bike-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bike-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.bike-card::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--orange);transition:width .3s}
+.bike-card:hover{border-color:var(--orange);transform:translateY(-2px)}
+.bike-card:hover::after{width:100%}
+.bike-card:active{transform:scale(.97)}
+
+.bike-icon{width:38px;height:38px;background:linear-gradient(135deg,rgba(255,107,26,.15),rgba(255,107,26,.04));border:1px solid rgba(255,107,26,.25);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:var(--orange)}
+.bike-icon svg{width:20px;height:20px}
+.bike-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.bike-km{font-size:10px;color:var(--text2);margin-bottom:10px;font-family:'Orbitron',sans-serif;letter-spacing:.5px}
+.start-btn{width:100%;background:linear-gradient(135deg,var(--orange),var(--orange2));border:none;border-radius:8px;padding:8px;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:2px;text-transform:uppercase;transition:opacity .15s}
+.start-btn:hover{opacity:.9}
+
+/* Fuel list */
+.fuel-list{display:flex;flex-direction:column;gap:7px}
+.fuel-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s}
+.fuel-item:hover{border-color:var(--cyan)}
+.fuel-icon{width:36px;height:36px;background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(0,229,255,.04));border:1px solid rgba(0,229,255,.2);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--cyan)}
+.fuel-icon svg{width:18px;height:18px}
+.fuel-text{flex:1}
+.fuel-name{font-size:13px;font-weight:600;color:var(--text)}
+.fuel-since{font-size:10px;color:var(--text2)}
+.fuel-arr{color:var(--cyan);font-size:18px;font-weight:300}
+
+/* History */
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.more-link{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);cursor:pointer}
+.hist-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-icon{width:34px;height:34px;background:var(--s2);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text2)}
+.hist-icon svg{width:16px;height:16px}
+.hist-info{flex:1}
+.hist-title{font-size:12px;font-weight:600;color:var(--text)}
+.hist-sub{font-size:10px;color:var(--text2)}
+.hist-val{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ── Bottom Nav ── */
+nav{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-around;padding:10px 10px 24px;background:linear-gradient(to top,var(--bg) 70%,transparent);z-index:50}
+.nav-wrap{display:flex;align-items:center;justify-content:space-around;width:100%;background:rgba(13,17,23,.9);border:1px solid var(--border2);border-radius:24px;padding:8px 6px;backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(255,107,26,.06)}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 16px;border-radius:16px;cursor:pointer;min-width:60px;transition:all .2s}
+.ni.active{background:linear-gradient(135deg,rgba(255,107,26,.18),rgba(255,107,26,.06));border:1px solid rgba(255,107,26,.3)}
+.ni svg{width:20px;height:20px;color:var(--text3)}
+.ni.active svg{color:var(--orange)}
+.ni span{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+.ni.active span{color:var(--orange)}
+
+/* Page label */
+.plabel{text-align:center;padding:6px 0 2px;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:3px;color:var(--text3);text-transform:uppercase}
+
+/* ── Info panel ── */
+.info-panel{width:320px;display:flex;flex-direction:column;gap:20px;padding-top:48px;flex-shrink:0}
+.info-panel h2{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px}
+.info-panel h2 span{color:var(--orange)}
+.tag{display:inline-block;background:var(--orange);color:#000;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
+.desc{font-size:14px;line-height:1.8;color:#888}
+.palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.swatch{width:36px;height:36px;border-radius:8px;position:relative}
+.swatch::after{content:attr(data-label);position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:8px;color:#555;white-space:nowrap;font-family:monospace}
+.traits{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.trait{font-size:12px;color:#666;display:flex;gap:8px;align-items:flex-start}
+.trait::before{content:'—';color:var(--orange);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- Phone -->
+<div class="frame">
+  <div class="frame-inner">
+    <div class="grid-bg"></div>
+    <div class="corner-tl"></div>
+    <div class="plabel">Pattern A — Dark Circuit</div>
+
+    <header>
+      <div class="logo">MOTO</div>
+      <div class="hrow">
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Touring -->
+      <div class="card">
+        <div class="card-top-line" style="background:linear-gradient(90deg,var(--orange),transparent)"></div>
+        <div class="card-glow" style="background:radial-gradient(circle,rgba(255,107,26,.1),transparent 70%)"></div>
+        <div class="eyebrow">Ready to Ride</div>
+        <div class="card-title">ツーリング開始</div>
+        <div class="bike-grid">
+          <div class="bike-card">
+            <div class="bike-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+            <div class="bike-name">CB400SF</div>
+            <div class="bike-km">12,450 KM</div>
+            <button class="start-btn">START ›</button>
+          </div>
+          <div class="bike-card">
+            <div class="bike-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+            <div class="bike-name">NC750X</div>
+            <div class="bike-km">8,200 KM</div>
+            <button class="start-btn">START ›</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fuel -->
+      <div class="card">
+        <div class="card-top-line" style="background:linear-gradient(90deg,var(--cyan),transparent)"></div>
+        <div class="eyebrow cyan">Fuel Log</div>
+        <div class="card-title">給油を登録</div>
+        <div class="fuel-list">
+          <div class="fuel-item">
+            <div class="fuel-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+            <div class="fuel-text"><div class="fuel-name">CB400SF</div><div class="fuel-since">前回 3日前</div></div>
+            <div class="fuel-arr">›</div>
+          </div>
+          <div class="fuel-item">
+            <div class="fuel-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+            <div class="fuel-text"><div class="fuel-name">NC750X</div><div class="fuel-since">前回 1週間前</div></div>
+            <div class="fuel-arr">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title" style="margin-bottom:0;font-size:18px">ヒストリー</div>
+          <div class="more-link">MORE ›</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+          <div class="hist-info"><div class="hist-title">奥多摩ツーリング</div><div class="hist-sub">2026/06/25 · CB400SF</div></div>
+          <div class="hist-val">245km</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+          <div class="hist-info"><div class="hist-title">給油記録</div><div class="hist-sub">2026/06/22 · NC750X</div></div>
+          <div class="hist-val" style="color:var(--cyan)">32.1L</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+          <div class="hist-info"><div class="hist-title">箱根ドライブ</div><div class="hist-sub">2026/06/20 · CB400SF</div></div>
+          <div class="hist-val">189km</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+          <div class="hist-info"><div class="hist-title">オイル交換</div><div class="hist-sub">2026/06/15 · CB400SF</div></div>
+          <div class="hist-val" style="color:var(--red)">整備</div>
+        </div>
+      </div>
+    </main>
+
+    <nav>
+      <div class="nav-wrap">
+        <div class="ni active">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Home</span>
+        </div>
+        <div class="ni">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+          <span>Bike</span>
+        </div>
+        <div class="ni">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm-1 4h2v6.414l3.293 3.293-1.414 1.414L12 14.586V7z"/></svg>
+          <span>Log</span>
+        </div>
+        <div class="ni">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <span>You</span>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- Info panel -->
+<div class="info-panel">
+  <div>
+    <div class="tag">Pattern A</div>
+    <h2>Dark <span>Circuit</span></h2>
+    <p class="desc">レーシング × サイバー。OLEDブラック地にオレンジ/シアンのデュアルアクセント。Orbitronフォントで機械的な質感を演出。ドットグリッドの背景テクスチャで奥行きを出す。バイクアプリの"本気感"を最大に。</p>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:16px">Color Palette</div>
+    <div class="palette">
+      <div class="swatch" style="background:#060810;border:1px solid #333" data-label="#060810"></div>
+      <div class="swatch" style="background:#0D1117" data-label="#0D1117"></div>
+      <div class="swatch" style="background:#1C2434" data-label="#1C2434"></div>
+      <div class="swatch" style="background:#FF6B1A" data-label="#FF6B1A"></div>
+      <div class="swatch" style="background:#00E5FF" data-label="#00E5FF"></div>
+      <div class="swatch" style="background:#00D084" data-label="#00D084"></div>
+    </div>
+  </div>
+  <div style="margin-top:24px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:12px">Typography</div>
+    <div style="font-family:'Orbitron',sans-serif;font-size:18px;color:#fff;letter-spacing:-1px">Orbitron 700/900</div>
+    <div style="font-family:'Inter',sans-serif;font-size:14px;color:#888;margin-top:4px">Inter 400/500/600</div>
+  </div>
+  <div class="traits">
+    <div class="trait">SVGアイコン統一（Lucide系）</div>
+    <div class="trait">フローティングピル型ボトムナビ</div>
+    <div class="trait">カードの上辺グラデーションライン</div>
+    <div class="trait">ホバー時の下辺スライドアニメ</div>
+    <div class="trait">prefers-reduced-motion 対応</div>
+    <div class="trait">WCAG AA コントラスト準拠</div>
+  </div>
+  <div style="padding:14px;background:#0D1117;border:1px solid #1E2B3D;border-radius:10px;margin-top:4px">
+    <div style="font-size:10px;color:#FF6B1A;font-weight:700;letter-spacing:1px;margin-bottom:6px">BEST FOR</div>
+    <div style="font-size:12px;color:#888;line-height:1.7">スポーツ志向 / 夜間ライダー / ゲーマー層。ダークUIが好みのヘビーユーザー向け。</div>
+  </div>
+</div>
+
+</body>
+</html>

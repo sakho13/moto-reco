@@ -7,6 +7,7 @@
 
 .title {
   font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
   letter-spacing: -0.02em;
 }
 
@@ -51,7 +52,7 @@
   border-radius: 999px;
   font-size: 14px;
   font-weight: 600;
-  background: #171717;
+  background: #ea580c;
   color: #ffffff;
 }
 
@@ -100,8 +101,8 @@ html[data-theme-mode='dark'] .item {
 }
 
 html[data-theme-mode='dark'] .version {
-  background: rgba(255, 255, 255, 0.9);
-  color: #0a0a0a;
+  background: #ea580c;
+  color: #ffffff;
 }
 
 html[data-theme-mode='dark'] .date {

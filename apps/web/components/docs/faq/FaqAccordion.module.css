@@ -7,9 +7,9 @@
 .categoryTitle {
   font-size: 20px;
   font-weight: 700;
-  color: #171717;
-  padding-left: 8px;
-  border-left: 4px solid #171717;
+  color: #0f172a;
+  padding-left: 12px;
+  border-left: 4px solid #ea580c;
 }
 
 .itemList {
@@ -29,6 +29,6 @@
 }
 
 html[data-theme-mode='dark'] .categoryTitle {
-  color: #ededed;
-  border-left-color: #ededed;
+  color: #f1f5f9;
+  border-left-color: #ea580c;
 }

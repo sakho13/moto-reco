@@ -1,10 +1,11 @@
-import { ProviderType, UserId } from '@repo/shared-types'
+import { ProviderType, UserId, UserPlan } from '@repo/shared-types'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export type ActiveUserInfo = {
   userId: string
   role: 'USER' | 'ADMIN' | 'GUEST'
   createdAt: Date
+  plan: UserPlan | null
 }
 
 export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
@@ -44,7 +45,16 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
     const authProvider = await this.connection.mAuthProvider.findFirst({
       select: {
         user: {
-          select: { id: true, role: true, createdAt: true },
+          select: {
+            id: true,
+            role: true,
+            createdAt: true,
+            planHistories: {
+              orderBy: { changedAt: 'desc' as const },
+              take: 1,
+              select: { plan: true },
+            },
+          },
         },
       },
       where: {
@@ -59,10 +69,14 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
 
     if (!authProvider?.user) return null
 
+    const plan =
+      (authProvider.user.planHistories[0]?.plan as UserPlan | undefined) ?? null
+
     return {
       userId: authProvider.user.id,
       role: authProvider.user.role as ActiveUserInfo['role'],
       createdAt: authProvider.user.createdAt,
+      plan,
     }
   }
 

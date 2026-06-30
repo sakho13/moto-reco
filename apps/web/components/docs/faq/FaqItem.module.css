@@ -31,7 +31,7 @@
 }
 
 .question:focus-visible {
-  outline: 2px solid #171717;
+  outline: 2px solid #ea580c;
   outline-offset: -2px;
 }
 
@@ -101,7 +101,7 @@ html[data-theme-mode='dark'] .question:hover {
 }
 
 html[data-theme-mode='dark'] .question:focus-visible {
-  outline-color: #ededed;
+  outline-color: #ea580c;
 }
 
 html[data-theme-mode='dark'] .questionText {

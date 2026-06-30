@@ -27,11 +27,21 @@ export async function GET(request: NextRequest, { params }: Params) {
         },
         orderBy: { ownedAt: 'desc' },
       },
+      planHistories: {
+        orderBy: { changedAt: 'desc' as const },
+        take: 1,
+        select: { plan: true },
+      },
     },
   })
 
   if (!user) return NextResponse.json({ message: 'Not Found' }, { status: 404 })
-  return NextResponse.json(user)
+
+  const { planHistories, ...rest } = user
+  return NextResponse.json({
+    ...rest,
+    currentPlan: planHistories[0]?.plan ?? null,
+  })
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {

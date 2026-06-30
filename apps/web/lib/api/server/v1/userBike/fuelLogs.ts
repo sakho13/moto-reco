@@ -141,7 +141,7 @@ userBikeFuelLogs.post(
   honoAuthMiddleware,
   zodValidateJson(FuelLogRegisterRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userId, role, plan } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -160,7 +160,7 @@ userBikeFuelLogs.post(
       const fuelLog = await service.registerFuelLog({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
-        limits: AccountLimitsValue.from(role),
+        limits: AccountLimitsValue.from(role, plan),
         refueledAt: body.refueledAt,
         mileage: body.mileage,
         previousMileage: body.previousMileage,

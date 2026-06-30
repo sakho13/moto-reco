@@ -1,5 +1,6 @@
 import {
   ApiResponseUserProfile,
+  ApiResponseUserPlanHistory,
   ApiResponseManufacturer,
   ApiResponseUserBikeList,
   ApiResponseUserBikeDetail,
@@ -187,6 +188,9 @@ type API_EP = {
   '/api/v1/user/profile': {
     GET: SuccessResponse<ApiResponseUserProfile>
     PATCH: SuccessResponse<ApiResponseUserProfile>
+  }
+  '/api/v1/user/plan/histories': {
+    GET: SuccessResponse<ApiResponseUserPlanHistory>
   }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>

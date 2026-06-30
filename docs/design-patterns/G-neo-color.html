@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern G — Neo Color | MotoRepo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F0E8;--s1:#FFFFFF;
+  --yellow:#FFE500;--mint:#00E5CC;--coral:#FF5A4E;--blue:#2979FF;
+  --ink:#0A0A0A;--ink2:#555;
+}
+body{font-family:'Space Grotesk',sans-serif;background:#EDE8DF;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;gap:32px;flex-wrap:wrap}
+
+.frame{width:390px;background:var(--bg);border-radius:0;overflow:hidden;box-shadow:0 0 0 3px var(--ink),8px 8px 0 0 var(--yellow);position:relative;flex-shrink:0}
+.frame-inner{height:812px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.frame-inner::-webkit-scrollbar{display:none}
+
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:24px 20px 16px;background:var(--yellow);border-bottom:3px solid var(--ink)}
+.logo{font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-1px;text-transform:uppercase}
+.hrow{display:flex;gap:8px}
+.hbtn{width:36px;height:36px;background:var(--ink);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--yellow)}
+.hbtn svg{width:16px;height:16px}
+
+main{padding:16px}
+
+/* Section title */
+.sec-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--ink2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:2px;background:var(--ink)}
+
+/* Color blocks — bike cards */
+.bike-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.bike-card{border:3px solid var(--ink);padding:16px;cursor:pointer;position:relative;z-index:1;transition:transform .12s}
+.bike-card::after{content:'';position:absolute;bottom:-5px;right:-5px;left:5px;top:5px;z-index:-1;transition:all .12s}
+.bike-card.y{background:var(--yellow)}
+.bike-card.y::after{background:color-mix(in srgb,var(--yellow) 60%,#000)}
+.bike-card.m{background:var(--mint)}
+.bike-card.m::after{background:color-mix(in srgb,var(--mint) 60%,#000)}
+.bike-card:hover{transform:translate(-3px,-3px)}
+.bike-card:hover::after{bottom:-8px;right:-8px;left:8px;top:8px}
+.bike-card:active{transform:translate(2px,2px)}
+.bike-card:active::after{bottom:-3px;right:-3px;left:3px;top:3px}
+
+.bike-icon{width:36px;height:36px;background:var(--ink);display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:#fff}
+.bike-icon svg{width:18px;height:18px}
+.bike-name{font-size:14px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.bike-km{font-size:10px;color:var(--ink);font-weight:600;opacity:.6;margin-bottom:10px}
+.start-btn{width:100%;background:var(--ink);border:2px solid var(--ink);padding:9px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:2px;transition:background .12s}
+.start-btn.y:hover{background:var(--coral);border-color:var(--coral)}
+.start-btn.m:hover{background:var(--blue);border-color:var(--blue)}
+
+/* Block divider */
+.block{border:3px solid var(--ink);margin-bottom:12px;position:relative;z-index:1}
+.block::after{content:'';position:absolute;bottom:-5px;right:-5px;left:5px;top:5px;background:var(--ink);z-index:-1}
+.block-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 0}
+.block-title{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.5px}
+.block-more{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral);cursor:pointer}
+.block-body{padding:6px 14px 14px}
+
+/* Fuel rows */
+.fuel-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:2px solid var(--ink)}
+.fuel-row:last-child{border-bottom:none}
+.fuel-sq{width:32px;height:32px;background:var(--coral);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+.fuel-sq svg{width:15px;height:15px}
+.fuel-bike{font-size:14px;font-weight:700;color:var(--ink);flex:1;text-transform:uppercase;letter-spacing:.5px}
+.fuel-sub{font-size:10px;color:var(--ink2);font-weight:500}
+.fuel-btn{background:var(--coral);border:2px solid var(--ink);font-size:10px;font-weight:700;color:#fff;padding:5px 10px;cursor:pointer;font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:1px;transition:background .12s}
+.fuel-btn:hover{background:var(--blue)}
+
+/* Hist rows */
+.hist-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:2px solid var(--ink)}
+.hist-row:last-child{border-bottom:none}
+.hist-tag{font-size:9px;font-weight:700;padding:4px 7px;border:2px solid var(--ink);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.hist-tag.tour{background:var(--mint);color:var(--ink)}
+.hist-tag.fuel{background:var(--coral);color:#fff}
+.hist-info{flex:1}
+.hist-title{font-size:13px;font-weight:700;color:var(--ink)}
+.hist-sub{font-size:10px;color:var(--ink2)}
+.hist-val{font-size:14px;font-weight:700;color:var(--blue)}
+
+nav{position:sticky;bottom:0;display:flex;align-items:stretch;background:var(--mint);border-top:3px solid var(--ink);height:58px;z-index:50}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-right:2px solid var(--ink);transition:background .12s;padding:6px 0}
+.ni:last-child{border-right:none}
+.ni:hover{background:rgba(0,0,0,.06)}
+.ni.active{background:var(--ink)}
+.ni svg{width:20px;height:20px;color:var(--ink2)}
+.ni.active svg{color:var(--mint)}
+.ni span{font-size:9px;font-weight:700;color:var(--ink2);letter-spacing:1px;text-transform:uppercase}
+.ni.active span{color:var(--mint)}
+
+.info-panel{width:320px;display:flex;flex-direction:column;gap:20px;padding-top:48px;flex-shrink:0}
+.info-panel h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#0A0A0A;letter-spacing:-1px;text-transform:uppercase}
+.info-panel h2 span{color:var(--coral)}
+.tag{display:inline-block;background:var(--yellow);border:2px solid var(--ink);color:var(--ink);font-size:9px;font-weight:700;padding:3px 8px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
+.desc{font-size:14px;line-height:1.8;color:#777}
+.palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.swatch{width:36px;height:36px;border:2px solid var(--ink);position:relative}
+.swatch::after{content:attr(data-label);position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:8px;color:#999;white-space:nowrap;font-family:monospace}
+.traits{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.trait{font-size:12px;color:#888;display:flex;gap:8px}
+.trait::before{content:'—';color:var(--coral);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="frame-inner">
+
+    <header>
+      <div class="logo">MotoRepo</div>
+      <div class="hrow">
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="sec-title">ツーリング開始</div>
+      <div class="bike-grid">
+        <div class="bike-card y">
+          <div class="bike-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+          <div class="bike-name">CB400SF</div>
+          <div class="bike-km">12,450 KM</div>
+          <button class="start-btn y">START →</button>
+        </div>
+        <div class="bike-card m">
+          <div class="bike-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+          <div class="bike-name">NC750X</div>
+          <div class="bike-km">8,200 KM</div>
+          <button class="start-btn m">START →</button>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-hd"><div class="block-title">給油</div></div>
+        <div class="block-body">
+          <div class="fuel-row">
+            <div class="fuel-sq"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+            <div style="flex:1"><div class="fuel-bike">CB400SF</div><div class="fuel-sub">前回: 3日前</div></div>
+            <button class="fuel-btn">記録 →</button>
+          </div>
+          <div class="fuel-row">
+            <div class="fuel-sq"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+            <div style="flex:1"><div class="fuel-bike">NC750X</div><div class="fuel-sub">前回: 1週間前</div></div>
+            <button class="fuel-btn">記録 →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-hd"><div class="block-title">ヒストリー</div><div class="block-more">すべて →</div></div>
+        <div class="block-body">
+          <div class="hist-row">
+            <div class="hist-tag tour">TOUR</div>
+            <div class="hist-info"><div class="hist-title">奥多摩ツーリング</div><div class="hist-sub">6/25 · CB400SF</div></div>
+            <div class="hist-val">245km</div>
+          </div>
+          <div class="hist-row">
+            <div class="hist-tag fuel">FUEL</div>
+            <div class="hist-info"><div class="hist-title">給油記録</div><div class="hist-sub">6/22 · NC750X</div></div>
+            <div class="hist-val">32.1L</div>
+          </div>
+          <div class="hist-row">
+            <div class="hist-tag tour">TOUR</div>
+            <div class="hist-info"><div class="hist-title">箱根ドライブ</div><div class="hist-sub">6/20 · CB400SF</div></div>
+            <div class="hist-val">189km</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav>
+      <div class="ni active">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>HOME</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+        <span>BIKE</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>LOG</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span>ME</span>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<div class="info-panel">
+  <div>
+    <div class="tag">Pattern G</div>
+    <h2>Neo <span>Color</span></h2>
+    <p class="desc">カラーネオブルータリスト。黄色/ミント/コーラル/青のブロックカラーと太いソリッドボーダー、カラーオフセットシャドウ。ポップで遊び心があり一目で記憶に残る。</p>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#999;text-transform:uppercase;margin-bottom:16px">Color Palette</div>
+    <div class="palette">
+      <div class="swatch" style="background:#F5F0E8" data-label="#F5F0E8"></div>
+      <div class="swatch" style="background:#FFE500" data-label="#FFE500"></div>
+      <div class="swatch" style="background:#00E5CC" data-label="#00E5CC"></div>
+      <div class="swatch" style="background:#FF5A4E" data-label="#FF5A4E"></div>
+      <div class="swatch" style="background:#2979FF" data-label="#2979FF"></div>
+      <div class="swatch" style="background:#0A0A0A" data-label="#0A0A0A"></div>
+    </div>
+  </div>
+  <div style="margin-top:24px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#999;text-transform:uppercase;margin-bottom:12px">Typography</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:18px;color:#0A0A0A;font-weight:700;letter-spacing:-1px">Space Grotesk</div>
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;color:#888;margin-top:4px">700 — uppercase heavy</div>
+  </div>
+  <div class="traits">
+    <div class="trait">バイクカードをカラーブロック（黄/ミント）で塗り分け</div>
+    <div class="trait">カラーオフセット shadow（黒でなく色付き）</div>
+    <div class="trait">黄ヘッダー + ミントナビ + コーラル CTA</div>
+    <div class="trait">ホバーでボタン色が変化</div>
+    <div class="trait">shadow なし / gradient なし — 平面ブロック一択</div>
+  </div>
+  <div style="padding:14px;background:#FFF;border:2px solid #0A0A0A;margin-top:4px;position:relative">
+    <div style="position:absolute;bottom:-5px;right:-5px;left:5px;top:5px;background:#FFE500;z-index:-1"></div>
+    <div style="font-size:10px;color:var(--coral);font-weight:700;letter-spacing:1px;margin-bottom:6px">BEST FOR</div>
+    <div style="font-size:12px;color:#666;line-height:1.7">若年層 / 遊び心のあるブランド / アプリのオンボーディング画面。視覚的インパクト最大。</div>
+  </div>
+</div>
+
+</body>
+</html>

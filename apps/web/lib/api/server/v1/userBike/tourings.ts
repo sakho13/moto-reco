@@ -97,7 +97,7 @@ userBikeTourings.post(
   honoAuthMiddleware,
   zodValidateJson(TouringRegisterRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userId, role, plan } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -114,7 +114,7 @@ userBikeTourings.post(
       const touring = await service.registerTouring({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         userId: createUserId(userId),
-        limits: AccountLimitsValue.from(role),
+        limits: AccountLimitsValue.from(role, plan),
         title: body.title,
         startDate: body.startDate,
         endDate: body.endDate,
@@ -205,7 +205,7 @@ userBikeTourings.post(
   honoAuthMiddleware,
   zodValidateJson(TouringStartEndRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userId, role, plan } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -230,7 +230,7 @@ userBikeTourings.post(
           action: 'start',
           myUserBikeId: createMyUserBikeId(myUserBikeId),
           userId: createUserId(userId),
-          limits: AccountLimitsValue.from(role),
+          limits: AccountLimitsValue.from(role, plan),
           touringPlanId: body.touringPlanId,
           title: body.title,
           startDate: body.startDate,
