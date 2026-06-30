@@ -3,6 +3,7 @@ import Link from 'next/link'
 import styles from './page.module.css'
 import { getReleaseNotes } from '@/lib/microcms/releaseNote'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
+import { stripHtmlToText } from '@/lib/utils/html'
 
 export const revalidate = 300
 
@@ -66,10 +67,8 @@ export default async function ReleaseNotePage() {
                 </time>
               </div>
               <h2 className={styles.itemTitle}>{note.title}</h2>
-              <div
-                className={styles.content}
-                dangerouslySetInnerHTML={{ __html: note.content }}
-              />
+              <p className={styles.excerpt}>{stripHtmlToText(note.content)}</p>
+              <span className={styles.readMore}>詳細を見る →</span>
             </Link>
           ))}
         </div>
