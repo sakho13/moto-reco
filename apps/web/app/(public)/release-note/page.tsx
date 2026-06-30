@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import styles from './page.module.css'
 import { microCMSClient } from '@/lib/microcms/config'
 import type { ReleaseNote } from '@/lib/microcms/types'
@@ -65,7 +66,11 @@ export default async function ReleaseNotePage() {
       ) : (
         <div className={styles.list}>
           {releaseNotes.map((note) => (
-            <article key={note.id} className={styles.item}>
+            <Link
+              key={note.id}
+              href={`/release-note/${note.version}`}
+              className={styles.item}
+            >
               <div className={styles.itemHeader}>
                 <span className={styles.version}>v{note.version}</span>
                 <time
@@ -86,7 +91,7 @@ export default async function ReleaseNotePage() {
                 className={styles.content}
                 dangerouslySetInnerHTML={{ __html: note.content }}
               />
-            </article>
+            </Link>
           ))}
         </div>
       )}

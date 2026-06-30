@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { getCurrentDate } from '@repo/shared-utils'
 import { microCMSClient } from '@/lib/microcms/config'
-import type { Blog } from '@/lib/microcms/types'
+import type { Blog, ReleaseNote } from '@/lib/microcms/types'
 import { SITE_URL } from '@/lib/statics'
 
 export const revalidate = 300
@@ -53,9 +53,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  const [blogPages] = await Promise.all([fetchBlogPages()])
+  const [blogPages, releaseNotePages] = await Promise.all([
+    fetchBlogPages(),
+    fetchReleaseNotePages(),
+  ])
 
-  return [...staticPages, ...blogPages]
+  return [...staticPages, ...blogPages, ...releaseNotePages]
 }
 
 async function fetchBlogPages() {
@@ -83,6 +86,38 @@ async function fetchBlogPages() {
     }))
   } catch (error) {
     console.error('[sitemap] ブログ記事取得失敗', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    })
+    return []
+  }
+}
+
+async function fetchReleaseNotePages() {
+  try {
+    if (!microCMSClient) return []
+    const data = await microCMSClient.getList<ReleaseNote>({
+      endpoint: 'motoreco-releases',
+      queries: {
+        orders: '-publishedAt',
+        limit: 100,
+        fields: 'version,updatedAt',
+        filters:
+          process.env.NODE_ENV !== 'development'
+            ? 'status[contains]published'
+            : undefined,
+      },
+    })
+    console.log(`[sitemap] リリースノート取得: ${data.contents.length}件`)
+
+    return data.contents.map((note): MetadataRoute.Sitemap[number] => ({
+      url: `${SITE_URL}/release-note/${note.version}`,
+      lastModified: new Date(note.updatedAt),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    }))
+  } catch (error) {
+    console.error('[sitemap] リリースノート取得失敗', {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
     })
