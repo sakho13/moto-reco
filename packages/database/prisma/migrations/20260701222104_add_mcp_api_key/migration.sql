@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "MApiKeyScope" AS ENUM ('READ', 'WRITE');
+
 -- CreateTable
 CREATE TABLE "MApiKey" (
     "id" TEXT NOT NULL,
@@ -5,6 +8,7 @@ CREATE TABLE "MApiKey" (
     "name" TEXT NOT NULL,
     "key_hash" TEXT NOT NULL,
     "prefix" TEXT NOT NULL,
+    "scopes" "MApiKeyScope"[] DEFAULT ARRAY['READ']::"MApiKeyScope"[],
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ NOT NULL,
