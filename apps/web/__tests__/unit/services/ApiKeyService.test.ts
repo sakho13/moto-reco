@@ -9,18 +9,20 @@ import { ApiKeyService } from '@/lib/api/server/services/ApiKeyService'
 const buildUserEntity = (
   overrides: Partial<{
     role: 'USER' | 'ADMIN' | 'GUEST'
-    plan: 'FREE' | 'PREMIUM' | 'UNLIMITED'
+    plan: 'FREE' | 'PREMIUM' | null
   }> = {}
 ) =>
-  new UserEntity({
-    id: createUserId('user-1'),
-    name: 'Test User',
-    role: overrides.role ?? 'USER',
-    status: 'ACTIVE',
-    plan: overrides.plan === 'UNLIMITED' ? 'FREE' : (overrides.plan ?? 'FREE'),
-    notificationEmail: null,
-    isProfilePublic: true,
-  })
+  new UserEntity(
+    {
+      id: createUserId('user-1'),
+      name: 'Test User',
+      role: overrides.role ?? 'USER',
+      status: 'ACTIVE',
+      notificationEmail: null,
+      isProfilePublic: true,
+    },
+    overrides.plan !== undefined ? overrides.plan : 'FREE'
+  )
 
 const buildApiKeyEntity = (
   overrides: Partial<ConstructorParameters<typeof ApiKeyEntity>[0]> = {}
@@ -170,11 +172,11 @@ describe('ApiKeyService.generateApiKey()', () => {
     expect(repository.countActiveByUserId).not.toHaveBeenCalled()
   })
 
-  test('ADMIN (UNLIMITED) → 成功（プラン制限なし）', async () => {
+  test('ADMIN (null plan) → 成功（プラン制限なし）', async () => {
     vi.mocked(repository.create).mockResolvedValue(buildApiKeyEntity())
 
     const result = await service.generateApiKey({
-      user: buildUserEntity({ role: 'ADMIN' }),
+      user: buildUserEntity({ role: 'ADMIN', plan: null }),
       name: 'key',
       scopes: ['READ'],
     })

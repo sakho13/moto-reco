@@ -614,13 +614,13 @@ user.post(
  * - role !== 'USER' の場合は空配列を返す
  */
 user.get('/plan/histories', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
 
   const userRepo = new PrismaUserRepository(prisma)
   const planHistoryRepo = new PrismaUserPlanHistoryRepository(prisma)
   const service = new UserPlanService(userRepo, planHistoryRepo)
 
-  const histories = await service.getPlanHistories(userId)
+  const histories = await service.getPlanHistories(userEntity.id)
 
   return c.json<SuccessResponse<ApiResponseUserPlanHistory>>({
     status: 'success',
@@ -647,9 +647,9 @@ user.patch(
   honoAuthMiddleware,
   zodValidateJson(ChangePlanRequestSchema),
   async (c) => {
-    const { userId: adminUserId, role } = c.var.user!
+    const { userEntity } = c.var.user!
 
-    if (role !== 'ADMIN') {
+    if (userEntity.role !== 'ADMIN') {
       throw new ApiV1Error('FORBIDDEN', 'この操作は管理者のみ実行できます')
     }
 
@@ -662,7 +662,7 @@ user.patch(
     await service.changePlan(
       createUserId(body.targetUserId),
       body.plan,
-      adminUserId,
+      userEntity.id,
       body.reason ?? null
     )
 

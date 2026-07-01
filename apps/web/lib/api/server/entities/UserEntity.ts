@@ -1,4 +1,9 @@
-import { type ApiKeyScope, type User, type UserId, type UserPlan } from '@repo/shared-types'
+import {
+  type ApiKeyScope,
+  type User,
+  type UserId,
+  type UserPlan,
+} from '@repo/shared-types'
 import { PLAN_ALLOWED_SCOPES } from '../../../statics'
 import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 import { PlanLimitsValue } from '../valueObjects/PlanLimitsValue'

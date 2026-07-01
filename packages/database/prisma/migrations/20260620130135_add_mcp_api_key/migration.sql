@@ -1,9 +1,3 @@
--- CreateEnum
-CREATE TYPE "MUserPlan" AS ENUM ('FREE', 'PREMIUM');
-
--- AlterTable
-ALTER TABLE "MUser" ADD COLUMN     "plan" "MUserPlan" NOT NULL DEFAULT 'FREE';
-
 -- CreateTable
 CREATE TABLE "MApiKey" (
     "id" TEXT NOT NULL,

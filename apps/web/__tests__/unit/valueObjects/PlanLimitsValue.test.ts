@@ -14,8 +14,8 @@ describe('PlanLimitsValue', () => {
       expect(limits.apiKey).toBeNull()
     })
 
-    test('UNLIMITED: apiKey は null（無制限）', () => {
-      const limits = PlanLimitsValue.from('UNLIMITED')
+    test('null（admin）: apiKey は null（無制限）', () => {
+      const limits = PlanLimitsValue.from(null)
       expect(limits.apiKey).toBeNull()
     })
 
@@ -41,8 +41,8 @@ describe('PlanLimitsValue', () => {
       expect(limits.isOver('apiKey', 999)).toBe(false)
     })
 
-    test("UNLIMITED: isOver('apiKey', 999) === false", () => {
-      const limits = PlanLimitsValue.from('UNLIMITED')
+    test("null（admin）: isOver('apiKey', 999) === false", () => {
+      const limits = PlanLimitsValue.from(null)
       expect(limits.isOver('apiKey', 999)).toBe(false)
     })
   })
@@ -62,8 +62,8 @@ describe('PlanLimitsValue', () => {
       expect(message).toBe('利用上限に達しました')
     })
 
-    test('UNLIMITED の apiKey: フォールバックメッセージが返る', () => {
-      const limits = PlanLimitsValue.from('UNLIMITED')
+    test('null（admin）の apiKey: フォールバックメッセージが返る', () => {
+      const limits = PlanLimitsValue.from(null)
       const message = limits.limitMessage('apiKey')
       expect(message).toBe('利用上限に達しました')
     })

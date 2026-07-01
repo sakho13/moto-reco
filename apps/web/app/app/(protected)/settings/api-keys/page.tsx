@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import type { ApiKeyScope } from '@repo/shared-types'
+import type { ApiKeyScope, UserPlan } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { Input } from '@repo/ui/input'
@@ -61,12 +61,12 @@ function ApiKeysSettingsPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
   const [selectedScopes, setSelectedScopes] = useState<ApiKeyScope[]>(['READ'])
-  const [userPlan, setUserPlan] = useState<string>('FREE')
+  const [userPlan, setUserPlan] = useState<UserPlan | null>(null)
   const [generatedKey, setGeneratedKey] = useState<GeneratedKey | null>(null)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const isPremium = userPlan === 'PREMIUM' || userPlan === 'UNLIMITED'
+  const isPremium = userPlan === 'PREMIUM'
 
   const fetchKeys = useCallback(async () => {
     try {
@@ -83,7 +83,7 @@ function ApiKeysSettingsPage() {
     if (!isGuest) {
       fetchKeys()
       apiGet('/api/v1/user/profile')
-        .then((res) => setUserPlan(res.data.plan))
+        .then((res) => setUserPlan(res.data.plan ?? null))
         .catch(() => {})
     } else {
       setIsLoading(false)

@@ -1,6 +1,6 @@
 import { Context, Next } from 'hono'
 import { prisma } from '@repo/database'
-import { createUserId, UserPlan } from '@repo/shared-types'
+import { createUserId } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
 import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { UserEntity } from '../entities/UserEntity'
@@ -62,15 +62,17 @@ export async function honoAuthMiddleware(
     }
 
     // Honoのコンテキストにユーザー情報を設定
-    const userEntity = new UserEntity({
-      id: createUserId(userInfo.userId),
-      name: userInfo.name,
-      role: userInfo.role,
-      status: userInfo.status,
-      plan: userInfo.plan as UserPlan,
-      notificationEmail: userInfo.notificationEmail,
-      isProfilePublic: userInfo.isProfilePublic,
-    })
+    const userEntity = new UserEntity(
+      {
+        id: createUserId(userInfo.userId),
+        name: userInfo.name,
+        role: userInfo.role,
+        status: userInfo.status,
+        notificationEmail: userInfo.notificationEmail,
+        isProfilePublic: userInfo.isProfilePublic,
+      },
+      userInfo.plan
+    )
     c.set('user', {
       userEntity,
       email: authProvider.metadata?.email as string | undefined,
