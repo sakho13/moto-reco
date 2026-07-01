@@ -58,181 +58,174 @@ async function authenticate(
   return (await service.verifyApiKey(token)) ?? null
 }
 
-function requireScope(scopes: ApiKeyScope[], required: ApiKeyScope): void {
-  if (!scopes.includes(required)) {
-    throw new Error(`このツールには ${required} スコープが必要です`)
-  }
-}
-
 function buildMcpServer(userId: string, scopes: ApiKeyScope[]): McpServer {
   const server = new McpServer({
     name: 'motoreco',
     version: '1.0.0',
   })
 
-  server.tool(
-    'list_bikes',
-    '登録されているマイバイクの一覧を取得します',
-    async () => {
-      requireScope(scopes, 'READ')
-      const bikes = await prisma.tUserMyBike.findMany({
-        where: { userId, ownStatus: 'OWN' },
-        include: {
-          userBike: {
-            include: { bike: { include: { manufacturer: true } } },
+  if (scopes.includes('READ')) {
+    server.tool(
+      'list_bikes',
+      '登録されているマイバイクの一覧を取得します',
+      async () => {
+        const bikes = await prisma.tUserMyBike.findMany({
+          where: { userId, ownStatus: 'OWN' },
+          include: {
+            userBike: {
+              include: { bike: { include: { manufacturer: true } } },
+            },
           },
-        },
-        orderBy: { ownedAt: 'desc' },
-      })
-      const data = bikes.map((b) => ({
-        myUserBikeId: b.id,
-        nickname: b.nickname ?? null,
-        manufacturer: b.userBike.bike?.manufacturer.name ?? null,
-        modelName: b.userBike.bike?.modelName ?? null,
-        displacement: b.userBike.displacement,
-        totalMileage: b.userBike.totalMileage,
-        ownedAt: b.ownedAt.toISOString(),
-      }))
-      return {
-        content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
-      }
-    }
-  )
-
-  server.tool(
-    'list_touring_plans',
-    '指定バイクのツーリングプラン一覧を取得します',
-    { myUserBikeId: z.string().describe('マイバイクID') },
-    async ({ myUserBikeId }) => {
-      requireScope(scopes, 'READ')
-      const plans = await prisma.tUserMyBikeTouringPlan.findMany({
-        where: { userMyBikeId: myUserBikeId, userMyBike: { userId } },
-        include: {
-          spots: {
-            where: { type: 'DESTINATION' },
-            select: { name: true, latitude: true, longitude: true },
-            take: 1,
-          },
-        },
-        orderBy: { updatedAt: 'desc' },
-      })
-      const data = plans.map((p) => ({
-        touringPlanId: p.id,
-        title: p.title,
-        destination: p.spots[0]
-          ? {
-              name: p.spots[0].name,
-              latitude: p.spots[0].latitude,
-              longitude: p.spots[0].longitude,
-            }
-          : null,
-        updatedAt: p.updatedAt.toISOString(),
-      }))
-      return {
-        content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
-      }
-    }
-  )
-
-  server.tool(
-    'get_touring_plan',
-    'ツーリングプランの詳細（スポット含む）を取得します',
-    { touringPlanId: z.string().describe('ツーリングプランID') },
-    async ({ touringPlanId }) => {
-      requireScope(scopes, 'READ')
-      const plan = await prisma.tUserMyBikeTouringPlan.findFirst({
-        where: { id: touringPlanId, userMyBike: { userId } },
-        include: { spots: { orderBy: { sortOrder: 'asc' } } },
-      })
-      if (!plan) {
+          orderBy: { ownedAt: 'desc' },
+        })
+        const data = bikes.map((b) => ({
+          myUserBikeId: b.id,
+          nickname: b.nickname ?? null,
+          manufacturer: b.userBike.bike?.manufacturer.name ?? null,
+          modelName: b.userBike.bike?.modelName ?? null,
+          displacement: b.userBike.displacement,
+          totalMileage: b.userBike.totalMileage,
+          ownedAt: b.ownedAt.toISOString(),
+        }))
         return {
-          content: [{ type: 'text', text: 'プランが見つかりません' }],
-          isError: true,
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
         }
       }
-      const data = {
-        touringPlanId: plan.id,
-        title: plan.title,
-        spots: plan.spots.map((s) => ({
-          spotId: s.id,
-          type: s.type,
-          name: s.name,
-          latitude: s.latitude,
-          longitude: s.longitude,
-          memo: s.memo,
-          stayMinutes: s.stayMinutes,
-          travelMinutesFromPrev: s.travelMinutesFromPrev,
-          routeTypeFromPrev: s.routeTypeFromPrev,
-          sortOrder: s.sortOrder,
-        })),
-      }
-      return {
-        content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
-      }
-    }
-  )
+    )
 
-  server.tool(
-    'get_maintenance_status',
-    'バイクのメンテナンス状況と次回推奨時期を取得します',
-    { myUserBikeId: z.string().describe('マイバイクID') },
-    async ({ myUserBikeId }) => {
-      requireScope(scopes, 'READ')
-      const myBike = await prisma.tUserMyBike.findFirst({
-        where: { id: myUserBikeId, userId },
-        include: {
-          userBike: {
-            include: { bike: { include: { bikeMaintenanceTypes: true } } },
+    server.tool(
+      'list_touring_plans',
+      '指定バイクのツーリングプラン一覧を取得します',
+      { myUserBikeId: z.string().describe('マイバイクID') },
+      async ({ myUserBikeId }) => {
+        const plans = await prisma.tUserMyBikeTouringPlan.findMany({
+          where: { userMyBikeId: myUserBikeId, userMyBike: { userId } },
+          include: {
+            spots: {
+              where: { type: 'DESTINATION' },
+              select: { name: true, latitude: true, longitude: true },
+              take: 1,
+            },
           },
-        },
-      })
-      if (!myBike) {
+          orderBy: { updatedAt: 'desc' },
+        })
+        const data = plans.map((p) => ({
+          touringPlanId: p.id,
+          title: p.title,
+          destination: p.spots[0]
+            ? {
+                name: p.spots[0].name,
+                latitude: p.spots[0].latitude,
+                longitude: p.spots[0].longitude,
+              }
+            : null,
+          updatedAt: p.updatedAt.toISOString(),
+        }))
         return {
-          content: [{ type: 'text', text: 'バイクが見つかりません' }],
-          isError: true,
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
         }
       }
-      const latestLogs = await prisma.tUserMyBikeMaintenance.findMany({
-        where: { userMyBikeId: myUserBikeId },
-        include: { maintenanceItems: true },
-        orderBy: { performedAt: 'desc' },
-      })
-      const latestByType: Record<
-        string,
-        { mileage: number; performedAt: Date }
-      > = {}
-      for (const log of latestLogs) {
-        for (const item of log.maintenanceItems) {
-          if (!latestByType[item.type]) {
-            latestByType[item.type] = {
-              mileage: log.mileage,
-              performedAt: log.performedAt,
+    )
+
+    server.tool(
+      'get_touring_plan',
+      'ツーリングプランの詳細（スポット含む）を取得します',
+      { touringPlanId: z.string().describe('ツーリングプランID') },
+      async ({ touringPlanId }) => {
+        const plan = await prisma.tUserMyBikeTouringPlan.findFirst({
+          where: { id: touringPlanId, userMyBike: { userId } },
+          include: { spots: { orderBy: { sortOrder: 'asc' } } },
+        })
+        if (!plan) {
+          return {
+            content: [{ type: 'text', text: 'プランが見つかりません' }],
+            isError: true,
+          }
+        }
+        const data = {
+          touringPlanId: plan.id,
+          title: plan.title,
+          spots: plan.spots.map((s) => ({
+            spotId: s.id,
+            type: s.type,
+            name: s.name,
+            latitude: s.latitude,
+            longitude: s.longitude,
+            memo: s.memo,
+            stayMinutes: s.stayMinutes,
+            travelMinutesFromPrev: s.travelMinutesFromPrev,
+            routeTypeFromPrev: s.routeTypeFromPrev,
+            sortOrder: s.sortOrder,
+          })),
+        }
+        return {
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+        }
+      }
+    )
+
+    server.tool(
+      'get_maintenance_status',
+      'バイクのメンテナンス状況と次回推奨時期を取得します',
+      { myUserBikeId: z.string().describe('マイバイクID') },
+      async ({ myUserBikeId }) => {
+        const myBike = await prisma.tUserMyBike.findFirst({
+          where: { id: myUserBikeId, userId },
+          include: {
+            userBike: {
+              include: { bike: { include: { bikeMaintenanceTypes: true } } },
+            },
+          },
+        })
+        if (!myBike) {
+          return {
+            content: [{ type: 'text', text: 'バイクが見つかりません' }],
+            isError: true,
+          }
+        }
+        const latestLogs = await prisma.tUserMyBikeMaintenance.findMany({
+          where: { userMyBikeId: myUserBikeId },
+          include: { maintenanceItems: true },
+          orderBy: { performedAt: 'desc' },
+        })
+        const latestByType: Record<
+          string,
+          { mileage: number; performedAt: Date }
+        > = {}
+        for (const log of latestLogs) {
+          for (const item of log.maintenanceItems) {
+            if (!latestByType[item.type]) {
+              latestByType[item.type] = {
+                mileage: log.mileage,
+                performedAt: log.performedAt,
+              }
             }
           }
         }
-      }
-      const currentMileage = myBike.userBike.totalMileage
-      const maintenanceTypes = myBike.userBike.bike?.bikeMaintenanceTypes ?? []
-      const items = maintenanceTypes.map((mt) => {
-        const last = latestByType[mt.type]
-        const nextMileage = last ? last.mileage + mt.recommendedMileage : null
+        const currentMileage = myBike.userBike.totalMileage
+        const maintenanceTypes =
+          myBike.userBike.bike?.bikeMaintenanceTypes ?? []
+        const items = maintenanceTypes.map((mt) => {
+          const last = latestByType[mt.type]
+          const nextMileage = last ? last.mileage + mt.recommendedMileage : null
+          return {
+            type: mt.type,
+            recommendedMileage: mt.recommendedMileage,
+            recommendedPeriodMonths: mt.recommendedPeriod,
+            lastPerformedAt: last?.performedAt.toISOString() ?? null,
+            lastPerformedMileage: last?.mileage ?? null,
+            nextRecommendedMileage: nextMileage,
+            overdueByMileage:
+              nextMileage !== null ? currentMileage - nextMileage : null,
+          }
+        })
+        const data = { myUserBikeId, currentMileage, maintenanceItems: items }
         return {
-          type: mt.type,
-          recommendedMileage: mt.recommendedMileage,
-          recommendedPeriodMonths: mt.recommendedPeriod,
-          lastPerformedAt: last?.performedAt.toISOString() ?? null,
-          lastPerformedMileage: last?.mileage ?? null,
-          nextRecommendedMileage: nextMileage,
-          overdueByMileage:
-            nextMileage !== null ? currentMileage - nextMileage : null,
+          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
         }
-      })
-      const data = { myUserBikeId, currentMileage, maintenanceItems: items }
-      return {
-        content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
       }
-    }
-  )
+    )
+  }
 
   return server
 }

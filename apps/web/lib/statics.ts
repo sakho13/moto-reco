@@ -64,11 +64,6 @@ export const PREMIUM_USER_LIMITS = {
 import type { ApiKeyScope, UserPlan } from '@repo/shared-types'
 
 /**
- * プラン別制限チェックの対象種別
- */
-export type PlanLimitKey = 'apiKey'
-
-/**
  * プラン別に許可されるAPIキースコープ
  */
 export const PLAN_ALLOWED_SCOPES: Record<UserPlan, ApiKeyScope[]> = {
@@ -79,10 +74,7 @@ export const PLAN_ALLOWED_SCOPES: Record<UserPlan, ApiKeyScope[]> = {
 /**
  * プラン別制限値（null = 無制限）
  */
-export const PLAN_LIMITS: Record<
-  UserPlan,
-  Record<PlanLimitKey, number | null>
-> = {
+export const PLAN_LIMITS: Record<UserPlan, { apiKey: number | null }> = {
   FREE: {
     apiKey: 1,
   },

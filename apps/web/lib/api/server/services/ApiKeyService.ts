@@ -3,7 +3,7 @@ import type { ApiKeyScope } from '@repo/shared-types'
 import { ApiKeyEntity } from '../entities/ApiKeyEntity'
 import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
-import { IApiKeyRepository } from '../interfaces/IApiKeyRepository'
+import type { IApiKeyRepository } from '../interfaces/IApiKeyRepository'
 
 export type GeneratedApiKey = {
   apiKey: ApiKeyEntity
@@ -18,7 +18,7 @@ export class ApiKeyService {
    * APIキーを生成して保存する
    *
    * @remarks
-   * GUESTは利用不可。プラン別制限は planLimits で管理する。
+   * GUESTは利用不可。プラン別制限は userEntity.limits で管理する。
    * fullKey は発行時のみ返すため、呼び出し元で安全に扱うこと。
    */
   async generateApiKey(params: {
@@ -33,16 +33,13 @@ export class ApiKeyService {
       )
     }
 
-    const planLimits = params.user.planLimits
-    if (planLimits.apiKey !== null) {
+    const limits = params.user.limits
+    if (limits.apiKey !== null) {
       const count = await this._apiKeyRepository.countActiveByUserId(
         String(params.user.id)
       )
-      if (planLimits.isOver('apiKey', count)) {
-        throw new ApiV1Error(
-          'INVALID_REQUEST',
-          planLimits.limitMessage('apiKey')
-        )
+      if (limits.isOver('apiKey', count)) {
+        throw new ApiV1Error('INVALID_REQUEST', limits.limitMessage('apiKey'))
       }
     }
 
@@ -53,7 +50,7 @@ export class ApiKeyService {
       )
     }
 
-    const allowedScopes = params.user.planAllowedScopes
+    const allowedScopes = limits.allowedScopes
     const invalidScopes = params.scopes.filter(
       (s) => !allowedScopes.includes(s)
     )
