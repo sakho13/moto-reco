@@ -103,10 +103,17 @@ export class AccountLimitsValue {
       )
     }
     // ADMIN: 全て無制限
-    return new AccountLimitsValue(role, null, null, null, null, null, null, null, [
-      'READ',
-      'WRITE',
-    ])
+    return new AccountLimitsValue(
+      role,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      ['READ', 'WRITE']
+    )
   }
 
   /**

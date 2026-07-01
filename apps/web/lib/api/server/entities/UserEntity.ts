@@ -1,8 +1,4 @@
-import {
-  type User,
-  type UserId,
-  type UserPlan,
-} from '@repo/shared-types'
+import { type User, type UserId, type UserPlan } from '@repo/shared-types'
 import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 
 export class UserEntity {
