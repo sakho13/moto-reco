@@ -126,6 +126,13 @@ export default function McpSetupPage() {
               ツーリングプランの詳細（スポット含む）を取得
             </li>
             <li>
+              <strong>list_touring_history</strong> —
+              指定バイクのツーリング履歴一覧を取得
+            </li>
+            <li>
+              <strong>get_touring_history</strong> — ツーリング履歴の詳細を取得
+            </li>
+            <li>
               <strong>get_maintenance_status</strong> —
               バイクのメンテナンス状況と次回推奨時期を取得
             </li>
