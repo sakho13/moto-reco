@@ -5,11 +5,11 @@ import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
   title: `MCP セットアップ`,
-  description: `${APP_NAME} の MCP サーバーを Claude Code や Claude Desktop から利用するための設定方法です。`,
+  description: `${APP_NAME} の MCP サーバーを Claude Code や Claude Desktop、ChatGPT から利用するための設定方法です。`,
   openGraph: {
     url: `${SITE_URL}/docs/mcp`,
     title: `MCP セットアップ | ${APP_NAME}`,
-    description: `${APP_NAME} の MCP サーバーを Claude Code や Claude Desktop から利用するための設定方法です。`,
+    description: `${APP_NAME} の MCP サーバーを Claude Code や Claude Desktop、ChatGPT から利用するための設定方法です。`,
     images: ['/top_image_1.png'],
   },
   twitter: {
@@ -34,7 +34,7 @@ const claudeCodeContent = (
   "mcpServers": {
     "motoreco": {
       "type": "http",
-      "url": "https://moto-reco.com/api/mcp",
+      "url": "${SITE_URL}/api/mcp",
       "headers": {
         "Authorization": "Bearer <発行したAPIキー>"
       }
@@ -61,7 +61,7 @@ const claudeDesktopContent = (
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://moto-reco.com/api/mcp",
+        "${SITE_URL}/api/mcp",
         "--header",
         "Authorization: Bearer <発行したAPIキー>"
       ]
@@ -71,13 +71,40 @@ const claudeDesktopContent = (
   </div>
 )
 
+const chatGptContent = (
+  <div className={styles.tabContent}>
+    <p className={styles.sectionBody}>
+      ChatGPT の「設定」→「コネクタ」（Settings → Connectors）から追加します。
+      利用にはPlus/Pro/Business/Enterpriseなど対応プランと、
+      開発者モード（Developer mode）の有効化が必要な場合があります。
+    </p>
+    <ol className={styles.orderedList}>
+      <li>
+        「コネクタを作成」（Create connector）をクリックし、名前（例:
+        motoreco）を入力
+      </li>
+      <li>
+        MCPサーバーURLに{' '}
+        <code className={styles.inlineCode}>{`${SITE_URL}/api/mcp`}</code>{' '}
+        を入力
+      </li>
+      <li>
+        認証方法で「カスタムヘッダー」（Custom header）を選択し、以下を入力
+        <pre className={styles.codeBlock}>{`ヘッダー名: Authorization
+値: Bearer <発行したAPIキー>`}</pre>
+      </li>
+      <li>保存後、チャット画面でコネクタを有効にすると利用できます</li>
+    </ol>
+  </div>
+)
+
 export default function McpSetupPage() {
   return (
     <>
       <div className={styles.header}>
         <h1 className={styles.title}>MCP セットアップ</h1>
         <p className={styles.description}>
-          {APP_NAME} の MCP サーバーを Claude Code や Claude Desktop
+          {APP_NAME} の MCP サーバーを Claude Code や Claude Desktop、ChatGPT
           から利用するための設定方法です。
         </p>
       </div>
@@ -105,6 +132,11 @@ export default function McpSetupPage() {
                 id: 'claude-desktop',
                 label: 'Claude Desktop',
                 content: claudeDesktopContent,
+              },
+              {
+                id: 'chatgpt',
+                label: 'ChatGPT',
+                content: chatGptContent,
               },
             ]}
           />
