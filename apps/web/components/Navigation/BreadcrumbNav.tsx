@@ -74,17 +74,20 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
   }
 
   if (segments[1] === 'profile') {
+    items.push({ label: 'プロフィール', href: '/app/profile' })
+
     if (segments[2] === 'account') {
-      items.push({ label: 'プロフィール', href: '/app/profile' })
       items.push({ label: '認証情報' })
-      return items
+    } else if (segments[2] === 'plan') {
+      items.push({ label: 'プラン' })
     }
-    items.push({ label: 'プロフィール' })
+
     return items
   }
 
   if (segments[1] === 'settings' && segments[2] === 'api-keys') {
-    items.push({ label: 'APIキー管理' })
+    items.push({ label: 'プロフィール', href: '/app/profile' })
+    items.push({ label: 'MCP APIキー管理' })
     return items
   }
 
