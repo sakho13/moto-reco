@@ -12,6 +12,7 @@ import { SpotEntity } from '@/lib/api/server/entities/SpotEntity'
 import { TouringEntity } from '@/lib/api/server/entities/TouringEntity'
 import { TouringPlanEntity } from '@/lib/api/server/entities/TouringPlanEntity'
 import { TouringPlanSpotEntity } from '@/lib/api/server/entities/TouringPlanSpotEntity'
+import { UserEntity } from '@/lib/api/server/entities/UserEntity'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { IFuelLogRepository } from '@/lib/api/server/interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '@/lib/api/server/interfaces/IMyUserBikeRepository'
@@ -20,10 +21,22 @@ import { ITouringPlanRepository } from '@/lib/api/server/interfaces/ITouringPlan
 import { ITouringPlanSpotRepository } from '@/lib/api/server/interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '@/lib/api/server/interfaces/ITouringRepository'
 import { TouringService } from '@/lib/api/server/services/TouringService'
-import { AccountLimitsValue } from '@/lib/api/server/valueObjects/AccountLimitsValue'
 
 const myUserBikeId = createMyUserBikeId('bike-1')
 const userId = createUserId('user-1')
+
+const buildUserEntity = (
+  overrides: Partial<{ role: 'USER' | 'ADMIN' | 'GUEST' }> = {}
+) =>
+  new UserEntity({
+    id: userId,
+    name: 'Test User',
+    role: overrides.role ?? 'USER',
+    status: 'ACTIVE',
+    plan: 'FREE',
+    notificationEmail: null,
+    isProfilePublic: true,
+  })
 
 const buildTouring = (overrides: Partial<Touring> = {}) => {
   return new TouringEntity({
@@ -160,8 +173,7 @@ describe('TouringService', () => {
     test('statusを指定しない場合COMPLETEDで登録される', async () => {
       const result = await service.registerTouring({
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
         title: 'ツーリング',
         startDate: new Date('2026-07-01T08:00:00.000Z'),
         endDate: new Date('2026-07-01T18:00:00.000Z'),
@@ -179,8 +191,7 @@ describe('TouringService', () => {
       await expect(
         service.registerTouring({
           myUserBikeId,
-          userId,
-          limits: AccountLimitsValue.from('USER'),
+          user: buildUserEntity(),
           title: 'ツーリング',
           startDate: new Date('2026-07-01T08:00:00.000Z'),
           endDate: new Date('2026-07-01T18:00:00.000Z'),
@@ -195,8 +206,7 @@ describe('TouringService', () => {
       await expect(
         service.registerTouring({
           myUserBikeId,
-          userId,
-          limits: AccountLimitsValue.from('GUEST'),
+          user: buildUserEntity({ role: 'GUEST' }),
           title: 'ツーリング',
           startDate: new Date('2026-07-01T08:00:00.000Z'),
           endDate: new Date('2026-07-01T18:00:00.000Z'),
@@ -215,8 +225,7 @@ describe('TouringService', () => {
         service.handleTouringAction({
           action: 'start',
           myUserBikeId,
-          userId,
-          limits: AccountLimitsValue.from('USER'),
+          user: buildUserEntity(),
         })
       ).rejects.toThrow(ApiV1Error)
     })
@@ -225,8 +234,7 @@ describe('TouringService', () => {
       const result = await service.handleTouringAction({
         action: 'start',
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
       })
 
       expect(result.title).toBe('ツーリング')
@@ -242,8 +250,7 @@ describe('TouringService', () => {
       const result = await service.handleTouringAction({
         action: 'start',
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
       })
 
       expect(result.startMileage).toBe(12345)
@@ -265,8 +272,7 @@ describe('TouringService', () => {
       const result = await service.handleTouringAction({
         action: 'start',
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
         touringPlanId: 'plan-1',
       })
 
@@ -290,8 +296,7 @@ describe('TouringService', () => {
       const result = await service.handleTouringAction({
         action: 'start',
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
         touringPlanId: 'plan-1',
         title: '個別タイトル',
       })
@@ -329,8 +334,7 @@ describe('TouringService', () => {
       const result = await service.handleTouringAction({
         action: 'start',
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
         touringPlanId: 'plan-1',
       })
 
@@ -382,8 +386,7 @@ describe('TouringService', () => {
       await service.handleTouringAction({
         action: 'start',
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
         touringPlanId: 'plan-1',
         startDate,
       })
@@ -425,8 +428,7 @@ describe('TouringService', () => {
         service.handleTouringAction({
           action: 'start',
           myUserBikeId,
-          userId,
-          limits: AccountLimitsValue.from('USER'),
+          user: buildUserEntity(),
           touringPlanId: 'plan-unknown',
         })
       ).rejects.toThrow(ApiV1Error)
@@ -441,7 +443,7 @@ describe('TouringService', () => {
         service.handleTouringAction({
           action: 'end',
           myUserBikeId,
-          userId,
+          user: buildUserEntity(),
           touringId: 'touring-1',
         })
       ).rejects.toThrow(ApiV1Error)
@@ -457,7 +459,7 @@ describe('TouringService', () => {
       const result = await service.handleTouringAction({
         action: 'end',
         myUserBikeId,
-        userId,
+        user: buildUserEntity(),
         touringId: 'touring-1',
       })
 
@@ -476,7 +478,7 @@ describe('TouringService', () => {
       const result = await service.handleTouringAction({
         action: 'end',
         myUserBikeId,
-        userId,
+        user: buildUserEntity(),
         touringId: 'touring-1',
         endLatitude: 36.0,
         endLongitude: 140.0,
@@ -496,7 +498,7 @@ describe('TouringService', () => {
       const result = await service.handleTouringAction({
         action: 'end',
         myUserBikeId,
-        userId,
+        user: buildUserEntity(),
         touringId: 'touring-1',
       })
 

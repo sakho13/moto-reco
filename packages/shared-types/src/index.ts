@@ -1,4 +1,5 @@
 export * from './common/ApiIO'
+export * from './domain/apiKey'
 export * from './domain/authprovider'
 export * from './domain/bike'
 export * from './domain/fuelLog'
