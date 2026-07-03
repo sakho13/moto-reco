@@ -3,6 +3,7 @@ import type {
   TouringPlanRouteType,
   TouringPlanSpotType,
 } from '../domain/touringPlanSpot'
+import type { UserPlan } from '../domain/user'
 
 export type SuccessResponse<T> = {
   status: 'success'
@@ -58,7 +59,17 @@ export type ApiResponseUserProfile = {
   notificationEmail: string | null
   isProfilePublic: boolean
   role: UserRole
+  /** 料金プラン。GUEST / ADMIN は null */
+  plan: UserPlan | null
 }
+
+export type ApiResponseUserPlanHistory = {
+  id: string
+  plan: UserPlan
+  changedAt: string
+  changedByName: string
+  reason: string | null
+}[]
 
 export type ApiResponsePublicUserPage = {
   userId: string

@@ -12,11 +12,11 @@ import { HonoVariables } from '../types/hono'
 const announcements = new Hono<{ Variables: HonoVariables }>()
 
 announcements.get('/', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const service = new AnnouncementService(
     new PrismaAnnouncementRepository(prisma)
   )
-  const result = await service.getPublishedAnnouncements(userId)
+  const result = await service.getPublishedAnnouncements(userEntity.id)
   return c.json<SuccessResponse<ApiResponseAnnouncementList>>({
     status: 'success',
     data: { announcements: result },
@@ -24,11 +24,11 @@ announcements.get('/', honoAuthMiddleware, async (c) => {
 })
 
 announcements.patch('/read-all', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const service = new AnnouncementService(
     new PrismaAnnouncementRepository(prisma)
   )
-  await service.markAllAsRead(userId)
+  await service.markAllAsRead(userEntity.id)
   return c.json<SuccessResponse<null>>({
     status: 'success',
     data: null,
@@ -37,12 +37,12 @@ announcements.patch('/read-all', honoAuthMiddleware, async (c) => {
 })
 
 announcements.patch('/:id/read', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const id = c.req.param('id')
   const service = new AnnouncementService(
     new PrismaAnnouncementRepository(prisma)
   )
-  await service.markAsRead(id, userId)
+  await service.markAsRead(id, userEntity.id)
   return c.json<SuccessResponse<null>>({
     status: 'success',
     data: null,

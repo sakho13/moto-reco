@@ -11,16 +11,29 @@ import { MyUserBikeEntity } from '@/lib/api/server/entities/MyUserBikeEntity'
 import { TouringEntity } from '@/lib/api/server/entities/TouringEntity'
 import { TouringPlanEntity } from '@/lib/api/server/entities/TouringPlanEntity'
 import { TouringPlanSpotEntity } from '@/lib/api/server/entities/TouringPlanSpotEntity'
+import { UserEntity } from '@/lib/api/server/entities/UserEntity'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { IMyUserBikeRepository } from '@/lib/api/server/interfaces/IMyUserBikeRepository'
 import { ITouringPlanRepository } from '@/lib/api/server/interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '@/lib/api/server/interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '@/lib/api/server/interfaces/ITouringRepository'
 import { TouringPlanService } from '@/lib/api/server/services/TouringPlanService'
-import { AccountLimitsValue } from '@/lib/api/server/valueObjects/AccountLimitsValue'
 
 const myUserBikeId = createMyUserBikeId('bike-1')
 const userId = createUserId('user-1')
+
+const buildUserEntity = (
+  overrides: Partial<{ role: 'USER' | 'ADMIN' | 'GUEST' }> = {}
+) =>
+  new UserEntity({
+    id: userId,
+    name: 'Test User',
+    role: overrides.role ?? 'USER',
+    status: 'ACTIVE',
+    plan: 'FREE',
+    notificationEmail: null,
+    isProfilePublic: true,
+  })
 
 const buildPlan = (overrides: Partial<TouringPlan> = {}) => {
   return new TouringPlanEntity({
@@ -130,8 +143,7 @@ describe('TouringPlanService', () => {
       await expect(
         service.registerPlan({
           myUserBikeId,
-          userId,
-          limits: AccountLimitsValue.from('USER'),
+          user: buildUserEntity(),
           title: 'プラン',
         })
       ).rejects.toThrow(ApiV1Error)
@@ -143,8 +155,7 @@ describe('TouringPlanService', () => {
 
       const result = await service.registerPlan({
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
         title: '日帰り箱根ツーリング',
       })
 
@@ -179,8 +190,7 @@ describe('TouringPlanService', () => {
 
       const result = await service.registerPlan({
         myUserBikeId,
-        userId,
-        limits: AccountLimitsValue.from('USER'),
+        user: buildUserEntity(),
         title: '日帰り箱根ツーリング',
         startLocation: { latitude: 35.6812, longitude: 139.7671 },
         destinationLocation: {

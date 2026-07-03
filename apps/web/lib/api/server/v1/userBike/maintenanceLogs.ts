@@ -5,7 +5,6 @@ import {
   ApiResponseMaintenanceLogList,
   createMaintenanceLogId,
   createMyUserBikeId,
-  createUserId,
   MaintenanceLogListQuerySchema,
   MaintenanceLogRegisterRequestSchema,
   MaintenanceLogUpdateRequestSchema,
@@ -19,7 +18,6 @@ import {
 import { PrismaMaintenanceLogRepository } from '../../repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeRepository'
 import { MaintenanceLogService } from '../../services/MaintenanceLogService'
-import { AccountLimitsValue } from '../../valueObjects/AccountLimitsValue'
 
 const userBikeMaintenanceLogs = new Hono().basePath(
   '/bike/:myUserBikeId/maintenance-logs'
@@ -30,7 +28,7 @@ userBikeMaintenanceLogs.get(
   honoAuthMiddleware,
   zodValidateQuery(MaintenanceLogListQuerySchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const query = c.req.valid('query')
 
@@ -43,7 +41,7 @@ userBikeMaintenanceLogs.get(
 
     const logs = await service.getMaintenanceLogs({
       myUserBikeId: createMyUserBikeId(myUserBikeId),
-      userId: createUserId(userId),
+      userId: userEntity.id,
       page: query.page ?? 1,
       perSize: query['per-size'] ?? 20,
       sortOrder: query['sort-order'] ?? 'desc',
@@ -71,7 +69,7 @@ userBikeMaintenanceLogs.post(
   honoAuthMiddleware,
   zodValidateJson(MaintenanceLogRegisterRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -85,8 +83,7 @@ userBikeMaintenanceLogs.post(
 
       return service.registerMaintenanceLog({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
-        limits: AccountLimitsValue.from(role),
+        user: userEntity,
         performedAt: body.performedAt,
         mileage: body.mileage,
         memo: body.memo,
@@ -117,7 +114,7 @@ userBikeMaintenanceLogs.patch(
   honoAuthMiddleware,
   zodValidateJson(MaintenanceLogUpdateRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -132,7 +129,7 @@ userBikeMaintenanceLogs.patch(
       return service.updateMaintenanceLog({
         maintenanceLogId: createMaintenanceLogId(body.maintenanceLogId),
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
+        userId: userEntity.id,
         performedAt: body.performedAt,
         mileage: body.mileage,
         memo: body.memo,

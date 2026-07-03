@@ -65,14 +65,17 @@ export class PrismaUserFollowRepository
 
     const users = records.map(
       (r) =>
-        new UserEntity({
-          id: createUserId(r.follower.id),
-          name: r.follower.name,
-          role: r.follower.role,
-          status: r.follower.status,
-          notificationEmail: r.follower.notificationEmail,
-          isProfilePublic: r.follower.isProfilePublic,
-        })
+        new UserEntity(
+          {
+            id: createUserId(r.follower.id),
+            name: r.follower.name,
+            role: r.follower.role,
+            status: r.follower.status,
+            notificationEmail: r.follower.notificationEmail,
+            isProfilePublic: r.follower.isProfilePublic,
+          },
+          null
+        )
     )
 
     return { users, total }
@@ -109,14 +112,17 @@ export class PrismaUserFollowRepository
 
     const users = records.map(
       (r) =>
-        new UserEntity({
-          id: createUserId(r.following.id),
-          name: r.following.name,
-          role: r.following.role,
-          status: r.following.status,
-          notificationEmail: r.following.notificationEmail,
-          isProfilePublic: r.following.isProfilePublic,
-        })
+        new UserEntity(
+          {
+            id: createUserId(r.following.id),
+            name: r.following.name,
+            role: r.following.role,
+            status: r.following.status,
+            notificationEmail: r.following.notificationEmail,
+            isProfilePublic: r.following.isProfilePublic,
+          },
+          null
+        )
     )
 
     return { users, total }
@@ -169,14 +175,17 @@ export class PrismaUserFollowRepository
 
     const users = records.map(
       (u) =>
-        new UserEntity({
-          id: createUserId(u.id),
-          name: u.name,
-          role: u.role,
-          status: u.status,
-          notificationEmail: u.notificationEmail,
-          isProfilePublic: u.isProfilePublic,
-        })
+        new UserEntity(
+          {
+            id: createUserId(u.id),
+            name: u.name,
+            role: u.role,
+            status: u.status,
+            notificationEmail: u.notificationEmail,
+            isProfilePublic: u.isProfilePublic,
+          },
+          null
+        )
     )
 
     return { users, total }

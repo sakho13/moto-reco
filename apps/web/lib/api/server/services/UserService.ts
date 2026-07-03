@@ -30,14 +30,17 @@ export class UserService {
     }
 
     const newUser = await this._userRepository.createUser(
-      new UserEntity({
-        id: createUserId(''),
-        name: user.name,
-        role: 'USER',
-        status: 'ACTIVE',
-        notificationEmail: (authProvider.metadata?.email as string) ?? null,
-        isProfilePublic: true,
-      }),
+      new UserEntity(
+        {
+          id: createUserId(''),
+          name: user.name,
+          role: 'USER',
+          status: 'ACTIVE',
+          notificationEmail: (authProvider.metadata?.email as string) ?? null,
+          isProfilePublic: true,
+        },
+        null
+      ),
       authProvider
     )
     return {
@@ -64,14 +67,17 @@ export class UserService {
     const guestName = user.name ?? `ゲスト_${Date.now()}`
 
     return this._userRepository.createGuestUser(
-      new UserEntity({
-        id: createUserId(''),
-        name: guestName,
-        role: 'GUEST',
-        status: 'ACTIVE',
-        notificationEmail: null,
-        isProfilePublic: false,
-      }),
+      new UserEntity(
+        {
+          id: createUserId(''),
+          name: guestName,
+          role: 'GUEST',
+          status: 'ACTIVE',
+          notificationEmail: null,
+          isProfilePublic: false,
+        },
+        null
+      ),
       authProvider
     )
   }

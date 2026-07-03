@@ -40,15 +40,35 @@ model MUser {
   status MUserStatus @default(ACTIVE) @map("status")
   role   MUserRole   @default(USER) @map("role")
 
-  authProviders        MAuthProvider[]
-  myBikes              TUserMyBike[]
-  histories            TUserMyBikeHistory[]
-  userQuit             TUserQuit?
-  followers            TUserFollow[]             @relation("UserFollowing")
-  following            TUserFollow[]             @relation("UserFollowers")
-  notifications        TNotification[]
-  announcementReads    TSystemAnnouncementRead[]
-  createdAnnouncements MSystemAnnouncement[]
+  authProviders           MAuthProvider[]
+  myBikes                 TUserMyBike[]
+  histories               TUserMyBikeHistory[]
+  userQuit                TUserQuit?
+  followers               TUserFollow[]             @relation("UserFollowing")
+  following               TUserFollow[]             @relation("UserFollowers")
+  notifications           TNotification[]
+  announcementReads       TSystemAnnouncementRead[]
+  createdAnnouncements    MSystemAnnouncement[]
+  planHistories           TUserPlanHistory[]
+  planHistoriesChangedBy  TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
+  apiKeys                 MApiKey[]
+}
+
+model MApiKey {
+  id       String         @id @default(cuid(2))
+  userId   String         @map("user_id")
+  name     String
+  keyHash  String         @unique @map("key_hash")
+  prefix   String         @map("prefix")
+  scopes   MApiKeyScope[] @default([READ]) @map("scopes")
+  isActive Boolean        @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
 }
 
 model MManufacturer {
@@ -353,6 +373,20 @@ model TUserQuit {
   @@index([status])
 }
 
+model TUserPlanHistory {
+  id          String    @id @default(cuid(2))
+  userId      String    @map("user_id")
+  plan        MUserPlan @map("plan")
+  changedAt   DateTime  @default(now()) @map("changed_at") @db.Timestamptz
+  changedById String    @map("changed_by_id")
+  reason      String?   @map("reason")
+
+  user      MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  changedBy MUser @relation("PlanHistoryChangedBy", fields: [changedById], references: [id], onDelete: Restrict)
+
+  @@index([userId, changedAt(sort: Desc)])
+}
+
 model TUserFollow {
   id          String @id @default(cuid(2))
   followerId  String @map("follower_id")
@@ -427,10 +461,20 @@ enum MUserStatus {
   SUSPENDED
 }
 
+enum MUserPlan {
+  FREE
+  PREMIUM
+}
+
 enum MUserRole {
   USER
   ADMIN
   GUEST
+}
+
+enum MApiKeyScope {
+  READ
+  WRITE
 }
 
 enum ProviderType {

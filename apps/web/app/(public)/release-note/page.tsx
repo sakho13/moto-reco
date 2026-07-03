@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import styles from './page.module.css'
-import { microCMSClient } from '@/lib/microcms/config'
-import type { ReleaseNote } from '@/lib/microcms/types'
+import { getReleaseNotes } from '@/lib/microcms/releaseNote'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
+import { stripHtmlToText } from '@/lib/utils/html'
 
 export const revalidate = 300
 
@@ -26,26 +27,6 @@ export const metadata: Metadata = {
   },
 }
 
-async function getReleaseNotes(): Promise<ReleaseNote[]> {
-  try {
-    if (!microCMSClient) return []
-    const data = await microCMSClient.getList<ReleaseNote>({
-      endpoint: 'motoreco-releases',
-      queries: {
-        orders: '-publishedAt',
-        limit: 100,
-        filters:
-          process.env.NODE_ENV !== 'development'
-            ? 'status[contains]published'
-            : undefined,
-      },
-    })
-    return data.contents
-  } catch {
-    return []
-  }
-}
-
 export default async function ReleaseNotePage() {
   const releaseNotes = await getReleaseNotes()
 
@@ -65,7 +46,11 @@ export default async function ReleaseNotePage() {
       ) : (
         <div className={styles.list}>
           {releaseNotes.map((note) => (
-            <article key={note.id} className={styles.item}>
+            <Link
+              key={note.id}
+              href={`/release-note/${note.version}`}
+              className={styles.item}
+            >
               <div className={styles.itemHeader}>
                 <span className={styles.version}>v{note.version}</span>
                 <time
@@ -82,11 +67,9 @@ export default async function ReleaseNotePage() {
                 </time>
               </div>
               <h2 className={styles.itemTitle}>{note.title}</h2>
-              <div
-                className={styles.content}
-                dangerouslySetInnerHTML={{ __html: note.content }}
-              />
-            </article>
+              <p className={styles.excerpt}>{stripHtmlToText(note.content)}</p>
+              <span className={styles.readMore}>詳細を見る →</span>
+            </Link>
           ))}
         </div>
       )}

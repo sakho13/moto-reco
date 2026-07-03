@@ -1886,4 +1886,69 @@ describe('TouringPlans API Endpoints', () => {
       expect404Error(json)
     })
   })
+
+  describe('FREEユーザーのツーリングプラン制限（10件まで）', () => {
+    test('FREEユーザーは10件までツーリングプランを登録できる', async () => {
+      const user = await createTestUser()
+      const { myUserBikeId } = await createTestUserBike(user.token, {
+        displacement: 400,
+      })
+
+      for (let i = 1; i <= 10; i++) {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ title: `プラン${i}` }),
+          }
+        )
+        expect(res.status).toBe(201)
+      }
+    })
+
+    test('FREEユーザーは11件目のツーリングプランを登録できない', async () => {
+      const user = await createTestUser()
+      const { myUserBikeId } = await createTestUserBike(user.token, {
+        displacement: 400,
+      })
+
+      for (let i = 1; i <= 10; i++) {
+        await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ title: `プラン${i}` }),
+          }
+        )
+      }
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: 'プラン11（エラー）' }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json).toMatchObject({
+        status: 'error',
+        errorCode: 'INVALID_REQUEST',
+        message: '無料ユーザーはツーリングプランを10件まで登録できます',
+      })
+    })
+  })
 })
