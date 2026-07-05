@@ -11,6 +11,7 @@ import {
   handleAnonymousSignInByFirebase,
   handleRegisterByFirebase,
 } from '../../helpers/firebaseTestToken'
+import { createAdminUser } from '../../helpers/notificationHelper'
 import { app } from '@/lib/api/server/app'
 
 afterEach(() => {
@@ -193,6 +194,7 @@ describe('User API Endpoints', () => {
           notificationEmail: expect.any(String),
           isProfilePublic: expect.any(Boolean),
           role: expect.any(String),
+          plan: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -235,6 +237,7 @@ describe('User API Endpoints', () => {
           notificationEmail,
           isProfilePublic: expect.any(Boolean),
           role: expect.any(String),
+          plan: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -275,6 +278,7 @@ describe('User API Endpoints', () => {
           notificationEmail: expect.any(String),
           isProfilePublic: false,
           role: expect.any(String),
+          plan: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -325,6 +329,7 @@ describe('User API Endpoints', () => {
           notificationEmail: expect.any(String),
           isProfilePublic: true,
           role: expect.any(String),
+          plan: expect.any(String),
         },
         message: expect.any(String),
       })
@@ -472,6 +477,7 @@ describe('User API Endpoints', () => {
           notificationEmail: expect.any(String),
           isProfilePublic: expect.any(Boolean),
           role: expect.any(String),
+          plan: 'FREE',
         },
         message: expect.any(String),
       })
@@ -1061,6 +1067,173 @@ describe('User API Endpoints', () => {
       const json2 = await res2.json()
 
       expect(json1.data.userId).toBe(json2.data.userId)
+    })
+  })
+
+  describe('プラン管理 API', () => {
+    describe('GET /api/v1/user/profile - plan フィールド', () => {
+      test('USER ロールのユーザーは plan: FREE を返す', async () => {
+        const { token } = await createTestUser()
+
+        const res = await app.request('/api/v1/user/profile', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const json = await res.json()
+
+        expect(res.status).toBe(200)
+        expect(json.data.plan).toBe('FREE')
+      })
+
+      test('GUEST ロールのユーザーは plan: null を返す', async () => {
+        const { token } = await createGuestUser()
+
+        const res = await app.request('/api/v1/user/profile', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const json = await res.json()
+
+        expect(res.status).toBe(200)
+        expect(json.data.plan).toBeNull()
+      })
+    })
+
+    describe('GET /api/v1/user/plan/histories', () => {
+      test('未認証の場合は 401 を返す', async () => {
+        await testAuthRequired('/api/v1/user/plan/histories', 'GET')
+      })
+
+      test('USER ロールのユーザーは初期 FREE 履歴を取得できる', async () => {
+        const { token } = await createTestUser()
+
+        const res = await app.request('/api/v1/user/plan/histories', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const json = await res.json()
+
+        expect(res.status).toBe(200)
+        expect(json.data).toHaveLength(1)
+        expect(json.data[0].plan).toBe('FREE')
+      })
+    })
+
+    describe('PATCH /api/v1/user/admin/plan', () => {
+      test('未認証の場合は 401 を返す', async () => {
+        await testAuthRequired('/api/v1/user/admin/plan', 'PATCH', {
+          targetUserId: 'dummy',
+          plan: 'PREMIUM',
+        })
+      })
+
+      test('USER ロールが呼ぶと 403 を返す', async () => {
+        const { token } = await createTestUser()
+        const target = await createTestUser()
+
+        const res = await app.request('/api/v1/user/admin/plan', {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            targetUserId: target.userId,
+            plan: 'PREMIUM',
+          }),
+        })
+
+        expect(res.status).toBe(403)
+      })
+
+      test('ADMIN が USER ロールのユーザーのプランを PREMIUM に変更できる', async () => {
+        const admin = await createTestUser()
+        await createAdminUser(admin.token, admin.userId)
+        const target = await createTestUser()
+
+        // プラン変更
+        const patchRes = await app.request('/api/v1/user/admin/plan', {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${admin.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            targetUserId: target.userId,
+            plan: 'PREMIUM',
+            reason: 'テスト用プラン変更',
+          }),
+        })
+        expect(patchRes.status).toBe(200)
+
+        // 履歴を確認
+        const histRes = await app.request('/api/v1/user/plan/histories', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${target.token}` },
+        })
+        const histJson = await histRes.json()
+
+        expect(histJson.data).toHaveLength(2)
+        expect(histJson.data[0].plan).toBe('PREMIUM')
+        expect(histJson.data[0].reason).toBe('テスト用プラン変更')
+      })
+
+      test('存在しないユーザーIDを指定すると 404 を返す', async () => {
+        const admin = await createTestUser()
+        await createAdminUser(admin.token, admin.userId)
+
+        const res = await app.request('/api/v1/user/admin/plan', {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${admin.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            targetUserId: 'nonexistent-id',
+            plan: 'PREMIUM',
+          }),
+        })
+
+        expect(res.status).toBe(404)
+      })
+
+      test('GUEST ロールのユーザーを対象にすると 403 を返す', async () => {
+        const admin = await createTestUser()
+        await createAdminUser(admin.token, admin.userId)
+        const guest = await createGuestUser()
+
+        const res = await app.request('/api/v1/user/admin/plan', {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${admin.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ targetUserId: guest.userId, plan: 'PREMIUM' }),
+        })
+
+        expect(res.status).toBe(403)
+      })
+
+      test('ADMIN ロールのユーザーを対象にすると 403 を返す', async () => {
+        const admin = await createTestUser()
+        await createAdminUser(admin.token, admin.userId)
+        const anotherAdmin = await createTestUser()
+        await createAdminUser(anotherAdmin.token, anotherAdmin.userId)
+
+        const res = await app.request('/api/v1/user/admin/plan', {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${admin.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            targetUserId: anotherAdmin.userId,
+            plan: 'PREMIUM',
+          }),
+        })
+
+        expect(res.status).toBe(403)
+      })
     })
   })
 })

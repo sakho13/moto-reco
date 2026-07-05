@@ -5,7 +5,6 @@ import {
   ApiResponseFuelLogList,
   createFuelLogId,
   createMyUserBikeId,
-  createUserId,
   FuelLogDeleteRequestSchema,
   FuelLogDetailParamSchema,
   FuelLogListQuerySchema,
@@ -25,7 +24,6 @@ import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeR
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../../repositories/PrismaUserBikeRepository'
 import { FuelLogService } from '../../services/FuelLogService'
-import { AccountLimitsValue } from '../../valueObjects/AccountLimitsValue'
 import { FuelLogSearchParams } from '../../valueObjects/FuelLogSearchParams'
 
 const userBikeFuelLogs = new Hono().basePath('/bike/:myUserBikeId/fuel-logs')
@@ -35,7 +33,7 @@ userBikeFuelLogs.get(
   honoAuthMiddleware,
   zodValidateQuery(FuelLogListQuerySchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const query = c.req.valid('query')
 
@@ -62,7 +60,7 @@ userBikeFuelLogs.get(
 
     const fuelLogs = await fuelLogService.getFuelLogs(
       createMyUserBikeId(myUserBikeId),
-      createUserId(userId),
+      userEntity.id,
       searchParams
     )
 
@@ -96,7 +94,7 @@ userBikeFuelLogs.get(
   honoAuthMiddleware,
   zodValidateParam(FuelLogDetailParamSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const params = c.req.valid('param')
 
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)
@@ -113,7 +111,7 @@ userBikeFuelLogs.get(
     const fuelLog = await fuelLogService.getFuelLogDetail(
       createFuelLogId(params.fuelLogId),
       createMyUserBikeId(params.myUserBikeId),
-      createUserId(userId)
+      userEntity.id
     )
 
     return c.json<SuccessResponse<ApiResponseFuelLogDetail>>({
@@ -141,7 +139,7 @@ userBikeFuelLogs.post(
   honoAuthMiddleware,
   zodValidateJson(FuelLogRegisterRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -159,8 +157,7 @@ userBikeFuelLogs.post(
 
       const fuelLog = await service.registerFuelLog({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
-        limits: AccountLimitsValue.from(role),
+        user: userEntity,
         refueledAt: body.refueledAt,
         mileage: body.mileage,
         previousMileage: body.previousMileage,
@@ -173,7 +170,7 @@ userBikeFuelLogs.post(
 
       const historyRepo = new PrismaHistoryRepository(t)
       await historyRepo.createHistory({
-        userId: createUserId(userId),
+        userId: userEntity.id,
         userMyBikeId: createMyUserBikeId(myUserBikeId),
         type: 'FUEL_LOG',
         occurredAt: fuelLog.refueledAt,
@@ -211,7 +208,7 @@ userBikeFuelLogs.patch(
   honoAuthMiddleware,
   zodValidateJson(FuelLogUpdateRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -231,7 +228,7 @@ userBikeFuelLogs.patch(
       const updated = await service.updateFuelLog({
         fuelLogId: createFuelLogId(body.fuelLogId),
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
+        userId: userEntity.id,
         refueledAt: body.refueledAt,
         mileage: body.mileage,
         previousMileage: body.previousMileage,
@@ -279,7 +276,7 @@ userBikeFuelLogs.delete(
   honoAuthMiddleware,
   zodValidateJson(FuelLogDeleteRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -298,7 +295,7 @@ userBikeFuelLogs.delete(
       return service.deleteFuelLog({
         fuelLogId: createFuelLogId(body.fuelLogId),
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
+        userId: userEntity.id,
       })
     })
 

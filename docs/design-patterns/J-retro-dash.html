@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern J — Retro Dashboard | MotoRepo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IM+Fell+English:ital@0;1&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F0E8D0;--s1:#EAE0C4;--s2:#E0D4B0;--s3:#D4C494;
+  --border:#B8A870;--border2:#A09060;
+  --ink:#2A1E08;--ink2:#6A5430;--ink3:#A08850;
+  --red:#8B2020;--red2:#B83030;
+  --gold:#B88020;--gold2:#D4A030;
+  --gauge:#C8A040;
+}
+body{font-family:'Oswald',sans-serif;background:#C8BC9C;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;gap:32px;flex-wrap:wrap}
+
+.frame{width:390px;background:var(--bg);border-radius:8px;overflow:hidden;box-shadow:0 0 0 3px var(--border2),0 0 0 6px var(--bg),4px 4px 0 8px var(--border2),0 20px 60px rgba(40,20,0,.4);position:relative;flex-shrink:0}
+.frame-inner{height:812px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.frame-inner::-webkit-scrollbar{display:none}
+
+/* Leather texture */
+.frame-inner::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.015) 0,rgba(0,0,0,.015) 1px,transparent 1px,transparent 4px);pointer-events:none;z-index:0}
+
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 14px;background:linear-gradient(to bottom,var(--s1),color-mix(in srgb,var(--s1) 70%,transparent));border-bottom:2px solid var(--border)}
+.logo{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--ink);letter-spacing:3px;text-transform:uppercase}
+.logo span{color:var(--red)}
+.hrow{display:flex;gap:8px}
+.hbtn{width:36px;height:36px;background:var(--s2);border:1.5px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink2);box-shadow:1px 1px 3px rgba(0,0,0,.15)}
+.hbtn svg{width:15px;height:15px}
+
+main{padding:0 16px 8px;position:relative;z-index:1}
+
+/* Odometer strip */
+.odometer{background:var(--ink);border:2px solid var(--border2);border-radius:4px;padding:10px 16px;margin:12px 0;display:flex;align-items:center;justify-content:space-between;box-shadow:inset 0 2px 4px rgba(0,0,0,.4),1px 1px 0 rgba(255,255,255,.05)}
+.odo-label{font-family:'Source Code Pro',monospace;font-size:10px;font-weight:600;color:var(--gauge);letter-spacing:2px;text-transform:uppercase}
+.odo-val{font-family:'Source Code Pro',monospace;font-size:22px;font-weight:600;color:var(--gauge);letter-spacing:4px;text-shadow:0 0 12px rgba(200,160,64,.4)}
+.odo-unit{font-family:'Source Code Pro',monospace;font-size:10px;color:var(--gold);letter-spacing:1px}
+
+/* Section header */
+.sec-hd{display:flex;align-items:center;gap:8px;margin:14px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.sec-num{font-family:'Source Code Pro',monospace;font-size:10px;color:var(--red);letter-spacing:1px}
+.sec-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:2px;flex:1}
+.sec-more{font-size:10px;color:var(--gold);cursor:pointer;letter-spacing:1px;text-transform:uppercase}
+
+/* Bike selector */
+.bike-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.bike-card{background:var(--s1);border:2px solid var(--border);border-radius:4px;padding:14px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;box-shadow:2px 2px 0 var(--border2)}
+.bike-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--red2))}
+.bike-card:hover{border-color:var(--gold);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--border2)}
+.bike-card:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--border2)}
+.speedometer{text-align:center;margin-bottom:10px}
+.speed-ring{display:inline-block;width:48px;height:48px;border:3px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--ink);margin:0 auto;box-shadow:inset 0 2px 6px rgba(0,0,0,.5)}
+.speed-ring svg{width:22px;height:22px;color:var(--gauge)}
+.bike-name{font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:2px}
+.bike-km{font-family:'Source Code Pro',monospace;font-size:10px;color:var(--ink3);text-align:center;margin-bottom:10px;letter-spacing:1px}
+.start-btn{width:100%;background:linear-gradient(to bottom,var(--red2),var(--red));border:1.5px solid var(--ink);border-radius:3px;padding:8px;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;text-transform:uppercase;letter-spacing:2px;transition:all .15s;box-shadow:0 2px 4px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1)}
+.start-btn:hover{background:linear-gradient(to bottom,#D04040,#A02828)}
+
+/* Fuel */
+.fuel-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.fuel-row:last-child{border-bottom:none}
+.fuel-gauge{width:34px;height:34px;background:var(--ink);border:2px solid var(--border2);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gauge);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+.fuel-gauge svg{width:17px;height:17px}
+.fuel-bike{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;color:var(--ink);text-transform:uppercase;letter-spacing:1px;flex:1}
+.fuel-sub{font-family:'Source Code Pro',monospace;font-size:9px;color:var(--ink3);letter-spacing:.5px}
+.fuel-btn{background:var(--s2);border:1.5px solid var(--border2);font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;color:var(--ink);padding:5px 10px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;border-radius:3px;box-shadow:1px 1px 0 var(--border2);transition:all .15s}
+.fuel-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold2)}
+
+/* History */
+.hist-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hist-stamp{width:38px;height:38px;background:var(--ink);border:1.5px solid var(--border2);border-radius:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+.hist-day{font-family:'Source Code Pro',monospace;font-size:12px;font-weight:600;color:var(--gauge);line-height:1}
+.hist-mon{font-family:'Source Code Pro',monospace;font-size:8px;color:var(--gold);letter-spacing:1px}
+.hist-info{flex:1}
+.hist-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:var(--ink);text-transform:uppercase;letter-spacing:.5px}
+.hist-sub{font-family:'Source Code Pro',monospace;font-size:9px;color:var(--ink3)}
+.hist-val{font-family:'Source Code Pro',monospace;font-size:13px;font-weight:600;color:var(--red)}
+
+/* Nav */
+nav{position:sticky;bottom:0;z-index:50;background:var(--ink);border-top:3px solid var(--border2);display:flex;align-items:stretch;height:58px}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border-right:1px solid rgba(255,255,255,.08);padding:6px 0;transition:background .15s}
+.ni:last-child{border-right:none}
+.ni:hover{background:rgba(255,255,255,.05)}
+.ni.active{background:linear-gradient(to bottom,rgba(200,160,64,.15),rgba(200,160,64,.05))}
+.ni svg{width:18px;height:18px;color:var(--ink3)}
+.ni.active svg{color:var(--gauge)}
+.ni span{font-family:'Oswald',sans-serif;font-size:8px;font-weight:600;color:var(--ink3);letter-spacing:2px;text-transform:uppercase}
+.ni.active span{color:var(--gauge)}
+
+.info-panel{width:320px;display:flex;flex-direction:column;gap:20px;padding-top:48px;flex-shrink:0}
+.info-panel h2{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:#2A1E08;letter-spacing:1px;text-transform:uppercase}
+.info-panel h2 span{color:var(--red)}
+.tag{display:inline-block;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;border-radius:2px}
+.desc{font-size:14px;line-height:1.8;color:#888}
+.palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.swatch{width:36px;height:36px;border-radius:3px;position:relative;border:1.5px solid #B8A870}
+.swatch::after{content:attr(data-label);position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:8px;color:#999;white-space:nowrap;font-family:monospace}
+.traits{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.trait{font-size:12px;color:#888;display:flex;gap:8px}
+.trait::before{content:'—';color:var(--red);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="frame-inner">
+    <header>
+      <div class="logo">Moto<span>.</span>Repo</div>
+      <div class="hrow">
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="odometer">
+        <div>
+          <div class="odo-label">Total Distance</div>
+          <div class="odo-val">020650</div>
+        </div>
+        <div class="odo-unit">km</div>
+      </div>
+
+      <div class="sec-hd">
+        <div class="sec-num">// 01</div>
+        <div class="sec-title">Departure</div>
+      </div>
+      <div class="bike-grid">
+        <div class="bike-card">
+          <div class="speedometer"><div class="speed-ring"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div></div>
+          <div class="bike-name">CB400SF</div>
+          <div class="bike-km">12,450 km</div>
+          <button class="start-btn">Start</button>
+        </div>
+        <div class="bike-card">
+          <div class="speedometer"><div class="speed-ring"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div></div>
+          <div class="bike-name">NC750X</div>
+          <div class="bike-km">8,200 km</div>
+          <button class="start-btn">Start</button>
+        </div>
+      </div>
+
+      <div class="sec-hd"><div class="sec-num">// 02</div><div class="sec-title">Fuel Log</div></div>
+      <div class="fuel-row">
+        <div class="fuel-gauge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+        <div style="flex:1"><div class="fuel-bike">CB400SF</div><div class="fuel-sub">Last fill: 3 days ago</div></div>
+        <button class="fuel-btn">Fill →</button>
+      </div>
+      <div class="fuel-row">
+        <div class="fuel-gauge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+        <div style="flex:1"><div class="fuel-bike">NC750X</div><div class="fuel-sub">Last fill: 7 days ago</div></div>
+        <button class="fuel-btn">Fill →</button>
+      </div>
+
+      <div class="sec-hd"><div class="sec-num">// 03</div><div class="sec-title">Logbook</div><div class="sec-more">All →</div></div>
+      <div class="hist-item">
+        <div class="hist-stamp"><div class="hist-day">25</div><div class="hist-mon">JUN</div></div>
+        <div class="hist-info"><div class="hist-title">Okutama Run</div><div class="hist-sub">CB400SF · Touring</div></div>
+        <div class="hist-val">245 km</div>
+      </div>
+      <div class="hist-item">
+        <div class="hist-stamp"><div class="hist-day">22</div><div class="hist-mon">JUN</div></div>
+        <div class="hist-info"><div class="hist-title">Fuel Up</div><div class="hist-sub">NC750X · Fuel</div></div>
+        <div class="hist-val" style="color:var(--gold)">32.1 L</div>
+      </div>
+      <div class="hist-item">
+        <div class="hist-stamp"><div class="hist-day">20</div><div class="hist-mon">JUN</div></div>
+        <div class="hist-info"><div class="hist-title">Hakone Pass</div><div class="hist-sub">CB400SF · Touring</div></div>
+        <div class="hist-val">189 km</div>
+      </div>
+    </main>
+
+    <nav>
+      <div class="ni active">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>Home</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+        <span>Bike</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Log</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        <span>Profile</span>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<div class="info-panel">
+  <div>
+    <div class="tag">Pattern J</div>
+    <h2>Retro <span>Dashboard</span></h2>
+    <p class="desc">ヴィンテージバイクのコックピットを模した懐古的UI。クリーム/セピアのレザーテクスチャ、オドメーター数字、スピードメーターリング、Source Code Proの計器フォント。</p>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#999;text-transform:uppercase;margin-bottom:16px">Color Palette</div>
+    <div class="palette">
+      <div class="swatch" style="background:#F0E8D0" data-label="#F0E8D0"></div>
+      <div class="swatch" style="background:#E0D4B0" data-label="#E0D4B0"></div>
+      <div class="swatch" style="background:#2A1E08" data-label="#2A1E08"></div>
+      <div class="swatch" style="background:#8B2020" data-label="#8B2020"></div>
+      <div class="swatch" style="background:#B88020" data-label="#B88020"></div>
+      <div class="swatch" style="background:#C8A040" data-label="#C8A040"></div>
+    </div>
+  </div>
+  <div style="margin-top:24px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#999;text-transform:uppercase;margin-bottom:12px">Typography</div>
+    <div style="font-family:'Oswald',sans-serif;font-size:18px;color:#2A1E08;font-weight:700;letter-spacing:2px;text-transform:uppercase">Oswald — 見出し</div>
+    <div style="font-family:'Source Code Pro',monospace;font-size:13px;color:#888;margin-top:6px;letter-spacing:1px">Source Code Pro — 計器数値</div>
+  </div>
+  <div class="traits">
+    <div class="trait">オドメーター表示 (020650 km)</div>
+    <div class="trait">スピードメーターリング アイコン</div>
+    <div class="trait">// セクションナンバリング</div>
+    <div class="trait">ロゴブック風日付スタンプ</div>
+    <div class="trait">黒ナビバー + ゴールドアクティブ</div>
+    <div class="trait">革テクスチャ (repeating-linear-gradient)</div>
+  </div>
+  <div style="padding:14px;background:var(--s1);border:1.5px solid var(--border);border-radius:4px;margin-top:4px;box-shadow:2px 2px 0 var(--border2)">
+    <div style="font-size:10px;color:var(--red);font-weight:700;letter-spacing:1px;margin-bottom:6px">BEST FOR</div>
+    <div style="font-size:12px;color:#888;line-height:1.7">クラシックバイク乗り / 40-60代 / ヴィンテージ愛好家。ノスタルジーと機能美を両立させたブランドに。</div>
+  </div>
+</div>
+
+</body>
+</html>

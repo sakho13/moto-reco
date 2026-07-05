@@ -15,7 +15,7 @@ import { HonoVariables } from '../types/hono'
 const notifications = new Hono<{ Variables: HonoVariables }>()
 
 notifications.get('/unread-count', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const notifService = new NotificationService(
     new PrismaNotificationRepository(prisma)
   )
@@ -23,8 +23,8 @@ notifications.get('/unread-count', honoAuthMiddleware, async (c) => {
     new PrismaAnnouncementRepository(prisma)
   )
   const [notifCount, announceCount] = await Promise.all([
-    notifService.countUnread(userId),
-    announceService.countUnread(userId),
+    notifService.countUnread(userEntity.id),
+    announceService.countUnread(userEntity.id),
   ])
   return c.json<SuccessResponse<ApiResponseNotificationUnreadCount>>({
     status: 'success',
@@ -33,13 +33,13 @@ notifications.get('/unread-count', honoAuthMiddleware, async (c) => {
 })
 
 notifications.get('/', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const pageParam = Number(c.req.query('page') ?? '1')
   const page = Number.isInteger(pageParam) && pageParam >= 1 ? pageParam : 1
   const service = new NotificationService(
     new PrismaNotificationRepository(prisma)
   )
-  const result = await service.getNotifications(userId, page)
+  const result = await service.getNotifications(userEntity.id, page)
   return c.json<SuccessResponse<ApiResponseNotificationList>>({
     status: 'success',
     data: result,
@@ -47,12 +47,12 @@ notifications.get('/', honoAuthMiddleware, async (c) => {
 })
 
 notifications.patch('/:id/read', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const id = c.req.param('id')
   const service = new NotificationService(
     new PrismaNotificationRepository(prisma)
   )
-  await service.markAsRead(id, userId)
+  await service.markAsRead(id, userEntity.id)
   return c.json<SuccessResponse<null>>({
     status: 'success',
     data: null,
@@ -61,11 +61,11 @@ notifications.patch('/:id/read', honoAuthMiddleware, async (c) => {
 })
 
 notifications.patch('/read-all', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const service = new NotificationService(
     new PrismaNotificationRepository(prisma)
   )
-  await service.markAllAsRead(userId)
+  await service.markAllAsRead(userEntity.id)
   return c.json<SuccessResponse<null>>({
     status: 'success',
     data: null,

@@ -9,7 +9,6 @@ import {
   createMyUserBikeId,
   createSpotId,
   createTouringId,
-  createUserId,
   SpotRegisterRequestSchema,
   SpotReorderRequestSchema,
   SpotUpdateRequestSchema,
@@ -34,7 +33,6 @@ import { PrismaTouringPlanSpotRepository } from '../../repositories/PrismaTourin
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { SpotService } from '../../services/SpotService'
 import { TouringService } from '../../services/TouringService'
-import { AccountLimitsValue } from '../../valueObjects/AccountLimitsValue'
 import { TouringSearchParams } from '../../valueObjects/TouringSearchParams'
 
 const userBikeTourings = new Hono().basePath('/bike/:myUserBikeId/tourings')
@@ -44,7 +42,7 @@ userBikeTourings.get(
   honoAuthMiddleware,
   zodValidateQuery(TouringListQuerySchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const query = c.req.valid('query')
 
@@ -61,7 +59,7 @@ userBikeTourings.get(
 
     const tourings = await service.getTourings(
       createMyUserBikeId(myUserBikeId),
-      createUserId(userId),
+      userEntity.id,
       searchParams
     )
 
@@ -97,7 +95,7 @@ userBikeTourings.post(
   honoAuthMiddleware,
   zodValidateJson(TouringRegisterRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -113,8 +111,7 @@ userBikeTourings.post(
 
       const touring = await service.registerTouring({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
-        limits: AccountLimitsValue.from(role),
+        user: userEntity,
         title: body.title,
         startDate: body.startDate,
         endDate: body.endDate,
@@ -127,7 +124,7 @@ userBikeTourings.post(
       if (touring.status === 'COMPLETED') {
         const historyRepo = new PrismaHistoryRepository(t)
         await historyRepo.createHistory({
-          userId: createUserId(userId),
+          userId: userEntity.id,
           userMyBikeId: createMyUserBikeId(myUserBikeId),
           type: 'TOURING',
           occurredAt: touring.endDate,
@@ -168,7 +165,7 @@ userBikeTourings.delete(
   honoAuthMiddleware,
   zodValidateJson(TouringDeleteRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -185,7 +182,7 @@ userBikeTourings.delete(
       return service.deleteTouring({
         touringId: createTouringId(body.touringId),
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
+        userId: userEntity.id,
       })
     })
 
@@ -205,7 +202,7 @@ userBikeTourings.post(
   honoAuthMiddleware,
   zodValidateJson(TouringStartEndRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const body = c.req.valid('json')
 
@@ -229,8 +226,7 @@ userBikeTourings.post(
         return service.handleTouringAction({
           action: 'start',
           myUserBikeId: createMyUserBikeId(myUserBikeId),
-          userId: createUserId(userId),
-          limits: AccountLimitsValue.from(role),
+          user: userEntity,
           touringPlanId: body.touringPlanId,
           title: body.title,
           startDate: body.startDate,
@@ -243,7 +239,7 @@ userBikeTourings.post(
       const touring = await service.handleTouringAction({
         action: 'end',
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
+        user: userEntity,
         touringId: body.touringId,
         endDate: body.endDate,
         endMileage: body.endMileage,
@@ -253,7 +249,7 @@ userBikeTourings.post(
 
       const historyRepo = new PrismaHistoryRepository(t)
       await historyRepo.createHistory({
-        userId: createUserId(userId),
+        userId: userEntity.id,
         userMyBikeId: createMyUserBikeId(myUserBikeId),
         type: 'TOURING',
         occurredAt: touring.endDate,
@@ -307,7 +303,7 @@ userBikeTourings.post(
 )
 
 userBikeTourings.get('/:touringId', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const myUserBikeId = c.req.param('myUserBikeId')
   const touringId = c.req.param('touringId')
 
@@ -319,7 +315,7 @@ userBikeTourings.get('/:touringId', honoAuthMiddleware, async (c) => {
   const touring = await service.getTouringById(
     createTouringId(touringId),
     createMyUserBikeId(myUserBikeId),
-    createUserId(userId)
+    userEntity.id
   )
 
   // 紐づいている給油履歴IDを取得
@@ -363,7 +359,7 @@ userBikeTourings.patch(
   honoAuthMiddleware,
   zodValidateJson(TouringUpdateRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const touringId = c.req.param('touringId')
     const body = c.req.valid('json')
@@ -382,7 +378,7 @@ userBikeTourings.patch(
       const updated = await service.updateTouring({
         touringId: createTouringId(touringId),
         myUserBikeId: createMyUserBikeId(myUserBikeId),
-        userId: createUserId(userId),
+        userId: userEntity.id,
         title: body.title,
         startDate: body.startDate,
         endDate: body.endDate,
@@ -446,7 +442,7 @@ userBikeTourings.patch(
 
 // スポット一覧取得
 userBikeTourings.get('/:touringId/spots', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const myUserBikeId = c.req.param('myUserBikeId')
   const touringId = c.req.param('touringId')
 
@@ -458,7 +454,7 @@ userBikeTourings.get('/:touringId/spots', honoAuthMiddleware, async (c) => {
   const spots = await service.getSpots(
     createTouringId(touringId),
     createMyUserBikeId(myUserBikeId),
-    createUserId(userId)
+    userEntity.id
   )
 
   return c.json<SuccessResponse<ApiResponseSpotList>>(
@@ -492,7 +488,7 @@ userBikeTourings.post(
   honoAuthMiddleware,
   zodValidateJson(SpotRegisterRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const touringId = c.req.param('touringId')
     const body = c.req.valid('json')
@@ -505,7 +501,7 @@ userBikeTourings.post(
     const spot = await service.registerSpot({
       touringId: createTouringId(touringId),
       myUserBikeId: createMyUserBikeId(myUserBikeId),
-      userId: createUserId(userId),
+      userId: userEntity.id,
       type: body.type,
       name: body.name,
       memo: body.memo,
@@ -547,7 +543,7 @@ userBikeTourings.patch(
   honoAuthMiddleware,
   zodValidateJson(SpotReorderRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const touringId = c.req.param('touringId')
     const body = c.req.valid('json')
@@ -561,7 +557,7 @@ userBikeTourings.patch(
       body.spotIds,
       createTouringId(touringId),
       createMyUserBikeId(myUserBikeId),
-      createUserId(userId)
+      userEntity.id
     )
 
     return c.json<SuccessResponse<undefined>>(
@@ -581,7 +577,7 @@ userBikeTourings.patch(
   honoAuthMiddleware,
   zodValidateJson(SpotUpdateRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const touringId = c.req.param('touringId')
     const spotId = c.req.param('spotId')
@@ -596,7 +592,7 @@ userBikeTourings.patch(
       spotId: createSpotId(spotId),
       touringId: createTouringId(touringId),
       myUserBikeId: createMyUserBikeId(myUserBikeId),
-      userId: createUserId(userId),
+      userId: userEntity.id,
       name: body.name,
       memo: body.memo,
       latitude: body.latitude,
@@ -637,7 +633,7 @@ userBikeTourings.delete(
   '/:touringId/spots/:spotId',
   honoAuthMiddleware,
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const myUserBikeId = c.req.param('myUserBikeId')
     const touringId = c.req.param('touringId')
     const spotId = c.req.param('spotId')
@@ -651,7 +647,7 @@ userBikeTourings.delete(
       createSpotId(spotId),
       createTouringId(touringId),
       createMyUserBikeId(myUserBikeId),
-      createUserId(userId)
+      userEntity.id
     )
 
     return c.json<SuccessResponse<undefined>>(

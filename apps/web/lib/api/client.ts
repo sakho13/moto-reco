@@ -1,5 +1,6 @@
 import {
   ApiResponseUserProfile,
+  ApiResponseUserPlanHistory,
   ApiResponseManufacturer,
   ApiResponseUserBikeList,
   ApiResponseUserBikeDetail,
@@ -188,6 +189,9 @@ type API_EP = {
     GET: SuccessResponse<ApiResponseUserProfile>
     PATCH: SuccessResponse<ApiResponseUserProfile>
   }
+  '/api/v1/user/plan/histories': {
+    GET: SuccessResponse<ApiResponseUserPlanHistory>
+  }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
   }
@@ -320,5 +324,33 @@ type API_EP = {
   ]: {
     PATCH: SuccessResponse<ApiResponseTouringPlanSpotDetail>
     DELETE: SuccessResponse<undefined>
+  }
+} & {
+  '/api/v1/mcp/api-keys': {
+    GET: SuccessResponse<{
+      apiKeys: {
+        apiKeyId: string
+        name: string
+        prefix: string
+        scopes: string[]
+        createdAt: string
+      }[]
+    }>
+    POST: SuccessResponse<{
+      apiKeyId: string
+      name: string
+      prefix: string
+      scopes: string[]
+      fullKey: string
+      createdAt: string
+    }>
+  }
+} & {
+  [key: `/api/v1/mcp/api-keys/${string}/revoke`]: {
+    PATCH: SuccessResponse<null>
+  }
+} & {
+  [key: `/api/v1/mcp/api-keys/${string}`]: {
+    DELETE: SuccessResponse<null>
   }
 }

@@ -6,10 +6,10 @@ import {
   UserId,
 } from '@repo/shared-types'
 import { MaintenanceLogEntity } from '../entities/MaintenanceLogEntity'
+import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 
 type GetMaintenanceLogsParams = {
   myUserBikeId: MyUserBikeId
@@ -21,8 +21,7 @@ type GetMaintenanceLogsParams = {
 
 type RegisterMaintenanceLogParams = {
   myUserBikeId: MyUserBikeId
-  userId: UserId
-  limits: AccountLimitsValue
+  user: UserEntity
   performedAt: Date
   mileage: number
   memo?: string | null
@@ -72,21 +71,22 @@ export class MaintenanceLogService {
   ): Promise<MaintenanceLogEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
-      params.userId
+      params.user.id
     )
 
     if (!myUserBike) {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    if (params.limits.maintenanceLog !== null) {
+    const limits = params.user.limits
+    if (limits.maintenanceLog !== null) {
       const count = await this.maintenanceLogRepository.countMaintenanceLogs(
         params.myUserBikeId
       )
-      if (params.limits.isOver('maintenanceLog', count)) {
+      if (limits.isOver('maintenanceLog', count)) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
-          params.limits.limitMessage('maintenanceLog')
+          limits.limitMessage('maintenanceLog')
         )
       }
     }
