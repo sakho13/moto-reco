@@ -206,6 +206,50 @@ export class PrismaFuelLogRepository
     )
   }
 
+  async findFuelLogsByTouringId(
+    touringId: TouringId,
+    myUserBikeId: MyUserBikeId
+  ): Promise<FuelLogEntity[]> {
+    const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
+      where: {
+        touringId: touringId,
+        userMyBikeId: myUserBikeId,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        amount: true,
+        price: true,
+        mileage: true,
+        previousMileage: true,
+        refueledAt: true,
+        memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    })
+
+    return fuelLogs.map(
+      (log) =>
+        new FuelLogEntity({
+          fuelLogId: createFuelLogId(log.id),
+          myUserBikeId: createMyUserBikeId(log.userMyBikeId),
+          amount: log.amount,
+          totalPrice: log.price,
+          mileage: log.mileage,
+          previousMileage: log.previousMileage,
+          refueledAt: log.refueledAt,
+          memo: log.memo,
+          touringId: log.touringId ? createTouringId(log.touringId) : null,
+          touringTitle: log.touring?.title ?? null,
+        })
+    )
+  }
+
   async findFuelLogById(
     fuelLogId: FuelLogId,
     myUserBikeId: MyUserBikeId

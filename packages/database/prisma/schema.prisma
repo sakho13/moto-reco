@@ -51,6 +51,24 @@ model MUser {
   createdAnnouncements    MSystemAnnouncement[]
   planHistories           TUserPlanHistory[]
   planHistoriesChangedBy  TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
+  apiKeys                 MApiKey[]
+}
+
+model MApiKey {
+  id       String         @id @default(cuid(2))
+  userId   String         @map("user_id")
+  name     String
+  keyHash  String         @unique @map("key_hash")
+  prefix   String         @map("prefix")
+  scopes   MApiKeyScope[] @default([READ]) @map("scopes")
+  isActive Boolean        @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
 }
 
 model MManufacturer {
@@ -452,6 +470,11 @@ enum MUserRole {
   USER
   ADMIN
   GUEST
+}
+
+enum MApiKeyScope {
+  READ
+  WRITE
 }
 
 enum ProviderType {

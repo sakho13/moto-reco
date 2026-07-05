@@ -1,7 +1,9 @@
-import { User, UserPlan } from '@repo/shared-types'
+import { type ApiKeyScope, type User, type UserPlan } from '@repo/shared-types'
 import {
   FREE_USER_LIMITS,
   GUEST_ACCOUNT_LIMITS,
+  PLAN_ALLOWED_SCOPES,
+  PLAN_LIMITS,
   PREMIUM_USER_LIMITS,
 } from '../../../statics'
 
@@ -14,6 +16,7 @@ export type LimitKey =
   | 'touring'
   | 'touringPlan'
   | 'maintenanceLog'
+  | 'apiKey'
 
 type LimitMessages = Partial<Record<LimitKey, string>>
 
@@ -23,12 +26,14 @@ const GUEST_MESSAGES: LimitMessages = {
   touring: `ゲストアカウントはツーリング履歴を${GUEST_ACCOUNT_LIMITS.TOURING}件まで登録できます`,
   touringPlan: `ゲストアカウントはツーリングプランを${GUEST_ACCOUNT_LIMITS.TOURING_PLAN}件まで登録できます`,
   maintenanceLog: `ゲストアカウントはメンテナンス履歴を${GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG}件まで登録できます`,
+  apiKey: 'ゲストアカウントはAPIキーを発行できません',
 }
 
 const FREE_MESSAGES: LimitMessages = {
   bike: `無料ユーザーはバイクを${FREE_USER_LIMITS.BIKE}台まで登録できます`,
   touringPlan: `無料ユーザーはツーリングプランを${FREE_USER_LIMITS.TOURING_PLAN}件まで登録できます`,
   maintenanceLog: `無料ユーザーはメンテナンス履歴を${FREE_USER_LIMITS.MAINTENANCE_LOG}件まで登録できます`,
+  apiKey: `無料プランはAPIキーを${PLAN_LIMITS.FREE.apiKey}個まで発行できます`,
 }
 
 const PREMIUM_MESSAGES: LimitMessages = {
@@ -47,7 +52,9 @@ export class AccountLimitsValue {
     readonly fuelLog: number | null,
     readonly touring: number | null,
     readonly touringPlan: number | null,
-    readonly maintenanceLog: number | null
+    readonly maintenanceLog: number | null,
+    readonly apiKey: number | null,
+    readonly allowedScopes: ApiKeyScope[]
   ) {}
 
   /**
@@ -63,7 +70,9 @@ export class AccountLimitsValue {
         GUEST_ACCOUNT_LIMITS.FUEL_LOG,
         GUEST_ACCOUNT_LIMITS.TOURING,
         GUEST_ACCOUNT_LIMITS.TOURING_PLAN,
-        GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG
+        GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG,
+        0,
+        []
       )
     }
     if (role === 'USER' && plan === 'PREMIUM') {
@@ -74,7 +83,9 @@ export class AccountLimitsValue {
         null,
         null,
         PREMIUM_USER_LIMITS.TOURING_PLAN,
-        PREMIUM_USER_LIMITS.MAINTENANCE_LOG
+        PREMIUM_USER_LIMITS.MAINTENANCE_LOG,
+        PLAN_LIMITS.PREMIUM.apiKey,
+        PLAN_ALLOWED_SCOPES.PREMIUM
       )
     }
     if (role === 'USER') {
@@ -86,11 +97,23 @@ export class AccountLimitsValue {
         null,
         null,
         FREE_USER_LIMITS.TOURING_PLAN,
-        FREE_USER_LIMITS.MAINTENANCE_LOG
+        FREE_USER_LIMITS.MAINTENANCE_LOG,
+        PLAN_LIMITS.FREE.apiKey,
+        PLAN_ALLOWED_SCOPES.FREE
       )
     }
     // ADMIN: 全て無制限
-    return new AccountLimitsValue(role, null, null, null, null, null, null)
+    return new AccountLimitsValue(
+      role,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      ['READ', 'WRITE']
+    )
   }
 
   /**
