@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
+  createFuelLogId,
   createMyUserBikeId,
   createTouringId,
   createTouringPlanId,
   createTouringPlanSpotId,
   createUserId,
+  FuelLog,
   Touring,
 } from '@repo/shared-types'
+import { FuelLogEntity } from '@/lib/api/server/entities/FuelLogEntity'
 import { MyUserBikeEntity } from '@/lib/api/server/entities/MyUserBikeEntity'
 import { SpotEntity } from '@/lib/api/server/entities/SpotEntity'
 import { TouringEntity } from '@/lib/api/server/entities/TouringEntity'
@@ -53,6 +56,22 @@ const buildTouring = (overrides: Partial<Touring> = {}) => {
     endLatitude: null,
     endLongitude: null,
     status: 'STARTED',
+    ...overrides,
+  })
+}
+
+const buildFuelLog = (overrides: Partial<FuelLog> = {}) => {
+  return new FuelLogEntity({
+    fuelLogId: createFuelLogId('fuel-log-1'),
+    myUserBikeId,
+    refueledAt: new Date('2020-07-01T09:00:00.000Z'),
+    mileage: 1050,
+    previousMileage: 1000,
+    amount: 10,
+    totalPrice: 1500,
+    memo: null,
+    touringId: null,
+    touringTitle: null,
     ...overrides,
   })
 }
@@ -592,6 +611,105 @@ describe('TouringService', () => {
       })
 
       expect(result.touringPlanId).toBe('plan-1')
+    })
+
+    describe('fuelLogIdsによる給油履歴の紐づけ更新', () => {
+      test('ツーリング期間外の給油履歴IDを指定しても紐づけできる', async () => {
+        const existing = buildTouring({ status: 'COMPLETED' })
+        vi.mocked(touringRepository.findTouringById).mockResolvedValue(existing)
+        // 期間外のためfindFuelLogsには含まれない（解除対象なし）
+        vi.mocked(fuelLogRepository.findFuelLogs).mockResolvedValue([])
+
+        const outOfRangeFuelLogId = createFuelLogId('fuel-log-out-of-range')
+
+        await service.updateTouring({
+          touringId: existing.id,
+          myUserBikeId,
+          userId,
+          fuelLogIds: [outOfRangeFuelLogId],
+        })
+
+        expect(
+          fuelLogRepository.updateMultipleFuelLogsTouringId
+        ).toHaveBeenCalledWith([outOfRangeFuelLogId], myUserBikeId, existing.id)
+      })
+
+      test('既に他のツーリングに紐づいている給油履歴を指定すると、新しいツーリングへ付け替えられる', async () => {
+        const existing = buildTouring({ status: 'COMPLETED' })
+        vi.mocked(touringRepository.findTouringById).mockResolvedValue(existing)
+        vi.mocked(fuelLogRepository.findFuelLogs).mockResolvedValue([])
+
+        const fuelLogLinkedToOtherTouring = createFuelLogId('fuel-log-other')
+
+        await service.updateTouring({
+          touringId: existing.id,
+          myUserBikeId,
+          userId,
+          fuelLogIds: [fuelLogLinkedToOtherTouring],
+        })
+
+        // 新しいツーリングIDで一括更新される（FKは単一のためこの呼び出しにより旧ツーリングとの紐づけは自動的に解除される）
+        expect(
+          fuelLogRepository.updateMultipleFuelLogsTouringId
+        ).toHaveBeenCalledWith(
+          [fuelLogLinkedToOtherTouring],
+          myUserBikeId,
+          existing.id
+        )
+      })
+
+      test('空配列を渡すと既存の紐づけが全解除される', async () => {
+        const existing = buildTouring({ status: 'COMPLETED' })
+        vi.mocked(touringRepository.findTouringById).mockResolvedValue(existing)
+
+        const linkedFuelLog1 = buildFuelLog({
+          fuelLogId: createFuelLogId('fuel-log-linked-1'),
+          touringId: existing.id,
+        })
+        const linkedFuelLog2 = buildFuelLog({
+          fuelLogId: createFuelLogId('fuel-log-linked-2'),
+          touringId: existing.id,
+        })
+        vi.mocked(fuelLogRepository.findFuelLogs).mockResolvedValue([
+          linkedFuelLog1,
+          linkedFuelLog2,
+        ])
+
+        await service.updateTouring({
+          touringId: existing.id,
+          myUserBikeId,
+          userId,
+          fuelLogIds: [],
+        })
+
+        expect(
+          fuelLogRepository.updateMultipleFuelLogsTouringId
+        ).toHaveBeenCalledTimes(1)
+        expect(
+          fuelLogRepository.updateMultipleFuelLogsTouringId
+        ).toHaveBeenCalledWith(
+          [linkedFuelLog1.id, linkedFuelLog2.id],
+          myUserBikeId,
+          null
+        )
+      })
+
+      test('fuelLogIdsが未指定の場合は紐づけ状態を変更しない', async () => {
+        const existing = buildTouring({ status: 'COMPLETED' })
+        vi.mocked(touringRepository.findTouringById).mockResolvedValue(existing)
+
+        await service.updateTouring({
+          touringId: existing.id,
+          myUserBikeId,
+          userId,
+          title: '更新後タイトル',
+        })
+
+        expect(fuelLogRepository.findFuelLogs).not.toHaveBeenCalled()
+        expect(
+          fuelLogRepository.updateMultipleFuelLogsTouringId
+        ).not.toHaveBeenCalled()
+      })
     })
   })
 

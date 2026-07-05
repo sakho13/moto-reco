@@ -122,7 +122,7 @@ export function TouringEditForm({
     )
   }
 
-  if (!initialData) return null
+  if (!initialData || !data) return null
 
   return (
     <div
