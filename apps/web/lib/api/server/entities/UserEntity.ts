@@ -1,4 +1,4 @@
-import { User, UserId, UserPlan } from '@repo/shared-types'
+import { type User, type UserId, type UserPlan } from '@repo/shared-types'
 import { AccountLimitsValue } from '../valueObjects/AccountLimitsValue'
 
 export class UserEntity {
@@ -22,10 +22,12 @@ export class UserEntity {
     return this._value.role
   }
 
+  /** 料金プラン（GUEST / ADMIN は null = 制限なし） */
   public get plan(): UserPlan | null {
     return this._plan
   }
 
+  /** バイク/ツーリング等の登録上限 */
   public get limits(): AccountLimitsValue {
     return AccountLimitsValue.from(this._value.role, this._plan)
   }

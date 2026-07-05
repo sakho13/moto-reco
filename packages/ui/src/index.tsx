@@ -45,3 +45,6 @@ export type { SelectProps, SelectOption } from './select'
 
 export { ThemeProvider, useTheme } from './context/ThemeContext'
 export { Toaster, toast } from './sonner'
+
+export { Tabs } from './tabs'
+export type { TabsProps, TabItem } from './tabs'

@@ -10,11 +10,13 @@ import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
+import { FuelIcon } from '@/components/icons/FuelIcon'
 import { SpotAddModal } from '@/components/spot/SpotAddModal'
 import { SpotEditModal } from '@/components/spot/SpotEditModal'
 import { RouteTimeline } from '@/components/touring/RouteTimeline'
 import type { RouteTimelineItem } from '@/components/touring/RouteTimeline'
 import { TouringEditModal } from '@/components/touring/TouringEditModal'
+import { TouringFuelLogLinkModal } from '@/components/touring/TouringFuelLogLinkModal'
 import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
@@ -33,6 +35,7 @@ function TouringDetailPage() {
   const bikeId = params.id as string
   const touringId = params.touringId as string
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isFuelLogLinkModalOpen, setIsFuelLogLinkModalOpen] = useState(false)
   const [editingLocationTarget, setEditingLocationTarget] = useState<
     'start' | 'end' | null
   >(null)
@@ -501,6 +504,14 @@ function TouringDetailPage() {
               >
                 <EditIcon />
               </button>
+              <button
+                onClick={() => setIsFuelLogLinkModalOpen(true)}
+                className={styles.editButton}
+                aria-label="給油履歴の紐づけ"
+                title="給油履歴の紐づけ"
+              >
+                <FuelIcon />
+              </button>
             </div>
             <p className={`text-xs mt-1 ${styles.mutedText}`}>
               {formatDate(touring.startDate)} → {formatDate(touring.endDate)}
@@ -554,6 +565,15 @@ function TouringDetailPage() {
           touringId={touringId}
           onClose={() => setIsEditModalOpen(false)}
           onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {isFuelLogLinkModalOpen && (
+        <TouringFuelLogLinkModal
+          bikeId={bikeId}
+          touringId={touringId}
+          onClose={() => setIsFuelLogLinkModalOpen(false)}
+          onSuccess={() => setIsFuelLogLinkModalOpen(false)}
         />
       )}
 

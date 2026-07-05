@@ -60,3 +60,25 @@ export const PREMIUM_USER_LIMITS = {
   /** メンテナンス履歴登録上限（無制限） */
   MAINTENANCE_LOG: null,
 } as const
+
+import type { ApiKeyScope, UserPlan } from '@repo/shared-types'
+
+/**
+ * プラン別に許可されるAPIキースコープ
+ */
+export const PLAN_ALLOWED_SCOPES: Record<UserPlan, ApiKeyScope[]> = {
+  FREE: ['READ'],
+  PREMIUM: ['READ', 'WRITE'],
+}
+
+/**
+ * プラン別制限値（null = 無制限）
+ */
+export const PLAN_LIMITS: Record<UserPlan, { apiKey: number | null }> = {
+  FREE: {
+    apiKey: 1,
+  },
+  PREMIUM: {
+    apiKey: null,
+  },
+}

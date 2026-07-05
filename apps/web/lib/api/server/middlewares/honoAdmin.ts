@@ -11,7 +11,7 @@ export async function honoAdminMiddleware(
   next: Next
 ) {
   const user = c.var.user
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.userEntity.role !== 'ADMIN') {
     throw new ApiV1Error('FORBIDDEN', '管理者権限が必要です')
   }
   await next()
