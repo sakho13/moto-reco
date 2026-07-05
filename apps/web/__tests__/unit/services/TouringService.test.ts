@@ -143,6 +143,7 @@ describe('TouringService', () => {
     fuelLogRepository = {
       createFuelLog: vi.fn(),
       findFuelLogs: vi.fn().mockResolvedValue([]),
+      findFuelLogsByTouringId: vi.fn().mockResolvedValue([]),
       findFuelLogById: vi.fn(),
       updateFuelLog: vi.fn(),
       deleteFuelLog: vi.fn(),
@@ -617,8 +618,10 @@ describe('TouringService', () => {
       test('ツーリング期間外の給油履歴IDを指定しても紐づけできる', async () => {
         const existing = buildTouring({ status: 'COMPLETED' })
         vi.mocked(touringRepository.findTouringById).mockResolvedValue(existing)
-        // 期間外のためfindFuelLogsには含まれない（解除対象なし）
-        vi.mocked(fuelLogRepository.findFuelLogs).mockResolvedValue([])
+        // 解除対象は現在このツーリングに紐づいているものだけなので空
+        vi.mocked(fuelLogRepository.findFuelLogsByTouringId).mockResolvedValue(
+          []
+        )
 
         const outOfRangeFuelLogId = createFuelLogId('fuel-log-out-of-range')
 
@@ -637,7 +640,9 @@ describe('TouringService', () => {
       test('既に他のツーリングに紐づいている給油履歴を指定すると、新しいツーリングへ付け替えられる', async () => {
         const existing = buildTouring({ status: 'COMPLETED' })
         vi.mocked(touringRepository.findTouringById).mockResolvedValue(existing)
-        vi.mocked(fuelLogRepository.findFuelLogs).mockResolvedValue([])
+        vi.mocked(fuelLogRepository.findFuelLogsByTouringId).mockResolvedValue(
+          []
+        )
 
         const fuelLogLinkedToOtherTouring = createFuelLogId('fuel-log-other')
 
@@ -670,10 +675,9 @@ describe('TouringService', () => {
           fuelLogId: createFuelLogId('fuel-log-linked-2'),
           touringId: existing.id,
         })
-        vi.mocked(fuelLogRepository.findFuelLogs).mockResolvedValue([
-          linkedFuelLog1,
-          linkedFuelLog2,
-        ])
+        vi.mocked(fuelLogRepository.findFuelLogsByTouringId).mockResolvedValue(
+          [linkedFuelLog1, linkedFuelLog2]
+        )
 
         await service.updateTouring({
           touringId: existing.id,
@@ -682,6 +686,10 @@ describe('TouringService', () => {
           fuelLogIds: [],
         })
 
+        expect(fuelLogRepository.findFuelLogsByTouringId).toHaveBeenCalledWith(
+          existing.id,
+          myUserBikeId
+        )
         expect(
           fuelLogRepository.updateMultipleFuelLogsTouringId
         ).toHaveBeenCalledTimes(1)
@@ -692,6 +700,37 @@ describe('TouringService', () => {
           myUserBikeId,
           null
         )
+      })
+
+      test('ツーリング期間外の給油日時で紐づいている給油履歴も、選択解除すると解除される', async () => {
+        // レビュー指摘: 解除対象の探索を期間内(startDate〜endDate)のfindFuelLogsに限定すると、
+        // 「全件表示」で紐づけた期間外の給油履歴が解除候補から漏れてしまう不具合の回帰テスト
+        const existing = buildTouring({
+          status: 'COMPLETED',
+          startDate: new Date('2020-07-01T09:00:00.000Z'),
+          endDate: new Date('2020-07-01T11:00:00.000Z'),
+        })
+        vi.mocked(touringRepository.findTouringById).mockResolvedValue(existing)
+
+        const outOfRangeLinkedFuelLog = buildFuelLog({
+          fuelLogId: createFuelLogId('fuel-log-out-of-range-linked'),
+          refueledAt: new Date('2020-06-20T09:00:00.000Z'),
+          touringId: existing.id,
+        })
+        vi.mocked(fuelLogRepository.findFuelLogsByTouringId).mockResolvedValue(
+          [outOfRangeLinkedFuelLog]
+        )
+
+        await service.updateTouring({
+          touringId: existing.id,
+          myUserBikeId,
+          userId,
+          fuelLogIds: [],
+        })
+
+        expect(
+          fuelLogRepository.updateMultipleFuelLogsTouringId
+        ).toHaveBeenCalledWith([outOfRangeLinkedFuelLog.id], myUserBikeId, null)
       })
 
       test('fuelLogIdsが未指定の場合は紐づけ状態を変更しない', async () => {
@@ -705,7 +744,9 @@ describe('TouringService', () => {
           title: '更新後タイトル',
         })
 
-        expect(fuelLogRepository.findFuelLogs).not.toHaveBeenCalled()
+        expect(
+          fuelLogRepository.findFuelLogsByTouringId
+        ).not.toHaveBeenCalled()
         expect(
           fuelLogRepository.updateMultipleFuelLogsTouringId
         ).not.toHaveBeenCalled()
