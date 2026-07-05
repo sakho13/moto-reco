@@ -37,11 +37,48 @@ export const GUEST_ACCOUNT_LIMITS = {
 } as const
 
 /**
- * 無料ユーザー（USERロール）の各種制限値
+ * 無料ユーザー（USERロール / FREEプラン）の各種制限値
  */
 export const FREE_USER_LIMITS = {
   /** バイク登録上限 */
   BIKE: 2,
   /** ツーリングプラン登録上限 */
   TOURING_PLAN: 10,
+  /** メンテナンス履歴登録上限 */
+  MAINTENANCE_LOG: 5,
 } as const
+
+/**
+ * プレミアムユーザー（USERロール / PREMIUMプラン）の各種制限値
+ * null は制限なし（無制限）を表す
+ */
+export const PREMIUM_USER_LIMITS = {
+  /** バイク登録上限 */
+  BIKE: 10,
+  /** ツーリングプラン登録上限（無制限） */
+  TOURING_PLAN: null,
+  /** メンテナンス履歴登録上限（無制限） */
+  MAINTENANCE_LOG: null,
+} as const
+
+import type { ApiKeyScope, UserPlan } from '@repo/shared-types'
+
+/**
+ * プラン別に許可されるAPIキースコープ
+ */
+export const PLAN_ALLOWED_SCOPES: Record<UserPlan, ApiKeyScope[]> = {
+  FREE: ['READ'],
+  PREMIUM: ['READ', 'WRITE'],
+}
+
+/**
+ * プラン別制限値（null = 無制限）
+ */
+export const PLAN_LIMITS: Record<UserPlan, { apiKey: number | null }> = {
+  FREE: {
+    apiKey: 1,
+  },
+  PREMIUM: {
+    apiKey: null,
+  },
+}

@@ -4,10 +4,12 @@ import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import {
   ApiResponseUserFollowList,
   ApiResponseUserProfile,
+  ApiResponseUserPlanHistory,
   ApiResponsePublicUserPage,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
   ApiResponseUserSearch,
+  ChangePlanRequestSchema,
   GuestRegisterRequestSchema,
   SuccessResponse,
   UserAuthRecoverRequestSchema,
@@ -28,19 +30,21 @@ import { PrismaHistoryRepository } from '../repositories/PrismaHistoryRepository
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaNotificationRepository } from '../repositories/PrismaNotificationRepository'
 import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepository'
+import { PrismaUserPlanHistoryRepository } from '../repositories/PrismaUserPlanHistoryRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
 import { UserFollowService } from '../services/UserFollowService'
+import { UserPlanService } from '../services/UserPlanService'
 import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
 
 const user = new Hono()
 
 user.get('/profile', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
 
   const userRepo = new PrismaUserRepository(prisma)
-  const user = await userRepo.findById(userId)
+  const user = await userRepo.findById(userEntity.id)
 
   if (!user) {
     throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
@@ -54,6 +58,7 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
       notificationEmail: user.notificationEmail,
       isProfilePublic: user.isProfilePublic,
       role: user.role as import('@repo/shared-types').UserRole,
+      plan: user.plan,
     },
     message: 'プロフィール取得成功',
   })
@@ -73,13 +78,13 @@ user.patch(
   honoAuthMiddleware,
   zodValidateJson(UserProfilePatchRequestSchema),
   async (c) => {
-    const { userId, role } = c.var.user!
+    const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
     const userRepo = new PrismaUserRepository(prisma)
 
     // ユーザーの存在確認
-    const user = await userRepo.findById(userId)
+    const user = await userRepo.findById(userEntity.id)
     if (!user) {
       throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
     }
@@ -93,7 +98,7 @@ user.patch(
       user.notificationEmail = body.notificationEmail ?? null
     }
     if (body.isProfilePublic !== undefined) {
-      if (role === 'GUEST' && body.isProfilePublic === true) {
+      if (userEntity.role === 'GUEST' && body.isProfilePublic === true) {
         throw new ApiV1Error(
           'INVALID_REQUEST',
           'ゲストアカウントはプロフィールを公開できません'
@@ -133,6 +138,7 @@ user.patch(
         notificationEmail: updatedUser.notificationEmail,
         isProfilePublic: updatedUser.isProfilePublic,
         role: updatedUser.role as import('@repo/shared-types').UserRole,
+        plan: updatedUser.plan,
       },
       message: 'プロフィール更新成功',
     })
@@ -141,7 +147,7 @@ user.patch(
 
 user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
   const userId = c.req.param('userId')
-  const requesterId = c.var.user?.userId
+  const requesterId = c.var.user?.userEntity.id
   const targetUserId = createUserId(userId)
 
   const userRepo = new PrismaUserRepository(prisma)
@@ -242,14 +248,14 @@ user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
 })
 
 user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
-  const { userId: followerId, role } = c.var.user!
+  const { userEntity } = c.var.user!
   const followingId = createUserId(c.req.param('userId'))
 
   const userRepo = new PrismaUserRepository(prisma)
   const followRepo = new PrismaUserFollowRepository(prisma)
   const notifRepo = new PrismaNotificationRepository(prisma)
   const service = new UserFollowService(userRepo, followRepo, notifRepo)
-  await service.followUser(followerId, followingId, role)
+  await service.followUser(userEntity.id, followingId, userEntity.role)
 
   return c.json<SuccessResponse<Record<string, never>>>({
     status: 'success',
@@ -259,7 +265,7 @@ user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
 })
 
 user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
-  const { userId: followerId } = c.var.user!
+  const { userEntity } = c.var.user!
   const followingId = createUserId(c.req.param('userId'))
 
   const userRepo = new PrismaUserRepository(prisma)
@@ -269,7 +275,7 @@ user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
     followRepo,
     new PrismaNotificationRepository(prisma)
   )
-  await service.unfollowUser(followerId, followingId)
+  await service.unfollowUser(userEntity.id, followingId)
 
   return c.json<SuccessResponse<Record<string, never>>>({
     status: 'success',
@@ -329,7 +335,7 @@ user.get('/:userId/following', honoAuthMiddleware, async (c) => {
 })
 
 user.get('/search', honoAuthMiddleware, async (c) => {
-  const { userId: requesterId } = c.var.user!
+  const { userEntity } = c.var.user!
   const query = c.req.query('q') ?? ''
   const page = Number(c.req.query('page') ?? '1')
 
@@ -348,7 +354,7 @@ user.get('/search', honoAuthMiddleware, async (c) => {
     followRepo,
     new PrismaNotificationRepository(prisma)
   )
-  const result = await service.searchUsers(query.trim(), requesterId, page)
+  const result = await service.searchUsers(query.trim(), userEntity.id, page)
 
   return c.json<SuccessResponse<ApiResponseUserSearch>>({
     status: 'success',
@@ -432,6 +438,7 @@ user.post(
           notificationEmail: user.notificationEmail,
           isProfilePublic: user.isProfilePublic,
           role: user.role as import('@repo/shared-types').UserRole,
+          plan: user.plan,
         },
         message: 'ユーザー登録成功',
       },
@@ -453,7 +460,7 @@ user.post(
   honoAuthMiddleware,
   zodValidateJson(UserAuthQuitRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
     const result = await prisma.$transaction(async (t) => {
@@ -467,7 +474,7 @@ user.post(
       )
 
       return service.quitUser({
-        userId,
+        userId: userEntity.id,
         quitReason: body.quitReason,
       })
     })
@@ -590,11 +597,80 @@ user.post(
           notificationEmail: guestUser.notificationEmail,
           isProfilePublic: guestUser.isProfilePublic,
           role: guestUser.role as import('@repo/shared-types').UserRole,
+          plan: guestUser.plan,
         },
         message: 'ゲストユーザー登録成功',
       },
       201
     )
+  }
+)
+
+/**
+ * 自分のプラン変更履歴を取得するエンドポイント
+ *
+ * @remarks
+ * - 認証必須
+ * - role !== 'USER' の場合は空配列を返す
+ */
+user.get('/plan/histories', honoAuthMiddleware, async (c) => {
+  const { userEntity } = c.var.user!
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const planHistoryRepo = new PrismaUserPlanHistoryRepository(prisma)
+  const service = new UserPlanService(userRepo, planHistoryRepo)
+
+  const histories = await service.getPlanHistories(userEntity.id)
+
+  return c.json<SuccessResponse<ApiResponseUserPlanHistory>>({
+    status: 'success',
+    data: histories.map((h) => ({
+      id: h.id,
+      plan: h.plan,
+      changedAt: h.changedAt.toISOString(),
+      changedByName: '',
+      reason: h.reason,
+    })),
+    message: 'プラン変更履歴取得成功',
+  })
+})
+
+/**
+ * ユーザーのプランを変更するエンドポイント（管理者専用）
+ *
+ * @remarks
+ * - 認証必須・ADMIN ロール限定
+ * - 対象ユーザーの role が USER 以外の場合は 403
+ */
+user.patch(
+  '/admin/plan',
+  honoAuthMiddleware,
+  zodValidateJson(ChangePlanRequestSchema),
+  async (c) => {
+    const { userEntity } = c.var.user!
+
+    if (userEntity.role !== 'ADMIN') {
+      throw new ApiV1Error('FORBIDDEN', 'この操作は管理者のみ実行できます')
+    }
+
+    const body = c.req.valid('json')
+
+    const userRepo = new PrismaUserRepository(prisma)
+    const planHistoryRepo = new PrismaUserPlanHistoryRepository(prisma)
+    const service = new UserPlanService(userRepo, planHistoryRepo)
+
+    await service.changePlan(
+      createUserId(body.targetUserId),
+      body.plan,
+      userEntity.id,
+      body.reason ?? null
+    )
+
+    return c.json<SuccessResponse<Record<string, never>>>({
+      status: 'success',
+      data: {},
+      message: 'プランを変更しました',
+    })
   }
 )
 

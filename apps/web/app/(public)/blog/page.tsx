@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from './page.module.css'
-import { microCMSClient } from '@/lib/microcms/config'
-import type { Blog } from '@/lib/microcms/types'
+import { getBlogs } from '@/lib/microcms/blog'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const revalidate = 300
@@ -26,26 +25,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/blog',
   },
-}
-
-async function getBlogs(): Promise<Blog[]> {
-  try {
-    if (!microCMSClient) return []
-    const data = await microCMSClient.getList<Blog>({
-      endpoint: 'motoreco-blogs',
-      queries: {
-        orders: '-publishedAt',
-        limit: 100,
-        filters:
-          process.env.NODE_ENV !== 'development'
-            ? 'status[contains]published'
-            : undefined,
-      },
-    })
-    return data.contents
-  } catch {
-    return []
-  }
 }
 
 export default async function BlogPage() {
