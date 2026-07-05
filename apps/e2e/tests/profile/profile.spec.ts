@@ -1,5 +1,5 @@
 import { expect, test } from '../../fixtures/authenticatedPage'
-import { ProfilePage } from '../../pages/profilePage'
+import { AccountPage, ProfilePage } from '../../pages/profilePage'
 
 /**
  * プロフィールページ E2E テスト
@@ -14,6 +14,17 @@ test.describe('プロフィールページ', () => {
     await expect(profilePage.profileCardHeading).toBeVisible()
     await expect(profilePage.authInfoLink).toBeVisible()
     await expect(profilePage.planLink).toBeVisible()
+  })
+
+  test('認証情報ページにメールアドレスが表示される', async ({
+    authenticatedPage,
+    testUserEmail,
+  }) => {
+    const accountPage = new AccountPage(authenticatedPage)
+    await accountPage.goto()
+
+    await expect(accountPage.accountCardHeading).toBeVisible()
+    await expect(accountPage.emailText(testUserEmail)).toBeVisible()
   })
 
   test('ログアウトボタンが表示される', async ({ authenticatedPage }) => {

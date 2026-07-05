@@ -20,7 +20,7 @@ const maintenance = new Hono()
  *   - myUserBikeId: ユーザバイクID（必須）
  */
 maintenance.get('/items', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
   const myUserBikeId = c.req.query('myUserBikeId')
 
   // バリデーション
@@ -34,7 +34,7 @@ maintenance.get('/items', honoAuthMiddleware, async (c) => {
 
   const maintenanceItems = await maintenanceService.getMaintenanceItems(
     createMyUserBikeId(myUserBikeId),
-    userId
+    userEntity.id
   )
 
   return c.json<SuccessResponse<ApiResponseMaintenanceItems>>({
