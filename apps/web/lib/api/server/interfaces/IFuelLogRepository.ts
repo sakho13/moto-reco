@@ -12,6 +12,13 @@ export interface IFuelLogRepository {
     fuelLogId: FuelLogId,
     myUserBikeId: MyUserBikeId
   ): Promise<FuelLogEntity | null>
+  /**
+   * 指定したツーリングに紐づく給油履歴を、給油日時の範囲によらず全件取得する
+   */
+  findFuelLogsByTouringId(
+    touringId: TouringId,
+    myUserBikeId: MyUserBikeId
+  ): Promise<FuelLogEntity[]>
   updateFuelLog(fuelLog: FuelLogEntity): Promise<FuelLogEntity>
   deleteFuelLog(fuelLogId: FuelLogId, myUserBikeId: MyUserBikeId): Promise<void>
   updateFuelLogTouringId(
