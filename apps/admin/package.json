@@ -21,7 +21,7 @@
     "@repo/firebase-auth-server": "workspace:*",
     "@tanstack/react-query": "5.101.2",
     "antd": "6.5.0",
-    "axios": "1.17.0",
+    "axios": "1.18.1",
     "firebase": "catalog:",
     "firebase-admin": "catalog:",
     "next": "catalog:",
