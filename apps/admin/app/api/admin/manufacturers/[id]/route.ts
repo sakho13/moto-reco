@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   return NextResponse.json(item)
 }
 
-export async function PUT(request: NextRequest, { params }: Params) {
+async function update(request: NextRequest, { params }: Params) {
   const auth = await requireAdmin(request)
   if ('error' in auth) return auth.error
 
@@ -31,6 +31,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
   const item = await prisma.mManufacturer.update({ where: { id }, data: body })
   return NextResponse.json(item)
 }
+
+// Refineのdata providerはデフォルトでPATCHを使用するため、PUTと同じ処理をPATCHにも割り当てる
+export { update as PUT, update as PATCH }
 
 export async function DELETE(request: NextRequest, { params }: Params) {
   const auth = await requireAdmin(request)
