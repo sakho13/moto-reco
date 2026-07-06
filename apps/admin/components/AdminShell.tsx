@@ -37,6 +37,22 @@ const resources = [
     meta: { label: 'メーカー' },
   },
   {
+    name: 'goods-manufacturers',
+    list: '/goods-manufacturers',
+    create: '/goods-manufacturers/create',
+    edit: '/goods-manufacturers/:id/edit',
+    show: '/goods-manufacturers/:id',
+    meta: { label: 'グッズメーカー' },
+  },
+  {
+    name: 'goods-models',
+    list: '/goods-models',
+    create: '/goods-models/create',
+    edit: '/goods-models/:id/edit',
+    show: '/goods-models/:id',
+    meta: { label: 'グッズ型番' },
+  },
+  {
     name: 'my-bikes',
     show: '/my-bikes/:id',
     meta: { hide: true },

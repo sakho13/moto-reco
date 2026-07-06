@@ -1,3 +1,4 @@
+import type { GoodsCategory } from '../domain/goods'
 import type { MaintenanceLogItem } from '../domain/maintenanceLog'
 import type {
   TouringPlanRouteType,
@@ -134,6 +135,27 @@ export type ApiResponseBikeSearch = {
     modelName: string
     displacement: number
     modelYear: number
+  }[]
+}
+
+export type ApiResponseGoodsManufacturer = {
+  manufacturers: {
+    goodsManufacturerId: string
+    name: string
+    nameEn: string | null
+  }[]
+}
+
+export type ApiResponseGoodsModelSearch = {
+  models: {
+    goodsModelId: string
+    goodsManufacturerId: string
+    manufacturerName: string
+    modelNumber: string
+    name: string
+    category: GoodsCategory
+    amazonAsin: string | null
+    rakutenItemId: string | null
   }[]
 }
 

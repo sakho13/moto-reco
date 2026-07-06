@@ -1,5 +1,5 @@
-import { prisma } from '../src/index'
-import { manufacturers } from './seedData'
+import { GoodsCategory, prisma } from '../src/index'
+import { goodsManufacturers, manufacturers } from './seedData'
 
 async function main() {
   console.log('Start seeding...')
@@ -38,6 +38,55 @@ async function main() {
     })
     console.log(
       `Created/Updated manufacturer: ${result.name} (${result.nameEn})`
+    )
+  }
+
+  // グッズメーカー・型番マスタのシード
+  console.log('Seeding goods manufacturers...')
+  for (const goodsManufacturer of goodsManufacturers) {
+    const result = await prisma.mGoodsManufacturer.upsert({
+      where: { name: goodsManufacturer.name },
+      update: {
+        name: goodsManufacturer.name,
+        nameEn: goodsManufacturer.nameEn,
+        websiteUrl: goodsManufacturer.websiteUrl,
+        isActive: goodsManufacturer.isActive,
+      },
+      create: {
+        name: goodsManufacturer.name,
+        nameEn: goodsManufacturer.nameEn,
+        websiteUrl: goodsManufacturer.websiteUrl,
+        isActive: goodsManufacturer.isActive,
+      },
+    })
+
+    for (const model of goodsManufacturer.models) {
+      await prisma.mGoodsModel.upsert({
+        where: {
+          goodsManufacturerId_modelNumber: {
+            goodsManufacturerId: result.id,
+            modelNumber: model.modelNumber,
+          },
+        },
+        update: {
+          name: model.name,
+          category: model.category as GoodsCategory,
+          amazonAsin: model.amazonAsin,
+          rakutenItemId: model.rakutenItemId,
+        },
+        create: {
+          goodsManufacturerId: result.id,
+          modelNumber: model.modelNumber,
+          name: model.name,
+          category: model.category as GoodsCategory,
+          amazonAsin: model.amazonAsin,
+          rakutenItemId: model.rakutenItemId,
+        },
+      })
+    }
+
+    console.log(
+      `Created/Updated goods manufacturer: ${result.name} (${result.nameEn}), ${goodsManufacturer.models.length} model(s)`
     )
   }
 
