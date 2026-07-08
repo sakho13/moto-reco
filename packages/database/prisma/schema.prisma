@@ -71,19 +71,23 @@ model MApiKey {
   @@index([userId, isActive])
 }
 
-model MManufacturer {
+model MCompany {
   id         String  @id @default(cuid(2))
-  name       String  @unique @map("name") // メーカー名（日本語）
+  name       String  @unique @map("name") // 会社名（日本語）
   nameEn     String? @map("name_en") // 英語名
   logoUrl    String? @map("logo_url") // ロゴURL
   websiteUrl String? @map("website_url") // 公式サイト
-  country    String? @map("country") // 国
-  isActive   Boolean @default(true) @map("is_active") // アクティブフラグ
+  country    String? @map("country") // 国（任意）
+
+  categories CompanyCategory[] @map("categories") // 会社の役割（複数可）
+
+  isActive Boolean @default(true) @map("is_active") // アクティブフラグ
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  bikes MBike[]
+  bikes       MBike[]
+  goodsModels MGoodsModel[]
 }
 
 model MBike {
@@ -101,7 +105,7 @@ model MBike {
   updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz
   settingStatus BikeStatus @default(INACTIVE) @map("setting_status") // 設定状態
 
-  manufacturer         MManufacturer      @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
+  manufacturer         MCompany           @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
   bikeMaintenanceTypes MMaintenanceType[]
   userBikes            TUserBike[]
 
@@ -123,20 +127,6 @@ model MMaintenanceType {
   @@unique([bikeId, type])
 }
 
-model MGoodsManufacturer {
-  id         String  @id @default(cuid(2))
-  name       String  @unique @map("name") // メーカー名（日本語）
-  nameEn     String? @map("name_en") // 英語名
-  logoUrl    String? @map("logo_url") // ロゴURL
-  websiteUrl String? @map("website_url") // 公式サイト
-  isActive   Boolean @default(true) @map("is_active") // アクティブフラグ
-
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  models MGoodsModel[]
-}
-
 model MGoodsModel {
   id                  String @id @default(cuid(2))
   goodsManufacturerId String @map("goods_manufacturer_id")
@@ -154,7 +144,7 @@ model MGoodsModel {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  manufacturer MGoodsManufacturer @relation(fields: [goodsManufacturerId], references: [id], onDelete: Restrict)
+  manufacturer MCompany @relation(fields: [goodsManufacturerId], references: [id], onDelete: Restrict)
 
   @@unique([goodsManufacturerId, modelNumber])
   @@index([category])
@@ -579,6 +569,11 @@ enum GoodsCategory {
   COVER // バイクカバー
   TOOL // 工具
   OTHER // その他
+}
+
+enum CompanyCategory {
+  BIKE_MAKER // バイクメーカー
+  GOODS_MANUFACTURER // グッズ製造会社
 }
 
 enum UserQuitStatus {

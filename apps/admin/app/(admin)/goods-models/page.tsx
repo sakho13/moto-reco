@@ -45,10 +45,13 @@ export default function GoodsModelListPage() {
   })
 
   const { selectProps: manufacturerSelectProps } = useSelect({
-    resource: 'goods-manufacturers',
+    resource: 'companies',
     optionLabel: 'name',
     optionValue: 'id',
     pagination: { pageSize: 200 },
+    filters: [
+      { field: 'category', operator: 'eq', value: 'GOODS_MANUFACTURER' },
+    ],
   })
 
   return (
@@ -93,7 +96,7 @@ export default function GoodsModelListPage() {
               | undefined
             if (!manufacturer) return '—'
             return (
-              <Link href={`/goods-manufacturers/${manufacturer.id}`}>
+              <Link href={`/companies/${manufacturer.id}`}>
                 {manufacturer.name}
               </Link>
             )

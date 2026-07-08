@@ -8,9 +8,12 @@ export default function GoodsModelEditPage() {
   const { formProps, saveButtonProps } = useForm()
 
   const { selectProps: manufacturerSelectProps } = useSelect({
-    resource: 'goods-manufacturers',
+    resource: 'companies',
     optionLabel: 'name',
     optionValue: 'id',
+    filters: [
+      { field: 'category', operator: 'eq', value: 'GOODS_MANUFACTURER' },
+    ],
   })
 
   return (

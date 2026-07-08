@@ -7,15 +7,15 @@ import {
 } from '@repo/shared-types'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
-import { PrismaManufacturerRepository } from '../repositories/PrismaManufacturerRepository'
+import { PrismaCompanyRepository } from '../repositories/PrismaCompanyRepository'
 import { BikeSearchParams } from '../valueObjects/BikeSearchParams'
 
 const bikes = new Hono()
 
 bikes.get('/manufacturers', honoAuthMiddleware, async (c) => {
-  const manufacturerRepo = new PrismaManufacturerRepository(prisma)
+  const companyRepo = new PrismaCompanyRepository(prisma)
 
-  const manufacturers = await manufacturerRepo.findAll()
+  const manufacturers = await companyRepo.findAll({ category: 'BIKE_MAKER' })
 
   return c.json<SuccessResponse<ApiResponseManufacturer>>({
     status: 'success',
@@ -23,8 +23,8 @@ bikes.get('/manufacturers', honoAuthMiddleware, async (c) => {
       manufacturers: manufacturers.map((m) => ({
         manufacturerId: m.id,
         name: m.name,
-        nameEn: m.nameEn,
-        country: m.country,
+        nameEn: m.nameEn ?? '',
+        country: m.country ?? '',
       })),
     },
     message: 'メーカー一覧取得成功',

@@ -1,6 +1,6 @@
 import {
+  CompanyId,
   GoodsCategory,
-  GoodsManufacturerId,
   GoodsModel,
   GoodsModelId,
 } from '@repo/shared-types'
@@ -16,7 +16,7 @@ export class GoodsModelEntity {
     return this._value.id
   }
 
-  public get goodsManufacturerId(): GoodsManufacturerId {
+  public get goodsManufacturerId(): CompanyId {
     return this._value.goodsManufacturerId
   }
 

@@ -1,3 +1,5 @@
+import { CompanyId } from './company'
+
 export type GoodsCategory =
   | 'HELMET'
   | 'GLOVE'
@@ -15,23 +17,13 @@ export type GoodsCategory =
   | 'TOOL'
   | 'OTHER'
 
-export type GoodsManufacturerId = string & { readonly __brand: unique symbol }
-export const createGoodsManufacturerId = (id: string): GoodsManufacturerId =>
-  id as GoodsManufacturerId
-
-export type GoodsManufacturer = {
-  id: GoodsManufacturerId
-  name: string
-  nameEn: string | null
-}
-
 export type GoodsModelId = string & { readonly __brand: unique symbol }
 export const createGoodsModelId = (id: string): GoodsModelId =>
   id as GoodsModelId
 
 export type GoodsModel = {
   id: GoodsModelId
-  goodsManufacturerId: GoodsManufacturerId
+  goodsManufacturerId: CompanyId
   manufacturerName: string
   modelNumber: string
   name: string

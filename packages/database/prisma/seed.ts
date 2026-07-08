@@ -1,5 +1,16 @@
-import { GoodsCategory, prisma } from '../src/index'
+import { CompanyCategory, GoodsCategory, prisma } from '../src/index'
 import { goodsManufacturers, manufacturers } from './seedData'
+
+/**
+ * 既存の categories を消さずに新しい区分をユニオンして返す
+ */
+async function unionCategories(
+  name: string,
+  category: CompanyCategory
+): Promise<CompanyCategory[]> {
+  const existing = await prisma.mCompany.findUnique({ where: { name } })
+  return Array.from(new Set([...(existing?.categories ?? []), category]))
+}
 
 async function main() {
   console.log('Start seeding...')
@@ -7,7 +18,8 @@ async function main() {
   // メーカーマスタのシード
   console.log('Seeding manufacturers...')
   for (const manufacturer of manufacturers) {
-    const result = await prisma.mManufacturer.upsert({
+    const categories = await unionCategories(manufacturer.name, 'BIKE_MAKER')
+    const result = await prisma.mCompany.upsert({
       where: { name: manufacturer.name },
       update: {
         name: manufacturer.name,
@@ -15,6 +27,7 @@ async function main() {
         websiteUrl: manufacturer.websiteUrl,
         country: manufacturer.country,
         isActive: manufacturer.isActive,
+        categories,
       },
       create: {
         name: manufacturer.name,
@@ -22,6 +35,7 @@ async function main() {
         websiteUrl: manufacturer.websiteUrl,
         country: manufacturer.country,
         isActive: manufacturer.isActive,
+        categories,
 
         bikes: {
           create:
@@ -44,19 +58,25 @@ async function main() {
   // グッズメーカー・型番マスタのシード
   console.log('Seeding goods manufacturers...')
   for (const goodsManufacturer of goodsManufacturers) {
-    const result = await prisma.mGoodsManufacturer.upsert({
+    const categories = await unionCategories(
+      goodsManufacturer.name,
+      'GOODS_MANUFACTURER'
+    )
+    const result = await prisma.mCompany.upsert({
       where: { name: goodsManufacturer.name },
       update: {
         name: goodsManufacturer.name,
         nameEn: goodsManufacturer.nameEn,
         websiteUrl: goodsManufacturer.websiteUrl,
         isActive: goodsManufacturer.isActive,
+        categories,
       },
       create: {
         name: goodsManufacturer.name,
         nameEn: goodsManufacturer.nameEn,
         websiteUrl: goodsManufacturer.websiteUrl,
         isActive: goodsManufacturer.isActive,
+        categories,
       },
     })
 

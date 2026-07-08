@@ -8,16 +8,18 @@ import {
 } from '@repo/shared-types'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateQuery } from '../middlewares/zodValidation'
-import { PrismaGoodsManufacturerRepository } from '../repositories/PrismaGoodsManufacturerRepository'
+import { PrismaCompanyRepository } from '../repositories/PrismaCompanyRepository'
 import { PrismaGoodsModelRepository } from '../repositories/PrismaGoodsModelRepository'
 import { GoodsModelSearchParams } from '../valueObjects/GoodsModelSearchParams'
 
 const goods = new Hono()
 
 goods.get('/manufacturers', honoAuthMiddleware, async (c) => {
-  const manufacturerRepo = new PrismaGoodsManufacturerRepository(prisma)
+  const companyRepo = new PrismaCompanyRepository(prisma)
 
-  const manufacturers = await manufacturerRepo.findAll()
+  const manufacturers = (
+    await companyRepo.findAll({ category: 'GOODS_MANUFACTURER' })
+  ).filter((m) => m.isActive)
 
   return c.json<SuccessResponse<ApiResponseGoodsManufacturer>>({
     status: 'success',

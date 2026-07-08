@@ -1,8 +1,5 @@
 import { Prisma } from '@repo/database'
-import {
-  createGoodsManufacturerId,
-  createGoodsModelId,
-} from '@repo/shared-types'
+import { createCompanyId, createGoodsModelId } from '@repo/shared-types'
 import { GoodsModelEntity } from '../entities/GoodsModelEntity'
 import { IGoodsModelRepository } from '../interfaces/IGoodsModelRepository'
 import { GoodsModelSearchParams } from '../valueObjects/GoodsModelSearchParams'
@@ -44,9 +41,7 @@ export class PrismaGoodsModelRepository
       (model) =>
         new GoodsModelEntity({
           id: createGoodsModelId(model.id),
-          goodsManufacturerId: createGoodsManufacturerId(
-            model.goodsManufacturerId
-          ),
+          goodsManufacturerId: createCompanyId(model.goodsManufacturerId),
           manufacturerName: model.manufacturer.name,
           modelNumber: model.modelNumber,
           name: model.name,

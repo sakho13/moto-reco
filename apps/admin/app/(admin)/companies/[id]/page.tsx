@@ -2,9 +2,10 @@
 
 import { DateField, Show } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
-import { Descriptions, Tag } from 'antd'
+import { Descriptions, Space, Tag } from 'antd'
+import { getCompanyCategoryLabel } from '@/lib/companyCategory'
 
-export default function ManufacturerShowPage() {
+export default function CompanyShowPage() {
   const { query } = useShow()
   const { data, isLoading } = query
   const record = data?.data
@@ -12,11 +13,18 @@ export default function ManufacturerShowPage() {
   return (
     <Show isLoading={isLoading}>
       <Descriptions bordered column={1}>
-        <Descriptions.Item label="メーカー名">
+        <Descriptions.Item label="会社名">
           {record?.name as string}
         </Descriptions.Item>
         <Descriptions.Item label="英語名">
           {(record?.nameEn as string) ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="区分">
+          <Space>
+            {((record?.categories as string[]) ?? []).map((category) => (
+              <Tag key={category}>{getCompanyCategoryLabel(category)}</Tag>
+            ))}
+          </Space>
         </Descriptions.Item>
         <Descriptions.Item label="国">
           {(record?.country as string) ?? '—'}
