@@ -27,7 +27,7 @@
     "@repo/shared-types": "workspace:*",
     "@repo/shared-utils": "workspace:*",
     "@repo/ui": "workspace:*",
-    "@scalar/nextjs-api-reference": "0.11.8",
+    "@scalar/nextjs-api-reference": "0.11.9",
     "@vercel/mcp-adapter": "0.3.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
@@ -42,7 +42,7 @@
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "recharts": "3.9.1",
+    "recharts": "3.9.2",
     "swr": "2.4.2",
     "tailwind-merge": "3.6.0",
     "zod": "catalog:"
