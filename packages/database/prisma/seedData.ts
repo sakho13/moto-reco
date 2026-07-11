@@ -239,3 +239,117 @@ export const manufacturers = [
     isActive: true,
   },
 ]
+
+/**
+ * グッズメーカー・型番マスタのシードデータ
+ *
+ * @remarks
+ * amazonAsin/rakutenItemIdは実在の商品リンクを確認の上、運営が別途設定する想定のため
+ * 初期シードではnullとしている。
+ */
+export const goodsManufacturers = [
+  {
+    name: 'SHOEI',
+    nameEn: 'SHOEI',
+    websiteUrl: 'https://www.shoei.com/',
+    isActive: true,
+    models: [
+      {
+        modelNumber: 'Z-8',
+        name: 'Z-8',
+        category: 'HELMET',
+        amazonAsin: null,
+        rakutenItemId: null,
+      },
+      {
+        modelNumber: 'GT-Air 3',
+        name: 'GT-Air 3',
+        category: 'HELMET',
+        amazonAsin: null,
+        rakutenItemId: null,
+      },
+    ],
+  },
+  {
+    name: 'アライ',
+    nameEn: 'Arai',
+    websiteUrl: 'https://www.arai.co.jp/',
+    isActive: true,
+    models: [
+      {
+        modelNumber: 'RX-7X',
+        name: 'RX-7X',
+        category: 'HELMET',
+        amazonAsin: null,
+        rakutenItemId: null,
+      },
+    ],
+  },
+  {
+    name: 'RSタイチ',
+    nameEn: 'RS Taichi',
+    websiteUrl: 'https://www.rs-taichi.com/',
+    isActive: true,
+    models: [
+      {
+        modelNumber: 'RSG046',
+        name: 'アームドレザーグローブ',
+        category: 'GLOVE',
+        amazonAsin: null,
+        rakutenItemId: null,
+      },
+      {
+        modelNumber: 'RSJ333',
+        name: 'ドライマスターオーバーパンツ',
+        category: 'RAINWEAR',
+        amazonAsin: null,
+        rakutenItemId: null,
+      },
+    ],
+  },
+  {
+    name: 'コミネ',
+    nameEn: 'Komine',
+    websiteUrl: 'https://www.komine.ac/',
+    isActive: true,
+    models: [
+      {
+        modelNumber: 'JK-596',
+        name: 'プロテクトメッシュジャケット',
+        category: 'JACKET',
+        amazonAsin: null,
+        rakutenItemId: null,
+      },
+    ],
+  },
+  {
+    name: 'SENA',
+    nameEn: 'SENA',
+    websiteUrl: 'https://www.sena.com/',
+    isActive: true,
+    models: [
+      {
+        modelNumber: '50S',
+        name: '50S',
+        category: 'INTERCOM',
+        amazonAsin: null,
+        rakutenItemId: null,
+      },
+    ],
+  },
+  {
+    name: 'GIVI',
+    nameEn: 'GIVI',
+    websiteUrl: 'https://givi-jp.com/',
+    isActive: true,
+    models: [
+      {
+        modelNumber: 'E52',
+        name: 'モノキーケース E52',
+        category: 'BOX_CASE',
+        amazonAsin: null,
+        rakutenItemId: null,
+      },
+    ],
+  },
+]

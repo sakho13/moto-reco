@@ -675,9 +675,10 @@ describe('TouringService', () => {
           fuelLogId: createFuelLogId('fuel-log-linked-2'),
           touringId: existing.id,
         })
-        vi.mocked(fuelLogRepository.findFuelLogsByTouringId).mockResolvedValue(
-          [linkedFuelLog1, linkedFuelLog2]
-        )
+        vi.mocked(fuelLogRepository.findFuelLogsByTouringId).mockResolvedValue([
+          linkedFuelLog1,
+          linkedFuelLog2,
+        ])
 
         await service.updateTouring({
           touringId: existing.id,
@@ -717,9 +718,9 @@ describe('TouringService', () => {
           refueledAt: new Date('2020-06-20T09:00:00.000Z'),
           touringId: existing.id,
         })
-        vi.mocked(fuelLogRepository.findFuelLogsByTouringId).mockResolvedValue(
-          [outOfRangeLinkedFuelLog]
-        )
+        vi.mocked(fuelLogRepository.findFuelLogsByTouringId).mockResolvedValue([
+          outOfRangeLinkedFuelLog,
+        ])
 
         await service.updateTouring({
           touringId: existing.id,
@@ -744,9 +745,7 @@ describe('TouringService', () => {
           title: '更新後タイトル',
         })
 
-        expect(
-          fuelLogRepository.findFuelLogsByTouringId
-        ).not.toHaveBeenCalled()
+        expect(fuelLogRepository.findFuelLogsByTouringId).not.toHaveBeenCalled()
         expect(
           fuelLogRepository.updateMultipleFuelLogsTouringId
         ).not.toHaveBeenCalled()

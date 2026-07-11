@@ -13,17 +13,18 @@ import {
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
 import { Button, Form, Input, Space, Table, Tag } from 'antd'
 import Link from 'next/link'
+import { getCompanyCategoryLabel } from '@/lib/companyCategory'
 
 type SearchForm = { q: string }
 
-export default function ManufacturerListPage() {
+export default function CompanyListPage() {
   const { tableProps, searchFormProps } = useTable<
     BaseRecord,
     never,
     SearchForm
   >({
     syncWithLocation: true,
-    resource: 'manufacturers',
+    resource: 'companies',
     onSearch: ({ q }) => {
       const filters: CrudFilters = []
       if (q) filters.push({ field: 'q', operator: 'eq', value: q })
@@ -35,7 +36,7 @@ export default function ManufacturerListPage() {
     <List headerButtons={<CreateButton />}>
       <Form {...searchFormProps} layout="inline" style={{ marginBottom: 16 }}>
         <Form.Item name="q">
-          <Input placeholder="メーカー名・英語名で検索" allowClear />
+          <Input placeholder="会社名・英語名で検索" allowClear />
         </Form.Item>
         <Form.Item>
           <Button htmlType="submit" icon={<SearchOutlined />}>
@@ -46,12 +47,23 @@ export default function ManufacturerListPage() {
       <Table {...tableProps} rowKey="id" scroll={{ x: true }}>
         <Table.Column
           dataIndex="name"
-          title="メーカー名"
+          title="会社名"
           render={(v: string, record: BaseRecord) => (
-            <Link href={`/manufacturers/${record.id as string}`}>{v}</Link>
+            <Link href={`/companies/${record.id as string}`}>{v}</Link>
           )}
         />
         <Table.Column dataIndex="nameEn" title="英語名" />
+        <Table.Column
+          dataIndex="categories"
+          title="区分"
+          render={(categories: string[]) => (
+            <Space>
+              {categories.map((category) => (
+                <Tag key={category}>{getCompanyCategoryLabel(category)}</Tag>
+              ))}
+            </Space>
+          )}
+        />
         <Table.Column dataIndex="country" title="国" />
         <Table.Column
           dataIndex="isActive"

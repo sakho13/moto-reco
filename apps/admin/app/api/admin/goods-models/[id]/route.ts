@@ -9,34 +9,44 @@ export async function GET(request: NextRequest, { params }: Params) {
   if ('error' in auth) return auth.error
 
   const { id } = await params
-  const item = await prisma.mManufacturer.findUnique({ where: { id } })
+  const item = await prisma.mGoodsModel.findUnique({
+    where: { id },
+    include: { manufacturer: { select: { id: true, name: true } } },
+  })
   if (!item) return NextResponse.json({ message: 'Not Found' }, { status: 404 })
   return NextResponse.json(item)
 }
 
-export async function PUT(request: NextRequest, { params }: Params) {
+async function update(request: NextRequest, { params }: Params) {
   const auth = await requireAdmin(request)
   if ('error' in auth) return auth.error
 
   const { id } = await params
   const body = (await request.json()) as {
+    goodsManufacturerId?: string
+    modelNumber?: string
     name?: string
-    nameEn?: string
-    logoUrl?: string
-    websiteUrl?: string
-    country?: string
+    category?: string
+    amazonAsin?: string
+    rakutenItemId?: string
     isActive?: boolean
   }
 
-  const item = await prisma.mManufacturer.update({ where: { id }, data: body })
+  const item = await prisma.mGoodsModel.update({
+    where: { id },
+    data: body as never,
+  })
   return NextResponse.json(item)
 }
+
+// Refineのdata providerはデフォルトでPATCHを使用するため、PUTと同じ処理をPATCHにも割り当てる
+export { update as PUT, update as PATCH }
 
 export async function DELETE(request: NextRequest, { params }: Params) {
   const auth = await requireAdmin(request)
   if ('error' in auth) return auth.error
 
   const { id } = await params
-  await prisma.mManufacturer.delete({ where: { id } })
+  await prisma.mGoodsModel.delete({ where: { id } })
   return NextResponse.json({ id })
 }
