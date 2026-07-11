@@ -30,10 +30,30 @@ export default function CompanyShowPage() {
           {(record?.country as string) ?? '—'}
         </Descriptions.Item>
         <Descriptions.Item label="公式サイト">
-          {(record?.websiteUrl as string) ?? '—'}
+          {record?.websiteUrl ? (
+            <a
+              href={record.websiteUrl as string}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {record.websiteUrl as string}
+            </a>
+          ) : (
+            '—'
+          )}
         </Descriptions.Item>
         <Descriptions.Item label="ロゴ URL">
-          {(record?.logoUrl as string) ?? '—'}
+          {record?.logoUrl ? (
+            <a
+              href={record.logoUrl as string}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {record.logoUrl as string}
+            </a>
+          ) : (
+            '—'
+          )}
         </Descriptions.Item>
         <Descriptions.Item label="有効">
           <Tag color={record?.isActive ? 'green' : 'default'}>
