@@ -1,4 +1,4 @@
-import { getApp, getApps, initializeApp, cert } from 'firebase-admin/app'
+import { getApps, initializeApp, cert } from 'firebase-admin/app'
 import type { Storage } from 'firebase-admin/storage'
 import { getStorage } from 'firebase-admin/storage'
 
@@ -7,10 +7,17 @@ const globalForFirebase = global as unknown as {
 }
 
 /**
- * Firebase Admin SDK の Storage クライアントを取得
+ * Storage専用のFirebaseアプリ名。
  *
- * getApp() が成功する前提（firebase-auth-server が先に初期化済み）。
- * 未初期化の場合は同じ環境変数でフォールバック初期化する。
+ * 署名付きURL生成(V4署名)はローカル完結の暗号処理でエミュレータ経由でも
+ * 実在するサービスアカウント形式の秘密鍵が必須なため、firebase-auth-server
+ * が初期化する認証情報なしのデフォルトアプリとは別に、常にcert認証情報を
+ * 持つ専用アプリを用意する。
+ */
+const STORAGE_APP_NAME = 'storage'
+
+/**
+ * Firebase Admin SDK の Storage クライアントを取得
  *
  * 必須環境変数:
  * - FIREBASE_PROJECT_ID
@@ -23,7 +30,12 @@ export function getFirebaseAdminStorage(): Storage {
     return globalForFirebase.firebaseAdminStorage
   }
 
-  const app = getApps().length > 0 ? getApp() : initFirebaseAdminApp()
+  if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+    process.env.FIREBASE_STORAGE_EMULATOR_HOST = 'localhost:9199'
+  }
+
+  const existingApp = getApps().find((a) => a.name === STORAGE_APP_NAME)
+  const app = existingApp ?? initFirebaseAdminApp()
   const storage = getStorage(app)
 
   if (process.env.NODE_ENV !== 'production') {
@@ -50,14 +62,11 @@ function initFirebaseAdminApp() {
     throw new Error('Firebase Admin 設定パラメータが未設定')
   }
 
-  const useEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true'
-
-  if (useEmulator) {
-    return initializeApp({ projectId })
-  }
-
-  return initializeApp({
-    credential: cert({ projectId, clientEmail, privateKey }),
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  })
+  return initializeApp(
+    {
+      credential: cert({ projectId, clientEmail, privateKey }),
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    },
+    STORAGE_APP_NAME
+  )
 }

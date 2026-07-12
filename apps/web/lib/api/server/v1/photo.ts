@@ -38,6 +38,8 @@ import { HonoVariables } from '../types/hono'
 const photo = new Hono<{ Variables: HonoVariables }>()
 
 const SIGNED_URL_EXPIRY_MS = 15 * 60 * 1000 // 15分
+// V4署名付きURLの有効期限はGCSの仕様上7日が上限
+const READ_SIGNED_URL_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000
 
 const CONTENT_TYPE_TO_EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -154,7 +156,7 @@ photo.post(
         const [url] = await file.getSignedUrl({
           version: 'v4',
           action: 'read',
-          expires: Date.now() + 365 * 24 * 60 * 60 * 1000, // 1年
+          expires: Date.now() + READ_SIGNED_URL_EXPIRY_MS,
         })
         return { ...p, photoUrl: url }
       })
@@ -258,7 +260,7 @@ photo.post(
         const [url] = await file.getSignedUrl({
           version: 'v4',
           action: 'read',
-          expires: Date.now() + 365 * 24 * 60 * 60 * 1000,
+          expires: Date.now() + READ_SIGNED_URL_EXPIRY_MS,
         })
         return { ...p, photoUrl: url }
       })
@@ -359,7 +361,7 @@ photo.post(
         const [url] = await file.getSignedUrl({
           version: 'v4',
           action: 'read',
-          expires: Date.now() + 365 * 24 * 60 * 60 * 1000,
+          expires: Date.now() + READ_SIGNED_URL_EXPIRY_MS,
         })
         return { ...p, photoUrl: url }
       })

@@ -16,6 +16,7 @@ import { FuelIcon } from '@/components/icons/FuelIcon'
 import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
+import { BikePhotosCard } from '@/components/photo/BikePhotosCard'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -137,6 +138,8 @@ function BikeDetailPage() {
             <span>ツーリング回数: {bike.touringCount}回</span>
           </div>
         </BaseCard>
+
+        <BikePhotosCard myUserBikeId={id} />
       </div>
 
       {/* 履歴管理セクション */}

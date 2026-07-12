@@ -24,6 +24,13 @@ function ProfileEditPage() {
             <span>認証情報</span>
             <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
           </Link>
+          <Link
+            href="/app/photos"
+            className="flex justify-between items-center text-sm py-2 border-b last:border-b-0"
+          >
+            <span>マイフォト</span>
+            <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
+          </Link>
           {!isGuest && (
             <Link
               href="/app/profile/plan"
