@@ -6,6 +6,7 @@ import type {
   ApiResponseFuelLogDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { toLocalDateTimeString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
@@ -50,18 +51,15 @@ export function FuelLogEditModal({
 
   useEffect(() => {
     if (data) {
-      const dateStr = new Date(data.refueledAt).toISOString().split('T')[0]
-      if (dateStr) {
-        setInitialData({
-          refueledAt: dateStr,
-          mileage: data.mileage.toString(),
-          previousMileage: data.previousMileage.toString(),
-          amount: data.amount.toString(),
-          totalPrice: data.totalPrice.toString(),
-          memo: data.memo ?? '',
-          updateTotalMileage: false,
-        })
-      }
+      setInitialData({
+        refueledAt: toLocalDateTimeString(data.refueledAt),
+        mileage: data.mileage.toString(),
+        previousMileage: data.previousMileage.toString(),
+        amount: data.amount.toString(),
+        totalPrice: data.totalPrice.toString(),
+        memo: data.memo ?? '',
+        updateTotalMileage: false,
+      })
     }
   }, [data])
 

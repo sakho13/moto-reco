@@ -40,19 +40,18 @@ export const UserBikeRegisterRequestSchema = z
       .number({ invalid_type_error: '購入価格は数値で指定してください' })
       .int('購入価格は整数で指定してください')
       .nonnegative('購入価格は0以上で指定してください')
+      .nullable()
       .optional(),
     purchaseMileage: z
       .number({ invalid_type_error: '購入時走行距離は数値で指定してください' })
       .int('購入時走行距離は整数で指定してください')
       .nonnegative('購入時走行距離は0以上で指定してください')
+      .nullable()
       .optional(),
     totalMileage: z
       .number({ invalid_type_error: '総走行距離は数値で指定してください' })
       .int('総走行距離は整数で指定してください')
       .nonnegative('総走行距離は0以上で指定してください')
-      .optional(),
-    isPublic: z
-      .boolean({ invalid_type_error: '公開設定は真偽値で指定してください' })
       .optional(),
   })
   .refine(
@@ -107,9 +106,6 @@ export const UserBikeUpdateRequestSchema = z
       .nonnegative('総走行距離は0以上で指定してください')
       .nullable()
       .optional(),
-    isPublic: z
-      .boolean({ invalid_type_error: '公開設定は真偽値で指定してください' })
-      .optional(),
   })
   .refine(
     (data) =>
@@ -118,8 +114,7 @@ export const UserBikeUpdateRequestSchema = z
       data.purchasePrice !== undefined ||
       data.purchaseMileage !== undefined ||
       data.totalMileage !== undefined ||
-      data.displacement !== undefined ||
-      data.isPublic !== undefined,
+      data.displacement !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }

@@ -9,21 +9,22 @@
     "dev:mobile": "dotenv -e .env.local -- pnpm --filter mobile dev",
     "dev:api": "dotenv -e .env.local -- pnpm --filter api dev",
     "test": "dotenv -e .env.local -- turbo run test",
+    "test:e2e": "dotenv -e .env.local -- turbo run test:e2e",
     "lint": "turbo run lint",
     "format": "prettier --write \"apps/**/*.{ts,tsx,md}\" \"packages/**/*.{ts,tsx,md}\" \"*.md\" --ignore-path .prettierignore",
     "check-types": "turbo run check-types",
     "storybook": "turbo run storybook"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "4.2.4",
+    "@tailwindcss/postcss": "4.3.2",
     "dotenv": "catalog:",
     "dotenv-cli": "catalog:",
     "prettier": "catalog:",
     "tailwindcss": "4.2.4",
-    "turbo": "2.9.7",
+    "turbo": "2.10.4",
     "typescript": "catalog:"
   },
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@11.5.0",
   "engines": {
     "node": ">=18"
   }

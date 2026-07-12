@@ -1,0 +1,22 @@
+.followSection {
+  display: flex;
+  gap: var(--spacing-6);
+}
+
+.followItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.followCount {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+.followLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}

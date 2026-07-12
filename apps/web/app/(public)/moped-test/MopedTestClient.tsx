@@ -6,6 +6,7 @@ import {
   ApiResponseMopedTestQuestionSet,
   MopedTestAnswerOption,
 } from '@repo/shared-types'
+import { getCurrentDate, formatDateTime } from '@repo/shared-utils'
 import { HistorySection } from './HistorySection'
 import styles from './page.module.css'
 import { SwipeCardDeck } from './SwipeCardDeck'
@@ -125,7 +126,7 @@ export function MopedTestClient() {
 
     const newSession: TestSession = {
       sessionId: Date.now().toString(36),
-      submittedAt: new Date().toISOString(),
+      submittedAt: getCurrentDate().toISOString(),
       score: finalScore,
       totalCount: questionSet.questionCount,
       passScore: questionSet.passScore,
@@ -194,7 +195,7 @@ export function MopedTestClient() {
         {lastSession && (
           <p className={styles.lastResult}>
             前回結果: {lastSession.score}点（
-            {new Date(lastSession.submittedAt).toLocaleString('ja-JP')}）
+            {formatDateTime(lastSession.submittedAt)}）
           </p>
         )}
         {history.length > 0 && (

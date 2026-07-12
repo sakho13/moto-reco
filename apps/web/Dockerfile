@@ -7,7 +7,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # pnpm インストール
-RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+RUN corepack enable && corepack prepare pnpm@11.5.0 --activate
 
 # package.jsonとpnpm-workspace.yamlコピー
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -16,6 +16,7 @@ COPY packages/database/package.json ./packages/database/
 COPY packages/firebase-auth-server/package.json ./packages/firebase-auth-server/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-utils/package.json ./packages/shared-utils/
+COPY packages/email/package.json ./packages/email/
 COPY packages/theme/package.json ./packages/theme/
 COPY packages/ui/package.json ./packages/ui/
 

@@ -19,8 +19,8 @@ model MAuthProvider {
 
   isActive Boolean @default(true) @map("is_active")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -32,33 +32,63 @@ model MUser {
   id                String  @id @default(cuid(2))
   name              String
   notificationEmail String? @map("notification_email")
+  isProfilePublic   Boolean @default(true) @map("is_profile_public")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   status MUserStatus @default(ACTIVE) @map("status")
   role   MUserRole   @default(USER) @map("role")
 
-  authProviders MAuthProvider[]
-  myBikes       TUserMyBike[]
-  histories     TUserMyBikeHistory[]
-  photos        TUserMyBikePhoto[]
-  userQuit      TUserQuit?
+  authProviders          MAuthProvider[]
+  myBikes                TUserMyBike[]
+  histories              TUserMyBikeHistory[]
+  photos                 TUserMyBikePhoto[]
+  userQuit               TUserQuit?
+  followers              TUserFollow[]             @relation("UserFollowing")
+  following              TUserFollow[]             @relation("UserFollowers")
+  notifications          TNotification[]
+  announcementReads      TSystemAnnouncementRead[]
+  createdAnnouncements   MSystemAnnouncement[]
+  planHistories          TUserPlanHistory[]
+  planHistoriesChangedBy TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
+  apiKeys                MApiKey[]
 }
 
-model MManufacturer {
+model MApiKey {
+  id       String         @id @default(cuid(2))
+  userId   String         @map("user_id")
+  name     String
+  keyHash  String         @unique @map("key_hash")
+  prefix   String         @map("prefix")
+  scopes   MApiKeyScope[] @default([READ]) @map("scopes")
+  isActive Boolean        @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+}
+
+model MCompany {
   id         String  @id @default(cuid(2))
-  name       String  @unique @map("name") // メーカー名（日本語）
+  name       String  @unique @map("name") // 会社名（日本語）
   nameEn     String? @map("name_en") // 英語名
   logoUrl    String? @map("logo_url") // ロゴURL
   websiteUrl String? @map("website_url") // 公式サイト
-  country    String? @map("country") // 国
-  isActive   Boolean @default(true) @map("is_active") // アクティブフラグ
+  country    String? @map("country") // 国（任意）
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  categories CompanyCategory[] @map("categories") // 会社の役割（複数可）
 
-  bikes MBike[]
+  isActive Boolean @default(true) @map("is_active") // アクティブフラグ
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  bikes       MBike[]
+  goodsModels MGoodsModel[]
 }
 
 model MBike {
@@ -72,11 +102,11 @@ model MBike {
   releaseYear  Int @map("release_year") // 発売年
   releaseMonth Int @map("release_month") // 発売月
 
-  createdAt     DateTime   @default(now()) @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz
   settingStatus BikeStatus @default(INACTIVE) @map("setting_status") // 設定状態
 
-  manufacturer         MManufacturer      @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
+  manufacturer         MCompany           @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
   bikeMaintenanceTypes MMaintenanceType[]
   userBikes            TUserBike[]
 
@@ -98,15 +128,38 @@ model MMaintenanceType {
   @@unique([bikeId, type])
 }
 
+model MGoodsModel {
+  id                  String @id @default(cuid(2))
+  goodsManufacturerId String @map("goods_manufacturer_id")
+
+  modelNumber String        @map("model_number") // 型番
+  name        String // 商品名
+  category    GoodsCategory @map("category")
+
+  // 購入先情報（商品ごとに一意なため、購入記録ではなくマスタ側で保持する）
+  amazonAsin    String? @map("amazon_asin")
+  rakutenItemId String? @map("rakuten_item_id")
+
+  isActive Boolean @default(true) @map("is_active") // アクティブフラグ
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  manufacturer MCompany @relation(fields: [goodsManufacturerId], references: [id], onDelete: Restrict)
+
+  @@unique([goodsManufacturerId, modelNumber])
+  @@index([category])
+}
+
 model TUserBike {
-  id           String @id @default(cuid(2))
+  id           String  @id @default(cuid(2))
   bikeId       String? @map("bike_id")
   serialNumber String? @map("serial_number")
   displacement Float   @map("displacement")
   totalMileage Int     @default(0) @map("total_mileage") // 総走行距離/km
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   bike    MBike?        @relation(fields: [bikeId], references: [id], onDelete: Restrict)
   myBikes TUserMyBike[]
@@ -119,18 +172,19 @@ model TUserMyBike {
 
   // ユーザー独自の設定
   nickname        String?   @map("nickname") // 愛称
-  purchaseDate    DateTime? @map("purchase_date")
+  purchaseDate    DateTime? @map("purchase_date") @db.Timestamptz
   purchasePrice   Int?      @map("purchase_price")
   purchaseMileage Int?      @map("purchase_mileage")
+  // 未使用: バイクの公開設定はフレンド機能追加（isProfilePublic）に伴い廃止
   isPublic        Boolean   @default(false) @map("is_public")
 
   // 所有状態
-  ownedAt   DateTime          @map("owned_at")
-  soldAt    DateTime?         @map("sold_at")
+  ownedAt   DateTime          @map("owned_at") @db.Timestamptz
+  soldAt    DateTime?         @map("sold_at") @db.Timestamptz
   ownStatus UserBikeOwnStatus @default(OWN) @map("own_status")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user     MUser     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userBike TUserBike @relation(fields: [userBikeId], references: [id], onDelete: Restrict)
@@ -138,10 +192,12 @@ model TUserMyBike {
   fuelLogs        TUserMyBikeFuelLog[]
   maintenanceLogs TUserMyBikeMaintenance[]
   tourings        TUserMyBikeTouring[]
+  touringPlans    TUserMyBikeTouringPlan[]
   histories       TUserMyBikeHistory[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
+  // 未使用: バイクの公開設定廃止に伴いこのインデックスも未使用
   @@index([isPublic, ownStatus, updatedAt(sort: Desc)], name: "idx_public_bikes")
 }
 
@@ -153,12 +209,12 @@ model TUserMyBikeFuelLog {
   price           Int      @map("price") // 給油価格/円
   mileage         Int      @map("mileage") // 給油時総走行距離/km
   previousMileage Int      @map("previous_mileage") // 前回給油時総走行距離/km
-  refueledAt      DateTime @map("refueled_at") // 給油日時
+  refueledAt      DateTime @map("refueled_at") @db.Timestamptz // 給油日時
   memo            String?  @map("memo") // メモ
   touringId       String?  @map("touring_id") // ツーリングID
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   userMyBike TUserMyBike         @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   touring    TUserMyBikeTouring? @relation(fields: [touringId], references: [id], onDelete: SetNull)
@@ -172,14 +228,14 @@ model TUserMyBikeMaintenance {
   id           String @id @default(cuid(2))
   userMyBikeId String @map("my_bike_id")
 
-  performedAt DateTime @map("performed_at") // 実施日時
+  performedAt DateTime @map("performed_at") @db.Timestamptz // 実施日時
   mileage     Int      @map("mileage") // 実施時走行距離/km
   memo        String?  @map("memo") // メモ
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  userMyBike       TUserMyBike                 @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  userMyBike       TUserMyBike                  @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
   maintenanceItems TUserMyBikeMaintenanceItem[]
 
   @@index([userMyBikeId, performedAt])
@@ -191,8 +247,8 @@ model TUserMyBikeMaintenanceItem {
   type          MaintenanceType @map("maintenance_type")
   value         Float?          @map("value") // メンテナンス項目の入力値
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   maintenanceLog TUserMyBikeMaintenance @relation(fields: [maintenanceId], references: [id], onDelete: Cascade)
 
@@ -201,12 +257,13 @@ model TUserMyBikeMaintenanceItem {
 }
 
 model TUserMyBikeTouring {
-  id           String        @id @default(cuid(2))
-  userMyBikeId String        @map("my_bike_id")
+  id           String  @id @default(cuid(2))
+  userMyBikeId String  @map("my_bike_id")
+  planId       String? @map("plan_id")
 
   title          String        @map("title")
-  startDate      DateTime      @map("start_date")
-  endDate        DateTime      @map("end_date")
+  startDate      DateTime      @map("start_date") @db.Timestamptz
+  endDate        DateTime      @map("end_date") @db.Timestamptz
   startMileage   Int?          @map("start_mileage")
   endMileage     Int?          @map("end_mileage")
   startLatitude  Float?        @map("start_latitude")
@@ -215,10 +272,11 @@ model TUserMyBikeTouring {
   endLongitude   Float?        @map("end_longitude")
   status         TouringStatus @default(COMPLETED) @map("status")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   userMyBike TUserMyBike              @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  plan       TUserMyBikeTouringPlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
   fuelLogs   TUserMyBikeFuelLog[]
   spots      TUserMyBikeTouringSpot[]
   history    TUserMyBikeHistory?
@@ -226,6 +284,51 @@ model TUserMyBikeTouring {
 
   @@index([userMyBikeId, startDate])
   @@index([userMyBikeId, status])
+  @@index([planId])
+}
+
+model TUserMyBikeTouringPlan {
+  id           String @id @default(cuid(2))
+  userMyBikeId String @map("my_bike_id")
+
+  title String @map("title")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  userMyBike TUserMyBike                  @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  spots      TUserMyBikeTouringPlanSpot[]
+  tourings   TUserMyBikeTouring[]
+
+  @@index([userMyBikeId, createdAt])
+}
+
+model TUserMyBikeTouringPlanSpot {
+  id     String @id @default(cuid(2))
+  planId String @map("plan_id")
+
+  type      TouringPlanSpotType @default(SPOT) @map("type")
+  name      String?             @map("name")
+  memo      String?             @map("memo")
+  latitude  Float?              @map("latitude")
+  longitude Float?              @map("longitude")
+
+  // 滞在時間（分）。START/DESTINATIONでは未使用想定。
+  stayMinutes Int? @map("stay_minutes")
+
+  // 直前の地点からの移動時間（分）・移動経路タイプ。START（最初の地点）では未使用想定。
+  travelMinutesFromPrev Int?                  @map("travel_minutes_from_prev")
+  routeTypeFromPrev     TouringPlanRouteType? @map("route_type_from_prev")
+
+  // SPOT/BREAKの並び順のみで使用（START/DESTINATIONは type により表示位置が固定されるため値は不問）
+  sortOrder Int @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  plan TUserMyBikeTouringPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId, sortOrder])
 }
 
 model TUserMyBikeHistory {
@@ -233,18 +336,18 @@ model TUserMyBikeHistory {
   userId       String          @map("user_id")
   userMyBikeId String?         @map("my_bike_id")
   type         BikeHistoryType @map("type")
-  occurredAt   DateTime        @map("occurred_at")
+  occurredAt   DateTime        @map("occurred_at") @db.Timestamptz
 
   fuelLogId String? @unique @map("fuel_log_id")
   touringId String? @unique @map("touring_id")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  user       MUser                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userMyBike TUserMyBike?         @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
-  fuelLog    TUserMyBikeFuelLog?  @relation(fields: [fuelLogId], references: [id], onDelete: Cascade)
-  touring    TUserMyBikeTouring?  @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  user       MUser               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike?        @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
+  fuelLog    TUserMyBikeFuelLog? @relation(fields: [fuelLogId], references: [id], onDelete: Cascade)
+  touring    TUserMyBikeTouring? @relation(fields: [touringId], references: [id], onDelete: Cascade)
 
   @@index([userId, occurredAt(sort: Desc)])
   @@index([userMyBikeId, occurredAt(sort: Desc)])
@@ -252,19 +355,30 @@ model TUserMyBikeHistory {
 }
 
 model TUserMyBikeTouringSpot {
-  id        String    @id @default(cuid(2))
-  touringId String    @map("touring_id")
-  type      SpotType  @default(SPOT) @map("type")
-  name      String?   @map("name")
-  memo      String?   @map("memo")
-  latitude  Float?    @map("latitude")
-  longitude Float?    @map("longitude")
-  visitedAt DateTime  @default(now()) @map("visited_at")
-  endAt     DateTime? @map("end_at")
-  sortOrder Int       @default(0) @map("sort_order")
+  id        String @id @default(cuid(2))
+  touringId String @map("touring_id")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  type      SpotType @default(SPOT) @map("type")
+  name      String?  @map("name")
+  memo      String?  @map("memo")
+  latitude  Float?   @map("latitude")
+  longitude Float?   @map("longitude")
+
+  // プラン由来の参考予定値（プランから開始した場合にコピーされる。常にこの意味）
+  plannedArrivalAt   DateTime? @map("planned_arrival_at") @db.Timestamptz
+  plannedDepartureAt DateTime? @map("planned_departure_at") @db.Timestamptz
+
+  // 実績（常にこの意味。statusに関わらず固定）
+  arrivedAt  DateTime? @map("arrived_at") @db.Timestamptz
+  departedAt DateTime? @map("departed_at") @db.Timestamptz
+
+  isSkipped Boolean   @default(false) @map("is_skipped")
+  skippedAt DateTime? @map("skipped_at") @db.Timestamptz
+
+  sortOrder Int @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   touring TUserMyBikeTouring              @relation(fields: [touringId], references: [id], onDelete: Cascade)
   photos  TUserMyBikeTouringSpotPhoto[]
@@ -312,20 +426,100 @@ model TUserMyBikeTouringSpotPhoto {
 }
 
 model TUserQuit {
-  id           String @id @default(cuid(2))
-  userId       String @map("user_id")
-  quitAt       DateTime @map("quit_at")
-  quitReason   String @map("quit_reason")
-  recoveryCode String @map("recovery_code")
+  id           String         @id @default(cuid(2))
+  userId       String         @map("user_id")
+  quitAt       DateTime       @map("quit_at") @db.Timestamptz
+  quitReason   String         @map("quit_reason")
+  recoveryCode String         @map("recovery_code")
   status       UserQuitStatus @default(QUIT) @map("status")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
   @@index([status])
+}
+
+model TUserPlanHistory {
+  id          String    @id @default(cuid(2))
+  userId      String    @map("user_id")
+  plan        MUserPlan @map("plan")
+  changedAt   DateTime  @default(now()) @map("changed_at") @db.Timestamptz
+  changedById String    @map("changed_by_id")
+  reason      String?   @map("reason")
+
+  user      MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  changedBy MUser @relation("PlanHistoryChangedBy", fields: [changedById], references: [id], onDelete: Restrict)
+
+  @@index([userId, changedAt(sort: Desc)])
+}
+
+model TUserFollow {
+  id          String @id @default(cuid(2))
+  followerId  String @map("follower_id")
+  followingId String @map("following_id")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  follower  MUser @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following MUser @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
+
+// ユーザー個別通知 (フォロー通知・将来のバイクメンテリマインダー等)
+model TNotification {
+  id        String           @id @default(cuid(2))
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  body      String
+  metadata  Json?
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at") @db.Timestamptz
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+}
+
+// システム一斉配信アナウンス (管理者が作成)
+model MSystemAnnouncement {
+  id          String             @id @default(cuid(2))
+  type        AnnouncementType
+  title       String
+  body        String
+  status      AnnouncementStatus @default(DRAFT)
+  scheduledAt DateTime?          @map("scheduled_at") @db.Timestamptz
+  publishedAt DateTime?          @map("published_at") @db.Timestamptz
+  createdBy   String             @map("created_by")
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  reads         TSystemAnnouncementRead[]
+  createdByUser MUser                     @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([status, scheduledAt])
+  @@index([status, publishedAt(sort: Desc)])
+}
+
+// システムアナウンス既読トラッキング (読んだユーザーだけ記録)
+model TSystemAnnouncementRead {
+  announcementId String   @map("announcement_id")
+  userId         String   @map("user_id")
+  readAt         DateTime @default(now()) @map("read_at") @db.Timestamptz
+
+  announcement MSystemAnnouncement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         MUser               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([announcementId, userId])
+  @@index([userId])
 }
 
 // Enums
@@ -336,10 +530,20 @@ enum MUserStatus {
   SUSPENDED
 }
 
+enum MUserPlan {
+  FREE
+  PREMIUM
+}
+
 enum MUserRole {
   USER
   ADMIN
   GUEST
+}
+
+enum MApiKeyScope {
+  READ
+  WRITE
 }
 
 enum ProviderType {
@@ -391,6 +595,29 @@ enum UserBikeOwnStatus {
   SCRAPPED // 廃車
 }
 
+enum GoodsCategory {
+  HELMET // ヘルメット
+  GLOVE // グローブ
+  JACKET // ジャケット
+  PANTS // パンツ
+  BOOTS // ブーツ
+  RAINWEAR // レインウェア
+  INTERCOM // インカム
+  DRIVE_RECORDER // ドライブレコーダー
+  NAVIGATION // ナビ
+  BOX_CASE // ボックス・パニアケース
+  BAG // バッグ
+  CHAIN_LOCK // チェーンロック
+  COVER // バイクカバー
+  TOOL // 工具
+  OTHER // その他
+}
+
+enum CompanyCategory {
+  BIKE_MAKER // バイクメーカー
+  GOODS_MANUFACTURER // グッズ製造会社
+}
+
 enum UserQuitStatus {
   QUIT
   RECOVERED
@@ -406,8 +633,37 @@ enum SpotType {
   BREAK
 }
 
+enum TouringPlanSpotType {
+  START // 出発地（プランにつき最大1件）
+  SPOT // 経由地
+  BREAK // 休憩
+  DESTINATION // 目的地（プランにつき最大1件）
+}
+
+enum TouringPlanRouteType {
+  GENERAL // 下道
+  HIGHWAY // 高速
+  MIXED // 混在
+}
+
 enum BikeHistoryType {
   FUEL_LOG
   TOURING
   MAINTENANCE
+}
+
+enum NotificationType {
+  FOLLOWED
+  // 将来追加: BIKE_MAINTENANCE_REMINDER
+}
+
+enum AnnouncementType {
+  SYSTEM_MAINTENANCE
+  // 将来追加: RELEASE_ANNOUNCEMENT
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  PUBLISHED
+  EXPIRED
 }

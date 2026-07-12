@@ -7,6 +7,7 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { formatDate } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
@@ -90,11 +91,6 @@ function BikeDetailPage() {
     bike.nickname ||
     `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
 
-  const formatDate = (iso: string) => {
-    const d = new Date(iso)
-    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
-  }
-
   return (
     <>
       {isEditModalOpen && (
@@ -154,8 +150,8 @@ function BikeDetailPage() {
 
         <NavigationCard
           href={`/app/my-bike/${id}/tourings`}
-          title="ツーリング履歴"
-          description="ツーリング履歴を確認・管理できます"
+          title="ツーリング"
+          description="ツーリング履歴・プランを確認・管理できます"
           icon={<TouringIcon />}
         />
 

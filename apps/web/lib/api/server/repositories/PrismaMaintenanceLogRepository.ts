@@ -135,6 +135,12 @@ export class PrismaMaintenanceLogRepository
     return logs.map(mapToEntity)
   }
 
+  async countMaintenanceLogs(myUserBikeId: MyUserBikeId): Promise<number> {
+    return this.connection.tUserMyBikeMaintenance.count({
+      where: { userMyBikeId: myUserBikeId },
+    })
+  }
+
   async updateMaintenanceLog(
     maintenanceLog: MaintenanceLogEntity
   ): Promise<MaintenanceLogEntity> {

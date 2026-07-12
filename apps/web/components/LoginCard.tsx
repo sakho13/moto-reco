@@ -234,7 +234,7 @@ export function LoginCard() {
         </Button>
       </form>
 
-      <div className="divider">
+      <div className="divider-label">
         <span>または</span>
       </div>
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@repo/ui/button'
-import { Checkbox } from '@repo/ui/checkbox'
+import { DateInput } from '@repo/ui/dateInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -10,9 +10,9 @@ import { InfoBox } from './InfoBox'
 
 export interface MyBikeEditFormData {
   nickname: string
+  purchaseDate: string
   totalMileage: string
   displacement: string
-  isPublic: boolean
 }
 
 export interface MyBikeEditFormProps {
@@ -21,7 +21,6 @@ export interface MyBikeEditFormProps {
   onSubmit: (data: MyBikeEditFormData) => Promise<void>
   isSubmitting: boolean
   error: string
-  isGuest?: boolean
 }
 
 export const MyBikeEditForm = ({
@@ -30,7 +29,6 @@ export const MyBikeEditForm = ({
   onSubmit,
   isSubmitting,
   error,
-  isGuest,
 }: MyBikeEditFormProps) => {
   const [formData, setFormData] = useState<MyBikeEditFormData>(initialData)
 
@@ -58,7 +56,7 @@ export const MyBikeEditForm = ({
         </InfoBox>
       )}
 
-      <FormField label="ニックネーム" htmlFor="nickname">
+      <FormField label="ニックネーム" htmlFor="nickname" required>
         <Input
           id="nickname"
           type="text"
@@ -67,8 +65,9 @@ export const MyBikeEditForm = ({
             setFormData((prev) => ({ ...prev, nickname: e.target.value }))
           }
           maxLength={50}
+          required
           disabled={isSubmitting}
-          placeholder="バイクの愛称（任意）"
+          placeholder="バイクの愛称"
         />
       </FormField>
 
@@ -89,6 +88,17 @@ export const MyBikeEditForm = ({
         />
       </FormField>
 
+      <FormField label="購入日" htmlFor="purchaseDate">
+        <DateInput
+          id="purchaseDate"
+          value={formData.purchaseDate}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, purchaseDate: e.target.value }))
+          }
+          disabled={isSubmitting}
+        />
+      </FormField>
+
       <FormField label="排気量 (cc)" htmlFor="displacement" required>
         <Input
           id="displacement"
@@ -103,23 +113,6 @@ export const MyBikeEditForm = ({
           required
           disabled={isSubmitting || !isDisplacementEditable}
           placeholder="例: 400"
-        />
-      </FormField>
-
-      <FormField label="公開設定" htmlFor="isPublic">
-        <Checkbox
-          id="isPublic"
-          checked={formData.isPublic}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, isPublic: e.target.checked }))
-          }
-          disabled={isSubmitting || (isGuest ?? false)}
-          label="このバイクを公開する"
-          helperText={
-            isGuest
-              ? 'ゲストアカウントはバイクを公開できません。'
-              : '公開したバイクは、公開ページに情報が掲載されます。'
-          }
         />
       </FormField>
 

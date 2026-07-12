@@ -29,20 +29,23 @@ function TouringRegisterPage() {
     try {
       await apiPost(`/api/v1/user-bike/bike/${bikeId}/tourings`, {
         title: formData.title,
-        startDate: new Date(formData.startDate),
-        endDate: new Date(formData.endDate),
-        startMileage: formData.startMileage
-          ? Number(formData.startMileage)
-          : null,
-        endMileage: formData.endMileage ? Number(formData.endMileage) : null,
+        startDate: new Date(formData.startDateTime),
+        endDate: new Date(formData.endDateTime),
+        ...(formData.startMileage
+          ? { startMileage: Number(formData.startMileage) }
+          : {}),
+        ...(formData.endMileage
+          ? { endMileage: Number(formData.endMileage) }
+          : {}),
         status: 'COMPLETED',
       })
 
       await mutate(
-        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=end-date&sort-order=desc`
+        `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
       )
+
       toast.success('ツーリング履歴を登録しました', {
-        description: 'ツーリング履歴一覧へ移動します。',
+        description: 'ツーリング一覧へ移動します。',
       })
       router.push(`/app/my-bike/${bikeId}/tourings`)
     } catch (err) {
@@ -63,7 +66,7 @@ function TouringRegisterPage() {
         </Button>
       </div>
 
-      <BaseCard title="ツーリング履歴を登録">
+      <BaseCard title="ツーリングを登録">
         <TouringForm
           onSubmit={handleFormSubmit}
           isSubmitting={isSubmitting}

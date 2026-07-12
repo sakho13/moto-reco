@@ -10,13 +10,14 @@
 
 .title {
   font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
   letter-spacing: -0.02em;
 }
 
 .description {
   font-size: 18px;
   line-height: 1.7;
-  color: rgba(23, 23, 23, 0.7);
+  color: var(--color-inkLight);
 }
 
 .pricingGrid {
@@ -27,16 +28,87 @@
   margin: 0 auto 96px;
 }
 
+.comparisonSection {
+  max-width: 1200px;
+  margin: 0 auto 96px;
+}
+
+.comparisonTitle {
+  font-size: 28px;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
+}
+
+.comparisonTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.comparisonTable th,
+.comparisonTable td {
+  padding: 14px 20px;
+  text-align: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+
+.comparisonTable thead th {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xs);
+  background: color-mix(in srgb, var(--color-ink) 4%, transparent);
+}
+
+.comparisonTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.comparisonTable tbody tr:hover {
+  background: color-mix(in srgb, var(--color-ink) 3%, transparent);
+}
+
+.featureCol {
+  text-align: left !important;
+  width: 220px;
+}
+
+.comparisonTable td:first-child {
+  text-align: left;
+  font-weight: var(--font-weight-medium);
+}
+
+.premiumCol {
+  color: var(--color-inkLight);
+}
+
+.comingSoon {
+  color: var(--color-inkLight);
+  font-style: italic;
+}
+
+.comparisonNote {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  margin-top: 12px;
+  text-align: center;
+}
+
 .faqSection {
   max-width: 1200px;
   margin: 0 auto;
   padding-top: 48px;
-  border-top: 1px solid rgba(23, 23, 23, 0.1);
+  border-top: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
 }
 
 .faqTitle {
   font-size: 28px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   margin-bottom: 32px;
   text-align: center;
 }
@@ -48,8 +120,8 @@
 }
 
 .faqItem {
-  background: rgba(23, 23, 23, 0.04);
-  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-ink) 4%, transparent);
+  border-radius: var(--radius-lg);
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -57,14 +129,14 @@
 }
 
 .faqItem h3 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
 }
 
 .faqItem p {
-  font-size: 15px;
-  line-height: 1.6;
-  color: rgba(23, 23, 23, 0.7);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-inkLight);
 }
 
 @media (max-width: 900px) {
@@ -76,6 +148,25 @@
     grid-template-columns: 1fr;
     gap: 24px;
     margin-bottom: 72px;
+  }
+
+  .comparisonSection {
+    margin-bottom: 72px;
+  }
+
+  .comparisonTitle {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .comparisonTable th,
+  .comparisonTable td {
+    padding: 10px 12px;
+    font-size: var(--font-size-xs);
+  }
+
+  .featureCol {
+    width: 140px;
   }
 
   .faqTitle {
@@ -93,23 +184,10 @@
   }
 
   .faqItem h3 {
-    font-size: 16px;
+    font-size: var(--font-size-md);
   }
 
   .faqItem p {
-    font-size: 14px;
+    font-size: var(--font-size-sm);
   }
-}
-
-html[data-theme-mode='dark'] .description,
-html[data-theme-mode='dark'] .faqItem p {
-  color: rgba(237, 237, 237, 0.7);
-}
-
-html[data-theme-mode='dark'] .faqSection {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-html[data-theme-mode='dark'] .faqItem {
-  background: rgba(255, 255, 255, 0.04);
 }

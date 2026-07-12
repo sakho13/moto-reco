@@ -1,24 +1,30 @@
 import {
+  createSpotId,
   createTouringId,
+  createTouringPlanId,
   FuelLogId,
   MyUserBikeId,
   TouringId,
   TouringStatus,
   UserId,
 } from '@repo/shared-types'
-import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
+import { getCurrentDate } from '@repo/shared-utils'
+import { SpotEntity } from '../entities/SpotEntity'
 import { TouringEntity } from '../entities/TouringEntity'
+import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
+import { ISpotRepository } from '../interfaces/ISpotRepository'
+import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
+import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
-import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
+import { computeTouringPlanSpotTimes } from './computeTouringPlanSpotTimes'
 
 type RegisterTouringParams = {
   myUserBikeId: MyUserBikeId
-  userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
+  user: UserEntity
   title: string
   startDate: Date
   endDate: Date
@@ -30,8 +36,8 @@ type RegisterTouringParams = {
 type StartTouringParams = {
   action: 'start'
   myUserBikeId: MyUserBikeId
-  userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
+  user: UserEntity
+  touringPlanId?: string
   title?: string
   startDate?: Date
   startMileage?: number
@@ -42,7 +48,7 @@ type StartTouringParams = {
 type EndTouringParams = {
   action: 'end'
   myUserBikeId: MyUserBikeId
-  userId: UserId
+  user: UserEntity
   touringId: string
   endDate?: Date
   endMileage?: number
@@ -73,7 +79,10 @@ export class TouringService {
   constructor(
     private touringRepository: ITouringRepository,
     private myUserBikeRepository: IMyUserBikeRepository,
-    private fuelLogRepository: IFuelLogRepository
+    private fuelLogRepository: IFuelLogRepository,
+    private touringPlanRepository?: ITouringPlanRepository,
+    private touringPlanSpotRepository?: ITouringPlanSpotRepository,
+    private spotRepository?: ISpotRepository
   ) {}
 
   public async registerTouring(
@@ -81,23 +90,20 @@ export class TouringService {
   ): Promise<TouringEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
-      params.userId
+      params.user.id
     )
 
     if (!myUserBike) {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    // ゲストアカウントのツーリング登録数チェック
-    if (params.role === 'GUEST') {
+    const limits = params.user.limits
+    if (limits.touring !== null) {
       const count = await this.touringRepository.countTourings(
         params.myUserBikeId
       )
-      if (count >= GUEST_ACCOUNT_LIMITS.TOURING) {
-        throw new ApiV1Error(
-          'INVALID_REQUEST',
-          'ゲストアカウントはツーリング履歴を2件まで登録できます'
-        )
+      if (limits.isOver('touring', count)) {
+        throw new ApiV1Error('INVALID_REQUEST', limits.limitMessage('touring'))
       }
     }
 
@@ -120,6 +126,7 @@ export class TouringService {
       const touring = new TouringEntity({
         touringId: createTouringId(''),
         myUserBikeId: params.myUserBikeId,
+        touringPlanId: null,
         title: params.title,
         startDate: params.startDate,
         endDate: params.endDate,
@@ -146,7 +153,7 @@ export class TouringService {
   ): Promise<TouringEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
-      params.userId
+      params.user.id
     )
 
     if (!myUserBike) {
@@ -155,15 +162,15 @@ export class TouringService {
 
     try {
       if (params.action === 'start') {
-        // ゲストアカウントのツーリング登録数チェック
-        if (params.role === 'GUEST') {
+        const limits = params.user.limits
+        if (limits.touring !== null) {
           const count = await this.touringRepository.countTourings(
             params.myUserBikeId
           )
-          if (count >= GUEST_ACCOUNT_LIMITS.TOURING) {
+          if (limits.isOver('touring', count)) {
             throw new ApiV1Error(
               'INVALID_REQUEST',
-              'ゲストアカウントはツーリング履歴を2件まで登録できます'
+              limits.limitMessage('touring')
             )
           }
         }
@@ -185,16 +192,115 @@ export class TouringService {
           const totalMileage =
             await this.myUserBikeRepository.findMyUserBikeTotalMileage(
               params.myUserBikeId,
-              params.userId
+              params.user.id
             )
           startMileage = totalMileage ?? undefined
         }
 
-        const startDate = params.startDate ?? new Date()
+        const startDate = params.startDate ?? getCurrentDate()
+
+        // プランから開始する場合: プラン＋プランスポットを取得してコピーする
+        if (params.touringPlanId !== undefined) {
+          if (
+            !this.touringPlanRepository ||
+            !this.touringPlanSpotRepository ||
+            !this.spotRepository
+          ) {
+            throw new ApiV1Error(
+              'INVALID_REQUEST',
+              'プランからのツーリング開始はサポートされていません'
+            )
+          }
+
+          const touringPlanId = createTouringPlanId(params.touringPlanId)
+          const plan = await this.touringPlanRepository.findPlanById(
+            touringPlanId,
+            params.myUserBikeId
+          )
+          if (!plan) {
+            throw new ApiV1Error(
+              'NOT_FOUND',
+              '指定されたツーリングプランが見つかりません'
+            )
+          }
+
+          const planSpotsWithTimes = await computeTouringPlanSpotTimes(
+            this.touringPlanSpotRepository,
+            plan.id
+          )
+          const startSpot = planSpotsWithTimes.find(
+            (s) => s.spot.type === 'START'
+          )?.spot
+          const destinationSpot = planSpotsWithTimes.find(
+            (s) => s.spot.type === 'DESTINATION'
+          )?.spot
+          const waypointSpots = planSpotsWithTimes.filter(
+            (s) => s.spot.type === 'SPOT' || s.spot.type === 'BREAK'
+          )
+
+          const touring = new TouringEntity({
+            touringId: createTouringId(''),
+            myUserBikeId: params.myUserBikeId,
+            touringPlanId: plan.id,
+            // プランタイトルを引き継ぐ（不整合 #9 の修正）
+            title: params.title ?? plan.title,
+            startDate,
+            endDate: startDate,
+            startMileage: startMileage ?? null,
+            endMileage: null,
+            startLatitude: params.startLatitude ?? startSpot?.latitude ?? null,
+            startLongitude:
+              params.startLongitude ?? startSpot?.longitude ?? null,
+            endLatitude: destinationSpot?.latitude ?? null,
+            endLongitude: destinationSpot?.longitude ?? null,
+            status: 'STARTED',
+          })
+
+          const created = await this.touringRepository.createTouring(touring)
+
+          // プランスポットの予定時刻（出発からの経過分数）を
+          // 実際のツーリング開始時刻(startDate)を基準とした実時刻に再アンカーする
+          const reanchorPlannedTime = (
+            offsetMinutes: number | null
+          ): Date | null => {
+            if (offsetMinutes === null) return null
+            return new Date(startDate.getTime() + offsetMinutes * 60 * 1000)
+          }
+
+          // プランの経由地・休憩を実績スポットとしてコピーする
+          for (const [index, waypoint] of waypointSpots.entries()) {
+            const spot = new SpotEntity({
+              spotId: createSpotId(''),
+              touringId: created.id,
+              type: waypoint.spot.type === 'BREAK' ? 'BREAK' : 'SPOT',
+              name: waypoint.spot.name,
+              memo: waypoint.spot.memo,
+              latitude: waypoint.spot.latitude,
+              longitude: waypoint.spot.longitude,
+              plannedArrivalAt: reanchorPlannedTime(
+                waypoint.plannedArrivalOffsetMinutes
+              ),
+              plannedDepartureAt: reanchorPlannedTime(
+                waypoint.plannedDepartureOffsetMinutes
+              ),
+              arrivedAt: null,
+              departedAt: null,
+              isSkipped: false,
+              skippedAt: null,
+              sortOrder: index,
+            })
+            await this.spotRepository.createSpot(spot)
+          }
+
+          // プラン自体は変更しない（再利用可能なまま残す）
+          return created
+        }
+
         const title = params.title ?? 'ツーリング'
         const touring = new TouringEntity({
           touringId: createTouringId(''),
           myUserBikeId: params.myUserBikeId,
+          touringPlanId: null,
           title,
           startDate,
           endDate: startDate,
@@ -228,15 +334,16 @@ export class TouringService {
         const totalMileage =
           await this.myUserBikeRepository.findMyUserBikeTotalMileage(
             params.myUserBikeId,
-            params.userId
+            params.user.id
           )
         endMileage = totalMileage ?? undefined
       }
 
-      const endDate = params.endDate ?? new Date()
+      const endDate = params.endDate ?? getCurrentDate()
       const touring = new TouringEntity({
         touringId: existingTouring.id,
         myUserBikeId: existingTouring.myUserBikeId,
+        touringPlanId: existingTouring.touringPlanId,
         title: existingTouring.title,
         startDate: existingTouring.startDate,
         endDate,
@@ -244,8 +351,15 @@ export class TouringService {
         endMileage: endMileage ?? existingTouring.endMileage,
         startLatitude: existingTouring.startLatitude,
         startLongitude: existingTouring.startLongitude,
-        endLatitude: params.endLatitude ?? null,
-        endLongitude: params.endLongitude ?? null,
+        // Bug #2修正: 未指定時は既存値（プラン由来の終着地など）を保持する
+        endLatitude:
+          params.endLatitude !== undefined
+            ? params.endLatitude
+            : existingTouring.endLatitude,
+        endLongitude:
+          params.endLongitude !== undefined
+            ? params.endLongitude
+            : existingTouring.endLongitude,
         status: 'COMPLETED',
       })
 
@@ -340,26 +454,27 @@ export class TouringService {
       const updatedTouring = new TouringEntity({
         touringId: existingTouring.id,
         myUserBikeId: existingTouring.myUserBikeId,
+        touringPlanId: existingTouring.touringPlanId,
         title: params.title ?? existingTouring.title,
         startDate: params.startDate ?? existingTouring.startDate,
         endDate: params.endDate ?? existingTouring.endDate,
         startMileage: params.startMileage ?? existingTouring.startMileage,
         endMileage: params.endMileage ?? existingTouring.endMileage,
         startLatitude:
-          'startLatitude' in params
-            ? (params.startLatitude ?? null)
+          params.startLatitude !== undefined
+            ? params.startLatitude
             : existingTouring.startLatitude,
         startLongitude:
-          'startLongitude' in params
-            ? (params.startLongitude ?? null)
+          params.startLongitude !== undefined
+            ? params.startLongitude
             : existingTouring.startLongitude,
         endLatitude:
-          'endLatitude' in params
-            ? (params.endLatitude ?? null)
+          params.endLatitude !== undefined
+            ? params.endLatitude
             : existingTouring.endLatitude,
         endLongitude:
-          'endLongitude' in params
-            ? (params.endLongitude ?? null)
+          params.endLongitude !== undefined
+            ? params.endLongitude
             : existingTouring.endLongitude,
         status: newStatus,
       })
@@ -368,22 +483,16 @@ export class TouringService {
 
       // 給油履歴の紐づけ更新
       if (params.fuelLogIds !== undefined) {
-        // 既存の紐づけを解除
-        const searchParams = new FuelLogSearchParams({
-          startDate: updatedTouring.startDate,
-          endDate: updatedTouring.endDate,
-        })
-        const existingFuelLogs = await this.fuelLogRepository.findFuelLogs(
-          params.myUserBikeId,
-          searchParams
-        )
+        // 既存の紐づけを解除（給油日時がツーリング期間外でも解除対象に含めるため、
+        // 期間で絞り込まずtouringIdで直接紐づいている給油履歴を全件取得する）
+        const existingFuelLogs =
+          await this.fuelLogRepository.findFuelLogsByTouringId(
+            params.touringId,
+            params.myUserBikeId
+          )
 
         const existingFuelLogIdsToUnlink = existingFuelLogs
-          .filter(
-            (log) =>
-              log.touringId === params.touringId &&
-              !params.fuelLogIds!.includes(log.id)
-          )
+          .filter((log) => !params.fuelLogIds!.includes(log.id))
           .map((log) => log.id)
 
         if (existingFuelLogIdsToUnlink.length > 0) {

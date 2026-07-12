@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Providers } from '@/components/Providers'
-import { ThemeToggleButton } from '@/components/ThemeToggleButton'
 import { APP_NAME } from '@/lib/statics'
 
 // Firebase認証を使用しているため、動的レンダリングを強制
@@ -25,12 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <Providers>
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggleButton />
-        </div>
-        {children}
-      </Providers>
+      <Providers>{children}</Providers>
     </>
   )
 }

@@ -5,7 +5,7 @@ import {
   type UserId,
   type UserQuitStatus,
 } from '@repo/shared-types'
-import { generateRandNumberStr } from '@repo/shared-utils'
+import { generateRandNumberStr, getCurrentDate } from '@repo/shared-utils'
 import { UserQuitEntity } from '../entities/UserQuitEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IUserQuitRepository } from '../interfaces/IUserQuitRepository'
@@ -39,7 +39,7 @@ export class UserQuitService {
     }
 
     const recoveryCode = generateRandNumberStr(5)
-    const quitAt = new Date()
+    const quitAt = getCurrentDate()
     const status: UserQuitStatus = 'QUIT'
 
     await this.userQuitRepository.create(

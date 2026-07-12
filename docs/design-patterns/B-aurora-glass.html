@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern B — Aurora Glass | MotoRepo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-from:#0F0A2E;--bg-to:#1A0A3A;
+  --glass:rgba(255,255,255,.06);--glass-b:rgba(255,255,255,.11);
+  --purple:#A78BFA;--cyan:#38BDF8;--pink:#F472B6;
+  --text:#F1F0FF;--text2:#9B9BC0;--text3:#5A5A90;
+  --green:#34D399;
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#0F0A2E;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;gap:32px;flex-wrap:wrap}
+
+/* ── Phone Frame ── */
+.frame{width:390px;border-radius:48px;overflow:hidden;box-shadow:0 0 0 2px #2A1A5A,0 0 0 10px #111,0 30px 80px rgba(0,0,0,.8);position:relative;flex-shrink:0}
+.frame::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:30px;background:#0F0A2E;border-radius:0 0 20px 20px;z-index:200}
+.frame-inner{height:812px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:linear-gradient(160deg,#0F0A2E 0%,#1A0A3A 40%,#0A1A3A 100%);position:relative}
+.frame-inner::-webkit-scrollbar{display:none}
+
+/* Aurora blobs */
+.aurora{position:absolute;border-radius:50%;pointer-events:none;z-index:0}
+.a1{top:-60px;left:-40px;width:260px;height:260px;background:radial-gradient(circle,rgba(167,139,250,.3),transparent 70%);animation:float1 8s ease-in-out infinite}
+.a2{top:80px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(56,189,248,.22),transparent 70%);animation:float2 10s ease-in-out infinite}
+.a3{top:320px;left:0;width:180px;height:180px;background:radial-gradient(circle,rgba(244,114,182,.16),transparent 70%);animation:float3 12s ease-in-out infinite}
+.a4{bottom:160px;right:20px;width:150px;height:150px;background:radial-gradient(circle,rgba(167,139,250,.18),transparent 70%);animation:float1 9s ease-in-out infinite reverse}
+@keyframes float1{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(18px,-12px) scale(1.06)}70%{transform:translate(-8px,8px) scale(.97)}}
+@keyframes float2{0%,100%{transform:translate(0,0) scale(1)}35%{transform:translate(-14px,10px) scale(1.04)}65%{transform:translate(10px,-8px) scale(.96)}}
+@keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(12px,-16px) scale(1.08)}}
+
+/* ── Header ── */
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:34px 20px 12px;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.08)}
+.logo{font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hrow{display:flex;gap:8px}
+.hbtn{width:36px;height:36px;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2)}
+.hbtn svg{width:16px;height:16px}
+
+/* ── Main ── */
+main{padding:0 16px 8px;position:relative;z-index:1}
+
+/* ── Glass cards ── */
+.card{background:rgba(255,255,255,.06);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)}
+.card-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.more-link{font-size:12px;font-weight:600;color:var(--purple);cursor:pointer}
+
+/* ── Bike cards ── */
+.bike-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bike-card{background:rgba(255,255,255,.06);border:1px solid rgba(167,139,250,.2);border-radius:14px;padding:14px;cursor:pointer;transition:all .25s}
+.bike-card:hover{background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.4);transform:translateY(-2px)}
+.bike-card:active{transform:scale(.97)}
+.bike-icon{width:38px;height:38px;background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(56,189,248,.2));border:1px solid rgba(167,139,250,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;color:var(--purple)}
+.bike-icon svg{width:20px;height:20px}
+.bike-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.bike-km{font-size:10px;color:var(--text2);margin-bottom:10px}
+.start-btn{width:100%;background:linear-gradient(135deg,var(--purple),#7C3AED);border:none;border-radius:10px;padding:8px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:opacity .15s}
+.start-btn:hover{opacity:.9}
+
+/* ── Fuel ── */
+.fuel-item{background:rgba(255,255,255,.05);border:1px solid rgba(56,189,248,.15);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:8px;transition:all .2s}
+.fuel-item:last-child{margin-bottom:0}
+.fuel-item:hover{border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.08)}
+.fuel-icon{width:38px;height:38px;background:linear-gradient(135deg,rgba(56,189,248,.3),rgba(56,189,248,.1));border:1px solid rgba(56,189,248,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--cyan)}
+.fuel-icon svg{width:19px;height:19px}
+.fuel-name{font-size:13px;font-weight:600;color:var(--text)}
+.fuel-since{font-size:11px;color:var(--text2)}
+.fuel-arr{color:var(--cyan);font-size:20px;font-weight:300}
+
+/* ── History ── */
+.hist-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.hist-item:last-child{border-bottom:none}
+.hist-dot{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hist-dot svg{width:16px;height:16px}
+.dot-tour{background:linear-gradient(135deg,rgba(167,139,250,.25),rgba(167,139,250,.1));border:1px solid rgba(167,139,250,.25);color:var(--purple)}
+.dot-fuel{background:linear-gradient(135deg,rgba(56,189,248,.25),rgba(56,189,248,.1));border:1px solid rgba(56,189,248,.25);color:var(--cyan)}
+.hist-info{flex:1}
+.hist-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.hist-sub{font-size:11px;color:var(--text2)}
+.hist-val{font-size:13px;font-weight:700;color:var(--green)}
+
+/* ── Bottom Nav ── */
+nav{position:sticky;bottom:0;display:flex;align-items:center;justify-content:center;padding:8px 16px 20px;background:linear-gradient(to top,rgba(15,10,46,.9) 60%,transparent);z-index:50}
+.nav-wrap{display:flex;align-items:center;justify-content:space-around;width:100%;background:rgba(255,255,255,.08);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.12);border-radius:28px;padding:8px;height:64px;box-shadow:0 16px 48px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.1)}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 16px;border-radius:18px;cursor:pointer;transition:all .2s;min-width:60px}
+.ni.active{background:linear-gradient(135deg,rgba(167,139,250,.25),rgba(56,189,248,.15));border:1px solid rgba(167,139,250,.35);box-shadow:0 0 20px rgba(167,139,250,.15)}
+.ni svg{width:20px;height:20px;color:var(--text3)}
+.ni.active svg{color:var(--purple)}
+.ni span{font-size:10px;font-weight:600;color:var(--text3)}
+.ni.active span{color:var(--purple)}
+
+/* ── Info panel ── */
+.info-panel{width:320px;display:flex;flex-direction:column;gap:20px;padding-top:48px;flex-shrink:0}
+.info-panel h2{font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px}
+.info-panel h2 span{background:linear-gradient(90deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tag{display:inline-block;background:linear-gradient(135deg,var(--purple),#7C3AED);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px}
+.desc{font-size:14px;line-height:1.8;color:#888}
+.palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.swatch{width:36px;height:36px;border-radius:8px;position:relative}
+.swatch::after{content:attr(data-label);position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:8px;color:#555;white-space:nowrap;font-family:monospace}
+.traits{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.trait{font-size:12px;color:#666;display:flex;gap:8px;align-items:flex-start}
+.trait::before{content:'—';color:var(--purple);flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="frame-inner">
+    <div class="aurora a1"></div>
+    <div class="aurora a2"></div>
+    <div class="aurora a3"></div>
+    <div class="aurora a4"></div>
+
+    <header>
+      <div class="logo">MotoRepo</div>
+      <div class="hrow">
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Touring -->
+      <div class="card">
+        <div class="card-title">今すぐツーリング</div>
+        <div class="card-sub">バイクを選んで出発しましょう</div>
+        <div class="bike-grid">
+          <div class="bike-card">
+            <div class="bike-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+            <div class="bike-name">CB400SF</div>
+            <div class="bike-km">12,450 km</div>
+            <button class="start-btn">出発する</button>
+          </div>
+          <div class="bike-card">
+            <div class="bike-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+            <div class="bike-name">NC750X</div>
+            <div class="bike-km">8,200 km</div>
+            <button class="start-btn">出発する</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fuel -->
+      <div class="card">
+        <div class="card-title">給油を登録</div>
+        <div class="card-sub">タップしてすぐに記録できます</div>
+        <div class="fuel-item">
+          <div class="fuel-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+          <div style="flex:1"><div class="fuel-name">CB400SF</div><div class="fuel-since">前回: 3日前</div></div>
+          <div class="fuel-arr">›</div>
+        </div>
+        <div class="fuel-item">
+          <div class="fuel-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+          <div style="flex:1"><div class="fuel-name">NC750X</div><div class="fuel-since">前回: 1週間前</div></div>
+          <div class="fuel-arr">›</div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">ヒストリー</div>
+          <div class="more-link">もっと見る →</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-dot dot-tour"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+          <div class="hist-info"><div class="hist-title">奥多摩ツーリング</div><div class="hist-sub">6/25 · CB400SF</div></div>
+          <div class="hist-val">245km</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-dot dot-fuel"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10a1 1 0 0 1-1-1 1 1 0 0 1 1-1 1 1 0 0 1 1 1 1 1 0 0 1-1 1m-6 0H6V5h6m7.77 2.23l.01-.01-3.72-3.72-1.07 1.07 2.1 2.1C18.84 7.13 19 7.61 19 8a2 2 0 0 0-2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.55-.22-1.05-.58-1.42M4 4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3h6v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V8.83L16.17 7H12v3H6V5a1 1 0 0 0-1-1H4z"/></svg></div>
+          <div class="hist-info"><div class="hist-title">給油記録</div><div class="hist-sub">6/22 · NC750X</div></div>
+          <div class="hist-val" style="color:var(--cyan)">32.1L</div>
+        </div>
+        <div class="hist-item">
+          <div class="hist-dot dot-tour"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+          <div class="hist-info"><div class="hist-title">箱根ドライブ</div><div class="hist-sub">6/20 · CB400SF</div></div>
+          <div class="hist-val">189km</div>
+        </div>
+      </div>
+    </main>
+
+    <nav>
+      <div class="nav-wrap">
+        <div class="ni active">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>ホーム</span>
+        </div>
+        <div class="ni">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+          <span>バイク</span>
+        </div>
+        <div class="ni">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>履歴</span>
+        </div>
+        <div class="ni">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          <span>プロフィール</span>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- Info panel -->
+<div class="info-panel">
+  <div>
+    <div class="tag">Pattern B</div>
+    <h2>Aurora <span>Glass</span></h2>
+    <p class="desc">深夜の宇宙をモチーフにしたオーロラグラスモーフィズム。紫/シアンのグラデーションオーロラがゆったりと動き続ける。半透明のglassカードでレイヤー感を演出。夢幻的かつモダンなUI。</p>
+  </div>
+  <div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:16px">Color Palette</div>
+    <div class="palette">
+      <div class="swatch" style="background:#0F0A2E;border:1px solid #2A1A5A" data-label="#0F0A2E"></div>
+      <div class="swatch" style="background:#1A0A3A" data-label="#1A0A3A"></div>
+      <div class="swatch" style="background:#A78BFA" data-label="#A78BFA"></div>
+      <div class="swatch" style="background:#38BDF8" data-label="#38BDF8"></div>
+      <div class="swatch" style="background:#F472B6" data-label="#F472B6"></div>
+      <div class="swatch" style="background:#34D399" data-label="#34D399"></div>
+    </div>
+  </div>
+  <div style="margin-top:24px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:12px">Typography</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;color:#fff;letter-spacing:-1px;font-weight:800">Plus Jakarta Sans</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:#888;margin-top:4px">400 / 600 / 800</div>
+  </div>
+  <div class="traits">
+    <div class="trait">3つのオーロラblob — CSS animation</div>
+    <div class="trait">backdrop-filter:blur(16–24px) glassmorphism</div>
+    <div class="trait">カード上辺の白グラデーションライン</div>
+    <div class="trait">フローティングピル型ナビ（グラデーションactive）</div>
+    <div class="trait">カラーごとの役割分離（紫=ツーリング/シアン=給油）</div>
+    <div class="trait">SVGアイコン統一</div>
+  </div>
+  <div style="padding:14px;background:rgba(255,255,255,.04);border:1px solid rgba(167,139,250,.2);border-radius:10px;margin-top:4px">
+    <div style="font-size:10px;color:var(--purple);font-weight:700;letter-spacing:1px;margin-bottom:6px">BEST FOR</div>
+    <div style="font-size:12px;color:#888;line-height:1.7">感度の高いユーザー層 / ファンタジー系 / ナイトライダー。プレミアム感を重視したいときに。</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -9,6 +9,29 @@
   border-bottom: 1px solid var(--color-cloud);
 }
 
+.itemClickable {
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+  padding: var(--spacing-2) var(--spacing-2);
+  margin: 0 calc(-1 * var(--spacing-2));
+}
+
+.itemClickable:hover {
+  background-color: var(--color-cloudHover);
+}
+
+.itemClickable:active {
+  background-color: var(--color-cloudActive);
+}
+
+.chevron {
+  font-size: 1.25rem;
+  color: var(--color-inkLight);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 /* 行1: タイトル・ステータス・編集 */
 .mainRow {
   display: flex;

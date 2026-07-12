@@ -25,7 +25,8 @@
         "MICRO_CMS_API_KEY",
         "MICRO_CMS_SERVICE_DOMAIN",
         "RESEND_API_KEY",
-        "RESEND_FROM_EMAIL"
+        "RESEND_FROM_EMAIL",
+        "ALLOWED_IPS"
       ]
     },
     "lint": {
@@ -57,7 +58,9 @@
         "MICRO_CMS_API_KEY",
         "MICRO_CMS_SERVICE_DOMAIN",
         "RESEND_API_KEY",
-        "RESEND_FROM_EMAIL"
+        "RESEND_FROM_EMAIL",
+        "ALLOWED_IPS",
+        "ADMIN_PORT"
       ]
     },
     "db:generate": {
@@ -66,7 +69,6 @@
     },
     "db:migrate": {
       "cache": false,
-      "persistent": true,
       "env": ["DATABASE_URL", "NODE_ENV"]
     },
     "db:deploy": {
@@ -85,6 +87,25 @@
     "test:watch": {
       "cache": false,
       "persistent": true
+    },
+    "test:e2e": {
+      "dependsOn": [],
+      "outputs": ["playwright-report/**", "test-results/**"],
+      "cache": false,
+      "env": [
+        "CI",
+        "NODE_ENV",
+        "DATABASE_URL",
+        "PLAYWRIGHT_BASE_URL",
+        "NEXT_PUBLIC_USE_FIREBASE_EMULATOR",
+        "NEXT_PUBLIC_FIREBASE_API_KEY",
+        "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
+        "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+        "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+        "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+        "NEXT_PUBLIC_FIREBASE_APP_ID",
+        "FIREBASE_AUTH_EMULATOR_URL"
+      ]
     },
     "storybook": {
       "cache": false,

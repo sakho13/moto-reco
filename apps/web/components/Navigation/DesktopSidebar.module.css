@@ -1,6 +1,6 @@
 .sidebar {
   position: fixed;
-  top: 3rem;
+  top: 4rem;
   left: 1rem;
   z-index: 50;
   display: flex;
@@ -11,6 +11,12 @@
   border: 1px solid var(--color-cloudHover);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
+}
+
+.bellWrapper {
+  margin-top: var(--spacing-2);
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--color-cloudHover);
 }
 
 /* モバイルでは非表示 */

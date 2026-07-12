@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { getTodayDateString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
-import { Checkbox } from '@repo/ui/checkbox'
+import { DateInput } from '@repo/ui/dateInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
@@ -15,7 +16,6 @@ export interface BikeFormData {
   purchaseMileage: string
   totalMileage: string
   displacement: string
-  isPublic: boolean
 }
 
 export interface BikeRegisterFormProps {
@@ -27,7 +27,6 @@ export interface BikeRegisterFormProps {
   onSubmit: (data: BikeFormData) => Promise<void>
   isSubmitting: boolean
   error: string
-  isGuest?: boolean
 }
 
 export const BikeRegisterForm = ({
@@ -35,7 +34,6 @@ export const BikeRegisterForm = ({
   onSubmit,
   isSubmitting,
   error,
-  isGuest,
 }: BikeRegisterFormProps) => {
   const [formData, setFormData] = useState<BikeFormData>({
     nickname: '',
@@ -44,7 +42,6 @@ export const BikeRegisterForm = ({
     purchaseMileage: '',
     totalMileage: '',
     displacement: '',
-    isPublic: false,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,7 +124,7 @@ export const BikeRegisterForm = ({
           </FormField>
         )}
 
-        <FormField label="ニックネーム" htmlFor="nickname">
+        <FormField label="ニックネーム" htmlFor="nickname" required>
           <Input
             id="nickname"
             type="text"
@@ -139,35 +136,15 @@ export const BikeRegisterForm = ({
               }))
             }
             maxLength={50}
+            required
             disabled={isSubmitting}
-            placeholder="バイクの愛称（任意）"
-          />
-        </FormField>
-
-        <FormField label="公開設定" htmlFor="isPublic">
-          <Checkbox
-            id="isPublic"
-            checked={formData.isPublic}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                isPublic: e.target.checked,
-              }))
-            }
-            disabled={isSubmitting || (isGuest ?? false)}
-            label="このバイクを公開する"
-            helperText={
-              isGuest
-                ? 'ゲストアカウントはバイクを公開できません。'
-                : '公開したバイクは、公開ページに情報が掲載されます。'
-            }
+            placeholder="バイクの愛称"
           />
         </FormField>
 
         <FormField label="購入日" htmlFor="purchaseDate">
-          <Input
+          <DateInput
             id="purchaseDate"
-            type="date"
             value={formData.purchaseDate}
             onChange={(e) =>
               setFormData((prev) => ({
@@ -175,7 +152,7 @@ export const BikeRegisterForm = ({
                 purchaseDate: e.target.value,
               }))
             }
-            max={new Date().toISOString().split('T')[0]}
+            max={getTodayDateString()}
             disabled={isSubmitting}
           />
         </FormField>

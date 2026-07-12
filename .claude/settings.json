@@ -3,6 +3,8 @@
   "permissions": {
     "allow": [
       "Bash(git show:*)",
+      "Bash(git checkout *)",
+      "Bash(git push *)",
       "Bash(docker exec:*)",
       "Bash(docker ps:*)",
       "Bash(docker inspect:*)",
@@ -11,6 +13,7 @@
       "Bash(cat:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
+      "Bash(tmux:*)",
       "Bash(xargs:*)",
       "Bash(gh issue view:*)",
       "Bash(gh issue comment:*)",
@@ -20,17 +23,11 @@
       "Bash(pnpm check-types:*)",
       "Bash(pnpm lint:*)",
       "Bash(pnpm format:*)",
-      "Read(.env.local)"
+      "Read(.env.local)",
+      "mcp__playwright__*"
     ],
-    "deny": [
-      "Read(.env)",
-      "Read(.env.production)"
-    ],
-    "ask": [
-      "Bash(gh issue close:*)",
-      "Bash(curl:*)",
-      "Bash(ssh:*)"
-    ]
+    "deny": ["Read(.env)", "Read(.env.production)"],
+    "ask": ["Bash(gh issue close:*)", "Bash(curl:*)", "Bash(ssh:*)"]
   },
   "hooks": {
     "Stop": [

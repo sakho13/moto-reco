@@ -1,0 +1,49 @@
+.list {
+  display: inline-flex;
+  background: rgba(23, 23, 23, 0.06);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 2px;
+  margin-bottom: 16px;
+}
+
+.trigger {
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: rgba(23, 23, 23, 0.6);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.5;
+}
+
+.trigger:hover {
+  color: rgba(23, 23, 23, 0.9);
+}
+
+.trigger.active {
+  background: #fff;
+  color: rgba(23, 23, 23, 0.95);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme-mode='dark'] .list {
+  background: rgba(237, 237, 237, 0.08);
+}
+
+html[data-theme-mode='dark'] .trigger {
+  color: rgba(237, 237, 237, 0.5);
+}
+
+html[data-theme-mode='dark'] .trigger:hover {
+  color: rgba(237, 237, 237, 0.85);
+}
+
+html[data-theme-mode='dark'] .trigger.active {
+  background: rgba(237, 237, 237, 0.1);
+  color: rgba(237, 237, 237, 0.95);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}

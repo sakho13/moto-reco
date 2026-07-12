@@ -7,6 +7,7 @@ import {
   MyUserBikeId,
   TouringId,
 } from '@repo/shared-types'
+import { getCurrentDate } from '@repo/shared-utils'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
@@ -66,7 +67,7 @@ export class PrismaFuelLogRepository
       return { startDate, endDate }
     }
 
-    const endDate = new Date()
+    const endDate = getCurrentDate()
     const startDate = this.calculatePeriodStartDate(endDate, period)
 
     if (!startDate) {
@@ -186,6 +187,50 @@ export class PrismaFuelLogRepository
       orderBy,
       skip: searchParams.skip,
       take: searchParams.take,
+    })
+
+    return fuelLogs.map(
+      (log) =>
+        new FuelLogEntity({
+          fuelLogId: createFuelLogId(log.id),
+          myUserBikeId: createMyUserBikeId(log.userMyBikeId),
+          amount: log.amount,
+          totalPrice: log.price,
+          mileage: log.mileage,
+          previousMileage: log.previousMileage,
+          refueledAt: log.refueledAt,
+          memo: log.memo,
+          touringId: log.touringId ? createTouringId(log.touringId) : null,
+          touringTitle: log.touring?.title ?? null,
+        })
+    )
+  }
+
+  async findFuelLogsByTouringId(
+    touringId: TouringId,
+    myUserBikeId: MyUserBikeId
+  ): Promise<FuelLogEntity[]> {
+    const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
+      where: {
+        touringId: touringId,
+        userMyBikeId: myUserBikeId,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        amount: true,
+        price: true,
+        mileage: true,
+        previousMileage: true,
+        refueledAt: true,
+        memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
+      },
     })
 
     return fuelLogs.map(

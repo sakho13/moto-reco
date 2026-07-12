@@ -1,0 +1,116 @@
+.item {
+  padding: var(--spacing-2) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.item:not(:last-child) {
+  border-bottom: 1px solid var(--color-cloud);
+}
+
+.itemClickable {
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+  padding: var(--spacing-2) var(--spacing-2);
+  margin: 0 calc(-1 * var(--spacing-2));
+}
+
+.itemClickable:hover {
+  background-color: var(--color-cloudHover);
+}
+
+.itemClickable:active {
+  background-color: var(--color-cloudActive);
+}
+
+.chevron {
+  font-size: 1.25rem;
+  color: var(--color-inkLight);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* 行1: タイトル・ステータス */
+.mainRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.statusBadgeStarted,
+.statusBadgeCompleted {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.statusBadgeStarted {
+  background-color: #10b981;
+  color: white;
+}
+
+.statusBadgeCompleted {
+  background-color: var(--color-cloud);
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+
+/* 行2: 実施日 */
+.periodRow {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+
+/* 行3: 走行距離 */
+.detailsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+  opacity: 0.5;
+}
+
+/* レスポンシブ対応: モバイル */
+@media (max-width: 640px) {
+  .titleSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-1);
+  }
+
+  .title {
+    font-size: var(--font-size-md);
+  }
+
+  .periodRow {
+    font-size: var(--font-size-xs);
+  }
+
+  .detailsRow {
+    font-size: 0.625rem;
+    flex-wrap: wrap;
+  }
+}

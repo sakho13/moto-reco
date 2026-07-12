@@ -194,6 +194,12 @@ const TouringStartRequestSchema = z.object({
   action: z.literal('start', {
     required_error: '操作は必須です',
   }),
+  touringPlanId: z
+    .string({
+      invalid_type_error: 'ツーリングプランIDは文字列で指定してください',
+    })
+    .min(1, 'ツーリングプランIDは1文字以上で指定してください')
+    .optional(),
   title: z
     .string({
       invalid_type_error: 'タイトルは文字列で指定してください',
@@ -283,6 +289,7 @@ export type TouringStartEndRequest = z.infer<
 export const TouringListQuerySchema = z.object({
   'sort-by': z.enum(['start-date', 'end-date']).optional(),
   'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+  status: z.enum(['STARTED', 'COMPLETED']).optional(),
 })
 
 export type TouringListQuery = z.infer<typeof TouringListQuerySchema>

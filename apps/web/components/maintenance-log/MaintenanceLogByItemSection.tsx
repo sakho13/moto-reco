@@ -1,6 +1,7 @@
 'use client'
 
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
+import { formatDate } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import styles from './MaintenanceLogByItemSection.module.css'
@@ -28,18 +29,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   ELECTRIC: '電気装置',
 }
 
-const formatDate = (dateString: string) => {
-  try {
-    return new Date(dateString).toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  } catch {
-    return dateString
-  }
-}
-
 const buildItemHistoryMap = (
   logs: ApiResponseMaintenanceLogDetail[]
 ): Map<string, ItemHistory[]> => {
@@ -62,12 +51,21 @@ const buildItemHistoryMap = (
   return map
 }
 
-const getNextMileage = (
+const getRemainingMileage = (
   lastMileage: number,
-  interval: number | null
+  interval: number,
+  currentMileage: number
+): number => lastMileage + interval - currentMileage
+
+const formatRecommendedInterval = (
+  mileageInterval: number | null,
+  periodMonths: number | null
 ): string | null => {
-  if (interval === null) return null
-  return `${(lastMileage + interval).toLocaleString()}km`
+  const parts: string[] = []
+  if (mileageInterval !== null)
+    parts.push(`${mileageInterval.toLocaleString()}km毎`)
+  if (periodMonths !== null) parts.push(`${periodMonths}ヶ月毎`)
+  return parts.length > 0 ? parts.join(' / ') : null
 }
 
 export const MaintenanceLogByItemSection = ({
@@ -110,6 +108,22 @@ export const MaintenanceLogByItemSection = ({
                         masterItem.recommendedMileageInterval
                       : false
 
+                  const recommendedInterval = formatRecommendedInterval(
+                    masterItem.recommendedMileageInterval,
+                    masterItem.recommendedPeriodMonths
+                  )
+
+                  const remainingKm =
+                    currentMileage !== undefined &&
+                    latest &&
+                    masterItem.recommendedMileageInterval !== null
+                      ? getRemainingMileage(
+                          latest.mileage,
+                          masterItem.recommendedMileageInterval,
+                          currentMileage
+                        )
+                      : null
+
                   return (
                     <div
                       key={masterItem.type}
@@ -130,26 +144,26 @@ export const MaintenanceLogByItemSection = ({
                                 ({latest.mileage.toLocaleString()}km)
                               </span>
                             </span>
-                            {masterItem.recommendedMileageInterval !== null && (
-                              <span className={styles.nextInfo}>
-                                次回目安:{' '}
-                                {getNextMileage(
-                                  latest.mileage,
-                                  masterItem.recommendedMileageInterval
-                                )}
+                            {remainingKm !== null && remainingKm > 0 && (
+                              <span className={styles.remainingMileage}>
+                                あと {remainingKm.toLocaleString()} km
                               </span>
                             )}
-                            {masterItem.recommendedPeriodMonths !== null &&
-                              masterItem.recommendedMileageInterval ===
-                                null && (
-                                <span className={styles.nextInfo}>
-                                  推奨: {masterItem.recommendedPeriodMonths}
-                                  ヶ月毎
-                                </span>
-                              )}
+                            {recommendedInterval !== null && (
+                              <span className={styles.recommendedInterval}>
+                                推奨: {recommendedInterval}
+                              </span>
+                            )}
                           </>
                         ) : (
-                          <span className={styles.noRecord}>記録なし</span>
+                          <>
+                            <span className={styles.noRecord}>記録なし</span>
+                            {recommendedInterval !== null && (
+                              <span className={styles.recommendedInterval}>
+                                推奨: {recommendedInterval}
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

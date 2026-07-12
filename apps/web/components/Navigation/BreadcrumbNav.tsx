@@ -16,7 +16,7 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return [{ label: 'ホーム' }]
   }
 
-  const items: BreadcrumbItem[] = [{ label: 'ホーム', href: '/app/home' }]
+  const items: BreadcrumbItem[] = []
 
   if (segments[1] === 'my-bike') {
     items.push({ label: 'マイバイク', href: '/app/my-bike' })
@@ -45,10 +45,12 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
 
     if (segments[3] === 'tourings') {
       items.push({
-        label: 'ツーリング履歴',
+        label: 'ツーリング一覧',
         href: `/app/my-bike/${segments[2]}/tourings`,
       })
-      if (segments[4]) {
+      if (segments[4] === 'register') {
+        items.push({ label: 'ツーリング登録' })
+      } else if (segments[4]) {
         items.push({ label: 'ツーリング詳細' })
       }
       return items
@@ -72,11 +74,24 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
   }
 
   if (segments[1] === 'profile') {
-    items.push({ label: 'プロフィール' })
+    items.push({ label: 'プロフィール', href: '/app/profile' })
+
+    if (segments[2] === 'account') {
+      items.push({ label: '認証情報' })
+    } else if (segments[2] === 'plan') {
+      items.push({ label: 'プラン' })
+    }
+
     return items
   }
 
-  return [{ label: 'ホーム', href: '/app/home' }, { label: 'ページ' }]
+  if (segments[1] === 'settings' && segments[2] === 'api-keys') {
+    items.push({ label: 'プロフィール', href: '/app/profile' })
+    items.push({ label: 'MCP APIキー管理' })
+    return items
+  }
+
+  return [{ label: 'ページ' }]
 }
 
 export function BreadcrumbNav() {

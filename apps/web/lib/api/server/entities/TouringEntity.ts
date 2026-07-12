@@ -2,6 +2,7 @@ import {
   MyUserBikeId,
   Touring,
   TouringId,
+  TouringPlanId,
   TouringStatus,
 } from '@repo/shared-types'
 
@@ -72,6 +73,10 @@ export class TouringEntity {
 
   public get myUserBikeId(): MyUserBikeId {
     return this._value.myUserBikeId
+  }
+
+  public get touringPlanId(): TouringPlanId | null {
+    return this._value.touringPlanId
   }
 
   public get title(): string {

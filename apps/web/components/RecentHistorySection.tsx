@@ -62,7 +62,12 @@ export const RecentHistorySection = () => {
   const historyItems = data ?? []
 
   return (
-    <BaseCard title="ヒストリー" headerAction={moreLink} noBorder>
+    <BaseCard
+      title="ヒストリー"
+      headerAction={moreLink}
+      noBorder
+      data-testid="history-section"
+    >
       {historyItems.length > 0 ? (
         <div className={styles.historyList}>
           {historyItems.map((item) => (

@@ -1,0 +1,448 @@
+/* ========================================
+   アニメーション定義
+   ======================================== */
+
+@keyframes bikeMove {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* ========================================
+   全画面コンテナ
+   ======================================== */
+
+.container {
+  /* ライトモード: 白カード + グレーサーフェスで階層を明確に */
+  --card-bg: var(--color-background);      /* #FFFFFF */
+  --card-surface: var(--color-cloud);      /* #F7F7F7 — 内側要素の背景 */
+  --card-border: var(--color-cloudActive); /* #CFCFCF — コントラスト強めの境界線 */
+  --card-text: var(--color-inkDark);       /* #0B0C0F — 最大コントラスト */
+  --card-text-muted: var(--color-ink);     /* #324256 — セカンダリ */
+  --card-text-dim: var(--color-inkLight);  /* #4E5C6F — ターシャリ */
+
+  position: relative;
+  width: 100%;
+  min-height: calc(100svh - 7rem);
+  padding: var(--spacing-6);
+  background-color: var(--card-bg);
+  border-top: 3px solid var(--color-product);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ダークモード: 専用ダークサーフェスで上書き（cloud=#676767は使えないため） */
+html[data-theme-mode='dark'] .container {
+  --card-bg: #1e293b;
+  --card-surface: #273548;
+  --card-border: rgba(255, 255, 255, 0.1);
+  /* --card-text 系は var(--color-ink*) がダーク値に自動切替するためそのまま */
+}
+
+/* ========================================
+   レイアウト
+   ======================================== */
+
+.endCornerArea {
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-4);
+  z-index: 2;
+}
+
+.endCornerButton {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  border: 1.5px solid var(--color-danger);
+  color: var(--color-danger);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    opacity 0.15s;
+  white-space: nowrap;
+}
+
+.endCornerButton:hover:not(:disabled) {
+  background-color: rgba(204, 0, 0, 0.06);
+}
+
+.endCornerButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bikeInfoArea {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding-right: 7rem;
+}
+
+.animatedBikeIcon {
+  flex-shrink: 0;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card-surface);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  color: var(--color-product);
+  animation: bikeMove 2s ease-in-out infinite;
+}
+
+.bikeNameLarge {
+  flex: 1;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--card-text);
+  line-height: var(--line-height-tight);
+  word-break: break-word;
+}
+
+.touringTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--card-text-muted);
+  word-break: break-word;
+  margin-bottom: var(--spacing-1);
+}
+
+.elapsedTime {
+  font-size: 3rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--card-text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: var(--spacing-1);
+}
+
+.startDateTime {
+  font-size: var(--font-size-sm);
+  color: var(--card-text-muted);
+}
+
+.startMileageInfo {
+  font-size: var(--font-size-sm);
+  color: var(--card-text-dim);
+  margin-top: var(--spacing-1);
+}
+
+/* ========================================
+   経過時間（左）＋ ウィジェット（右）横並び
+   ======================================== */
+
+.timeRow {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: flex-start;
+}
+
+.timeInfo {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.widgetSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  min-width: 0;
+}
+
+.arrivedBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  background-color: color-mix(in srgb, var(--color-product) 10%, var(--card-surface));
+  border: 1.5px solid var(--color-product);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-product);
+}
+
+.noDestinationHint {
+  font-size: var(--font-size-sm);
+  color: var(--card-text-dim);
+  text-align: center;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--card-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--card-border);
+}
+
+/* ========================================
+   下部エリア（アクションボタン）
+   ======================================== */
+
+.bottomArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-top: clamp(var(--spacing-4), 6vh, var(--spacing-10));
+}
+
+.spotButton svg {
+  /* Tailwind preflight が svg { display: block } を設定するため inline-flex 内で改行される問題を修正 */
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.bottomRow {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.breakButton {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-3) var(--spacing-2);
+  border-radius: var(--radius-md);
+  background-color: var(--card-surface);
+  border: 1.5px solid var(--card-border);
+  color: var(--card-text-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+  min-height: 2.5rem;
+}
+
+.breakButton:hover:not(:disabled) {
+  background-color: var(--color-cloudHover);
+  border-color: var(--color-cloudActive);
+}
+
+.breakButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.breakStatus {
+  font-size: var(--font-size-xs);
+  color: var(--card-text-dim);
+  text-align: center;
+}
+
+.fuelButton {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-3) var(--spacing-2);
+  border-radius: var(--radius-md);
+  background-color: var(--card-surface);
+  border: 1.5px solid var(--card-border);
+  color: var(--card-text-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+  white-space: nowrap;
+  min-height: 2.5rem;
+}
+
+.fuelButton:hover:not(:disabled) {
+  background-color: var(--color-cloudHover);
+  border-color: var(--color-cloudActive);
+}
+
+.fuelButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ========================================
+   モーダル（スポット・走行距離）
+   ======================================== */
+
+.spotModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  padding: var(--spacing-4);
+}
+
+@media (min-width: 641px) {
+  .spotModalOverlay {
+    align-items: center;
+  }
+}
+
+.spotModal {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-lg);
+}
+
+.spotModalTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-4);
+}
+
+.spotModalField {
+  margin-bottom: var(--spacing-3);
+}
+
+.spotModalLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-1);
+}
+
+.spotModalInput {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-base);
+}
+
+.spotModalInput:focus {
+  border-color: var(--color-product);
+}
+
+.spotModalTextarea {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color var(--transition-base);
+}
+
+.spotModalTextarea:focus {
+  border-color: var(--color-product);
+}
+
+.spotMapArea {
+  height: 180px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-cloud);
+  margin-bottom: var(--spacing-4);
+}
+
+.spotMap {
+  width: 100%;
+  height: 100%;
+}
+
+.spotMapMessage {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  opacity: 0.5;
+  text-align: center;
+  padding: var(--spacing-4);
+}
+
+.spotMapAccuracyHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  margin-top: calc(var(--spacing-1) * -1);
+  margin-bottom: var(--spacing-3);
+}
+
+.spotModalActions {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.spotModalActions > * {
+  flex: 1;
+}
+
+.mileageModalHint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-3);
+}
+
+.mileageModalError {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+  margin-top: var(--spacing-1);
+}
+
+/* ========================================
+   レスポンシブ
+   ======================================== */
+
+@media (max-width: 640px) {
+  .container {
+    padding: var(--spacing-4);
+  }
+
+  .animatedBikeIcon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .bikeInfoArea {
+    padding-right: 5rem;
+  }
+
+  .bikeNameLarge {
+    font-size: var(--font-size-lg);
+  }
+
+  .elapsedTime {
+    font-size: 2.5rem;
+  }
+
+  .touringTitle {
+    font-size: var(--font-size-base);
+  }
+
+  /* SP でも経過時間の右にウィジェットを横並び表示するため column は使わない */
+}

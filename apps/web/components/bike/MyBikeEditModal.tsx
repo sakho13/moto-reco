@@ -10,7 +10,6 @@ import { MyBikeEditForm, type MyBikeEditFormData } from './MyBikeEditForm'
 import { ModalBase } from '@/components/common/ModalBase'
 import { authenticatedFetch, apiPatch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { useAuth } from '@/lib/hooks/useAuth'
 
 interface MyBikeEditModalProps {
   bikeId: string
@@ -23,7 +22,11 @@ export function MyBikeEditModal({
   onClose,
   onSuccess,
 }: MyBikeEditModalProps) {
-  const { isGuest } = useAuth()
+  const toDateInputValue = (date: string | null): string => {
+    if (!date) return ''
+    return date.slice(0, 10)
+  }
+
   const [initialData, setInitialData] = useState<MyBikeEditFormData | null>(
     null
   )
@@ -52,9 +55,9 @@ export function MyBikeEditModal({
     if (!data) return
     setInitialData({
       nickname: data.nickname ?? '',
+      purchaseDate: toDateInputValue(data.purchaseDate),
       totalMileage: data.totalMileage.toString(),
       displacement: data.displacement.toString(),
-      isPublic: data.isPublic,
     })
     setIsDisplacementEditable(data.bikeId === null)
   }, [data])
@@ -66,11 +69,13 @@ export function MyBikeEditModal({
     try {
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}`, {
         nickname: formData.nickname.trim() ? formData.nickname.trim() : null,
+        purchaseDate: formData.purchaseDate
+          ? new Date(formData.purchaseDate)
+          : null,
         totalMileage: Number(formData.totalMileage),
         ...(isDisplacementEditable
           ? { displacement: Number(formData.displacement) }
           : {}),
-        isPublic: formData.isPublic,
       })
 
       await Promise.all([
@@ -96,7 +101,6 @@ export function MyBikeEditModal({
           onSubmit={handleFormSubmit}
           isSubmitting={isSubmitting}
           error={error}
-          isGuest={isGuest}
         />
       )}
     </ModalBase>

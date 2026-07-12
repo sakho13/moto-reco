@@ -82,6 +82,21 @@
   transform: scale(0.98);
 }
 
+/* ===== Outline Modifier ===== */
+
+.button.outline {
+  background-color: transparent;
+  border: 1.5px solid currentColor;
+}
+
+.button.outline:hover:not(:disabled) {
+  background-color: var(--color-cloud);
+}
+
+.button.primary.outline { color: var(--color-product); }
+.button.danger.outline  { color: var(--color-danger); }
+.button.social.outline  { color: var(--color-social); }
+
 /* ===== Sizes ===== */
 
 /* Small */

@@ -5,8 +5,8 @@ import {
   TouringId,
   UserId,
 } from '@repo/shared-types'
-import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { FuelLogEntity } from '../entities/FuelLogEntity'
+import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
@@ -16,8 +16,7 @@ import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
 type RegisterFuelLogParams = {
   myUserBikeId: MyUserBikeId
-  userId: UserId
-  role: 'USER' | 'ADMIN' | 'GUEST'
+  user: UserEntity
   refueledAt: Date
   mileage: number
   previousMileage: number
@@ -25,6 +24,7 @@ type RegisterFuelLogParams = {
   totalPrice: number
   memo?: string | null
   updateTotalMileage: boolean
+  touringId?: string | null
 }
 
 type UpdateFuelLogParams = {
@@ -58,47 +58,47 @@ export class FuelLogService {
   ): Promise<FuelLogEntity> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
-      params.userId
+      params.user.id
     )
 
     if (!myUserBike) {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    // ゲストアカウントの給油履歴登録数チェック
-    if (params.role === 'GUEST') {
+    const limits = params.user.limits
+    if (limits.fuelLog !== null) {
       const count = await this.fuelLogRepository.countFuelLogs(
         params.myUserBikeId
       )
-      if (count >= GUEST_ACCOUNT_LIMITS.FUEL_LOG) {
-        throw new ApiV1Error(
-          'INVALID_REQUEST',
-          'ゲストアカウントは給油履歴を5件まで登録できます'
-        )
+      if (limits.isOver('fuelLog', count)) {
+        throw new ApiV1Error('INVALID_REQUEST', limits.limitMessage('fuelLog'))
       }
     }
 
-    // 進行中ツーリングの自動紐づけ
     let touringId: TouringId | null = null
     let touringTitle: string | null = null
 
-    try {
+    if (params.touringId) {
+      try {
+        const touring = await this.touringRepository.findTouringById(
+          params.touringId as TouringId,
+          params.myUserBikeId
+        )
+        if (touring) {
+          touringId = touring.id
+          touringTitle = touring.title
+        }
+      } catch (error) {
+        console.error('Failed to link touring:', error)
+      }
+    } else {
       const ongoingTouring = await this.touringRepository.findOngoingTouring(
         params.myUserBikeId
       )
-
-      // 給油日時がツーリング期間内であれば自動紐づけ
-      if (
-        ongoingTouring &&
-        params.refueledAt >= ongoingTouring.startDate &&
-        params.refueledAt <= new Date()
-      ) {
+      if (ongoingTouring && params.refueledAt >= ongoingTouring.startDate) {
         touringId = ongoingTouring.id
         touringTitle = ongoingTouring.title
       }
-    } catch (error) {
-      // ツーリング取得エラーが発生しても給油履歴登録は継続
-      console.error('Failed to auto-link touring:', error)
     }
 
     const fuelLog = new FuelLogEntity({

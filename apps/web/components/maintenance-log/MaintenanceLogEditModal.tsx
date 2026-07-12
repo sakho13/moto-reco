@@ -6,6 +6,7 @@ import type {
   ApiResponseMaintenanceLogDetail,
   MaintenanceType,
 } from '@repo/shared-types'
+import { toLocalDateTimeString } from '@repo/shared-utils'
 import { toast } from '@repo/ui/sonner'
 import {
   MaintenanceLogForm,
@@ -35,7 +36,7 @@ export function MaintenanceLogEditModal({
   >()
 
   useEffect(() => {
-    const dateStr = new Date(log.performedAt).toISOString().split('T')[0]
+    const dateStr = toLocalDateTimeString(log.performedAt).split('T')[0]
     if (dateStr) {
       setInitialData({
         performedAt: dateStr,

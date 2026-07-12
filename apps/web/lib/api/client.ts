@@ -1,5 +1,6 @@
 import {
   ApiResponseUserProfile,
+  ApiResponseUserPlanHistory,
   ApiResponseManufacturer,
   ApiResponseUserBikeList,
   ApiResponseUserBikeDetail,
@@ -9,6 +10,9 @@ import {
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
   ApiResponseUserQuit,
+  ApiResponsePublicUserPage,
+  ApiResponseUserFollowList,
+  ApiResponseUserSearch,
   ApiResponseFuelInsight,
   ApiResponseTouringDetail,
   ApiResponseTouringList,
@@ -16,6 +20,11 @@ import {
   ApiResponseBikesOngoingTourings,
   ApiResponseSpotDetail,
   ApiResponseSpotList,
+  ApiResponseTouringPlanDetail,
+  ApiResponseTouringPlanList,
+  ApiResponseTouringPlanLocation,
+  ApiResponseTouringPlanSpotDetail,
+  ApiResponseTouringPlanSpotList,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -178,7 +187,10 @@ export const apiDelete = async <U extends keyof API_EP>(
 type API_EP = {
   '/api/v1/user/profile': {
     GET: SuccessResponse<ApiResponseUserProfile>
-    POST: SuccessResponse<ApiResponseUserProfile>
+    PATCH: SuccessResponse<ApiResponseUserProfile>
+  }
+  '/api/v1/user/plan/histories': {
+    GET: SuccessResponse<ApiResponseUserPlanHistory>
   }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
@@ -200,6 +212,27 @@ type API_EP = {
   }
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
+  }
+} & {
+  '/api/v1/user/search': {
+    GET: SuccessResponse<ApiResponseUserSearch>
+  }
+} & {
+  [key: `/api/v1/user/${string}/page`]: {
+    GET: SuccessResponse<ApiResponsePublicUserPage>
+  }
+} & {
+  [key: `/api/v1/user/${string}/follow`]: {
+    POST: SuccessResponse<Record<string, never>>
+    DELETE: SuccessResponse<Record<string, never>>
+  }
+} & {
+  [key: `/api/v1/user/${string}/followers`]: {
+    GET: SuccessResponse<ApiResponseUserFollowList>
+  }
+} & {
+  [key: `/api/v1/user/${string}/following`]: {
+    GET: SuccessResponse<ApiResponseUserFollowList>
   }
 } & {
   [key: `/api/v1/user-bike/bike/${string}/fuel-logs`]: {
@@ -250,5 +283,74 @@ type API_EP = {
   [key: `/api/v1/user-bike/bike/${string}`]: {
     GET: SuccessResponse<ApiResponseUserBikeDetail>
     PATCH: SuccessResponse<ApiResponseUserBikeDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/touring-plans`]: {
+    GET: SuccessResponse<ApiResponseTouringPlanList>
+    POST: SuccessResponse<ApiResponseTouringPlanDetail>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}`]: {
+    GET: SuccessResponse<ApiResponseTouringPlanDetail>
+    PATCH: SuccessResponse<ApiResponseTouringPlanDetail>
+    DELETE: SuccessResponse<undefined>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/start-location`
+  ]: {
+    PATCH: SuccessResponse<ApiResponseTouringPlanLocation | null>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/destination-location`
+  ]: {
+    PATCH: SuccessResponse<ApiResponseTouringPlanLocation | null>
+  }
+} & {
+  [key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots`]: {
+    GET: SuccessResponse<ApiResponseTouringPlanSpotList>
+    POST: SuccessResponse<ApiResponseTouringPlanSpotDetail>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots/reorder`
+  ]: {
+    PATCH: SuccessResponse<undefined>
+  }
+} & {
+  [
+    key: `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots/${string}`
+  ]: {
+    PATCH: SuccessResponse<ApiResponseTouringPlanSpotDetail>
+    DELETE: SuccessResponse<undefined>
+  }
+} & {
+  '/api/v1/mcp/api-keys': {
+    GET: SuccessResponse<{
+      apiKeys: {
+        apiKeyId: string
+        name: string
+        prefix: string
+        scopes: string[]
+        createdAt: string
+      }[]
+    }>
+    POST: SuccessResponse<{
+      apiKeyId: string
+      name: string
+      prefix: string
+      scopes: string[]
+      fullKey: string
+      createdAt: string
+    }>
+  }
+} & {
+  [key: `/api/v1/mcp/api-keys/${string}/revoke`]: {
+    PATCH: SuccessResponse<null>
+  }
+} & {
+  [key: `/api/v1/mcp/api-keys/${string}`]: {
+    DELETE: SuccessResponse<null>
   }
 }

@@ -4,34 +4,13 @@ import { notFound } from 'next/navigation'
 import { BlogToc } from './BlogToc'
 import styles from './page.module.css'
 import { parseHeadings } from '@/lib/blog/toc'
-import { microCMSClient } from '@/lib/microcms/config'
-import type { Blog } from '@/lib/microcms/types'
+import { getBlogBySlug } from '@/lib/microcms/blog'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const revalidate = 300
 
 type Props = {
   params: Promise<{ slug: string }>
-}
-
-async function getBlogBySlug(slug: string): Promise<Blog | null> {
-  try {
-    if (!microCMSClient) return null
-    const data = await microCMSClient.getList<Blog>({
-      endpoint: 'motoreco-blogs',
-      queries: {
-        filters: `slug[equals]${slug}${
-          process.env.NODE_ENV !== 'development'
-            ? '[and]status[contains]published'
-            : ''
-        }`,
-        limit: 1,
-      },
-    })
-    return data.contents[0] ?? null
-  } catch {
-    return null
-  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -79,6 +58,19 @@ export default async function BlogDetailPage({ params }: Props) {
 
   return (
     <div className="public-page-container">
+      {blog.eyecatch && (
+        <div className={styles.eyecatch}>
+          <Image
+            src={blog.eyecatch.url}
+            alt=""
+            fill
+            sizes="(max-width: 900px) 100vw, 960px"
+            style={{ objectFit: 'cover' }}
+            priority
+            unoptimized
+          />
+        </div>
+      )}
       <article className={styles.article}>
         <header className={styles.header}>
           <h1 className={styles.articleTitle}>{blog.title}</h1>
@@ -106,20 +98,6 @@ export default async function BlogDetailPage({ params }: Props) {
               </ul>
             )}
           </div>
-
-          {blog.eyecatch && (
-            <div className={styles.eyecatch}>
-              <Image
-                src={blog.eyecatch.url}
-                alt=""
-                fill
-                sizes="(max-width: 900px) 100vw, 720px"
-                style={{ objectFit: 'cover' }}
-                priority
-                unoptimized
-              />
-            </div>
-          )}
         </header>
 
         <BlogToc headings={headings} />

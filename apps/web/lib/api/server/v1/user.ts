@@ -2,33 +2,49 @@ import { Hono } from 'hono'
 import { prisma } from '@repo/database'
 import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import {
+  ApiResponseUserFollowList,
   ApiResponseUserProfile,
+  ApiResponseUserPlanHistory,
+  ApiResponsePublicUserPage,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
+  ApiResponseUserSearch,
+  ChangePlanRequestSchema,
   GuestRegisterRequestSchema,
   SuccessResponse,
   UserAuthRecoverRequestSchema,
   UserAuthQuitRequestSchema,
   UserAuthRegisterRequestSchema,
-  UserProfileUpdateRequestSchema,
+  UserProfilePatchRequestSchema,
+  createUserId,
 } from '@repo/shared-types'
 import { ApiV1Error } from '../errors/ApiV1Error'
-import { honoAuthMiddleware } from '../middlewares/honoAuth'
+import {
+  honoAuthMiddleware,
+  honoOptionalAuthMiddleware,
+} from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
+import { PrismaHistoryRepository } from '../repositories/PrismaHistoryRepository'
+import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
+import { PrismaNotificationRepository } from '../repositories/PrismaNotificationRepository'
+import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepository'
+import { PrismaUserPlanHistoryRepository } from '../repositories/PrismaUserPlanHistoryRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
+import { UserFollowService } from '../services/UserFollowService'
+import { UserPlanService } from '../services/UserPlanService'
 import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
 
 const user = new Hono()
 
 user.get('/profile', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
 
   const userRepo = new PrismaUserRepository(prisma)
-  const user = await userRepo.findById(userId)
+  const user = await userRepo.findById(userEntity.id)
 
   if (!user) {
     throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
@@ -40,44 +56,56 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
       userId: user.id,
       name: user.name,
       notificationEmail: user.notificationEmail,
+      isProfilePublic: user.isProfilePublic,
+      role: user.role as import('@repo/shared-types').UserRole,
+      plan: user.plan,
     },
     message: 'プロフィール取得成功',
   })
 })
 
 /**
- * ユーザープロフィール更新エンドポイント
+ * ユーザープロフィール部分更新エンドポイント
  *
  * @remarks
  * - 認証必須（honoAuthMiddleware）
  * - リクエストボディのバリデーション（zodValidateJson）
- * - nameフィールド: 1文字以上50文字以下
+ * - nameフィールド: 指定時は1文字以上50文字以下
+ * - 少なくとも1フィールドの指定が必須
  */
-user.post(
+user.patch(
   '/profile',
   honoAuthMiddleware,
-  zodValidateJson(UserProfileUpdateRequestSchema),
+  zodValidateJson(UserProfilePatchRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
-    const body = c.req.valid('json') // 型安全に UserProfileUpdateRequest として取得
+    const { userEntity } = c.var.user!
+    const body = c.req.valid('json')
 
     const userRepo = new PrismaUserRepository(prisma)
 
     // ユーザーの存在確認
-    const user = await userRepo.findById(userId)
+    const user = await userRepo.findById(userEntity.id)
     if (!user) {
       throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
     }
 
     const prevNotificationEmail = user.notificationEmail
 
-    if (body.name) {
+    if (body.name !== undefined) {
       user.name = body.name
     }
     if (body.notificationEmail !== undefined) {
       user.notificationEmail = body.notificationEmail ?? null
     }
-
+    if (body.isProfilePublic !== undefined) {
+      if (userEntity.role === 'GUEST' && body.isProfilePublic === true) {
+        throw new ApiV1Error(
+          'INVALID_REQUEST',
+          'ゲストアカウントはプロフィールを公開できません'
+        )
+      }
+      user.isProfilePublic = body.isProfilePublic
+    }
     // プロフィール更新
     const updatedUser = await userRepo.updateUser(user)
 
@@ -108,11 +136,232 @@ user.post(
         userId: updatedUser.id,
         name: updatedUser.name,
         notificationEmail: updatedUser.notificationEmail,
+        isProfilePublic: updatedUser.isProfilePublic,
+        role: updatedUser.role as import('@repo/shared-types').UserRole,
+        plan: updatedUser.plan,
       },
       message: 'プロフィール更新成功',
     })
   }
 )
+
+user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
+  const userId = c.req.param('userId')
+  const requesterId = c.var.user?.userEntity.id
+  const targetUserId = createUserId(userId)
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
+  const historyRepo = new PrismaHistoryRepository(prisma)
+  const targetUser = await userRepo.findById(targetUserId)
+
+  if (!targetUser || !targetUser.isProfilePublic) {
+    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
+  }
+
+  const [bikes, histories, followerCount, followingCount, isFollowing] =
+    await Promise.all([
+      myUserBikeRepo.findPublicBikesByUserId(targetUserId, 8),
+      historyRepo.findPublicHistoriesByUserId(targetUserId, 30),
+      followRepo.countFollowers(targetUserId),
+      followRepo.countFollowing(targetUserId),
+      requesterId
+        ? followRepo.isFollowing(requesterId, targetUserId)
+        : Promise.resolve(false),
+    ])
+
+  return c.json<SuccessResponse<ApiResponsePublicUserPage>>({
+    status: 'success',
+    data: {
+      userId: targetUser.id,
+      name: targetUser.name,
+      followerCount,
+      followingCount,
+      isFollowing,
+      bikes: bikes.map((bike) => ({
+        myUserBikeId: bike.myUserBikeId,
+        manufacturerName: bike.manufacturerName,
+        modelName: bike.modelName,
+        nickname: bike.nickname,
+        displacement: bike.displacement,
+        totalMileage: bike.totalMileage,
+        ownedAt: bike.ownedAt.toISOString(),
+        updatedAt: bike.updatedAt.toISOString(),
+      })),
+      histories: histories
+        .map((item) => {
+          const bikeName =
+            item.userMyBike?.nickname ??
+            item.userMyBike?.userBike.bike?.modelName ??
+            'バイク'
+          if (item.type === 'FUEL_LOG' && item.fuelLog) {
+            return {
+              bikeId: item.userMyBikeId ?? '',
+              bikeName,
+              type: 'FUEL_LOG' as const,
+              occurredAt: item.occurredAt.toISOString(),
+              fuelLog: {
+                fuelLogId: item.fuelLog.id,
+                refueledAt: item.fuelLog.refueledAt.toISOString(),
+                mileage: item.fuelLog.mileage,
+                previousMileage: item.fuelLog.previousMileage,
+                amount: item.fuelLog.amount,
+                totalPrice: item.fuelLog.price,
+                memo: item.fuelLog.memo,
+                fuelEfficiency: null,
+                pricePerLiter: null,
+                touringId: item.fuelLog.touringId,
+                touringTitle: null,
+              },
+            }
+          }
+          if (item.type === 'TOURING' && item.touring) {
+            return {
+              bikeId: item.userMyBikeId ?? '',
+              bikeName,
+              type: 'TOURING' as const,
+              occurredAt: item.occurredAt.toISOString(),
+              touring: {
+                touringId: item.touring.id,
+                touringPlanId: item.touring.planId,
+                title: item.touring.title,
+                startDate: item.touring.startDate.toISOString(),
+                endDate: item.touring.endDate.toISOString(),
+                startMileage: item.touring.startMileage,
+                endMileage: item.touring.endMileage,
+                startLatitude: null,
+                startLongitude: null,
+                endLatitude: null,
+                endLongitude: null,
+                status: item.touring.status,
+                fuelLogIds: [],
+              },
+            }
+          }
+          return null
+        })
+        .filter((v): v is NonNullable<typeof v> => v !== null),
+    },
+    message: '公開プロフィール取得成功',
+  })
+})
+
+user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
+  const { userEntity } = c.var.user!
+  const followingId = createUserId(c.req.param('userId'))
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const notifRepo = new PrismaNotificationRepository(prisma)
+  const service = new UserFollowService(userRepo, followRepo, notifRepo)
+  await service.followUser(userEntity.id, followingId, userEntity.role)
+
+  return c.json<SuccessResponse<Record<string, never>>>({
+    status: 'success',
+    data: {},
+    message: 'フォローしました',
+  })
+})
+
+user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
+  const { userEntity } = c.var.user!
+  const followingId = createUserId(c.req.param('userId'))
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(
+    userRepo,
+    followRepo,
+    new PrismaNotificationRepository(prisma)
+  )
+  await service.unfollowUser(userEntity.id, followingId)
+
+  return c.json<SuccessResponse<Record<string, never>>>({
+    status: 'success',
+    data: {},
+    message: 'フォロー解除しました',
+  })
+})
+
+user.get('/:userId/followers', honoAuthMiddleware, async (c) => {
+  const userId = createUserId(c.req.param('userId'))
+  const page = Number(c.req.query('page') ?? '1')
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const targetUser = await userRepo.findById(userId)
+  if (!targetUser || !targetUser.isProfilePublic) {
+    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
+  }
+
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(
+    userRepo,
+    followRepo,
+    new PrismaNotificationRepository(prisma)
+  )
+  const result = await service.getFollowers(userId, page)
+
+  return c.json<SuccessResponse<ApiResponseUserFollowList>>({
+    status: 'success',
+    data: result,
+    message: 'フォロワー一覧取得成功',
+  })
+})
+
+user.get('/:userId/following', honoAuthMiddleware, async (c) => {
+  const userId = createUserId(c.req.param('userId'))
+  const page = Number(c.req.query('page') ?? '1')
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const targetUser = await userRepo.findById(userId)
+  if (!targetUser || !targetUser.isProfilePublic) {
+    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
+  }
+
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(
+    userRepo,
+    followRepo,
+    new PrismaNotificationRepository(prisma)
+  )
+  const result = await service.getFollowing(userId, page)
+
+  return c.json<SuccessResponse<ApiResponseUserFollowList>>({
+    status: 'success',
+    data: result,
+    message: 'フォロー中一覧取得成功',
+  })
+})
+
+user.get('/search', honoAuthMiddleware, async (c) => {
+  const { userEntity } = c.var.user!
+  const query = c.req.query('q') ?? ''
+  const page = Number(c.req.query('page') ?? '1')
+
+  if (query.trim().length === 0) {
+    return c.json<SuccessResponse<ApiResponseUserSearch>>({
+      status: 'success',
+      data: { users: [], total: 0, page },
+      message: 'ユーザー検索成功',
+    })
+  }
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const followRepo = new PrismaUserFollowRepository(prisma)
+  const service = new UserFollowService(
+    userRepo,
+    followRepo,
+    new PrismaNotificationRepository(prisma)
+  )
+  const result = await service.searchUsers(query.trim(), userEntity.id, page)
+
+  return c.json<SuccessResponse<ApiResponseUserSearch>>({
+    status: 'success',
+    data: result,
+    message: 'ユーザー検索成功',
+  })
+})
 
 /**
  * ユーザー認証登録エンドポイント
@@ -187,6 +436,9 @@ user.post(
           userId: user.id,
           name: user.name,
           notificationEmail: user.notificationEmail,
+          isProfilePublic: user.isProfilePublic,
+          role: user.role as import('@repo/shared-types').UserRole,
+          plan: user.plan,
         },
         message: 'ユーザー登録成功',
       },
@@ -208,7 +460,7 @@ user.post(
   honoAuthMiddleware,
   zodValidateJson(UserAuthQuitRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
     const result = await prisma.$transaction(async (t) => {
@@ -222,7 +474,7 @@ user.post(
       )
 
       return service.quitUser({
-        userId,
+        userId: userEntity.id,
         quitReason: body.quitReason,
       })
     })
@@ -343,11 +595,82 @@ user.post(
           userId: guestUser.id,
           name: guestUser.name,
           notificationEmail: guestUser.notificationEmail,
+          isProfilePublic: guestUser.isProfilePublic,
+          role: guestUser.role as import('@repo/shared-types').UserRole,
+          plan: guestUser.plan,
         },
         message: 'ゲストユーザー登録成功',
       },
       201
     )
+  }
+)
+
+/**
+ * 自分のプラン変更履歴を取得するエンドポイント
+ *
+ * @remarks
+ * - 認証必須
+ * - role !== 'USER' の場合は空配列を返す
+ */
+user.get('/plan/histories', honoAuthMiddleware, async (c) => {
+  const { userEntity } = c.var.user!
+
+  const userRepo = new PrismaUserRepository(prisma)
+  const planHistoryRepo = new PrismaUserPlanHistoryRepository(prisma)
+  const service = new UserPlanService(userRepo, planHistoryRepo)
+
+  const histories = await service.getPlanHistories(userEntity.id)
+
+  return c.json<SuccessResponse<ApiResponseUserPlanHistory>>({
+    status: 'success',
+    data: histories.map((h) => ({
+      id: h.id,
+      plan: h.plan,
+      changedAt: h.changedAt.toISOString(),
+      changedByName: '',
+      reason: h.reason,
+    })),
+    message: 'プラン変更履歴取得成功',
+  })
+})
+
+/**
+ * ユーザーのプランを変更するエンドポイント（管理者専用）
+ *
+ * @remarks
+ * - 認証必須・ADMIN ロール限定
+ * - 対象ユーザーの role が USER 以外の場合は 403
+ */
+user.patch(
+  '/admin/plan',
+  honoAuthMiddleware,
+  zodValidateJson(ChangePlanRequestSchema),
+  async (c) => {
+    const { userEntity } = c.var.user!
+
+    if (userEntity.role !== 'ADMIN') {
+      throw new ApiV1Error('FORBIDDEN', 'この操作は管理者のみ実行できます')
+    }
+
+    const body = c.req.valid('json')
+
+    const userRepo = new PrismaUserRepository(prisma)
+    const planHistoryRepo = new PrismaUserPlanHistoryRepository(prisma)
+    const service = new UserPlanService(userRepo, planHistoryRepo)
+
+    await service.changePlan(
+      createUserId(body.targetUserId),
+      body.plan,
+      userEntity.id,
+      body.reason ?? null
+    )
+
+    return c.json<SuccessResponse<Record<string, never>>>({
+      status: 'success',
+      data: {},
+      message: 'プランを変更しました',
+    })
   }
 )
 
