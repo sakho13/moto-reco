@@ -182,16 +182,15 @@ describe('Photo API Endpoints', () => {
       expect(json.data[0]).toMatchObject({
         photoId: expect.any(String),
         photoUrl: expect.any(String),
-        orderIndex: 0,
       })
 
-      const dbPhoto = await prisma.tUserMyBikePhoto.findFirst({
+      const dbPhoto = await prisma.tUserPhoto.findFirst({
         where: { userId, storagePath: photoPath },
       })
       expect(dbPhoto).not.toBeNull()
     })
 
-    test('複数枚登録でorderIndexが0から連番になる', async () => {
+    test('複数枚登録すると全件作成される', async () => {
       const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
         method: 'POST',
         headers: {
@@ -218,34 +217,9 @@ describe('Photo API Endpoints', () => {
 
       const json = await res.json()
       expect(res.status).toBe(201)
-      expect(json.data[0].orderIndex).toBe(0)
-      expect(json.data[1].orderIndex).toBe(1)
-      expect(json.data[2].orderIndex).toBe(2)
-    })
-
-    test('既存の写真がある状態で追加するとorderIndexが継続する', async () => {
-      await createTestTouringPhoto({ userId, touringId, orderIndex: 0 })
-      await createTestTouringPhoto({ userId, touringId, orderIndex: 1 })
-
-      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          photos: [
-            {
-              photoPath: `users/${userId}/photos/new.jpg`,
-              takenAt: '2024-06-01T13:00:00.000Z',
-            },
-          ],
-        }),
-      })
-
-      const json = await res.json()
-      expect(res.status).toBe(201)
-      expect(json.data[0].orderIndex).toBe(2)
+      expect(json.data).toHaveLength(3)
+      const photoIds = json.data.map((p: { photoId: string }) => p.photoId)
+      expect(new Set(photoIds).size).toBe(3)
     })
 
     test('存在しないtouringIdは404になる', async () => {
@@ -365,10 +339,22 @@ describe('Photo API Endpoints', () => {
       expect(json.data).toEqual([])
     })
 
-    test('写真がある場合はorderIndex昇順で返す', async () => {
-      await createTestTouringPhoto({ userId, touringId, orderIndex: 0 })
-      await createTestTouringPhoto({ userId, touringId, orderIndex: 1 })
-      await createTestTouringPhoto({ userId, touringId, orderIndex: 2 })
+    test('写真がある場合は撮影日時の昇順で返す', async () => {
+      const photoId1 = await createTestTouringPhoto({
+        userId,
+        touringId,
+        takenAt: new Date('2024-06-01T10:00:00.000Z'),
+      })
+      const photoId2 = await createTestTouringPhoto({
+        userId,
+        touringId,
+        takenAt: new Date('2024-06-01T11:00:00.000Z'),
+      })
+      const photoId3 = await createTestTouringPhoto({
+        userId,
+        touringId,
+        takenAt: new Date('2024-06-01T12:00:00.000Z'),
+      })
 
       const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
         method: 'GET',
@@ -378,9 +364,11 @@ describe('Photo API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.data).toHaveLength(3)
-      expect(json.data[0].orderIndex).toBe(0)
-      expect(json.data[1].orderIndex).toBe(1)
-      expect(json.data[2].orderIndex).toBe(2)
+      expect(json.data.map((p: { photoId: string }) => p.photoId)).toEqual([
+        photoId1,
+        photoId2,
+        photoId3,
+      ])
     })
 
     test('他ユーザーのtouringIdは404になる', async () => {
@@ -473,10 +461,9 @@ describe('Photo API Endpoints', () => {
       expect(json.data).toHaveLength(1)
       expect(json.data[0]).toMatchObject({
         photoId: expect.any(String),
-        orderIndex: 0,
       })
 
-      const dbPhoto = await prisma.tUserMyBikePhoto.findFirst({
+      const dbPhoto = await prisma.tUserPhoto.findFirst({
         where: { userId, storagePath: photoPath },
       })
       expect(dbPhoto).not.toBeNull()
@@ -615,9 +602,17 @@ describe('Photo API Endpoints', () => {
       expect(json.data).toEqual([])
     })
 
-    test('写真がある場合はorderIndex昇順で返す', async () => {
-      await createTestSpotPhoto({ userId, spotId, orderIndex: 0 })
-      await createTestSpotPhoto({ userId, spotId, orderIndex: 1 })
+    test('写真がある場合は撮影日時の昇順で返す', async () => {
+      const photoId1 = await createTestSpotPhoto({
+        userId,
+        spotId,
+        takenAt: new Date('2024-06-01T11:00:00.000Z'),
+      })
+      const photoId2 = await createTestSpotPhoto({
+        userId,
+        spotId,
+        takenAt: new Date('2024-06-01T12:00:00.000Z'),
+      })
 
       const res = await app.request(`/api/v1/photo/spot/${spotId}`, {
         method: 'GET',
@@ -627,8 +622,10 @@ describe('Photo API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(200)
       expect(json.data).toHaveLength(2)
-      expect(json.data[0].orderIndex).toBe(0)
-      expect(json.data[1].orderIndex).toBe(1)
+      expect(json.data.map((p: { photoId: string }) => p.photoId)).toEqual([
+        photoId1,
+        photoId2,
+      ])
     })
 
     test('他ユーザーのspotIdは404になる', async () => {
@@ -706,7 +703,7 @@ describe('Photo API Endpoints', () => {
       const json = await res.json()
       expect(json.status).toBe('success')
 
-      const dbPhoto = await prisma.tUserMyBikePhoto.findUnique({
+      const dbPhoto = await prisma.tUserPhoto.findUnique({
         where: { id: photoId },
       })
       expect(dbPhoto).toBeNull()

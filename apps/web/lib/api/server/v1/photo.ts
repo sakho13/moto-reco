@@ -1,14 +1,20 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
 import {
+  ApiResponseBikePhotoList,
   ApiResponsePhotoDetail,
   ApiResponsePhotoUploadUrl,
   ApiResponseSpotPhotoList,
   ApiResponseTouringPhotoList,
+  ApiResponseUserPhotoList,
+  createMyUserBikeId,
   createPhotoId,
   createSpotId,
   createTouringId,
   createUserId,
+  PhotoListQuerySchema,
+  PhotoRegisterForBikeRequest,
+  PhotoRegisterForBikeRequestSchema,
   PhotoRegisterForSpotRequest,
   PhotoRegisterForSpotRequestSchema,
   PhotoRegisterForTouringRequest,
@@ -21,7 +27,7 @@ import {
   getFirebaseAdminStorage,
   getStorageBucketName,
 } from '../../../firebase/adminStorage'
-import { SpotPhotoEntity, TouringPhotoEntity } from '../entities/PhotoEntity'
+import { PhotoEntity } from '../entities/PhotoEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'
@@ -40,15 +46,13 @@ const CONTENT_TYPE_TO_EXT: Record<string, string> = {
 }
 
 const toApiResponsePhotoDetail = (
-  entity: TouringPhotoEntity | SpotPhotoEntity,
-  orderIndex: number
+  entity: PhotoEntity
 ): ApiResponsePhotoDetail => ({
   photoId: entity.id,
   photoUrl: entity.photoUrl,
   storagePath: entity.storagePath,
   memo: entity.memo,
   takenAt: entity.takenAt.toISOString(),
-  orderIndex,
 })
 
 /**
@@ -173,9 +177,7 @@ photo.post(
     return c.json<SuccessResponse<ApiResponseTouringPhotoList>>(
       {
         status: 'success',
-        data: created.map((entity) =>
-          toApiResponsePhotoDetail(entity, entity.orderIndex)
-        ),
+        data: created.map(toApiResponsePhotoDetail),
         message: 'ツーリング写真登録成功',
       },
       201
@@ -209,9 +211,7 @@ photo.get('/touring/:touringId', honoAuthMiddleware, async (c) => {
 
   return c.json<SuccessResponse<ApiResponseTouringPhotoList>>({
     status: 'success',
-    data: photos.map((entity) =>
-      toApiResponsePhotoDetail(entity, entity.orderIndex)
-    ),
+    data: photos.map(toApiResponsePhotoDetail),
     message: 'ツーリング写真一覧取得成功',
   })
 })
@@ -281,9 +281,7 @@ photo.post(
     return c.json<SuccessResponse<ApiResponseSpotPhotoList>>(
       {
         status: 'success',
-        data: created.map((entity) =>
-          toApiResponsePhotoDetail(entity, entity.orderIndex)
-        ),
+        data: created.map(toApiResponsePhotoDetail),
         message: 'スポット写真登録成功',
       },
       201
@@ -319,10 +317,152 @@ photo.get('/spot/:spotId', honoAuthMiddleware, async (c) => {
 
   return c.json<SuccessResponse<ApiResponseSpotPhotoList>>({
     status: 'success',
-    data: photos.map((entity) =>
-      toApiResponsePhotoDetail(entity, entity.orderIndex)
-    ),
+    data: photos.map(toApiResponsePhotoDetail),
     message: 'スポット写真一覧取得成功',
+  })
+})
+
+/**
+ * POST /api/v1/photo/bike/:myUserBikeId
+ * バイク本体に写真を追加する（ツーリング/スポットを介さない日常の1枚）
+ */
+photo.post(
+  '/bike/:myUserBikeId',
+  honoAuthMiddleware,
+  zodValidateJson(PhotoRegisterForBikeRequestSchema),
+  async (c) => {
+    const { userEntity } = c.var.user!
+    const userId = userEntity.id
+    const myUserBikeId = c.req.param('myUserBikeId')
+    const { photos } = c.req.valid('json') as PhotoRegisterForBikeRequest
+
+    // 所有権検証: バイクがこのユーザーのものか
+    const myBike = await prisma.tUserMyBike.findFirst({
+      where: { id: myUserBikeId, userId },
+    })
+
+    if (!myBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    for (const p of photos) {
+      validatePhotoPath(p.photoPath, userId)
+    }
+
+    const storage = getFirebaseAdminStorage()
+    const bucketName = getStorageBucketName()
+    const bucket = storage.bucket(bucketName)
+
+    const photosWithUrls = await Promise.all(
+      photos.map(async (p) => {
+        const file = bucket.file(p.photoPath)
+        const [url] = await file.getSignedUrl({
+          version: 'v4',
+          action: 'read',
+          expires: Date.now() + 365 * 24 * 60 * 60 * 1000,
+        })
+        return { ...p, photoUrl: url }
+      })
+    )
+
+    const photoRepo = new PrismaPhotoRepository(prisma)
+    const service = new PhotoService(photoRepo)
+
+    const created = await service.registerPhotosForBike({
+      userId: createUserId(userId),
+      myUserBikeId: createMyUserBikeId(myUserBikeId),
+      photos: photosWithUrls.map((p) => ({
+        storagePath: p.photoPath,
+        photoUrl: p.photoUrl,
+        memo: p.memo,
+        takenAt: p.takenAt,
+      })),
+    })
+
+    return c.json<SuccessResponse<ApiResponseBikePhotoList>>(
+      {
+        status: 'success',
+        data: created.map(toApiResponsePhotoDetail),
+        message: 'バイク写真登録成功',
+      },
+      201
+    )
+  }
+)
+
+/**
+ * GET /api/v1/photo/bike/:myUserBikeId
+ * バイク本体に直接紐づく写真一覧を取得する
+ */
+photo.get('/bike/:myUserBikeId', honoAuthMiddleware, async (c) => {
+  const { userEntity } = c.var.user!
+  const userId = userEntity.id
+  const myUserBikeId = c.req.param('myUserBikeId')
+
+  const myBike = await prisma.tUserMyBike.findFirst({
+    where: { id: myUserBikeId, userId },
+  })
+
+  if (!myBike) {
+    throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+  }
+
+  const photoRepo = new PrismaPhotoRepository(prisma)
+  const service = new PhotoService(photoRepo)
+  const photos = await service.getPhotosByMyBikeId(
+    createMyUserBikeId(myUserBikeId)
+  )
+
+  return c.json<SuccessResponse<ApiResponseBikePhotoList>>({
+    status: 'success',
+    data: photos.map(toApiResponsePhotoDetail),
+    message: 'バイク写真一覧取得成功',
+  })
+})
+
+/**
+ * GET /api/v1/photo
+ * ユーザーの全写真を横断して取得する（マイフォト・ギャラリー、ページネーション対応）
+ * ツーリング/スポット/バイクいずれの紐づけかは attachedTo で返す
+ */
+photo.get('/', honoAuthMiddleware, async (c) => {
+  const { userEntity } = c.var.user!
+  const userId = userEntity.id
+
+  const queryResult = PhotoListQuerySchema.safeParse(c.req.query())
+  if (!queryResult.success) {
+    return c.json(
+      {
+        status: 'error',
+        errorCode: 'VALIDATION_ERROR',
+        message: 'クエリパラメータが不正です',
+      },
+      400
+    )
+  }
+  const page = queryResult.data.page ?? 1
+  const pageSize = queryResult.data['per-size'] ?? 30
+
+  const photoRepo = new PrismaPhotoRepository(prisma)
+  const service = new PhotoService(photoRepo)
+  const photos = await service.getPhotosByUserId(createUserId(userId), {
+    page,
+    pageSize,
+  })
+
+  return c.json<SuccessResponse<ApiResponseUserPhotoList>>({
+    status: 'success',
+    data: photos.map((entity) => ({
+      ...toApiResponsePhotoDetail(entity),
+      attachments: entity.attachments.map((attachment) =>
+        attachment.type === 'TOURING'
+          ? { type: 'TOURING' as const, touringId: attachment.touringId }
+          : attachment.type === 'SPOT'
+            ? { type: 'SPOT' as const, spotId: attachment.spotId }
+            : { type: 'BIKE' as const, myUserBikeId: attachment.myUserBikeId }
+      ),
+    })),
+    message: 'マイフォト一覧取得成功',
   })
 })
 

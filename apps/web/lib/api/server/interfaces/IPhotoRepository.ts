@@ -1,9 +1,11 @@
-import { PhotoId, SpotId, TouringId, UserId } from '@repo/shared-types'
 import {
-  PhotoEntity,
-  SpotPhotoEntity,
-  TouringPhotoEntity,
-} from '../entities/PhotoEntity'
+  MyUserBikeId,
+  PhotoId,
+  SpotId,
+  TouringId,
+  UserId,
+} from '@repo/shared-types'
+import { PhotoEntity } from '../entities/PhotoEntity'
 
 type CreatePhotoForTouringParams = {
   userId: UserId
@@ -12,7 +14,6 @@ type CreatePhotoForTouringParams = {
   photoUrl: string
   memo?: string | null
   takenAt: Date
-  orderIndex: number
 }
 
 type CreatePhotoForSpotParams = {
@@ -22,16 +23,35 @@ type CreatePhotoForSpotParams = {
   photoUrl: string
   memo?: string | null
   takenAt: Date
-  orderIndex: number
+}
+
+type CreatePhotoForBikeParams = {
+  userId: UserId
+  myUserBikeId: MyUserBikeId
+  storagePath: string
+  photoUrl: string
+  memo?: string | null
+  takenAt: Date
+}
+
+type FindPhotosByUserIdParams = {
+  skip: number
+  take: number
 }
 
 export interface IPhotoRepository {
   createPhotoForTouring(
     params: CreatePhotoForTouringParams
-  ): Promise<TouringPhotoEntity>
-  createPhotoForSpot(params: CreatePhotoForSpotParams): Promise<SpotPhotoEntity>
-  findPhotosByTouringId(touringId: TouringId): Promise<TouringPhotoEntity[]>
-  findPhotosBySpotId(spotId: SpotId): Promise<SpotPhotoEntity[]>
+  ): Promise<PhotoEntity>
+  createPhotoForSpot(params: CreatePhotoForSpotParams): Promise<PhotoEntity>
+  createPhotoForBike(params: CreatePhotoForBikeParams): Promise<PhotoEntity>
+  findPhotosByTouringId(touringId: TouringId): Promise<PhotoEntity[]>
+  findPhotosBySpotId(spotId: SpotId): Promise<PhotoEntity[]>
+  findPhotosByMyBikeId(myUserBikeId: MyUserBikeId): Promise<PhotoEntity[]>
+  findPhotosByUserId(
+    userId: UserId,
+    params: FindPhotosByUserIdParams
+  ): Promise<PhotoEntity[]>
   findPhotoById(photoId: PhotoId): Promise<PhotoEntity | null>
   deletePhoto(photoId: PhotoId): Promise<string>
 }

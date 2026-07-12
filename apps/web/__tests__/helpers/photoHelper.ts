@@ -6,19 +6,16 @@ import { prisma } from '@repo/database'
 export async function createTestTouringPhoto(params: {
   userId: string
   touringId: string
-  orderIndex?: number
+  takenAt?: Date
 }): Promise<string> {
-  const photo = await prisma.tUserMyBikePhoto.create({
+  const photo = await prisma.tUserPhoto.create({
     data: {
       userId: params.userId,
       photoUrl: 'https://storage.example.com/test.jpg',
-      storagePath: `users/${params.userId}/photos/test-${Date.now()}.jpg`,
-      takenAt: new Date(),
-      touringPhoto: {
-        create: {
-          touringId: params.touringId,
-          orderIndex: params.orderIndex ?? 0,
-        },
+      storagePath: `users/${params.userId}/photos/test-${Date.now()}-${Math.random()}.jpg`,
+      takenAt: params.takenAt ?? new Date(),
+      touringLinks: {
+        create: { touringId: params.touringId },
       },
     },
   })
@@ -31,19 +28,16 @@ export async function createTestTouringPhoto(params: {
 export async function createTestSpotPhoto(params: {
   userId: string
   spotId: string
-  orderIndex?: number
+  takenAt?: Date
 }): Promise<string> {
-  const photo = await prisma.tUserMyBikePhoto.create({
+  const photo = await prisma.tUserPhoto.create({
     data: {
       userId: params.userId,
       photoUrl: 'https://storage.example.com/test.jpg',
-      storagePath: `users/${params.userId}/photos/test-${Date.now()}.jpg`,
-      takenAt: new Date(),
-      spotPhoto: {
-        create: {
-          spotId: params.spotId,
-          orderIndex: params.orderIndex ?? 0,
-        },
+      storagePath: `users/${params.userId}/photos/test-${Date.now()}-${Math.random()}.jpg`,
+      takenAt: params.takenAt ?? new Date(),
+      spotLinks: {
+        create: { spotId: params.spotId },
       },
     },
   })

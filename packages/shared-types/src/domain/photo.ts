@@ -1,3 +1,4 @@
+import { MyUserBikeId } from './bike'
 import { SpotId } from './spot'
 import { TouringId } from './touring'
 import { UserId } from './user'
@@ -5,12 +6,11 @@ import { UserId } from './user'
 export type PhotoId = string & { readonly __brand: unique symbol }
 export const createPhotoId = (id: string): PhotoId => id as PhotoId
 
-export type TouringPhotoId = string & { readonly __brand: unique symbol }
-export const createTouringPhotoId = (id: string): TouringPhotoId =>
-  id as TouringPhotoId
-
-export type SpotPhotoId = string & { readonly __brand: unique symbol }
-export const createSpotPhotoId = (id: string): SpotPhotoId => id as SpotPhotoId
+/** 写真がどのエンティティに紐づいているか。1枚の写真が複数の紐づけを持つ場合もある */
+export type PhotoAttachment =
+  | { type: 'TOURING'; touringId: TouringId }
+  | { type: 'SPOT'; spotId: SpotId }
+  | { type: 'BIKE'; myUserBikeId: MyUserBikeId }
 
 export type Photo = {
   photoId: PhotoId
@@ -19,16 +19,5 @@ export type Photo = {
   storagePath: string
   memo: string | null
   takenAt: Date
-}
-
-export type TouringPhoto = Photo & {
-  touringPhotoId: TouringPhotoId
-  touringId: TouringId
-  orderIndex: number
-}
-
-export type SpotPhoto = Photo & {
-  spotPhotoId: SpotPhotoId
-  spotId: SpotId
-  orderIndex: number
+  attachments: PhotoAttachment[]
 }

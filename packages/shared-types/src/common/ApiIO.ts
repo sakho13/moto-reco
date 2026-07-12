@@ -249,16 +249,27 @@ export type ApiResponsePhotoDetail = {
   storagePath: string
   memo: string | null
   takenAt: string
-  orderIndex: number
 }
 
 export type ApiResponseTouringPhotoList = ApiResponsePhotoDetail[]
 export type ApiResponseSpotPhotoList = ApiResponsePhotoDetail[]
+export type ApiResponseBikePhotoList = ApiResponsePhotoDetail[]
 
 export type ApiResponsePhotoUploadUrl = {
   signedUploadUrl: string
   photoPath: string
 }[]
+
+/** マイフォト（ユーザーの全写真を横断した一元ギャラリー）の1件 */
+export type ApiResponseUserPhotoDetail = ApiResponsePhotoDetail & {
+  attachments: (
+    | { type: 'TOURING'; touringId: string }
+    | { type: 'SPOT'; spotId: string }
+    | { type: 'BIKE'; myUserBikeId: string }
+  )[]
+}
+
+export type ApiResponseUserPhotoList = ApiResponseUserPhotoDetail[]
 
 export type ApiResponseBikeHistoryItem =
   | {

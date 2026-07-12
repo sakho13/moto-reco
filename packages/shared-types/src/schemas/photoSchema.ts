@@ -89,3 +89,27 @@ export const PhotoRegisterForSpotRequestSchema = z.object({
 export type PhotoRegisterForSpotRequest = z.infer<
   typeof PhotoRegisterForSpotRequestSchema
 >
+
+/**
+ * バイク本体への写真追加リクエストのバリデーションスキーマ
+ * （ツーリング/スポットを介さない日常の1枚）
+ */
+export const PhotoRegisterForBikeRequestSchema = z.object({
+  photos: z
+    .array(PhotoItemSchema)
+    .max(PHOTO_MAX_COUNT, `写真は${PHOTO_MAX_COUNT}枚以内で指定してください`),
+})
+
+export type PhotoRegisterForBikeRequest = z.infer<
+  typeof PhotoRegisterForBikeRequestSchema
+>
+
+/**
+ * 写真一覧取得（マイフォト・ギャラリー）のページネーションクエリスキーマ
+ */
+export const PhotoListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).optional(),
+  'per-size': z.coerce.number().int().min(1).max(100).optional(),
+})
+
+export type PhotoListQuery = z.infer<typeof PhotoListQuerySchema>
