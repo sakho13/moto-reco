@@ -74,7 +74,8 @@ photo.post(
   honoAuthMiddleware,
   zodValidateJson(PhotoUploadUrlRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
+    const userId = userEntity.id
     const { files } = c.req.valid('json') as PhotoUploadUrlRequest
 
     const storage = getFirebaseAdminStorage()
@@ -116,7 +117,8 @@ photo.post(
   honoAuthMiddleware,
   zodValidateJson(PhotoRegisterForTouringRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
+    const userId = userEntity.id
     const touringId = c.req.param('touringId')
     const { photos } = c.req.valid('json') as PhotoRegisterForTouringRequest
 
@@ -186,7 +188,8 @@ photo.post(
  * ツーリングの写真一覧を取得する
  */
 photo.get('/touring/:touringId', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
+  const userId = userEntity.id
   const touringId = c.req.param('touringId')
 
   const touring = await prisma.tUserMyBikeTouring.findFirst({
@@ -222,7 +225,8 @@ photo.post(
   honoAuthMiddleware,
   zodValidateJson(PhotoRegisterForSpotRequestSchema),
   async (c) => {
-    const { userId } = c.var.user!
+    const { userEntity } = c.var.user!
+    const userId = userEntity.id
     const spotId = c.req.param('spotId')
     const { photos } = c.req.valid('json') as PhotoRegisterForSpotRequest
 
@@ -292,7 +296,8 @@ photo.post(
  * スポットの写真一覧を取得する
  */
 photo.get('/spot/:spotId', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
+  const userId = userEntity.id
   const spotId = c.req.param('spotId')
 
   const spot = await prisma.tUserMyBikeTouringSpot.findFirst({
@@ -326,7 +331,8 @@ photo.get('/spot/:spotId', honoAuthMiddleware, async (c) => {
  * 写真を削除する（Storage上のファイルも削除）
  */
 photo.delete('/:photoId', honoAuthMiddleware, async (c) => {
-  const { userId } = c.var.user!
+  const { userEntity } = c.var.user!
+  const userId = userEntity.id
   const photoId = c.req.param('photoId')
 
   const photoRepo = new PrismaPhotoRepository(prisma)
