@@ -85,6 +85,18 @@ DOCKER_LOCALSTACK_SERVICES_END=4559   # LocalStack Services Range End
 **注意**: ポートを変更した場合、`DATABASE_URL`や`FIREBASE_AUTH_EMULATOR_HOST`なども更新してください。  
 **注意**: Worktree A では `DOCKER_FIREBASE_AUTH_PORT=9199` と `DOCKER_FIREBASE_STORAGE_PORT`（デフォルト 9199）が競合します。Worktree A で Storage を使う場合は `DOCKER_FIREBASE_STORAGE_PORT=9299` を明示的に設定してください。
 
+## 写真アップロード機能（署名付きURL）のローカル検証
+
+写真アップロード機能は署名付きURL（V4署名）を使用しており、Firebase Storage Emulator経由でも**構文的に有効なRSA秘密鍵**が`FIREBASE_PRIVATE_KEY`に設定されている必要があります（署名計算自体はローカルで完結し、実際のGCPとは通信しないため、ダミー鍵で問題ありません）。
+
+`.env.local`にはこの用途のダミー鍵が設定済みです。万一プレースホルダ（`YOUR_PRIVATE_KEY`）に戻ってしまった場合は、以下で再生成してください。
+
+```bash
+openssl genrsa 2048 | awk '{printf "%s\\n", $0}'
+```
+
+出力を`FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"`の形式で`.env.local`に設定してください。
+
 ## LAN端末（iPhone等）からのFirebase Emulator接続
 
 iPhoneなど同一LAN上のデバイスでアプリを確認する際、Firebase Auth Emulatorへの接続に追加設定が必要です。
