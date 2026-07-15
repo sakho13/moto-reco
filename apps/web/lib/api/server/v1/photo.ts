@@ -40,6 +40,8 @@ const photo = new Hono<{ Variables: HonoVariables }>()
 const SIGNED_URL_EXPIRY_MS = 15 * 60 * 1000 // 15分
 // V4署名付きURLの有効期限はGCSの仕様上7日が上限
 const READ_SIGNED_URL_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000
+// Firebase Storage EmulatorのURL(署名付きURLでの書き込みに未対応のため専用エンドポイントを使う)
+const STORAGE_EMULATOR_BASE_URL = 'http://localhost:9199'
 
 const CONTENT_TYPE_TO_EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -87,6 +89,7 @@ photo.post(
     const storage = getFirebaseAdminStorage()
     const bucketName = getStorageBucketName()
     const bucket = storage.bucket(bucketName)
+    const useEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true'
 
     const urls: ApiResponsePhotoUploadUrl = []
 
@@ -94,8 +97,20 @@ photo.post(
       const ext = CONTENT_TYPE_TO_EXT[fileItem.contentType] ?? 'jpg'
       const filename = `${crypto.randomUUID()}.${ext}`
       const photoPath = `users/${userId}/photos/${filename}`
-      const file = bucket.file(photoPath)
 
+      if (useEmulator) {
+        // Storage Emulatorは署名付きURLでの書き込み(PUT)に未対応のため、
+        // エミュレータのJSON API(単純アップロード)へ直接POSTさせる
+        const uploadUrl = `${STORAGE_EMULATOR_BASE_URL}/upload/storage/v1/b/${encodeURIComponent(bucketName)}/o?uploadType=media&name=${encodeURIComponent(photoPath)}`
+        urls.push({
+          signedUploadUrl: uploadUrl,
+          photoPath,
+          uploadMethod: 'POST',
+        })
+        continue
+      }
+
+      const file = bucket.file(photoPath)
       const [signedUrl] = await file.getSignedUrl({
         version: 'v4',
         action: 'write',
@@ -103,7 +118,7 @@ photo.post(
         contentType: fileItem.contentType,
       })
 
-      urls.push({ signedUploadUrl: signedUrl, photoPath })
+      urls.push({ signedUploadUrl: signedUrl, photoPath, uploadMethod: 'PUT' })
     }
 
     return c.json<SuccessResponse<ApiResponsePhotoUploadUrl>>({

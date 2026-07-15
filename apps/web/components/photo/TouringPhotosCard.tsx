@@ -76,17 +76,17 @@ export function TouringPhotosCard({
         (await urlRes.json()) as SuccessResponse<ApiResponsePhotoUploadUrl>
       const signedUrls = urlJson.data
 
-      // 2. 各ファイルを署名付きURLにPUT
+      // 2. 各ファイルをアップロード先URLへ送信
       const photoPaths: { photoPath: string; takenAt: string }[] = []
       for (let i = 0; i < files.length; i++) {
         const f = files[i]!
-        const { signedUploadUrl, photoPath } = signedUrls[i]!
-        const putRes = await fetch(signedUploadUrl, {
-          method: 'PUT',
+        const { signedUploadUrl, photoPath, uploadMethod } = signedUrls[i]!
+        const uploadRes = await fetch(signedUploadUrl, {
+          method: uploadMethod,
           body: f,
           headers: { 'Content-Type': f.type },
         })
-        if (!putRes.ok) throw new Error('ファイルアップロード失敗')
+        if (!uploadRes.ok) throw new Error('ファイルアップロード失敗')
         photoPaths.push({ photoPath, takenAt: new Date().toISOString() })
       }
 

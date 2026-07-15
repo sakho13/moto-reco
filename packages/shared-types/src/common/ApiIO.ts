@@ -258,6 +258,8 @@ export type ApiResponseBikePhotoList = ApiResponsePhotoDetail[]
 export type ApiResponsePhotoUploadUrl = {
   signedUploadUrl: string
   photoPath: string
+  /** アップロード先へのHTTPメソッド。Storage Emulatorは署名付きURLでの書き込みに対応していないため、開発環境ではPOSTになる */
+  uploadMethod: 'PUT' | 'POST'
 }[]
 
 /** マイフォト（ユーザーの全写真を横断した一元ギャラリー）の1件 */
