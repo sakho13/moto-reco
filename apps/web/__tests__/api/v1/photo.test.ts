@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { prisma } from '@repo/database'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { getTestBikeId, createTestUserBike } from '../../helpers/bikeHelper'
+import { createAdminUser } from '../../helpers/notificationHelper'
 import {
   createTestTouringPhoto,
   createTestSpotPhoto,
@@ -36,6 +37,7 @@ describe('Photo API Endpoints', () => {
 
     beforeEach(async () => {
       const user = await createTestUser()
+      await createAdminUser(user.token, user.userId)
       token = user.token
     })
 
@@ -133,6 +135,7 @@ describe('Photo API Endpoints', () => {
 
     beforeEach(async () => {
       const user = await createTestUser()
+      await createAdminUser(user.token, user.userId)
       token = user.token
       userId = user.userId
       const bikeId = await getTestBikeId()
@@ -311,6 +314,7 @@ describe('Photo API Endpoints', () => {
 
     beforeEach(async () => {
       const user = await createTestUser()
+      await createAdminUser(user.token, user.userId)
       token = user.token
       userId = user.userId
       const bikeId = await getTestBikeId()
@@ -408,6 +412,7 @@ describe('Photo API Endpoints', () => {
 
     beforeEach(async () => {
       const user = await createTestUser()
+      await createAdminUser(user.token, user.userId)
       token = user.token
       userId = user.userId
       const bikeId = await getTestBikeId()
@@ -569,6 +574,7 @@ describe('Photo API Endpoints', () => {
 
     beforeEach(async () => {
       const user = await createTestUser()
+      await createAdminUser(user.token, user.userId)
       token = user.token
       userId = user.userId
       const bikeId = await getTestBikeId()
@@ -674,6 +680,7 @@ describe('Photo API Endpoints', () => {
 
     beforeEach(async () => {
       const user = await createTestUser()
+      await createAdminUser(user.token, user.userId)
       token = user.token
       userId = user.userId
       const bikeId = await getTestBikeId()
