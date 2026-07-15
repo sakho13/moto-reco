@@ -17,7 +17,7 @@ import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
 import { BikePhotosCard } from '@/components/photo/BikePhotosCard'
-import { authenticatedFetch } from '@/lib/api/client'
+import { apiGet, authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -26,6 +26,12 @@ function BikeDetailPage() {
   const router = useRouter()
   const id = params.id as string
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+  const { data: profile } = useSWR('/api/v1/user/profile', async (url) => {
+    const response = await apiGet(url)
+    return response.data
+  })
+  const isAdmin = profile?.role === 'ADMIN'
 
   const { data, error, isLoading } = useSWR(
     id ? `/api/v1/user-bike/bike/${id}` : null,
@@ -139,7 +145,7 @@ function BikeDetailPage() {
           </div>
         </BaseCard>
 
-        <BikePhotosCard myUserBikeId={id} />
+        {isAdmin && <BikePhotosCard myUserBikeId={id} />}
       </div>
 
       {/* 履歴管理セクション */}

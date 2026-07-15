@@ -49,6 +49,12 @@ function TouringDetailPage() {
   const [localSpots, setLocalSpots] = useState<ApiResponseSpotDetail[]>([])
   const [isBreakLoading, setIsBreakLoading] = useState(false)
 
+  const { data: profile } = useSWR('/api/v1/user/profile', async (url) => {
+    const response = await apiGet(url)
+    return response.data
+  })
+  const isAdmin = profile?.role === 'ADMIN'
+
   const {
     data: touring,
     error: touringError,
@@ -556,23 +562,27 @@ function TouringDetailPage() {
           </div>
           <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
             {spotsCard}
+            {isAdmin && (
+              <TouringPhotosCard
+                touringId={touringId}
+                cardClassName={styles.card}
+                mutedTextClassName={styles.mutedText}
+                editButtonClassName={styles.editButton}
+              />
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="w-full max-w-md space-y-4">
+          {spotsCard}
+          {isAdmin && (
             <TouringPhotosCard
               touringId={touringId}
               cardClassName={styles.card}
               mutedTextClassName={styles.mutedText}
               editButtonClassName={styles.editButton}
             />
-          </div>
-        </div>
-      ) : (
-        <div className="w-full max-w-md space-y-4">
-          {spotsCard}
-          <TouringPhotosCard
-            touringId={touringId}
-            cardClassName={styles.card}
-            mutedTextClassName={styles.mutedText}
-            editButtonClassName={styles.editButton}
-          />
+          )}
         </div>
       )}
 

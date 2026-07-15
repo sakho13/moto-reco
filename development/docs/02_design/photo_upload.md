@@ -57,7 +57,11 @@
 
 ## APIエンドポイント
 
-すべて `honoAuthMiddleware` による認証必須。
+すべて `honoAuthMiddleware` + `honoAdminMiddleware` による認証必須・**ADMINロール限定**。
+
+> Storage設定を含め新規追加の機能のため、現時点では一般ユーザーには公開しない。
+> クライアント側もプロフィール画面の「マイフォト」リンク・バイク詳細/ツーリング詳細の写真カードを
+> `role === 'ADMIN'` の場合のみ表示する。
 
 | メソッド | パス | 説明 |
 |---|---|---|
@@ -234,3 +238,15 @@ POST /api/v1/photo/touring/:touringId
 | 1リクエストあたり最大枚数 | 10枚 |
 | 署名付きアップロードURLの有効期限 | 15分 |
 | 署名付き読取URLの有効期限 | 1年 |
+
+---
+
+## 本番環境の Firebase Storage セキュリティルール
+
+`development/firebase_emulator/storage.rules` はローカル開発用エミュレータのみに適用される設定であり、
+本番プロジェクトのFirebase Storageには自動反映されない（このリポジトリのCI/CDに `firebase deploy` 相当のstorage rulesデプロイ手順は存在しない）。
+
+そのため、本番公開前に以下をFirebase Consoleまたは別途の手順で本番プロジェクトに設定する必要がある。
+
+- 認証済みユーザーのみ読み書き可能なルール（最低限エミュレータと同等のもの）
+- 可能であれば `users/{userId}/photos/{fileName}` のパスに対し、リクエストユーザー自身の領域のみ書き込みを許可するルールへ強化する
