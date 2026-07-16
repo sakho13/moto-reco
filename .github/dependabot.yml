@@ -9,7 +9,7 @@ updates:
     schedule:
       interval: daily
       timezone: 'Asia/Tokyo'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 5
     commit-message:
       prefix: '⬆️'
     target-branch: 'develop'
