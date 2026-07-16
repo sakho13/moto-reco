@@ -29,9 +29,20 @@ import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAdminMiddleware } from '../middlewares/honoAdmin'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'
+import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaPhotoRepository } from '../repositories/PrismaPhotoRepository'
+import { PrismaSpotRepository } from '../repositories/PrismaSpotRepository'
+import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
 import { PhotoService } from '../services/PhotoService'
 import { HonoVariables } from '../types/hono'
+
+const createPhotoService = (): PhotoService =>
+  new PhotoService(
+    new PrismaPhotoRepository(prisma),
+    new PrismaTouringRepository(prisma),
+    new PrismaSpotRepository(prisma),
+    new PrismaMyUserBikeRepository(prisma)
+  )
 
 const photo = new Hono<{ Variables: HonoVariables }>()
 
@@ -143,18 +154,6 @@ photo.post(
     const touringId = c.req.param('touringId')
     const { photos } = c.req.valid('json')
 
-    // 所有権検証: touringがこのユーザーのものか
-    const touring = await prisma.tUserMyBikeTouring.findFirst({
-      where: {
-        id: touringId,
-        userMyBike: { userId },
-      },
-    })
-
-    if (!touring) {
-      throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
-    }
-
     // photoPathが自分のパスに属するか検証
     for (const p of photos) {
       validatePhotoPath(p.photoPath, userId)
@@ -177,8 +176,7 @@ photo.post(
       })
     )
 
-    const photoRepo = new PrismaPhotoRepository(prisma)
-    const service = new PhotoService(photoRepo)
+    const service = createPhotoService()
 
     const created = await service.registerPhotosForTouring({
       userId: createUserId(userId),
@@ -215,21 +213,10 @@ photo.get(
     const userId = userEntity.id
     const touringId = c.req.param('touringId')
 
-    const touring = await prisma.tUserMyBikeTouring.findFirst({
-      where: {
-        id: touringId,
-        userMyBike: { userId },
-      },
-    })
-
-    if (!touring) {
-      throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
-    }
-
-    const photoRepo = new PrismaPhotoRepository(prisma)
-    const service = new PhotoService(photoRepo)
+    const service = createPhotoService()
     const photos = await service.getPhotosByTouringId(
-      createTouringId(touringId)
+      createTouringId(touringId),
+      createUserId(userId)
     )
 
     return c.json<SuccessResponse<ApiResponseTouringPhotoList>>({
@@ -241,33 +228,20 @@ photo.get(
 )
 
 /**
- * POST /api/v1/photo/spot/:spotId
+ * POST /api/v1/photo/touring/:touringId/spot/:spotId
  * スポットに写真を追加する
  */
 photo.post(
-  '/spot/:spotId',
+  '/touring/:touringId/spot/:spotId',
   honoAuthMiddleware,
   honoAdminMiddleware,
   zodValidateJson(PhotoRegisterForSpotRequestSchema),
   async (c) => {
     const { userEntity } = c.var.user!
     const userId = userEntity.id
+    const touringId = c.req.param('touringId')
     const spotId = c.req.param('spotId')
     const { photos } = c.req.valid('json')
-
-    // 所有権検証: spotがこのユーザーのものか
-    const spot = await prisma.tUserMyBikeTouringSpot.findFirst({
-      where: {
-        id: spotId,
-        touring: {
-          userMyBike: { userId },
-        },
-      },
-    })
-
-    if (!spot) {
-      throw new ApiV1Error('NOT_FOUND', '指定されたスポットが見つかりません')
-    }
 
     for (const p of photos) {
       validatePhotoPath(p.photoPath, userId)
@@ -289,11 +263,11 @@ photo.post(
       })
     )
 
-    const photoRepo = new PrismaPhotoRepository(prisma)
-    const service = new PhotoService(photoRepo)
+    const service = createPhotoService()
 
     const created = await service.registerPhotosForSpot({
       userId: createUserId(userId),
+      touringId: createTouringId(touringId),
       spotId: createSpotId(spotId),
       photos: photosWithUrls.map((p) => ({
         storagePath: p.photoPath,
@@ -315,34 +289,25 @@ photo.post(
 )
 
 /**
- * GET /api/v1/photo/spot/:spotId
+ * GET /api/v1/photo/touring/:touringId/spot/:spotId
  * スポットの写真一覧を取得する
  */
 photo.get(
-  '/spot/:spotId',
+  '/touring/:touringId/spot/:spotId',
   honoAuthMiddleware,
   honoAdminMiddleware,
   async (c) => {
     const { userEntity } = c.var.user!
     const userId = userEntity.id
+    const touringId = c.req.param('touringId')
     const spotId = c.req.param('spotId')
 
-    const spot = await prisma.tUserMyBikeTouringSpot.findFirst({
-      where: {
-        id: spotId,
-        touring: {
-          userMyBike: { userId },
-        },
-      },
-    })
-
-    if (!spot) {
-      throw new ApiV1Error('NOT_FOUND', '指定されたスポットが見つかりません')
-    }
-
-    const photoRepo = new PrismaPhotoRepository(prisma)
-    const service = new PhotoService(photoRepo)
-    const photos = await service.getPhotosBySpotId(createSpotId(spotId))
+    const service = createPhotoService()
+    const photos = await service.getPhotosBySpotId(
+      createSpotId(spotId),
+      createTouringId(touringId),
+      createUserId(userId)
+    )
 
     return c.json<SuccessResponse<ApiResponseSpotPhotoList>>({
       status: 'success',
@@ -367,15 +332,6 @@ photo.post(
     const myUserBikeId = c.req.param('myUserBikeId')
     const { photos } = c.req.valid('json')
 
-    // 所有権検証: バイクがこのユーザーのものか
-    const myBike = await prisma.tUserMyBike.findFirst({
-      where: { id: myUserBikeId, userId },
-    })
-
-    if (!myBike) {
-      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
-    }
-
     for (const p of photos) {
       validatePhotoPath(p.photoPath, userId)
     }
@@ -396,8 +352,7 @@ photo.post(
       })
     )
 
-    const photoRepo = new PrismaPhotoRepository(prisma)
-    const service = new PhotoService(photoRepo)
+    const service = createPhotoService()
 
     const created = await service.registerPhotosForBike({
       userId: createUserId(userId),
@@ -434,18 +389,10 @@ photo.get(
     const userId = userEntity.id
     const myUserBikeId = c.req.param('myUserBikeId')
 
-    const myBike = await prisma.tUserMyBike.findFirst({
-      where: { id: myUserBikeId, userId },
-    })
-
-    if (!myBike) {
-      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
-    }
-
-    const photoRepo = new PrismaPhotoRepository(prisma)
-    const service = new PhotoService(photoRepo)
+    const service = createPhotoService()
     const photos = await service.getPhotosByMyBikeId(
-      createMyUserBikeId(myUserBikeId)
+      createMyUserBikeId(myUserBikeId),
+      createUserId(userId)
     )
 
     return c.json<SuccessResponse<ApiResponseBikePhotoList>>({
@@ -479,8 +426,7 @@ photo.get('/', honoAuthMiddleware, honoAdminMiddleware, async (c) => {
   const page = queryResult.data.page ?? 1
   const pageSize = queryResult.data['per-size'] ?? 30
 
-  const photoRepo = new PrismaPhotoRepository(prisma)
-  const service = new PhotoService(photoRepo)
+  const service = createPhotoService()
   const photos = await service.getPhotosByUserId(createUserId(userId), {
     page,
     pageSize,
@@ -515,8 +461,7 @@ photo.delete(
     const userId = userEntity.id
     const photoId = c.req.param('photoId')
 
-    const photoRepo = new PrismaPhotoRepository(prisma)
-    const service = new PhotoService(photoRepo)
+    const service = createPhotoService()
 
     const storagePath = await service.deletePhoto({
       photoId: createPhotoId(photoId),

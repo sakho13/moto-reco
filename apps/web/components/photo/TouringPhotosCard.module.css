@@ -24,8 +24,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.55);
-  color: #fff;
+  background-color: color-mix(in srgb, var(--color-inkDark) 55%, transparent);
+  color: var(--color-background);
   font-size: 14px;
   line-height: 1;
   display: flex;

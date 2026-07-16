@@ -401,9 +401,9 @@ describe('Photo API Endpoints', () => {
   })
 
   // -----------------------------------------------------------------------
-  // POST /api/v1/photo/spot/:spotId
+  // POST /api/v1/photo/touring/:touringId/spot/:spotId
   // -----------------------------------------------------------------------
-  describe('POST /api/v1/photo/spot/:spotId', () => {
+  describe('POST /api/v1/photo/touring/:touringId/spot/:spotId', () => {
     let token: string
     let userId: string
     let myUserBikeId: string
@@ -431,34 +431,41 @@ describe('Photo API Endpoints', () => {
     })
 
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
-      await testAuthRequired(`/api/v1/photo/spot/${spotId}`, 'POST', {
-        photos: [
-          {
-            photoPath: `users/${userId}/photos/test.jpg`,
-            takenAt: '2024-06-01T11:00:00.000Z',
-          },
-        ],
-      })
+      await testAuthRequired(
+        `/api/v1/photo/touring/${touringId}/spot/${spotId}`,
+        'POST',
+        {
+          photos: [
+            {
+              photoPath: `users/${userId}/photos/test.jpg`,
+              takenAt: '2024-06-01T11:00:00.000Z',
+            },
+          ],
+        }
+      )
     })
 
     test('スポットに写真を登録するとDBにレコードが作成される', async () => {
       const photoPath = `users/${userId}/photos/spot-test.jpg`
 
-      const res = await app.request(`/api/v1/photo/spot/${spotId}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          photos: [
-            {
-              photoPath,
-              takenAt: '2024-06-01T11:00:00.000Z',
-            },
-          ],
-        }),
-      })
+      const res = await app.request(
+        `/api/v1/photo/touring/${touringId}/spot/${spotId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photos: [
+              {
+                photoPath,
+                takenAt: '2024-06-01T11:00:00.000Z',
+              },
+            ],
+          }),
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(201)
@@ -474,27 +481,82 @@ describe('Photo API Endpoints', () => {
       expect(dbPhoto).not.toBeNull()
     })
 
-    test('存在しないspotIdは404になる', async () => {
-      const res = await app.request('/api/v1/photo/spot/non-existent-id', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          photos: [
-            {
-              photoPath: `users/${userId}/photos/test.jpg`,
-              takenAt: '2024-06-01T11:00:00.000Z',
-            },
-          ],
-        }),
-      })
+    test('存在しないtouringIdは404になる', async () => {
+      const res = await app.request(
+        `/api/v1/photo/touring/non-existent-id/spot/${spotId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photos: [
+              {
+                photoPath: `users/${userId}/photos/test.jpg`,
+                takenAt: '2024-06-01T11:00:00.000Z',
+              },
+            ],
+          }),
+        }
+      )
 
       expect(res.status).toBe(404)
     })
 
-    test('他ユーザーのspotIdは404になる', async () => {
+    test('存在しないspotIdは404になる', async () => {
+      const res = await app.request(
+        `/api/v1/photo/touring/${touringId}/spot/non-existent-id`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photos: [
+              {
+                photoPath: `users/${userId}/photos/test.jpg`,
+                takenAt: '2024-06-01T11:00:00.000Z',
+              },
+            ],
+          }),
+        }
+      )
+
+      expect(res.status).toBe(404)
+    })
+
+    test('他のtouringIdに属するspotIdは404になる', async () => {
+      const otherTouringId = await createTestTouring(token, myUserBikeId, {
+        title: '別のテストツーリング',
+        startDate: '2024-06-02T09:00:00.000Z',
+        endDate: '2024-06-02T18:00:00.000Z',
+      })
+
+      const res = await app.request(
+        `/api/v1/photo/touring/${otherTouringId}/spot/${spotId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photos: [
+              {
+                photoPath: `users/${userId}/photos/test.jpg`,
+                takenAt: '2024-06-01T11:00:00.000Z',
+              },
+            ],
+          }),
+        }
+      )
+
+      expect(res.status).toBe(404)
+    })
+
+    test('他ユーザーのtouringId・spotIdは404になる', async () => {
       const otherUser = await createTestUser()
       const otherBikeId = await getTestBikeId()
       const otherBike = await createTestUserBike(otherUser.token, {
@@ -520,21 +582,24 @@ describe('Photo API Endpoints', () => {
         }
       )
 
-      const res = await app.request(`/api/v1/photo/spot/${otherSpotId}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          photos: [
-            {
-              photoPath: `users/${userId}/photos/test.jpg`,
-              takenAt: '2024-06-01T11:00:00.000Z',
-            },
-          ],
-        }),
-      })
+      const res = await app.request(
+        `/api/v1/photo/touring/${otherTouringId}/spot/${otherSpotId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photos: [
+              {
+                photoPath: `users/${userId}/photos/test.jpg`,
+                takenAt: '2024-06-01T11:00:00.000Z',
+              },
+            ],
+          }),
+        }
+      )
 
       expect(res.status).toBe(404)
     })
@@ -542,30 +607,33 @@ describe('Photo API Endpoints', () => {
     test('他ユーザーのphotoPathは400になる', async () => {
       const otherUser = await createTestUser()
 
-      const res = await app.request(`/api/v1/photo/spot/${spotId}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          photos: [
-            {
-              photoPath: `users/${otherUser.userId}/photos/test.jpg`,
-              takenAt: '2024-06-01T11:00:00.000Z',
-            },
-          ],
-        }),
-      })
+      const res = await app.request(
+        `/api/v1/photo/touring/${touringId}/spot/${spotId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photos: [
+              {
+                photoPath: `users/${otherUser.userId}/photos/test.jpg`,
+                takenAt: '2024-06-01T11:00:00.000Z',
+              },
+            ],
+          }),
+        }
+      )
 
       expect(res.status).toBe(400)
     })
   })
 
   // -----------------------------------------------------------------------
-  // GET /api/v1/photo/spot/:spotId
+  // GET /api/v1/photo/touring/:touringId/spot/:spotId
   // -----------------------------------------------------------------------
-  describe('GET /api/v1/photo/spot/:spotId', () => {
+  describe('GET /api/v1/photo/touring/:touringId/spot/:spotId', () => {
     let token: string
     let userId: string
     let myUserBikeId: string
@@ -593,14 +661,20 @@ describe('Photo API Endpoints', () => {
     })
 
     test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
-      await testAuthRequired(`/api/v1/photo/spot/${spotId}`, 'GET')
+      await testAuthRequired(
+        `/api/v1/photo/touring/${touringId}/spot/${spotId}`,
+        'GET'
+      )
     })
 
     test('写真がない場合は空配列を返す', async () => {
-      const res = await app.request(`/api/v1/photo/spot/${spotId}`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await app.request(
+        `/api/v1/photo/touring/${touringId}/spot/${spotId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(200)
@@ -620,10 +694,13 @@ describe('Photo API Endpoints', () => {
         takenAt: new Date('2024-06-01T12:00:00.000Z'),
       })
 
-      const res = await app.request(`/api/v1/photo/spot/${spotId}`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await app.request(
+        `/api/v1/photo/touring/${touringId}/spot/${spotId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(200)
@@ -634,7 +711,25 @@ describe('Photo API Endpoints', () => {
       ])
     })
 
-    test('他ユーザーのspotIdは404になる', async () => {
+    test('他のtouringIdに属するspotIdは404になる', async () => {
+      const otherTouringId = await createTestTouring(token, myUserBikeId, {
+        title: '別のテストツーリング',
+        startDate: '2024-06-02T09:00:00.000Z',
+        endDate: '2024-06-02T18:00:00.000Z',
+      })
+
+      const res = await app.request(
+        `/api/v1/photo/touring/${otherTouringId}/spot/${spotId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      expect(res.status).toBe(404)
+    })
+
+    test('他ユーザーのtouringId・spotIdは404になる', async () => {
       const otherUser = await createTestUser()
       const otherBikeId = await getTestBikeId()
       const otherBike = await createTestUserBike(otherUser.token, {
@@ -660,10 +755,13 @@ describe('Photo API Endpoints', () => {
         }
       )
 
-      const res = await app.request(`/api/v1/photo/spot/${otherSpotId}`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await app.request(
+        `/api/v1/photo/touring/${otherTouringId}/spot/${otherSpotId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
 
       expect(res.status).toBe(404)
     })
