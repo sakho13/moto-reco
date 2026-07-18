@@ -11,6 +11,7 @@ import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
+import { TouringPhotosCard } from '@/components/photo/TouringPhotosCard'
 import { SpotAddModal } from '@/components/spot/SpotAddModal'
 import { SpotEditModal } from '@/components/spot/SpotEditModal'
 import { RouteTimeline } from '@/components/touring/RouteTimeline'
@@ -47,6 +48,12 @@ function TouringDetailPage() {
   )
   const [localSpots, setLocalSpots] = useState<ApiResponseSpotDetail[]>([])
   const [isBreakLoading, setIsBreakLoading] = useState(false)
+
+  const { data: profile } = useSWR('/api/v1/user/profile', async (url) => {
+    const response = await apiGet(url)
+    return response.data
+  })
+  const isAdmin = profile?.role === 'ADMIN'
 
   const {
     data: touring,
@@ -553,10 +560,30 @@ function TouringDetailPage() {
               </div>
             </div>
           </div>
-          <div className="md:w-80 lg:w-96 shrink-0 space-y-4">{spotsCard}</div>
+          <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
+            {spotsCard}
+            {isAdmin && (
+              <TouringPhotosCard
+                touringId={touringId}
+                cardClassName={styles.card}
+                mutedTextClassName={styles.mutedText}
+                editButtonClassName={styles.editButton}
+              />
+            )}
+          </div>
         </div>
       ) : (
-        <div className="w-full max-w-md space-y-4">{spotsCard}</div>
+        <div className="w-full max-w-md space-y-4">
+          {spotsCard}
+          {isAdmin && (
+            <TouringPhotosCard
+              touringId={touringId}
+              cardClassName={styles.card}
+              mutedTextClassName={styles.mutedText}
+              editButtonClassName={styles.editButton}
+            />
+          )}
+        </div>
       )}
 
       {isEditModalOpen && (

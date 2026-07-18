@@ -121,6 +121,7 @@ describe('TouringService', () => {
       updateTouring: vi.fn().mockImplementation(async (t) => t),
       findTourings: vi.fn(),
       findTouringById: vi.fn(),
+      findTouringByIdForUser: vi.fn(),
       findOngoingTouring: vi.fn().mockResolvedValue(null),
       updateTouringStatus: vi.fn(),
       deleteTouring: vi.fn(),

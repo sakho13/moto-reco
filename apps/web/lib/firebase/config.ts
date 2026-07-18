@@ -1,5 +1,10 @@
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth'
+import {
+  getStorage,
+  connectStorageEmulator,
+  type FirebaseStorage,
+} from 'firebase/storage'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,6 +17,7 @@ const firebaseConfig = {
 
 let firebaseApp: FirebaseApp
 let firebaseAuth: Auth
+let firebaseStorage: FirebaseStorage
 
 /**
  * Firebase アプリケーションの初期化
@@ -21,6 +27,24 @@ export const getFirebaseApp = (): FirebaseApp => {
     firebaseApp = initializeApp(firebaseConfig)
   }
   return firebaseApp
+}
+
+/**
+ * Firebase Storage インスタンスの取得
+ */
+export const getFirebaseStorage = (): FirebaseStorage => {
+  if (!firebaseStorage) {
+    const app = getFirebaseApp()
+    firebaseStorage = getStorage(app)
+
+    if (
+      process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true' &&
+      typeof window !== 'undefined'
+    ) {
+      connectStorageEmulator(firebaseStorage, 'localhost', 9199)
+    }
+  }
+  return firebaseStorage
 }
 
 /**

@@ -64,6 +64,7 @@ pnpm storybook
 DATABASE_PORT=5432                    # PostgreSQL
 DOCKER_FIREBASE_UI_PORT=4000          # Firebase Emulator UI
 DOCKER_FIREBASE_AUTH_PORT=9099        # Firebase Auth Emulator
+DOCKER_FIREBASE_STORAGE_PORT=9199     # Firebase Storage Emulator
 DOCKER_LOCALSTACK_PORT=4566           # LocalStack Gateway
 DOCKER_LOCALSTACK_SERVICES_START=4510 # LocalStack Services Range Start
 DOCKER_LOCALSTACK_SERVICES_END=4559   # LocalStack Services Range End
@@ -76,11 +77,25 @@ DOCKER_LOCALSTACK_SERVICES_END=4559   # LocalStack Services Range End
 | DATABASE_PORT                    | 5432           | 5433       | 5434       |
 | DOCKER_FIREBASE_UI_PORT          | 4000           | 4100       | 4200       |
 | DOCKER_FIREBASE_AUTH_PORT        | 9099           | 9199       | 9299       |
+| DOCKER_FIREBASE_STORAGE_PORT     | 9199           | 9299       | 9399       |
 | DOCKER_LOCALSTACK_PORT           | 4566           | 4666       | 4766       |
 | DOCKER_LOCALSTACK_SERVICES_START | 4510           | 4610       | 4710       |
 | DOCKER_LOCALSTACK_SERVICES_END   | 4559           | 4659       | 4759       |
 
-**注意**: ポートを変更した場合、`DATABASE_URL`や`FIREBASE_AUTH_EMULATOR_HOST`なども更新してください。
+**注意**: ポートを変更した場合、`DATABASE_URL`や`FIREBASE_AUTH_EMULATOR_HOST`なども更新してください。  
+**注意**: Worktree A では `DOCKER_FIREBASE_AUTH_PORT=9199` と `DOCKER_FIREBASE_STORAGE_PORT`（デフォルト 9199）が競合します。Worktree A で Storage を使う場合は `DOCKER_FIREBASE_STORAGE_PORT=9299` を明示的に設定してください。
+
+## 写真アップロード機能（署名付きURL）のローカル検証
+
+写真アップロード機能は署名付きURL（V4署名）を使用しており、Firebase Storage Emulator経由でも**構文的に有効なRSA秘密鍵**が`FIREBASE_PRIVATE_KEY`に設定されている必要があります（署名計算自体はローカルで完結し、実際のGCPとは通信しないため、ダミー鍵で問題ありません）。
+
+`.env.local`にはこの用途のダミー鍵が設定済みです。万一プレースホルダ（`YOUR_PRIVATE_KEY`）に戻ってしまった場合は、以下で再生成してください。
+
+```bash
+openssl genrsa 2048 | awk '{printf "%s\\n", $0}'
+```
+
+出力を`FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"`の形式で`.env.local`に設定してください。
 
 ## LAN端末（iPhone等）からのFirebase Emulator接続
 

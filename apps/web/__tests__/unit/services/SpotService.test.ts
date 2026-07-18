@@ -78,6 +78,7 @@ describe('SpotService', () => {
       updateTouring: vi.fn(),
       findTourings: vi.fn(),
       findTouringById: vi.fn().mockResolvedValue(buildTouring()),
+      findTouringByIdForUser: vi.fn(),
       findOngoingTouring: vi.fn(),
       updateTouringStatus: vi.fn(),
       deleteTouring: vi.fn(),
