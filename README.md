@@ -8,27 +8,30 @@
 
 ### Apps
 
-- **`web`**: Next.js フロントエンドアプリケーション (http://localhost:3000)
-- **`api`**: Hono バックエンドAPI
-- **`docs`**: Next.js ドキュメントサイト / OpenAPI仕様書 (http://localhost:3001)
+- **`web`**: Next.js メインアプリケーション (http://localhost:3000)
+  - LP（ランディングページ）、アプリ本体、API（Hono）、APIドキュメント（Scalar）、MCPサーバーを1つのアプリに統合
+- **`admin`**: 管理画面 (http://localhost:3001)
+  - Next.js + [Refine](https://refine.dev/) + Ant Design で構築
+- **`e2e`**: Playwright E2Eテスト（アプリではないが `apps/` 配下で管理）
+
+#### ポート番号
+
+- Webアプリ: `WEB_PORT` (デフォルト: 3000)
+- 管理画面: `ADMIN_PORT` (デフォルト: 3001)
 
 ### 開発ツール
 
 - **Storybook**: UIコンポーネント開発環境 (http://localhost:6006)
   - `packages/ui`のコンポーネントをStorybookで開発・確認できます
 
-#### ポート番号
-
-- Webアプリ: `WEB_PORT` (デフォルト: 3000)
-- ドキュメントサイト: `DOCS_PORT` (デフォルト: 3001)
-- APIサーバー: `API_PORT` (デフォルト: 3002)
-
 ### Packages
 
 - **`@repo/ui`**: React コンポーネントライブラリ
+- **`@repo/theme`**: テーマ管理パッケージ（カラー・フォントサイズ・曲線・シャドウ等のデザイントークン）
 - **`@repo/database`**: Prisma データベースパッケージ
 - **`@repo/shared-types`**: 共有型定義
 - **`@repo/shared-utils`**: 共有ユーティリティ
+- **`@repo/email`**: メール送信パッケージ（Resend連携、ウェルカムメール・通知メール等のテンプレート）
 - **`@repo/firebase-auth-server`**: Firebase 認証サーバー
 - **`@repo/eslint-config`**: ESLint 設定
 - **`@repo/typescript-config`**: TypeScript 設定
@@ -37,24 +40,31 @@
 
 ### インフラ (GCP)
 
-- GCP Cloud Run を使用したコンテナデプロイを実施している
+- GCP Cloud Run（サービス: `motoreco-web`）を使用したコンテナデプロイを実施している
+- データベースは Cloud SQL (PostgreSQL 17)、シークレットは Secret Manager で管理
+- GitHub Actions から Workload Identity Federation（OIDC）でデプロイ
+- リージョンは `asia-northeast1`（東京）
+- 2026年3月にAWSからGCPへ移管済み（詳細は [`development/docs/02_design/infrastructure.md`](development/docs/02_design/infrastructure.md) を参照）
 
 ## 技術スタック
 
 - **フロントエンド**: Next.js, React
-- **バックエンド**: Hono
+- **管理画面**: Next.js, Refine, Ant Design
+- **バックエンド**: Hono（Next.js の API Routes 上にマウント）
 - **データベース**: PostgreSQL, Prisma
 - **認証**: Firebase Authentication
+- **ストレージ**: Firebase Storage（署名付きURLによる写真アップロード）
+- **メール送信**: Resend
 - **モノレポ**: Turborepo
 - **パッケージマネージャー**: pnpm
-- **開発ツール**: TypeScript, ESLint, Prettier, Vitest
+- **開発ツール**: TypeScript, ESLint, Prettier, Vitest, Playwright
 
 ## 開発環境のセットアップ
 
 ### 必要要件
 
 - Node.js >= 18
-- pnpm 9.15.4
+- pnpm 11.5.0
 - Docker & Docker Compose
 
 ### 環境変数の設定
@@ -82,14 +92,15 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your-measurement-id
 
 # Webアプリケーション
-NEXT_PUBLIC_WEB_URL=http://localhost:3000  # docsサイトからのログインリンク先（本番環境では本番URLを設定）
+NEXT_PUBLIC_WEB_URL=http://localhost:3000  # Webアプリの公開URL（本番環境では本番URLを設定）
 NEXT_PUBLIC_APP_VERSION=dev  # アプリのバージョン表示用
 
-# AWS (LocalStack)
-AWS_REGION=ap-northeast-1
-AWS_ACCESS_KEY_ID=test
-AWS_SECRET_ACCESS_KEY=test
+# メール (Resend)
+RESEND_API_KEY=your-resend-api-key
+RESEND_FROM_EMAIL="MotoReco <no-reply@example.com>"
 ```
+
+写真アップロード機能をローカルで検証する場合の注意点は [`development/README.md`](development/README.md) の「写真アップロード機能（署名付きURL）のローカル検証」セクションを参照してください。
 
 ### インフラの起動
 
@@ -102,8 +113,7 @@ docker compose up -d
 起動されるサービス：
 
 - **PostgreSQL**: ポート 5432
-- **Firebase Emulator**: ポート 4000 (UI), 9099 (Auth)
-- **LocalStack**: ポート 4566 (S3, SSM, SecretsManager等)
+- **Firebase Emulator**: ポート 4000 (UI), 9099 (Auth), 9199 (Storage)
 
 ### データベースのセットアップ
 
@@ -135,8 +145,8 @@ pnpm dev
 # Webアプリのみ
 pnpm dev:web
 
-# APIサーバーのみ
-pnpm dev:api
+# 管理画面のみ
+pnpm --filter admin dev
 ```
 
 ### Storybookの起動
@@ -157,6 +167,9 @@ pnpm turbo db:generate
 
 # スキーマをデータベースに適用
 pnpm turbo db:deploy
+
+# シードデータの投入
+pnpm turbo db:seed
 
 # Prisma Studio の起動 (packages/database 内で実行)
 cd packages/database
@@ -182,8 +195,8 @@ pnpm test
 # テストをウォッチモードで実行
 pnpm turbo test:watch
 
-# カバレッジレポート付きでテスト
-pnpm turbo test:coverage
+# カバレッジレポート付きでテスト（apps/web）
+pnpm --filter web test -- --coverage
 ```
 
 ### E2E テスト (Playwright)
@@ -228,6 +241,8 @@ pnpm check-types
 - `development/docs/03_development/`: 開発ルール
   - `coding.md`: コーディング規約
   - `git.md`: Git運用ルール
+
+また、`docs/er-diagram.md` にDBスキーマのER図（Mermaid）があります。
 
 ## Turborepo について
 
