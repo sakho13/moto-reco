@@ -83,7 +83,7 @@ function PhotosPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-md">
         <div className="flex items-center justify-center min-h-100">
           <p className="text-lg">読み込み中...</p>
         </div>
@@ -93,7 +93,7 @@ function PhotosPage() {
 
   if (error) {
     return (
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-md">
         <div className={styles.errorCard}>
           <h1 className={styles.errorTitle}>エラー</h1>
           <p className={styles.errorMessage}>
@@ -107,8 +107,8 @@ function PhotosPage() {
   }
 
   return (
-    <div className="w-full max-w-2xl">
-      <BaseCard title="マイフォト" data-testid="photos-section">
+    <div className="w-full max-w-md">
+      <BaseCard title="フォト" data-testid="photos-section">
         {photos.length > 0 ? (
           <div className={styles.photoGrid}>
             {photos.map((photo) => (

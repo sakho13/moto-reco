@@ -69,7 +69,7 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
   }
 
   if (segments[1] === 'photos') {
-    items.push({ label: 'マイフォト' })
+    items.push({ label: 'フォト' })
     return items
   }
 
