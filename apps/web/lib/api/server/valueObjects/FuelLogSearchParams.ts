@@ -11,6 +11,7 @@ export class FuelLogSearchParams {
   private readonly _period?: FuelLogPeriod
   private readonly _startDate?: Date
   private readonly _endDate?: Date
+  private readonly _keyword?: string
 
   constructor(params: {
     page?: number
@@ -20,6 +21,7 @@ export class FuelLogSearchParams {
     period?: FuelLogPeriod
     startDate?: Date
     endDate?: Date
+    keyword?: string
   }) {
     this._page = params.page && params.page > 0 ? params.page : 1
     this._pageSize = this.validatePageSize(params.pageSize)
@@ -28,6 +30,7 @@ export class FuelLogSearchParams {
     this._period = params.period
     this._startDate = params.startDate
     this._endDate = params.endDate
+    this._keyword = params.keyword
   }
 
   private validatePageSize(size?: number): number {
@@ -70,6 +73,10 @@ export class FuelLogSearchParams {
 
   get endDate(): Date | undefined {
     return this._endDate
+  }
+
+  get keyword(): string | undefined {
+    return this._keyword
   }
 
   get isDateRangeMode(): boolean {

@@ -18,6 +18,7 @@ import {
 import { PrismaMaintenanceLogRepository } from '../../repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeRepository'
 import { MaintenanceLogService } from '../../services/MaintenanceLogService'
+import { MaintenanceLogSearchParams } from '../../valueObjects/MaintenanceLogSearchParams'
 
 const userBikeMaintenanceLogs = new Hono().basePath(
   '/bike/:myUserBikeId/maintenance-logs'
@@ -39,12 +40,17 @@ userBikeMaintenanceLogs.get(
       myUserBikeRepo
     )
 
+    const searchParams = new MaintenanceLogSearchParams({
+      page: query.page,
+      pageSize: query['per-size'],
+      sortOrder: query['sort-order'],
+      keyword: query.keyword,
+    })
+
     const logs = await service.getMaintenanceLogs({
       myUserBikeId: createMyUserBikeId(myUserBikeId),
       userId: userEntity.id,
-      page: query.page ?? 1,
-      perSize: query['per-size'] ?? 20,
-      sortOrder: query['sort-order'] ?? 'desc',
+      searchParams,
     })
 
     return c.json<SuccessResponse<ApiResponseMaintenanceLogList>>(

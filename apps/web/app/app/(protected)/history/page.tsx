@@ -106,10 +106,12 @@ function HistoryPage() {
                           bikeId: item.bikeId,
                           fuelLogId: item.fuelLog.fuelLogId,
                         })
-                    : () =>
-                        router.push(
-                          `/app/my-bike/${item.bikeId}/tourings/${item.touring.touringId}`
-                        )
+                    : item.type === 'TOURING'
+                      ? () =>
+                          router.push(
+                            `/app/my-bike/${item.bikeId}/tourings/${item.touring.touringId}`
+                          )
+                      : undefined
                 }
               />
             ))}

@@ -3,6 +3,7 @@ import {
   TouringId,
   TouringPlanId,
   TouringStatus,
+  UserId,
 } from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
@@ -17,6 +18,14 @@ export interface ITouringRepository {
   findTouringById(
     touringId: TouringId,
     myUserBikeId: MyUserBikeId
+  ): Promise<TouringEntity | null>
+  /**
+   * myUserBikeIdを介さず、ツーリングがユーザー本人の所有バイクに紐づくかを直接検証する。
+   * 写真機能などmyUserBikeIdをURLに含まないtouringId起点のエンドポイント向け。
+   */
+  findTouringByIdForUser(
+    touringId: TouringId,
+    userId: UserId
   ): Promise<TouringEntity | null>
   findOngoingTouring(myUserBikeId: MyUserBikeId): Promise<TouringEntity | null>
   updateTouringStatus(

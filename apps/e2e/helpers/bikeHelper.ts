@@ -1,4 +1,4 @@
-const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000'
+import { BASE_URL } from './env'
 
 /**
  * API 経由でテスト用バイクを登録し、myUserBikeId を返す

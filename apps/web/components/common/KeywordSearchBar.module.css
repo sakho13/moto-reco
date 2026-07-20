@@ -1,0 +1,10 @@
+.form {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+.inputWrap {
+  flex: 1;
+}

@@ -1,8 +1,8 @@
 import { expect, test as base, type Page } from '@playwright/test'
 import { createTestUserAndGetToken } from '../helpers/authHelper'
 import { createRandomEmail } from '../helpers/createRandomEmail'
+import { BASE_URL } from '../helpers/env'
 
-const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000'
 const TEST_PASSWORD = 'password123'
 
 type AuthenticatedFixtures = {

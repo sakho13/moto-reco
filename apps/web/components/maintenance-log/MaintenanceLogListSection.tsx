@@ -5,6 +5,7 @@ import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { MaintenanceLogItem } from './MaintenanceLogItem'
 import styles from './MaintenanceLogListSection.module.css'
+import { KeywordSearchBar } from '@/components/common/KeywordSearchBar'
 
 type MaintenanceLogListSectionProps = {
   logs: ApiResponseMaintenanceLogDetail[]
@@ -13,6 +14,8 @@ type MaintenanceLogListSectionProps = {
   onLoadMore?: () => void
   canLoadMore?: boolean
   isLoadingMore?: boolean
+  onSearch: (keyword: string) => void
+  isSearchActive: boolean
 }
 
 export const MaintenanceLogListSection = ({
@@ -22,15 +25,28 @@ export const MaintenanceLogListSection = ({
   onLoadMore,
   canLoadMore = false,
   isLoadingMore = false,
+  onSearch,
+  isSearchActive,
 }: MaintenanceLogListSectionProps) => {
   return (
     <BaseCard title="メンテナンス履歴">
+      <KeywordSearchBar
+        placeholder="メモで検索"
+        onSearch={onSearch}
+        testId="maintenance-log-search"
+      />
       {logs.length === 0 ? (
         <div className={styles.emptyState}>
-          <p>メンテナンス履歴がまだありません</p>
-          <Button onClick={onRegister} variant="primary">
-            最初のメンテナンスを登録
-          </Button>
+          {isSearchActive ? (
+            <p>該当するメンテナンス履歴が見つかりませんでした</p>
+          ) : (
+            <>
+              <p>メンテナンス履歴がまだありません</p>
+              <Button onClick={onRegister} variant="primary">
+                最初のメンテナンスを登録
+              </Button>
+            </>
+          )}
         </div>
       ) : (
         <div className={styles.listContainer}>

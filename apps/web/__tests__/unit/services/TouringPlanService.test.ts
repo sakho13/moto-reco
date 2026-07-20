@@ -108,6 +108,7 @@ describe('TouringPlanService', () => {
       updateTouring: vi.fn(),
       findTourings: vi.fn(),
       findTouringById: vi.fn(),
+      findTouringByIdForUser: vi.fn(),
       findOngoingTouring: vi.fn(),
       updateTouringStatus: vi.fn(),
       deleteTouring: vi.fn(),

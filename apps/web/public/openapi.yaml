@@ -14,6 +14,8 @@ tags:
     description: バイク情報関連のAPI
   - name: user-bikes
     description: ユーザー所有バイク関連のAPI
+  - name: photos
+    description: 写真関連のAPI
 
 paths:
   /api/v1/user/profile:
@@ -1581,6 +1583,430 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/photo/upload-url:
+    post:
+      summary: 写真アップロード用の署名付きURL発行
+      description: Firebase Storageへの署名付きアップロードURLを発行する。実際の写真登録は別途各登録エンドポイントで行う。
+      tags:
+        - photos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoUploadUrlRequest'
+      responses:
+        '200':
+          description: 署名付きアップロードURL生成成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhotoUploadUrlItem'
+                  message:
+                    type: string
+                    example: 署名付きアップロードURL生成成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/photo/touring/{touring-id}:
+    post:
+      summary: ツーリングへの写真登録
+      tags:
+        - photos
+      parameters:
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoRegisterRequest'
+      responses:
+        '201':
+          description: ツーリング写真登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhotoDetail'
+                  message:
+                    type: string
+                    example: ツーリング写真登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    get:
+      summary: ツーリングの写真一覧取得
+      tags:
+        - photos
+      parameters:
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+      responses:
+        '200':
+          description: ツーリング写真一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhotoDetail'
+                  message:
+                    type: string
+                    example: ツーリング写真一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/photo/touring/{touring-id}/spot/{spot-id}:
+    post:
+      summary: スポットへの写真登録
+      tags:
+        - photos
+      parameters:
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+        - in: path
+          name: spot-id
+          required: true
+          schema:
+            type: string
+          description: スポットID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoRegisterRequest'
+      responses:
+        '201':
+          description: スポット写真登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhotoDetail'
+                  message:
+                    type: string
+                    example: スポット写真登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    get:
+      summary: スポットの写真一覧取得
+      tags:
+        - photos
+      parameters:
+        - in: path
+          name: touring-id
+          required: true
+          schema:
+            type: string
+          description: ツーリングID
+        - in: path
+          name: spot-id
+          required: true
+          schema:
+            type: string
+          description: スポットID
+      responses:
+        '200':
+          description: スポット写真一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhotoDetail'
+                  message:
+                    type: string
+                    example: スポット写真一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/photo/bike/{my-user-bike-id}:
+    post:
+      summary: バイク本体への写真登録
+      description: ツーリング/スポットを介さない日常の1枚を登録する。
+      tags:
+        - photos
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoRegisterRequest'
+      responses:
+        '201':
+          description: バイク写真登録成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhotoDetail'
+                  message:
+                    type: string
+                    example: バイク写真登録成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    get:
+      summary: バイク本体に直接紐づく写真一覧取得
+      tags:
+        - photos
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+      responses:
+        '200':
+          description: バイク写真一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PhotoDetail'
+                  message:
+                    type: string
+                    example: バイク写真一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/photo:
+    get:
+      summary: マイフォト一覧取得（ユーザーの全写真横断・ページネーション対応）
+      description: ツーリング/スポット/バイクいずれの紐づけかはattachmentsで返す。
+      tags:
+        - photos
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          description: ページ番号（1始まり、デフォルト1）
+        - in: query
+          name: per-size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: 1ページあたりの件数（デフォルト30）
+      responses:
+        '200':
+          description: マイフォト一覧取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserPhotoDetail'
+                  message:
+                    type: string
+                    example: マイフォト一覧取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/v1/photo/{photo-id}:
+    delete:
+      summary: 写真削除
+      description: Storage上のファイルも合わせて削除する。
+      tags:
+        - photos
+      parameters:
+        - in: path
+          name: photo-id
+          required: true
+          schema:
+            type: string
+          description: 写真ID
+      responses:
+        '200':
+          description: 写真削除成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: 写真削除成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/health:
     get:
       summary: ヘルスチェック
@@ -2440,6 +2866,111 @@ components:
             type: string
           minItems: 1
           description: 並び替え後のスポットIDの順序
+
+    PhotoDetail:
+      type: object
+      properties:
+        photoId:
+          type: string
+        photoUrl:
+          type: string
+          description: 読み取り用の署名付きURL（有効期限あり）
+        storagePath:
+          type: string
+          description: Firebase Storage上のパス
+        memo:
+          type: string
+          nullable: true
+        takenAt:
+          type: string
+          format: date-time
+          description: 撮影日時（ISO 8601形式）
+
+    UserPhotoDetail:
+      allOf:
+        - $ref: '#/components/schemas/PhotoDetail'
+        - type: object
+          properties:
+            attachments:
+              type: array
+              description: ツーリング/スポット/バイクいずれの紐づけかを表す一覧
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [TOURING, SPOT, BIKE]
+                  touringId:
+                    type: string
+                  spotId:
+                    type: string
+                  myUserBikeId:
+                    type: string
+
+    PhotoUploadUrlRequest:
+      type: object
+      required:
+        - files
+      properties:
+        files:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            type: object
+            required:
+              - contentType
+              - fileName
+              - fileSize
+            properties:
+              contentType:
+                type: string
+                enum: [image/jpeg, image/png, image/webp]
+              fileName:
+                type: string
+              fileSize:
+                type: integer
+                minimum: 1
+
+    PhotoUploadUrlItem:
+      type: object
+      properties:
+        signedUploadUrl:
+          type: string
+          description: 書き込み用の署名付きURL（有効期限15分）
+        photoPath:
+          type: string
+          description: Firebase Storage上のアップロード先パス
+        uploadMethod:
+          type: string
+          enum: [PUT, POST]
+          description: アップロード先へのHTTPメソッド（Storage Emulatorではuploadタイプの制約によりPOSTになる）
+
+    PhotoRegisterRequest:
+      type: object
+      required:
+        - photos
+      properties:
+        photos:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            required:
+              - photoPath
+              - takenAt
+            properties:
+              photoPath:
+                type: string
+                description: upload-urlで発行したphotoPath（自分のユーザーパス配下のみ許可）
+              takenAt:
+                type: string
+                format: date-time
+                description: 撮影日時（ISO 8601形式）
+              memo:
+                type: string
+                nullable: true
+                maxLength: 500
 
     ErrorCode:
       type: string

@@ -45,6 +45,7 @@ userBikeFuelLogs.get(
       period: query.period,
       startDate: query.startDate,
       endDate: query.endDate,
+      keyword: query.keyword,
     })
 
     const fuelLogRepo = new PrismaFuelLogRepository(prisma)

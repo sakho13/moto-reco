@@ -9,6 +9,9 @@ type Props = {
 }
 
 export const HistoryItemCard = ({ item, onClick }: Props) => {
+  const badgeClass =
+    item.type === 'FUEL_LOG' ? styles.badgeFuel : styles.badgeTouring
+
   return (
     <div
       className={`${styles.historyItemCard} ${onClick ? styles.clickable : ''}`}
@@ -20,9 +23,7 @@ export const HistoryItemCard = ({ item, onClick }: Props) => {
       <div className={styles.content}>
         <div className={styles.header}>
           <div className={styles.badges}>
-            <span
-              className={`${styles.badge} ${item.type === 'FUEL_LOG' ? styles.badgeFuel : styles.badgeTouring}`}
-            >
+            <span className={`${styles.badge} ${badgeClass}`}>
               {item.type === 'FUEL_LOG' ? (
                 <>
                   <Fuel size={12} />

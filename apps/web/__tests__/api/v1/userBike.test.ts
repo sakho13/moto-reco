@@ -1925,6 +1925,142 @@ describe('UserBike API Endpoints', () => {
         }
       })
     })
+
+    describe('キーワード検索機能', () => {
+      let touringId: string
+
+      beforeEach(async () => {
+        touringId = await createTestTouring(token, myUserBikeId, {
+          title: '房総半島ツーリング',
+          startDate: '2024-06-05T00:00:00.000Z',
+          endDate: '2024-06-05T00:00:00.000Z',
+        })
+
+        await createTestFuelLog(token, myUserBikeId, {
+          refueledAt: '2024-06-01T10:00:00.000Z',
+          mileage: 3500,
+          amount: 10.0,
+          totalPrice: 1500,
+          memo: 'ENEOSで給油しました',
+        })
+        await createTestFuelLog(token, myUserBikeId, {
+          refueledAt: '2024-06-02T10:00:00.000Z',
+          mileage: 3600,
+          amount: 10.0,
+          totalPrice: 1500,
+          memo: '出光スタンドで給油',
+        })
+        await createTestFuelLog(token, myUserBikeId, {
+          refueledAt: '2024-06-06T10:00:00.000Z',
+          mileage: 3700,
+          amount: 10.0,
+          totalPrice: 1500,
+          touringId,
+        })
+      })
+
+      test('メモの部分一致で給油履歴を検索できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?keyword=${encodeURIComponent('ENEOS')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+        expect(json.data[0].memo).toBe('ENEOSで給油しました')
+      })
+
+      test('大文字小文字を区別せず検索できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?keyword=${encodeURIComponent('eneos')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+      })
+
+      test('前後の空白はトリムされて検索される', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?keyword=${encodeURIComponent('  ENEOS  ')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+      })
+
+      test('紐づくツーリングタイトルの部分一致でも検索できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?keyword=${encodeURIComponent('房総')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+        expect(json.data[0].touringId).toBe(touringId)
+      })
+
+      test('該当データがない場合は空配列を返す', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?keyword=${encodeURIComponent('存在しないキーワード')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data).toEqual([])
+      })
+
+      test('既存のソート指定と併用できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?keyword=${encodeURIComponent('給油')}&sort-order=asc`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(2)
+        expect(json.data[0].refueledAt).toBe('2024-06-01T10:00:00.000Z')
+        expect(json.data[1].refueledAt).toBe('2024-06-02T10:00:00.000Z')
+      })
+
+      test('空白のみのkeywordはバリデーションエラーとなる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs?keyword=${encodeURIComponent('   ')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(400)
+        expectValidationError(json)
+      })
+    })
   })
 
   describe('GET /api/v1/user-bike/bike/:myUserBikeId/fuel-insights', () => {
@@ -3073,6 +3209,92 @@ describe('UserBike API Endpoints', () => {
           touring.startDate
         )
         expect(new Date(touring.endDate).toISOString()).toBe(touring.endDate)
+      })
+    })
+
+    describe('キーワード検索機能', () => {
+      beforeEach(async () => {
+        await createTestTouring(token, myUserBikeId, {
+          title: 'Golden Week Ride',
+          startDate: '2024-05-01T00:00:00.000Z',
+          endDate: '2024-05-03T00:00:00.000Z',
+        })
+      })
+
+      test('タイトルの部分一致でツーリングを検索できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings?keyword=${encodeURIComponent('春')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(2)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const titles = json.data.map((t: any) => t.title)
+        expect(titles).toEqual(
+          expect.arrayContaining(['早春ツーリング', '春ツーリング'])
+        )
+      })
+
+      test('大文字小文字を区別せず検索できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings?keyword=${encodeURIComponent('golden')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+        expect(json.data[0].title).toBe('Golden Week Ride')
+      })
+
+      test('前後の空白はトリムされて検索される', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings?keyword=${encodeURIComponent('  早春  ')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+      })
+
+      test('該当データがない場合は空配列を返す', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings?keyword=${encodeURIComponent('存在しないキーワード')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data).toEqual([])
+      })
+
+      test('既存のstatusフィルタと併用できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/tourings?keyword=${encodeURIComponent('ツーリング')}&status=COMPLETED`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(3)
       })
     })
   })

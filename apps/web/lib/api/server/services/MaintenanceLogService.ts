@@ -10,13 +10,18 @@ import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
+import { MaintenanceLogSearchParams } from '../valueObjects/MaintenanceLogSearchParams'
 
 type GetMaintenanceLogsParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
-  page: number
-  perSize: number
-  sortOrder: 'asc' | 'desc'
+  searchParams: MaintenanceLogSearchParams
+}
+
+type GetAllMaintenanceLogsParams = {
+  myUserBikeId: MyUserBikeId
+  userId: UserId
+  sortOrder?: 'asc' | 'desc'
 }
 
 type RegisterMaintenanceLogParams = {
@@ -58,12 +63,35 @@ export class MaintenanceLogService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    return this.maintenanceLogRepository.findMaintenanceLogs({
-      myUserBikeId: params.myUserBikeId,
-      page: params.page,
-      perSize: params.perSize,
-      sortOrder: params.sortOrder,
-    })
+    return this.maintenanceLogRepository.findMaintenanceLogs(
+      params.myUserBikeId,
+      params.searchParams
+    )
+  }
+
+  /**
+   * ページングで打ち切らず全件のメンテナンス履歴を取得する。
+   * @remarks
+   * MaintenanceLogSearchParams経由のfindMaintenanceLogsはpageSizeが
+   * 一覧APIの負荷対策として100件に丸められるため、全履歴を必要とする
+   * 集計処理では専用のfindAllMaintenanceLogs（単一クエリ）を使う。
+   */
+  public async getAllMaintenanceLogs(
+    params: GetAllMaintenanceLogsParams
+  ): Promise<MaintenanceLogEntity[]> {
+    const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
+      params.myUserBikeId,
+      params.userId
+    )
+
+    if (!myUserBike) {
+      throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
+    }
+
+    return this.maintenanceLogRepository.findAllMaintenanceLogs(
+      params.myUserBikeId,
+      params.sortOrder ?? 'desc'
+    )
   }
 
   public async registerMaintenanceLog(

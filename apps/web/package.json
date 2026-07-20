@@ -27,7 +27,7 @@
     "@repo/shared-types": "workspace:*",
     "@repo/shared-utils": "workspace:*",
     "@repo/ui": "workspace:*",
-    "@scalar/nextjs-api-reference": "0.11.9",
+    "@scalar/nextjs-api-reference": "0.11.10",
     "@vercel/mcp-adapter": "0.3.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",

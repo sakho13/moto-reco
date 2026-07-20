@@ -103,6 +103,13 @@ export const MaintenanceLogListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1).optional(),
   'per-size': z.coerce.number().int().min(1).max(100).default(20).optional(),
   'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
+  keyword: z
+    .string({
+      invalid_type_error: 'キーワードは文字列で指定してください',
+    })
+    .trim()
+    .min(1, 'キーワードは1文字以上で指定してください')
+    .optional(),
 })
 
 export type MaintenanceLogListQuery = z.infer<

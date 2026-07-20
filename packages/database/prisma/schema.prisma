@@ -43,6 +43,7 @@ model MUser {
   authProviders          MAuthProvider[]
   myBikes                TUserMyBike[]
   histories              TUserMyBikeHistory[]
+  photos                 TUserPhoto[]
   userQuit               TUserQuit?
   followers              TUserFollow[]             @relation("UserFollowing")
   following              TUserFollow[]             @relation("UserFollowers")
@@ -193,6 +194,7 @@ model TUserMyBike {
   tourings        TUserMyBikeTouring[]
   touringPlans    TUserMyBikeTouringPlan[]
   histories       TUserMyBikeHistory[]
+  directPhotos    TUserMyBikeDirectPhoto[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
@@ -279,6 +281,7 @@ model TUserMyBikeTouring {
   fuelLogs   TUserMyBikeFuelLog[]
   spots      TUserMyBikeTouringSpot[]
   history    TUserMyBikeHistory?
+  photos     TUserMyBikeTouringPhoto[]
 
   @@index([userMyBikeId, startDate])
   @@index([userMyBikeId, status])
@@ -378,9 +381,60 @@ model TUserMyBikeTouringSpot {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  touring TUserMyBikeTouring @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  touring TUserMyBikeTouring              @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  photos  TUserMyBikeTouringSpotPhoto[]
 
   @@index([touringId, sortOrder])
+}
+
+// 写真の実体。ユーザーにのみ紐づく(特定のMyBikeにスコープされない)
+model TUserPhoto {
+  id          String   @id @default(cuid(2))
+  userId      String   @map("user_id")
+  photoUrl    String   @map("photo_url")
+  storagePath String   @map("storage_path")
+  memo        String?  @map("memo")
+  takenAt     DateTime @map("taken_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user         MUser                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  touringLinks TUserMyBikeTouringPhoto[]
+  spotLinks    TUserMyBikeTouringSpotPhoto[]
+  bikeLinks    TUserMyBikeDirectPhoto[]
+}
+
+// ツーリングと写真の紐づけ(1枚の写真が複数ツーリングに紐づく可能性もブロックしない)
+model TUserMyBikeTouringPhoto {
+  touringId String @map("touring_id")
+  photoId   String @map("photo_id")
+
+  touring TUserMyBikeTouring @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  photo   TUserPhoto         @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@id([touringId, photoId])
+}
+
+// スポットと写真の紐づけ
+model TUserMyBikeTouringSpotPhoto {
+  spotId  String @map("spot_id")
+  photoId String @map("photo_id")
+
+  spot  TUserMyBikeTouringSpot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  photo TUserPhoto             @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@id([spotId, photoId])
+}
+
+// バイク本体と写真の紐づけ（ツーリング/スポットを介さない日常の1枚）
+model TUserMyBikeDirectPhoto {
+  userMyBikeId String @map("my_bike_id")
+  photoId      String @map("photo_id")
+
+  userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  photo      TUserPhoto  @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@id([userMyBikeId, photoId])
 }
 
 model TUserQuit {
