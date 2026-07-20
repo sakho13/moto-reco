@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import useSWR from 'swr'
 import type {
   ApiResponseTouringDetail,
@@ -17,6 +18,7 @@ function TouringsPage() {
   const params = useParams()
   const router = useRouter()
   const bikeId = params.id as string
+  const [keyword, setKeyword] = useState('')
 
   const {
     data: tourings,
@@ -24,7 +26,9 @@ function TouringsPage() {
     isLoading,
   } = useSWR(
     bikeId
-      ? `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
+      ? `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc${
+          keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''
+        }`
       : null,
     async (url: string) => {
       const response = await authenticatedFetch(url, { method: 'GET' })
@@ -39,7 +43,8 @@ function TouringsPage() {
         ApiResponseTouringDetail[]
       >
       return json.data
-    }
+    },
+    { keepPreviousData: true }
   )
 
   // 表示順: STARTED → COMPLETED (開始日降順)
@@ -60,7 +65,7 @@ function TouringsPage() {
     router.push(`/app/my-bike/${bikeId}/tourings/register?mode=history`)
   }
 
-  if (isLoading) {
+  if (isLoading && !tourings) {
     return (
       <div className="w-full max-w-2xl">
         <div className="flex items-center justify-center min-h-100">
@@ -125,6 +130,8 @@ function TouringsPage() {
           tourings={sortedTourings}
           onDetail={handleDetail}
           onRegister={handleRegisterHistory}
+          onSearch={setKeyword}
+          isSearchActive={keyword.length > 0}
         />
       </div>
     </>

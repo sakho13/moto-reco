@@ -167,6 +167,23 @@ export class PrismaFuelLogRepository
               refueledAt: dateRangeCondition,
             }
           : {}),
+        ...(searchParams.keyword
+          ? {
+              OR: [
+                {
+                  memo: { contains: searchParams.keyword, mode: 'insensitive' },
+                },
+                {
+                  touring: {
+                    title: {
+                      contains: searchParams.keyword,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              ],
+            }
+          : {}),
       },
       select: {
         id: true,

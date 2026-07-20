@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createTestUserBike } from '../../helpers/bikeHelper'
@@ -125,6 +126,170 @@ describe('Maintenance Log API Endpoints', () => {
       expect(json.message).toBe('メンテナンス履歴登録成功')
       expect(json.data.maintenanceLogId).toBeDefined()
       expect(json.data.items).toHaveLength(2)
+    })
+  })
+
+  describe('GET /api/v1/user-bike/bike/:myUserBikeId/maintenance-logs', () => {
+    beforeEach(async () => {
+      await createTestMaintenanceLog(token, myUserBikeId, {
+        performedAt: '2024-01-01T10:00:00.000Z',
+        mileage: 10500,
+        memo: 'エンジンオイル交換',
+        items: [{ maintenanceType: 'ENGINE_OIL', value: 1 }],
+      })
+      await createTestMaintenanceLog(token, myUserBikeId, {
+        performedAt: '2024-02-01T10:00:00.000Z',
+        mileage: 11000,
+        memo: 'チェーン注油',
+        items: [{ maintenanceType: 'DRIVE_CHAIN', value: 1 }],
+      })
+      await createTestMaintenanceLog(token, myUserBikeId, {
+        performedAt: '2024-03-01T10:00:00.000Z',
+        mileage: 11500,
+        items: [{ maintenanceType: 'FRONT_TIRE', value: 1 }],
+      })
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(
+        `/api/v1/user-bike/bike/${myUserBikeId}/maintenance-logs`,
+        'GET'
+      )
+    })
+
+    test('存在しないバイクIDの場合は404となる', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${randomUUID()}/maintenance-logs`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('メンテナンス履歴一覧を取得できる（デフォルトパラメータ）', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/maintenance-logs`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.message).toBe('メンテナンス履歴一覧取得成功')
+      expect(Array.isArray(json.data)).toBe(true)
+      expect(json.data.length).toBe(3)
+      expect(json.data[0].performedAt).toBe('2024-03-01T10:00:00.000Z')
+      expect(json.data[2].performedAt).toBe('2024-01-01T10:00:00.000Z')
+    })
+
+    test('メンテナンス履歴が0件の場合は空配列を返す', async () => {
+      const bike = await createTestUserBike(token, {
+        displacement: 125,
+        nickname: 'メンテナンス履歴なしバイク',
+        totalMileage: 100,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${bike.myUserBikeId}/maintenance-logs`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toEqual([])
+    })
+
+    describe('キーワード検索機能', () => {
+      test('メモの部分一致でメンテナンス履歴を検索できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/maintenance-logs?keyword=${encodeURIComponent('オイル')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+        expect(json.data[0].memo).toBe('エンジンオイル交換')
+      })
+
+      test('大文字小文字を区別せず検索できる', async () => {
+        await createTestMaintenanceLog(token, myUserBikeId, {
+          performedAt: '2024-04-01T10:00:00.000Z',
+          mileage: 12000,
+          memo: 'REAR SHOCK点検',
+          items: [{ maintenanceType: 'LIGHT', value: null }],
+        })
+
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/maintenance-logs?keyword=${encodeURIComponent('rear shock')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+        expect(json.data[0].memo).toBe('REAR SHOCK点検')
+      })
+
+      test('前後の空白はトリムされて検索される', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/maintenance-logs?keyword=${encodeURIComponent('  オイル  ')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+      })
+
+      test('該当データがない場合は空配列を返す', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/maintenance-logs?keyword=${encodeURIComponent('存在しないキーワード')}`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data).toEqual([])
+      })
+
+      test('既存のページネーション・ソートと併用できる', async () => {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/maintenance-logs?keyword=${encodeURIComponent('注油')}&sort-order=asc&page=1&per-size=10`,
+          {
+            method: 'GET',
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+
+        const json = await res.json()
+        expect(res.status).toBe(200)
+        expect(json.data.length).toBe(1)
+        expect(json.data[0].memo).toBe('チェーン注油')
+      })
     })
   })
 

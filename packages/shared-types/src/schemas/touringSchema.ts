@@ -290,6 +290,13 @@ export const TouringListQuerySchema = z.object({
   'sort-by': z.enum(['start-date', 'end-date']).optional(),
   'sort-order': z.enum(['asc', 'desc']).default('desc').optional(),
   status: z.enum(['STARTED', 'COMPLETED']).optional(),
+  keyword: z
+    .string({
+      invalid_type_error: 'キーワードは文字列で指定してください',
+    })
+    .trim()
+    .min(1, 'キーワードは1文字以上で指定してください')
+    .optional(),
 })
 
 export type TouringListQuery = z.infer<typeof TouringListQuerySchema>

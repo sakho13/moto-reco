@@ -1,4 +1,4 @@
-const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000'
+import { BASE_URL } from './env'
 
 type TouringPlanLocation = {
   latitude: number
