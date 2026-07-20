@@ -14,6 +14,10 @@ export interface IMaintenanceLogRepository {
     myUserBikeId: MyUserBikeId,
     searchParams: MaintenanceLogSearchParams
   ): Promise<MaintenanceLogEntity[]>
+  findAllMaintenanceLogs(
+    myUserBikeId: MyUserBikeId,
+    sortOrder: 'asc' | 'desc'
+  ): Promise<MaintenanceLogEntity[]>
   updateMaintenanceLog(
     maintenanceLog: MaintenanceLogEntity
   ): Promise<MaintenanceLogEntity>

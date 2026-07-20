@@ -142,6 +142,31 @@ export class PrismaMaintenanceLogRepository
     return logs.map(mapToEntity)
   }
 
+  async findAllMaintenanceLogs(
+    myUserBikeId: MyUserBikeId,
+    sortOrder: 'asc' | 'desc'
+  ): Promise<MaintenanceLogEntity[]> {
+    const logs = await this.connection.tUserMyBikeMaintenance.findMany({
+      where: { userMyBikeId: myUserBikeId },
+      orderBy: { performedAt: sortOrder },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        performedAt: true,
+        mileage: true,
+        memo: true,
+        maintenanceItems: {
+          select: {
+            type: true,
+            value: true,
+          },
+        },
+      },
+    })
+
+    return logs.map(mapToEntity)
+  }
+
   async countMaintenanceLogs(myUserBikeId: MyUserBikeId): Promise<number> {
     return this.connection.tUserMyBikeMaintenance.count({
       where: { userMyBikeId: myUserBikeId },
