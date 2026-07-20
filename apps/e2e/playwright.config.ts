@@ -7,6 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env.local') })
 
+// helpers/env.ts を import すると dotenv.config() より先に評価されてしまうため、
+// ここだけは BASE_URL を独自に算出する
 const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000'
 const isCI = !!process.env['CI']
 
