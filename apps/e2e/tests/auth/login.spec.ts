@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
 import { createTestUserAndGetToken } from '../../helpers/authHelper'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
+import { BASE_URL } from '../../helpers/env'
 import { HomePage } from '../../pages/homePage'
 import { LoginPage } from '../../pages/loginPage'
 
 const TEST_PASSWORD = 'password123'
-const BASE_URL = process.env['PLAYWRIGHT_BASE_URL'] ?? 'http://localhost:3000'
 
 /**
  * ログインフロー E2E テスト

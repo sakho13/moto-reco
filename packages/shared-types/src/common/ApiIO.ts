@@ -1,3 +1,4 @@
+import type { GoodsCategory } from '../domain/goods'
 import type { MaintenanceLogItem } from '../domain/maintenanceLog'
 import type {
   TouringPlanRouteType,
@@ -137,6 +138,27 @@ export type ApiResponseBikeSearch = {
   }[]
 }
 
+export type ApiResponseGoodsManufacturer = {
+  manufacturers: {
+    goodsManufacturerId: string
+    name: string
+    nameEn: string | null
+  }[]
+}
+
+export type ApiResponseGoodsModelSearch = {
+  models: {
+    goodsModelId: string
+    goodsManufacturerId: string
+    manufacturerName: string
+    modelNumber: string
+    name: string
+    category: GoodsCategory
+    amazonAsin: string | null
+    rakutenItemId: string | null
+  }[]
+}
+
 export type ApiResponseUserBikeRegister = {
   userBikeId: string
   myUserBikeId: string
@@ -220,6 +242,36 @@ export type ApiResponseMaintenanceLogDetail = {
 }
 
 export type ApiResponseMaintenanceLogList = ApiResponseMaintenanceLogDetail[]
+
+export type ApiResponsePhotoDetail = {
+  photoId: string
+  photoUrl: string
+  storagePath: string
+  memo: string | null
+  takenAt: string
+}
+
+export type ApiResponseTouringPhotoList = ApiResponsePhotoDetail[]
+export type ApiResponseSpotPhotoList = ApiResponsePhotoDetail[]
+export type ApiResponseBikePhotoList = ApiResponsePhotoDetail[]
+
+export type ApiResponsePhotoUploadUrl = {
+  signedUploadUrl: string
+  photoPath: string
+  /** アップロード先へのHTTPメソッド。Storage Emulatorは署名付きURLでの書き込みに対応していないため、開発環境ではPOSTになる */
+  uploadMethod: 'PUT' | 'POST'
+}[]
+
+/** マイフォト（ユーザーの全写真を横断した一元ギャラリー）の1件 */
+export type ApiResponseUserPhotoDetail = ApiResponsePhotoDetail & {
+  attachments: (
+    | { type: 'TOURING'; touringId: string }
+    | { type: 'SPOT'; spotId: string }
+    | { type: 'BIKE'; myUserBikeId: string }
+  )[]
+}
+
+export type ApiResponseUserPhotoList = ApiResponseUserPhotoDetail[]
 
 export type ApiResponseBikeHistoryItem =
   | {

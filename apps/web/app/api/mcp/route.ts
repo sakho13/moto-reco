@@ -322,19 +322,11 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
               )?.bikeMaintenanceTypes ?? [])
             : []
 
-          const logCount = await maintenanceLogRepo.countMaintenanceLogs(
-            createMyUserBikeId(myUserBikeId)
-          )
-          const logs =
-            logCount > 0
-              ? await maintenanceLogService.getMaintenanceLogs({
-                  myUserBikeId: createMyUserBikeId(myUserBikeId),
-                  userId,
-                  page: 1,
-                  perSize: logCount,
-                  sortOrder: 'desc',
-                })
-              : []
+          const logs = await maintenanceLogService.getAllMaintenanceLogs({
+            myUserBikeId: createMyUserBikeId(myUserBikeId),
+            userId,
+            sortOrder: 'desc',
+          })
 
           const latestByType: Record<
             string,

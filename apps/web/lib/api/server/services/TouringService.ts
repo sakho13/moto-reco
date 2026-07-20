@@ -19,7 +19,6 @@ import { ISpotRepository } from '../interfaces/ISpotRepository'
 import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
-import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { computeTouringPlanSpotTimes } from './computeTouringPlanSpotTimes'
 
@@ -484,22 +483,16 @@ export class TouringService {
 
       // 給油履歴の紐づけ更新
       if (params.fuelLogIds !== undefined) {
-        // 既存の紐づけを解除
-        const searchParams = new FuelLogSearchParams({
-          startDate: updatedTouring.startDate,
-          endDate: updatedTouring.endDate,
-        })
-        const existingFuelLogs = await this.fuelLogRepository.findFuelLogs(
-          params.myUserBikeId,
-          searchParams
-        )
+        // 既存の紐づけを解除（給油日時がツーリング期間外でも解除対象に含めるため、
+        // 期間で絞り込まずtouringIdで直接紐づいている給油履歴を全件取得する）
+        const existingFuelLogs =
+          await this.fuelLogRepository.findFuelLogsByTouringId(
+            params.touringId,
+            params.myUserBikeId
+          )
 
         const existingFuelLogIdsToUnlink = existingFuelLogs
-          .filter(
-            (log) =>
-              log.touringId === params.touringId &&
-              !params.fuelLogIds!.includes(log.id)
-          )
+          .filter((log) => !params.fuelLogIds!.includes(log.id))
           .map((log) => log.id)
 
         if (existingFuelLogIdsToUnlink.length > 0) {

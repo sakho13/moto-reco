@@ -39,10 +39,11 @@ export default function BikeListPage() {
   })
 
   const { selectProps: manufacturerSelectProps } = useSelect({
-    resource: 'manufacturers',
+    resource: 'companies',
     optionLabel: 'name',
     optionValue: 'id',
     pagination: { pageSize: 200 },
+    filters: [{ field: 'category', operator: 'eq', value: 'BIKE_MAKER' }],
   })
 
   return (
@@ -74,7 +75,7 @@ export default function BikeListPage() {
               | undefined
             if (!manufacturer) return '—'
             return (
-              <Link href={`/manufacturers/${manufacturer.id}`}>
+              <Link href={`/companies/${manufacturer.id}`}>
                 {manufacturer.name}
               </Link>
             )

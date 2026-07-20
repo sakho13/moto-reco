@@ -32,6 +32,7 @@ function MaintenanceLogsPage() {
   const [editingLog, setEditingLog] =
     useState<ApiResponseMaintenanceLogDetail | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('date')
+  const [keyword, setKeyword] = useState('')
 
   const fetchLogs = async (url: string) => {
     const response = await authenticatedFetch(url, { method: 'GET' })
@@ -52,9 +53,12 @@ function MaintenanceLogsPage() {
     useSWRInfinite(
       (pageIndex: number) =>
         bikeId
-          ? `/api/v1/user-bike/bike/${bikeId}/maintenance-logs?sort-order=desc&per-size=${PER_SIZE}&page=${pageIndex + 1}`
+          ? `/api/v1/user-bike/bike/${bikeId}/maintenance-logs?sort-order=desc&per-size=${PER_SIZE}&page=${pageIndex + 1}${
+              keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''
+            }`
           : null,
-      fetchLogs
+      fetchLogs,
+      { keepPreviousData: true }
     )
 
   // 項目別ビュー用: 全件取得（最大100件）
@@ -77,7 +81,7 @@ function MaintenanceLogsPage() {
     }
   )
 
-  if (isLoading) {
+  if (isLoading && !data) {
     return (
       <div className="w-full max-w-2xl">
         <div className="flex items-center justify-center min-h-100">
@@ -125,6 +129,11 @@ function MaintenanceLogsPage() {
   }
 
   const handleSuccess = () => {
+    setSize(1)
+  }
+
+  const handleSearch = (value: string) => {
+    setKeyword(value)
     setSize(1)
   }
 
@@ -191,6 +200,8 @@ function MaintenanceLogsPage() {
             onLoadMore={() => setSize(size + 1)}
             canLoadMore={canLoadMore}
             isLoadingMore={isLoadingMore}
+            onSearch={handleSearch}
+            isSearchActive={keyword.length > 0}
           />
         ) : isAllLoading ? (
           <div className="flex items-center justify-center p-8">

@@ -1,3 +1,4 @@
+import { Prisma } from '@repo/database'
 import {
   createMyUserBikeId,
   createTouringId,
@@ -6,6 +7,7 @@ import {
   TouringId,
   TouringPlanId,
   TouringStatus,
+  UserId,
 } from '@repo/shared-types'
 import { TouringEntity } from '../entities/TouringEntity'
 import { ITouringRepository } from '../interfaces/ITouringRepository'
@@ -125,13 +127,20 @@ export class PrismaTouringRepository
             { startDate: searchParams.sortOrder },
           ]
 
+    const where: Prisma.TUserMyBikeTouringWhereInput = {
+      userMyBikeId: myUserBikeId,
+    }
+
+    if (searchParams.status !== undefined) {
+      where.status = searchParams.status
+    }
+
+    if (searchParams.keyword) {
+      where.title = { contains: searchParams.keyword, mode: 'insensitive' }
+    }
+
     const tourings = await this.connection.tUserMyBikeTouring.findMany({
-      where: {
-        userMyBikeId: myUserBikeId,
-        ...(searchParams.status !== undefined
-          ? { status: searchParams.status }
-          : {}),
-      },
+      where,
       select: touringSelect,
       orderBy,
     })
@@ -147,6 +156,25 @@ export class PrismaTouringRepository
       where: {
         id: touringId,
         userMyBikeId: myUserBikeId,
+      },
+      select: touringSelect,
+    })
+
+    if (!touring) {
+      return null
+    }
+
+    return toTouringEntity(touring)
+  }
+
+  async findTouringByIdForUser(
+    touringId: TouringId,
+    userId: UserId
+  ): Promise<TouringEntity | null> {
+    const touring = await this.connection.tUserMyBikeTouring.findFirst({
+      where: {
+        id: touringId,
+        userMyBike: { userId },
       },
       select: touringSelect,
     })

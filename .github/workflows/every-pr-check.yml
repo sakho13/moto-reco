@@ -117,11 +117,11 @@ jobs:
         working-directory: ./development/firebase_emulator
         run: |
           npx firebase emulators:start \
-            --only auth \
+            --only auth,storage \
             --project motoreco \
             --import ./init-data \
             --export-on-exit &
-          npx wait-on tcp:9099 tcp:4000
+          npx wait-on tcp:9099 tcp:4000 tcp:9199
 
       - name: Run tests
         working-directory: ./

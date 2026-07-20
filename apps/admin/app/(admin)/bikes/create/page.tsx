@@ -12,9 +12,10 @@ export default function BikeCreatePage() {
   const { formProps, saveButtonProps } = useForm()
 
   const { selectProps: manufacturerSelectProps } = useSelect({
-    resource: 'manufacturers',
+    resource: 'companies',
     optionLabel: 'name',
     optionValue: 'id',
+    filters: [{ field: 'category', operator: 'eq', value: 'BIKE_MAKER' }],
   })
 
   return (

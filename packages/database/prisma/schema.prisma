@@ -40,18 +40,19 @@ model MUser {
   status MUserStatus @default(ACTIVE) @map("status")
   role   MUserRole   @default(USER) @map("role")
 
-  authProviders           MAuthProvider[]
-  myBikes                 TUserMyBike[]
-  histories               TUserMyBikeHistory[]
-  userQuit                TUserQuit?
-  followers               TUserFollow[]             @relation("UserFollowing")
-  following               TUserFollow[]             @relation("UserFollowers")
-  notifications           TNotification[]
-  announcementReads       TSystemAnnouncementRead[]
-  createdAnnouncements    MSystemAnnouncement[]
-  planHistories           TUserPlanHistory[]
-  planHistoriesChangedBy  TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
-  apiKeys                 MApiKey[]
+  authProviders          MAuthProvider[]
+  myBikes                TUserMyBike[]
+  histories              TUserMyBikeHistory[]
+  photos                 TUserPhoto[]
+  userQuit               TUserQuit?
+  followers              TUserFollow[]             @relation("UserFollowing")
+  following              TUserFollow[]             @relation("UserFollowers")
+  notifications          TNotification[]
+  announcementReads      TSystemAnnouncementRead[]
+  createdAnnouncements   MSystemAnnouncement[]
+  planHistories          TUserPlanHistory[]
+  planHistoriesChangedBy TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
+  apiKeys                MApiKey[]
 }
 
 model MApiKey {
@@ -71,19 +72,23 @@ model MApiKey {
   @@index([userId, isActive])
 }
 
-model MManufacturer {
+model MCompany {
   id         String  @id @default(cuid(2))
-  name       String  @unique @map("name") // メーカー名（日本語）
+  name       String  @unique @map("name") // 会社名（日本語）
   nameEn     String? @map("name_en") // 英語名
   logoUrl    String? @map("logo_url") // ロゴURL
   websiteUrl String? @map("website_url") // 公式サイト
-  country    String? @map("country") // 国
-  isActive   Boolean @default(true) @map("is_active") // アクティブフラグ
+  country    String? @map("country") // 国（任意）
+
+  categories CompanyCategory[] @map("categories") // 会社の役割（複数可）
+
+  isActive Boolean @default(true) @map("is_active") // アクティブフラグ
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  bikes MBike[]
+  bikes       MBike[]
+  goodsModels MGoodsModel[]
 }
 
 model MBike {
@@ -101,7 +106,7 @@ model MBike {
   updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz
   settingStatus BikeStatus @default(INACTIVE) @map("setting_status") // 設定状態
 
-  manufacturer         MManufacturer      @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
+  manufacturer         MCompany           @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
   bikeMaintenanceTypes MMaintenanceType[]
   userBikes            TUserBike[]
 
@@ -121,6 +126,29 @@ model MMaintenanceType {
   bike MBike @relation(fields: [bikeId], references: [id], onDelete: Restrict)
 
   @@unique([bikeId, type])
+}
+
+model MGoodsModel {
+  id                  String @id @default(cuid(2))
+  goodsManufacturerId String @map("goods_manufacturer_id")
+
+  modelNumber String        @map("model_number") // 型番
+  name        String // 商品名
+  category    GoodsCategory @map("category")
+
+  // 購入先情報（商品ごとに一意なため、購入記録ではなくマスタ側で保持する）
+  amazonAsin    String? @map("amazon_asin")
+  rakutenItemId String? @map("rakuten_item_id")
+
+  isActive Boolean @default(true) @map("is_active") // アクティブフラグ
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  manufacturer MCompany @relation(fields: [goodsManufacturerId], references: [id], onDelete: Restrict)
+
+  @@unique([goodsManufacturerId, modelNumber])
+  @@index([category])
 }
 
 model TUserBike {
@@ -166,6 +194,7 @@ model TUserMyBike {
   tourings        TUserMyBikeTouring[]
   touringPlans    TUserMyBikeTouringPlan[]
   histories       TUserMyBikeHistory[]
+  directPhotos    TUserMyBikeDirectPhoto[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
@@ -252,6 +281,7 @@ model TUserMyBikeTouring {
   fuelLogs   TUserMyBikeFuelLog[]
   spots      TUserMyBikeTouringSpot[]
   history    TUserMyBikeHistory?
+  photos     TUserMyBikeTouringPhoto[]
 
   @@index([userMyBikeId, startDate])
   @@index([userMyBikeId, status])
@@ -351,9 +381,60 @@ model TUserMyBikeTouringSpot {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  touring TUserMyBikeTouring @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  touring TUserMyBikeTouring              @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  photos  TUserMyBikeTouringSpotPhoto[]
 
   @@index([touringId, sortOrder])
+}
+
+// 写真の実体。ユーザーにのみ紐づく(特定のMyBikeにスコープされない)
+model TUserPhoto {
+  id          String   @id @default(cuid(2))
+  userId      String   @map("user_id")
+  photoUrl    String   @map("photo_url")
+  storagePath String   @map("storage_path")
+  memo        String?  @map("memo")
+  takenAt     DateTime @map("taken_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user         MUser                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  touringLinks TUserMyBikeTouringPhoto[]
+  spotLinks    TUserMyBikeTouringSpotPhoto[]
+  bikeLinks    TUserMyBikeDirectPhoto[]
+}
+
+// ツーリングと写真の紐づけ(1枚の写真が複数ツーリングに紐づく可能性もブロックしない)
+model TUserMyBikeTouringPhoto {
+  touringId String @map("touring_id")
+  photoId   String @map("photo_id")
+
+  touring TUserMyBikeTouring @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  photo   TUserPhoto         @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@id([touringId, photoId])
+}
+
+// スポットと写真の紐づけ
+model TUserMyBikeTouringSpotPhoto {
+  spotId  String @map("spot_id")
+  photoId String @map("photo_id")
+
+  spot  TUserMyBikeTouringSpot @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  photo TUserPhoto             @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@id([spotId, photoId])
+}
+
+// バイク本体と写真の紐づけ（ツーリング/スポットを介さない日常の1枚）
+model TUserMyBikeDirectPhoto {
+  userMyBikeId String @map("my_bike_id")
+  photoId      String @map("photo_id")
+
+  userMyBike TUserMyBike @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  photo      TUserPhoto  @relation(fields: [photoId], references: [id], onDelete: Cascade)
+
+  @@id([userMyBikeId, photoId])
 }
 
 model TUserQuit {
@@ -524,6 +605,29 @@ enum UserBikeOwnStatus {
   SOLD // 売却済み
   TRANSFERRED // 譲渡済み
   SCRAPPED // 廃車
+}
+
+enum GoodsCategory {
+  HELMET // ヘルメット
+  GLOVE // グローブ
+  JACKET // ジャケット
+  PANTS // パンツ
+  BOOTS // ブーツ
+  RAINWEAR // レインウェア
+  INTERCOM // インカム
+  DRIVE_RECORDER // ドライブレコーダー
+  NAVIGATION // ナビ
+  BOX_CASE // ボックス・パニアケース
+  BAG // バッグ
+  CHAIN_LOCK // チェーンロック
+  COVER // バイクカバー
+  TOOL // 工具
+  OTHER // その他
+}
+
+enum CompanyCategory {
+  BIKE_MAKER // バイクメーカー
+  GOODS_MANUFACTURER // グッズ製造会社
 }
 
 enum UserQuitStatus {

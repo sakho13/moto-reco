@@ -32,6 +32,7 @@ function FuelLogsPage() {
   const [chartPeriod, setChartPeriod] = useState<FuelLogPeriod>('latest-year')
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
   const [editingFuelLogId, setEditingFuelLogId] = useState<string | null>(null)
+  const [keyword, setKeyword] = useState('')
 
   const chartPeriodOptions: SelectOption[] = [
     { value: 'latest-year', label: '最新の履歴から1年' },
@@ -60,9 +61,10 @@ function FuelLogsPage() {
         bikeId
           ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=desc&per-size=10&page=${
               pageIndex + 1
-            }`
+            }${keyword ? `&keyword=${encodeURIComponent(keyword)}` : ''}`
           : null,
-      fetchFuelLogs
+      fetchFuelLogs,
+      { keepPreviousData: true }
     )
 
   const {
@@ -88,7 +90,12 @@ function FuelLogsPage() {
     setSize(size + 1)
   }
 
-  if (isLoading) {
+  const handleSearch = (value: string) => {
+    setKeyword(value)
+    setSize(1)
+  }
+
+  if (isLoading && !data) {
     return (
       <div className="w-full max-w-2xl">
         <div className="flex items-center justify-center min-h-100">
@@ -229,6 +236,8 @@ function FuelLogsPage() {
             onLoadMore={handleLoadMore}
             canLoadMore={canLoadMore}
             isLoadingMore={isLoadingMore}
+            onSearch={handleSearch}
+            isSearchActive={keyword.length > 0}
           />
         </div>
       </div>

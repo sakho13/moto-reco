@@ -50,6 +50,7 @@ userBikeTourings.get(
       sortBy: query['sort-by'] === 'end-date' ? 'endDate' : 'startDate',
       sortOrder: query['sort-order'],
       status: query['status'],
+      keyword: query['keyword'],
     })
 
     const touringRepo = new PrismaTouringRepository(prisma)
