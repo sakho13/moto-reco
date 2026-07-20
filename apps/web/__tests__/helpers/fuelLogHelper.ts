@@ -14,6 +14,7 @@ export async function createTestFuelLog(
     totalPrice: number
     memo?: string | null
     updateTotalMileage?: boolean
+    touringId?: string | null
   }
 ): Promise<string> {
   const payload = {

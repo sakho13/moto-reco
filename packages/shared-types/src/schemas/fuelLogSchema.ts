@@ -91,6 +91,13 @@ export const FuelLogListQuerySchema = z
         invalid_type_error: '終了日は日付形式で指定してください',
       })
       .optional(),
+    keyword: z
+      .string({
+        invalid_type_error: 'キーワードは文字列で指定してください',
+      })
+      .trim()
+      .min(1, 'キーワードは1文字以上で指定してください')
+      .optional(),
   })
   // 排他制御: period と startDate/endDate の両方指定を禁止
   .refine(

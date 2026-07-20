@@ -1,3 +1,4 @@
+import { Prisma } from '@repo/database'
 import {
   createMaintenanceLogId,
   createMyUserBikeId,
@@ -6,10 +7,8 @@ import {
   MyUserBikeId,
 } from '@repo/shared-types'
 import { MaintenanceLogEntity } from '../entities/MaintenanceLogEntity'
-import {
-  IMaintenanceLogRepository,
-  MaintenanceLogListParams,
-} from '../interfaces/IMaintenanceLogRepository'
+import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
+import { MaintenanceLogSearchParams } from '../valueObjects/MaintenanceLogSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 type MaintenanceLogRow = {
@@ -109,14 +108,22 @@ export class PrismaMaintenanceLogRepository
   }
 
   async findMaintenanceLogs(
-    params: MaintenanceLogListParams
+    myUserBikeId: MyUserBikeId,
+    searchParams: MaintenanceLogSearchParams
   ): Promise<MaintenanceLogEntity[]> {
-    const { myUserBikeId, page, perSize, sortOrder } = params
+    const where: Prisma.TUserMyBikeMaintenanceWhereInput = {
+      userMyBikeId: myUserBikeId,
+    }
+
+    if (searchParams.keyword) {
+      where.memo = { contains: searchParams.keyword, mode: 'insensitive' }
+    }
+
     const logs = await this.connection.tUserMyBikeMaintenance.findMany({
-      where: { userMyBikeId: myUserBikeId },
-      orderBy: { performedAt: sortOrder },
-      skip: (page - 1) * perSize,
-      take: perSize,
+      where,
+      orderBy: { performedAt: searchParams.sortOrder },
+      skip: searchParams.skip,
+      take: searchParams.take,
       select: {
         id: true,
         userMyBikeId: true,

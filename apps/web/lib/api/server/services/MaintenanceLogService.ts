@@ -10,13 +10,12 @@ import { UserEntity } from '../entities/UserEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
 import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
+import { MaintenanceLogSearchParams } from '../valueObjects/MaintenanceLogSearchParams'
 
 type GetMaintenanceLogsParams = {
   myUserBikeId: MyUserBikeId
   userId: UserId
-  page: number
-  perSize: number
-  sortOrder: 'asc' | 'desc'
+  searchParams: MaintenanceLogSearchParams
 }
 
 type RegisterMaintenanceLogParams = {
@@ -58,12 +57,10 @@ export class MaintenanceLogService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    return this.maintenanceLogRepository.findMaintenanceLogs({
-      myUserBikeId: params.myUserBikeId,
-      page: params.page,
-      perSize: params.perSize,
-      sortOrder: params.sortOrder,
-    })
+    return this.maintenanceLogRepository.findMaintenanceLogs(
+      params.myUserBikeId,
+      params.searchParams
+    )
   }
 
   public async registerMaintenanceLog(

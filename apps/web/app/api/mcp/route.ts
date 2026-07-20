@@ -23,6 +23,7 @@ import { ApiKeyService } from '@/lib/api/server/services/ApiKeyService'
 import { MaintenanceLogService } from '@/lib/api/server/services/MaintenanceLogService'
 import { TouringPlanService } from '@/lib/api/server/services/TouringPlanService'
 import { TouringService } from '@/lib/api/server/services/TouringService'
+import { MaintenanceLogSearchParams } from '@/lib/api/server/valueObjects/MaintenanceLogSearchParams'
 import { TouringSearchParams } from '@/lib/api/server/valueObjects/TouringSearchParams'
 import { UserBikeSearchParams } from '@/lib/api/server/valueObjects/UserBikeSearchParams'
 
@@ -330,9 +331,11 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
               ? await maintenanceLogService.getMaintenanceLogs({
                   myUserBikeId: createMyUserBikeId(myUserBikeId),
                   userId,
-                  page: 1,
-                  perSize: logCount,
-                  sortOrder: 'desc',
+                  searchParams: new MaintenanceLogSearchParams({
+                    page: 1,
+                    pageSize: logCount,
+                    sortOrder: 'desc',
+                  }),
                 })
               : []
 

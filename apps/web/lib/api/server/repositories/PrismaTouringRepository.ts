@@ -1,3 +1,4 @@
+import { Prisma } from '@repo/database'
 import {
   createMyUserBikeId,
   createTouringId,
@@ -126,13 +127,20 @@ export class PrismaTouringRepository
             { startDate: searchParams.sortOrder },
           ]
 
+    const where: Prisma.TUserMyBikeTouringWhereInput = {
+      userMyBikeId: myUserBikeId,
+    }
+
+    if (searchParams.status !== undefined) {
+      where.status = searchParams.status
+    }
+
+    if (searchParams.keyword) {
+      where.title = { contains: searchParams.keyword, mode: 'insensitive' }
+    }
+
     const tourings = await this.connection.tUserMyBikeTouring.findMany({
-      where: {
-        userMyBikeId: myUserBikeId,
-        ...(searchParams.status !== undefined
-          ? { status: searchParams.status }
-          : {}),
-      },
+      where,
       select: touringSelect,
       orderBy,
     })

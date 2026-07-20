@@ -1,12 +1,6 @@
 import { MaintenanceLogId, MyUserBikeId } from '@repo/shared-types'
 import { MaintenanceLogEntity } from '../entities/MaintenanceLogEntity'
-
-export type MaintenanceLogListParams = {
-  myUserBikeId: MyUserBikeId
-  page: number
-  perSize: number
-  sortOrder: 'asc' | 'desc'
-}
+import { MaintenanceLogSearchParams } from '../valueObjects/MaintenanceLogSearchParams'
 
 export interface IMaintenanceLogRepository {
   createMaintenanceLog(
@@ -17,7 +11,8 @@ export interface IMaintenanceLogRepository {
     myUserBikeId: MyUserBikeId
   ): Promise<MaintenanceLogEntity | null>
   findMaintenanceLogs(
-    params: MaintenanceLogListParams
+    myUserBikeId: MyUserBikeId,
+    searchParams: MaintenanceLogSearchParams
   ): Promise<MaintenanceLogEntity[]>
   updateMaintenanceLog(
     maintenanceLog: MaintenanceLogEntity
