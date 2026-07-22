@@ -453,14 +453,15 @@ user.post(
  * @remarks
  * - 認証必須（honoAuthMiddleware）
  * - 退会理由の入力が必須
- * - 退会後に復帰コードを返却
+ * - GUEST/ADMINロールは退会不可
+ * - 復帰用URL（トークン付き）をメールで送信する。復帰コード等はレスポンスに含めない
  */
 user.post(
   '/auth/quit',
   honoAuthMiddleware,
   zodValidateJson(UserAuthQuitRequestSchema),
   async (c) => {
-    const { userEntity } = c.var.user!
+    const { userEntity, email } = c.var.user!
     const body = c.req.valid('json')
 
     const result = await prisma.$transaction(async (t) => {
@@ -479,12 +480,28 @@ user.post(
       })
     })
 
+    if (email) {
+      const emailRepository = new ResendEmailRepository(
+        process.env.RESEND_API_KEY,
+        process.env.RESEND_FROM_EMAIL
+      )
+      const emailService = new EmailService(emailRepository)
+
+      emailService
+        .sendByType(EmailType.USER_QUIT, {
+          to: email,
+          userName: userEntity.name,
+          recoveryToken: result.recoveryToken,
+        })
+        .catch((error: unknown) => {
+          console.error('退会案内メール送信に失敗しました', error)
+        })
+    }
+
     return c.json<SuccessResponse<ApiResponseUserQuit>>({
       status: 'success',
-      data: {
-        recoveryCode: result.recoveryCode,
-      },
-      message: '退会処理が完了しました',
+      data: {},
+      message: '退会処理が完了しました。復帰用のご案内メールを送信しました。',
     })
   }
 )
@@ -493,29 +510,17 @@ user.post(
  * ユーザー復帰エンドポイント
  *
  * @remarks
- * - Firebase認証トークン必須
- * - 復帰コードの入力が必須
+ * - 認証不要（完全公開エンドポイント）。メールに記載された復帰トークンのみで完結する
+ * - トークンをSHA-256ハッシュ化して照合し、猶予期間(purgeAt)を超過していないか確認する
+ * - 成功時はワンタイム化（RECOVERED）する
  */
 user.post(
   '/auth/recover',
   zodValidateJson(UserAuthRecoverRequestSchema),
   async (c) => {
-    const authHeader = c.req.header('Authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new ApiV1Error('AUTH_FAILED', '認証トークンが提供されていません')
-    }
-
-    const token = authHeader.substring('Bearer '.length)
-    const firebaseAuthRepo = new FirebaseAuthRepository()
-    const authProvider = await firebaseAuthRepo.authorize(token)
-
-    if (!authProvider) {
-      throw new ApiV1Error('AUTH_FAILED', '認証トークンが無効です')
-    }
-
     const body = c.req.valid('json')
 
-    const result = await prisma.$transaction(async (t) => {
+    await prisma.$transaction(async (t) => {
       const userRepo = new PrismaUserRepository(t)
       const authProviderRepo = new PrismaAuthProviderRepository(t)
       const userQuitRepo = new PrismaUserQuitRepository(t)
@@ -526,17 +531,13 @@ user.post(
       )
 
       return service.recoverUser({
-        externalId: authProvider.externalId,
-        providerType: authProvider.provider,
-        recoveryCode: body.recoveryCode,
+        token: body.token,
       })
     })
 
     return c.json<SuccessResponse<ApiResponseUserRecover>>({
       status: 'success',
-      data: {
-        userId: result.userId,
-      },
+      data: {},
       message: '復帰処理が完了しました',
     })
   }

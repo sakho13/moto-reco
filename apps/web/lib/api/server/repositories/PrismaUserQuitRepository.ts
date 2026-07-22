@@ -8,6 +8,36 @@ import { UserQuitEntity } from '../entities/UserQuitEntity'
 import { IUserQuitRepository } from '../interfaces/IUserQuitRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
+const SELECT = {
+  id: true,
+  userId: true,
+  quitAt: true,
+  quitReason: true,
+  recoveryTokenHash: true,
+  purgeAt: true,
+  status: true,
+} as const
+
+function toEntity(row: {
+  id: string
+  userId: string
+  quitAt: Date
+  quitReason: string
+  recoveryTokenHash: string
+  purgeAt: Date
+  status: UserQuitStatus
+}): UserQuitEntity {
+  return new UserQuitEntity({
+    id: createUserQuitId(row.id),
+    userId: createUserId(row.userId),
+    quitAt: row.quitAt,
+    quitReason: row.quitReason,
+    recoveryTokenHash: row.recoveryTokenHash,
+    purgeAt: row.purgeAt,
+    status: row.status,
+  })
+}
+
 export class PrismaUserQuitRepository
   extends PrismaRepositoryBase
   implements IUserQuitRepository
@@ -18,27 +48,14 @@ export class PrismaUserQuitRepository
         userId: userQuit.userId,
         quitAt: userQuit.quitAt,
         quitReason: userQuit.quitReason,
-        recoveryCode: userQuit.recoveryCode,
+        recoveryTokenHash: userQuit.recoveryTokenHash,
+        purgeAt: userQuit.purgeAt,
         status: userQuit.status,
       },
-      select: {
-        id: true,
-        userId: true,
-        quitAt: true,
-        quitReason: true,
-        recoveryCode: true,
-        status: true,
-      },
+      select: SELECT,
     })
 
-    return new UserQuitEntity({
-      id: createUserQuitId(created.id),
-      userId: createUserId(created.userId),
-      quitAt: created.quitAt,
-      quitReason: created.quitReason,
-      recoveryCode: created.recoveryCode,
-      status: created.status,
-    })
+    return toEntity(created)
   }
 
   async findByUserId(userId: UserId): Promise<UserQuitEntity | null> {
@@ -46,28 +63,23 @@ export class PrismaUserQuitRepository
       where: {
         userId,
       },
-      select: {
-        id: true,
-        userId: true,
-        quitAt: true,
-        quitReason: true,
-        recoveryCode: true,
-        status: true,
+      select: SELECT,
+    })
+
+    return userQuit ? toEntity(userQuit) : null
+  }
+
+  async findByRecoveryTokenHash(
+    recoveryTokenHash: string
+  ): Promise<UserQuitEntity | null> {
+    const userQuit = await this.connection.tUserQuit.findFirst({
+      where: {
+        recoveryTokenHash,
       },
+      select: SELECT,
     })
 
-    if (!userQuit) {
-      return null
-    }
-
-    return new UserQuitEntity({
-      id: createUserQuitId(userQuit.id),
-      userId: createUserId(userQuit.userId),
-      quitAt: userQuit.quitAt,
-      quitReason: userQuit.quitReason,
-      recoveryCode: userQuit.recoveryCode,
-      status: userQuit.status,
-    })
+    return userQuit ? toEntity(userQuit) : null
   }
 
   async updateStatus(userId: UserId, status: UserQuitStatus): Promise<void> {
@@ -79,5 +91,17 @@ export class PrismaUserQuitRepository
         status,
       },
     })
+  }
+
+  async findPurgeTargets(now: Date): Promise<UserQuitEntity[]> {
+    const rows = await this.connection.tUserQuit.findMany({
+      where: {
+        status: 'QUIT',
+        purgeAt: { lte: now },
+      },
+      select: SELECT,
+    })
+
+    return rows.map(toEntity)
   }
 }

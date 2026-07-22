@@ -28,8 +28,12 @@ export class UserQuitEntity {
     return this._value.quitAt
   }
 
-  public get recoveryCode(): string {
-    return this._value.recoveryCode
+  public get recoveryTokenHash(): string {
+    return this._value.recoveryTokenHash
+  }
+
+  public get purgeAt(): Date {
+    return this._value.purgeAt
   }
 
   public get status(): UserQuitStatus {
