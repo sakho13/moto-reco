@@ -10,6 +10,9 @@ export type UserQuit = {
   userId: UserId
   quitReason: string
   quitAt: Date
-  recoveryCode: string
+  /** 復帰トークンのSHA-256ハッシュ（平文トークンはメールにのみ埋め込みDBには保存しない） */
+  recoveryTokenHash: string
+  /** 完全物理削除予定日時（quitAtの30日後） */
+  purgeAt: Date
   status: UserQuitStatus
 }

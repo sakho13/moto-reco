@@ -26,6 +26,7 @@ export const ErrorCodeMap = {
   FORBIDDEN: 'FORBIDDEN',
   USER_NOT_REGISTERED: 'USER_NOT_REGISTERED',
   GUEST_EXPIRED: 'GUEST_EXPIRED',
+  USER_QUIT: 'USER_QUIT',
   NOT_FOUND: 'NOT_FOUND',
   SERVER_ERROR: 'SERVER_ERROR',
 } as const
@@ -40,6 +41,7 @@ export const ErrorCodeToHttpStatus = {
   FORBIDDEN: 403,
   USER_NOT_REGISTERED: 403,
   GUEST_EXPIRED: 401,
+  USER_QUIT: 403,
   NOT_FOUND: 404,
   SERVER_ERROR: 500,
 } as const satisfies Record<ErrorCode, number>
@@ -110,12 +112,34 @@ export type ApiResponseUserSearch = {
   page: number
 }
 
-export type ApiResponseUserQuit = {
-  recoveryCode: string
+/** 退会処理は完了メッセージのみを返す（復帰用トークンはメール本文にのみ埋め込む） */
+export type ApiResponseUserQuit = Record<string, never>
+
+/** 復帰処理も完了メッセージのみを返す（非認証の公開エンドポイントのため個人情報は含めない） */
+export type ApiResponseUserRecover = Record<string, never>
+
+export type ApiResponseSystemApiKeyItem = {
+  systemApiKeyId: string
+  name: string
+  prefix: string
+  isActive: boolean
+  lastUsedAt: string | null
+  createdAt: string
 }
 
-export type ApiResponseUserRecover = {
-  userId: string
+export type ApiResponseSystemApiKeyList = {
+  systemApiKeys: ApiResponseSystemApiKeyItem[]
+}
+
+export type ApiResponseSystemApiKeyGenerate = ApiResponseSystemApiKeyItem & {
+  /** 発行時のみ返す平文フルキー */
+  fullKey: string
+}
+
+/** 完全削除バッチ（内部API）の実行結果 */
+export type ApiResponseInternalPurgeQuitUsers = {
+  succeededUserIds: string[]
+  failedUserIds: string[]
 }
 
 export type ApiResponseManufacturer = {
