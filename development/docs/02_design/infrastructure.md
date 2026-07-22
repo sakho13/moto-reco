@@ -221,6 +221,30 @@ GitHubリポジトリの Settings > Secrets and variables > Actions で設定。
 | `run-migration.yml` | 手動（workflow_dispatch） | Cloud Run JobsでPrismaマイグレーション実行 |
 | `switch-traffic.yml` | 手動（workflow_dispatch） | 指定リビジョンへトラフィック100%切り替え |
 | `every-pr-check.yml` | PRオープン/更新 | lint・build・test（PostgreSQL / LocalStack / Firebase Emulator使用） |
+| `purge-quit-users.yml` | 週次cron（毎週月曜04:00 JST）＋手動（workflow_dispatch） | 猶予期間(30日)を超過した退会ユーザーの完全削除バッチAPI（`POST /api/v1/internal/purge-quit-users`）をHTTPで呼び出す |
+
+### 完全削除バッチ（purge-quit-users.yml）
+
+退会ユーザーの完全物理削除（Firebase Authアカウント・DB関連データ・Storage実ファイル）は、GCPのCloud Schedulerではなく **GitHub Actionsのschedule** から実行する（GCPの新規課金リソースを増やさないための方針）。
+
+```
+GitHub Actions (schedule: cron)
+  │ HTTP POST (Authorization: Bearer <システムAPIキー>)
+  ▼
+Cloud Run (motoreco-web)
+  POST /api/v1/internal/purge-quit-users
+  │ MSystemApiKeyのハッシュ照合ミドルウェアで認証
+  ▼
+PurgeUserService
+  1. Storage実ファイル削除
+  2. TUserPlanHistory（changedBy）の明示削除（Restrict FK対応）
+  3. MUser削除（Cascadeで関連データ削除）
+  4. Firebase Authアカウント削除
+```
+
+- 認証はDB管理の`MSystemApiKey`テーブルによるハッシュ照合（環境変数ではない）。発行・失効は管理者専用API/UI（`/app/admin/system-api-keys`）で行う。
+- ワークフロー内で参照する平文キーはGitHub Secretsの`INTERNAL_PURGE_SECRET`に登録する（登録作業はリポジトリ管理者が別途実施する）。
+- 対象ユーザーが1件失敗してもバッチ全体は継続する（ユーザー単位でtry/catch）。
 
 ---
 
