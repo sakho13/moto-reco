@@ -1,17 +1,19 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { createUserId, createUserQuitId } from '@repo/shared-types'
-import { UserQuitEntity } from '@/lib/api/server/entities/UserQuitEntity'
+import { createUserId } from '@repo/shared-types'
+import { IPurgeTargetRepository } from '@/lib/api/server/interfaces/IPurgeTargetRepository'
 import {
   IPurgeUserRepository,
   PurgeTargetAuthProvider,
 } from '@/lib/api/server/interfaces/IPurgeUserRepository'
-import { IUserQuitRepository } from '@/lib/api/server/interfaces/IUserQuitRepository'
 import { PurgeUserService } from '@/lib/api/server/services/PurgeUserService'
 
 const deleteUserFromFirebaseAuth = vi.fn()
 const deleteStorageFile = vi.fn()
 
-vi.mock('@/lib/firebase/adminStorage', () => ({
+vi.mock('@repo/firebase-auth-server', () => ({
+  getFirebaseAdminAuthClient: () => ({
+    deleteUser: deleteUserFromFirebaseAuth,
+  }),
   getFirebaseAdminStorage: () => ({
     bucket: () => ({
       file: () => ({
@@ -22,30 +24,7 @@ vi.mock('@/lib/firebase/adminStorage', () => ({
   getStorageBucketName: () => 'test-bucket',
 }))
 
-vi.mock('@repo/firebase-auth-server', () => ({
-  getFirebaseAdminAuthClient: () => ({
-    deleteUser: deleteUserFromFirebaseAuth,
-  }),
-}))
-
-const buildUserQuitEntity = (
-  overrides: Partial<{ userId: string; purgeAt: Date }> = {}
-) =>
-  new UserQuitEntity({
-    id: createUserQuitId('quit-1'),
-    userId: createUserId(overrides.userId ?? 'user-1'),
-    quitReason: 'テスト退会理由',
-    quitAt: new Date('2026-01-01T00:00:00Z'),
-    recoveryTokenHash: 'hash',
-    purgeAt: overrides.purgeAt ?? new Date('2026-01-31T00:00:00Z'),
-    status: 'QUIT',
-  })
-
-const buildUserQuitRepository = (): IUserQuitRepository => ({
-  create: vi.fn(),
-  findByUserId: vi.fn(),
-  findByRecoveryTokenHash: vi.fn(),
-  updateStatus: vi.fn(),
+const buildPurgeTargetRepository = (): IPurgeTargetRepository => ({
   findPurgeTargets: vi.fn(),
 })
 
@@ -57,7 +36,7 @@ const buildPurgeUserRepository = (): IPurgeUserRepository => ({
 })
 
 describe('PurgeUserService.purgeExpiredQuitUsers()', () => {
-  let userQuitRepository: IUserQuitRepository
+  let purgeTargetRepository: IPurgeTargetRepository
   let purgeUserRepository: IPurgeUserRepository
   let service: PurgeUserService
 
@@ -65,13 +44,13 @@ describe('PurgeUserService.purgeExpiredQuitUsers()', () => {
     vi.clearAllMocks()
     deleteStorageFile.mockResolvedValue([{}])
     deleteUserFromFirebaseAuth.mockResolvedValue(undefined)
-    userQuitRepository = buildUserQuitRepository()
+    purgeTargetRepository = buildPurgeTargetRepository()
     purgeUserRepository = buildPurgeUserRepository()
-    service = new PurgeUserService(userQuitRepository, purgeUserRepository)
+    service = new PurgeUserService(purgeTargetRepository, purgeUserRepository)
   })
 
   test('対象が0件の場合は成功・失敗ともに0件を返す', async () => {
-    vi.mocked(userQuitRepository.findPurgeTargets).mockResolvedValue([])
+    vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([])
 
     const result = await service.purgeExpiredQuitUsers(new Date())
 
@@ -79,9 +58,11 @@ describe('PurgeUserService.purgeExpiredQuitUsers()', () => {
     expect(purgeUserRepository.deleteUser).not.toHaveBeenCalled()
   })
 
-  test('対象ユーザーを Storage → プラン履歴 → DB → Firebase Auth の順で削除する', async () => {
-    const target = buildUserQuitEntity({ userId: 'user-1' })
-    vi.mocked(userQuitRepository.findPurgeTargets).mockResolvedValue([target])
+  test('対象ユーザーを Firebase Auth → Storage → プラン履歴 → DB の順で削除する', async () => {
+    const userId = createUserId('user-1')
+    vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([
+      { userId },
+    ])
     vi.mocked(
       purgeUserRepository.findPhotoStoragePathsByUserId
     ).mockResolvedValue(['users/user-1/photos/a.jpg'])
@@ -93,6 +74,9 @@ describe('PurgeUserService.purgeExpiredQuitUsers()', () => {
     )
 
     const callOrder: string[] = []
+    deleteUserFromFirebaseAuth.mockImplementation(async () => {
+      callOrder.push('firebaseAuth')
+    })
     deleteStorageFile.mockImplementation(async () => {
       callOrder.push('storage')
       return [{}]
@@ -105,29 +89,67 @@ describe('PurgeUserService.purgeExpiredQuitUsers()', () => {
     vi.mocked(purgeUserRepository.deleteUser).mockImplementation(async () => {
       callOrder.push('deleteUser')
     })
-    deleteUserFromFirebaseAuth.mockImplementation(async () => {
-      callOrder.push('firebaseAuth')
-    })
 
     const result = await service.purgeExpiredQuitUsers(new Date())
 
     expect(result.succeededUserIds).toEqual(['user-1'])
     expect(result.failedUserIds).toEqual([])
     expect(callOrder).toEqual([
+      'firebaseAuth',
       'storage',
       'planHistory',
       'deleteUser',
-      'firebaseAuth',
     ])
     expect(deleteUserFromFirebaseAuth).toHaveBeenCalledWith('firebase-uid-1')
   })
 
+  test('Firebase Auth削除が失敗した場合はDB削除に進まず、失敗として扱われる（次回バッチで再試行可能にする）', async () => {
+    const userId = createUserId('user-fail')
+    vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([
+      { userId },
+    ])
+    vi.mocked(purgeUserRepository.findAuthProvidersByUserId).mockResolvedValue([
+      { externalId: 'firebase-uid-1', providerType: 'FIREBASE_EMAIL' },
+    ])
+    deleteUserFromFirebaseAuth.mockRejectedValue(
+      Object.assign(new Error('network error'), { code: 'auth/internal-error' })
+    )
+
+    const result = await service.purgeExpiredQuitUsers(new Date())
+
+    expect(result.succeededUserIds).toEqual([])
+    expect(result.failedUserIds).toEqual(['user-fail'])
+    expect(purgeUserRepository.deleteUser).not.toHaveBeenCalled()
+    expect(
+      purgeUserRepository.deletePlanHistoryAsChangedBy
+    ).not.toHaveBeenCalled()
+  })
+
+  test('Firebase Auth側で既に削除済み(auth/user-not-found)の場合は成功として扱いDB削除まで進める', async () => {
+    const userId = createUserId('user-1')
+    vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([
+      { userId },
+    ])
+    vi.mocked(purgeUserRepository.findAuthProvidersByUserId).mockResolvedValue([
+      { externalId: 'firebase-uid-1', providerType: 'FIREBASE_EMAIL' },
+    ])
+    deleteUserFromFirebaseAuth.mockRejectedValue(
+      Object.assign(new Error('not found'), { code: 'auth/user-not-found' })
+    )
+
+    const result = await service.purgeExpiredQuitUsers(new Date())
+
+    expect(result.succeededUserIds).toEqual(['user-1'])
+    expect(result.failedUserIds).toEqual([])
+    expect(purgeUserRepository.deleteUser).toHaveBeenCalledWith('user-1')
+  })
+
   test('1件のDB削除失敗が他の対象ユーザーの処理を止めない', async () => {
-    const failingTarget = buildUserQuitEntity({ userId: 'user-fail' })
-    const succeedingTarget = buildUserQuitEntity({ userId: 'user-ok' })
-    vi.mocked(userQuitRepository.findPurgeTargets).mockResolvedValue([
-      failingTarget,
-      succeedingTarget,
+    const failingUserId = createUserId('user-fail')
+    const succeedingUserId = createUserId('user-ok')
+    vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([
+      { userId: failingUserId },
+      { userId: succeedingUserId },
     ])
     vi.mocked(purgeUserRepository.deleteUser).mockImplementation(
       async (userId) => {
@@ -144,8 +166,10 @@ describe('PurgeUserService.purgeExpiredQuitUsers()', () => {
   })
 
   test('Storageファイル削除が個別に失敗してもDB削除は継続される', async () => {
-    const target = buildUserQuitEntity({ userId: 'user-1' })
-    vi.mocked(userQuitRepository.findPurgeTargets).mockResolvedValue([target])
+    const userId = createUserId('user-1')
+    vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([
+      { userId },
+    ])
     vi.mocked(
       purgeUserRepository.findPhotoStoragePathsByUserId
     ).mockResolvedValue(['users/user-1/photos/a.jpg'])
@@ -158,8 +182,10 @@ describe('PurgeUserService.purgeExpiredQuitUsers()', () => {
   })
 
   test('Restrict FK対応: deleteUserの前にdeletePlanHistoryAsChangedByが呼ばれる', async () => {
-    const target = buildUserQuitEntity({ userId: 'user-1' })
-    vi.mocked(userQuitRepository.findPurgeTargets).mockResolvedValue([target])
+    const userId = createUserId('user-1')
+    vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([
+      { userId },
+    ])
 
     await service.purgeExpiredQuitUsers(new Date())
 

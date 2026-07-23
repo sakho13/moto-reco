@@ -41,15 +41,6 @@ function ProfileEditPage() {
               <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
             </Link>
           )}
-          {isAdmin && (
-            <Link
-              href="/app/admin/system-api-keys"
-              className="flex justify-between items-center text-sm py-2 border-b last:border-b-0"
-            >
-              <span>システムAPIキー管理</span>
-              <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
-            </Link>
-          )}
           {!isGuest && (
             <Link
               href="/app/profile/plan"

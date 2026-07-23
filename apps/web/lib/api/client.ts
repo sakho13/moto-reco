@@ -26,8 +26,6 @@ import {
   ApiResponseTouringPlanLocation,
   ApiResponseTouringPlanSpotDetail,
   ApiResponseTouringPlanSpotList,
-  ApiResponseSystemApiKeyGenerate,
-  ApiResponseSystemApiKeyList,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -378,14 +376,5 @@ type API_EP = {
 } & {
   [key: `/api/v1/mcp/api-keys/${string}`]: {
     DELETE: SuccessResponse<null>
-  }
-} & {
-  '/api/v1/admin/system-api-keys': {
-    GET: SuccessResponse<ApiResponseSystemApiKeyList>
-    POST: SuccessResponse<ApiResponseSystemApiKeyGenerate>
-  }
-} & {
-  [key: `/api/v1/admin/system-api-keys/${string}`]: {
-    PATCH: SuccessResponse<null>
   }
 }

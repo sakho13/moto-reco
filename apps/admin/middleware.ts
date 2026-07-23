@@ -21,5 +21,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // /api/internal 配下はGitHub Actions等の外部からシステムAPIキーで
+  // 認証される内部バッチ用エンドポイントのため、IP制限の対象から除外する
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/internal).*)'],
 }

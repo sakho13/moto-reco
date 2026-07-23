@@ -7,7 +7,10 @@ on:
   workflow_dispatch:
 
 env:
-  API_BASE_URL: https://moto-reco.com
+  # apps/admin の本番URL。GitHubリポジトリ（またはproduction environment）の
+  # Variables に登録すること（デプロイ先のCloud Run URLはデプロイの度に変わらない
+  # 前提のカスタムドメイン、またはドメインマッピング済みのURLを設定する）
+  ADMIN_API_BASE_URL: ${{ vars.ADMIN_API_BASE_URL }}
 
 jobs:
   purge-quit-users:
@@ -20,7 +23,7 @@ jobs:
           echo "猶予期間(30日)を超過した退会ユーザーの完全削除バッチを実行します"
 
           HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
-            -X POST "${{ env.API_BASE_URL }}/api/v1/internal/purge-quit-users" \
+            -X POST "${{ env.ADMIN_API_BASE_URL }}/api/internal/purge-quit-users" \
             -H "Authorization: Bearer ${{ secrets.INTERNAL_PURGE_SECRET }}" \
             -H "Content-Type: application/json")
 

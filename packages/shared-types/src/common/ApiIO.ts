@@ -118,30 +118,6 @@ export type ApiResponseUserQuit = Record<string, never>
 /** 復帰処理も完了メッセージのみを返す（非認証の公開エンドポイントのため個人情報は含めない） */
 export type ApiResponseUserRecover = Record<string, never>
 
-export type ApiResponseSystemApiKeyItem = {
-  systemApiKeyId: string
-  name: string
-  prefix: string
-  isActive: boolean
-  lastUsedAt: string | null
-  createdAt: string
-}
-
-export type ApiResponseSystemApiKeyList = {
-  systemApiKeys: ApiResponseSystemApiKeyItem[]
-}
-
-export type ApiResponseSystemApiKeyGenerate = ApiResponseSystemApiKeyItem & {
-  /** 発行時のみ返す平文フルキー */
-  fullKey: string
-}
-
-/** 完全削除バッチ（内部API）の実行結果 */
-export type ApiResponseInternalPurgeQuitUsers = {
-  succeededUserIds: string[]
-  failedUserIds: string[]
-}
-
 export type ApiResponseManufacturer = {
   manufacturers: {
     manufacturerId: string
