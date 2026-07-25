@@ -37,6 +37,7 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vitest/coverage-v8": "2.1.8",
     "eslint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
