@@ -1,5 +1,9 @@
 import { Prisma } from '@repo/database'
-import { createCompanyId, createGoodsModelId } from '@repo/shared-types'
+import {
+  createCompanyId,
+  createGoodsModelId,
+  GoodsModelId,
+} from '@repo/shared-types'
 import { GoodsModelEntity } from '../entities/GoodsModelEntity'
 import { IGoodsModelRepository } from '../interfaces/IGoodsModelRepository'
 import { GoodsModelSearchParams } from '../valueObjects/GoodsModelSearchParams'
@@ -50,5 +54,29 @@ export class PrismaGoodsModelRepository
           rakutenItemId: model.rakutenItemId,
         })
     )
+  }
+
+  async findById(goodsModelId: GoodsModelId): Promise<GoodsModelEntity | null> {
+    const model = await this.connection.mGoodsModel.findUnique({
+      where: { id: goodsModelId },
+      include: {
+        manufacturer: true,
+      },
+    })
+
+    if (!model) {
+      return null
+    }
+
+    return new GoodsModelEntity({
+      id: createGoodsModelId(model.id),
+      goodsManufacturerId: createCompanyId(model.goodsManufacturerId),
+      manufacturerName: model.manufacturer.name,
+      modelNumber: model.modelNumber,
+      name: model.name,
+      category: model.category,
+      amazonAsin: model.amazonAsin,
+      rakutenItemId: model.rakutenItemId,
+    })
   }
 }

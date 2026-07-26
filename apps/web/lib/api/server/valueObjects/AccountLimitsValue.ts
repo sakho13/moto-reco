@@ -16,6 +16,7 @@ export type LimitKey =
   | 'touring'
   | 'touringPlan'
   | 'maintenanceLog'
+  | 'goods'
   | 'apiKey'
 
 type LimitMessages = Partial<Record<LimitKey, string>>
@@ -26,6 +27,7 @@ const GUEST_MESSAGES: LimitMessages = {
   touring: `ゲストアカウントはツーリング履歴を${GUEST_ACCOUNT_LIMITS.TOURING}件まで登録できます`,
   touringPlan: `ゲストアカウントはツーリングプランを${GUEST_ACCOUNT_LIMITS.TOURING_PLAN}件まで登録できます`,
   maintenanceLog: `ゲストアカウントはメンテナンス履歴を${GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG}件まで登録できます`,
+  goods: `ゲストアカウントはグッズを${GUEST_ACCOUNT_LIMITS.GOODS}件まで登録できます`,
   apiKey: 'ゲストアカウントはAPIキーを発行できません',
 }
 
@@ -53,6 +55,7 @@ export class AccountLimitsValue {
     readonly touring: number | null,
     readonly touringPlan: number | null,
     readonly maintenanceLog: number | null,
+    readonly goods: number | null,
     readonly apiKey: number | null,
     readonly allowedScopes: ApiKeyScope[]
   ) {}
@@ -71,6 +74,7 @@ export class AccountLimitsValue {
         GUEST_ACCOUNT_LIMITS.TOURING,
         GUEST_ACCOUNT_LIMITS.TOURING_PLAN,
         GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG,
+        GUEST_ACCOUNT_LIMITS.GOODS,
         0,
         []
       )
@@ -84,6 +88,7 @@ export class AccountLimitsValue {
         null,
         PREMIUM_USER_LIMITS.TOURING_PLAN,
         PREMIUM_USER_LIMITS.MAINTENANCE_LOG,
+        null,
         PLAN_LIMITS.PREMIUM.apiKey,
         PLAN_ALLOWED_SCOPES.PREMIUM
       )
@@ -98,6 +103,7 @@ export class AccountLimitsValue {
         null,
         FREE_USER_LIMITS.TOURING_PLAN,
         FREE_USER_LIMITS.MAINTENANCE_LOG,
+        null,
         PLAN_LIMITS.FREE.apiKey,
         PLAN_ALLOWED_SCOPES.FREE
       )
@@ -105,6 +111,7 @@ export class AccountLimitsValue {
     // ADMIN: 全て無制限
     return new AccountLimitsValue(
       role,
+      null,
       null,
       null,
       null,
