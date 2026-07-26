@@ -112,8 +112,10 @@ export type ApiResponseUserSearch = {
   page: number
 }
 
-/** 退会処理は完了メッセージのみを返す（復帰用トークンはメール本文にのみ埋め込む） */
-export type ApiResponseUserQuit = Record<string, never>
+/** 退会処理完了時に復帰用トークンを返す（サインアウト後の復帰用URL表示ページに引き継ぐため） */
+export type ApiResponseUserQuit = {
+  recoveryToken: string
+}
 
 /** 復帰処理も完了メッセージのみを返す（非認証の公開エンドポイントのため個人情報は含めない） */
 export type ApiResponseUserRecover = Record<string, never>

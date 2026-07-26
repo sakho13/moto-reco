@@ -43,19 +43,24 @@ export class PrismaUserQuitRepository
   implements IUserQuitRepository
 {
   async create(userQuit: UserQuitEntity): Promise<UserQuitEntity> {
-    const created = await this.connection.tUserQuit.create({
-      data: {
-        userId: userQuit.userId,
-        quitAt: userQuit.quitAt,
-        quitReason: userQuit.quitReason,
-        recoveryTokenHash: userQuit.recoveryTokenHash,
-        purgeAt: userQuit.purgeAt,
-        status: userQuit.status,
-      },
+    // userIdはユニーク制約のため、復帰(RECOVERED)済みユーザーが再度退会する場合は
+    // 既存レコードを新しい退会情報で上書きする
+    const data = {
+      quitAt: userQuit.quitAt,
+      quitReason: userQuit.quitReason,
+      recoveryTokenHash: userQuit.recoveryTokenHash,
+      purgeAt: userQuit.purgeAt,
+      status: userQuit.status,
+    }
+
+    const saved = await this.connection.tUserQuit.upsert({
+      where: { userId: userQuit.userId },
+      create: { userId: userQuit.userId, ...data },
+      update: data,
       select: SELECT,
     })
 
-    return toEntity(created)
+    return toEntity(saved)
   }
 
   async findByUserId(userId: UserId): Promise<UserQuitEntity | null> {

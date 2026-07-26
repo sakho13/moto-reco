@@ -677,7 +677,7 @@ describe('User API Endpoints', () => {
       expect(res.status).toBe(403)
     })
 
-    test('退会処理が完了し復帰案内メールが送信される（レスポンスにトークン等は含まれない）', async () => {
+    test('退会処理が完了し復帰案内メールが送信される（レスポンスに復帰トークンが含まれる）', async () => {
       const { token, userId } = await createTestUser()
 
       // createTestUser内の登録処理で送られるWelcomeメールを除外するため、
@@ -701,7 +701,7 @@ describe('User API Endpoints', () => {
       const json = await res.json()
       expect(json).toEqual({
         status: 'success',
-        data: {},
+        data: { recoveryToken: expect.any(String) },
         message: expect.any(String),
       })
       expect(res.status).toBe(200)
@@ -853,6 +853,57 @@ describe('User API Endpoints', () => {
       expect(secondJson.status).toBe('error')
       expect(secondJson.errorCode).toBe('INVALID_REQUEST')
       expect(secondRes.status).toBe(400)
+    })
+
+    test('復帰済みユーザーが再度退会できる（TUserQuitレコードが上書きされる）', async () => {
+      const { token, userId } = await createTestUser()
+
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+
+      await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: '最初の退会理由' }),
+      })
+
+      const firstRecoveryToken = extractRecoveryToken(
+        sendSpy.mock.calls[0]![0].html
+      )
+      await app.request('/api/v1/user/auth/recover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: firstRecoveryToken }),
+      })
+
+      const res = await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: '2回目の退会理由' }),
+      })
+
+      const json = await res.json()
+      expect(json.status).toBe('success')
+      expect(res.status).toBe(200)
+
+      const quitRecord = await prisma.tUserQuit.findUnique({
+        where: { userId },
+      })
+      expect(quitRecord?.status).toBe('QUIT')
+      expect(quitRecord?.quitReason).toBe('2回目の退会理由')
+
+      const userRecord = await prisma.mUser.findUnique({
+        where: { id: userId },
+        select: { status: true },
+      })
+      expect(userRecord?.status).toBe('INACTIVE')
     })
 
     test('猶予期間(purgeAt)を過ぎている場合は復帰できない', async () => {

@@ -17,11 +17,11 @@ const PROVIDER_LABEL: Record<string, string> = {
   'google.com': 'Google',
 }
 
-type QuitStep = 'form' | 'confirm' | 'done'
+type QuitStep = 'form' | 'confirm'
 
 function AccountPage() {
   const router = useRouter()
-  const { user, isGuest, signOut } = useAuth()
+  const { user, isGuest } = useAuth()
 
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false)
   const [quitStep, setQuitStep] = useState<QuitStep>('form')
@@ -58,34 +58,29 @@ function AccountPage() {
     setIsSubmitting(true)
     setError(null)
     try {
-      await apiPost('/api/v1/user/auth/quit', {
+      const result = await apiPost('/api/v1/user/auth/quit', {
         quitReason: quitReason.trim(),
       })
-      await signOut()
-      setQuitStep('done')
+      // サインアウトは遷移先の /app/quit-complete で行う。
+      // ここで signOut すると withAuth のリダイレクトが先に発火し、
+      // quit-complete への遷移と競合してログイン画面に飛ばされてしまう。
+      router.push(
+        `/app/quit-complete?token=${encodeURIComponent(result.data.recoveryToken)}`
+      )
     } catch (e) {
       setError(
         e instanceof ApiV1Error
           ? e.message
           : '退会処理に失敗しました。もう一度お試しください。'
       )
-    } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const handleBackToLogin = () => {
-    setIsQuitModalOpen(false)
-    router.push('/app/login')
   }
 
   return (
     <div className="w-full max-w-md flex flex-col gap-4">
       {isQuitModalOpen && (
-        <ModalBase
-          title={quitStep === 'done' ? '退会手続き完了' : '退会手続き'}
-          onClose={handleCloseQuitModal}
-        >
+        <ModalBase title="退会手続き" onClose={handleCloseQuitModal}>
           {error && (
             <div className="pb-2">
               <ErrorMessage>{error}</ErrorMessage>
@@ -170,31 +165,6 @@ function AccountPage() {
                   戻る
                 </Button>
               </div>
-            </div>
-          )}
-
-          {quitStep === 'done' && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-4)',
-              }}
-            >
-              <p style={{ fontSize: 'var(--font-size-sm)' }}>
-                退会手続きが完了しました。ご登録のメールアドレスに復帰用のご案内メールを送信しました。
-              </p>
-              <p
-                style={{
-                  fontSize: 'var(--font-size-sm)',
-                  color: 'var(--color-muted-foreground)',
-                }}
-              >
-                30日間は案内メール内のリンクから復帰できます。以降は完全に削除され復帰できません。
-              </p>
-              <Button variant="primary" fullWidth onClick={handleBackToLogin}>
-                ログイン画面に戻る
-              </Button>
             </div>
           )}
         </ModalBase>

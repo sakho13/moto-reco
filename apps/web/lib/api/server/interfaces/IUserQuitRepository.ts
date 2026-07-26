@@ -4,6 +4,10 @@ import { UserQuitEntity } from '../entities/UserQuitEntity'
 export interface IUserQuitRepository {
   /**
    * 退会情報を登録する
+   *
+   * @remarks
+   * userIdごとに1レコードのみ保持する。既に退会情報が存在する場合
+   * （復帰済みユーザーが再度退会した場合など）は新しい内容で上書きする。
    */
   create(userQuit: UserQuitEntity): Promise<UserQuitEntity>
 
