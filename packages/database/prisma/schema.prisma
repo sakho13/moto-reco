@@ -53,6 +53,7 @@ model MUser {
   planHistories          TUserPlanHistory[]
   planHistoriesChangedBy TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
   apiKeys                MApiKey[]
+  goods                  TUserGoods[]
 }
 
 model MApiKey {
@@ -89,6 +90,28 @@ model MCompany {
 
   bikes       MBike[]
   goodsModels MGoodsModel[]
+}
+
+model TUserGoods {
+  id           String  @id @default(cuid(2))
+  userId       String  @map("user_id")
+  userMyBikeId String? @map("my_bike_id")
+  goodsModelId String  @map("goods_model_id")
+
+  purchasedAt DateTime? @map("purchased_at") @db.Timestamptz
+  price       Int?      @map("price")
+  memo        String?   @map("memo")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user       MUser        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike? @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
+  goodsModel MGoodsModel  @relation(fields: [goodsModelId], references: [id], onDelete: Restrict)
+
+  @@index([userId, purchasedAt(sort: Desc)])
+  @@index([userMyBikeId])
+  @@index([goodsModelId])
 }
 
 model MBike {
@@ -145,7 +168,8 @@ model MGoodsModel {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  manufacturer MCompany @relation(fields: [goodsManufacturerId], references: [id], onDelete: Restrict)
+  manufacturer MCompany     @relation(fields: [goodsManufacturerId], references: [id], onDelete: Restrict)
+  userGoods    TUserGoods[]
 
   @@unique([goodsManufacturerId, modelNumber])
   @@index([category])
@@ -195,6 +219,7 @@ model TUserMyBike {
   touringPlans    TUserMyBikeTouringPlan[]
   histories       TUserMyBikeHistory[]
   directPhotos    TUserMyBikeDirectPhoto[]
+  goods           TUserGoods[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
