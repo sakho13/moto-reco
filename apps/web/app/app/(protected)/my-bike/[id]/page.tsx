@@ -11,6 +11,7 @@ import { formatDate } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
+import { AttachedGoodsSection } from '@/components/goods/AttachedGoodsSection'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
 import { TouringIcon } from '@/components/icons/TouringIcon'
@@ -146,6 +147,8 @@ function BikeDetailPage() {
         </BaseCard>
 
         {isAdmin && <BikePhotosCard myUserBikeId={id} />}
+
+        <AttachedGoodsSection myUserBikeId={id} />
       </div>
 
       {/* 履歴管理セクション */}

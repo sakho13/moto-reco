@@ -68,6 +68,21 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return items
   }
 
+  if (segments[1] === 'goods') {
+    items.push({ label: 'グッズ', href: '/app/goods' })
+
+    if (segments[2] === 'catalog') {
+      items.push({ label: 'カタログ検索' })
+      return items
+    }
+
+    if (segments.length === 2) {
+      items[items.length - 1] = { label: 'グッズ' }
+    }
+
+    return items
+  }
+
   if (segments[1] === 'photos') {
     items.push({ label: 'フォト' })
     return items

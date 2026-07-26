@@ -1,0 +1,80 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.mainRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.category {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.name {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+}
+
+.detailsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  opacity: 0.8;
+}
+
+.separator {
+  opacity: 0.4;
+}
+
+.memoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+  opacity: 0.7;
+  white-space: pre-wrap;
+}
+
+.memoLabel {
+  flex-shrink: 0;
+  font-weight: var(--font-weight-semibold);
+  opacity: 0.6;
+}
+
+.memoText {
+  line-height: 1.4;
+}
+
+.footerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-1);
+}
+
+.link {
+  font-size: var(--font-size-sm);
+  color: var(--color-product);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

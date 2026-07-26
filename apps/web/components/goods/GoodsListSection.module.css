@@ -1,0 +1,22 @@
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+
+.emptyState p {
+  margin-bottom: 0;
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--spacing-4);
+}

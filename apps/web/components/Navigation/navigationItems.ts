@@ -1,4 +1,5 @@
 import { BikeIcon } from '@/components/icons/BikeIcon'
+import { GoodsIcon } from '@/components/icons/GoodsIcon'
 import { HistoryIcon } from '@/components/icons/HistoryIcon'
 import { HomeIcon } from '@/components/icons/HomeIcon'
 import { ProfileIcon } from '@/components/icons/ProfileIcon'
@@ -18,6 +19,12 @@ export const navigationItems: NavigationItem[] = [
     label: 'ヒストリー',
     href: '/app/history',
     icon: HistoryIcon,
+  },
+  {
+    id: 'goods',
+    label: 'グッズ',
+    href: '/app/goods',
+    icon: GoodsIcon,
   },
   {
     id: 'profile',
