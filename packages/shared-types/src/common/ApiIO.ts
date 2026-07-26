@@ -26,6 +26,7 @@ export const ErrorCodeMap = {
   FORBIDDEN: 'FORBIDDEN',
   USER_NOT_REGISTERED: 'USER_NOT_REGISTERED',
   GUEST_EXPIRED: 'GUEST_EXPIRED',
+  USER_QUIT: 'USER_QUIT',
   NOT_FOUND: 'NOT_FOUND',
   SERVER_ERROR: 'SERVER_ERROR',
 } as const
@@ -40,6 +41,7 @@ export const ErrorCodeToHttpStatus = {
   FORBIDDEN: 403,
   USER_NOT_REGISTERED: 403,
   GUEST_EXPIRED: 401,
+  USER_QUIT: 403,
   NOT_FOUND: 404,
   SERVER_ERROR: 500,
 } as const satisfies Record<ErrorCode, number>
@@ -110,13 +112,13 @@ export type ApiResponseUserSearch = {
   page: number
 }
 
+/** 退会処理完了時に復帰用トークンを返す（サインアウト後の復帰用URL表示ページに引き継ぐため） */
 export type ApiResponseUserQuit = {
-  recoveryCode: string
+  recoveryToken: string
 }
 
-export type ApiResponseUserRecover = {
-  userId: string
-}
+/** 復帰処理も完了メッセージのみを返す（非認証の公開エンドポイントのため個人情報は含めない） */
+export type ApiResponseUserRecover = Record<string, never>
 
 export type ApiResponseManufacturer = {
   manufacturers: {

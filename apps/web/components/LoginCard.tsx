@@ -28,6 +28,10 @@ export function LoginCard() {
 
   /**
    * メール/パスワードログイン処理
+   *
+   * @remarks
+   * Firebase認証成功後にプロフィール取得APIで退会済み（USER_QUIT）かどうかを確認する。
+   * 退会済みの場合はホームへ遷移させず、復帰案内メッセージを表示する。
    */
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault()
@@ -36,6 +40,27 @@ export function LoginCard() {
 
     try {
       await signInWithEmail(email, password)
+
+      try {
+        await apiGet('/api/v1/user/profile')
+      } catch (profileError: unknown) {
+        if (
+          profileError instanceof ApiV1Error &&
+          profileError.errorCode === 'USER_QUIT'
+        ) {
+          await signOut()
+          trackEvent('login_error', {
+            method: 'email',
+            error_code: 'USER_QUIT',
+          })
+          setError(
+            'このアカウントは退会済みです。ご登録のメールアドレスに送信した復帰用のご案内をご確認ください。'
+          )
+          return
+        }
+        // USER_QUIT以外のプロフィール取得エラーはログイン自体を妨げない
+      }
+
       trackEvent('web_login', { method: 'email' })
       router.push('/app/home')
     } catch (err) {
@@ -116,6 +141,22 @@ export function LoginCard() {
         return
       } catch (profileError: unknown) {
         // profile APIのエラーをハンドリング
+
+        // 退会済みアカウントの場合は復帰案内メッセージを表示する
+        if (
+          profileError instanceof ApiV1Error &&
+          profileError.errorCode === 'USER_QUIT'
+        ) {
+          await signOut()
+          trackEvent('login_error', {
+            method: 'google',
+            error_code: 'USER_QUIT',
+          })
+          setError(
+            'このアカウントは退会済みです。ご登録のメールアドレスに送信した復帰用のご案内をご確認ください。'
+          )
+          return
+        }
 
         // エラーがApiV1Errorで、errorCodeが'USER_NOT_REGISTERED'かチェック
         const isUserNotRegistered =

@@ -1,6 +1,10 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
 import {
+  getFirebaseAdminStorage,
+  getStorageBucketName,
+} from '@repo/firebase-auth-server'
+import {
   ApiResponseBikePhotoList,
   ApiResponsePhotoDetail,
   ApiResponsePhotoUploadUrl,
@@ -20,10 +24,6 @@ import {
   SuccessResponse,
 } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
-import {
-  getFirebaseAdminStorage,
-  getStorageBucketName,
-} from '../../../firebase/adminStorage'
 import { PhotoEntity } from '../entities/PhotoEntity'
 import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAdminMiddleware } from '../middlewares/honoAdmin'
