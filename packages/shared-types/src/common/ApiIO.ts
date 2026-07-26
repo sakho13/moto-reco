@@ -161,6 +161,26 @@ export type ApiResponseGoodsModelSearch = {
   }[]
 }
 
+export type ApiResponseUserGoodsDetail = {
+  userGoodsId: string
+  userMyBikeId: string | null
+  purchasedAt: string | null
+  price: number | null
+  memo: string | null
+  goodsModelId: string
+  goodsManufacturerId: string
+  manufacturerName: string
+  modelNumber: string
+  modelName: string
+  category: GoodsCategory
+  amazonAsin: string | null
+  rakutenItemId: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type ApiResponseUserGoodsList = ApiResponseUserGoodsDetail[]
+
 export type ApiResponseUserBikeRegister = {
   userBikeId: string
   myUserBikeId: string
