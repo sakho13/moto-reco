@@ -35,6 +35,9 @@ function Page() {
           >
             バイクを登録
           </Button>
+          <Button variant="cloud" onClick={() => router.push('/app/goods')}>
+            グッズ一覧
+          </Button>
         </div>
         {isAtGuestBikeLimit && (
           <p className="text-sm text-gray-500">

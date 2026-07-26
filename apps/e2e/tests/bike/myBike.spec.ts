@@ -53,4 +53,15 @@ test.describe('マイバイクページ', () => {
 
     await expect(authenticatedPage).toHaveURL(/\/app\/bike\/register/)
   })
+
+  test('「グッズ一覧」ボタンをクリックするとグッズ一覧ページへ遷移する', async ({
+    authenticatedPage,
+  }) => {
+    const myBikePage = new MyBikePage(authenticatedPage)
+    await myBikePage.goto()
+
+    await myBikePage.goodsListButton.click()
+
+    await expect(authenticatedPage).toHaveURL(/\/app\/goods$/)
+  })
 })

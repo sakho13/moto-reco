@@ -14,6 +14,7 @@ import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
 import { AttachedGoodsSection } from '@/components/goods/AttachedGoodsSection'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
+import { GoodsIcon } from '@/components/icons/GoodsIcon'
 import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
@@ -172,6 +173,13 @@ function BikeDetailPage() {
           title="メンテナンス履歴"
           description="メンテナンス履歴を確認・管理できます"
           icon={<WrenchIcon />}
+        />
+
+        <NavigationCard
+          href="/app/goods"
+          title="グッズ"
+          description="登録した購入グッズを一覧で確認できます"
+          icon={<GoodsIcon />}
         />
       </div>
     </>

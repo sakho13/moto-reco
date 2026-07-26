@@ -45,4 +45,19 @@ test.describe('マイバイク詳細 - 取り付けアクセサリ', () => {
       section.getByText('取り付けアクセサリがまだ登録されていません')
     ).toBeVisible()
   })
+
+  test('「グッズ」カードからグッズ一覧ページへ遷移する', async ({
+    authenticatedPage: page,
+    authToken,
+  }) => {
+    const myUserBikeId = await registerTestBike(authToken, {
+      nickname: 'グッズ導線テスト',
+    })
+
+    await page.goto(`/app/my-bike/${myUserBikeId}`)
+
+    await page.getByRole('link', { name: /グッズ/ }).click()
+
+    await expect(page).toHaveURL(/\/app\/goods$/)
+  })
 })
