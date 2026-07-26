@@ -127,7 +127,10 @@ function GoodsCatalogPage() {
       </div>
 
       <div className="w-full max-w-md flex flex-col gap-4 mb-20">
-        <BaseCard title="グッズカタログ検索" data-testid="goods-catalog-section">
+        <BaseCard
+          title="グッズカタログ検索"
+          data-testid="goods-catalog-section"
+        >
           <div className={styles.filters}>
             <Select
               id="manufacturerId"

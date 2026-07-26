@@ -70,9 +70,7 @@ function GoodsPage() {
               ? error.message
               : 'グッズ一覧の取得に失敗しました'}
           </p>
-          <Button onClick={() => router.push('/app/home')}>
-            ホームに戻る
-          </Button>
+          <Button onClick={() => router.push('/app/home')}>ホームに戻る</Button>
         </div>
       </div>
     )

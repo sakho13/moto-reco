@@ -58,13 +58,10 @@ export function GoodsPurchaseModal({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const { data: bikesData } = useSWR(
-    '/api/v1/user-bike/bikes',
-    async (url) => {
-      const response = await apiGet(url)
-      return response.data
-    }
-  )
+  const { data: bikesData } = useSWR('/api/v1/user-bike/bikes', async (url) => {
+    const response = await apiGet(url)
+    return response.data
+  })
 
   const bikeOptions: SelectOption[] = [
     { value: '', label: '紐付けなし' },
@@ -97,9 +94,7 @@ export function GoodsPurchaseModal({
       router.push('/app/goods')
       onClose()
     } catch (err) {
-      setError(
-        err instanceof ApiV1Error ? err.message : 'エラーが発生しました'
-      )
+      setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
     }

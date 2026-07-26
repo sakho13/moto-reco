@@ -35,8 +35,7 @@ export type GoodsModel = {
 }
 
 export type UserGoodsId = string & { readonly __brand: unique symbol }
-export const createUserGoodsId = (id: string): UserGoodsId =>
-  id as UserGoodsId
+export const createUserGoodsId = (id: string): UserGoodsId => id as UserGoodsId
 
 /**
  * ユーザーの購入グッズ。マスタ(MGoodsModel)側の表示用情報をJOINして保持する。
