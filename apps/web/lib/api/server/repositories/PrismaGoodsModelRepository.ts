@@ -57,8 +57,8 @@ export class PrismaGoodsModelRepository
   }
 
   async findById(goodsModelId: GoodsModelId): Promise<GoodsModelEntity | null> {
-    const model = await this.connection.mGoodsModel.findUnique({
-      where: { id: goodsModelId },
+    const model = await this.connection.mGoodsModel.findFirst({
+      where: { id: goodsModelId, isActive: true },
       include: {
         manufacturer: true,
       },

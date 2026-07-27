@@ -5,7 +5,10 @@ import {
   testAuthRequired,
 } from '../../helpers/authHelper'
 import { createTestUserBike } from '../../helpers/bikeHelper'
-import { getTestGoodsModelId } from '../../helpers/goodsModelHelper'
+import {
+  getInactiveTestGoodsModelId,
+  getTestGoodsModelId,
+} from '../../helpers/goodsModelHelper'
 import {
   expect404Error,
   expectValidationError,
@@ -50,6 +53,24 @@ describe('UserGoods API Endpoints', () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ goodsModelId: 'invalid-goods-model-id' }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+      expect(json.message).toBe('指定されたグッズが見つかりません')
+    })
+
+    test('非アクティブなgoodsModelIdを指定した場合にエラーとなる', async () => {
+      const inactiveGoodsModelId = await getInactiveTestGoodsModelId()
+
+      const res = await app.request('/api/v1/user-goods', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ goodsModelId: inactiveGoodsModelId }),
       })
 
       const json = await res.json()
@@ -300,6 +321,36 @@ describe('UserGoods API Endpoints', () => {
         },
         body: JSON.stringify({ price: 1000 }),
       })
+
+      const json = await res.json()
+      expect(res.status).toBe(404)
+      expect404Error(json)
+    })
+
+    test('非アクティブなgoodsModelIdへの更新はエラーとなる', async () => {
+      const createRes = await app.request('/api/v1/user-goods', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ goodsModelId }),
+      })
+      const createJson = await createRes.json()
+
+      const inactiveGoodsModelId = await getInactiveTestGoodsModelId()
+
+      const res = await app.request(
+        `/api/v1/user-goods/${createJson.data.userGoodsId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ goodsModelId: inactiveGoodsModelId }),
+        }
+      )
 
       const json = await res.json()
       expect(res.status).toBe(404)
