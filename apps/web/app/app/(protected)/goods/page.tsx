@@ -58,7 +58,7 @@ function GoodsPage() {
     return (
       <div className="w-full max-w-2xl">
         <div className="mb-4">
-          <Button onClick={() => router.push('/app/home')} variant="cloud">
+          <Button onClick={() => router.push('/app/my-bike')} variant="cloud">
             ← 戻る
           </Button>
         </div>
@@ -70,7 +70,9 @@ function GoodsPage() {
               ? error.message
               : 'グッズ一覧の取得に失敗しました'}
           </p>
-          <Button onClick={() => router.push('/app/home')}>ホームに戻る</Button>
+          <Button onClick={() => router.push('/app/my-bike')}>
+            マイバイク一覧に戻る
+          </Button>
         </div>
       </div>
     )
@@ -84,7 +86,7 @@ function GoodsPage() {
   return (
     <>
       <div className="w-full max-w-md mb-4">
-        <Button variant="cloud" onClick={() => router.push('/app/home')}>
+        <Button variant="cloud" onClick={() => router.push('/app/my-bike')}>
           ← 戻る
         </Button>
       </div>
