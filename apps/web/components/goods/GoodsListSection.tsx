@@ -5,6 +5,7 @@ import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { GoodsCard } from './GoodsCard'
 import styles from './GoodsListSection.module.css'
+import { PlusIcon } from '@/components/icons/PlusIcon'
 
 export interface GoodsListSectionProps {
   /**
@@ -77,8 +78,14 @@ export const GoodsListSection = ({
       title={title}
       data-testid={testId}
       headerAction={
-        <Button onClick={onRegister} variant="primary" size="sm">
-          {registerLabel}
+        <Button
+          onClick={onRegister}
+          variant="cloud"
+          size="sm"
+          aria-label={registerLabel}
+          title={registerLabel}
+        >
+          <PlusIcon />
         </Button>
       }
     >
