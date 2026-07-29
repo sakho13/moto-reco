@@ -58,10 +58,13 @@ export function GoodsPurchaseModal({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const { data: bikesData } = useSWR('/api/v1/user-bike/bikes', async (url) => {
-    const response = await apiGet(url)
-    return response.data
-  })
+  const { data: bikesData, isLoading: isBikesLoading } = useSWR(
+    '/api/v1/user-bike/bikes',
+    async (url) => {
+      const response = await apiGet(url)
+      return response.data
+    }
+  )
 
   const bikeOptions: SelectOption[] = [
     { value: '', label: '紐付けなし' },
@@ -127,7 +130,7 @@ export function GoodsPurchaseModal({
                 userMyBikeId: e.target.value,
               }))
             }
-            disabled={isSubmitting}
+            disabled={isSubmitting || isBikesLoading}
           />
         </FormField>
 
@@ -180,11 +183,15 @@ export function GoodsPurchaseModal({
 
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isBikesLoading}
           fullWidth
           loading={isSubmitting}
         >
-          {isSubmitting ? '登録中...' : '登録する'}
+          {isSubmitting
+            ? '登録中...'
+            : isBikesLoading
+              ? 'バイク情報を読み込み中...'
+              : '登録する'}
         </Button>
       </form>
     </ModalBase>
