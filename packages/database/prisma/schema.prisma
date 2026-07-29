@@ -438,12 +438,13 @@ model TUserMyBikeDirectPhoto {
 }
 
 model TUserQuit {
-  id           String         @id @default(cuid(2))
-  userId       String         @map("user_id")
-  quitAt       DateTime       @map("quit_at") @db.Timestamptz
-  quitReason   String         @map("quit_reason")
-  recoveryCode String         @map("recovery_code")
-  status       UserQuitStatus @default(QUIT) @map("status")
+  id                String         @id @default(cuid(2))
+  userId            String         @map("user_id")
+  quitAt            DateTime       @map("quit_at") @db.Timestamptz
+  quitReason        String         @map("quit_reason")
+  recoveryTokenHash String         @map("recovery_token_hash")
+  purgeAt           DateTime       @map("purge_at") @db.Timestamptz
+  status            UserQuitStatus @default(QUIT) @map("status")
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
@@ -451,7 +452,22 @@ model TUserQuit {
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
-  @@index([status])
+  @@index([status, purgeAt])
+}
+
+// 内部API（削除バッチ等）を保護するためのシステム共通APIキー。特定ユーザーに紐づかない。
+model MSystemApiKey {
+  id         String    @id @default(cuid(2))
+  name       String
+  keyHash    String    @unique @map("key_hash")
+  prefix     String    @map("prefix")
+  isActive   Boolean   @default(true) @map("is_active")
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([isActive])
 }
 
 model TUserPlanHistory {

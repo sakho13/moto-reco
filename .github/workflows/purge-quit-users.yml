@@ -1,0 +1,39 @@
+name: Purge Quit Users
+
+on:
+  schedule:
+    # 毎週月曜 04:00 JST (19:00 UTC 日曜) に実行
+    - cron: '0 19 * * 0'
+  workflow_dispatch:
+
+env:
+  # apps/admin の本番URL。GitHubリポジトリ（またはproduction environment）の
+  # Variables に登録すること（デプロイ先のCloud Run URLはデプロイの度に変わらない
+  # 前提のカスタムドメイン、またはドメインマッピング済みのURLを設定する）
+  ADMIN_API_BASE_URL: ${{ vars.ADMIN_API_BASE_URL }}
+
+jobs:
+  purge-quit-users:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Call purge-quit-users internal API
+        run: |
+          echo "猶予期間(30日)を超過した退会ユーザーの完全削除バッチを実行します"
+
+          HTTP_STATUS=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST "${{ env.ADMIN_API_BASE_URL }}/api/internal/purge-quit-users" \
+            -H "Authorization: Bearer ${{ secrets.INTERNAL_PURGE_SECRET }}" \
+            -H "Content-Type: application/json")
+
+          echo "HTTP Status: ${HTTP_STATUS}"
+          echo "Response:"
+          cat response.json
+
+          if [ "$HTTP_STATUS" -ge 400 ]; then
+            echo "❌ 完全削除バッチの呼び出しに失敗しました"
+            exit 1
+          fi
+
+          echo "✅ 完全削除バッチの呼び出しに成功しました"

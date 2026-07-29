@@ -81,6 +81,23 @@ export class PrismaUserRepository
     return user ? toUserEntity(user) : null
   }
 
+  async findByAuthProviderIncludingInactive(
+    authProvider: AuthProviderEntity
+  ): Promise<UserEntity | null> {
+    const user = await this.connection.mUser.findFirst({
+      select: USER_SELECT,
+      where: {
+        authProviders: {
+          some: {
+            providerType: authProvider.provider,
+            externalId: authProvider.externalId,
+          },
+        },
+      },
+    })
+    return user ? toUserEntity(user) : null
+  }
+
   async createUser(
     user: UserEntity,
     authProvider: AuthProviderEntity

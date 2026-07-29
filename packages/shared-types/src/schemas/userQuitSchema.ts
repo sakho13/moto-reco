@@ -21,17 +21,17 @@ export const UserAuthQuitRequestSchema = z.object({
  * ユーザー復帰リクエストのバリデーションスキーマ
  *
  * @remarks
- * - recoveryCode: 5桁の数字
+ * - token: メール本文のURLに埋め込まれた復帰用トークン（平文）
+ * - 認証は不要（トークンのみで完結する公開エンドポイント）
  */
 export const UserAuthRecoverRequestSchema = z.object({
-  recoveryCode: z
+  token: z
     .string({
-      required_error: '復帰コードは必須です',
-      invalid_type_error: '復帰コードは文字列である必要があります',
+      required_error: '復帰トークンは必須です',
+      invalid_type_error: '復帰トークンは文字列である必要があります',
     })
     .trim()
-    .length(5, '復帰コードは5桁である必要があります')
-    .regex(/^\d{5}$/, '復帰コードは5桁の数字である必要があります'),
+    .min(1, '復帰トークンは必須です'),
 })
 
 /**

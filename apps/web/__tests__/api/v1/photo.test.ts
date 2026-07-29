@@ -10,7 +10,8 @@ import {
 import { createTestTouring, createTestSpot } from '../../helpers/touringHelper'
 import { app } from '@/lib/api/server/app'
 
-vi.mock('@/lib/firebase/adminStorage', () => ({
+vi.mock('@repo/firebase-auth-server', async (importOriginal) => ({
+  ...(await importOriginal()),
   getFirebaseAdminStorage: () => ({
     bucket: () => ({
       file: () => ({
