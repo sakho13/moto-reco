@@ -43,6 +43,11 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
       return items
     }
 
+    if (segments[3] === 'goods') {
+      items.push({ label: '取り付けアクセサリ' })
+      return items
+    }
+
     if (segments[3] === 'tourings') {
       items.push({
         label: 'ツーリング一覧',

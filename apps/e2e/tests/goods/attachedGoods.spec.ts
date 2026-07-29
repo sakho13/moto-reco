@@ -4,9 +4,10 @@ import {
   findTestGoodsModel,
   registerTestUserGoods,
 } from '../../helpers/goodsHelper'
+import { AttachedGoodsPage } from '../../pages/attachedGoodsPage'
 
 /**
- * マイバイク詳細ページ「取り付けアクセサリ」セクション E2E テスト
+ * マイバイク詳細「取り付けアクセサリ」ページ E2E テスト
  */
 test.describe('マイバイク詳細 - 取り付けアクセサリ', () => {
   test('バイクに紐づけたグッズが取り付けアクセサリセクションに表示される', async ({
@@ -22,11 +23,11 @@ test.describe('マイバイク詳細 - 取り付けアクセサリ', () => {
       userMyBikeId: myUserBikeId,
     })
 
-    await page.goto(`/app/my-bike/${myUserBikeId}`)
+    const attachedGoodsPage = new AttachedGoodsPage(page)
+    await attachedGoodsPage.goto(myUserBikeId)
 
-    const section = page.getByTestId('attached-goods-section')
     await expect(
-      section.getByText(`${model.manufacturerName} ${model.name}`)
+      attachedGoodsPage.goodsCard(`${model.manufacturerName} ${model.name}`)
     ).toBeVisible()
   })
 
@@ -38,11 +39,26 @@ test.describe('マイバイク詳細 - 取り付けアクセサリ', () => {
       nickname: 'グッズ未紐付けテスト',
     })
 
+    const attachedGoodsPage = new AttachedGoodsPage(page)
+    await attachedGoodsPage.goto(myUserBikeId)
+
+    await expect(attachedGoodsPage.emptyMessage).toBeVisible()
+  })
+
+  test('「取り付けアクセサリ」カードから専用ページへ遷移する', async ({
+    authenticatedPage: page,
+    authToken,
+  }) => {
+    const myUserBikeId = await registerTestBike(authToken, {
+      nickname: 'グッズ導線テスト',
+    })
+
     await page.goto(`/app/my-bike/${myUserBikeId}`)
 
-    const section = page.getByTestId('attached-goods-section')
-    await expect(
-      section.getByText('取り付けアクセサリがまだ登録されていません')
-    ).toBeVisible()
+    await page.getByRole('link', { name: /取り付けアクセサリ/ }).click()
+
+    await expect(page).toHaveURL(
+      new RegExp(`/app/my-bike/${myUserBikeId}/goods$`)
+    )
   })
 })
