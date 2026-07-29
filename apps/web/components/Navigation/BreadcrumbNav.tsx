@@ -77,7 +77,7 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     items.push({ label: 'グッズ', href: '/app/goods' })
 
     if (segments[2] === 'catalog') {
-      items.push({ label: 'カタログ検索' })
+      items.push({ label: 'グッズ登録' })
       return items
     }
 
