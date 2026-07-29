@@ -19,13 +19,8 @@ export interface GoodsCardProps {
  * `onEdit`/`onDelete` は任意。呼び出し元が渡した場合のみ操作ボタンを表示する。
  */
 export const GoodsCard = ({ goods, onEdit, onDelete }: GoodsCardProps) => {
-  const amazonUrl = goods.amazonAsin
-    ? `https://www.amazon.co.jp/dp/${goods.amazonAsin}`
-    : null
-  const rakutenUrl = goods.rakutenItemId
-    ? `https://item.rakuten.co.jp/${goods.rakutenItemId}`
-    : null
-  const hasFooter = amazonUrl || rakutenUrl || onEdit || onDelete
+  const { amazonUrl, rakutenUrl, officialUrl } = goods
+  const hasFooter = amazonUrl || rakutenUrl || officialUrl || onEdit || onDelete
 
   return (
     <div className={styles.card}>
@@ -59,6 +54,16 @@ export const GoodsCard = ({ goods, onEdit, onDelete }: GoodsCardProps) => {
 
       {hasFooter && (
         <div className={styles.footerRow}>
+          {officialUrl && (
+            <a
+              href={officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              公式サイトで見る
+            </a>
+          )}
           {amazonUrl && (
             <a
               href={amazonUrl}

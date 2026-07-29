@@ -53,6 +53,9 @@ export default function GoodsModelCreatePage() {
         <Form.Item label="楽天商品ID" name="rakutenItemId">
           <Input />
         </Form.Item>
+        <Form.Item label="公式サイトURL" name="officialUrl">
+          <Input placeholder="例: https://example.com/products/xxxx" />
+        </Form.Item>
         <Form.Item
           label="有効"
           name="isActive"

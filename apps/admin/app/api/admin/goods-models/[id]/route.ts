@@ -29,6 +29,7 @@ async function update(request: NextRequest, { params }: Params) {
     category?: string
     amazonAsin?: string
     rakutenItemId?: string
+    officialUrl?: string
     isActive?: boolean
   }
 

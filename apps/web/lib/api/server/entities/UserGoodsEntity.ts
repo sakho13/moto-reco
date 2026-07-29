@@ -7,6 +7,7 @@ import {
   UserGoodsId,
   UserId,
 } from '@repo/shared-types'
+import { buildAmazonUrl, buildRakutenUrl } from '../utils/goodsPurchaseLinks'
 
 export class UserGoodsEntity {
   private _value: UserGoods
@@ -73,6 +74,22 @@ export class UserGoodsEntity {
 
   public get rakutenItemId(): string | null {
     return this._value.rakutenItemId
+  }
+
+  public get officialUrl(): string | null {
+    return this._value.officialUrl
+  }
+
+  public get amazonUrl(): string | null {
+    return this._value.amazonAsin
+      ? buildAmazonUrl(this._value.amazonAsin)
+      : null
+  }
+
+  public get rakutenUrl(): string | null {
+    return this._value.rakutenItemId
+      ? buildRakutenUrl(this._value.rakutenItemId)
+      : null
   }
 
   public get createdAt(): Date {

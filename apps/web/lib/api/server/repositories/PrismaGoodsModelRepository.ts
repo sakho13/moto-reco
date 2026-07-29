@@ -52,6 +52,7 @@ export class PrismaGoodsModelRepository
           category: model.category,
           amazonAsin: model.amazonAsin,
           rakutenItemId: model.rakutenItemId,
+          officialUrl: model.officialUrl,
         })
     )
   }
@@ -77,6 +78,7 @@ export class PrismaGoodsModelRepository
       category: model.category,
       amazonAsin: model.amazonAsin,
       rakutenItemId: model.rakutenItemId,
+      officialUrl: model.officialUrl,
     })
   }
 }

@@ -156,8 +156,9 @@ export type ApiResponseGoodsModelSearch = {
     modelNumber: string
     name: string
     category: GoodsCategory
-    amazonAsin: string | null
-    rakutenItemId: string | null
+    amazonUrl: string | null
+    rakutenUrl: string | null
+    officialUrl: string | null
   }[]
 }
 
@@ -173,8 +174,9 @@ export type ApiResponseUserGoodsDetail = {
   modelNumber: string
   modelName: string
   category: GoodsCategory
-  amazonAsin: string | null
-  rakutenItemId: string | null
+  amazonUrl: string | null
+  rakutenUrl: string | null
+  officialUrl: string | null
   createdAt: string
   updatedAt: string
 }

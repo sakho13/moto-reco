@@ -68,6 +68,7 @@ erDiagram
         GoodsCategory category
         string amazonAsin "購入先情報はマスタ側に集約"
         string rakutenItemId
+        string officialUrl "公式サイトのグッズ解説ページURL"
         boolean isActive
     }
 

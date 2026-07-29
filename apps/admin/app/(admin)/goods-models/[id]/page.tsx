@@ -31,6 +31,19 @@ export default function GoodsModelShowPage() {
         <Descriptions.Item label="楽天商品ID">
           {(record?.rakutenItemId as string) ?? '—'}
         </Descriptions.Item>
+        <Descriptions.Item label="公式サイトURL">
+          {record?.officialUrl ? (
+            <a
+              href={record.officialUrl as string}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {record.officialUrl as string}
+            </a>
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
         <Descriptions.Item label="有効">
           <Tag color={record?.isActive ? 'green' : 'default'}>
             {record?.isActive ? '有効' : '無効'}

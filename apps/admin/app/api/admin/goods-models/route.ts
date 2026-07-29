@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
     category: string
     amazonAsin?: string
     rakutenItemId?: string
+    officialUrl?: string
     isActive?: boolean
   }
 

@@ -162,6 +162,7 @@ model MGoodsModel {
   // 購入先情報（商品ごとに一意なため、購入記録ではなくマスタ側で保持する）
   amazonAsin    String? @map("amazon_asin")
   rakutenItemId String? @map("rakuten_item_id")
+  officialUrl   String? @map("official_url") // 公式サイトのグッズ解説ページURL
 
   isActive Boolean @default(true) @map("is_active") // アクティブフラグ
 
@@ -658,6 +659,7 @@ enum GoodsCategory {
   INTERCOM // インカム
   DRIVE_RECORDER // ドライブレコーダー
   NAVIGATION // ナビ
+  ELECTRICAL // 電装系
   BOX_CASE // ボックス・パニアケース
   BAG // バッグ
   CHAIN_LOCK // チェーンロック

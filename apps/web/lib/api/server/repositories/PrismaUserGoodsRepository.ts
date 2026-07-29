@@ -49,6 +49,7 @@ export class PrismaUserGoodsRepository
       category: record.goodsModel.category,
       amazonAsin: record.goodsModel.amazonAsin,
       rakutenItemId: record.goodsModel.rakutenItemId,
+      officialUrl: record.goodsModel.officialUrl,
       createdAt: record.createdAt,
       updatedAt: record.updatedAt,
     })

@@ -92,6 +92,7 @@ export class UserGoodsService {
         category: goodsModel.category,
         amazonAsin: goodsModel.amazonAsin,
         rakutenItemId: goodsModel.rakutenItemId,
+        officialUrl: goodsModel.officialUrl,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -212,6 +213,9 @@ export class UserGoodsService {
         rakutenItemId: goodsModel
           ? goodsModel.rakutenItemId
           : existingUserGoods.rakutenItemId,
+        officialUrl: goodsModel
+          ? goodsModel.officialUrl
+          : existingUserGoods.officialUrl,
         createdAt: existingUserGoods.createdAt,
         updatedAt: new Date(),
       })

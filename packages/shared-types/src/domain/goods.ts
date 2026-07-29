@@ -12,6 +12,7 @@ export type GoodsCategory =
   | 'INTERCOM'
   | 'DRIVE_RECORDER'
   | 'NAVIGATION'
+  | 'ELECTRICAL'
   | 'BOX_CASE'
   | 'BAG'
   | 'CHAIN_LOCK'
@@ -32,6 +33,7 @@ export type GoodsModel = {
   category: GoodsCategory
   amazonAsin: string | null
   rakutenItemId: string | null
+  officialUrl: string | null
 }
 
 export type UserGoodsId = string & { readonly __brand: unique symbol }
@@ -57,6 +59,7 @@ export type UserGoods = {
   category: GoodsCategory
   amazonAsin: string | null
   rakutenItemId: string | null
+  officialUrl: string | null
 
   createdAt: Date
   updatedAt: Date

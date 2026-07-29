@@ -22,12 +22,7 @@ export const GoodsCatalogItem = ({
   model,
   onSelect,
 }: GoodsCatalogItemProps) => {
-  const amazonUrl = model.amazonAsin
-    ? `https://www.amazon.co.jp/dp/${model.amazonAsin}`
-    : null
-  const rakutenUrl = model.rakutenItemId
-    ? `https://item.rakuten.co.jp/${model.rakutenItemId}`
-    : null
+  const { amazonUrl, rakutenUrl, officialUrl } = model
 
   return (
     <div className={styles.card}>
@@ -41,8 +36,18 @@ export const GoodsCatalogItem = ({
         </span>
       </div>
 
-      {(amazonUrl || rakutenUrl) && (
+      {(amazonUrl || rakutenUrl || officialUrl) && (
         <div className={styles.linksRow}>
+          {officialUrl && (
+            <a
+              href={officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.link}
+            >
+              公式サイトで見る
+            </a>
+          )}
           {amazonUrl && (
             <a
               href={amazonUrl}

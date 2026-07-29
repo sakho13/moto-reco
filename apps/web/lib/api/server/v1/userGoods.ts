@@ -57,8 +57,9 @@ function toResponseData(entity: UserGoodsEntity): ApiResponseUserGoodsDetail {
     modelNumber: entity.modelNumber,
     modelName: entity.modelName,
     category: entity.category,
-    amazonAsin: entity.amazonAsin,
-    rakutenItemId: entity.rakutenItemId,
+    amazonUrl: entity.amazonUrl,
+    rakutenUrl: entity.rakutenUrl,
+    officialUrl: entity.officialUrl,
     createdAt: entity.createdAt.toISOString(),
     updatedAt: entity.updatedAt.toISOString(),
   }
