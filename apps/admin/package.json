@@ -24,7 +24,7 @@
     "@repo/shared-utils": "workspace:*",
     "@tanstack/react-query": "5.101.4",
     "antd": "6.5.1",
-    "axios": "1.18.1",
+    "axios": "1.19.0",
     "firebase": "catalog:",
     "firebase-admin": "catalog:",
     "next": "catalog:",
