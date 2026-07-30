@@ -23,7 +23,7 @@
     "@repo/shared-types": "workspace:*",
     "@repo/shared-utils": "workspace:*",
     "@tanstack/react-query": "5.101.4",
-    "antd": "6.5.1",
+    "antd": "6.5.2",
     "axios": "1.18.1",
     "firebase": "catalog:",
     "firebase-admin": "catalog:",
