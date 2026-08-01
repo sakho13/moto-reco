@@ -4,13 +4,18 @@ import {
   GoodsModel,
   GoodsModelId,
 } from '@repo/shared-types'
-import { buildAmazonUrl, buildRakutenUrl } from '../utils/goodsPurchaseLinks'
+import { GoodsPurchaseLinksValue } from '../valueObjects/GoodsPurchaseLinksValue'
 
 export class GoodsModelEntity {
   private _value: GoodsModel
+  private _purchaseLinks: GoodsPurchaseLinksValue
 
   constructor(goodsModel: GoodsModel) {
     this._value = goodsModel
+    this._purchaseLinks = GoodsPurchaseLinksValue.from(
+      goodsModel.amazonAsin,
+      goodsModel.rakutenItemId
+    )
   }
 
   public get id(): GoodsModelId {
@@ -50,15 +55,11 @@ export class GoodsModelEntity {
   }
 
   public get amazonUrl(): string | null {
-    return this._value.amazonAsin
-      ? buildAmazonUrl(this._value.amazonAsin)
-      : null
+    return this._purchaseLinks.amazonUrl
   }
 
   public get rakutenUrl(): string | null {
-    return this._value.rakutenItemId
-      ? buildRakutenUrl(this._value.rakutenItemId)
-      : null
+    return this._purchaseLinks.rakutenUrl
   }
 
   public toJson(): GoodsModel {
