@@ -175,7 +175,7 @@ function BikeDetailPage() {
         <NavigationCard
           href={`/app/my-bike/${id}/goods`}
           title="取り付けアクセサリ"
-          description="このバイクに取り付けたグッズを確認・管理できます"
+          description="取り付けたグッズを確認・管理できます"
           icon={<GoodsIcon />}
         />
       </div>

@@ -6,7 +6,9 @@ import type {
   ApiResponseUserGoodsList,
   SuccessResponse,
 } from '@repo/shared-types'
+import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
+import { ErrorMessage } from '@repo/ui/errorMessage'
 import { GoodsListSection } from '@/components/goods/GoodsListSection'
 import { authenticatedFetch } from '@/lib/api/client'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
@@ -63,17 +65,16 @@ function GoodsPage() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">
+        <BaseCard title="エラー">
+          <ErrorMessage>
             {error instanceof ApiV1Error
               ? error.message
               : 'グッズ一覧の取得に失敗しました'}
-          </p>
+          </ErrorMessage>
           <Button onClick={() => router.push('/app/my-bike')}>
             マイバイク一覧に戻る
           </Button>
-        </div>
+        </BaseCard>
       </div>
     )
   }
