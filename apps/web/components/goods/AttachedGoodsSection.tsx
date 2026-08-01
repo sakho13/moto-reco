@@ -89,6 +89,7 @@ export function AttachedGoodsSection({ myUserBikeId }: Props) {
       canLoadMore={canLoadMore}
       isLoadingMore={isLoadingMore}
       emptyMessage="取り付けアクセサリがまだ登録されていません"
+      onChanged={() => mutate()}
     />
   )
 }

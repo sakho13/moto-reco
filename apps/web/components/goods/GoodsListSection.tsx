@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import type { ApiResponseUserGoodsDetail } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { GoodsCard } from './GoodsCard'
+import { GoodsEditModal } from './GoodsEditModal'
 import styles from './GoodsListSection.module.css'
 import { PlusIcon } from '@/components/icons/PlusIcon'
 
@@ -54,6 +56,14 @@ export interface GoodsListSectionProps {
    * @default 'グッズがまだ登録されていません'
    */
   emptyMessage?: string
+
+  /**
+   * グッズの編集・削除成功時に呼ばれるコールバック
+   *
+   * @remarks
+   * 呼び出し元が保持するSWRキャッシュの再取得（`mutate`）を想定している
+   */
+  onChanged?: () => void
 }
 
 /**
@@ -72,45 +82,68 @@ export const GoodsListSection = ({
   canLoadMore = false,
   isLoadingMore = false,
   emptyMessage = 'グッズがまだ登録されていません',
+  onChanged,
 }: GoodsListSectionProps) => {
+  const [editingGoods, setEditingGoods] =
+    useState<ApiResponseUserGoodsDetail | null>(null)
+
+  const handleEditModalSuccess = () => {
+    setEditingGoods(null)
+    onChanged?.()
+  }
+
   return (
-    <BaseCard
-      title={title}
-      data-testid={testId}
-      headerAction={
-        <Button
-          onClick={onRegister}
-          variant="cloud"
-          size="sm"
-          aria-label={registerLabel}
-          title={registerLabel}
-        >
-          <PlusIcon />
-        </Button>
-      }
-    >
-      {goodsList.length === 0 ? (
-        <div className={styles.emptyState}>
-          <p>{emptyMessage}</p>
-        </div>
-      ) : (
-        <div className={styles.listContainer}>
-          {goodsList.map((goods) => (
-            <GoodsCard key={goods.userGoodsId} goods={goods} />
-          ))}
-          {canLoadMore && onLoadMore && (
-            <div className={styles.loadMore}>
-              <Button
-                onClick={onLoadMore}
-                variant="cloud"
-                loading={isLoadingMore}
-              >
-                もっと見る
-              </Button>
-            </div>
-          )}
-        </div>
+    <>
+      <BaseCard
+        title={title}
+        data-testid={testId}
+        headerAction={
+          <Button
+            onClick={onRegister}
+            variant="cloud"
+            size="sm"
+            aria-label={registerLabel}
+            title={registerLabel}
+          >
+            <PlusIcon />
+          </Button>
+        }
+      >
+        {goodsList.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>{emptyMessage}</p>
+          </div>
+        ) : (
+          <div className={styles.listContainer}>
+            {goodsList.map((goods) => (
+              <GoodsCard
+                key={goods.userGoodsId}
+                goods={goods}
+                onClick={() => setEditingGoods(goods)}
+              />
+            ))}
+            {canLoadMore && onLoadMore && (
+              <div className={styles.loadMore}>
+                <Button
+                  onClick={onLoadMore}
+                  variant="cloud"
+                  loading={isLoadingMore}
+                >
+                  もっと見る
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </BaseCard>
+
+      {editingGoods && (
+        <GoodsEditModal
+          goods={editingGoods}
+          onClose={() => setEditingGoods(null)}
+          onSuccess={handleEditModalSuccess}
+        />
       )}
-    </BaseCard>
+    </>
   )
 }

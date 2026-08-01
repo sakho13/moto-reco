@@ -31,7 +31,7 @@ function GoodsPage() {
     return json.data
   }
 
-  const { data, error, isLoading, size, setSize, isValidating } =
+  const { data, error, isLoading, size, setSize, isValidating, mutate } =
     useSWRInfinite(
       (pageIndex) => `/api/v1/user-goods?per-size=10&page=${pageIndex + 1}`,
       fetchUserGoods,
@@ -101,6 +101,7 @@ function GoodsPage() {
           onLoadMore={handleLoadMore}
           canLoadMore={canLoadMore}
           isLoadingMore={isLoadingMore}
+          onChanged={() => mutate()}
         />
       </div>
     </>
