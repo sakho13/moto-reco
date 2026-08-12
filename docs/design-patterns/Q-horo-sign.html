@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern Q — 琺瑯サイン | MotoRepo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Antique&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* 琺瑯（ほうろう）看板の下地 */
+  --bg:#EDE3CE;--s1:#FAF6EC;--s2:#E2D5B8;--s3:#D3C3A0;
+  --border:#C9B892;--border2:#A8925F;
+  /* 濃紺のインク（看板の主文字色） */
+  --navy:#152B45;--navy2:#0C1B2C;
+  --ink:#1B1710;--ink2:#63563F;--ink3:#9A886A;
+  /* 朱赤（差し色・警告） */
+  --red:#A32126;--red2:#821A1E;
+  --green:#2F5D3A;
+  --amber:#B8811F;
+}
+body{font-family:'Zen Kaku Gothic New',sans-serif;background:#BFB093;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;gap:32px;flex-wrap:wrap}
+
+/* ── 看板そのもののフレーム（縁を巻いた琺瑯板 + 四隅のビス） ── */
+.frame{width:390px;background:var(--bg);border-radius:6px;overflow:hidden;position:relative;flex-shrink:0;
+  box-shadow:0 0 0 3px var(--s1),0 0 0 6px var(--navy),0 0 0 7px rgba(0,0,0,.35),8px 12px 0 -3px rgba(50,35,10,.3),0 26px 54px rgba(50,35,10,.35)}
+.frame-inner{height:812px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative}
+.frame-inner::-webkit-scrollbar{display:none}
+/* 琺瑯の照り（左上からの緩いハイライト）＋ 経年のムラ */
+.frame-inner::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:60;
+  background:linear-gradient(150deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,.06) 26%,transparent 46%)}
+.frame-inner::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 18% 12%,rgba(120,90,40,.05),transparent 42%),radial-gradient(circle at 82% 74%,rgba(120,90,40,.06),transparent 40%)}
+/* 四隅のビス */
+.screw{position:absolute;width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#EDEFF0,#9AA0A3 62%,#6B7174);z-index:70;box-shadow:0 1px 2px rgba(0,0,0,.45)}
+.screw::after{content:'';position:absolute;top:50%;left:20%;right:20%;height:1.4px;background:#5B6164;transform:translateY(-50%) rotate(38deg)}
+.screw.tl{top:9px;left:9px}.screw.tr{top:9px;right:9px}.screw.bl{bottom:9px;left:9px}.screw.br{bottom:9px;right:9px}
+
+/* ── ヘッダー（濃紺の看板帯 + 朱赤のライン） ── */
+header{position:sticky;top:0;z-index:50;background:var(--navy);padding:18px 22px 14px;
+  border-bottom:4px solid var(--red);display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.logo{font-family:'Zen Antique',serif;font-size:23px;color:#F7F1E0;letter-spacing:4px;line-height:1}
+.logo em{font-style:normal;color:#E8B04A}
+.logo small{display:block;font-family:'Zen Kaku Gothic New',sans-serif;font-size:8px;font-weight:500;color:#8FA3B8;letter-spacing:4px;margin-top:6px}
+.hrow{display:flex;gap:8px}
+.hbtn{width:34px;height:34px;border-radius:3px;background:#F7F1E0;border:1.5px solid #0A1725;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--navy);box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.hbtn svg{width:15px;height:15px}
+
+main{padding:0 16px 12px;position:relative;z-index:1}
+
+/* ── 走行距離（大きな琺瑯プレート） ── */
+.odo{margin:16px 0 6px;background:var(--s1);border:2px solid var(--navy);border-radius:3px;padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between;position:relative;
+  box-shadow:inset 0 0 0 1px var(--s1),inset 0 0 0 3px var(--s1),inset 0 0 0 4px var(--red),4px 5px 0 -1px rgba(50,35,10,.28)}
+.odo-label{font-family:'Zen Antique',serif;font-size:11px;color:var(--navy);letter-spacing:5px;margin-bottom:6px}
+.odo-val{font-family:'Zen Antique',serif;font-size:34px;color:var(--ink);letter-spacing:3px;line-height:1}
+.odo-val i{font-style:normal;color:var(--red)}
+.odo-unit{font-family:'Zen Antique',serif;font-size:13px;color:var(--ink2);letter-spacing:2px;align-self:flex-end}
+/* 丸い判子風の印 */
+.stamp{position:absolute;top:-11px;right:14px;width:50px;height:50px;border-radius:50%;border:2.5px solid var(--red);
+  background:rgba(250,246,236,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-11deg)}
+.stamp b{font-family:'Zen Antique',serif;font-size:15px;color:var(--red);line-height:1;letter-spacing:1px}
+.stamp small{font-family:'Zen Antique',serif;font-size:7px;color:var(--red);letter-spacing:1px;margin-top:2px}
+
+/* ── セクション見出し（濃紺の小看板） ── */
+.sec{display:flex;align-items:stretch;margin:22px 0 12px;border:2px solid var(--navy);border-radius:2px;overflow:hidden;
+  box-shadow:3px 4px 0 -1px rgba(50,35,10,.28)}
+.sec-no{background:var(--red);color:#F7F1E0;font-family:'Zen Antique',serif;font-size:13px;padding:8px 11px;letter-spacing:1px;display:flex;align-items:center}
+.sec-title{background:var(--navy);color:#F7F1E0;font-family:'Zen Antique',serif;font-size:15px;padding:8px 14px;letter-spacing:5px;flex:1;display:flex;align-items:center}
+.sec-en{background:var(--s1);color:var(--ink2);font-size:9px;font-weight:700;letter-spacing:2px;padding:8px 11px;display:flex;align-items:center}
+.sec-more{background:var(--s1);color:var(--red);font-size:10px;font-weight:700;letter-spacing:1px;padding:8px 11px;display:flex;align-items:center;cursor:pointer;border-left:1.5px solid var(--border)}
+
+/* ── バイク（琺瑯札） ── */
+.bikes{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.bike{background:var(--s1);border:2px solid var(--navy);border-radius:2px;padding:13px 12px;text-align:center;cursor:pointer;
+  transition:transform .12s,box-shadow .12s;box-shadow:3px 4px 0 -1px rgba(50,35,10,.28)}
+.bike:hover{transform:translate(-1px,-1px);box-shadow:4px 6px 0 -1px rgba(50,35,10,.3)}
+.bike:active{transform:translate(2px,3px);box-shadow:1px 1px 0 -1px rgba(50,35,10,.28)}
+.mark{width:48px;height:48px;margin:0 auto 9px;border-radius:50%;border:2px solid var(--navy);background:var(--bg);
+  display:flex;align-items:center;justify-content:center;color:var(--navy);box-shadow:inset 0 0 0 2px var(--s1)}
+.mark svg{width:24px;height:24px}
+.bike-name{font-family:'Zen Antique',serif;font-size:15px;color:var(--ink);letter-spacing:1.5px;margin-bottom:2px}
+.bike-km{font-size:10px;color:var(--ink3);letter-spacing:1px;margin-bottom:11px}
+.go{width:100%;font-family:'Zen Antique',serif;font-size:14px;letter-spacing:5px;color:#FAF6EC;background:var(--red);
+  border:2px solid var(--navy2);border-radius:2px;padding:8px 0 8px 5px;cursor:pointer;
+  box-shadow:0 2px 0 var(--navy2);transition:all .1s}
+.go:hover{background:#B92A2F}
+.go:active{transform:translateY(2px);box-shadow:0 0 0 var(--navy2)}
+
+/* ── 給油 ── */
+.fuel{border:2px solid var(--navy);border-radius:2px;background:var(--s1);overflow:hidden;box-shadow:3px 4px 0 -1px rgba(50,35,10,.28)}
+.fuel-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1.5px solid var(--border);cursor:pointer;transition:background .12s}
+.fuel-row:last-child{border-bottom:none}
+.fuel-row:hover{background:#F2EBD9}
+.fuel-no{width:30px;height:30px;flex-shrink:0;background:var(--navy);color:#F7F1E0;font-family:'Zen Antique',serif;font-size:14px;
+  display:flex;align-items:center;justify-content:center;border-radius:2px}
+.fuel-name{font-family:'Zen Antique',serif;font-size:15px;color:var(--ink);letter-spacing:1.5px}
+.fuel-sub{font-size:10px;color:var(--ink3);margin-top:2px;letter-spacing:.5px}
+.fuel-go{font-family:'Zen Antique',serif;font-size:12px;color:var(--navy);letter-spacing:2px;background:var(--bg);
+  border:1.5px solid var(--navy);border-radius:2px;padding:6px 12px 6px 14px;cursor:pointer;box-shadow:0 2px 0 rgba(21,43,69,.55);transition:all .1s}
+.fuel-go:hover{background:var(--navy);color:#F7F1E0}
+.fuel-go:active{transform:translateY(2px);box-shadow:0 0 0 rgba(21,43,69,.55)}
+
+/* ── ヒストリー（帳簿の罫線） ── */
+.hist-wrap{border:2px solid var(--navy);border-radius:2px;background:var(--s1);box-shadow:3px 4px 0 -1px rgba(50,35,10,.28);overflow:hidden}
+.hist{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1.5px solid var(--border)}
+.hist:last-child{border-bottom:none}
+.date{width:46px;flex-shrink:0;text-align:center;border-right:1.5px solid var(--border);padding-right:10px}
+.date b{display:block;font-family:'Zen Antique',serif;font-size:19px;color:var(--navy);line-height:1}
+.date small{display:block;font-family:'Zen Antique',serif;font-size:9px;color:var(--ink3);margin-top:3px;letter-spacing:1px}
+.hist-body{flex:1;min-width:0}
+.hist-title{font-family:'Zen Antique',serif;font-size:14px;color:var(--ink);letter-spacing:1px}
+.hist-sub{font-size:10px;color:var(--ink3);margin-top:3px}
+.hist-val{font-family:'Zen Antique',serif;font-size:14px;color:var(--red);letter-spacing:1px;flex-shrink:0}
+.hist-val.l{color:var(--amber)}
+
+/* ── ナビ（濃紺の帯・アクティブは朱赤の札） ── */
+nav{position:sticky;bottom:0;z-index:50;display:flex;height:62px;background:var(--navy);border-top:4px solid var(--red)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;
+  border-right:1px solid rgba(247,241,224,.14);transition:background .12s}
+.ni:last-child{border-right:none}
+.ni:hover{background:rgba(247,241,224,.07)}
+.ni svg{width:19px;height:19px;color:#7E93AA}
+.ni span{font-family:'Zen Antique',serif;font-size:10px;color:#7E93AA;letter-spacing:2px}
+.ni.active{background:var(--red)}
+.ni.active svg,.ni.active span{color:#FAF6EC}
+
+/* ── 解説パネル ── */
+.info-panel{width:320px;display:flex;flex-direction:column;gap:20px;padding-top:44px;flex-shrink:0}
+.info-panel h2{font-family:'Zen Antique',serif;font-size:24px;color:#1B1710;letter-spacing:4px}
+.info-panel h2 span{color:var(--red)}
+.tag{display:inline-block;background:var(--navy);color:#F7F1E0;font-size:9px;font-weight:700;padding:4px 9px;letter-spacing:2px;margin-bottom:12px;border-radius:2px}
+.desc{font-size:13px;line-height:1.9;color:#5C5039}
+.cap{font-size:10px;font-weight:700;letter-spacing:2.5px;color:#867757;margin-bottom:16px}
+.palette{display:flex;gap:9px;flex-wrap:wrap}
+.swatch{width:36px;height:36px;border-radius:2px;position:relative;border:1px solid rgba(60,45,20,.4)}
+.swatch::after{content:attr(data-label);position:absolute;bottom:-19px;left:50%;transform:translateX(-50%);font-size:8px;color:#867757;white-space:nowrap;font-family:monospace}
+.traits{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+.trait{font-size:12px;color:#5C5039;display:flex;gap:8px;line-height:1.6}
+.trait::before{content:'—';color:var(--red);flex-shrink:0}
+.best{padding:14px;background:#FAF6EC;border:2px solid var(--navy);border-radius:2px;box-shadow:3px 4px 0 -1px rgba(50,35,10,.28)}
+.best-h{font-size:10px;color:var(--red);font-weight:700;letter-spacing:2px;margin-bottom:7px}
+.best-b{font-size:12px;color:#5C5039;line-height:1.8}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="frame-inner">
+    <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+
+    <header>
+      <div class="logo">モト<em>・</em>レコ<small>MOTO REPO</small></div>
+      <div class="hrow">
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="hbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="odo">
+        <div>
+          <div class="odo-label">総 走 行</div>
+          <div class="odo-val">20,65<i>0</i></div>
+        </div>
+        <div class="odo-unit">粁</div>
+        <div class="stamp"><b>皆勤</b><small>3ヶ月</small></div>
+      </div>
+
+      <!-- 01 出発 -->
+      <div class="sec">
+        <div class="sec-no">壱</div>
+        <div class="sec-title">出発</div>
+        <div class="sec-en">DEPARTURE</div>
+      </div>
+      <div class="bikes">
+        <div class="bike">
+          <div class="mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+          <div class="bike-name">CB400SF</div>
+          <div class="bike-km">12,450 km</div>
+          <button class="go">出発</button>
+        </div>
+        <div class="bike">
+          <div class="mark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></div>
+          <div class="bike-name">NC750X</div>
+          <div class="bike-km">8,200 km</div>
+          <button class="go">出発</button>
+        </div>
+      </div>
+
+      <!-- 02 給油 -->
+      <div class="sec">
+        <div class="sec-no">弐</div>
+        <div class="sec-title">給油</div>
+        <div class="sec-en">FUEL</div>
+      </div>
+      <div class="fuel">
+        <div class="fuel-row">
+          <div class="fuel-no">甲</div>
+          <div style="flex:1"><div class="fuel-name">CB400SF</div><div class="fuel-sub">前回 3日前 ・ 28.4 km/L</div></div>
+          <button class="fuel-go">記録</button>
+        </div>
+        <div class="fuel-row">
+          <div class="fuel-no">乙</div>
+          <div style="flex:1"><div class="fuel-name">NC750X</div><div class="fuel-sub">前回 1週間前 ・ 31.2 km/L</div></div>
+          <button class="fuel-go">記録</button>
+        </div>
+      </div>
+
+      <!-- 03 記録 -->
+      <div class="sec">
+        <div class="sec-no">参</div>
+        <div class="sec-title">記録</div>
+        <div class="sec-more">全て見る</div>
+      </div>
+      <div class="hist-wrap">
+        <div class="hist">
+          <div class="date"><b>25</b><small>六月</small></div>
+          <div class="hist-body"><div class="hist-title">奥多摩ツーリング</div><div class="hist-sub">CB400SF ・ 晴</div></div>
+          <div class="hist-val">245 km</div>
+        </div>
+        <div class="hist">
+          <div class="date"><b>22</b><small>六月</small></div>
+          <div class="hist-body"><div class="hist-title">給油</div><div class="hist-sub">NC750X ・ レギュラー</div></div>
+          <div class="hist-val l">32.1 L</div>
+        </div>
+        <div class="hist">
+          <div class="date"><b>20</b><small>六月</small></div>
+          <div class="hist-body"><div class="hist-title">箱根ドライブ</div><div class="hist-sub">CB400SF ・ 曇</div></div>
+          <div class="hist-val">189 km</div>
+        </div>
+      </div>
+    </main>
+
+    <nav>
+      <div class="ni active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+        <span>家</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+        <span>車体</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+        <span>記録</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+        <span>設定</span>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<div class="info-panel">
+  <div>
+    <div class="tag">PATTERN Q</div>
+    <h2>琺瑯<span>サイン</span></h2>
+    <p class="desc">昭和の街角に掛かっていた琺瑯（ほうろう）看板の造形。濃紺の地に朱赤のライン、縁を巻いた白フチ、四隅のビス。見出しはすべて「小看板」として立ち、UI全体が一枚の金属板に焼き付けられた印刷物のように見える。Pより主張が強く、ブランドの顔として効く。</p>
+  </div>
+  <div>
+    <div class="cap">COLOR PALETTE</div>
+    <div class="palette">
+      <div class="swatch" style="background:#EDE3CE" data-label="#EDE3CE"></div>
+      <div class="swatch" style="background:#FAF6EC" data-label="#FAF6EC"></div>
+      <div class="swatch" style="background:#152B45" data-label="#152B45"></div>
+      <div class="swatch" style="background:#A32126" data-label="#A32126"></div>
+      <div class="swatch" style="background:#B8811F" data-label="#B8811F"></div>
+      <div class="swatch" style="background:#2F5D3A" data-label="#2F5D3A"></div>
+    </div>
+  </div>
+  <div style="margin-top:26px">
+    <div class="cap">TYPOGRAPHY</div>
+    <div style="font-family:'Zen Antique',serif;font-size:20px;color:#1B1710;letter-spacing:3px">Zen Antique — 見出し・数値</div>
+    <div style="font-size:13px;color:#5C5039;margin-top:8px;letter-spacing:.5px">Zen Kaku Gothic New — 本文・補足</div>
+  </div>
+  <div class="traits">
+    <div class="trait">濃紺 × 朱赤 × 生成りの三色に限定した配色</div>
+    <div class="trait">見出しは「壱・弐・参」の番号札付き小看板</div>
+    <div class="trait">白フチを巻いた二重枠（inset box-shadow で再現）</div>
+    <div class="trait">四隅のビスと琺瑯の照り（斜めハイライト）</div>
+    <div class="trait">「粁」「甲乙」など旧字ラベルで時代感を担保</div>
+    <div class="trait">影は硬いオフセットのみ。ぼかし影は使わない</div>
+  </div>
+  <div class="best">
+    <div class="best-h">BEST FOR</div>
+    <div class="best-b">LP・About・リリースノートなど「顔」となる面。アプリ全面に敷くと情報量の多い画面で圧が強いため、Pと併用して見出し系だけQにする使い分けも有効。</div>
+  </div>
+</div>
+
+</body>
+</html>
