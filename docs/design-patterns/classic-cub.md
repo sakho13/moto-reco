@@ -134,9 +134,12 @@ P と R は寸法・構造が同一なので、テーマ1つの light / dark と
 | `success` | `#3bceac` | `#3E6B3A` | ハンターグリーン |
 | `successHover` | `#32b89c` | `#345A31` | |
 | `successActive` | `#279f85` | `#2A4A28` | |
-| `danger` | `#CC0000` | `#A32126` | 朱赤 |
-| `dangerHover` | `#AA0000` | `#871A1E` | |
-| `dangerActive` | `#880000` | `#6B1215` | |
+| `danger` | `#CC0000` | `#6E1215` | 深い血赤。product と同系色になるため明度で分ける |
+| `dangerHover` | `#AA0000` | `#5A0E11` | |
+| `dangerActive` | `#880000` | `#470B0D` | |
+| `dangerInk` | （なし） | `#FFF3E2` | danger を敷いたときの文字色 |
+| `productInk` | （なし） | `#FFF3E2` | product を敷いたときの文字色 |
+| `socialInk` | （なし） | `#FFF3E2` | social を敷いたときの文字色 |
 | `warning` | `#FFD166` | `#C08A2E` | 計器のアンバーランプ |
 | `warningHover` | `#E6B800` | `#A5741F` | |
 | `warningActive` | `#CC9900` | `#8A6018` | |
@@ -158,30 +161,60 @@ P と R は寸法・構造が同一なので、テーマ1つの light / dark と
 | `product` | `#38BDF8` | `#D9A441` |
 | `productHover` | `#0EA5E9` | `#F0BC5C` |
 | `productActive` | `#0284C7` | `#B98B2E` |
+| `productInk` | （なし） | `#241D16` |
 | `success` | `#34D399` | `#5FA36B` |
-| `danger` | `#F87171` | `#C0464A` |
+| `danger` | `#F87171` | `#E0777B` |
+| `dangerInk` | （なし） | `#241D16` |
 | `warning` | `#FBBF24` | `#E0B45E` |
 | `social` | `#8B9DC3` | `#7E9CB8` |
+| `socialActive` | `#6A7B9D` | `#708DA8` |
+| `socialInk` | （なし） | `#16211A` |
 | `ink` | `#E2E8F0` | `#EDE3CE` |
 | `inkLight` | `#94A3B8` | `#AEBBAC` |
 | `inkDark` | `#F8FAFC` | `#FBF6EA` |
 
+ダークの `danger` はモックアップの `#C0464A`（テールランプの赤）より明るい。
+`--color-danger` は塗りだけでなく入力エラーの文字色としても使われており、
+`#C0464A` では地色 `#1A2820` に対して 3.08:1 と WCAG AA（4.5:1）に届かないため、
+5.18:1 を確保できる明度まで上げている。
+
 ### 4-3. `product` と `danger` が両方赤になる問題
 
 ブランド色を赤にすると、破壊的操作（`danger`）と色相が近接して区別が曖昧になる。
-色だけで解決しようとすると、どちらかがカブらしさを失う。**形で二重に伝える**方針を推奨する。
+ライトテーマでは **明度で分ける** 方針を採った。
 
-- **`product`（主要アクション）＝ 塗りつぶしの赤**。塗りの赤は product が独占する
-- **`danger`（破壊的操作）＝ 白地 + 赤枠 + 赤文字のアウトライン + アイコン + 確認ダイアログ**
+- `product` = `#9B2226`（タスマニアレッド）
+- `danger` = `#6E1215`（深い血赤）— 並べたときに明確に沈んで見える
 
-`Button` は既に `outline` プロパティを持つので、`danger` を原則 `outline` 運用にすれば
-コンポーネントの追加なしで成立する。
+それでも同系色ではあるため、破壊的操作は色だけに頼らず、
+`Button` の `outline` バリアントと確認ダイアログを併用して形でも伝えること。
 
-採用しない場合の代替は `product` をパールブルー `#1F4666` にし、赤をロゴ・アクティブ下線・
-数値ハイライトだけの差し色に格下げする案。トークン衝突は起きないが、赤の面積が減るぶん
-カブらしさは弱まる。
+ダークテーマでは `product` がアンバー、`danger` が赤で色相が離れるためこの問題は起きない。
 
-### 4-4. 角丸
+### 4-4. 塗りの上に乗る文字色（`*Ink` トークン）
+
+`product` はライトで赤、ダークでアンバーと明度が大きく変わるため、
+`color: white` 固定では**ダークでアンバー地に白文字（2.25:1）となり判読できない**。
+塗りごとに前景色トークンを持たせて解決している。
+
+| トークン | light | dark | 用途 |
+|---|---|---|---|
+| `productInk` | `#FFF3E2` | `#241D16` | `--color-product` を背景にした要素の文字色 |
+| `dangerInk` | `#FFF3E2` | `#241D16` | 同上（danger） |
+| `socialInk` | `#FFF3E2` | `#16211A` | 同上（social） |
+
+主要な組み合わせは WCAG AA（4.5:1）を満たしている（実測値）。
+
+| 組み合わせ | light | dark |
+|---|---|---|
+| `ink` on `background` | 14.28 | 12.04 |
+| `inkLight` on `background` | 5.16 | 7.68 |
+| `productInk` on `product` | 7.23 | 7.40 |
+| `dangerInk` on `danger` | 10.89 | 5.62 |
+| `socialInk` on `social` | 7.44 | 5.79 |
+| `danger` as text on `background` | 10.24 | 5.18 |
+
+### 4-5. 角丸
 
 均一な等比をやめ、部位ごとに曲率を変える。
 
@@ -192,7 +225,7 @@ P と R は寸法・構造が同一なので、テーマ1つの light / dark と
 | `radius.lg` | `1rem` | `0.875rem` (14px) — カード |
 | `radius.full` | `9999px` | 変更なし — メーター・ヘッドライト |
 
-### 4-5. 影
+### 4-6. 影
 
 ぼかし影を捨て、**硬いオフセット + inset のハイライト**（塗装面の照り）に置き換える。
 
@@ -211,20 +244,37 @@ shadows: {
 }
 ```
 
-### 4-6. フォント（トークン未定義 — 追加が必要）
+### 4-7. フォント
 
-`ThemeTokens` にフォントファミリーの枠がないため、現状は `layout.tsx` に Geist が直書きされている。
-テーマで切り替えられるよう `fontFamilies` の追加を提案する。
+`ThemeTokens` にフォントファミリーの枠がなく、`layout.tsx` に Geist が直書きされていたため、
+`fontFamilies` トークンを追加して見出し（明朝）と本文（和文ゴシック）を分けた。
 
 ```ts
 fontFamilies: {
-  display: "'Shippori Mincho B1', serif",       // 見出し・数値（Qの場合は 'Zen Antique'）
-  body: "'Zen Kaku Gothic New', sans-serif",    // 本文・ラベル
+  // 見出し・数値
+  display: "'Hiragino Mincho ProN', 'Hiragino Mincho Pro', 'Yu Mincho', YuMincho, 'Noto Serif JP', 'Noto Serif CJK JP', serif",
+  // 本文・ラベル
+  body: "'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', YuGothic, 'Noto Sans JP', 'Noto Sans CJK JP', system-ui, sans-serif",
 }
 ```
 
-いずれも Google Fonts で入手可能。和文サブセットが大きいため、
-`next/font/google` の `subsets` 指定か、使用字種を絞ったサブセット化を前提とする。
+モックアップで使った Shippori Mincho B1 / Zen Kaku Gothic New ではなく、
+**各OSに標準搭載されている明朝・ゴシックを指定している**。理由は次の3点。
+
+1. 和文Webフォントは1書体あたり数MB。`preload: false` にしても実利用時の転送量が大きい
+2. `next/font/google` はビルド時に Google Fonts へ取りに行くため、
+   外部ネットワークに出られないビルド環境ではビルド自体が失敗する
+3. 「見出しは明朝、本文はゴシック」というコントラストが意匠の要であり、
+   その効果はOS標準の明朝でも十分に得られる
+
+指定書体そのものにこだわる場合は、使用字種を絞ったサブセットを作って
+`next/font/local` で自己ホストする方法がある（ビルド時の外部依存も発生しない）。
+その場合は本トークンの値を差し替えるだけでよい。
+
+`ThemeProvider` は `useEffect` でトークンを流し込むため、ハイドレーション前は
+`--font-family-*` が未定義になる。初回描画で書体が入れ替わらないよう、
+`apps/web/app/globals.css` の `:root` に同じ値を既定値として置いている
+（**トークン側を変更したら globals.css も合わせること**）。
 
 ---
 
@@ -243,30 +293,36 @@ fontFamilies: {
 
 ---
 
-## 6. 段階的な導入案
+## 6. 段階的な導入案と進捗
 
 一度に全画面を変えず、影響範囲の小さい順に進める。
 
-1. **配色とフォントの差し替え**（`packages/theme` + `layout.tsx`）
-   — 構造を変えないので差分が読みやすく、E2Eへの影響も出ない
-2. **`Button` / `BaseCard` の質感調整**（`packages/ui`）
-   — Storybook（`pnpm storybook`）で確認しながら進められる
-3. **新規コンポーネント追加**（`Dial` / `Odometer` / `FuelGauge`）
-   — ホーム画面から適用
-4. **ラベルの和文化**（`START` → `出発` など）
-   — ここで初めて `apps/e2e` の Page Object Model / spec の文言参照に影響が出るため、
-     `apps/e2e/pages` と `apps/e2e/tests` の該当箇所を同一PRで修正する
-5. **ダークモード（R）の適用**
-6. **LP側へのQ適用**（採用する場合）
+| # | ステップ | 状態 |
+|---|---|---|
+| 1 | **配色とフォントの差し替え**（`packages/theme` + `layout.tsx`）— 構造を変えないので差分が読みやすく、E2Eへの影響も出ない | ✅ 適用済み（P=light / R=dark） |
+| 2 | **`Button` の質感調整**（`packages/ui`）— 押し込み挙動と上面ハイライト | ✅ 適用済み |
+| 3 | **`BaseCard` の影** — `--shadow-sm` を参照しているためトークン差し替えで反映 | ✅ 適用済み（コンポーネント変更なし） |
+| 4 | **新規コンポーネント追加**（`Dial` / `Odometer` / `FuelGauge`）— ホーム画面から適用 | 未着手 |
+| 5 | **ラベルの和文化**（`START` → `出発` など） | 未着手 |
+| 6 | **ナビのアクティブ表現を下線バーに** | 未着手 |
+| 7 | **アイコンの線画SVG統一** | 未着手 |
+| 8 | **LP側へのQ適用**（採用する場合） | 対象外（P・R を採用） |
+
+ステップ5では `apps/e2e` の Page Object Model / spec の文言参照に影響が出るため、
+`apps/e2e/pages` と `apps/e2e/tests` の該当箇所を同一PRで修正すること。
 
 ---
 
 ## 7. E2Eへの影響
 
-**本検討の成果物（`docs/design-patterns/` 配下のHTML・PNG・本ドキュメント）による影響はない。**
-`apps/web` のコンポーネント・文言・ロール名を一切変更していないため、
-`apps/e2e/pages` および `apps/e2e/tests` の参照先はすべて現状のまま有効。
+**ステップ1〜3（配色・書体・質感の適用）による影響はない。**
 
-ただし上記「段階的な導入案」のステップ4（ラベルの和文化）を実施する段階では、
+変更したのはカラートークン・書体・CSSの見た目のみで、
+文言・DOM構造・ロール名は一切変更していない。
+`apps/e2e/pages` と `apps/e2e/tests` を確認したところ、
+`toHaveCSS` や色・フォントに関するアサーションは存在せず、
+すべて `getByRole()` / `getByText()` による参照のため影響を受けない。
+
+ただし「段階的な導入案」のステップ5（ラベルの和文化）を実施する段階では、
 `getByRole('button', { name: ... })` および `getByText()` の引数が影響を受ける。
 実装時に `apps/e2e` 側を同一PRで修正すること。

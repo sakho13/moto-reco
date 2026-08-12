@@ -6,7 +6,7 @@
   min-height: 100vh;
   padding: 40px 24px;
   text-align: center;
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-family-body);
   background: #ffffff;
   color: #171717;
 }

@@ -48,7 +48,7 @@
   display: inline-block;
   padding: var(--spacing-2) var(--spacing-6);
   background-color: var(--color-product);
-  color: var(--color-product-foreground);
+  color: var(--color-productInk);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   font-weight: 500;

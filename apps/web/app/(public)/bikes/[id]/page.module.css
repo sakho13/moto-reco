@@ -3,7 +3,7 @@
   background: var(--background);
   min-height: 100vh;
   padding: 80px 96px 64px;
-  font-family: var(--font-geist-sans);
+  font-family: var(--font-family-body);
 }
 
 .header {

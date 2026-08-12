@@ -22,7 +22,7 @@
   border: none;
   cursor: pointer;
   text-align: left;
-  font-family: var(--font-geist-sans);
+  font-family: var(--font-family-body);
   transition: background 0.2s ease;
 }
 

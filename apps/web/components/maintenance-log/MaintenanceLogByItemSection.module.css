@@ -72,7 +72,7 @@
   display: inline-block;
   padding: 1px var(--spacing-1);
   background-color: var(--color-danger);
-  color: white;
+  color: var(--color-dangerInk);
   border-radius: var(--radius-sm);
   font-size: 0.625rem;
   font-weight: var(--font-weight-bold);
