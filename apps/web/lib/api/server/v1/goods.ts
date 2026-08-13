@@ -6,6 +6,7 @@ import {
   GoodsModelSearchQuerySchema,
   SuccessResponse,
 } from '@repo/shared-types'
+import { honoAdminMiddleware } from '../middlewares/honoAdmin'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateQuery } from '../middlewares/zodValidation'
 import { PrismaCompanyRepository } from '../repositories/PrismaCompanyRepository'
@@ -14,29 +15,35 @@ import { GoodsModelSearchParams } from '../valueObjects/GoodsModelSearchParams'
 
 const goods = new Hono()
 
-goods.get('/manufacturers', honoAuthMiddleware, async (c) => {
-  const companyRepo = new PrismaCompanyRepository(prisma)
+goods.get(
+  '/manufacturers',
+  honoAuthMiddleware,
+  honoAdminMiddleware,
+  async (c) => {
+    const companyRepo = new PrismaCompanyRepository(prisma)
 
-  const manufacturers = (
-    await companyRepo.findAll({ category: 'GOODS_MANUFACTURER' })
-  ).filter((m) => m.isActive)
+    const manufacturers = (
+      await companyRepo.findAll({ category: 'GOODS_MANUFACTURER' })
+    ).filter((m) => m.isActive)
 
-  return c.json<SuccessResponse<ApiResponseGoodsManufacturer>>({
-    status: 'success',
-    data: {
-      manufacturers: manufacturers.map((m) => ({
-        goodsManufacturerId: m.id,
-        name: m.name,
-        nameEn: m.nameEn,
-      })),
-    },
-    message: 'グッズメーカー一覧取得成功',
-  })
-})
+    return c.json<SuccessResponse<ApiResponseGoodsManufacturer>>({
+      status: 'success',
+      data: {
+        manufacturers: manufacturers.map((m) => ({
+          goodsManufacturerId: m.id,
+          name: m.name,
+          nameEn: m.nameEn,
+        })),
+      },
+      message: 'グッズメーカー一覧取得成功',
+    })
+  }
+)
 
 goods.get(
   '/models',
   honoAuthMiddleware,
+  honoAdminMiddleware,
   zodValidateQuery(GoodsModelSearchQuerySchema),
   async (c) => {
     const query = c.req.valid('query')

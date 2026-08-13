@@ -13,6 +13,12 @@ function Page() {
   const router = useRouter()
   const { isGuest } = useAuth()
 
+  const { data: profile } = useSWR('/api/v1/user/profile', async (url) => {
+    const response = await apiGet(url)
+    return response.data
+  })
+  const isAdmin = profile?.role === 'ADMIN'
+
   // MyBikeListSection と同じ SWR キーを使いキャッシュを共有する
   const { data: bikesData, isLoading: bikesLoading } = useSWR(
     '/api/v1/user-bike/bikes',
@@ -35,9 +41,11 @@ function Page() {
           >
             バイクを登録
           </Button>
-          <Button variant="cloud" onClick={() => router.push('/app/goods')}>
-            グッズ一覧
-          </Button>
+          {isAdmin && (
+            <Button variant="cloud" onClick={() => router.push('/app/goods')}>
+              グッズ一覧
+            </Button>
+          )}
         </div>
         {isAtGuestBikeLimit && (
           <p className="text-sm text-gray-500">

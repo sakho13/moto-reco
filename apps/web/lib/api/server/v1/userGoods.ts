@@ -14,6 +14,7 @@ import {
   UserGoodsUpdateRequestSchema,
 } from '@repo/shared-types'
 import { UserGoodsEntity } from '../entities/UserGoodsEntity'
+import { honoAdminMiddleware } from '../middlewares/honoAdmin'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import {
   zodValidateJson,
@@ -68,6 +69,7 @@ function toResponseData(entity: UserGoodsEntity): ApiResponseUserGoodsDetail {
 userGoods.get(
   '/',
   honoAuthMiddleware,
+  honoAdminMiddleware,
   zodValidateQuery(UserGoodsListQuerySchema),
   async (c) => {
     const { userEntity } = c.var.user!
@@ -106,6 +108,7 @@ userGoods.get(
 userGoods.get(
   '/:userGoodsId',
   honoAuthMiddleware,
+  honoAdminMiddleware,
   zodValidateParam(UserGoodsDetailParamSchema),
   async (c) => {
     const { userEntity } = c.var.user!
@@ -136,6 +139,7 @@ userGoods.get(
 userGoods.post(
   '/',
   honoAuthMiddleware,
+  honoAdminMiddleware,
   zodValidateJson(UserGoodsRegisterRequestSchema),
   async (c) => {
     const { userEntity } = c.var.user!
@@ -175,6 +179,7 @@ userGoods.post(
 userGoods.patch(
   '/:userGoodsId',
   honoAuthMiddleware,
+  honoAdminMiddleware,
   zodValidateParam(UserGoodsDetailParamSchema),
   zodValidateJson(UserGoodsUpdateRequestSchema),
   async (c) => {
@@ -219,6 +224,7 @@ userGoods.patch(
 userGoods.delete(
   '/:userGoodsId',
   honoAuthMiddleware,
+  honoAdminMiddleware,
   zodValidateParam(UserGoodsDetailParamSchema),
   async (c) => {
     const { userEntity } = c.var.user!

@@ -172,12 +172,14 @@ function BikeDetailPage() {
           icon={<WrenchIcon />}
         />
 
-        <NavigationCard
-          href={`/app/my-bike/${id}/goods`}
-          title="取り付けアクセサリ"
-          description="取り付けたグッズを確認・管理できます"
-          icon={<GoodsIcon />}
-        />
+        {isAdmin && (
+          <NavigationCard
+            href={`/app/my-bike/${id}/goods`}
+            title="取り付けアクセサリ"
+            description="取り付けたグッズを確認・管理できます"
+            icon={<GoodsIcon />}
+          />
+        )}
       </div>
     </>
   )

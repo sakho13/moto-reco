@@ -1,14 +1,11 @@
 import { beforeEach, describe, expect, test } from 'vitest'
-import {
-  createGuestUser,
-  createTestUser,
-  testAuthRequired,
-} from '../../helpers/authHelper'
+import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createTestUserBike } from '../../helpers/bikeHelper'
 import {
   getInactiveTestGoodsModelId,
   getTestGoodsModelId,
 } from '../../helpers/goodsModelHelper'
+import { createAdminUser } from '../../helpers/notificationHelper'
 import {
   expect404Error,
   expectValidationError,
@@ -21,6 +18,7 @@ describe('UserGoods API Endpoints', () => {
 
   beforeEach(async () => {
     const user = await createTestUser()
+    await createAdminUser(user.token, user.userId)
     token = user.token
     goodsModelId = await getTestGoodsModelId()
   })
@@ -168,6 +166,7 @@ describe('UserGoods API Endpoints', () => {
       })
 
       const otherUser = await createTestUser()
+      await createAdminUser(otherUser.token, otherUser.userId)
       await app.request('/api/v1/user-goods', {
         method: 'POST',
         headers: {
@@ -261,6 +260,7 @@ describe('UserGoods API Endpoints', () => {
 
     test('他ユーザーのグッズは取得できない', async () => {
       const otherUser = await createTestUser()
+      await createAdminUser(otherUser.token, otherUser.userId)
       const createRes = await app.request('/api/v1/user-goods', {
         method: 'POST',
         headers: {
@@ -460,56 +460,6 @@ describe('UserGoods API Endpoints', () => {
         }
       )
       expect(getRes.status).toBe(404)
-    })
-  })
-
-  describe('ゲストアカウントのグッズ登録制限（5件まで）', () => {
-    test('ゲストアカウントは5件まで登録できる', async () => {
-      const guest = await createGuestUser()
-
-      for (let i = 0; i < 5; i++) {
-        const res = await app.request('/api/v1/user-goods', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${guest.token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ goodsModelId }),
-        })
-        expect(res.status).toBe(201)
-      }
-    })
-
-    test('ゲストアカウントは6件目のグッズを登録できない', async () => {
-      const guest = await createGuestUser()
-
-      for (let i = 0; i < 5; i++) {
-        await app.request('/api/v1/user-goods', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${guest.token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ goodsModelId }),
-        })
-      }
-
-      const res = await app.request('/api/v1/user-goods', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${guest.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ goodsModelId }),
-      })
-
-      const json = await res.json()
-      expect(res.status).toBe(400)
-      expect(json).toMatchObject({
-        status: 'error',
-        errorCode: 'INVALID_REQUEST',
-        message: 'ゲストアカウントはグッズを5件まで登録できます',
-      })
     })
   })
 })
