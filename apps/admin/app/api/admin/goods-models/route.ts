@@ -47,6 +47,9 @@ export async function POST(request: NextRequest) {
     modelNumber: string
     name: string
     category: string
+    imageUrl?: string
+    description?: string
+    releaseDate?: string
     amazonAsin?: string
     rakutenItemId?: string
     officialUrl?: string

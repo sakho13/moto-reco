@@ -42,6 +42,18 @@ export class GoodsModelEntity {
     return this._value.category
   }
 
+  public get imageUrl(): string | null {
+    return this._value.imageUrl
+  }
+
+  public get description(): string | null {
+    return this._value.description
+  }
+
+  public get releaseDate(): Date | null {
+    return this._value.releaseDate
+  }
+
   public get amazonAsin(): string | null {
     return this._value.amazonAsin
   }

@@ -25,6 +25,31 @@ export default function GoodsModelShowPage() {
         <Descriptions.Item label="カテゴリ">
           <Tag>{getGoodsCategoryLabel(record?.category as string)}</Tag>
         </Descriptions.Item>
+        <Descriptions.Item label="商品画像">
+          {record?.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={record.imageUrl as string}
+              alt=""
+              style={{ maxWidth: 240, maxHeight: 240, objectFit: 'contain' }}
+            />
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
+        <Descriptions.Item label="紹介文">
+          {(record?.description as string) ?? '—'}
+        </Descriptions.Item>
+        <Descriptions.Item label="販売開始日">
+          {record?.releaseDate ? (
+            <DateField
+              value={record.releaseDate as string}
+              format="YYYY/MM/DD"
+            />
+          ) : (
+            '—'
+          )}
+        </Descriptions.Item>
         <Descriptions.Item label="Amazon ASIN">
           {(record?.amazonAsin as string) ?? '—'}
         </Descriptions.Item>

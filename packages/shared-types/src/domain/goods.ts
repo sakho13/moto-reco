@@ -31,6 +31,9 @@ export type GoodsModel = {
   modelNumber: string
   name: string
   category: GoodsCategory
+  imageUrl: string | null
+  description: string | null
+  releaseDate: Date | null
   amazonAsin: string | null
   rakutenItemId: string | null
   officialUrl: string | null

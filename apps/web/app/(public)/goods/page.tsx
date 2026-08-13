@@ -1,4 +1,7 @@
+import { ShoppingBag } from 'lucide-react'
 import type { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
 import { prisma } from '@repo/database'
 import type { GoodsCategory, GoodsModelId } from '@repo/shared-types'
 import styles from './page.module.css'
@@ -6,7 +9,6 @@ import {
   GOODS_CATEGORY_LABELS,
   GOODS_CATEGORY_ORDER,
 } from '@/components/goods/goodsCategoryLabels'
-import { GoodsModelEntity } from '@/lib/api/server/entities/GoodsModelEntity'
 import { PrismaCompanyRepository } from '@/lib/api/server/repositories/PrismaCompanyRepository'
 import { PrismaGoodsModelRepository } from '@/lib/api/server/repositories/PrismaGoodsModelRepository'
 import { GoodsModelSearchParams } from '@/lib/api/server/valueObjects/GoodsModelSearchParams'
@@ -75,20 +77,6 @@ export default async function PublicGoodsPage({
     })
   )
 
-  const modelsByManufacturer = new Map<string, GoodsModelEntity[]>()
-  for (const model of models) {
-    const list = modelsByManufacturer.get(model.goodsManufacturerId) ?? []
-    list.push(model)
-    modelsByManufacturer.set(model.goodsManufacturerId, list)
-  }
-
-  const sections = manufacturers
-    .map((manufacturer) => ({
-      manufacturer,
-      items: modelsByManufacturer.get(manufacturer.id) ?? [],
-    }))
-    .filter((section) => section.items.length > 0)
-
   const isFiltered = Boolean(trimmedKeyword || manufacturerId || category)
 
   return (
@@ -135,7 +123,7 @@ export default async function PublicGoodsPage({
         </button>
       </form>
 
-      {sections.length === 0 ? (
+      {models.length === 0 ? (
         <div className={styles.empty}>
           <p>
             {isFiltered
@@ -144,77 +132,42 @@ export default async function PublicGoodsPage({
           </p>
         </div>
       ) : (
-        <div className={styles.manufacturerList}>
-          {sections.map(({ manufacturer, items }) => (
-            <section
-              key={manufacturer.id}
-              className={styles.manufacturerSection}
-            >
-              <h2 className={styles.manufacturerName}>
-                {manufacturer.websiteUrl ? (
-                  <a
-                    href={manufacturer.websiteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {manufacturer.name}
-                  </a>
-                ) : (
-                  manufacturer.name
-                )}
-              </h2>
-              <ul className={styles.grid}>
-                {items.map((model) => (
-                  <li key={model.id as GoodsModelId} className={styles.card}>
-                    <p className={styles.cardCategory}>
-                      {GOODS_CATEGORY_LABELS[model.category]}
-                    </p>
-                    <p className={styles.cardTitle}>{model.name}</p>
-                    <p className={styles.cardModelNumber}>
-                      {model.modelNumber}
-                    </p>
-                    {(model.officialUrl ||
-                      model.amazonUrl ||
-                      model.rakutenUrl) && (
-                      <div className={styles.linksRow}>
-                        {model.officialUrl && (
-                          <a
-                            href={model.officialUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.link}
-                          >
-                            公式サイト
-                          </a>
-                        )}
-                        {model.amazonUrl && (
-                          <a
-                            href={model.amazonUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.link}
-                          >
-                            Amazon
-                          </a>
-                        )}
-                        {model.rakutenUrl && (
-                          <a
-                            href={model.rakutenUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.link}
-                          >
-                            楽天市場
-                          </a>
-                        )}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </section>
+        <ul className={styles.grid}>
+          {models.map((model) => (
+            <li key={model.id as GoodsModelId}>
+              <Link href={`/goods/${model.id}`} className={styles.card}>
+                <div className={styles.cardImage}>
+                  {model.imageUrl ? (
+                    <Image
+                      src={model.imageUrl}
+                      alt={model.name}
+                      fill
+                      sizes="(max-width: 900px) 100vw, 320px"
+                      style={{ objectFit: 'contain' }}
+                      unoptimized
+                    />
+                  ) : (
+                    <ShoppingBag
+                      className={styles.cardImagePlaceholder}
+                      size={40}
+                      strokeWidth={1.5}
+                    />
+                  )}
+                </div>
+                <div className={styles.cardBody}>
+                  <p className={styles.cardManufacturer}>
+                    {model.manufacturerName}
+                  </p>
+                  <p className={styles.cardCategory}>
+                    {GOODS_CATEGORY_LABELS[model.category]}
+                  </p>
+                  <p className={styles.cardTitle}>{model.name}</p>
+                  <p className={styles.cardModelNumber}>{model.modelNumber}</p>
+                </div>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   )

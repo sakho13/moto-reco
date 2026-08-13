@@ -159,6 +159,10 @@ model MGoodsModel {
   name        String // 商品名
   category    GoodsCategory @map("category")
 
+  imageUrl    String?   @map("image_url") // 商品画像URL
+  description String?   @map("description") // 紹介文（公式サイト等からの手動転記）
+  releaseDate DateTime? @map("release_date") @db.Date // 販売開始日
+
   // 購入先情報（商品ごとに一意なため、購入記録ではなくマスタ側で保持する）
   amazonAsin    String? @map("amazon_asin")
   rakutenItemId String? @map("rakuten_item_id")
