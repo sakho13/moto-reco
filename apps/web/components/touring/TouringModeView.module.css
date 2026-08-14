@@ -311,7 +311,7 @@ html[data-theme-mode='dark'] .container {
 .spotModalTitle {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  color: var(--color-ink);
   margin-bottom: var(--spacing-4);
 }
 
@@ -323,7 +323,7 @@ html[data-theme-mode='dark'] .container {
   display: block;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
+  color: var(--color-inkLight);
   margin-bottom: var(--spacing-1);
 }
 
@@ -334,7 +334,7 @@ html[data-theme-mode='dark'] .container {
   border: 1px solid var(--color-cloud);
   border-radius: var(--radius-md);
   background-color: var(--color-background);
-  color: var(--color-text-primary);
+  color: var(--color-ink);
   outline: none;
   transition: border-color var(--transition-base);
 }
@@ -350,7 +350,7 @@ html[data-theme-mode='dark'] .container {
   border: 1px solid var(--color-cloud);
   border-radius: var(--radius-md);
   background-color: var(--color-background);
-  color: var(--color-text-primary);
+  color: var(--color-ink);
   outline: none;
   resize: vertical;
   min-height: 80px;
@@ -404,7 +404,7 @@ html[data-theme-mode='dark'] .container {
 
 .mileageModalHint {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--color-inkLight);
   margin-bottom: var(--spacing-3);
 }
 

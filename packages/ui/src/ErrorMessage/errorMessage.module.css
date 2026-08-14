@@ -3,7 +3,7 @@
   padding: var(--spacing-3) var(--spacing-4);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
-  color: var(--color-background);
+  color: var(--color-dangerInk);
   background-color: var(--color-danger);
   border: 1px solid var(--color-dangerActive);
   border-radius: var(--radius-md);

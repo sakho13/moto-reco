@@ -59,22 +59,22 @@ export function HistorySection({ history, onClearHistory }: Props) {
               {passScore > 0 && (
                 <ReferenceLine
                   y={passScore}
-                  stroke="#c62828"
+                  stroke="var(--color-danger)"
                   strokeDasharray="4 4"
                   label={{
                     value: `合格 ${passScore}点`,
                     position: 'insideTopRight',
                     fontSize: 11,
-                    fill: '#c62828',
+                    fill: 'var(--color-danger)',
                   }}
                 />
               )}
               <Line
                 type="monotone"
                 dataKey="score"
-                stroke="#007d32"
+                stroke="var(--color-success)"
                 strokeWidth={2}
-                dot={{ r: 4, fill: '#007d32' }}
+                dot={{ r: 4, fill: 'var(--color-success)' }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>

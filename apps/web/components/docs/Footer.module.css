@@ -2,10 +2,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid rgba(23, 23, 23, 0.1);
+  border-top: 1px solid var(--color-cloud);
   padding: 32px 96px;
-  font-size: 14px;
-  color: rgba(23, 23, 23, 0.6);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
   margin-top: 88px;
 }
 
@@ -14,20 +15,40 @@
   align-items: center;
   justify-content: center;
   padding: 8px 20px;
-  border-radius: 999px;
-  background: #171717;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 12px rgba(23, 23, 23, 0.15);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-md);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 2px 0 var(--color-cloudActive);
+  transition:
+    background-color var(--transition-base),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .feedbackLink:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(23, 23, 23, 0.2);
+  background-color: var(--color-cloudHover);
+}
+
+.feedbackLink:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedbackLink {
+    transition: none;
+  }
+
+  .feedbackLink:active {
+    transform: none;
+  }
 }
 
 @media (max-width: 900px) {
@@ -43,19 +64,4 @@
     font-size: 13px;
     padding: 7px 16px;
   }
-}
-
-html[data-theme-mode='dark'] .footer {
-  color: rgba(237, 237, 237, 0.7);
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-html[data-theme-mode='dark'] .feedbackLink {
-  background: #ededed;
-  color: #0a0a0a;
-  box-shadow: 0 4px 12px rgba(237, 237, 237, 0.15);
-}
-
-html[data-theme-mode='dark'] .feedbackLink:hover {
-  box-shadow: 0 6px 16px rgba(237, 237, 237, 0.2);
 }

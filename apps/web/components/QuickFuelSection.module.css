@@ -19,7 +19,7 @@
 .title {
   font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-ink);
 }
 
 /* バイク選択セクション */
@@ -129,7 +129,7 @@
 .emptyState {
   text-align: center;
   padding: var(--spacing-8);
-  color: var(--color-text-secondary);
+  color: var(--color-inkLight);
 }
 
 .emptyState p {
@@ -139,7 +139,7 @@
 .loadingContainer {
   text-align: center;
   padding: var(--spacing-8);
-  color: var(--color-text-secondary);
+  color: var(--color-inkLight);
 }
 
 .errorContainer {
@@ -161,7 +161,7 @@
 
 .guestLimitMessage {
   font-size: var(--font-size-sm);
-  color: var(--color-ink-muted, #6b7280);
+  color: var(--color-inkLight);
   text-align: center;
   padding: var(--spacing-2) var(--spacing-4);
   margin-bottom: var(--spacing-2);

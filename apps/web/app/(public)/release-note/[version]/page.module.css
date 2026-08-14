@@ -22,19 +22,21 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-display);
   font-size: 14px;
   font-weight: 600;
-  background: #ea580c;
-  color: #ffffff;
+  background: var(--color-product);
+  color: var(--color-productInk);
 }
 
 .date {
   font-size: 14px;
-  color: rgba(23, 23, 23, 0.5);
+  color: var(--color-inkLight);
 }
 
 .articleTitle {
+  font-family: var(--font-family-display);
   font-size: clamp(24px, 3vw, 36px);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -44,7 +46,7 @@
 .content {
   font-size: 16px;
   line-height: 1.9;
-  color: rgba(23, 23, 23, 0.85);
+  color: var(--color-ink);
 }
 
 .content p {
@@ -75,7 +77,7 @@
   gap: 16px;
   margin-top: 16px;
   padding-top: 24px;
-  border-top: 1px solid rgba(23, 23, 23, 0.1);
+  border-top: 1px solid var(--color-cloud);
 }
 
 .pagerLink {
@@ -83,14 +85,14 @@
   flex-direction: column;
   gap: 4px;
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   text-decoration: none;
   color: inherit;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--transition-fast);
 }
 
 .pagerLink:hover {
-  background-color: rgba(23, 23, 23, 0.04);
+  background-color: var(--color-cloud);
 }
 
 .pagerLinkNext {
@@ -101,30 +103,10 @@
 
 .pagerLabel {
   font-size: 13px;
-  color: rgba(23, 23, 23, 0.5);
+  color: var(--color-inkLight);
 }
 
 .pagerVersion {
   font-size: 15px;
   font-weight: 600;
-}
-
-html[data-theme-mode='dark'] .date {
-  color: rgba(237, 237, 237, 0.5);
-}
-
-html[data-theme-mode='dark'] .content {
-  color: rgba(237, 237, 237, 0.85);
-}
-
-html[data-theme-mode='dark'] .pager {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-html[data-theme-mode='dark'] .pagerLink:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
-html[data-theme-mode='dark'] .pagerLabel {
-  color: rgba(237, 237, 237, 0.5);
 }

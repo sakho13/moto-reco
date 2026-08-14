@@ -24,7 +24,7 @@
 
 .navButton.active {
   background-color: var(--color-product);
-  color: white;
+  color: var(--color-productInk);
 }
 
 .withLabel {
