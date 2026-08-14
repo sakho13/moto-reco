@@ -1,6 +1,7 @@
 import { createUserId } from '@repo/shared-types'
 import { AuthProviderEntity } from '../entities/AuthProviderEntity'
 import { UserEntity } from '../entities/UserEntity'
+import { ApiV1Error } from '../errors/ApiV1Error'
 import { IUserRepository } from '../interfaces/IUserRepository'
 
 export class UserService {
@@ -19,13 +20,24 @@ export class UserService {
     status: 'EXISTS' | 'CREATED'
     user: UserEntity
   }> {
-    const createdUser =
-      await this._userRepository.findByAuthProvider(authProvider)
+    // ステータス不問で既存判定を行い、退会済み(INACTIVE)ユーザーを
+    // 「未登録」と誤判定してユニーク制約違反を起こさないようにする
+    const existingUser =
+      await this._userRepository.findByAuthProviderIncludingInactive(
+        authProvider
+      )
 
-    if (createdUser) {
+    if (existingUser) {
+      if (existingUser.status !== 'ACTIVE') {
+        throw new ApiV1Error(
+          'USER_QUIT',
+          '退会済みのアカウントです。ご登録のメールアドレスをご確認ください。'
+        )
+      }
+
       return {
         status: 'EXISTS',
-        user: createdUser,
+        user: existingUser,
       }
     }
 

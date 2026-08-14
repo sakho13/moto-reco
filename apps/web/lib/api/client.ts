@@ -10,6 +10,7 @@ import {
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
   ApiResponseUserQuit,
+  ApiResponseUserRecover,
   ApiResponsePublicUserPage,
   ApiResponseUserFollowList,
   ApiResponseUserSearch,
@@ -25,6 +26,9 @@ import {
   ApiResponseTouringPlanLocation,
   ApiResponseTouringPlanSpotDetail,
   ApiResponseTouringPlanSpotList,
+  ApiResponseUserGoodsDetail,
+  ApiResponseUserGoodsList,
+  ApiResponseGoodsManufacturer,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -117,6 +121,26 @@ export const apiGet = async <U extends keyof API_EP>(
 }
 
 /**
+ * 未認証（公開）POSTリクエスト
+ *
+ * @remarks
+ * `Authorization` ヘッダーを付与しない。復帰APIなど、ログイン前に呼び出す
+ * 必要がある公開エンドポイント専用。
+ * @throws {ApiV1Error} APIエラーが発生した場合
+ */
+export const apiPostPublic = async <U extends keyof API_EP>(
+  url: U,
+  data: unknown
+): Promise<API_EP[U] extends { POST: unknown } ? API_EP[U]['POST'] : never> => {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  return handleApiResponse(response)
+}
+
+/**
  * 認証付きPOSTリクエスト
  *
  * @throws {ApiV1Error} APIエラーが発生した場合
@@ -198,6 +222,9 @@ type API_EP = {
   '/api/v1/user/auth/quit': {
     POST: SuccessResponse<ApiResponseUserQuit>
   }
+  '/api/v1/user/auth/recover': {
+    POST: SuccessResponse<ApiResponseUserRecover>
+  }
   '/api/v1/user/auth/guest/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
   }
@@ -212,6 +239,19 @@ type API_EP = {
   }
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
+  }
+  '/api/v1/user-goods': {
+    GET: SuccessResponse<ApiResponseUserGoodsList>
+    POST: SuccessResponse<ApiResponseUserGoodsDetail>
+  }
+  '/api/v1/goods/manufacturers': {
+    GET: SuccessResponse<ApiResponseGoodsManufacturer>
+  }
+} & {
+  [key: `/api/v1/user-goods/${string}`]: {
+    GET: SuccessResponse<ApiResponseUserGoodsDetail>
+    PATCH: SuccessResponse<ApiResponseUserGoodsDetail>
+    DELETE: SuccessResponse<undefined>
   }
 } & {
   '/api/v1/user/search': {

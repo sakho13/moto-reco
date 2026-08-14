@@ -7,9 +7,9 @@
   max-width: 1100px;
   margin: 0 auto;
   padding: 64px 96px 80px;
-  font-family: var(--font-geist-sans);
-  color: var(--foreground);
-  background: var(--background);
+  font-family: var(--font-family-body);
+  color: var(--color-ink);
+  background: var(--color-background);
 }
 
 .sidebar {

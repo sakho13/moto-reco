@@ -13,12 +13,12 @@
 .title {
   font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--color-ink);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(calc(50% - var(--spacing-4) / 2), 1fr));
   gap: var(--spacing-4);
   width: 100%;
 }
@@ -32,7 +32,7 @@
 .emptyState {
   text-align: center;
   padding: var(--spacing-8);
-  color: var(--color-text-secondary);
+  color: var(--color-inkLight);
 }
 
 .emptyState p {
@@ -42,7 +42,7 @@
 .loadingContainer {
   text-align: center;
   padding: var(--spacing-8);
-  color: var(--color-text-secondary);
+  color: var(--color-inkLight);
 }
 
 .errorContainer {

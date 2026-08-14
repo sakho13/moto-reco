@@ -1,0 +1,51 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+}
+
+.mainRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.category {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.name {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+}
+
+.meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  opacity: 0.7;
+}
+
+.linksRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+}
+
+.link {
+  font-size: var(--font-size-sm);
+  color: var(--color-product);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

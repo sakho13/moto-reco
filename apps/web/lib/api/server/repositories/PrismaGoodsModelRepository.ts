@@ -1,5 +1,9 @@
 import { Prisma } from '@repo/database'
-import { createCompanyId, createGoodsModelId } from '@repo/shared-types'
+import {
+  createCompanyId,
+  createGoodsModelId,
+  GoodsModelId,
+} from '@repo/shared-types'
 import { GoodsModelEntity } from '../entities/GoodsModelEntity'
 import { IGoodsModelRepository } from '../interfaces/IGoodsModelRepository'
 import { GoodsModelSearchParams } from '../valueObjects/GoodsModelSearchParams'
@@ -27,9 +31,17 @@ export class PrismaGoodsModelRepository
       ]
     }
 
+    // 検索条件（メーカー・カテゴリ・キーワード）が一つも指定されていない場合は
+    // 販売開始日の新しい順（未設定は末尾）、それ以外は商品名の昇順で並べる
+    const isUnfiltered =
+      !params.manufacturerId && !params.category && !params.keyword
+    const orderBy: Prisma.MGoodsModelOrderByWithRelationInput = isUnfiltered
+      ? { releaseDate: { sort: 'desc', nulls: 'last' } }
+      : { name: 'asc' }
+
     const models = await this.connection.mGoodsModel.findMany({
       where,
-      orderBy: { name: 'asc' },
+      orderBy,
       skip: params.skip,
       take: params.take,
       include: {
@@ -46,9 +58,41 @@ export class PrismaGoodsModelRepository
           modelNumber: model.modelNumber,
           name: model.name,
           category: model.category,
+          imageUrl: model.imageUrl,
+          description: model.description,
+          releaseDate: model.releaseDate,
           amazonAsin: model.amazonAsin,
           rakutenItemId: model.rakutenItemId,
+          officialUrl: model.officialUrl,
         })
     )
+  }
+
+  async findById(goodsModelId: GoodsModelId): Promise<GoodsModelEntity | null> {
+    const model = await this.connection.mGoodsModel.findFirst({
+      where: { id: goodsModelId, isActive: true },
+      include: {
+        manufacturer: true,
+      },
+    })
+
+    if (!model) {
+      return null
+    }
+
+    return new GoodsModelEntity({
+      id: createGoodsModelId(model.id),
+      goodsManufacturerId: createCompanyId(model.goodsManufacturerId),
+      manufacturerName: model.manufacturer.name,
+      modelNumber: model.modelNumber,
+      name: model.name,
+      category: model.category,
+      imageUrl: model.imageUrl,
+      description: model.description,
+      releaseDate: model.releaseDate,
+      amazonAsin: model.amazonAsin,
+      rakutenItemId: model.rakutenItemId,
+      officialUrl: model.officialUrl,
+    })
   }
 }

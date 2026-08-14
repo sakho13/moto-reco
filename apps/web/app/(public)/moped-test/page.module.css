@@ -15,7 +15,7 @@
 
 .version,
 .lastResult {
-  color: #666;
+  color: var(--color-inkLight);
   font-size: 14px;
 }
 
@@ -35,21 +35,21 @@
   width: 100%;
   max-width: 420px;
   height: 4px;
-  background: #e5e5e5;
-  border-radius: 2px;
+  background: var(--color-cloud);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: #171717;
-  border-radius: 2px;
+  background: var(--color-product);
+  border-radius: var(--radius-full);
   transition: width 0.35s ease;
 }
 
 .progressLabel {
   font-size: 13px;
-  color: #666;
+  color: var(--color-inkLight);
 }
 
 .swipeDeck {
@@ -70,9 +70,9 @@
 .swipeCardBehindInner {
   width: 100%;
   height: 100%;
-  border-radius: 20px;
-  background: #f0f0f0;
-  box-shadow: 0 4px 16px rgba(23, 23, 23, 0.06);
+  border-radius: var(--radius-lg);
+  background: var(--color-cloud);
+  box-shadow: var(--shadow-sm);
 }
 
 /* トップカード */
@@ -80,9 +80,10 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 8px 32px rgba(23, 23, 23, 0.12);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  background: var(--color-background);
+  box-shadow: var(--shadow-md);
   cursor: grab;
   user-select: none;
   touch-action: none;
@@ -91,7 +92,7 @@
 }
 
 .swipeCard:focus-visible {
-  outline: 2px solid #171717;
+  outline: 2px solid var(--color-product);
   outline-offset: 2px;
 }
 
@@ -103,12 +104,11 @@
   transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-
 /* スワイプオーバーレイ */
 .swipeOverlay {
   position: absolute;
   inset: 0;
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -120,15 +120,15 @@
 }
 
 .overlayTrue {
-  background: rgba(0, 180, 80, 0.15);
-  border-color: rgba(0, 180, 80, 0.6);
-  color: #007d32;
+  background: color-mix(in srgb, var(--color-success) 15%, transparent);
+  border-color: color-mix(in srgb, var(--color-success) 60%, transparent);
+  color: var(--color-success);
 }
 
 .overlayFalse {
-  background: rgba(198, 40, 40, 0.12);
-  border-color: rgba(198, 40, 40, 0.5);
-  color: #c62828;
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-danger) 50%, transparent);
+  color: var(--color-danger);
 }
 
 /* カード内コンテンツ */
@@ -143,11 +143,13 @@
 }
 
 .questionNumber {
+  font-family: var(--font-family-display);
   font-size: 12px;
-  color: #999;
+  color: var(--color-inkLight);
 }
 
 .questionStatement {
+  font-family: var(--font-family-body);
   font-size: 17px;
   font-weight: 600;
   line-height: 1.6;
@@ -160,8 +162,8 @@
   width: 100%;
   max-height: 140px;
   object-fit: contain;
-  border-radius: 8px;
-  background: #f5f5f5;
+  border-radius: var(--radius-sm);
+  background: var(--color-cloud);
   padding: 4px;
 }
 
@@ -177,7 +179,7 @@
 .hintButtonTrue {
   flex: 1;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   border: 2px solid;
   background: transparent;
   font-size: 14px;
@@ -187,26 +189,26 @@
 }
 
 .hintButtonFalse {
-  border-color: #c62828;
-  color: #c62828;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
 }
 
 .hintButtonFalse:hover {
-  background: rgba(198, 40, 40, 0.08);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
 }
 
 .hintButtonTrue {
-  border-color: #007d32;
-  color: #007d32;
+  border-color: var(--color-success);
+  color: var(--color-success);
 }
 
 .hintButtonTrue:hover {
-  background: rgba(0, 180, 80, 0.08);
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
 }
 
 .swipeHint {
   font-size: 12px;
-  color: #999;
+  color: var(--color-inkLight);
   text-align: center;
 }
 
@@ -223,11 +225,12 @@
 .resultSummaryBox {
   text-align: center;
   padding: 32px 16px;
-  border-radius: 16px;
-  background: #f8f8f8;
+  border-radius: var(--radius-lg);
+  background: var(--color-cloud);
 }
 
 .resultScore {
+  font-family: var(--font-family-display);
   font-size: 48px;
   font-weight: 700;
   line-height: 1;
@@ -246,11 +249,11 @@
 }
 
 .resultPass {
-  color: #007d32;
+  color: var(--color-success);
 }
 
 .resultFail {
-  color: #c62828;
+  color: var(--color-danger);
 }
 
 .resultQuestionList {
@@ -260,19 +263,21 @@
 }
 
 .resultQuestionItem {
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
   padding: 16px;
-  background: #fff;
+  background: var(--color-background);
+  box-shadow: var(--shadow-sm);
 }
 
 .resultQuestionItem .questionCategory {
   font-size: 12px;
-  color: #444;
+  color: var(--color-inkLight);
   margin-bottom: 6px;
 }
 
 .resultQuestionItem h3 {
+  font-family: var(--font-family-body);
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 10px;
@@ -284,16 +289,16 @@
 }
 
 .correct {
-  color: #007d32;
+  color: var(--color-success);
 }
 
 .incorrect {
-  color: #c62828;
+  color: var(--color-danger);
 }
 
 .resultExplanation {
   font-size: 14px;
-  color: #444;
+  color: var(--color-inkLight);
   line-height: 1.6;
 }
 
@@ -306,12 +311,43 @@
 
 .retryButton {
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 10px 20px;
-  background: #171717;
-  color: #fff;
+  background-color: var(--color-product);
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.16),
+    rgba(0, 0, 0, 0.08)
+  );
+  color: var(--color-productInk);
   font-size: 15px;
   cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 0 rgba(0, 0, 0, 0.32);
+  transition:
+    background-color var(--transition-base),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.retryButton:hover {
+  background-color: var(--color-productHover);
+}
+
+.retryButton:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .retryButton {
+    transition: none;
+  }
+
+  .retryButton:active {
+    transform: none;
+  }
 }
 
 /* =====================
@@ -320,59 +356,8 @@
 
 .questionCategory {
   font-size: 12px;
-  color: #444;
+  color: var(--color-inkLight);
   margin-bottom: 8px;
-}
-
-/* =====================
-   ダークモード
-   ===================== */
-
-html[data-theme-mode='dark'] .questionImage {
-  background: #2a2a2a;
-}
-
-html[data-theme-mode='dark'] .swipeCard {
-  background: #1a1a1a;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-}
-
-html[data-theme-mode='dark'] .swipeCardBehindInner {
-  background: #222;
-}
-
-html[data-theme-mode='dark'] .resultSummaryBox {
-  background: #1a1a1a;
-}
-
-html[data-theme-mode='dark'] .resultQuestionItem {
-  background: #1a1a1a;
-  border-color: #333;
-}
-
-html[data-theme-mode='dark'] .resultExplanation {
-  color: #aaa;
-}
-
-html[data-theme-mode='dark'] .version,
-html[data-theme-mode='dark'] .lastResult,
-html[data-theme-mode='dark'] .progressLabel,
-html[data-theme-mode='dark'] .swipeHint,
-html[data-theme-mode='dark'] .questionNumber {
-  color: #888;
-}
-
-html[data-theme-mode='dark'] .progressBar {
-  background: #333;
-}
-
-html[data-theme-mode='dark'] .progressFill {
-  background: #fff;
-}
-
-html[data-theme-mode='dark'] .retryButton {
-  background: #fff;
-  color: #171717;
 }
 
 /* =====================
@@ -381,17 +366,17 @@ html[data-theme-mode='dark'] .retryButton {
 
 .historyToggleButton {
   background: none;
-  border: 1px solid #bbb;
-  border-radius: 8px;
+  border: 1px solid var(--color-cloudActive);
+  border-radius: var(--radius-md);
   padding: 8px 16px;
   font-size: 14px;
-  color: #555;
+  color: var(--color-inkLight);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .historyToggleButton:hover {
-  background: #f0f0f0;
+  background: var(--color-cloud);
 }
 
 /* =====================
@@ -403,8 +388,8 @@ html[data-theme-mode='dark'] .retryButton {
   flex-direction: column;
   gap: 12px;
   padding: 20px;
-  background: #f8f8f8;
-  border-radius: 12px;
+  background: var(--color-cloud);
+  border-radius: var(--radius-lg);
 }
 
 .historyHeader {
@@ -420,23 +405,23 @@ html[data-theme-mode='dark'] .retryButton {
 
 .clearHistoryButton {
   background: none;
-  border: 1px solid #c62828;
-  border-radius: 8px;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
   padding: 6px 12px;
   font-size: 13px;
-  color: #c62828;
+  color: var(--color-danger);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .clearHistoryButton:hover {
-  background: rgba(198, 40, 40, 0.08);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
 }
 
 /* グラフラッパー */
 .historyChart {
-  background: #fff;
-  border-radius: 10px;
+  background: var(--color-background);
+  border-radius: var(--radius-md);
   padding: 12px 8px 4px;
 }
 
@@ -451,9 +436,10 @@ html[data-theme-mode='dark'] .retryButton {
 }
 
 .historyItem {
-  border: 1px solid #e5e5e5;
-  border-radius: 10px;
-  background: #fff;
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  background: var(--color-background);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
@@ -478,7 +464,7 @@ html[data-theme-mode='dark'] .retryButton {
 }
 
 .historyItemDate {
-  color: #666;
+  color: var(--color-inkLight);
   font-size: 13px;
   flex: 1;
 }
@@ -491,7 +477,7 @@ html[data-theme-mode='dark'] .retryButton {
   font-size: 12px;
   font-weight: 700;
   padding: 2px 8px;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   border: 1px solid currentColor;
 }
 
@@ -501,7 +487,7 @@ html[data-theme-mode='dark'] .retryButton {
 
 .historyAnswerGrid {
   padding: 0 16px 12px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--color-cloud);
 }
 
 .historyAnswerSummary {
@@ -523,64 +509,22 @@ html[data-theme-mode='dark'] .retryButton {
   align-items: center;
   gap: 2px;
   font-size: 11px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   padding: 4px 6px;
   min-width: 36px;
 }
 
 .historyAnswerNum {
-  color: #888;
+  color: var(--color-inkLight);
   font-size: 10px;
 }
 
 .historyAnswerCorrect {
-  background: rgba(0, 125, 50, 0.1);
-  color: #007d32;
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
+  color: var(--color-success);
 }
 
 .historyAnswerIncorrect {
-  background: rgba(198, 40, 40, 0.1);
-  color: #c62828;
-}
-
-/* =====================
-   ダークモード（履歴）
-   ===================== */
-
-html[data-theme-mode='dark'] .historySection {
-  background: #1a1a1a;
-}
-
-html[data-theme-mode='dark'] .historyChart {
-  background: #111;
-}
-
-html[data-theme-mode='dark'] .historyItem {
-  background: #1a1a1a;
-  border-color: #333;
-}
-
-html[data-theme-mode='dark'] .historyAnswerGrid {
-  border-top-color: #2a2a2a;
-}
-
-html[data-theme-mode='dark'] .historyItemDate {
-  color: #888;
-}
-
-html[data-theme-mode='dark'] .historyToggleButton {
-  border-color: #555;
-  color: #aaa;
-}
-
-html[data-theme-mode='dark'] .historyToggleButton:hover {
-  background: #2a2a2a;
-}
-
-html[data-theme-mode='dark'] .historyAnswerCorrect {
-  background: rgba(0, 125, 50, 0.2);
-}
-
-html[data-theme-mode='dark'] .historyAnswerIncorrect {
-  background: rgba(198, 40, 40, 0.2);
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
 }

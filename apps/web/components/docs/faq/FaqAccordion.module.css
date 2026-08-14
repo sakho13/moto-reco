@@ -1,21 +1,22 @@
 .accordion {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-4);
 }
 
 .categoryTitle {
+  font-family: var(--font-family-display);
   font-size: 20px;
   font-weight: 700;
-  color: #0f172a;
-  padding-left: 12px;
-  border-left: 4px solid #ea580c;
+  color: var(--color-ink);
+  padding-left: var(--spacing-3);
+  border-left: 4px solid var(--color-product);
 }
 
 .itemList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-3);
 }
 
 @media (max-width: 900px) {
@@ -26,9 +27,4 @@
   .itemList {
     gap: 10px;
   }
-}
-
-html[data-theme-mode='dark'] .categoryTitle {
-  color: #f1f5f9;
-  border-left-color: #ea580c;
 }

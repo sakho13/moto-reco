@@ -62,6 +62,11 @@ const resources = [
     show: '/notifications/:id',
     meta: { label: 'ユーザー通知' },
   },
+  {
+    name: 'system-api-keys',
+    list: '/system-api-keys',
+    meta: { label: 'システムAPIキー' },
+  },
 ]
 
 function AdminLayout({ children }: { children: React.ReactNode }) {

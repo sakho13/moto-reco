@@ -93,6 +93,39 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
   }
 
   /**
+   * 外部ID（Firebase UIDなど）が退会済みユーザーのものかどうかを判定
+   *
+   * @remarks
+   * アクティブユーザーの判定（findActiveUserInfoByExternalId）がnullを
+   * 返した場合にのみ呼び出す想定。通常のアクティブユーザーではクエリが
+   * 増えないようにするための設計。
+   */
+  async isQuitUserByExternalId(
+    externalId: string,
+    providerType: ProviderType
+  ): Promise<boolean> {
+    const authProvider = await this.connection.mAuthProvider.findFirst({
+      select: {
+        user: {
+          select: {
+            status: true,
+            userQuit: { select: { status: true } },
+          },
+        },
+      },
+      where: {
+        externalId: externalId,
+        providerType: providerType,
+      },
+    })
+
+    return (
+      authProvider?.user?.status === 'INACTIVE' &&
+      authProvider?.user?.userQuit?.status === 'QUIT'
+    )
+  }
+
+  /**
    * 外部ID（Firebase UIDなど）から内部User IDを取得（アクティブ判定なし）
    */
   async findUserIdByExternalId(

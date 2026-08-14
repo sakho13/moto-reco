@@ -53,6 +53,7 @@ model MUser {
   planHistories          TUserPlanHistory[]
   planHistoriesChangedBy TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
   apiKeys                MApiKey[]
+  goods                  TUserGoods[]
 }
 
 model MApiKey {
@@ -89,6 +90,28 @@ model MCompany {
 
   bikes       MBike[]
   goodsModels MGoodsModel[]
+}
+
+model TUserGoods {
+  id           String  @id @default(cuid(2))
+  userId       String  @map("user_id")
+  userMyBikeId String? @map("my_bike_id")
+  goodsModelId String  @map("goods_model_id")
+
+  purchasedAt DateTime? @map("purchased_at") @db.Timestamptz
+  price       Int?      @map("price")
+  memo        String?   @map("memo")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user       MUser        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userMyBike TUserMyBike? @relation(fields: [userMyBikeId], references: [id], onDelete: SetNull)
+  goodsModel MGoodsModel  @relation(fields: [goodsModelId], references: [id], onDelete: Restrict)
+
+  @@index([userId, purchasedAt(sort: Desc)])
+  @@index([userMyBikeId])
+  @@index([goodsModelId])
 }
 
 model MBike {
@@ -136,16 +159,22 @@ model MGoodsModel {
   name        String // 商品名
   category    GoodsCategory @map("category")
 
+  imageUrl    String?   @map("image_url") // 商品画像URL
+  description String?   @map("description") // 紹介文（公式サイト等からの手動転記）
+  releaseDate DateTime? @map("release_date") @db.Date // 販売開始日
+
   // 購入先情報（商品ごとに一意なため、購入記録ではなくマスタ側で保持する）
   amazonAsin    String? @map("amazon_asin")
   rakutenItemId String? @map("rakuten_item_id")
+  officialUrl   String? @map("official_url") // 公式サイトのグッズ解説ページURL
 
   isActive Boolean @default(true) @map("is_active") // アクティブフラグ
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  manufacturer MCompany @relation(fields: [goodsManufacturerId], references: [id], onDelete: Restrict)
+  manufacturer MCompany     @relation(fields: [goodsManufacturerId], references: [id], onDelete: Restrict)
+  userGoods    TUserGoods[]
 
   @@unique([goodsManufacturerId, modelNumber])
   @@index([category])
@@ -195,6 +224,7 @@ model TUserMyBike {
   touringPlans    TUserMyBikeTouringPlan[]
   histories       TUserMyBikeHistory[]
   directPhotos    TUserMyBikeDirectPhoto[]
+  goods           TUserGoods[]
 
   @@index([userId, ownStatus])
   @@index([ownedAt])
@@ -438,12 +468,13 @@ model TUserMyBikeDirectPhoto {
 }
 
 model TUserQuit {
-  id           String         @id @default(cuid(2))
-  userId       String         @map("user_id")
-  quitAt       DateTime       @map("quit_at") @db.Timestamptz
-  quitReason   String         @map("quit_reason")
-  recoveryCode String         @map("recovery_code")
-  status       UserQuitStatus @default(QUIT) @map("status")
+  id                String         @id @default(cuid(2))
+  userId            String         @map("user_id")
+  quitAt            DateTime       @map("quit_at") @db.Timestamptz
+  quitReason        String         @map("quit_reason")
+  recoveryTokenHash String         @map("recovery_token_hash")
+  purgeAt           DateTime       @map("purge_at") @db.Timestamptz
+  status            UserQuitStatus @default(QUIT) @map("status")
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
@@ -451,7 +482,22 @@ model TUserQuit {
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
-  @@index([status])
+  @@index([status, purgeAt])
+}
+
+// 内部API（削除バッチ等）を保護するためのシステム共通APIキー。特定ユーザーに紐づかない。
+model MSystemApiKey {
+  id         String    @id @default(cuid(2))
+  name       String
+  keyHash    String    @unique @map("key_hash")
+  prefix     String    @map("prefix")
+  isActive   Boolean   @default(true) @map("is_active")
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([isActive])
 }
 
 model TUserPlanHistory {
@@ -617,6 +663,7 @@ enum GoodsCategory {
   INTERCOM // インカム
   DRIVE_RECORDER // ドライブレコーダー
   NAVIGATION // ナビ
+  ELECTRICAL // 電装系
   BOX_CASE // ボックス・パニアケース
   BAG // バッグ
   CHAIN_LOCK // チェーンロック

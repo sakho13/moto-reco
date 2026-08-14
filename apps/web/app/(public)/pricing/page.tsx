@@ -103,6 +103,12 @@ export default function PricingPage() {
                 <td className={styles.comingSoon}>無制限（予定）</td>
               </tr>
               <tr>
+                <td>購入グッズ登録</td>
+                <td>{GUEST_ACCOUNT_LIMITS.GOODS}件まで</td>
+                <td>無制限</td>
+                <td className={styles.comingSoon}>無制限（予定）</td>
+              </tr>
+              <tr>
                 <td>メンテナンス通知</td>
                 <td>-</td>
                 <td>○</td>

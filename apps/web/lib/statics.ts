@@ -32,6 +32,8 @@ export const GUEST_ACCOUNT_LIMITS = {
   TOURING_PLAN: 2,
   /** メンテナンス履歴登録上限 */
   MAINTENANCE_LOG: 2,
+  /** 購入グッズ登録上限 */
+  GOODS: 5,
   /** アカウント有効期間（ミリ秒） */
   TTL_MS: 7 * 24 * 60 * 60 * 1000,
 } as const

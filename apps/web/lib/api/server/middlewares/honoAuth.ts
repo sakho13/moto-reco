@@ -42,6 +42,18 @@ export async function honoAuthMiddleware(
     )
 
     if (!userInfo) {
+      // アクティブユーザーでなかった場合のみ、退会済みかどうかを追加で判定する
+      const isQuitUser = await authProviderRepo.isQuitUserByExternalId(
+        authProvider.externalId,
+        authProvider.provider
+      )
+      if (isQuitUser) {
+        throw new ApiV1Error(
+          'USER_QUIT',
+          '退会済みのアカウントです。ご登録のメールアドレスをご確認ください。'
+        )
+      }
+
       throw new ApiV1Error(
         'USER_NOT_REGISTERED',
         'ユーザー登録が完了していません'

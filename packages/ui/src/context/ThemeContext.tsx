@@ -72,6 +72,10 @@ export const ThemeProvider = ({
     Object.entries(theme.spacing).forEach(([key, value]) => {
       root.style.setProperty(`--spacing-${key}`, String(value))
     })
+    // fontFamilies
+    Object.entries(theme.fontFamilies).forEach(([key, value]) => {
+      root.style.setProperty(`--font-family-${key}`, String(value))
+    })
     // fontWeights
     Object.entries(theme.fontWeights).forEach(([key, value]) => {
       root.style.setProperty(`--font-weight-${key}`, String(value))
