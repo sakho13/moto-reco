@@ -91,9 +91,9 @@ const transitions = {
 const defaultLightTheme: ThemeTokens = {
   colors: {
     background: '#F4EDDF',
-    cloud: '#EAE0C9',
-    cloudHover: '#DED2B6',
-    cloudActive: '#CBBB98',
+    cloud: '#D6C9AC',
+    cloudHover: '#BCAB88',
+    cloudActive: '#A28D64',
 
     // タスマニアレッド（ブランド・主要アクション）
     product: '#9B2226',
@@ -153,9 +153,9 @@ const defaultLightTheme: ThemeTokens = {
 const defaultDarkTheme: ThemeTokens = {
   colors: {
     background: '#1A2820',
-    cloud: '#22332A',
-    cloudHover: '#2A3E33',
-    cloudActive: '#33493C',
+    cloud: '#3A5245',
+    cloudHover: '#4C6A59',
+    cloudActive: '#5E826D',
 
     // 夜に灯るのはアンバー。赤は暗い地色の上で沈むため主要アクションから外す
     product: '#D9A441',
