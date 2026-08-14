@@ -1,16 +1,18 @@
 .toc {
   padding: 20px 24px;
-  border-radius: 12px;
-  background: rgba(23, 23, 23, 0.04);
-  border: 1px solid rgba(23, 23, 23, 0.08);
+  border-radius: var(--radius-lg);
+  background: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
+  font-family: var(--font-family-body);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(23, 23, 23, 0.45);
+  color: var(--color-inkLight);
   margin: 0 0 12px;
 }
 
@@ -26,54 +28,39 @@
 .itemH2 a,
 .itemH3 a {
   display: block;
+  font-family: var(--font-family-body);
   font-size: 14px;
   line-height: 1.5;
-  color: rgba(23, 23, 23, 0.75);
+  color: var(--color-inkLight);
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
+  border-left: 2px solid transparent;
   padding: 3px 6px;
-  transition: background-color 0.12s ease, color 0.12s ease;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .itemH3 {
   padding-left: 16px;
-  border-left: 2px solid rgba(23, 23, 23, 0.1);
+  border-left: 2px solid var(--color-cloud);
 }
 
 .itemH3 a {
   font-size: 13px;
-  color: rgba(23, 23, 23, 0.5);
+  color: var(--color-inkLight);
 }
 
 .itemH2 a:hover,
 .itemH3 a:hover {
-  background-color: rgba(23, 23, 23, 0.06);
-  color: rgba(23, 23, 23, 0.9);
+  background-color: var(--color-cloud);
+  color: var(--color-ink);
+  border-left-color: var(--color-product);
 }
 
-html[data-theme-mode='dark'] .toc {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-html[data-theme-mode='dark'] .title {
-  color: rgba(237, 237, 237, 0.4);
-}
-
-html[data-theme-mode='dark'] .itemH2 a {
-  color: rgba(237, 237, 237, 0.7);
-}
-
-html[data-theme-mode='dark'] .itemH3 {
-  border-left-color: rgba(237, 237, 237, 0.1);
-}
-
-html[data-theme-mode='dark'] .itemH3 a {
-  color: rgba(237, 237, 237, 0.45);
-}
-
-html[data-theme-mode='dark'] .itemH2 a:hover,
-html[data-theme-mode='dark'] .itemH3 a:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-  color: rgba(237, 237, 237, 0.9);
+.itemH2 a:focus-visible,
+.itemH3 a:focus-visible {
+  outline: 2px solid var(--color-product);
+  outline-offset: -2px;
 }

@@ -8,6 +8,7 @@ export const GOODS_CATEGORY_OPTIONS = [
   { value: 'INTERCOM', label: 'インカム' },
   { value: 'DRIVE_RECORDER', label: 'ドライブレコーダー' },
   { value: 'NAVIGATION', label: 'ナビ' },
+  { value: 'ELECTRICAL', label: '電装系' },
   { value: 'BOX_CASE', label: 'ボックス・パニアケース' },
   { value: 'BAG', label: 'バッグ' },
   { value: 'CHAIN_LOCK', label: 'チェーンロック' },

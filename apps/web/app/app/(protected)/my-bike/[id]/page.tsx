@@ -13,6 +13,7 @@ import { Button } from '@repo/ui/button'
 import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { FuelIcon } from '@/components/icons/FuelIcon'
+import { GoodsIcon } from '@/components/icons/GoodsIcon'
 import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
@@ -170,6 +171,15 @@ function BikeDetailPage() {
           description="メンテナンス履歴を確認・管理できます"
           icon={<WrenchIcon />}
         />
+
+        {isAdmin && (
+          <NavigationCard
+            href={`/app/my-bike/${id}/goods`}
+            title="取り付けアクセサリ"
+            description="取り付けたグッズを確認・管理できます"
+            icon={<GoodsIcon />}
+          />
+        )}
       </div>
     </>
   )

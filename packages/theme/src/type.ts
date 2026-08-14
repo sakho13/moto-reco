@@ -9,6 +9,8 @@ export type ThemeTokens = {
     product: string
     productHover: string
     productActive: string
+    /** product を背景に敷いたときの文字色 */
+    productInk: string
 
     // 成功カラー
     success: string
@@ -19,6 +21,8 @@ export type ThemeTokens = {
     danger: string
     dangerHover: string
     dangerActive: string
+    /** danger を背景に敷いたときの文字色 */
+    dangerInk: string
 
     // 注意カラー
     warning: string
@@ -29,6 +33,8 @@ export type ThemeTokens = {
     social: string
     socialHover: string
     socialActive: string
+    /** social を背景に敷いたときの文字色 */
+    socialInk: string
 
     // テキスト文字色
     ink: string
@@ -47,6 +53,12 @@ export type ThemeTokens = {
     10: string
     12: string
     16: string
+  }
+  fontFamilies: {
+    /** 見出し・数値に使う表示用書体（明朝系） */
+    display: string
+    /** 本文・ラベルに使う書体（和文ゴシック系） */
+    body: string
   }
   fontSizes: {
     xs: string

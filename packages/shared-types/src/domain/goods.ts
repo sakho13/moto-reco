@@ -1,4 +1,6 @@
+import { MyUserBikeId } from './bike'
 import { CompanyId } from './company'
+import { UserId } from './user'
 
 export type GoodsCategory =
   | 'HELMET'
@@ -10,6 +12,7 @@ export type GoodsCategory =
   | 'INTERCOM'
   | 'DRIVE_RECORDER'
   | 'NAVIGATION'
+  | 'ELECTRICAL'
   | 'BOX_CASE'
   | 'BAG'
   | 'CHAIN_LOCK'
@@ -28,6 +31,39 @@ export type GoodsModel = {
   modelNumber: string
   name: string
   category: GoodsCategory
+  imageUrl: string | null
+  description: string | null
+  releaseDate: Date | null
   amazonAsin: string | null
   rakutenItemId: string | null
+  officialUrl: string | null
+}
+
+export type UserGoodsId = string & { readonly __brand: unique symbol }
+export const createUserGoodsId = (id: string): UserGoodsId => id as UserGoodsId
+
+/**
+ * ユーザーの購入グッズ。マスタ(MGoodsModel)側の表示用情報をJOINして保持する。
+ */
+export type UserGoods = {
+  userGoodsId: UserGoodsId
+  userId: UserId
+  userMyBikeId: MyUserBikeId | null
+  goodsModelId: GoodsModelId
+  purchasedAt: Date | null
+  price: number | null
+  memo: string | null
+
+  // マスタ側の表示用情報（JOIN）
+  goodsManufacturerId: CompanyId
+  manufacturerName: string
+  modelNumber: string
+  modelName: string
+  category: GoodsCategory
+  amazonAsin: string | null
+  rakutenItemId: string | null
+  officialUrl: string | null
+
+  createdAt: Date
+  updatedAt: Date
 }

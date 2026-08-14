@@ -25,7 +25,7 @@
 
 .stepCircle.active {
   background-color: var(--color-product);
-  color: var(--color-background);
+  color: var(--color-productInk);
 }
 
 .stepCircle.inactive {

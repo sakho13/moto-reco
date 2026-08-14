@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pattern R — ナイトライド | MotoRepo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Shippori+Mincho+B1:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* ハンターグリーンの車体（夜） */
+  --bg:#1A2820;--s1:#22332A;--s2:#2A3E33;--s3:#33493C;
+  --border:#3A5245;--border2:#4C6A59;
+  /* 生成りの文字（ヘッドライトに照らされた色） */
+  --ink:#EDE3CE;--ink2:#AEBBAC;--ink3:#7D8C7E;
+  /* 計器のアンバーランプ（主役の灯り） */
+  --amber:#D9A441;--amber2:#F0BC5C;--amber3:#A87A26;
+  /* テールランプの赤 */
+  --red:#C0464A;--red2:#9E3237;
+  --green:#5FA36B;
+  /* メッキ（夜のクローム＝暗く沈む） */
+  --chrome:linear-gradient(145deg,#D8DDDE 0%,#8E9698 36%,#4E5658 54%,#7E8688 74%,#C3C9CA 100%);
+  --chrome-edge:#5A6264;
+}
+body{font-family:'Zen Kaku Gothic New',sans-serif;background:#0E1712;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;gap:32px;flex-wrap:wrap}
+
+.frame{width:390px;background:var(--bg);border-radius:20px;overflow:hidden;position:relative;flex-shrink:0;
+  box-shadow:0 0 0 1px #0C130F,0 0 0 5px #22332A,0 0 0 6px var(--chrome-edge),6px 10px 0 -2px rgba(0,0,0,.5),0 24px 56px rgba(0,0,0,.7)}
+.frame-inner{height:812px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative}
+.frame-inner::-webkit-scrollbar{display:none}
+/* ヘッドライトの照射（画面上部から漏れる暖色） */
+.frame-inner::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 260px 200px at 50% -30px,rgba(217,164,65,.16),transparent 70%),
+             repeating-linear-gradient(45deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px)}
+
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+  padding:20px 20px 13px;background:linear-gradient(to bottom,#243529,#1E2E24);
+  border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(237,227,206,.06) inset}
+.logo{font-family:'Shippori Mincho B1',serif;font-size:21px;font-weight:600;color:var(--ink);letter-spacing:1px;display:flex;align-items:baseline}
+.logo em{font-style:normal;color:var(--amber)}
+.logo small{font-family:'Zen Kaku Gothic New',sans-serif;font-size:9px;font-weight:500;color:var(--ink3);letter-spacing:2.5px;margin-left:6px}
+.hrow{display:flex;gap:9px}
+.hbtn{width:36px;height:36px;border-radius:50%;background:var(--chrome);padding:2px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.6)}
+.hbtn i{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;
+  background:radial-gradient(circle at 34% 28%,#2E4335,#1C2A22 72%);color:var(--ink2)}
+.hbtn svg{width:15px;height:15px}
+
+main{padding:0 16px 10px;position:relative;z-index:1}
+
+/* ── 夜の計器（アンバーに光る文字盤） ── */
+.odo{margin:14px 0 4px;background:linear-gradient(to bottom,#24352B,#1D2C23);border:1px solid var(--border);
+  border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:14px;
+  box-shadow:0 1px 0 rgba(237,227,206,.06) inset,2px 3px 0 -1px rgba(0,0,0,.4)}
+.dial{width:60px;height:60px;border-radius:50%;background:var(--chrome);padding:3px;flex-shrink:0;box-shadow:0 2px 5px rgba(0,0,0,.6)}
+.dial i{display:block;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 50% 55%,#3A2C12,#171F18 78%);
+  box-shadow:inset 0 0 12px rgba(217,164,65,.35),inset 0 2px 5px rgba(0,0,0,.7)}
+.dial svg{width:100%;height:100%;display:block}
+.odo-body{flex:1}
+.odo-label{font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:3px;margin-bottom:5px}
+.drum{display:flex;gap:2px}
+.drum span{width:20px;height:28px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to bottom,#0B100D,#1A241D 45%,#0B100D);
+  color:var(--amber2);font-family:'Shippori Mincho B1',serif;font-size:18px;font-weight:600;border-radius:2px;
+  box-shadow:inset 0 0 5px rgba(0,0,0,.8);text-shadow:0 0 8px rgba(217,164,65,.55)}
+.drum span.trip{background:linear-gradient(to bottom,#5B1F22,#8A3035 45%,#5B1F22);color:#FFE7CE;text-shadow:0 0 8px rgba(192,70,74,.6)}
+.odo-unit{font-size:10px;color:var(--ink2);letter-spacing:2px;margin-top:5px}
+
+/* ── セクション見出し ── */
+.sec{display:flex;align-items:center;gap:9px;margin:20px 0 11px}
+.sec-dot{width:9px;height:9px;border-radius:50%;background:var(--amber);flex-shrink:0;box-shadow:0 0 10px rgba(217,164,65,.7)}
+.sec-title{font-family:'Shippori Mincho B1',serif;font-size:16px;font-weight:600;color:var(--ink);letter-spacing:2px}
+.sec-en{font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:2.5px}
+.sec-rule{flex:1;height:3px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.sec-more{font-size:11px;color:var(--amber);cursor:pointer;letter-spacing:.5px;border-bottom:1px solid rgba(217,164,65,.4)}
+
+/* ── バイク（点灯した丸目） ── */
+.bikes{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.bike{background:linear-gradient(to bottom,#26382D,#1F2E25);border:1px solid var(--border);border-radius:14px;padding:15px 12px 13px;
+  text-align:center;cursor:pointer;transition:transform .14s,box-shadow .14s;
+  box-shadow:0 1px 0 rgba(237,227,206,.06) inset,2px 3px 0 -1px rgba(0,0,0,.4)}
+.bike:hover{transform:translate(-1px,-1px);border-color:var(--border2);box-shadow:0 1px 0 rgba(237,227,206,.08) inset,3px 5px 0 -1px rgba(0,0,0,.45)}
+.bike:active{transform:translate(1px,2px);box-shadow:0 1px 0 rgba(237,227,206,.06) inset,1px 1px 0 -1px rgba(0,0,0,.4)}
+.lamp{width:54px;height:54px;border-radius:50%;background:var(--chrome);padding:3px;margin:0 auto 10px;box-shadow:0 2px 5px rgba(0,0,0,.6)}
+.lamp i{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;
+  background:radial-gradient(circle at 50% 46%,#FFE9B8,#E8B85A 42%,#B8862C 100%);
+  box-shadow:0 0 22px rgba(217,164,65,.65),inset 0 -2px 6px rgba(120,80,15,.5)}
+.lamp svg{width:24px;height:24px;color:#4A3A12}
+.bike-name{font-family:'Shippori Mincho B1',serif;font-size:15px;font-weight:600;color:var(--ink);letter-spacing:1px;margin-bottom:3px}
+.bike-km{font-size:11px;color:var(--ink3);letter-spacing:1px;margin-bottom:11px}
+.go{width:100%;font-family:'Shippori Mincho B1',serif;font-size:14px;font-weight:600;letter-spacing:3px;color:#2A1F08;
+  background:linear-gradient(to bottom,#F0BC5C,#D9A441 46%,#B98B2E);border:1px solid #8E6A1E;border-radius:7px;padding:9px 0;cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 0 #7A5A18,0 0 16px rgba(217,164,65,.28);transition:all .12s}
+.go:hover{background:linear-gradient(to bottom,#FFCB6E,#E5B04C 46%,#C4952F)}
+.go:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(255,255,255,.3) inset,0 0 0 #7A5A18}
+
+/* ── 給油 ── */
+.fuel{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 0 rgba(237,227,206,.06) inset,2px 3px 0 -1px rgba(0,0,0,.4)}
+.fuel-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .14s}
+.fuel-row:last-child{border-bottom:none}
+.fuel-row:hover{background:#2A3E33}
+.gauge{width:44px;height:30px;flex-shrink:0}
+.fuel-name{font-family:'Shippori Mincho B1',serif;font-size:15px;font-weight:600;color:var(--ink);letter-spacing:1px}
+.fuel-sub{font-size:10px;color:var(--ink3);letter-spacing:.5px;margin-top:2px}
+.fuel-go{font-size:11px;font-weight:700;color:var(--ink);letter-spacing:1.5px;border:1px solid var(--border2);border-radius:5px;
+  padding:6px 11px;background:linear-gradient(to bottom,#2F4438,#24352B);cursor:pointer;
+  box-shadow:0 1px 0 rgba(237,227,206,.08) inset,0 2px 0 -1px rgba(0,0,0,.5);transition:all .12s}
+.fuel-go:hover{color:var(--amber2);border-color:var(--amber3)}
+.fuel-go:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(237,227,206,.08) inset,0 0 0 rgba(0,0,0,.5)}
+
+/* ── ヒストリー ── */
+.hist{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px dashed var(--border)}
+.hist:last-child{border-bottom:none}
+.plate{width:52px;flex-shrink:0;background:linear-gradient(to bottom,#2C4034,#22332A);border:1.5px solid var(--border2);border-radius:4px;
+  text-align:center;padding:4px 0 3px;box-shadow:1px 2px 0 -1px rgba(0,0,0,.5)}
+.plate b{display:block;font-family:'Shippori Mincho B1',serif;font-size:17px;font-weight:600;color:var(--ink);line-height:1}
+.plate small{display:block;font-size:8px;font-weight:700;color:var(--ink3);letter-spacing:2px;margin-top:2px}
+.hist-body{flex:1;min-width:0}
+.hist-title{font-family:'Shippori Mincho B1',serif;font-size:14px;font-weight:600;color:var(--ink);letter-spacing:.5px}
+.hist-sub{font-size:10px;color:var(--ink3);margin-top:2px;letter-spacing:.5px}
+.hist-val{font-family:'Shippori Mincho B1',serif;font-size:14px;font-weight:600;color:var(--amber);letter-spacing:.5px;flex-shrink:0}
+.hist-val.r{color:var(--red)}
+
+/* ── ナビ ── */
+nav{position:sticky;bottom:0;z-index:50;display:flex;height:62px;background:linear-gradient(to bottom,#1E2E24,#16211A);
+  border-top:1px solid var(--chrome-edge);box-shadow:0 -1px 0 rgba(237,227,206,.06) inset}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;position:relative;transition:color .14s}
+.ni svg{width:20px;height:20px;color:var(--ink3)}
+.ni span{font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:1.5px}
+.ni:hover svg,.ni:hover span{color:var(--ink2)}
+.ni.active svg{color:var(--amber);filter:drop-shadow(0 0 6px rgba(217,164,65,.6))}
+.ni.active span{color:var(--amber)}
+.ni.active::after{content:'';position:absolute;bottom:0;left:26%;right:26%;height:3px;background:var(--amber);border-radius:2px 2px 0 0;box-shadow:0 0 10px rgba(217,164,65,.8)}
+
+/* ── 解説パネル ── */
+.info-panel{width:320px;display:flex;flex-direction:column;gap:20px;padding-top:44px;flex-shrink:0}
+.info-panel h2{font-family:'Shippori Mincho B1',serif;font-size:23px;font-weight:600;color:#EDE3CE;letter-spacing:2px}
+.info-panel h2 span{color:var(--amber)}
+.tag{display:inline-block;background:var(--amber);color:#22190A;font-size:9px;font-weight:700;padding:4px 9px;letter-spacing:2px;margin-bottom:12px;border-radius:3px}
+.desc{font-size:13px;line-height:1.9;color:#9AA89A}
+.cap{font-size:10px;font-weight:700;letter-spacing:2.5px;color:#6E7D70;margin-bottom:16px}
+.palette{display:flex;gap:9px;flex-wrap:wrap}
+.swatch{width:36px;height:36px;border-radius:4px;position:relative;border:1px solid rgba(237,227,206,.22)}
+.swatch::after{content:attr(data-label);position:absolute;bottom:-19px;left:50%;transform:translateX(-50%);font-size:8px;color:#6E7D70;white-space:nowrap;font-family:monospace}
+.traits{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+.trait{font-size:12px;color:#9AA89A;display:flex;gap:8px;line-height:1.6}
+.trait::before{content:'—';color:var(--amber);flex-shrink:0}
+.best{padding:14px;background:#22332A;border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 0 rgba(237,227,206,.06) inset,2px 3px 0 -1px rgba(0,0,0,.4)}
+.best-h{font-size:10px;color:var(--amber);font-weight:700;letter-spacing:2px;margin-bottom:7px}
+.best-b{font-size:12px;color:#9AA89A;line-height:1.8}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="frame-inner">
+    <header>
+      <div class="logo">Moto<em>・</em>Repo<small>整備手帳</small></div>
+      <div class="hrow">
+        <div class="hbtn"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></i></div>
+        <div class="hbtn"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></i></div>
+      </div>
+    </header>
+
+    <main>
+      <div class="odo">
+        <div class="dial"><i>
+          <svg viewBox="0 0 60 60">
+            <g stroke="#D9A441" stroke-width="1.4" stroke-linecap="round" opacity=".9">
+              <line x1="30" y1="7"  x2="30" y2="12"/>
+              <line x1="9"  y1="30" x2="14" y2="30"/>
+              <line x1="51" y1="30" x2="46" y2="30"/>
+              <line x1="15" y1="15" x2="18.5" y2="18.5"/>
+              <line x1="45" y1="15" x2="41.5" y2="18.5"/>
+            </g>
+            <g stroke="#A87A26" stroke-width="1">
+              <line x1="11.5" y1="20.5" x2="15" y2="22.5"/>
+              <line x1="48.5" y1="20.5" x2="45" y2="22.5"/>
+              <line x1="22" y1="9.5" x2="24" y2="13"/>
+              <line x1="38" y1="9.5" x2="36" y2="13"/>
+            </g>
+            <path d="M45 15 A21 21 0 0 1 51 30" fill="none" stroke="#C0464A" stroke-width="2.6" stroke-linecap="round"/>
+            <line x1="30" y1="30" x2="17.5" y2="19" stroke="#E8595E" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="30" cy="30" r="3.6" fill="#0E1712"/>
+            <circle cx="30" cy="30" r="1.4" fill="#8E9698"/>
+            <text x="30" y="47" text-anchor="middle" font-family="'Shippori Mincho B1',serif" font-size="7" fill="#C79A45" letter-spacing="1">km/h</text>
+          </svg>
+        </i></div>
+        <div class="odo-body">
+          <div class="odo-label">総 走 行 距 離</div>
+          <div class="drum">
+            <span>0</span><span>2</span><span>0</span><span>6</span><span>5</span><span class="trip">0</span>
+          </div>
+          <div class="odo-unit">キロメートル</div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-dot"></div>
+        <div class="sec-title">出発</div>
+        <div class="sec-en">DEPARTURE</div>
+        <div class="sec-rule"></div>
+      </div>
+      <div class="bikes">
+        <div class="bike">
+          <div class="lamp"><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></i></div>
+          <div class="bike-name">CB400SF</div>
+          <div class="bike-km">12,450 km</div>
+          <button class="go">出 発</button>
+        </div>
+        <div class="bike">
+          <div class="lamp"><i><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg></i></div>
+          <div class="bike-name">NC750X</div>
+          <div class="bike-km">8,200 km</div>
+          <button class="go">出 発</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-dot"></div>
+        <div class="sec-title">給油</div>
+        <div class="sec-en">FUEL</div>
+        <div class="sec-rule"></div>
+      </div>
+      <div class="fuel">
+        <div class="fuel-row">
+          <svg class="gauge" viewBox="0 0 44 30">
+            <path d="M6 25 A16 16 0 0 1 38 25" fill="none" stroke="#4C6A59" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M6 25 A16 16 0 0 1 10.7 13.7" fill="none" stroke="#C0464A" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="22" y1="25" x2="31" y2="14.5" stroke="#D9A441" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="22" cy="25" r="2.2" fill="#D9A441"/>
+            <text x="4" y="29" font-family="'Shippori Mincho B1',serif" font-size="7" fill="#AEBBAC">E</text>
+            <text x="36" y="29" font-family="'Shippori Mincho B1',serif" font-size="7" fill="#AEBBAC">F</text>
+          </svg>
+          <div style="flex:1"><div class="fuel-name">CB400SF</div><div class="fuel-sub">前回の給油　3日前・28.4 km/L</div></div>
+          <button class="fuel-go">記 録</button>
+        </div>
+        <div class="fuel-row">
+          <svg class="gauge" viewBox="0 0 44 30">
+            <path d="M6 25 A16 16 0 0 1 38 25" fill="none" stroke="#4C6A59" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M6 25 A16 16 0 0 1 13.3 11.3" fill="none" stroke="#C0464A" stroke-width="2.8" stroke-linecap="round"/>
+            <line x1="22" y1="25" x2="25.5" y2="11.5" stroke="#D9A441" stroke-width="1.7" stroke-linecap="round"/>
+            <circle cx="22" cy="25" r="2.2" fill="#D9A441"/>
+            <text x="4" y="29" font-family="'Shippori Mincho B1',serif" font-size="7" fill="#AEBBAC">E</text>
+            <text x="36" y="29" font-family="'Shippori Mincho B1',serif" font-size="7" fill="#AEBBAC">F</text>
+          </svg>
+          <div style="flex:1"><div class="fuel-name">NC750X</div><div class="fuel-sub">前回の給油　1週間前・31.2 km/L</div></div>
+          <button class="fuel-go">記 録</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-dot"></div>
+        <div class="sec-title">走行の記録</div>
+        <div class="sec-en">LOGBOOK</div>
+        <div class="sec-rule"></div>
+        <div class="sec-more">すべて見る</div>
+      </div>
+      <div class="hist">
+        <div class="plate"><b>25</b><small>6月</small></div>
+        <div class="hist-body"><div class="hist-title">奥多摩ツーリング</div><div class="hist-sub">CB400SF ・ 晴れ</div></div>
+        <div class="hist-val">245 km</div>
+      </div>
+      <div class="hist">
+        <div class="plate"><b>22</b><small>6月</small></div>
+        <div class="hist-body"><div class="hist-title">給油</div><div class="hist-sub">NC750X ・ レギュラー</div></div>
+        <div class="hist-val r">32.1 L</div>
+      </div>
+      <div class="hist">
+        <div class="plate"><b>20</b><small>6月</small></div>
+        <div class="hist-body"><div class="hist-title">箱根ドライブ</div><div class="hist-sub">CB400SF ・ くもり</div></div>
+        <div class="hist-val">189 km</div>
+      </div>
+    </main>
+
+    <nav>
+      <div class="ni active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+        <span>ホーム</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 6h1.5L8 10H3l-.75-1.5A1 1 0 0 1 3 7H5V6zm9-1a1 1 0 1 0 0 2h.5L16 11h-3.5l-1.5-3H9a1 1 0 0 0 0 2h1l1.5 3H8a3 3 0 1 0 0 6 3 3 0 0 0 3-3h4a3 3 0 1 0 6 0 3 3 0 0 0-3-3h-1.5L14 5zm-5 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+        <span>バイク</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+        <span>記録</span>
+      </div>
+      <div class="ni">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+        <span>設定</span>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<div class="info-panel">
+  <div>
+    <div class="tag">PATTERN R</div>
+    <h2>ナイト<span>ライド</span></h2>
+    <p class="desc">P（カブ・アイボリー）のダークモード対応版。CT125のハンターグリーンを地色に、ヘッドライトとメーター照明のアンバーだけが光る「日が落ちてからの帰り道」。青いネオンではなく暖色の灯りで作るため、暗くしてもクラシックの体温が残る。PとRで1つのテーマの light / dark を構成できる。</p>
+  </div>
+  <div>
+    <div class="cap">COLOR PALETTE</div>
+    <div class="palette">
+      <div class="swatch" style="background:#1A2820" data-label="#1A2820"></div>
+      <div class="swatch" style="background:#22332A" data-label="#22332A"></div>
+      <div class="swatch" style="background:#EDE3CE" data-label="#EDE3CE"></div>
+      <div class="swatch" style="background:#D9A441" data-label="#D9A441"></div>
+      <div class="swatch" style="background:#C0464A" data-label="#C0464A"></div>
+      <div class="swatch" style="background:#5FA36B" data-label="#5FA36B"></div>
+    </div>
+  </div>
+  <div style="margin-top:26px">
+    <div class="cap">TYPOGRAPHY</div>
+    <div style="font-family:'Shippori Mincho B1',serif;font-size:19px;color:#EDE3CE;font-weight:600;letter-spacing:2px">しっぽり明朝 B1 — 見出し・数値</div>
+    <div style="font-size:13px;color:#9AA89A;margin-top:8px;letter-spacing:.5px">Zen Kaku Gothic New — 本文・ラベル</div>
+  </div>
+  <div class="traits">
+    <div class="trait">地色はハンターグリーン。純黒・青黒は使わない</div>
+    <div class="trait">文字は白ではなく生成り（#EDE3CE）で目に優しく</div>
+    <div class="trait">光るのはアンバーのみ。発光色を1つに絞る</div>
+    <div class="trait">画面上部からヘッドライトの照射グラデーション</div>
+    <div class="trait">メッキは暗く沈ませて夜のクロームを表現</div>
+    <div class="trait">Pと構造・寸法は完全に共通（トークン差し替えのみ）</div>
+  </div>
+  <div class="best">
+    <div class="best-h">BEST FOR</div>
+    <div class="best-b">夜間走行後の記録入力、ナイトツーリング。Pのダークモードとして対で運用する前提。単独採用も可能。</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+.backLinkWrap {
+  margin-bottom: 24px;
+}
+
+.backLink {
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.article {
+  display: grid;
+  grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
+  gap: 40px;
+}
+
+@media (max-width: 800px) {
+  .article {
+    grid-template-columns: 1fr;
+  }
+}
+
+.image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--color-cloud);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.manufacturer {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-inkLight);
+}
+
+.category {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-inkLight);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.title {
+  font-family: var(--font-family-display);
+  font-size: clamp(24px, 3vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-top: var(--spacing-1);
+}
+
+.modelNumber {
+  font-size: var(--font-size-md);
+  color: var(--color-inkLight);
+}
+
+.description {
+  font-size: var(--font-size-md);
+  line-height: 1.8;
+  color: var(--color-ink);
+  white-space: pre-wrap;
+  margin-top: var(--spacing-2);
+}
+
+.linksRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-3);
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  background-color: var(--color-product);
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.16),
+    rgba(0, 0, 0, 0.08)
+  );
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-productInk);
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 0 rgba(0, 0, 0, 0.32);
+  transition:
+    background-color var(--transition-base),
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.linkButton:hover {
+  background-color: var(--color-productHover);
+}
+
+.linkButton:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linkButton {
+    transition: none;
+  }
+
+  .linkButton:active {
+    transform: none;
+  }
+}

@@ -3,6 +3,16 @@
 :root {
   --background: var(--color-background);
   --foreground: var(--color-ink);
+
+  /*
+   * ThemeProvider は useEffect でトークンを流し込むため、ハイドレーション前は
+   * --font-family-* が未定義になる。初回描画で書体が入れ替わらないよう既定値を置く。
+   * 値は packages/theme の fontFamilies と一致させること。
+   */
+  --font-family-body: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic',
+    YuGothic, 'Noto Sans JP', 'Noto Sans CJK JP', system-ui, sans-serif;
+  --font-family-display: 'Hiragino Mincho ProN', 'Hiragino Mincho Pro',
+    'Yu Mincho', YuMincho, 'Noto Serif JP', 'Noto Serif CJK JP', serif;
 }
 
 html,
@@ -14,6 +24,15 @@ body {
 body {
   color: var(--color-ink);
   background: var(--color-background);
+  font-family: var(--font-family-body);
+}
+
+/* 見出しは明朝。和文明朝は字面が詰まって見えるため字間を少し開ける */
+h1,
+h2,
+h3 {
+  font-family: var(--font-family-display);
+  letter-spacing: 0.04em;
 }
 
 footer {
@@ -134,6 +153,37 @@ html[data-theme-mode='light'] {
   }
 }
 
-* {
-  transition: background-color 0.3s ease;
+/* ================================================
+   テーマモード切り替え
+   ================================================ */
+
+/*
+ * ライト/ダーク切り替え時の色変化のみを滑らかにする。
+ * 以前は `* { transition: background-color }` を指定していたが、
+ * 全要素へのワイルドカードはホバーやフォーカスの応答まで鈍らせるため面要素に限定する。
+ */
+body,
+header,
+footer,
+main,
+section,
+article,
+aside,
+nav {
+  transition:
+    background-color var(--transition-slow),
+    color var(--transition-slow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  header,
+  footer,
+  main,
+  section,
+  article,
+  aside,
+  nav {
+    transition: none;
+  }
 }
