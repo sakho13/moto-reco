@@ -116,6 +116,21 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return items
   }
 
+  if (segments[1] === 'search') {
+    items.push({ label: 'ユーザーを探す' })
+    return items
+  }
+
+  if (segments[1] === 'notifications') {
+    items.push({ label: '通知' })
+    return items
+  }
+
+  if (segments[1] === 'users') {
+    items.push({ label: 'ユーザープロフィール' })
+    return items
+  }
+
   return [{ label: 'ページ' }]
 }
 
