@@ -54,6 +54,7 @@
   color: var(--color-ink);
   line-height: var(--line-height-tight);
   margin: 0;
+  overflow-wrap: break-word;
 }
 
 .description {

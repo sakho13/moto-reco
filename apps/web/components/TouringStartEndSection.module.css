@@ -105,7 +105,7 @@
 /* バイク選択グリッド（小さめ） */
 .bikeSelectionGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(calc(50% - var(--spacing-3) / 2), 1fr));
   gap: var(--spacing-3);
   width: 100%;
 }
