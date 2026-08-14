@@ -13,10 +13,12 @@
 }
 
 .articleTitle {
+  font-family: var(--font-family-display);
   font-size: clamp(24px, 3vw, 36px);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.3;
+  color: var(--color-ink);
 }
 
 .meta {
@@ -29,7 +31,7 @@
 
 .date {
   font-size: 14px;
-  color: rgba(23, 23, 23, 0.5);
+  color: var(--color-inkLight);
 }
 
 .keywords {
@@ -45,10 +47,10 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 13px;
-  background: rgba(23, 23, 23, 0.06);
-  color: rgba(23, 23, 23, 0.7);
+  background: var(--color-cloud);
+  color: var(--color-inkLight);
 }
 
 .eyecatch {
@@ -56,9 +58,11 @@
   width: 100%;
   max-width: 960px;
   aspect-ratio: 16 / 9;
-  border-radius: 20px;
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  background: rgba(23, 23, 23, 0.05);
+  background: var(--color-cloud);
+  box-shadow: var(--shadow-md);
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 40px;
@@ -67,7 +71,7 @@
 .content {
   font-size: 16px;
   line-height: 1.9;
-  color: rgba(23, 23, 23, 0.85);
+  color: var(--color-ink);
 }
 
 .content h2 {
@@ -77,7 +81,7 @@
   line-height: 1.3;
   margin: 2em 0 0.75em;
   padding-left: 14px;
-  border-left: 4px solid rgba(23, 23, 23, 0.75);
+  border-left: 4px solid var(--color-product);
 }
 
 .content h3 {
@@ -85,7 +89,7 @@
   font-weight: 600;
   margin: 1.5em 0 0.5em;
   padding-left: 12px;
-  border-left: 2px solid rgba(23, 23, 23, 0.3);
+  border-left: 2px solid var(--color-cloudActive);
 }
 
 .content p {
@@ -111,36 +115,40 @@
 }
 
 .content a {
-  color: rgba(14, 99, 196, 0.9);
+  color: var(--color-product);
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1.5px;
-  text-decoration-color: rgba(14, 99, 196, 0.35);
-  border-radius: 2px;
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--color-product) 35%,
+    transparent
+  );
+  border-radius: var(--radius-sm);
   padding: 0 2px;
   transition:
-    background-color 0.15s ease,
-    text-decoration-color 0.15s ease;
+    background-color var(--transition-fast),
+    text-decoration-color var(--transition-fast);
 }
 
 .content a:hover {
-  background-color: rgba(14, 99, 196, 0.07);
-  text-decoration-color: rgba(14, 99, 196, 0.75);
+  background-color: color-mix(in srgb, var(--color-product) 8%, transparent);
+  text-decoration-color: var(--color-product);
 }
 
 .content img {
   max-width: 100%;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 .content blockquote {
   margin: 1.5em 0;
   padding: 16px 24px;
-  border-left: 4px solid rgba(23, 23, 23, 0.2);
-  background: rgba(23, 23, 23, 0.03);
-  border-radius: 0 8px 8px 0;
-  color: rgba(23, 23, 23, 0.65);
+  border-left: 4px solid var(--color-cloudActive);
+  background: color-mix(in srgb, var(--color-cloud) 35%, transparent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--color-inkLight);
 }
 
 .content table {
@@ -152,96 +160,33 @@
 
 .content th,
 .content td {
-  border: 1px solid rgba(23, 23, 23, 0.15);
+  border: 1px solid var(--color-cloud);
   padding: 10px 14px;
   text-align: left;
   line-height: 1.6;
 }
 
 .content th {
-  background: rgba(23, 23, 23, 0.05);
+  background: var(--color-cloud);
   font-weight: 600;
   font-size: 13px;
-  color: rgba(23, 23, 23, 0.7);
+  color: var(--color-inkLight);
 }
 
 .content tr:nth-child(even) td {
-  background: rgba(23, 23, 23, 0.02);
+  background: color-mix(in srgb, var(--color-cloud) 45%, transparent);
 }
 
 .content h4 {
   font-size: clamp(15px, 1.8vw, 18px);
   font-weight: 600;
   margin: 1.25em 0 0.4em;
-  color: rgba(23, 23, 23, 0.8);
+  color: var(--color-ink);
 }
 
 .content h5 {
   font-size: clamp(14px, 1.6vw, 16px);
   font-weight: 600;
   margin: 1em 0 0.3em;
-  color: rgba(23, 23, 23, 0.7);
-}
-
-html[data-theme-mode='dark'] .date {
-  color: rgba(237, 237, 237, 0.5);
-}
-
-html[data-theme-mode='dark'] .keyword {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(237, 237, 237, 0.7);
-}
-
-html[data-theme-mode='dark'] .eyecatch {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-html[data-theme-mode='dark'] .content {
-  color: rgba(237, 237, 237, 0.85);
-}
-
-html[data-theme-mode='dark'] .content a {
-  color: rgba(100, 170, 255, 0.9);
-  text-decoration-color: rgba(100, 170, 255, 0.35);
-}
-
-html[data-theme-mode='dark'] .content a:hover {
-  background-color: rgba(100, 170, 255, 0.08);
-  text-decoration-color: rgba(100, 170, 255, 0.75);
-}
-
-html[data-theme-mode='dark'] .content h2 {
-  border-left-color: rgba(237, 237, 237, 0.75);
-}
-
-html[data-theme-mode='dark'] .content h3 {
-  border-left-color: rgba(237, 237, 237, 0.3);
-}
-
-html[data-theme-mode='dark'] .content blockquote {
-  border-left-color: rgba(237, 237, 237, 0.2);
-  background: rgba(237, 237, 237, 0.04);
-  color: rgba(237, 237, 237, 0.65);
-}
-
-html[data-theme-mode='dark'] .content th,
-html[data-theme-mode='dark'] .content td {
-  border-color: rgba(237, 237, 237, 0.12);
-}
-
-html[data-theme-mode='dark'] .content th {
-  background: rgba(237, 237, 237, 0.06);
-  color: rgba(237, 237, 237, 0.6);
-}
-
-html[data-theme-mode='dark'] .content tr:nth-child(even) td {
-  background: rgba(237, 237, 237, 0.02);
-}
-
-html[data-theme-mode='dark'] .content h4 {
-  color: rgba(237, 237, 237, 0.8);
-}
-
-html[data-theme-mode='dark'] .content h5 {
-  color: rgba(237, 237, 237, 0.7);
+  color: var(--color-inkLight);
 }

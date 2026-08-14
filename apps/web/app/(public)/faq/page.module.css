@@ -1,40 +1,38 @@
 .header {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-4);
   max-width: 720px;
-  margin-bottom: 48px;
+  margin-bottom: var(--spacing-12);
 }
 
 .title {
+  font-family: var(--font-family-display);
   font-size: clamp(32px, 4vw, 48px);
   font-weight: 800;
   letter-spacing: -0.02em;
+  color: var(--color-ink);
 }
 
 .description {
-  font-size: 18px;
+  font-size: var(--font-size-lg);
   line-height: 1.7;
-  color: rgba(23, 23, 23, 0.7);
+  color: var(--color-inkLight);
 }
 
 .faqContainer {
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: var(--spacing-12);
   max-width: 900px;
 }
 
 @media (max-width: 900px) {
   .header {
-    margin-bottom: 32px;
+    margin-bottom: var(--spacing-8);
   }
 
   .faqContainer {
-    gap: 40px;
+    gap: var(--spacing-10);
   }
-}
-
-html[data-theme-mode='dark'] .description {
-  color: rgba(237, 237, 237, 0.7);
 }

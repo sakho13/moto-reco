@@ -8,8 +8,8 @@
   margin: 0 auto;
   padding: 64px 96px 80px;
   font-family: var(--font-family-body);
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--color-ink);
+  background: var(--color-background);
 }
 
 .sidebar {
