@@ -1,0 +1,12 @@
+.modelInfo {
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-md);
+}
+
+.modelName {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-ink);
+}

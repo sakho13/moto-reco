@@ -546,6 +546,64 @@ describe('User API Endpoints', () => {
       })
       expect(res.status).toBe(400)
     })
+
+    test('退会済みユーザーが再登録しようとするとUSER_QUITエラーとなる（500エラーにならない）', async () => {
+      vi.spyOn(ResendEmailRepository.prototype, 'send').mockResolvedValue()
+
+      const { token } = await createTestUser()
+
+      await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: 'テスト退会理由' }),
+      })
+
+      const res = await app.request('/api/v1/user/auth/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: '再登録テストユーザー' }),
+      })
+
+      const json = await res.json()
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('USER_QUIT')
+      expect(res.status).toBe(403)
+    })
+  })
+
+  describe('退会済みユーザーの認証済みAPIアクセス', () => {
+    test('退会済みユーザーが認証必須APIを呼び出すとUSER_QUITエラーとなる', async () => {
+      vi.spyOn(ResendEmailRepository.prototype, 'send').mockResolvedValue()
+
+      const { token } = await createTestUser()
+
+      await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: 'テスト退会理由' }),
+      })
+
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const json = await res.json()
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('USER_QUIT')
+      expect(res.status).toBe(403)
+    })
   })
 
   describe('POST /api/v1/user/auth/quit', () => {
@@ -583,8 +641,51 @@ describe('User API Endpoints', () => {
       expect(res.status).toBe(400)
     })
 
-    test('退会処理が完了し復帰コードが返却される', async () => {
+    test('GUESTロールは退会できない', async () => {
+      const { token } = await createGuestUser()
+      const res = await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: 'テスト退会理由' }),
+      })
+
+      const json = await res.json()
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('FORBIDDEN')
+      expect(res.status).toBe(403)
+    })
+
+    test('ADMINロールは退会できない', async () => {
       const { token, userId } = await createTestUser()
+      await createAdminUser(token, userId)
+
+      const res = await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: 'テスト退会理由' }),
+      })
+
+      const json = await res.json()
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('FORBIDDEN')
+      expect(res.status).toBe(403)
+    })
+
+    test('退会処理が完了し復帰案内メールが送信される（レスポンスに復帰トークンが含まれる）', async () => {
+      const { token, userId } = await createTestUser()
+
+      // createTestUser内の登録処理で送られるWelcomeメールを除外するため、
+      // 退会APIを呼ぶ直前にspyを仕込む
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+
       const quitReason = 'テスト退会理由'
       const res = await app.request('/api/v1/user/auth/quit', {
         method: 'POST',
@@ -600,21 +701,22 @@ describe('User API Endpoints', () => {
       const json = await res.json()
       expect(json).toEqual({
         status: 'success',
-        data: {
-          recoveryCode: expect.any(String),
-        },
+        data: { recoveryToken: expect.any(String) },
         message: expect.any(String),
       })
       expect(res.status).toBe(200)
-      expect(json.data.recoveryCode).toHaveLength(5)
+      expect(sendSpy).toHaveBeenCalledTimes(1)
 
       const quitRecord = await prisma.tUserQuit.findUnique({
         where: { userId },
       })
       expect(quitRecord).not.toBeNull()
       expect(quitRecord?.quitReason).toBe(quitReason)
-      expect(quitRecord?.recoveryCode).toBe(json.data.recoveryCode)
       expect(quitRecord?.status).toBe('QUIT')
+      expect(quitRecord?.recoveryTokenHash).toEqual(expect.any(String))
+      expect(quitRecord?.purgeAt.getTime()).toBeGreaterThan(
+        quitRecord!.quitAt.getTime()
+      )
 
       const userRecord = await prisma.mUser.findUnique({
         where: { id: userId },
@@ -634,44 +736,56 @@ describe('User API Endpoints', () => {
   })
 
   describe('POST /api/v1/user/auth/recover', () => {
-    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
-      await testAuthRequired('/api/v1/user/auth/recover', 'POST', {
-        recoveryCode: '12345',
-      })
-    })
+    /** 退会メールのHTML本文から復帰用の平文トークンを抽出する */
+    const extractRecoveryToken = (html: string): string => {
+      const match = html.match(/token=([^"&]+)/)
+      const token = match?.[1]
+      if (!token) throw new Error('復帰トークンが見つかりませんでした')
+      return token
+    }
 
-    test('復帰コードが空文字でエラーとなる', async () => {
-      const { token } = await createTestUser()
+    test('tokenが空文字でエラーとなる', async () => {
       const res = await app.request('/api/v1/user/auth/recover', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          recoveryCode: '',
-        }),
+        body: JSON.stringify({ token: '' }),
       })
 
       const json = await res.json()
       expect(json.status).toBe('error')
       expect(json.errorCode).toBe('VALIDATION_ERROR')
-      expect(json.message).toBeDefined()
-      expect(json.details).toEqual(
-        expect.arrayContaining([
-          {
-            field: 'recoveryCode',
-            message: expect.any(String),
-          },
-        ])
-      )
       expect(res.status).toBe(400)
     })
 
-    test('復帰処理が完了しユーザーが有効化される', async () => {
+    test('Authorizationヘッダーが無くても呼び出せる（公開エンドポイント）', async () => {
+      const res = await app.request('/api/v1/user/auth/recover', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: 'invalid-token' }),
+      })
+
+      const json = await res.json()
+      // 認証エラーではなく、トークン不正のエラーになること
+      expect(json.errorCode).not.toBe('AUTH_FAILED')
+      expect(json.errorCode).toBe('NOT_FOUND')
+      expect(res.status).toBe(404)
+    })
+
+    test('復帰処理が完了しユーザーが有効化される（ワンタイム化される）', async () => {
       const { token, userId } = await createTestUser()
+
+      // createTestUser内の登録処理で送られるWelcomeメールを除外するため、
+      // 退会APIを呼ぶ直前にspyを仕込む
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+
       const quitReason = 'テスト退会理由'
-      const quitRes = await app.request('/api/v1/user/auth/quit', {
+      await app.request('/api/v1/user/auth/quit', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -681,25 +795,25 @@ describe('User API Endpoints', () => {
           quitReason,
         }),
       })
-      const quitJson = await quitRes.json()
+
+      expect(sendSpy).toHaveBeenCalledTimes(1)
+      const sentHtml = sendSpy.mock.calls[0]![0].html
+      const recoveryToken = extractRecoveryToken(sentHtml)
 
       const res = await app.request('/api/v1/user/auth/recover', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          recoveryCode: quitJson.data.recoveryCode,
+          token: recoveryToken,
         }),
       })
 
       const json = await res.json()
       expect(json).toEqual({
         status: 'success',
-        data: {
-          userId,
-        },
+        data: {},
         message: expect.any(String),
       })
       expect(res.status).toBe(200)
@@ -724,6 +838,113 @@ describe('User API Endpoints', () => {
       expect(
         authProviders.every((provider) => provider.isActive === true)
       ).toBe(true)
+
+      // ワンタイム化: 同じトークンで再度復帰しようとするとエラーになる
+      const secondRes = await app.request('/api/v1/user/auth/recover', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: recoveryToken,
+        }),
+      })
+      const secondJson = await secondRes.json()
+      expect(secondJson.status).toBe('error')
+      expect(secondJson.errorCode).toBe('INVALID_REQUEST')
+      expect(secondRes.status).toBe(400)
+    })
+
+    test('復帰済みユーザーが再度退会できる（TUserQuitレコードが上書きされる）', async () => {
+      const { token, userId } = await createTestUser()
+
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+
+      await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: '最初の退会理由' }),
+      })
+
+      const firstRecoveryToken = extractRecoveryToken(
+        sendSpy.mock.calls[0]![0].html
+      )
+      await app.request('/api/v1/user/auth/recover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: firstRecoveryToken }),
+      })
+
+      const res = await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: '2回目の退会理由' }),
+      })
+
+      const json = await res.json()
+      expect(json.status).toBe('success')
+      expect(res.status).toBe(200)
+
+      const quitRecord = await prisma.tUserQuit.findUnique({
+        where: { userId },
+      })
+      expect(quitRecord?.status).toBe('QUIT')
+      expect(quitRecord?.quitReason).toBe('2回目の退会理由')
+
+      const userRecord = await prisma.mUser.findUnique({
+        where: { id: userId },
+        select: { status: true },
+      })
+      expect(userRecord?.status).toBe('INACTIVE')
+    })
+
+    test('猶予期間(purgeAt)を過ぎている場合は復帰できない', async () => {
+      const { token, userId } = await createTestUser()
+
+      // createTestUser内の登録処理で送られるWelcomeメールを除外するため、
+      // 退会APIを呼ぶ直前にspyを仕込む
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+
+      await app.request('/api/v1/user/auth/quit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ quitReason: 'テスト退会理由' }),
+      })
+
+      const sentHtml = sendSpy.mock.calls[0]![0].html
+      const recoveryToken = extractRecoveryToken(sentHtml)
+
+      // 猶予期間を過去日時に書き換えて期限切れ状態を再現する
+      await prisma.tUserQuit.update({
+        where: { userId },
+        data: { purgeAt: new Date('2000-01-01T00:00:00Z') },
+      })
+
+      const res = await app.request('/api/v1/user/auth/recover', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: recoveryToken }),
+      })
+
+      const json = await res.json()
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('INVALID_REQUEST')
+      expect(res.status).toBe(400)
     })
   })
 

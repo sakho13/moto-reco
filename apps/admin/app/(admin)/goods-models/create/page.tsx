@@ -1,7 +1,7 @@
 'use client'
 
 import { Create, useForm, useSelect } from '@refinedev/antd'
-import { Form, Input, Select, Switch } from 'antd'
+import { DatePicker, Form, Input, Select, Switch } from 'antd'
 import { GOODS_CATEGORY_OPTIONS } from '@/lib/goodsCategory'
 
 export default function GoodsModelCreatePage() {
@@ -47,11 +47,26 @@ export default function GoodsModelCreatePage() {
             placeholder="カテゴリを選択"
           />
         </Form.Item>
+        <Form.Item label="商品画像URL" name="imageUrl">
+          <Input placeholder="例: https://example.com/images/xxxx.jpg" />
+        </Form.Item>
+        <Form.Item label="紹介文" name="description">
+          <Input.TextArea
+            rows={4}
+            placeholder="公式サイト等の紹介文をそのまま転記"
+          />
+        </Form.Item>
+        <Form.Item label="販売開始日" name="releaseDate">
+          <DatePicker style={{ width: '100%' }} />
+        </Form.Item>
         <Form.Item label="Amazon ASIN" name="amazonAsin">
           <Input placeholder="例: B00XXXXXXXX" />
         </Form.Item>
         <Form.Item label="楽天商品ID" name="rakutenItemId">
           <Input />
+        </Form.Item>
+        <Form.Item label="公式サイトURL" name="officialUrl">
+          <Input placeholder="例: https://example.com/products/xxxx" />
         </Form.Item>
         <Form.Item
           label="有効"

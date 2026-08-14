@@ -18,6 +18,17 @@ export interface IUserRepository {
   ): Promise<UserEntity | null>
 
   /**
+   * 認証プロバイダからUserを取得（ステータス不問）
+   *
+   * @remarks
+   * 退会済み（INACTIVE）ユーザーを「未登録」と誤判定して再登録時に
+   * ユニーク制約違反を起こさないよう、登録前チェックに使用する。
+   */
+  findByAuthProviderIncludingInactive(
+    authProvider: AuthProviderEntity
+  ): Promise<UserEntity | null>
+
+  /**
    * ユーザーを新規作成
    * @param user
    * @returns

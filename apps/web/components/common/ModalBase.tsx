@@ -45,6 +45,8 @@ export function ModalBase({
       <div
         className={`${styles.modal} ${size === 'sm' ? styles.modalSm : ''}`}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
         <div className={styles.header}>
           <h2 className="text-lg font-semibold">{title}</h2>
