@@ -21,6 +21,7 @@ export const GoodsModelSearchQuerySchema = z.object({
       'INTERCOM',
       'DRIVE_RECORDER',
       'NAVIGATION',
+      'ELECTRICAL',
       'BOX_CASE',
       'BAG',
       'CHAIN_LOCK',

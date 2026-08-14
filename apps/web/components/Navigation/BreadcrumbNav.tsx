@@ -43,6 +43,11 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
       return items
     }
 
+    if (segments[3] === 'goods') {
+      items.push({ label: '取り付けアクセサリ' })
+      return items
+    }
+
     if (segments[3] === 'tourings') {
       items.push({
         label: 'ツーリング一覧',
@@ -65,6 +70,21 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
 
   if (segments[1] === 'history') {
     items.push({ label: 'ヒストリー' })
+    return items
+  }
+
+  if (segments[1] === 'goods') {
+    items.push({ label: 'グッズ', href: '/app/goods' })
+
+    if (segments[2] === 'catalog') {
+      items.push({ label: 'グッズ登録' })
+      return items
+    }
+
+    if (segments.length === 2) {
+      items[items.length - 1] = { label: 'グッズ' }
+    }
+
     return items
   }
 

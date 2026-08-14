@@ -26,6 +26,9 @@ import {
   ApiResponseTouringPlanLocation,
   ApiResponseTouringPlanSpotDetail,
   ApiResponseTouringPlanSpotList,
+  ApiResponseUserGoodsDetail,
+  ApiResponseUserGoodsList,
+  ApiResponseGoodsManufacturer,
   ErrorResponse,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -236,6 +239,19 @@ type API_EP = {
   }
   '/api/v1/user-bike/register': {
     POST: SuccessResponse<ApiResponseUserBikeRegister>
+  }
+  '/api/v1/user-goods': {
+    GET: SuccessResponse<ApiResponseUserGoodsList>
+    POST: SuccessResponse<ApiResponseUserGoodsDetail>
+  }
+  '/api/v1/goods/manufacturers': {
+    GET: SuccessResponse<ApiResponseGoodsManufacturer>
+  }
+} & {
+  [key: `/api/v1/user-goods/${string}`]: {
+    GET: SuccessResponse<ApiResponseUserGoodsDetail>
+    PATCH: SuccessResponse<ApiResponseUserGoodsDetail>
+    DELETE: SuccessResponse<undefined>
   }
 } & {
   '/api/v1/user/search': {

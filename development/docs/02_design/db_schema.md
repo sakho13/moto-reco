@@ -7,8 +7,10 @@ erDiagram
     MUser ||--o{ MAuthProvider : "認証"
     MUser ||--o{ TMyBike : "所有"
     MUser ||--o| TUserQuit : "退会"
+    MUser ||--o{ TUserGoods : "購入グッズ"
 
-    MManufacturer ||--o{ MBike : "製造"
+    MCompany ||--o{ MBike : "製造"
+    MCompany ||--o{ MGoodsModel : "製造"
 
     MBike ||--o{ MMaintenanceType : "推奨メンテナンス"
     MBike ||--o{ TUserBike : "車種"
@@ -21,6 +23,9 @@ erDiagram
     TMyBike ||--o{ TUserBikeLiability : "自賠責保険"
     TMyBike ||--o{ TUserBikeInsurance : "任意保険"
     TMyBike ||--o{ TUserBikeInspection : "車検履歴"
+    TMyBike ||--o{ TUserGoods : "取り付けアクセサリ"
+
+    MGoodsModel ||--o{ TUserGoods : "紐付け"
 
     MUser {
         string id PK
@@ -36,13 +41,14 @@ erDiagram
         string externalId
     }
 
-    MManufacturer {
+    MCompany {
         string id PK
         string name UK
         string nameEn
         string logoUrl
         string websiteUrl
         string country
+        CompanyCategory[] categories "BIKE_MAKER / GOODS_MANUFACTURER（複数可）"
         boolean isActive
     }
 
@@ -52,6 +58,28 @@ erDiagram
         string modelName
         float displacement
         int modelYear
+    }
+
+    MGoodsModel {
+        string id PK
+        string goodsManufacturerId FK "MCompany"
+        string modelNumber
+        string name
+        GoodsCategory category
+        string amazonAsin "購入先情報はマスタ側に集約"
+        string rakutenItemId
+        string officialUrl "公式サイトのグッズ解説ページURL"
+        boolean isActive
+    }
+
+    TUserGoods {
+        string id PK
+        string userId FK
+        string userMyBikeId FK "任意。取り付けたマイバイク"
+        string goodsModelId FK "MGoodsModel"
+        datetime purchasedAt
+        int price
+        string memo
     }
 
     MMaintenanceType {
@@ -159,14 +187,16 @@ erDiagram
 | ---------------- | -------------------------------------------------------- | -------- |
 | MUser            | ユーザー情報を格納するマスターテーブル                   | ✅       |
 | MAuthProvider    | 認証情報を格納するマスターテーブル                       | ✅       |
-| MManufacturer    | バイクメーカー情報を格納するマスターテーブル             | ✅       |
+| MCompany         | 会社マスターテーブル（バイクメーカー/グッズメーカーを`categories`で兼用。旧`MManufacturer`は#464で統合済み） | ✅       |
 | MBike            | バイク車種マスターテーブル（同じシリーズでも年式別）     | ✅       |
 | MMaintenanceType | メンテナンス種類情報を格納するマスターテーブル           | ✅       |
+| MGoodsModel      | グッズ型番マスターテーブル（メーカー・カテゴリ・Amazon ASIN/楽天商品IDを保持） | ✅       |
 | TUserBike        | 物理的なバイクの実体（車台番号で識別）                   | ✅       |
-| TMyBike          | ユーザー視点の「マイバイク」（所有履歴・ニックネーム等） | ✅       |
-| TUserBikeFuel    | マイバイクの燃料履歴情報を格納するテーブル               | ✅       |
+| TUserMyBike      | ユーザー視点の「マイバイク」（所有履歴・ニックネーム等） | ✅       |
+| TUserMyBikeFuelLog | マイバイクの給油履歴情報を格納するテーブル             | ✅       |
 | TUserMyBikeMaintenance | マイバイクのメンテナンス履歴情報を格納するテーブル   | ✅       |
 | TUserMyBikeMaintenanceItem | メンテナンス項目ごとの入力値を格納するテーブル | ✅       |
+| TUserGoods       | ユーザーが購入したグッズ（マイバイクへの取り付けは任意）を格納するテーブル | ✅       |
 | TUserQuit        | ユーザーの退会・復帰・完全削除予定日時を管理するテーブル | ✅       |
 | MSystemApiKey    | 内部バッチAPI保護用のシステム共通APIキーを管理するマスターテーブル | ✅       |
 

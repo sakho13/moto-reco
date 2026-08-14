@@ -14,6 +14,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '/', label: 'ホーム' },
   { href: '/about', label: 'このアプリについて' },
   { href: '/blog', label: 'ブログ' },
+  { href: '/goods', label: 'アクセサリ' },
   { href: '/release-note', label: 'リリースノート' },
   { href: '/faq', label: 'FAQ' },
   { href: '/pricing', label: '料金プラン' },

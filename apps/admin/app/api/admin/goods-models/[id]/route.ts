@@ -27,8 +27,12 @@ async function update(request: NextRequest, { params }: Params) {
     modelNumber?: string
     name?: string
     category?: string
+    imageUrl?: string
+    description?: string
+    releaseDate?: string
     amazonAsin?: string
     rakutenItemId?: string
+    officialUrl?: string
     isActive?: boolean
   }
 
