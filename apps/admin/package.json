@@ -23,7 +23,7 @@
     "@repo/shared-types": "workspace:*",
     "@repo/shared-utils": "workspace:*",
     "@tanstack/react-query": "5.101.4",
-    "antd": "6.5.2",
+    "antd": "6.6.0",
     "axios": "1.18.1",
     "dayjs": "1.11.21",
     "firebase": "catalog:",
