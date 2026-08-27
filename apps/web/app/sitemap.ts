@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next'
+import { prisma } from '@repo/database'
 import { getCurrentDate } from '@repo/shared-utils'
+import { PrismaGoodsModelRepository } from '@/lib/api/server/repositories/PrismaGoodsModelRepository'
 import { getBlogSitemapEntries } from '@/lib/microcms/blog'
 import { getReleaseNoteSitemapEntries } from '@/lib/microcms/releaseNote'
 import { SITE_URL } from '@/lib/statics'
@@ -40,6 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      url: `${SITE_URL}/goods`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
       url: `${SITE_URL}/blog`,
       lastModified: now,
       changeFrequency: 'weekly',
@@ -53,9 +61,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  const [blogEntries, releaseNoteEntries] = await Promise.all([
+  const goodsModelRepo = new PrismaGoodsModelRepository(prisma)
+
+  const [blogEntries, releaseNoteEntries, goodsEntries] = await Promise.all([
     getBlogSitemapEntries(),
     getReleaseNoteSitemapEntries(),
+    goodsModelRepo.findAllForSitemap(),
   ])
 
   const blogPages: MetadataRoute.Sitemap = blogEntries.map((blog) => ({
@@ -74,5 +85,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })
   )
 
-  return [...staticPages, ...blogPages, ...releaseNotePages]
+  const goodsPages: MetadataRoute.Sitemap = goodsEntries.map((goods) => ({
+    url: `${SITE_URL}/goods/${goods.id}`,
+    lastModified: goods.updatedAt,
+    changeFrequency: 'monthly',
+    priority: 0.5,
+  }))
+
+  return [...staticPages, ...blogPages, ...releaseNotePages, ...goodsPages]
 }
