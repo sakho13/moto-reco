@@ -115,7 +115,7 @@ importers:
         version: 1.0.3(antd@6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@refinedev/antd':
         specifier: 6.0.3
-        version: 6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.101.4(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(dayjs@1.11.21)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        version: 6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.101.4(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(dayjs@1.11.23)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@refinedev/core':
         specifier: 5.0.12
         version: 5.0.12(@tanstack/react-query@5.101.4(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -147,8 +147,8 @@ importers:
         specifier: 1.19.0
         version: 1.19.0
       dayjs:
-        specifier: 1.11.21
-        version: 1.11.21
+        specifier: 1.11.23
+        version: 1.11.23
       firebase:
         specifier: 'catalog:'
         version: 12.6.0
@@ -3836,8 +3836,8 @@ packages:
   date-fns@4.4.0:
     resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
 
-  dayjs@1.11.21:
-    resolution: {integrity: sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==}
+  dayjs@1.11.23:
+    resolution: {integrity: sha512-QDTCU0M0MxR3hQfnlDJfwekQiaanm1ubOD231u73WBckQ/fsamwRLiE2GBz6D3a/xF1NgfiDLJjXBa1hYOYTtQ==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -4142,6 +4142,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -6611,7 +6612,7 @@ snapshots:
       '@babel/runtime': 7.29.7
       '@ctrl/tinycolor': 3.6.1
       antd: 6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      dayjs: 1.11.21
+      dayjs: 1.11.23
       rc-util: 5.44.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
@@ -6624,7 +6625,7 @@ snapshots:
       '@babel/runtime': 7.29.7
       antd: 6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       classnames: 2.5.1
-      dayjs: 1.11.21
+      dayjs: 1.11.23
       lodash: 4.17.21
       lodash-es: 4.18.1
       rc-util: 5.44.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -8141,7 +8142,7 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
-  '@rc-component/picker@1.11.0(date-fns@4.4.0)(dayjs@1.11.21)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@rc-component/picker@1.11.0(date-fns@4.4.0)(dayjs@1.11.23)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@rc-component/overflow': 1.0.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/resize-observer': 1.1.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -8152,7 +8153,7 @@ snapshots:
       react-dom: 19.2.1(react@19.2.1)
     optionalDependencies:
       date-fns: 4.4.0
-      dayjs: 1.11.21
+      dayjs: 1.11.23
 
   '@rc-component/portal@2.2.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
@@ -8335,7 +8336,7 @@ snapshots:
       react: 19.2.1
       react-redux: 9.3.0(@types/react@19.2.2)(react@19.2.1)(redux@5.0.1)
 
-  '@refinedev/antd@6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.101.4(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(dayjs@1.11.21)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@refinedev/antd@6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.101.4(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(dayjs@1.11.23)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@ant-design/icons': 5.6.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@ant-design/pro-layout': 7.22.7(antd@6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -8345,7 +8346,7 @@ snapshots:
       '@types/react': 19.2.2
       '@types/react-dom': 19.2.2(@types/react@19.2.2)
       antd: 6.5.2(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      dayjs: 1.11.21
+      dayjs: 1.11.23
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       react-markdown: 6.0.3(@types/react@19.2.2)(react@19.2.1)
@@ -8413,7 +8414,7 @@ snapshots:
   '@refinedev/ui-types@2.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.101.4(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@refinedev/core': 5.0.12(@tanstack/react-query@5.101.4(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      dayjs: 1.11.21
+      dayjs: 1.11.23
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       tslib: 2.8.1
@@ -9471,7 +9472,7 @@ snapshots:
       '@rc-component/mutate-observer': 2.0.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/notification': 2.0.7(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/pagination': 1.4.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@rc-component/picker': 1.11.0(date-fns@4.4.0)(dayjs@1.11.21)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@rc-component/picker': 1.11.0(date-fns@4.4.0)(dayjs@1.11.23)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/progress': 1.0.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/qrcode': 2.0.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/rate': 1.0.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -9491,7 +9492,7 @@ snapshots:
       '@rc-component/upload': 1.1.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@rc-component/util': 1.12.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       clsx: 2.1.1
-      dayjs: 1.11.21
+      dayjs: 1.11.23
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       scroll-into-view-if-needed: 3.1.0
@@ -9863,7 +9864,7 @@ snapshots:
 
   date-fns@4.4.0: {}
 
-  dayjs@1.11.21: {}
+  dayjs@1.11.23: {}
 
   debug@4.4.3:
     dependencies:
