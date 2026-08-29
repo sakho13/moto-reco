@@ -5,6 +5,7 @@ export type AnnouncementRecord = {
   type: string
   title: string
   body: string
+  version: string | null
   status: string
   scheduledAt: Date | null
   publishedAt: Date | null
@@ -25,6 +26,7 @@ export type CreateAnnouncementInput = {
   type: string
   title: string
   body: string
+  version?: string | null
   scheduledAt?: Date | null
   createdBy: UserId
 }
@@ -32,6 +34,7 @@ export type CreateAnnouncementInput = {
 export interface IAnnouncementRepository {
   create(input: CreateAnnouncementInput): Promise<AnnouncementRecord>
   findPublished(userId: UserId): Promise<AnnouncementWithReadStatus[]>
+  findPublishedByType(type: string): Promise<AnnouncementRecord[]>
   findAll(): Promise<AnnouncementWithReadCount[]>
   findById(id: string): Promise<AnnouncementWithReadCount | null>
   publish(id: string): Promise<AnnouncementRecord>

@@ -75,6 +75,12 @@ export default function AnnouncementListPage() {
         />
         <Table.Column dataIndex="type" title="種別" width={160} />
         <Table.Column
+          dataIndex="version"
+          title="バージョン"
+          width={100}
+          render={(v: string | null) => v ?? '—'}
+        />
+        <Table.Column
           dataIndex="readCount"
           title="既読数"
           width={80}

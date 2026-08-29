@@ -18,8 +18,28 @@ export default function AnnouncementCreatePage() {
           <Select
             options={[
               { label: 'システムメンテナンス', value: 'SYSTEM_MAINTENANCE' },
+              { label: 'リリースノート', value: 'RELEASE_ANNOUNCEMENT' },
             ]}
           />
+        </Form.Item>
+        <Form.Item
+          noStyle
+          shouldUpdate={(prev, curr) => prev.type !== curr.type}
+        >
+          {({ getFieldValue }) =>
+            getFieldValue('type') === 'RELEASE_ANNOUNCEMENT' && (
+              <Form.Item
+                label="バージョン"
+                name="version"
+                rules={[
+                  { required: true, message: 'バージョンは必須です' },
+                  { max: 20, message: '20文字以内で入力してください' },
+                ]}
+              >
+                <Input placeholder="例: 0.0.24" maxLength={20} />
+              </Form.Item>
+            )
+          }
         </Form.Item>
         <Form.Item
           label="タイトル"
@@ -29,7 +49,7 @@ export default function AnnouncementCreatePage() {
             { max: 100, message: '100文字以内で入力してください' },
           ]}
         >
-          <Input placeholder="例: メンテナンスのお知らせ" maxLength={100} />
+          <Input placeholder="例: 軽微な修正" maxLength={100} />
         </Form.Item>
         <Form.Item
           label="本文"

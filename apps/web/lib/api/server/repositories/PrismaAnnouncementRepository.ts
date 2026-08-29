@@ -19,6 +19,7 @@ export class PrismaAnnouncementRepository
         type: input.type as never,
         title: input.title,
         body: input.body,
+        version: input.version ?? null,
         scheduledAt: input.scheduledAt ?? null,
         createdBy: input.createdBy,
       },
@@ -38,6 +39,14 @@ export class PrismaAnnouncementRepository
       ...this._toRecord(row),
       isRead: row.reads.length > 0,
     }))
+  }
+
+  async findPublishedByType(type: string): Promise<AnnouncementRecord[]> {
+    const rows = await this.connection.mSystemAnnouncement.findMany({
+      where: { status: 'PUBLISHED', type: type as never },
+      orderBy: { publishedAt: 'desc' },
+    })
+    return rows.map((row) => this._toRecord(row))
   }
 
   async findAll(): Promise<AnnouncementWithReadCount[]> {
@@ -120,6 +129,7 @@ export class PrismaAnnouncementRepository
       type: row.type,
       title: row.title,
       body: row.body,
+      version: row.version,
       status: row.status,
       scheduledAt: row.scheduledAt,
       publishedAt: row.publishedAt,

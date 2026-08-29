@@ -34,6 +34,7 @@ export async function GET(
     type: a.type,
     title: a.title,
     body: a.body,
+    version: a.version,
     status: a.status,
     scheduledAt: a.scheduledAt,
     publishedAt: a.publishedAt,

@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
     type: a.type,
     title: a.title,
     body: a.body,
+    version: a.version,
     status: a.status,
     scheduledAt: a.scheduledAt,
     publishedAt: a.publishedAt,
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
     title: string
     body: string
     type?: string
+    version?: string | null
     scheduledAt?: string | null
     publishImmediately?: boolean
   }
@@ -61,6 +63,7 @@ export async function POST(request: NextRequest) {
       type: (body.type ?? 'SYSTEM_MAINTENANCE') as never,
       title: body.title,
       body: body.body,
+      version: body.version ?? null,
       scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : null,
       status: 'DRAFT',
       createdBy: auth.ctx.userId,

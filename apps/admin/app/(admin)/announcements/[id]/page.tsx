@@ -90,6 +90,11 @@ export default function AnnouncementShowPage() {
         <Descriptions.Item label="種別">
           {record?.type as string}
         </Descriptions.Item>
+        {record?.version && (
+          <Descriptions.Item label="バージョン">
+            {record.version as string}
+          </Descriptions.Item>
+        )}
         <Descriptions.Item label="タイトル">
           <Typography.Text strong>{record?.title as string}</Typography.Text>
         </Descriptions.Item>
