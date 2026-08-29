@@ -29,7 +29,7 @@ import { TouringPlanService } from '@/lib/api/server/services/TouringPlanService
 import { TouringService } from '@/lib/api/server/services/TouringService'
 import { TouringSearchParams } from '@/lib/api/server/valueObjects/TouringSearchParams'
 import { UserBikeSearchParams } from '@/lib/api/server/valueObjects/UserBikeSearchParams'
-import { WEB_URL } from '@/lib/statics'
+import { SITE_URL, WEB_URL } from '@/lib/statics'
 
 /**
  * stateless モード用の単発リクエストトランスポート。
@@ -116,7 +116,12 @@ async function toToolResult(
 function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
   const server = new McpServer({
     name: 'motoreco',
+    title: 'MotoReco',
     version: '1.0.0',
+    websiteUrl: SITE_URL,
+    description:
+      'バイクの給油・メンテナンス・ツーリング記録を管理するmotorecoのMCPサーバー',
+    icons: [{ src: `${WEB_URL}/favicon.ico`, mimeType: 'image/x-icon' }],
   })
   const userId = createUserId(rawUserId)
 
