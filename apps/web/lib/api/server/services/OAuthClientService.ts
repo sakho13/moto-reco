@@ -13,6 +13,20 @@ export type RegisteredOAuthClient = {
 }
 
 /**
+ * redirect_uriとして許可しないスキーム
+ *
+ * @remarks
+ * `javascript:` 等はブラウザ上で `window.location.href` に代入されると
+ * MotoRecoのオリジンでスクリプトが実行され得るため拒否する。
+ */
+const DISALLOWED_REDIRECT_URI_SCHEMES = new Set([
+  'javascript:',
+  'data:',
+  'vbscript:',
+  'file:',
+])
+
+/**
  * OAuthクライアント登録・検証を担うサービス
  *
  * @remarks
@@ -40,12 +54,25 @@ export class OAuthClientService {
       )
     }
     for (const uri of params.redirectUris) {
+      let parsed: URL
       try {
-        new URL(uri)
+        parsed = new URL(uri)
       } catch {
         throw new OAuthError(
           'invalid_client_metadata',
           `redirect_uri の形式が不正です: ${uri}`
+        )
+      }
+      if (DISALLOWED_REDIRECT_URI_SCHEMES.has(parsed.protocol.toLowerCase())) {
+        throw new OAuthError(
+          'invalid_client_metadata',
+          `redirect_uri に許可されないスキームが指定されています: ${uri}`
+        )
+      }
+      if (parsed.hash) {
+        throw new OAuthError(
+          'invalid_client_metadata',
+          `redirect_uri にフラグメントを含めることはできません: ${uri}`
         )
       }
     }

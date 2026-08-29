@@ -41,11 +41,12 @@ export class PrismaOAuthAuthorizationCodeRepository
     return row ? toEntity(row) : null
   }
 
-  async markUsed(id: string): Promise<void> {
-    await this.connection.tOAuthAuthorizationCode.update({
-      where: { id },
+  async markUsed(id: string): Promise<boolean> {
+    const result = await this.connection.tOAuthAuthorizationCode.updateMany({
+      where: { id, used: false },
       data: { used: true },
     })
+    return result.count > 0
   }
 }
 

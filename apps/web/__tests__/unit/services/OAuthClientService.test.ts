@@ -49,6 +49,25 @@ describe('OAuthClientService.registerClient()', () => {
     ).rejects.toMatchObject({ error: 'invalid_client_metadata' })
   })
 
+  test.each([
+    'javascript:alert(1)',
+    'data:text/html,x',
+    'vbscript:x',
+    'file:///etc/passwd',
+  ])('実行可能スキーム(%s) → invalid_client_metadata エラー', async (uri) => {
+    await expect(
+      service.registerClient({ redirectUris: [uri] })
+    ).rejects.toMatchObject({ error: 'invalid_client_metadata' })
+  })
+
+  test('フラグメントを含むredirect_uri → invalid_client_metadata エラー', async () => {
+    await expect(
+      service.registerClient({
+        redirectUris: ['https://example.com/callback#fragment'],
+      })
+    ).rejects.toMatchObject({ error: 'invalid_client_metadata' })
+  })
+
   test('正常系（tokenEndpointAuthMethod未指定） → clientSecretはnull、clientIdはmcpc_始まり', async () => {
     vi.mocked(repository.create).mockResolvedValue(buildClientEntity())
 

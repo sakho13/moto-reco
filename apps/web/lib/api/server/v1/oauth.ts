@@ -9,6 +9,7 @@ import { zodValidateJson } from '../middlewares/zodValidation'
 import { PrismaOAuthAuthorizationCodeRepository } from '../repositories/PrismaOAuthAuthorizationCodeRepository'
 import { PrismaOAuthClientRepository } from '../repositories/PrismaOAuthClientRepository'
 import { PrismaOAuthTokenRepository } from '../repositories/PrismaOAuthTokenRepository'
+import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
 import { OAuthAuthorizationService } from '../services/OAuthAuthorizationService'
 import { OAuthClientService } from '../services/OAuthClientService'
 import { HonoVariables } from '../types/hono'
@@ -106,6 +107,10 @@ oauth.post(
     const { userEntity } = c.var.user!
     const body = c.req.valid('json')
 
+    if (userEntity.role === 'GUEST') {
+      throw new ApiV1Error('FORBIDDEN', 'ゲストアカウントはMCPを利用できません')
+    }
+
     const clientRepository = new PrismaOAuthClientRepository(prisma)
     const clientService = new OAuthClientService(clientRepository)
 
@@ -134,7 +139,8 @@ oauth.post(
     const service = new OAuthAuthorizationService(
       clientRepository,
       new PrismaOAuthAuthorizationCodeRepository(prisma),
-      new PrismaOAuthTokenRepository(prisma)
+      new PrismaOAuthTokenRepository(prisma),
+      new PrismaUserRepository(prisma)
     )
 
     let code: string
@@ -223,7 +229,8 @@ oauth.post('/token', async (c) => {
   const service = new OAuthAuthorizationService(
     clientRepository,
     new PrismaOAuthAuthorizationCodeRepository(prisma),
-    new PrismaOAuthTokenRepository(prisma)
+    new PrismaOAuthTokenRepository(prisma),
+    new PrismaUserRepository(prisma)
   )
 
   let tokens

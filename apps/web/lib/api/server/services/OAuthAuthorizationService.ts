@@ -1,10 +1,12 @@
 import { createHash, randomBytes } from 'crypto'
 import type { ApiKeyScope } from '@repo/shared-types'
+import { createUserId } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
 import { OAuthError } from '../errors/OAuthError'
 import type { IOAuthAuthorizationCodeRepository } from '../interfaces/IOAuthAuthorizationCodeRepository'
 import type { IOAuthClientRepository } from '../interfaces/IOAuthClientRepository'
 import type { IOAuthTokenRepository } from '../interfaces/IOAuthTokenRepository'
+import type { IUserRepository } from '../interfaces/IUserRepository'
 import { OAuthClientService } from './OAuthClientService'
 
 const ALLOWED_SCOPES: ApiKeyScope[] = ['READ', 'WRITE']
@@ -33,7 +35,8 @@ export class OAuthAuthorizationService {
   constructor(
     private readonly _clientRepository: IOAuthClientRepository,
     private readonly _codeRepository: IOAuthAuthorizationCodeRepository,
-    private readonly _tokenRepository: IOAuthTokenRepository
+    private readonly _tokenRepository: IOAuthTokenRepository,
+    private readonly _userRepository: IUserRepository
   ) {
     this._clientService = new OAuthClientService(_clientRepository)
   }
@@ -52,6 +55,18 @@ export class OAuthAuthorizationService {
       throw new OAuthError('invalid_scope', '有効なscopeが指定されていません')
     }
     return Array.from(new Set(scopes))
+  }
+
+  /**
+   * ユーザーがMCPを利用可能な状態か検証する
+   *
+   * @remarks
+   * 退会・停止済み（`findById`がACTIVE以外を除外して`null`を返す）、
+   * およびゲストアカウントを無効とみなす。
+   */
+  private async isUsableUser(userId: string): Promise<boolean> {
+    const user = await this._userRepository.findById(createUserId(userId))
+    return user !== null && user.role !== 'GUEST'
   }
 
   /**
@@ -135,7 +150,16 @@ export class OAuthAuthorizationService {
 
     this.verifyPkce(authCode.codeChallenge, params.codeVerifier)
 
-    await this._codeRepository.markUsed(authCode.id)
+    if (!(await this.isUsableUser(authCode.userId))) {
+      throw new OAuthError('invalid_grant', 'ユーザーが無効です')
+    }
+
+    // used: false を条件にした原子的な更新。並行した交換リクエストによる
+    // 認可コードの二重使用（二重トークン発行）を防ぐ。
+    const marked = await this._codeRepository.markUsed(authCode.id)
+    if (!marked) {
+      throw new OAuthError('invalid_grant', '認可コードは既に使用されています')
+    }
 
     return this.issueTokens(client.id, authCode.userId, authCode.scopes)
   }
@@ -167,15 +191,25 @@ export class OAuthAuthorizationService {
         'リフレッシュトークンの有効期限が切れています'
       )
     }
+    if (!(await this.isUsableUser(token.userId))) {
+      throw new OAuthError('invalid_grant', 'ユーザーが無効です')
+    }
 
-    return this.rotateTokens(token.id, client.id, token.userId, token.scopes)
+    return this.rotateTokens(
+      token.id,
+      refreshTokenHash,
+      client.id,
+      token.userId,
+      token.scopes
+    )
   }
 
   /**
    * MCPサーバー（/api/mcp）用: アクセストークンを検証しuserId/scopesを返す
    *
    * @remarks
-   * 無効な場合はnullを返す。
+   * 無効な場合はnullを返す。トークン自体の失効・期限に加え、
+   * 紐づくユーザーが退会・停止済み、またはゲストである場合も無効として扱う。
    */
   async verifyAccessToken(
     accessToken: string
@@ -184,6 +218,7 @@ export class OAuthAuthorizationService {
     const token = await this._tokenRepository.findByAccessTokenHash(hash)
     if (!token || token.revoked) return null
     if (token.isAccessTokenExpired(getCurrentDate())) return null
+    if (!(await this.isUsableUser(token.userId))) return null
     return { userId: token.userId, scopes: token.scopes }
   }
 
@@ -232,6 +267,7 @@ export class OAuthAuthorizationService {
 
   private async rotateTokens(
     tokenRowId: string,
+    expectedRefreshTokenHash: string,
     clientId: string,
     userId: string,
     scopes: ApiKeyScope[]
@@ -246,12 +282,24 @@ export class OAuthAuthorizationService {
       .digest('hex')
     const now = getCurrentDate().getTime()
 
-    await this._tokenRepository.rotate(tokenRowId, {
-      accessTokenHash,
-      refreshTokenHash,
-      accessTokenExpiresAt: new Date(now + ACCESS_TOKEN_TTL_MS),
-      refreshTokenExpiresAt: new Date(now + REFRESH_TOKEN_TTL_MS),
-    })
+    // 現在のrefreshTokenHashを条件にした原子的な更新。並行したリフレッシュ
+    // リクエストによる後勝ちの上書き（片方のトークンの即時失効）を防ぐ。
+    const rotated = await this._tokenRepository.rotate(
+      tokenRowId,
+      expectedRefreshTokenHash,
+      {
+        accessTokenHash,
+        refreshTokenHash,
+        accessTokenExpiresAt: new Date(now + ACCESS_TOKEN_TTL_MS),
+        refreshTokenExpiresAt: new Date(now + REFRESH_TOKEN_TTL_MS),
+      }
+    )
+    if (!rotated) {
+      throw new OAuthError(
+        'invalid_grant',
+        'リフレッシュトークンは既に使用されています'
+      )
+    }
 
     return {
       accessToken,

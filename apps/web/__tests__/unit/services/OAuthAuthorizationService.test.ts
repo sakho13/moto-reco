@@ -1,11 +1,14 @@
 import { createHash } from 'crypto'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { createUserId } from '@repo/shared-types'
 import { OAuthAuthorizationCodeEntity } from '@/lib/api/server/entities/OAuthAuthorizationCodeEntity'
 import { OAuthClientEntity } from '@/lib/api/server/entities/OAuthClientEntity'
 import { OAuthTokenEntity } from '@/lib/api/server/entities/OAuthTokenEntity'
+import { UserEntity } from '@/lib/api/server/entities/UserEntity'
 import { IOAuthAuthorizationCodeRepository } from '@/lib/api/server/interfaces/IOAuthAuthorizationCodeRepository'
 import { IOAuthClientRepository } from '@/lib/api/server/interfaces/IOAuthClientRepository'
 import { IOAuthTokenRepository } from '@/lib/api/server/interfaces/IOAuthTokenRepository'
+import { IUserRepository } from '@/lib/api/server/interfaces/IUserRepository'
 import { OAuthAuthorizationService } from '@/lib/api/server/services/OAuthAuthorizationService'
 
 const NOW = new Date('2026-08-29T00:00:00Z')
@@ -68,6 +71,25 @@ const buildTokenEntity = (
     ...overrides,
   })
 
+const buildUserEntity = (
+  overrides: Partial<{
+    id: string
+    role: 'USER' | 'ADMIN' | 'GUEST'
+    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+  }> = {}
+) =>
+  new UserEntity(
+    {
+      id: createUserId(overrides.id ?? 'user-1'),
+      name: 'Test User',
+      role: overrides.role ?? 'USER',
+      status: overrides.status ?? 'ACTIVE',
+      notificationEmail: null,
+      isProfilePublic: false,
+    },
+    null
+  )
+
 const buildClientRepository = (): IOAuthClientRepository => ({
   findByClientId: vi.fn(),
   create: vi.fn(),
@@ -86,6 +108,18 @@ const buildTokenRepository = (): IOAuthTokenRepository => ({
   rotate: vi.fn(),
 })
 
+const buildUserRepository = (): IUserRepository => ({
+  findById: vi.fn(),
+  findByIdIncludingInactive: vi.fn(),
+  findByAuthProvider: vi.fn(),
+  findByAuthProviderIncludingInactive: vi.fn(),
+  createUser: vi.fn(),
+  updateUser: vi.fn(),
+  deactivateUser: vi.fn(),
+  activateUser: vi.fn(),
+  createGuestUser: vi.fn(),
+})
+
 afterEach(() => {
   vi.useRealTimers()
 })
@@ -94,6 +128,7 @@ describe('OAuthAuthorizationService.createAuthorizationCode()', () => {
   let clientRepository: IOAuthClientRepository
   let codeRepository: IOAuthAuthorizationCodeRepository
   let tokenRepository: IOAuthTokenRepository
+  let userRepository: IUserRepository
   let service: OAuthAuthorizationService
 
   beforeEach(() => {
@@ -102,10 +137,12 @@ describe('OAuthAuthorizationService.createAuthorizationCode()', () => {
     clientRepository = buildClientRepository()
     codeRepository = buildCodeRepository()
     tokenRepository = buildTokenRepository()
+    userRepository = buildUserRepository()
     service = new OAuthAuthorizationService(
       clientRepository,
       codeRepository,
-      tokenRepository
+      tokenRepository,
+      userRepository
     )
   })
 
@@ -179,6 +216,7 @@ describe('OAuthAuthorizationService.exchangeAuthorizationCode()', () => {
   let clientRepository: IOAuthClientRepository
   let codeRepository: IOAuthAuthorizationCodeRepository
   let tokenRepository: IOAuthTokenRepository
+  let userRepository: IUserRepository
   let service: OAuthAuthorizationService
 
   beforeEach(() => {
@@ -187,14 +225,18 @@ describe('OAuthAuthorizationService.exchangeAuthorizationCode()', () => {
     clientRepository = buildClientRepository()
     codeRepository = buildCodeRepository()
     tokenRepository = buildTokenRepository()
+    userRepository = buildUserRepository()
     service = new OAuthAuthorizationService(
       clientRepository,
       codeRepository,
-      tokenRepository
+      tokenRepository,
+      userRepository
     )
     vi.mocked(clientRepository.findByClientId).mockResolvedValue(
       buildClientEntity()
     )
+    vi.mocked(userRepository.findById).mockResolvedValue(buildUserEntity())
+    vi.mocked(codeRepository.markUsed).mockResolvedValue(true)
   })
 
   const exchangeParams = {
@@ -255,6 +297,43 @@ describe('OAuthAuthorizationService.exchangeAuthorizationCode()', () => {
     ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
+  test('ユーザーが退会済み（findByIdがnull） → invalid_grant エラー', async () => {
+    vi.mocked(codeRepository.findByCodeHash).mockResolvedValue(
+      buildAuthCodeEntity()
+    )
+    vi.mocked(userRepository.findById).mockResolvedValue(null)
+
+    await expect(
+      service.exchangeAuthorizationCode(exchangeParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
+    expect(codeRepository.markUsed).not.toHaveBeenCalled()
+  })
+
+  test('ユーザーがゲスト → invalid_grant エラー', async () => {
+    vi.mocked(codeRepository.findByCodeHash).mockResolvedValue(
+      buildAuthCodeEntity()
+    )
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ role: 'GUEST' })
+    )
+
+    await expect(
+      service.exchangeAuthorizationCode(exchangeParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
+  })
+
+  test('認可コードが並行して既に消費されていた（markUsedがfalse） → invalid_grant エラー', async () => {
+    vi.mocked(codeRepository.findByCodeHash).mockResolvedValue(
+      buildAuthCodeEntity()
+    )
+    vi.mocked(codeRepository.markUsed).mockResolvedValue(false)
+
+    await expect(
+      service.exchangeAuthorizationCode(exchangeParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
+    expect(tokenRepository.create).not.toHaveBeenCalled()
+  })
+
   test('正常系 → accessToken/refreshTokenが返り、markUsedとtokenRepository.createが呼ばれる', async () => {
     vi.mocked(codeRepository.findByCodeHash).mockResolvedValue(
       buildAuthCodeEntity()
@@ -274,6 +353,7 @@ describe('OAuthAuthorizationService.refreshAccessToken()', () => {
   let clientRepository: IOAuthClientRepository
   let codeRepository: IOAuthAuthorizationCodeRepository
   let tokenRepository: IOAuthTokenRepository
+  let userRepository: IUserRepository
   let service: OAuthAuthorizationService
 
   beforeEach(() => {
@@ -282,14 +362,17 @@ describe('OAuthAuthorizationService.refreshAccessToken()', () => {
     clientRepository = buildClientRepository()
     codeRepository = buildCodeRepository()
     tokenRepository = buildTokenRepository()
+    userRepository = buildUserRepository()
     service = new OAuthAuthorizationService(
       clientRepository,
       codeRepository,
-      tokenRepository
+      tokenRepository,
+      userRepository
     )
     vi.mocked(clientRepository.findByClientId).mockResolvedValue(
       buildClientEntity()
     )
+    vi.mocked(userRepository.findById).mockResolvedValue(buildUserEntity())
   })
 
   const refreshParams = {
@@ -327,7 +410,43 @@ describe('OAuthAuthorizationService.refreshAccessToken()', () => {
     ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
-  test('正常系 → tokenRepository.rotateが呼ばれ、新しいトークンが返る', async () => {
+  test('ユーザーが退会済み（findByIdがnull） → invalid_grant エラー', async () => {
+    vi.mocked(tokenRepository.findByRefreshTokenHash).mockResolvedValue(
+      buildTokenEntity()
+    )
+    vi.mocked(userRepository.findById).mockResolvedValue(null)
+
+    await expect(
+      service.refreshAccessToken(refreshParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
+    expect(tokenRepository.rotate).not.toHaveBeenCalled()
+  })
+
+  test('ユーザーがゲスト → invalid_grant エラー', async () => {
+    vi.mocked(tokenRepository.findByRefreshTokenHash).mockResolvedValue(
+      buildTokenEntity()
+    )
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ role: 'GUEST' })
+    )
+
+    await expect(
+      service.refreshAccessToken(refreshParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
+  })
+
+  test('並行リクエストで既にローテーション済み（rotateがnull） → invalid_grant エラー', async () => {
+    vi.mocked(tokenRepository.findByRefreshTokenHash).mockResolvedValue(
+      buildTokenEntity()
+    )
+    vi.mocked(tokenRepository.rotate).mockResolvedValue(null)
+
+    await expect(
+      service.refreshAccessToken(refreshParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
+  })
+
+  test('正常系 → tokenRepository.rotateが現在のrefreshTokenHashを条件に呼ばれ、新しいトークンが返る', async () => {
     vi.mocked(tokenRepository.findByRefreshTokenHash).mockResolvedValue(
       buildTokenEntity()
     )
@@ -339,6 +458,7 @@ describe('OAuthAuthorizationService.refreshAccessToken()', () => {
 
     expect(tokenRepository.rotate).toHaveBeenCalledWith(
       'token-1',
+      createHash('sha256').update(refreshParams.refreshToken).digest('hex'),
       expect.objectContaining({
         accessTokenHash: expect.any(String),
         refreshTokenHash: expect.any(String),
@@ -351,17 +471,21 @@ describe('OAuthAuthorizationService.refreshAccessToken()', () => {
 
 describe('OAuthAuthorizationService.verifyAccessToken()', () => {
   let tokenRepository: IOAuthTokenRepository
+  let userRepository: IUserRepository
   let service: OAuthAuthorizationService
 
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(NOW)
     tokenRepository = buildTokenRepository()
+    userRepository = buildUserRepository()
     service = new OAuthAuthorizationService(
       buildClientRepository(),
       buildCodeRepository(),
-      tokenRepository
+      tokenRepository,
+      userRepository
     )
+    vi.mocked(userRepository.findById).mockResolvedValue(buildUserEntity())
   })
 
   test('トークンが見つからない → null', async () => {
@@ -383,6 +507,26 @@ describe('OAuthAuthorizationService.verifyAccessToken()', () => {
       buildTokenEntity({
         accessTokenExpiresAt: new Date(NOW.getTime() - 1000),
       })
+    )
+
+    await expect(service.verifyAccessToken('token')).resolves.toBeNull()
+  })
+
+  test('ユーザーが退会済み（findByIdがnull） → null', async () => {
+    vi.mocked(tokenRepository.findByAccessTokenHash).mockResolvedValue(
+      buildTokenEntity()
+    )
+    vi.mocked(userRepository.findById).mockResolvedValue(null)
+
+    await expect(service.verifyAccessToken('token')).resolves.toBeNull()
+  })
+
+  test('ユーザーがゲスト → null', async () => {
+    vi.mocked(tokenRepository.findByAccessTokenHash).mockResolvedValue(
+      buildTokenEntity()
+    )
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ role: 'GUEST' })
     )
 
     await expect(service.verifyAccessToken('token')).resolves.toBeNull()

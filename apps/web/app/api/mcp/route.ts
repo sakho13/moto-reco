@@ -21,6 +21,7 @@ import { PrismaOAuthTokenRepository } from '@/lib/api/server/repositories/Prisma
 import { PrismaTouringPlanRepository } from '@/lib/api/server/repositories/PrismaTouringPlanRepository'
 import { PrismaTouringPlanSpotRepository } from '@/lib/api/server/repositories/PrismaTouringPlanSpotRepository'
 import { PrismaTouringRepository } from '@/lib/api/server/repositories/PrismaTouringRepository'
+import { PrismaUserRepository } from '@/lib/api/server/repositories/PrismaUserRepository'
 import { MaintenanceLogService } from '@/lib/api/server/services/MaintenanceLogService'
 import { OAuthAuthorizationService } from '@/lib/api/server/services/OAuthAuthorizationService'
 import { TouringPlanService } from '@/lib/api/server/services/TouringPlanService'
@@ -85,7 +86,8 @@ async function authenticate(
   const oauthService = new OAuthAuthorizationService(
     new PrismaOAuthClientRepository(prisma),
     new PrismaOAuthAuthorizationCodeRepository(prisma),
-    new PrismaOAuthTokenRepository(prisma)
+    new PrismaOAuthTokenRepository(prisma),
+    new PrismaUserRepository(prisma)
   )
   return (await oauthService.verifyAccessToken(token)) ?? null
 }

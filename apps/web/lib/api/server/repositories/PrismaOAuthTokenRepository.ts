@@ -50,21 +50,27 @@ export class PrismaOAuthTokenRepository
 
   async rotate(
     id: string,
+    expectedRefreshTokenHash: string,
     params: {
       accessTokenHash: string
       refreshTokenHash: string | null
       accessTokenExpiresAt: Date
       refreshTokenExpiresAt: Date | null
     }
-  ): Promise<OAuthTokenEntity> {
-    const row = await this.connection.tOAuthToken.update({
-      where: { id },
+  ): Promise<OAuthTokenEntity | null> {
+    const result = await this.connection.tOAuthToken.updateMany({
+      where: { id, refreshTokenHash: expectedRefreshTokenHash },
       data: {
         accessTokenHash: params.accessTokenHash,
         refreshTokenHash: params.refreshTokenHash,
         accessTokenExpiresAt: params.accessTokenExpiresAt,
         refreshTokenExpiresAt: params.refreshTokenExpiresAt,
       },
+    })
+    if (result.count === 0) return null
+
+    const row = await this.connection.tOAuthToken.findUniqueOrThrow({
+      where: { id },
     })
     return toEntity(row)
   }
