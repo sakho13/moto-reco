@@ -9,6 +9,14 @@ import type {
   IAnnouncementRepository,
 } from '../interfaces/IAnnouncementRepository'
 
+export type PublishedReleaseNote = {
+  announcementId: string
+  version: string
+  title: string
+  body: string
+  publishedAt: string
+}
+
 export class AnnouncementService {
   constructor(
     private readonly _announcementRepository: IAnnouncementRepository
@@ -59,6 +67,7 @@ export class AnnouncementService {
       type: AnnouncementType
       title: string
       body: string
+      version: string | null
       publishedAt: string
       isRead: boolean
     }[]
@@ -69,8 +78,22 @@ export class AnnouncementService {
       type: r.type as AnnouncementType,
       title: r.title,
       body: r.body,
+      version: r.version,
       publishedAt: r.publishedAt!.toISOString(),
       isRead: r.isRead,
+    }))
+  }
+
+  async getPublishedReleaseNotes(): Promise<PublishedReleaseNote[]> {
+    const rows = await this._announcementRepository.findPublishedByType(
+      'RELEASE_ANNOUNCEMENT'
+    )
+    return rows.map((r) => ({
+      announcementId: r.id,
+      version: r.version!,
+      title: r.title,
+      body: r.body,
+      publishedAt: r.publishedAt!.toISOString(),
     }))
   }
 
@@ -80,6 +103,7 @@ export class AnnouncementService {
       type: AnnouncementType
       title: string
       body: string
+      version: string | null
       status: AnnouncementStatus
       scheduledAt: string | null
       publishedAt: string | null
@@ -97,6 +121,7 @@ export class AnnouncementService {
     type: AnnouncementType
     title: string
     body: string
+    version: string | null
     status: AnnouncementStatus
     scheduledAt: string | null
     publishedAt: string | null
@@ -132,6 +157,7 @@ export class AnnouncementService {
     type: string
     title: string
     body: string
+    version: string | null
     status: string
     scheduledAt: Date | null
     publishedAt: Date | null
@@ -143,6 +169,7 @@ export class AnnouncementService {
     type: AnnouncementType
     title: string
     body: string
+    version: string | null
     status: AnnouncementStatus
     scheduledAt: string | null
     publishedAt: string | null
@@ -155,6 +182,7 @@ export class AnnouncementService {
       type: row.type as AnnouncementType,
       title: row.title,
       body: row.body,
+      version: row.version,
       status: row.status as AnnouncementStatus,
       scheduledAt: row.scheduledAt?.toISOString() ?? null,
       publishedAt: row.publishedAt?.toISOString() ?? null,

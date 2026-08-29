@@ -66,6 +66,11 @@ export default function AnnouncementShowPage() {
   const headerButtons = (
     <Space>
       {record?.status === 'DRAFT' && (
+        <Button onClick={() => router.push(`/announcements/${record.id}/edit`)}>
+          編集
+        </Button>
+      )}
+      {record?.status === 'DRAFT' && (
         <Button type="primary" onClick={handlePublish}>
           公開
         </Button>
@@ -90,6 +95,11 @@ export default function AnnouncementShowPage() {
         <Descriptions.Item label="種別">
           {record?.type as string}
         </Descriptions.Item>
+        {record?.version && (
+          <Descriptions.Item label="バージョン">
+            {record.version as string}
+          </Descriptions.Item>
+        )}
         <Descriptions.Item label="タイトル">
           <Typography.Text strong>{record?.title as string}</Typography.Text>
         </Descriptions.Item>

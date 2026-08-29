@@ -553,6 +553,7 @@ model MSystemAnnouncement {
   type        AnnouncementType
   title       String
   body        String
+  version     String?
   status      AnnouncementStatus @default(DRAFT)
   scheduledAt DateTime?          @map("scheduled_at") @db.Timestamptz
   publishedAt DateTime?          @map("published_at") @db.Timestamptz
@@ -718,7 +719,7 @@ enum NotificationType {
 
 enum AnnouncementType {
   SYSTEM_MAINTENANCE
-  // 将来追加: RELEASE_ANNOUNCEMENT
+  RELEASE_ANNOUNCEMENT
 }
 
 enum AnnouncementStatus {

@@ -58,6 +58,7 @@ export async function createTestAnnouncement(
     type?: string
     title?: string
     body?: string
+    version?: string
   } = {}
 ): Promise<string> {
   const record = await prisma.mSystemAnnouncement.create({
@@ -65,6 +66,7 @@ export async function createTestAnnouncement(
       type: (options.type ?? 'SYSTEM_MAINTENANCE') as never,
       title: options.title ?? 'テストアナウンス',
       body: options.body ?? 'テストアナウンスの本文',
+      version: options.version ?? null,
       createdBy: adminUserId,
     },
   })

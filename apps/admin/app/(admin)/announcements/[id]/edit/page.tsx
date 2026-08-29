@@ -1,21 +1,26 @@
 'use client'
 
-import { Create, useForm } from '@refinedev/antd'
-import { Form, Input, Select } from 'antd'
+import { Edit, useForm } from '@refinedev/antd'
+import { Alert, Form, Input, Select } from 'antd'
 import { MarkdownEditor } from '@/components/MarkdownEditor'
 
-export default function AnnouncementCreatePage() {
-  const { formProps, saveButtonProps } = useForm({ resource: 'announcements' })
+export default function AnnouncementEditPage() {
+  const { formProps, saveButtonProps, query } = useForm()
+  const record = query?.data?.data
+  const isEditable = !record || record.status === 'DRAFT'
 
   return (
-    <Create saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="vertical">
-        <Form.Item
-          label="種別"
-          name="type"
-          initialValue="SYSTEM_MAINTENANCE"
-          rules={[{ required: true }]}
-        >
+    <Edit saveButtonProps={{ ...saveButtonProps, disabled: !isEditable }}>
+      {!isEditable && (
+        <Alert
+          type="warning"
+          showIcon
+          message="下書き以外のアナウンスは編集できません"
+          style={{ marginBottom: 24 }}
+        />
+      )}
+      <Form {...formProps} layout="vertical" disabled={!isEditable}>
+        <Form.Item label="種別" name="type" rules={[{ required: true }]}>
           <Select
             options={[
               { label: 'システムメンテナンス', value: 'SYSTEM_MAINTENANCE' },
@@ -67,6 +72,6 @@ export default function AnnouncementCreatePage() {
           />
         </Form.Item>
       </Form>
-    </Create>
+    </Edit>
   )
 }
