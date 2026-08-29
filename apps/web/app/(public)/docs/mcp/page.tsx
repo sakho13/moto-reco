@@ -5,11 +5,11 @@ import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
   title: `MCP セットアップ`,
-  description: `${APP_NAME} の MCP サーバーを Claude Code や Claude.ai、ChatGPT から利用するための設定方法です。`,
+  description: `${APP_NAME} の MCP サーバーを ClaudeやChatGPT から利用するための設定方法です。`,
   openGraph: {
     url: `${SITE_URL}/docs/mcp`,
     title: `MCP セットアップ | ${APP_NAME}`,
-    description: `${APP_NAME} の MCP サーバーを Claude Code や Claude.ai、ChatGPT から利用するための設定方法です。`,
+    description: `${APP_NAME} の MCP サーバーを ClaudeやChatGPT から利用するための設定方法です。`,
     images: ['/top_image_1.png'],
   },
   twitter: {
