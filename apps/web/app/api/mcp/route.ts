@@ -126,9 +126,9 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
   const userId = createUserId(rawUserId)
 
   if (scopes.includes('READ')) {
-    server.tool(
+    server.registerTool(
       'list_bikes',
-      '登録されているマイバイクの一覧を取得します',
+      { description: '登録されているマイバイクの一覧を取得します' },
       async () =>
         toToolResult(async () => {
           const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
@@ -149,10 +149,12 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
         })
     )
 
-    server.tool(
+    server.registerTool(
       'list_touring_plans',
-      '指定バイクのツーリングプラン一覧を取得します',
-      { myUserBikeId: z.string().describe('マイバイクID') },
+      {
+        description: '指定バイクのツーリングプラン一覧を取得します',
+        inputSchema: { myUserBikeId: z.string().describe('マイバイクID') },
+      },
       async ({ myUserBikeId }) =>
         toToolResult(async () => {
           const touringPlanRepo = new PrismaTouringPlanRepository(prisma)
@@ -187,12 +189,14 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
         })
     )
 
-    server.tool(
+    server.registerTool(
       'get_touring_plan',
-      'ツーリングプランの詳細（スポット含む）を取得します',
       {
-        myUserBikeId: z.string().describe('マイバイクID'),
-        touringPlanId: z.string().describe('ツーリングプランID'),
+        description: 'ツーリングプランの詳細（スポット含む）を取得します',
+        inputSchema: {
+          myUserBikeId: z.string().describe('マイバイクID'),
+          touringPlanId: z.string().describe('ツーリングプランID'),
+        },
       },
       async ({ myUserBikeId, touringPlanId }) =>
         toToolResult(async () => {
@@ -238,15 +242,18 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
         })
     )
 
-    server.tool(
+    server.registerTool(
       'list_touring_history',
-      '指定バイクのツーリング履歴（実施済み・実施中のツーリング記録）一覧を取得します',
       {
-        myUserBikeId: z.string().describe('マイバイクID'),
-        status: z
-          .enum(['STARTED', 'COMPLETED'])
-          .optional()
-          .describe('ステータスで絞り込み（省略時は全件）'),
+        description:
+          '指定バイクのツーリング履歴（実施済み・実施中のツーリング記録）一覧を取得します',
+        inputSchema: {
+          myUserBikeId: z.string().describe('マイバイクID'),
+          status: z
+            .enum(['STARTED', 'COMPLETED'])
+            .optional()
+            .describe('ステータスで絞り込み（省略時は全件）'),
+        },
       },
       async ({ myUserBikeId, status }) =>
         toToolResult(async () => {
@@ -277,12 +284,14 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
         })
     )
 
-    server.tool(
+    server.registerTool(
       'get_touring_history',
-      'ツーリング履歴の詳細を取得します',
       {
-        myUserBikeId: z.string().describe('マイバイクID'),
-        touringId: z.string().describe('ツーリング履歴ID'),
+        description: 'ツーリング履歴の詳細を取得します',
+        inputSchema: {
+          myUserBikeId: z.string().describe('マイバイクID'),
+          touringId: z.string().describe('ツーリング履歴ID'),
+        },
       },
       async ({ myUserBikeId, touringId }) =>
         toToolResult(async () => {
@@ -317,10 +326,12 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
         })
     )
 
-    server.tool(
+    server.registerTool(
       'get_maintenance_status',
-      'バイクのメンテナンス状況と次回推奨時期を取得します',
-      { myUserBikeId: z.string().describe('マイバイクID') },
+      {
+        description: 'バイクのメンテナンス状況と次回推奨時期を取得します',
+        inputSchema: { myUserBikeId: z.string().describe('マイバイクID') },
+      },
       async ({ myUserBikeId }) =>
         toToolResult(async () => {
           const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
