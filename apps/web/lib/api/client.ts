@@ -393,4 +393,8 @@ type API_EP = {
   [key: `/api/v1/mcp/api-keys/${string}`]: {
     DELETE: SuccessResponse<null>
   }
+} & {
+  '/api/v1/mcp/oauth/authorize': {
+    POST: SuccessResponse<{ redirectUrl: string }>
+  }
 }
