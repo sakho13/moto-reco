@@ -85,7 +85,9 @@ export class OAuthAuthorizationService {
 
     const code = randomBytes(32).toString('base64url')
     const codeHash = createHash('sha256').update(code).digest('hex')
-    const expiresAt = new Date(getCurrentDate().getTime() + AUTHORIZATION_CODE_TTL_MS)
+    const expiresAt = new Date(
+      getCurrentDate().getTime() + AUTHORIZATION_CODE_TTL_MS
+    )
 
     await this._codeRepository.create({
       codeHash,
@@ -122,7 +124,10 @@ export class OAuthAuthorizationService {
       throw new OAuthError('invalid_grant', '認可コードが無効です')
     }
     if (authCode.isExpired(getCurrentDate())) {
-      throw new OAuthError('invalid_grant', '認可コードの有効期限が切れています')
+      throw new OAuthError(
+        'invalid_grant',
+        '認可コードの有効期限が切れています'
+      )
     }
     if (authCode.redirectUri !== params.redirectUri) {
       throw new OAuthError('invalid_grant', 'redirect_uri が一致しません')
@@ -150,13 +155,17 @@ export class OAuthAuthorizationService {
     const refreshTokenHash = createHash('sha256')
       .update(params.refreshToken)
       .digest('hex')
-    const token = await this._tokenRepository.findByRefreshTokenHash(refreshTokenHash)
+    const token =
+      await this._tokenRepository.findByRefreshTokenHash(refreshTokenHash)
 
     if (!token || token.revoked || token.clientId !== client.id) {
       throw new OAuthError('invalid_grant', 'リフレッシュトークンが無効です')
     }
     if (token.isRefreshTokenExpired(getCurrentDate())) {
-      throw new OAuthError('invalid_grant', 'リフレッシュトークンの有効期限が切れています')
+      throw new OAuthError(
+        'invalid_grant',
+        'リフレッシュトークンの有効期限が切れています'
+      )
     }
 
     return this.rotateTokens(token.id, client.id, token.userId, token.scopes)
@@ -195,8 +204,12 @@ export class OAuthAuthorizationService {
   ): Promise<IssuedTokens> {
     const accessToken = `mcpat_${randomBytes(32).toString('base64url')}`
     const refreshToken = `mcprt_${randomBytes(32).toString('base64url')}`
-    const accessTokenHash = createHash('sha256').update(accessToken).digest('hex')
-    const refreshTokenHash = createHash('sha256').update(refreshToken).digest('hex')
+    const accessTokenHash = createHash('sha256')
+      .update(accessToken)
+      .digest('hex')
+    const refreshTokenHash = createHash('sha256')
+      .update(refreshToken)
+      .digest('hex')
     const now = getCurrentDate().getTime()
 
     await this._tokenRepository.create({
@@ -209,7 +222,12 @@ export class OAuthAuthorizationService {
       refreshTokenExpiresAt: new Date(now + REFRESH_TOKEN_TTL_MS),
     })
 
-    return { accessToken, refreshToken, scopes, expiresIn: ACCESS_TOKEN_TTL_MS / 1000 }
+    return {
+      accessToken,
+      refreshToken,
+      scopes,
+      expiresIn: ACCESS_TOKEN_TTL_MS / 1000,
+    }
   }
 
   private async rotateTokens(
@@ -220,8 +238,12 @@ export class OAuthAuthorizationService {
   ): Promise<IssuedTokens> {
     const accessToken = `mcpat_${randomBytes(32).toString('base64url')}`
     const refreshToken = `mcprt_${randomBytes(32).toString('base64url')}`
-    const accessTokenHash = createHash('sha256').update(accessToken).digest('hex')
-    const refreshTokenHash = createHash('sha256').update(refreshToken).digest('hex')
+    const accessTokenHash = createHash('sha256')
+      .update(accessToken)
+      .digest('hex')
+    const refreshTokenHash = createHash('sha256')
+      .update(refreshToken)
+      .digest('hex')
     const now = getCurrentDate().getTime()
 
     await this._tokenRepository.rotate(tokenRowId, {
@@ -231,6 +253,11 @@ export class OAuthAuthorizationService {
       refreshTokenExpiresAt: new Date(now + REFRESH_TOKEN_TTL_MS),
     })
 
-    return { accessToken, refreshToken, scopes, expiresIn: ACCESS_TOKEN_TTL_MS / 1000 }
+    return {
+      accessToken,
+      refreshToken,
+      scopes,
+      expiresIn: ACCESS_TOKEN_TTL_MS / 1000,
+    }
   }
 }

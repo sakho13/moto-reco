@@ -152,7 +152,9 @@ describe('OAuthClientService.verifyClientSecret()', () => {
   test('confidential clientでsecret未指定 → invalid_client エラー', () => {
     const client = buildClientEntity({
       tokenEndpointAuthMethod: 'CLIENT_SECRET_BASIC',
-      clientSecretHash: createHash('sha256').update('correct-secret').digest('hex'),
+      clientSecretHash: createHash('sha256')
+        .update('correct-secret')
+        .digest('hex'),
     })
 
     expect(() => service.verifyClientSecret(client, undefined)).toThrow(
@@ -163,7 +165,9 @@ describe('OAuthClientService.verifyClientSecret()', () => {
   test('confidential clientで誤ったsecret → invalid_client エラー', () => {
     const client = buildClientEntity({
       tokenEndpointAuthMethod: 'CLIENT_SECRET_BASIC',
-      clientSecretHash: createHash('sha256').update('correct-secret').digest('hex'),
+      clientSecretHash: createHash('sha256')
+        .update('correct-secret')
+        .digest('hex'),
     })
 
     expect(() => service.verifyClientSecret(client, 'wrong-secret')).toThrow(
@@ -174,7 +178,9 @@ describe('OAuthClientService.verifyClientSecret()', () => {
   test('confidential clientで正しいsecret → 例外なし', () => {
     const client = buildClientEntity({
       tokenEndpointAuthMethod: 'CLIENT_SECRET_BASIC',
-      clientSecretHash: createHash('sha256').update('correct-secret').digest('hex'),
+      clientSecretHash: createHash('sha256')
+        .update('correct-secret')
+        .digest('hex'),
     })
 
     expect(() =>

@@ -21,7 +21,9 @@ export interface IOAuthTokenRepository {
   /**
    * ハッシュ化済みのアクセストークンからレコードを取得する
    */
-  findByAccessTokenHash(accessTokenHash: string): Promise<OAuthTokenEntity | null>
+  findByAccessTokenHash(
+    accessTokenHash: string
+  ): Promise<OAuthTokenEntity | null>
 
   /**
    * ハッシュ化済みのリフレッシュトークンからレコードを取得する

@@ -34,7 +34,10 @@ export class OAuthClientService {
     tokenEndpointAuthMethod?: string
   }): Promise<RegisteredOAuthClient> {
     if (!params.redirectUris || params.redirectUris.length === 0) {
-      throw new OAuthError('invalid_client_metadata', 'redirect_uris は必須です')
+      throw new OAuthError(
+        'invalid_client_metadata',
+        'redirect_uris は必須です'
+      )
     }
     for (const uri of params.redirectUris) {
       try {
@@ -101,7 +104,10 @@ export class OAuthClientService {
   /**
    * confidential client（client_secret_basic）の場合のみclient_secretを検証する
    */
-  verifyClientSecret(client: OAuthClientEntity, clientSecret: string | undefined): void {
+  verifyClientSecret(
+    client: OAuthClientEntity,
+    clientSecret: string | undefined
+  ): void {
     if (!client.isConfidential()) return
     if (!clientSecret) {
       throw new OAuthError('invalid_client', 'client_secret が必要です', 401)

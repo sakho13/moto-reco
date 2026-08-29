@@ -85,13 +85,12 @@ const claudeAppContent = (
         <code className={styles.inlineCode}>{`${SITE_URL}/api/mcp`}</code>{' '}
         を入力して保存する
       </li>
-      <li>
-        自動的にmoto-recoの認可画面が開くので、ログインして「許可」を押す
-      </li>
+      <li>自動的にmoto-recoの認可画面が開くので、ログインして「許可」を押す</li>
       <li>接続が完了し、チャット画面でツールが利用できるようになります</li>
     </ol>
     <p className={styles.sectionBody}>
-      ※ APIキー方式（Claude Code向け）とは別の認証方式です。どちらも併用できます。
+      ※ APIキー方式（Claude
+      Code向け）とは別の認証方式です。どちらも併用できます。
     </p>
   </div>
 )

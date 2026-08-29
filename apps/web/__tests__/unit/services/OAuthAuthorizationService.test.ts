@@ -31,7 +31,9 @@ const CODE_CHALLENGE = createHash('sha256')
   .digest('base64url')
 
 const buildAuthCodeEntity = (
-  overrides: Partial<ConstructorParameters<typeof OAuthAuthorizationCodeEntity>[0]> = {}
+  overrides: Partial<
+    ConstructorParameters<typeof OAuthAuthorizationCodeEntity>[0]
+  > = {}
 ) =>
   new OAuthAuthorizationCodeEntity({
     id: 'auth-code-1',
@@ -205,9 +207,9 @@ describe('OAuthAuthorizationService.exchangeAuthorizationCode()', () => {
   test('コードが見つからない → invalid_grant エラー', async () => {
     vi.mocked(codeRepository.findByCodeHash).mockResolvedValue(null)
 
-    await expect(service.exchangeAuthorizationCode(exchangeParams)).rejects.toMatchObject(
-      { error: 'invalid_grant' }
-    )
+    await expect(
+      service.exchangeAuthorizationCode(exchangeParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
   test('コードが使用済み → invalid_grant エラー', async () => {
@@ -215,9 +217,9 @@ describe('OAuthAuthorizationService.exchangeAuthorizationCode()', () => {
       buildAuthCodeEntity({ used: true })
     )
 
-    await expect(service.exchangeAuthorizationCode(exchangeParams)).rejects.toMatchObject(
-      { error: 'invalid_grant' }
-    )
+    await expect(
+      service.exchangeAuthorizationCode(exchangeParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
   test('コードが有効期限切れ → invalid_grant エラー', async () => {
@@ -225,9 +227,9 @@ describe('OAuthAuthorizationService.exchangeAuthorizationCode()', () => {
       buildAuthCodeEntity({ expiresAt: new Date(NOW.getTime() - 1000) })
     )
 
-    await expect(service.exchangeAuthorizationCode(exchangeParams)).rejects.toMatchObject(
-      { error: 'invalid_grant' }
-    )
+    await expect(
+      service.exchangeAuthorizationCode(exchangeParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
   test('redirect_uriが不一致 → invalid_grant エラー', async () => {
@@ -235,9 +237,9 @@ describe('OAuthAuthorizationService.exchangeAuthorizationCode()', () => {
       buildAuthCodeEntity({ redirectUri: 'https://other.example.com/callback' })
     )
 
-    await expect(service.exchangeAuthorizationCode(exchangeParams)).rejects.toMatchObject(
-      { error: 'invalid_grant' }
-    )
+    await expect(
+      service.exchangeAuthorizationCode(exchangeParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
   test('PKCE検証失敗（code_verifierが不一致） → invalid_grant エラー', async () => {
@@ -290,14 +292,17 @@ describe('OAuthAuthorizationService.refreshAccessToken()', () => {
     )
   })
 
-  const refreshParams = { refreshToken: 'plain-refresh-token', clientId: 'mcpc_abc123' }
+  const refreshParams = {
+    refreshToken: 'plain-refresh-token',
+    clientId: 'mcpc_abc123',
+  }
 
   test('トークンが見つからない → invalid_grant エラー', async () => {
     vi.mocked(tokenRepository.findByRefreshTokenHash).mockResolvedValue(null)
 
-    await expect(service.refreshAccessToken(refreshParams)).rejects.toMatchObject(
-      { error: 'invalid_grant' }
-    )
+    await expect(
+      service.refreshAccessToken(refreshParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
   test('トークンがrevoked → invalid_grant エラー', async () => {
@@ -305,9 +310,9 @@ describe('OAuthAuthorizationService.refreshAccessToken()', () => {
       buildTokenEntity({ revoked: true })
     )
 
-    await expect(service.refreshAccessToken(refreshParams)).rejects.toMatchObject(
-      { error: 'invalid_grant' }
-    )
+    await expect(
+      service.refreshAccessToken(refreshParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
   test('リフレッシュトークンの有効期限切れ → invalid_grant エラー', async () => {
@@ -317,9 +322,9 @@ describe('OAuthAuthorizationService.refreshAccessToken()', () => {
       })
     )
 
-    await expect(service.refreshAccessToken(refreshParams)).rejects.toMatchObject(
-      { error: 'invalid_grant' }
-    )
+    await expect(
+      service.refreshAccessToken(refreshParams)
+    ).rejects.toMatchObject({ error: 'invalid_grant' })
   })
 
   test('正常系 → tokenRepository.rotateが呼ばれ、新しいトークンが返る', async () => {
