@@ -81,15 +81,6 @@
       "cache": false,
       "env": ["DATABASE_URL", "NODE_ENV"]
     },
-    "migrate:release-notes": {
-      "cache": false,
-      "env": [
-        "DATABASE_URL",
-        "MICRO_CMS_API_KEY",
-        "MICRO_CMS_SERVICE_DOMAIN",
-        "MIGRATION_ADMIN_USER_ID"
-      ]
-    },
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"],
