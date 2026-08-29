@@ -1,6 +1,14 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
 import {
+  ApiV1Error,
+  MyUserBikeDetail,
+  FuelInsightSearchParams,
+  FuelLogSearchParams,
+  TouringSearchParams,
+  UserBikeSearchParams,
+} from '@repo/shared-domain'
+import {
   ApiResponseUserBikeList,
   ApiResponseUserBikeDetail,
   ApiResponseFuelInsight,
@@ -17,8 +25,6 @@ import {
   FuelInsightQuerySchema,
   HistoryListQuerySchema,
 } from '@repo/shared-types'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { MyUserBikeDetail } from '../interfaces/IMyUserBikeRepository'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson, zodValidateQuery } from '../middlewares/zodValidation'
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
@@ -30,10 +36,6 @@ import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeReposito
 import { FuelInsightService } from '../services/FuelInsightService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
-import { FuelInsightSearchParams } from '../valueObjects/FuelInsightSearchParams'
-import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
-import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
-import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 import userBikeFuelLogs from './userBike/fuelLogs'
 import userBikeMaintenanceLogs from './userBike/maintenanceLogs'
 import userBikeTouringPlans from './userBike/touringPlans'

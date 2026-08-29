@@ -3,11 +3,11 @@
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { ApiV1Error } from '@repo/shared-domain'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { apiPostPublic } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 /**
  * アカウント復帰カード

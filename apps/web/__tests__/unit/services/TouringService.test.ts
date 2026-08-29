@@ -1,5 +1,21 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
+  FuelLogEntity,
+  MyUserBikeEntity,
+  SpotEntity,
+  TouringEntity,
+  TouringPlanEntity,
+  TouringPlanSpotEntity,
+  UserEntity,
+  ApiV1Error,
+  IFuelLogRepository,
+  IMyUserBikeRepository,
+  ISpotRepository,
+  ITouringPlanRepository,
+  ITouringPlanSpotRepository,
+  ITouringRepository,
+} from '@repo/shared-domain'
+import {
   createFuelLogId,
   createMyUserBikeId,
   createTouringId,
@@ -9,20 +25,6 @@ import {
   FuelLog,
   Touring,
 } from '@repo/shared-types'
-import { FuelLogEntity } from '@/lib/api/server/entities/FuelLogEntity'
-import { MyUserBikeEntity } from '@/lib/api/server/entities/MyUserBikeEntity'
-import { SpotEntity } from '@/lib/api/server/entities/SpotEntity'
-import { TouringEntity } from '@/lib/api/server/entities/TouringEntity'
-import { TouringPlanEntity } from '@/lib/api/server/entities/TouringPlanEntity'
-import { TouringPlanSpotEntity } from '@/lib/api/server/entities/TouringPlanSpotEntity'
-import { UserEntity } from '@/lib/api/server/entities/UserEntity'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { IFuelLogRepository } from '@/lib/api/server/interfaces/IFuelLogRepository'
-import { IMyUserBikeRepository } from '@/lib/api/server/interfaces/IMyUserBikeRepository'
-import { ISpotRepository } from '@/lib/api/server/interfaces/ISpotRepository'
-import { ITouringPlanRepository } from '@/lib/api/server/interfaces/ITouringPlanRepository'
-import { ITouringPlanSpotRepository } from '@/lib/api/server/interfaces/ITouringPlanSpotRepository'
-import { ITouringRepository } from '@/lib/api/server/interfaces/ITouringRepository'
 import { TouringService } from '@/lib/api/server/services/TouringService'
 
 const myUserBikeId = createMyUserBikeId('bike-1')

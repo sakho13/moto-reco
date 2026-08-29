@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import useSWRInfinite from 'swr/infinite'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseUserPhotoList,
   SuccessResponse,
@@ -10,7 +11,6 @@ import { BaseCard } from '@repo/ui/baseCard'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
 import { authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 const PAGE_SIZE = 30

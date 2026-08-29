@@ -1,7 +1,6 @@
+import { ApiV1Error, IMyUserBikeRepository } from '@repo/shared-domain'
 import type { MaintenanceItem, MyUserBikeId, UserId } from '@repo/shared-types'
 import { MAINTENANCE_ITEMS_MASTER } from '../constants/maintenanceItems'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 
 /**
  * メンテナンスサービス

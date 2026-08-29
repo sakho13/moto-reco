@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import { toast } from '@repo/ui/sonner'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { apiPatch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 type LocationType = 'start' | 'end'
 

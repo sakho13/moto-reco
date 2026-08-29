@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { GoodsModelSearchParams } from '@repo/shared-domain'
 import {
   ApiResponseGoodsManufacturer,
   ApiResponseGoodsModelSearch,
@@ -11,7 +12,6 @@ import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateQuery } from '../middlewares/zodValidation'
 import { PrismaCompanyRepository } from '../repositories/PrismaCompanyRepository'
 import { PrismaGoodsModelRepository } from '../repositories/PrismaGoodsModelRepository'
-import { GoodsModelSearchParams } from '../valueObjects/GoodsModelSearchParams'
 
 const goods = new Hono()
 

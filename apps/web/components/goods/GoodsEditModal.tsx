@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react'
 import useSWR from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type { ApiResponseUserGoodsDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { DateInput } from '@repo/ui/dateInput'
@@ -14,7 +15,6 @@ import { Textarea } from '@repo/ui/textarea'
 import styles from './GoodsPurchaseModal.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiDelete, apiGet, apiPatch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 export interface GoodsEditModalProps {
   goods: ApiResponseUserGoodsDetail

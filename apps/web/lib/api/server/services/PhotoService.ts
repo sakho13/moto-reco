@@ -1,17 +1,19 @@
 import {
+  PhotoEntity,
+  TouringEntity,
+  ApiV1Error,
+  IMyUserBikeRepository,
+  IPhotoRepository,
+  ISpotRepository,
+  ITouringRepository,
+} from '@repo/shared-domain'
+import {
   MyUserBikeId,
   PhotoId,
   SpotId,
   TouringId,
   UserId,
 } from '@repo/shared-types'
-import { PhotoEntity } from '../entities/PhotoEntity'
-import { TouringEntity } from '../entities/TouringEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { IPhotoRepository } from '../interfaces/IPhotoRepository'
-import { ISpotRepository } from '../interfaces/ISpotRepository'
-import { ITouringRepository } from '../interfaces/ITouringRepository'
 
 type PhotoInput = {
   storagePath: string

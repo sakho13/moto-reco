@@ -1,8 +1,10 @@
+import {
+  UserPlanHistoryEntity,
+  ApiV1Error,
+  IUserPlanHistoryRepository,
+  IUserRepository,
+} from '@repo/shared-domain'
 import { UserId, UserPlan, createUserPlanHistoryId } from '@repo/shared-types'
-import { UserPlanHistoryEntity } from '../entities/UserPlanHistoryEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IUserPlanHistoryRepository } from '../interfaces/IUserPlanHistoryRepository'
-import { IUserRepository } from '../interfaces/IUserRepository'
 
 export class UserPlanService {
   private _userRepository: IUserRepository

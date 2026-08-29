@@ -1,17 +1,19 @@
 import {
+  UserEntity,
+  UserGoodsEntity,
+  ApiV1Error,
+  IGoodsModelRepository,
+  IMyUserBikeRepository,
+  IUserGoodsRepository,
+  UserGoodsSearchParams,
+} from '@repo/shared-domain'
+import {
   GoodsModelId,
   MyUserBikeId,
   UserGoodsId,
   UserId,
   createUserGoodsId,
 } from '@repo/shared-types'
-import { UserEntity } from '../entities/UserEntity'
-import { UserGoodsEntity } from '../entities/UserGoodsEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IGoodsModelRepository } from '../interfaces/IGoodsModelRepository'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { IUserGoodsRepository } from '../interfaces/IUserGoodsRepository'
-import { UserGoodsSearchParams } from '../valueObjects/UserGoodsSearchParams'
 
 type RegisterUserGoodsParams = {
   user: UserEntity

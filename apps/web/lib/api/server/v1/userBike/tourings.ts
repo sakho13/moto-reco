@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { TouringSearchParams } from '@repo/shared-domain'
 import {
   ApiResponseSpotDetail,
   ApiResponseSpotList,
@@ -33,7 +34,6 @@ import { PrismaTouringPlanSpotRepository } from '../../repositories/PrismaTourin
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { SpotService } from '../../services/SpotService'
 import { TouringService } from '../../services/TouringService'
-import { TouringSearchParams } from '../../valueObjects/TouringSearchParams'
 
 const userBikeTourings = new Hono().basePath('/bike/:myUserBikeId/tourings')
 

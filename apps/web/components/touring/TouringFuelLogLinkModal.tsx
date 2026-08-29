@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseTouringDetail,
   SuccessResponse,
@@ -12,7 +13,6 @@ import { toast } from '@repo/ui/sonner'
 import { FuelLogLinkPicker } from './FuelLogLinkPicker'
 import { ModalBase } from '@/components/common/ModalBase'
 import { authenticatedFetch, apiPatch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 /**
  * 給油履歴ピッカーの検索範囲をツーリング期間の前後に広げる幅（時間）

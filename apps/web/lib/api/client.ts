@@ -1,3 +1,4 @@
+import { ApiV1Error } from '@repo/shared-domain'
 import {
   ApiResponseUserProfile,
   ApiResponseUserPlanHistory,
@@ -33,7 +34,6 @@ import {
   SuccessResponse,
 } from '@repo/shared-types'
 import { getFirebaseAuth } from '../firebase/config'
-import { ApiV1Error } from './server/errors/ApiV1Error'
 
 /**
  * 認証付きAPIリクエスト
@@ -366,31 +366,7 @@ type API_EP = {
     DELETE: SuccessResponse<undefined>
   }
 } & {
-  '/api/v1/mcp/api-keys': {
-    GET: SuccessResponse<{
-      apiKeys: {
-        apiKeyId: string
-        name: string
-        prefix: string
-        scopes: string[]
-        createdAt: string
-      }[]
-    }>
-    POST: SuccessResponse<{
-      apiKeyId: string
-      name: string
-      prefix: string
-      scopes: string[]
-      fullKey: string
-      createdAt: string
-    }>
-  }
-} & {
-  [key: `/api/v1/mcp/api-keys/${string}/revoke`]: {
-    PATCH: SuccessResponse<null>
-  }
-} & {
-  [key: `/api/v1/mcp/api-keys/${string}`]: {
-    DELETE: SuccessResponse<null>
+  '/api/v1/mcp/oauth/authorize': {
+    POST: SuccessResponse<{ redirectUrl: string }>
   }
 }

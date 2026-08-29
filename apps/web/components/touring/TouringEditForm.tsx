@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseTouringDetail,
   SuccessResponse,
@@ -14,7 +15,6 @@ import {
   type TouringFormData,
 } from '@/components/touring/TouringForm'
 import { authenticatedFetch, apiPatch, apiDelete } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 interface TouringEditFormProps {
   bikeId: string

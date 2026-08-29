@@ -2,13 +2,13 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { ApiV1Error } from '@repo/shared-domain'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { Textarea } from '@repo/ui/textarea'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
 

@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
@@ -19,7 +20,6 @@ import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { NavigationCard } from '@/components/NavigationCard'
 import { BikePhotosCard } from '@/components/photo/BikePhotosCard'
 import { apiGet, authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 function BikeDetailPage() {

@@ -1,6 +1,5 @@
+import { UserEntity, IUserFollowRepository } from '@repo/shared-domain'
 import { createUserId, type UserId } from '@repo/shared-types'
-import { UserEntity } from '../entities/UserEntity'
-import { IUserFollowRepository } from '../interfaces/IUserFollowRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 const PAGE_SIZE = 20

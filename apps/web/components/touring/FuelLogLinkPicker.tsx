@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import useSWRInfinite from 'swr/infinite'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseFuelLogList,
   SuccessResponse,
@@ -11,7 +12,6 @@ import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
 import styles from './FuelLogLinkPicker.module.css'
 import { authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 const PAGE_SIZE = 10
 

@@ -5,11 +5,11 @@ import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
   title: `MCP セットアップ`,
-  description: `${APP_NAME} の MCP サーバーを Claude Code や Claude Desktop、ChatGPT から利用するための設定方法です。`,
+  description: `${APP_NAME} の MCP サーバーを ClaudeやChatGPT から利用するための設定方法です。`,
   openGraph: {
     url: `${SITE_URL}/docs/mcp`,
     title: `MCP セットアップ | ${APP_NAME}`,
-    description: `${APP_NAME} の MCP サーバーを Claude Code や Claude Desktop、ChatGPT から利用するための設定方法です。`,
+    description: `${APP_NAME} の MCP サーバーを ClaudeやChatGPT から利用するための設定方法です。`,
     images: ['/top_image_1.png'],
   },
   twitter: {
@@ -27,47 +27,36 @@ export const metadata: Metadata = {
 const claudeCodeContent = (
   <div className={styles.tabContent}>
     <p className={styles.sectionBody}>
-      <code className={styles.inlineCode}>~/.claude/settings.json</code>{' '}
-      に以下を追加してください：
+      ターミナルで以下のコマンドを実行してMCPサーバーを追加してください：
     </p>
-    <pre className={styles.codeBlock}>{`{
-  "mcpServers": {
-    "motoreco": {
-      "type": "http",
-      "url": "${SITE_URL}/api/mcp",
-      "headers": {
-        "Authorization": "Bearer <発行したAPIキー>"
-      }
-    }
-  }
-}`}</pre>
+    <pre
+      className={styles.codeBlock}
+    >{`claude mcp add --transport http motoreco ${SITE_URL}/api/mcp`}</pre>
+    <p className={styles.sectionBody}>
+      追加後、Claude Code内で <code className={styles.inlineCode}>/mcp</code>{' '}
+      コマンドを実行するとOAuth認可フローが開始されます。ブラウザが開くので
+      moto-recoにログインし「許可する」を押してください。APIキーの発行・設定は不要です。
+    </p>
   </div>
 )
 
-const claudeDesktopContent = (
+const claudeAppContent = (
   <div className={styles.tabContent}>
     <p className={styles.sectionBody}>
-      Claude Desktop は HTTP 形式の MCP サーバーを直接サポートしていないため、
-      <code className={styles.inlineCode}>mcp-remote</code>{' '}
-      を介して接続します。Node.js がインストールされている必要があります。
+      Claude.ai（Web/Desktop/Mobile）の「コネクタを追加」機能から、
+      APIキーの発行・設定なしで接続できます。
     </p>
-    <p className={styles.sectionBody}>
-      <code className={styles.inlineCode}>claude_desktop_config.json</code>{' '}
-      に以下を追加してください：
-    </p>
-    <pre className={styles.codeBlock}>{`{
-  "mcpServers": {
-    "motoreco": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "${SITE_URL}/api/mcp",
-        "--header",
-        "Authorization: Bearer <発行したAPIキー>"
-      ]
-    }
-  }
-}`}</pre>
+    <ol className={styles.orderedList}>
+      <li>Claude.aiの「設定」→「コネクタ」（Settings → Connectors）を開く</li>
+      <li>
+        「カスタムコネクタを追加」（Add custom connector）を選択し、名前（例:
+        motoreco）とサーバーURL{' '}
+        <code className={styles.inlineCode}>{`${SITE_URL}/api/mcp`}</code>{' '}
+        を入力して保存する
+      </li>
+      <li>自動的にmoto-recoの認可画面が開くので、ログインして「許可」を押す</li>
+      <li>接続が完了し、チャット画面でツールが利用できるようになります</li>
+    </ol>
   </div>
 )
 
@@ -88,10 +77,9 @@ const chatGptContent = (
         <code className={styles.inlineCode}>{`${SITE_URL}/api/mcp`}</code>{' '}
         を入力
       </li>
+      <li>認証方法で「OAuth」を選択して保存する</li>
       <li>
-        認証方法で「カスタムヘッダー」（Custom header）を選択し、以下を入力
-        <pre className={styles.codeBlock}>{`ヘッダー名: Authorization
-値: Bearer <発行したAPIキー>`}</pre>
+        自動的にmoto-recoのログイン・認可画面が開くので、ログインして「許可する」を押す
       </li>
       <li>保存後、チャット画面でコネクタを有効にすると利用できます</li>
     </ol>
@@ -104,23 +92,15 @@ export default function McpSetupPage() {
       <div className={styles.header}>
         <h1 className={styles.title}>MCP セットアップ</h1>
         <p className={styles.description}>
-          {APP_NAME} の MCP サーバーを Claude Code や Claude Desktop、ChatGPT
-          から利用するための設定方法です。
+          {APP_NAME} の MCP サーバーを Claude Code や Claude.ai、ChatGPT
+          から利用するための設定方法です。いずれもOAuth認証に対応しており、
+          APIキーの発行・設定は不要です。
         </p>
       </div>
 
       <div className={styles.content}>
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>1. APIキーを発行する</h2>
-          <p className={styles.sectionBody}>
-            アプリのプロフィール画面から「オプション」→「MCP
-            APIキー管理」を開き、
-            APIキーを発行してください。キーは発行後に一度だけ表示されます。
-          </p>
-        </section>
-
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>2. アプリに設定する</h2>
+          <h2 className={styles.sectionTitle}>接続方法</h2>
           <Tabs
             tabs={[
               {
@@ -129,9 +109,9 @@ export default function McpSetupPage() {
                 content: claudeCodeContent,
               },
               {
-                id: 'claude-desktop',
-                label: 'Claude Desktop',
-                content: claudeDesktopContent,
+                id: 'claude-app',
+                label: 'Claude.ai / Desktop / Mobile',
+                content: claudeAppContent,
               },
               {
                 id: 'chatgpt',

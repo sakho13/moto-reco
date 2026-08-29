@@ -1,10 +1,10 @@
 import type { MetadataRoute } from 'next'
 import { prisma } from '@repo/database'
-import { getCurrentDate } from '@repo/shared-utils'
 import {
   GoodsModelSitemapEntry,
   IGoodsModelRepository,
-} from '@/lib/api/server/interfaces/IGoodsModelRepository'
+} from '@repo/shared-domain'
+import { getCurrentDate } from '@repo/shared-utils'
 import { PrismaGoodsModelRepository } from '@/lib/api/server/repositories/PrismaGoodsModelRepository'
 import { getBlogSitemapEntries } from '@/lib/microcms/blog'
 import { SITE_URL } from '@/lib/statics'

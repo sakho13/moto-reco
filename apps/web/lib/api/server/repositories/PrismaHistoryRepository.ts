@@ -1,4 +1,9 @@
 import {
+  HistoryEntity,
+  IHistoryRepository,
+  PublicHistoryDetail,
+} from '@repo/shared-domain'
+import {
   createFuelLogId,
   createHistoryId,
   createMyUserBikeId,
@@ -6,11 +11,6 @@ import {
   createUserId,
   UserId,
 } from '@repo/shared-types'
-import { HistoryEntity } from '../entities/HistoryEntity'
-import {
-  IHistoryRepository,
-  PublicHistoryDetail,
-} from '../interfaces/IHistoryRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaHistoryRepository

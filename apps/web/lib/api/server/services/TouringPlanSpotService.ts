@@ -1,4 +1,13 @@
 import {
+  TouringPlanEntity,
+  TouringPlanSpotEntity,
+  ApiV1Error,
+  IMyUserBikeRepository,
+  ITouringPlanRepository,
+  ITouringPlanSpotRepository,
+} from '@repo/shared-domain'
+import type { TouringPlanSpotReorderRequest } from '@repo/shared-types'
+import {
   createTouringPlanSpotId,
   MyUserBikeId,
   TouringPlanId,
@@ -6,13 +15,6 @@ import {
   TouringPlanSpotId,
   UserId,
 } from '@repo/shared-types'
-import type { TouringPlanSpotReorderRequest } from '@repo/shared-types'
-import { TouringPlanEntity } from '../entities/TouringPlanEntity'
-import { TouringPlanSpotEntity } from '../entities/TouringPlanSpotEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
-import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import {
   computeTouringPlanSpotTimes,
   TouringPlanSpotWithTimes,

@@ -1,4 +1,4 @@
-import type { UserEntity } from '../entities/UserEntity'
+import type { UserEntity } from '@repo/shared-domain'
 
 // Honoアプリケーション全体で使用する変数の型定義
 export type HonoVariables = {

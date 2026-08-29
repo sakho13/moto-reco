@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { FuelLogSearchParams } from '@repo/shared-domain'
 import {
   ApiResponseFuelLogDetail,
   ApiResponseFuelLogList,
@@ -24,7 +25,6 @@ import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeR
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { PrismaUserBikeRepository } from '../../repositories/PrismaUserBikeRepository'
 import { FuelLogService } from '../../services/FuelLogService'
-import { FuelLogSearchParams } from '../../valueObjects/FuelLogSearchParams'
 
 const userBikeFuelLogs = new Hono().basePath('/bike/:myUserBikeId/fuel-logs')
 

@@ -1,13 +1,13 @@
+import { ApiV1Error } from '@repo/shared-domain'
+import type {
+  CreateAnnouncementInput,
+  IAnnouncementRepository,
+} from '@repo/shared-domain'
 import type {
   AnnouncementStatus,
   AnnouncementType,
   UserId,
 } from '@repo/shared-types'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import type {
-  CreateAnnouncementInput,
-  IAnnouncementRepository,
-} from '../interfaces/IAnnouncementRepository'
 
 export type PublishedReleaseNote = {
   announcementId: string

@@ -1,5 +1,10 @@
 import { Prisma } from '@repo/database'
 import {
+  UserGoodsEntity,
+  IUserGoodsRepository,
+  UserGoodsSearchParams,
+} from '@repo/shared-domain'
+import {
   createCompanyId,
   createGoodsModelId,
   createMyUserBikeId,
@@ -8,9 +13,6 @@ import {
   UserGoodsId,
   UserId,
 } from '@repo/shared-types'
-import { UserGoodsEntity } from '../entities/UserGoodsEntity'
-import { IUserGoodsRepository } from '../interfaces/IUserGoodsRepository'
-import { UserGoodsSearchParams } from '../valueObjects/UserGoodsSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 const userGoodsInclude = {

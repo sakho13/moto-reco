@@ -1,5 +1,5 @@
+import type { INotificationRepository } from '@repo/shared-domain'
 import type { NotificationType, UserId } from '@repo/shared-types'
-import type { INotificationRepository } from '../interfaces/INotificationRepository'
 
 export class NotificationService {
   constructor(

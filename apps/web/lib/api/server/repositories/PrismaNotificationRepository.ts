@@ -1,11 +1,11 @@
 import { Prisma } from '@repo/database'
-import type { UserId } from '@repo/shared-types'
-import { getCurrentDate } from '@repo/shared-utils'
 import type {
   CreateNotificationInput,
   INotificationRepository,
   NotificationRecord,
-} from '../interfaces/INotificationRepository'
+} from '@repo/shared-domain'
+import type { UserId } from '@repo/shared-types'
+import { getCurrentDate } from '@repo/shared-utils'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaNotificationRepository

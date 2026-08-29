@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR from 'swr'
 import useSWRInfinite from 'swr/infinite'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
@@ -17,7 +18,6 @@ import { MaintenanceLogEditModal } from '@/components/maintenance-log/Maintenanc
 import { MaintenanceLogListSection } from '@/components/maintenance-log/MaintenanceLogListSection'
 import { MaintenanceLogRegisterModal } from '@/components/maintenance-log/MaintenanceLogRegisterModal'
 import { authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 const PER_SIZE = 20

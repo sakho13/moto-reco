@@ -2,11 +2,11 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import useSWR from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
 import { PlanCard } from '@/components/touring/PlanCard'
 import { apiGet } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 function TouringPlansPage() {

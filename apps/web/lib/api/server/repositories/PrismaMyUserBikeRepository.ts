@@ -1,4 +1,11 @@
 import {
+  MyUserBikeEntity,
+  IMyUserBikeRepository,
+  MyUserBikeDetail,
+  PublicMyUserBikeDetail,
+  UserBikeSearchParams,
+} from '@repo/shared-domain'
+import {
   createBikeId,
   createMyUserBikeId,
   createUserBikeId,
@@ -7,13 +14,6 @@ import {
   UserId,
   UserBikeId,
 } from '@repo/shared-types'
-import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
-import {
-  IMyUserBikeRepository,
-  MyUserBikeDetail,
-  PublicMyUserBikeDetail,
-} from '../interfaces/IMyUserBikeRepository'
-import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaMyUserBikeRepository

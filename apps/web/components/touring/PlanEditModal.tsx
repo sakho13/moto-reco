@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type { ApiResponseTouringPlanDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
@@ -10,7 +11,6 @@ import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiDelete, apiPatch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 interface PlanEditModalProps {
   bikeId: string

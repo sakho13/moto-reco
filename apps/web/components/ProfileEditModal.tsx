@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
 import { Checkbox } from '@repo/ui/checkbox'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPatch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 interface ProfileEditModalProps {
   initialName: string

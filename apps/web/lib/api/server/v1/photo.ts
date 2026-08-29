@@ -4,6 +4,7 @@ import {
   getFirebaseAdminStorage,
   getStorageBucketName,
 } from '@repo/firebase-auth-server'
+import { PhotoEntity, ApiV1Error } from '@repo/shared-domain'
 import {
   ApiResponseBikePhotoList,
   ApiResponsePhotoDetail,
@@ -24,8 +25,6 @@ import {
   SuccessResponse,
 } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
-import { PhotoEntity } from '../entities/PhotoEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAdminMiddleware } from '../middlewares/honoAdmin'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'

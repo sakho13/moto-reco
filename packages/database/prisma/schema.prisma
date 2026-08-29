@@ -40,20 +40,82 @@ model MUser {
   status MUserStatus @default(ACTIVE) @map("status")
   role   MUserRole   @default(USER) @map("role")
 
-  authProviders          MAuthProvider[]
-  myBikes                TUserMyBike[]
-  histories              TUserMyBikeHistory[]
-  photos                 TUserPhoto[]
-  userQuit               TUserQuit?
-  followers              TUserFollow[]             @relation("UserFollowing")
-  following              TUserFollow[]             @relation("UserFollowers")
-  notifications          TNotification[]
-  announcementReads      TSystemAnnouncementRead[]
-  createdAnnouncements   MSystemAnnouncement[]
-  planHistories          TUserPlanHistory[]
-  planHistoriesChangedBy TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
-  apiKeys                MApiKey[]
-  goods                  TUserGoods[]
+  authProviders           MAuthProvider[]
+  myBikes                 TUserMyBike[]
+  histories               TUserMyBikeHistory[]
+  photos                  TUserPhoto[]
+  userQuit                TUserQuit?
+  followers               TUserFollow[]             @relation("UserFollowing")
+  following               TUserFollow[]             @relation("UserFollowers")
+  notifications           TNotification[]
+  announcementReads       TSystemAnnouncementRead[]
+  createdAnnouncements    MSystemAnnouncement[]
+  planHistories           TUserPlanHistory[]
+  planHistoriesChangedBy  TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
+  apiKeys                 MApiKey[]
+  goods                   TUserGoods[]
+  oAuthAuthorizationCodes TOAuthAuthorizationCode[]
+  oAuthTokens             TOAuthToken[]
+}
+
+model MOAuthClient {
+  id                      String                       @id @default(cuid(2))
+  clientId                String                       @unique @map("client_id")
+  clientSecretHash        String?                      @map("client_secret_hash")
+  clientName              String                       @map("client_name")
+  redirectUris            String[]                     @map("redirect_uris")
+  tokenEndpointAuthMethod OAuthTokenEndpointAuthMethod @default(NONE) @map("token_endpoint_auth_method")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  authorizationCodes TOAuthAuthorizationCode[]
+  tokens             TOAuthToken[]
+
+  @@index([clientId])
+}
+
+model TOAuthAuthorizationCode {
+  id                  String         @id @default(cuid(2))
+  codeHash            String         @unique @map("code_hash")
+  clientId            String         @map("client_id")
+  userId              String         @map("user_id")
+  redirectUri         String         @map("redirect_uri")
+  codeChallenge       String         @map("code_challenge")
+  codeChallengeMethod String         @default("S256") @map("code_challenge_method")
+  scopes              MApiKeyScope[] @default([READ]) @map("scopes")
+  used                Boolean        @default(false) @map("used")
+  expiresAt           DateTime       @map("expires_at") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  client MOAuthClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user   MUser        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model TOAuthToken {
+  id                    String         @id @default(cuid(2))
+  accessTokenHash       String         @unique @map("access_token_hash")
+  refreshTokenHash      String?        @unique @map("refresh_token_hash")
+  clientId              String         @map("client_id")
+  userId                String         @map("user_id")
+  scopes                MApiKeyScope[] @default([READ]) @map("scopes")
+  revoked               Boolean        @default(false) @map("revoked")
+  accessTokenExpiresAt  DateTime       @map("access_token_expires_at") @db.Timestamptz
+  refreshTokenExpiresAt DateTime?      @map("refresh_token_expires_at") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  client MOAuthClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user   MUser        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId, revoked])
 }
 
 model MApiKey {
@@ -306,8 +368,8 @@ model TUserMyBikeTouring {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  userMyBike TUserMyBike              @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
-  plan       TUserMyBikeTouringPlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
+  userMyBike TUserMyBike               @relation(fields: [userMyBikeId], references: [id], onDelete: Cascade)
+  plan       TUserMyBikeTouringPlan?   @relation(fields: [planId], references: [id], onDelete: SetNull)
   fuelLogs   TUserMyBikeFuelLog[]
   spots      TUserMyBikeTouringSpot[]
   history    TUserMyBikeHistory?
@@ -411,7 +473,7 @@ model TUserMyBikeTouringSpot {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  touring TUserMyBikeTouring              @relation(fields: [touringId], references: [id], onDelete: Cascade)
+  touring TUserMyBikeTouring            @relation(fields: [touringId], references: [id], onDelete: Cascade)
   photos  TUserMyBikeTouringSpotPhoto[]
 
   @@index([touringId, sortOrder])
@@ -726,4 +788,9 @@ enum AnnouncementStatus {
   DRAFT
   PUBLISHED
   EXPIRED
+}
+
+enum OAuthTokenEndpointAuthMethod {
+  NONE
+  CLIENT_SECRET_BASIC
 }

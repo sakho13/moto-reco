@@ -2,8 +2,9 @@
 
 import { UserRound } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { FormEvent, useState } from 'react'
+import { ApiV1Error } from '@repo/shared-domain'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
@@ -12,12 +13,16 @@ import { Input } from '@repo/ui/input'
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { getFirebaseAuth } from '@/lib/firebase/config'
 import { useAuth } from '@/lib/hooks/useAuth'
 
 export function LoginCard() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  // オープンリダイレクト対策: /app/ 配下の相対パスのみ許可する
+  const rawRedirect = searchParams.get('redirect')
+  const redirectTo =
+    rawRedirect && rawRedirect.startsWith('/app/') ? rawRedirect : '/app/home'
   const { signInWithEmail, signInWithGoogle, signOut, signInAsGuest } =
     useAuth()
 
@@ -62,7 +67,7 @@ export function LoginCard() {
       }
 
       trackEvent('web_login', { method: 'email' })
-      router.push('/app/home')
+      router.push(redirectTo)
     } catch (err) {
       console.error('Login error:', err)
       trackEvent('login_error', {
@@ -104,7 +109,7 @@ export function LoginCard() {
       await apiPost('/api/v1/user/auth/guest/register', {})
 
       trackEvent('web_guest_login', { method: 'anonymous' })
-      router.push('/app/home')
+      router.push(redirectTo)
     } catch (err) {
       console.error('Guest login error:', err)
       await signOut()
@@ -137,7 +142,7 @@ export function LoginCard() {
 
         // 成功 = 既に登録済み
         trackEvent('web_login', { method: 'google' })
-        router.push('/app/home')
+        router.push(redirectTo)
         return
       } catch (profileError: unknown) {
         // profile APIのエラーをハンドリング
@@ -186,7 +191,7 @@ export function LoginCard() {
           // 4. 登録成功 → ホームへ
           trackEvent('web_sign_up', { method: 'google' })
           trackEvent('web_login', { method: 'google' })
-          router.push('/app/home')
+          router.push(redirectTo)
           return
         }
 
