@@ -16,15 +16,20 @@ import { PrismaApiKeyRepository } from '@/lib/api/server/repositories/PrismaApiK
 import { PrismaFuelLogRepository } from '@/lib/api/server/repositories/PrismaFuelLogRepository'
 import { PrismaMaintenanceLogRepository } from '@/lib/api/server/repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
+import { PrismaOAuthAuthorizationCodeRepository } from '@/lib/api/server/repositories/PrismaOAuthAuthorizationCodeRepository'
+import { PrismaOAuthClientRepository } from '@/lib/api/server/repositories/PrismaOAuthClientRepository'
+import { PrismaOAuthTokenRepository } from '@/lib/api/server/repositories/PrismaOAuthTokenRepository'
 import { PrismaTouringPlanRepository } from '@/lib/api/server/repositories/PrismaTouringPlanRepository'
 import { PrismaTouringPlanSpotRepository } from '@/lib/api/server/repositories/PrismaTouringPlanSpotRepository'
 import { PrismaTouringRepository } from '@/lib/api/server/repositories/PrismaTouringRepository'
 import { ApiKeyService } from '@/lib/api/server/services/ApiKeyService'
 import { MaintenanceLogService } from '@/lib/api/server/services/MaintenanceLogService'
+import { OAuthAuthorizationService } from '@/lib/api/server/services/OAuthAuthorizationService'
 import { TouringPlanService } from '@/lib/api/server/services/TouringPlanService'
 import { TouringService } from '@/lib/api/server/services/TouringService'
 import { TouringSearchParams } from '@/lib/api/server/valueObjects/TouringSearchParams'
 import { UserBikeSearchParams } from '@/lib/api/server/valueObjects/UserBikeSearchParams'
+import { WEB_URL } from '@/lib/statics'
 
 /**
  * stateless モード用の単発リクエストトランスポート。
@@ -66,14 +71,31 @@ class SingleRequestTransport implements Transport {
   }
 }
 
+/**
+ * MCPサーバーへのリクエストを認証する
+ *
+ * @remarks
+ * Bearerトークンが `mk_` で始まる場合は既存のAPIキー方式、それ以外はOAuthアクセストークンとして検証する。
+ * 既存のAPIキー方式の挙動は変更しない（後方互換）。
+ */
 async function authenticate(
   request: NextRequest
 ): Promise<{ userId: string; scopes: ApiKeyScope[] } | null> {
   const authHeader = request.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) return null
   const token = authHeader.slice('Bearer '.length)
-  const service = new ApiKeyService(new PrismaApiKeyRepository(prisma))
-  return (await service.verifyApiKey(token)) ?? null
+
+  if (token.startsWith('mk_')) {
+    const service = new ApiKeyService(new PrismaApiKeyRepository(prisma))
+    return (await service.verifyApiKey(token)) ?? null
+  }
+
+  const oauthService = new OAuthAuthorizationService(
+    new PrismaOAuthClientRepository(prisma),
+    new PrismaOAuthAuthorizationCodeRepository(prisma),
+    new PrismaOAuthTokenRepository(prisma)
+  )
+  return (await oauthService.verifyAccessToken(token)) ?? null
 }
 
 /** Repository/Service層が返す NOT_FOUND を MCP の isError レスポンスに変換する */
@@ -377,11 +399,17 @@ export async function POST(request: NextRequest) {
         jsonrpc: '2.0',
         error: {
           code: -32001,
-          message: 'Unauthorized: 有効なAPIキーが必要です',
+          message:
+            'Unauthorized: 有効なAPIキーまたはOAuthアクセストークンが必要です',
         },
         id: null,
       },
-      { status: 401 }
+      {
+        status: 401,
+        headers: {
+          'WWW-Authenticate': `Bearer resource_metadata="${WEB_URL}/.well-known/oauth-protected-resource"`,
+        },
+      }
     )
   }
 
