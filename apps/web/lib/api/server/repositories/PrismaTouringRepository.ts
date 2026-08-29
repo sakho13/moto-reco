@@ -1,5 +1,10 @@
 import { Prisma } from '@repo/database'
 import {
+  TouringEntity,
+  ITouringRepository,
+  TouringSearchParams,
+} from '@repo/shared-domain'
+import {
   createMyUserBikeId,
   createTouringId,
   createTouringPlanId,
@@ -9,9 +14,6 @@ import {
   TouringStatus,
   UserId,
 } from '@repo/shared-types'
-import { TouringEntity } from '../entities/TouringEntity'
-import { ITouringRepository } from '../interfaces/ITouringRepository'
-import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 const touringSelect = {

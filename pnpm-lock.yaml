@@ -252,6 +252,9 @@ importers:
       '@repo/markdown':
         specifier: workspace:*
         version: link:../../packages/markdown
+      '@repo/shared-domain':
+        specifier: workspace:*
+        version: link:../../packages/shared-domain
       '@repo/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
@@ -466,6 +469,12 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+
+  packages/shared-domain:
+    dependencies:
+      '@repo/shared-types':
+        specifier: workspace:*
+        version: link:../shared-types
 
   packages/shared-types:
     dependencies:

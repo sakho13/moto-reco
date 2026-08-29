@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { MaintenanceLogSearchParams } from '@repo/shared-domain'
 import {
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
@@ -18,7 +19,6 @@ import {
 import { PrismaMaintenanceLogRepository } from '../../repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeRepository'
 import { MaintenanceLogService } from '../../services/MaintenanceLogService'
-import { MaintenanceLogSearchParams } from '../../valueObjects/MaintenanceLogSearchParams'
 
 const userBikeMaintenanceLogs = new Hono().basePath(
   '/bike/:myUserBikeId/maintenance-logs'

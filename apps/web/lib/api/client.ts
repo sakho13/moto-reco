@@ -1,3 +1,4 @@
+import { ApiV1Error } from '@repo/shared-domain'
 import {
   ApiResponseUserProfile,
   ApiResponseUserPlanHistory,
@@ -33,7 +34,6 @@ import {
   SuccessResponse,
 } from '@repo/shared-types'
 import { getFirebaseAuth } from '../firebase/config'
-import { ApiV1Error } from './server/errors/ApiV1Error'
 
 /**
  * 認証付きAPIリクエスト

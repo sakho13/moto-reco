@@ -1,12 +1,14 @@
 import { createHash, randomBytes } from 'crypto'
+import type {
+  IOAuthAuthorizationCodeRepository,
+  IOAuthClientRepository,
+  IOAuthTokenRepository,
+  IUserRepository,
+} from '@repo/shared-domain'
 import type { ApiKeyScope } from '@repo/shared-types'
 import { createUserId } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
 import { OAuthError } from '../errors/OAuthError'
-import type { IOAuthAuthorizationCodeRepository } from '../interfaces/IOAuthAuthorizationCodeRepository'
-import type { IOAuthClientRepository } from '../interfaces/IOAuthClientRepository'
-import type { IOAuthTokenRepository } from '../interfaces/IOAuthTokenRepository'
-import type { IUserRepository } from '../interfaces/IUserRepository'
 import { OAuthClientService } from './OAuthClientService'
 
 const ALLOWED_SCOPES: ApiKeyScope[] = ['READ', 'WRITE']

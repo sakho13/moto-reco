@@ -32,6 +32,10 @@ export default defineConfig({
         __dirname,
         '../../packages/shared-types/src'
       ),
+      '@repo/shared-domain': path.resolve(
+        __dirname,
+        '../../packages/shared-domain/src'
+      ),
       '@repo/shared-utils': path.resolve(
         __dirname,
         '../../packages/shared-utils/src'

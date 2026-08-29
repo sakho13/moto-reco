@@ -1,6 +1,5 @@
+import { OAuthTokenEntity, IOAuthTokenRepository } from '@repo/shared-domain'
 import type { ApiKeyScope } from '@repo/shared-types'
-import { OAuthTokenEntity } from '../entities/OAuthTokenEntity'
-import { IOAuthTokenRepository } from '../interfaces/IOAuthTokenRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaOAuthTokenRepository

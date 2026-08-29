@@ -1,6 +1,5 @@
+import { UserBikeEntity, IUserBikeRepository } from '@repo/shared-domain'
 import { createBikeId, createUserBikeId } from '@repo/shared-types'
-import { UserBikeEntity } from '../entities/UserBikeEntity'
-import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaUserBikeRepository

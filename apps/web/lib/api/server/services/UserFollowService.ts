@@ -1,8 +1,10 @@
+import { ApiV1Error } from '@repo/shared-domain'
+import type {
+  INotificationRepository,
+  IUserFollowRepository,
+  IUserRepository,
+} from '@repo/shared-domain'
 import type { UserId } from '@repo/shared-types'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import type { INotificationRepository } from '../interfaces/INotificationRepository'
-import type { IUserFollowRepository } from '../interfaces/IUserFollowRepository'
-import type { IUserRepository } from '../interfaces/IUserRepository'
 
 const PAGE_SIZE = 20
 

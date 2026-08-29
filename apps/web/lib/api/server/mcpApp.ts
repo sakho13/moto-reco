@@ -5,13 +5,17 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { prisma } from '@repo/database'
 import {
+  ApiV1Error,
+  TouringSearchParams,
+  UserBikeSearchParams,
+} from '@repo/shared-domain'
+import {
   ApiKeyScope,
   createMyUserBikeId,
   createTouringId,
   createTouringPlanId,
   createUserId,
 } from '@repo/shared-types'
-import { ApiV1Error } from './errors/ApiV1Error'
 import { PrismaFuelLogRepository } from './repositories/PrismaFuelLogRepository'
 import { PrismaMaintenanceLogRepository } from './repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from './repositories/PrismaMyUserBikeRepository'
@@ -26,8 +30,6 @@ import { MaintenanceLogService } from './services/MaintenanceLogService'
 import { OAuthAuthorizationService } from './services/OAuthAuthorizationService'
 import { TouringPlanService } from './services/TouringPlanService'
 import { TouringService } from './services/TouringService'
-import { TouringSearchParams } from './valueObjects/TouringSearchParams'
-import { UserBikeSearchParams } from './valueObjects/UserBikeSearchParams'
 import { SITE_URL, WEB_URL } from '@/lib/statics'
 
 /**

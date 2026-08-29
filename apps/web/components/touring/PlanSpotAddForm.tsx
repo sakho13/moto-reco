@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type { TouringPlanRouteType } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { FormField } from '@repo/ui/formField'
@@ -11,7 +12,6 @@ import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
 type PlanSpotAddFormProps = {

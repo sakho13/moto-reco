@@ -1,14 +1,16 @@
 import { createHash } from 'crypto'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import {
+  OAuthAuthorizationCodeEntity,
+  OAuthClientEntity,
+  OAuthTokenEntity,
+  UserEntity,
+  IOAuthAuthorizationCodeRepository,
+  IOAuthClientRepository,
+  IOAuthTokenRepository,
+  IUserRepository,
+} from '@repo/shared-domain'
 import { createUserId } from '@repo/shared-types'
-import { OAuthAuthorizationCodeEntity } from '@/lib/api/server/entities/OAuthAuthorizationCodeEntity'
-import { OAuthClientEntity } from '@/lib/api/server/entities/OAuthClientEntity'
-import { OAuthTokenEntity } from '@/lib/api/server/entities/OAuthTokenEntity'
-import { UserEntity } from '@/lib/api/server/entities/UserEntity'
-import { IOAuthAuthorizationCodeRepository } from '@/lib/api/server/interfaces/IOAuthAuthorizationCodeRepository'
-import { IOAuthClientRepository } from '@/lib/api/server/interfaces/IOAuthClientRepository'
-import { IOAuthTokenRepository } from '@/lib/api/server/interfaces/IOAuthTokenRepository'
-import { IUserRepository } from '@/lib/api/server/interfaces/IUserRepository'
 import { OAuthAuthorizationService } from '@/lib/api/server/services/OAuthAuthorizationService'
 
 const NOW = new Date('2026-08-29T00:00:00Z')

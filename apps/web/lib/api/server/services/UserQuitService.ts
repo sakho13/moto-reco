@@ -1,10 +1,12 @@
 import { createHash, randomBytes } from 'crypto'
+import {
+  UserQuitEntity,
+  ApiV1Error,
+  IUserQuitRepository,
+  IUserRepository,
+} from '@repo/shared-domain'
 import { createUserQuitId, type UserId } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
-import { UserQuitEntity } from '../entities/UserQuitEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IUserQuitRepository } from '../interfaces/IUserQuitRepository'
-import { IUserRepository } from '../interfaces/IUserRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
 
 /** 退会から完全物理削除までの猶予期間（日数） */

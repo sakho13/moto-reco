@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { prisma } from '@repo/database'
+import { GoodsModelSearchParams } from '@repo/shared-domain'
 import type { GoodsCategory, GoodsModelId } from '@repo/shared-types'
 import styles from './page.module.css'
 import {
@@ -11,7 +12,6 @@ import {
 } from '@/components/goods/goodsCategoryLabels'
 import { PrismaCompanyRepository } from '@/lib/api/server/repositories/PrismaCompanyRepository'
 import { PrismaGoodsModelRepository } from '@/lib/api/server/repositories/PrismaGoodsModelRepository'
-import { GoodsModelSearchParams } from '@/lib/api/server/valueObjects/GoodsModelSearchParams'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const revalidate = 300

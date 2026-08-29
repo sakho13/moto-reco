@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { ApiV1Error } from '@repo/shared-domain'
 import {
   ApiResponseMaintenanceItems,
   createMyUserBikeId,
   SuccessResponse,
 } from '@repo/shared-types'
-import { ApiV1Error } from '../errors/ApiV1Error'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { MaintenanceService } from '../services/MaintenanceService'

@@ -1,11 +1,13 @@
 import { createHash } from 'crypto'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import {
+  UserEntity,
+  UserQuitEntity,
+  ApiV1Error,
+  IUserQuitRepository,
+  IUserRepository,
+} from '@repo/shared-domain'
 import { createUserId, createUserQuitId } from '@repo/shared-types'
-import { UserEntity } from '@/lib/api/server/entities/UserEntity'
-import { UserQuitEntity } from '@/lib/api/server/entities/UserQuitEntity'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { IUserQuitRepository } from '@/lib/api/server/interfaces/IUserQuitRepository'
-import { IUserRepository } from '@/lib/api/server/interfaces/IUserRepository'
 import { PrismaAuthProviderRepository } from '@/lib/api/server/repositories/PrismaAuthProviderRepository'
 import { UserQuitService } from '@/lib/api/server/services/UserQuitService'
 

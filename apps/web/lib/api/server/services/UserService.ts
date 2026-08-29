@@ -1,8 +1,10 @@
+import {
+  AuthProviderEntity,
+  UserEntity,
+  ApiV1Error,
+  IUserRepository,
+} from '@repo/shared-domain'
 import { createUserId } from '@repo/shared-types'
-import { AuthProviderEntity } from '../entities/AuthProviderEntity'
-import { UserEntity } from '../entities/UserEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IUserRepository } from '../interfaces/IUserRepository'
 
 export class UserService {
   private _userRepository: IUserRepository

@@ -1,8 +1,7 @@
 import { createHash } from 'crypto'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { OAuthClientEntity } from '@/lib/api/server/entities/OAuthClientEntity'
+import { OAuthClientEntity, IOAuthClientRepository } from '@repo/shared-domain'
 import { OAuthError } from '@/lib/api/server/errors/OAuthError'
-import { IOAuthClientRepository } from '@/lib/api/server/interfaces/IOAuthClientRepository'
 import { OAuthClientService } from '@/lib/api/server/services/OAuthClientService'
 
 const buildClientEntity = (

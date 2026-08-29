@@ -1,6 +1,5 @@
+import { CompanyEntity, ICompanyRepository } from '@repo/shared-domain'
 import { CompanyCategory, createCompanyId } from '@repo/shared-types'
-import { CompanyEntity } from '../entities/CompanyEntity'
-import { ICompanyRepository } from '../interfaces/ICompanyRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaCompanyRepository

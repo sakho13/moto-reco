@@ -1,5 +1,10 @@
 import { PrismaClient } from '@repo/database'
 import {
+  TouringPlanSpotEntity,
+  ITouringPlanSpotRepository,
+  SingletonTouringPlanSpotData,
+} from '@repo/shared-domain'
+import {
   createTouringPlanId,
   createTouringPlanSpotId,
   TouringPlanId,
@@ -7,11 +12,6 @@ import {
   TouringPlanSpotId,
   TouringPlanSpotType,
 } from '@repo/shared-types'
-import { TouringPlanSpotEntity } from '../entities/TouringPlanSpotEntity'
-import {
-  ITouringPlanSpotRepository,
-  SingletonTouringPlanSpotData,
-} from '../interfaces/ITouringPlanSpotRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 const touringPlanSpotSelect = {

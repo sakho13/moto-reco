@@ -1,8 +1,10 @@
+import {
+  FuelInsightEntity,
+  ApiV1Error,
+  IFuelInsightRepository,
+  IMyUserBikeRepository,
+} from '@repo/shared-domain'
 import { FuelInsightPeriod, MyUserBikeId, UserId } from '@repo/shared-types'
-import { FuelInsightEntity } from '../entities/FuelInsightEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IFuelInsightRepository } from '../interfaces/IFuelInsightRepository'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
 
 export class FuelInsightService {
   constructor(

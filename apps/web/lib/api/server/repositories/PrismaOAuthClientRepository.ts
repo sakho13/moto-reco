@@ -1,8 +1,8 @@
 import {
   OAuthClientEntity,
   OAuthTokenEndpointAuthMethod,
-} from '../entities/OAuthClientEntity'
-import { IOAuthClientRepository } from '../interfaces/IOAuthClientRepository'
+  IOAuthClientRepository,
+} from '@repo/shared-domain'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaOAuthClientRepository

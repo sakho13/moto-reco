@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import {
   getNowLocalDateTimeString,
   toLocalDateTimeString,
@@ -14,7 +15,6 @@ import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 type SpotAddFormProps = {
   bikeId: string

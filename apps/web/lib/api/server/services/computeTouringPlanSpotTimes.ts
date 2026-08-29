@@ -1,6 +1,8 @@
+import {
+  TouringPlanSpotEntity,
+  ITouringPlanSpotRepository,
+} from '@repo/shared-domain'
 import { TouringPlanId } from '@repo/shared-types'
-import { TouringPlanSpotEntity } from '../entities/TouringPlanSpotEntity'
-import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
 import { calculateTouringPlanSpotTimes } from './calculateTouringPlanSpotTimes'
 
 export type TouringPlanSpotWithTimes = {

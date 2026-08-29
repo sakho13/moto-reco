@@ -1,5 +1,17 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
+  MyUserBikeEntity,
+  TouringEntity,
+  TouringPlanEntity,
+  TouringPlanSpotEntity,
+  UserEntity,
+  ApiV1Error,
+  IMyUserBikeRepository,
+  ITouringPlanRepository,
+  ITouringPlanSpotRepository,
+  ITouringRepository,
+} from '@repo/shared-domain'
+import {
   createMyUserBikeId,
   createTouringId,
   createTouringPlanId,
@@ -7,16 +19,6 @@ import {
   createUserId,
   TouringPlan,
 } from '@repo/shared-types'
-import { MyUserBikeEntity } from '@/lib/api/server/entities/MyUserBikeEntity'
-import { TouringEntity } from '@/lib/api/server/entities/TouringEntity'
-import { TouringPlanEntity } from '@/lib/api/server/entities/TouringPlanEntity'
-import { TouringPlanSpotEntity } from '@/lib/api/server/entities/TouringPlanSpotEntity'
-import { UserEntity } from '@/lib/api/server/entities/UserEntity'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { IMyUserBikeRepository } from '@/lib/api/server/interfaces/IMyUserBikeRepository'
-import { ITouringPlanRepository } from '@/lib/api/server/interfaces/ITouringPlanRepository'
-import { ITouringPlanSpotRepository } from '@/lib/api/server/interfaces/ITouringPlanSpotRepository'
-import { ITouringRepository } from '@/lib/api/server/interfaces/ITouringRepository'
 import { TouringPlanService } from '@/lib/api/server/services/TouringPlanService'
 
 const myUserBikeId = createMyUserBikeId('bike-1')

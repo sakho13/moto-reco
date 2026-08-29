@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { MaintenanceLogSearchParams } from '@/lib/api/server/valueObjects/MaintenanceLogSearchParams'
+import { MaintenanceLogSearchParams } from '@repo/shared-domain'
 
 describe('MaintenanceLogSearchParams', () => {
   describe('デフォルト値', () => {

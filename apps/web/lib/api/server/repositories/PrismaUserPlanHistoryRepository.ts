@@ -1,11 +1,13 @@
 import {
+  UserPlanHistoryEntity,
+  IUserPlanHistoryRepository,
+} from '@repo/shared-domain'
+import {
   UserId,
   UserPlan,
   createUserId,
   createUserPlanHistoryId,
 } from '@repo/shared-types'
-import { UserPlanHistoryEntity } from '../entities/UserPlanHistoryEntity'
-import { IUserPlanHistoryRepository } from '../interfaces/IUserPlanHistoryRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaUserPlanHistoryRepository

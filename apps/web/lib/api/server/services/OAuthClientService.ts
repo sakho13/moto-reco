@@ -2,9 +2,9 @@ import { createHash, randomBytes } from 'crypto'
 import type {
   OAuthClientEntity,
   OAuthTokenEndpointAuthMethod,
-} from '../entities/OAuthClientEntity'
+  IOAuthClientRepository,
+} from '@repo/shared-domain'
 import { OAuthError } from '../errors/OAuthError'
-import type { IOAuthClientRepository } from '../interfaces/IOAuthClientRepository'
 
 export type RegisteredOAuthClient = {
   client: OAuthClientEntity

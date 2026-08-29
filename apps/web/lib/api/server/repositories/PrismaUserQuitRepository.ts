@@ -1,11 +1,10 @@
+import { UserQuitEntity, IUserQuitRepository } from '@repo/shared-domain'
 import {
   createUserId,
   createUserQuitId,
   type UserId,
   type UserQuitStatus,
 } from '@repo/shared-types'
-import { UserQuitEntity } from '../entities/UserQuitEntity'
-import { IUserQuitRepository } from '../interfaces/IUserQuitRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 const SELECT = {

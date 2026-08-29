@@ -1,4 +1,5 @@
 import { PrismaClient } from '@repo/database'
+import { SpotEntity, ISpotRepository } from '@repo/shared-domain'
 import {
   createSpotId,
   createTouringId,
@@ -6,8 +7,6 @@ import {
   SpotType,
   TouringId,
 } from '@repo/shared-types'
-import { SpotEntity } from '../entities/SpotEntity'
-import { ISpotRepository } from '../interfaces/ISpotRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 const spotSelect = {

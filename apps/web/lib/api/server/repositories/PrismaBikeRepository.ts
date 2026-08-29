@@ -1,8 +1,10 @@
 import { Prisma } from '@repo/database'
+import {
+  BikeEntity,
+  IBikeRepository,
+  BikeSearchParams,
+} from '@repo/shared-domain'
 import { BikeId, createBikeId } from '@repo/shared-types'
-import { BikeEntity } from '../entities/BikeEntity'
-import { IBikeRepository } from '../interfaces/IBikeRepository'
-import { BikeSearchParams } from '../valueObjects/BikeSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaBikeRepository

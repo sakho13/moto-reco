@@ -1,18 +1,20 @@
 import {
+  BikeEntity,
+  MyUserBikeEntity,
+  UserBikeEntity,
+  UserEntity,
+  ApiV1Error,
+  IBikeRepository,
+  IMyUserBikeRepository,
+  IUserBikeRepository,
+} from '@repo/shared-domain'
+import {
   BikeId,
   createMyUserBikeId,
   createUserBikeId,
   UserId,
 } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
-import { BikeEntity } from '../entities/BikeEntity'
-import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
-import { UserBikeEntity } from '../entities/UserBikeEntity'
-import { UserEntity } from '../entities/UserEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IBikeRepository } from '../interfaces/IBikeRepository'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
 
 type RegisterUserBikeParams = {
   bikeId?: BikeId | null

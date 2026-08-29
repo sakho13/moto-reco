@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
@@ -13,7 +14,6 @@ import {
 import { InfoBox } from '@/components/bike/InfoBox'
 import { StepIndicator } from '@/components/bike/StepIndicator'
 import { apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 type Step = 1 | 2 | 3

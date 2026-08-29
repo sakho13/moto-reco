@@ -1,14 +1,16 @@
 import { Prisma } from '@repo/database'
 import {
+  MaintenanceLogEntity,
+  IMaintenanceLogRepository,
+  MaintenanceLogSearchParams,
+} from '@repo/shared-domain'
+import {
   createMaintenanceLogId,
   createMyUserBikeId,
   MaintenanceLogId,
   MaintenanceType,
   MyUserBikeId,
 } from '@repo/shared-types'
-import { MaintenanceLogEntity } from '../entities/MaintenanceLogEntity'
-import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
-import { MaintenanceLogSearchParams } from '../valueObjects/MaintenanceLogSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 type MaintenanceLogRow = {

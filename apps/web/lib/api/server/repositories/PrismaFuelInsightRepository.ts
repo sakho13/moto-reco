@@ -1,7 +1,6 @@
 import { Prisma } from '@repo/database'
+import { FuelInsightEntity, IFuelInsightRepository } from '@repo/shared-domain'
 import { FuelInsightPeriod, MyUserBikeId } from '@repo/shared-types'
-import { FuelInsightEntity } from '../entities/FuelInsightEntity'
-import { IFuelInsightRepository } from '../interfaces/IFuelInsightRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 type FuelInsightRow = {

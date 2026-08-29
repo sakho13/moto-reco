@@ -1,4 +1,12 @@
 import {
+  SpotEntity,
+  ApiV1Error,
+  IMyUserBikeRepository,
+  ISpotRepository,
+  ITouringRepository,
+} from '@repo/shared-domain'
+import type { SpotReorderRequest } from '@repo/shared-types'
+import {
   createSpotId,
   MyUserBikeId,
   SpotId,
@@ -6,13 +14,7 @@ import {
   TouringId,
   UserId,
 } from '@repo/shared-types'
-import type { SpotReorderRequest } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
-import { SpotEntity } from '../entities/SpotEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { ISpotRepository } from '../interfaces/ISpotRepository'
-import { ITouringRepository } from '../interfaces/ITouringRepository'
 
 type RegisterSpotParams = {
   touringId: TouringId

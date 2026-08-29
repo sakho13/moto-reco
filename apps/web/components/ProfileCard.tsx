@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import useSWR from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
@@ -10,7 +11,6 @@ import styles from './ProfileCard.module.css'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { ProfileEditModal } from '@/components/ProfileEditModal'
 import { apiGet } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useAuth } from '@/lib/hooks/useAuth'
 
 export function ProfileCard() {

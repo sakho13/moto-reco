@@ -1,12 +1,12 @@
-import type { UserId } from '@repo/shared-types'
-import { getCurrentDate } from '@repo/shared-utils'
 import type {
   AnnouncementRecord,
   AnnouncementWithReadCount,
   AnnouncementWithReadStatus,
   CreateAnnouncementInput,
   IAnnouncementRepository,
-} from '../interfaces/IAnnouncementRepository'
+} from '@repo/shared-domain'
+import type { UserId } from '@repo/shared-types'
+import { getCurrentDate } from '@repo/shared-utils'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaAnnouncementRepository

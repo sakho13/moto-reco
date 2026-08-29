@@ -1,6 +1,8 @@
+import {
+  OAuthAuthorizationCodeEntity,
+  IOAuthAuthorizationCodeRepository,
+} from '@repo/shared-domain'
 import type { ApiKeyScope } from '@repo/shared-types'
-import { OAuthAuthorizationCodeEntity } from '../entities/OAuthAuthorizationCodeEntity'
-import { IOAuthAuthorizationCodeRepository } from '../interfaces/IOAuthAuthorizationCodeRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaOAuthAuthorizationCodeRepository

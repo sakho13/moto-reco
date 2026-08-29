@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR from 'swr'
 import useSWRInfinite from 'swr/infinite'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseFuelLogList,
   FuelLogPeriod,
@@ -19,7 +20,6 @@ import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
 import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
 import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal'
 import { authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'

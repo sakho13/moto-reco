@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import { getCurrentDate } from '@repo/shared-utils'
 import { toast } from '@repo/ui/sonner'
 import { QuickFuelSection } from '@/components/QuickFuelSection'
@@ -9,7 +10,6 @@ import { RecentHistorySection } from '@/components/RecentHistorySection'
 import { TouringModeView } from '@/components/touring/TouringModeView'
 import { TouringStartEndSection } from '@/components/TouringStartEndSection'
 import { apiGet, apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 

@@ -1,5 +1,5 @@
 import { Context, Next } from 'hono'
-import { ApiV1Error } from '../errors/ApiV1Error'
+import { ApiV1Error } from '@repo/shared-domain'
 import { HonoVariables } from '../types/hono'
 
 /**

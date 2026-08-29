@@ -1,4 +1,17 @@
 import {
+  SpotEntity,
+  TouringEntity,
+  UserEntity,
+  ApiV1Error,
+  IFuelLogRepository,
+  IMyUserBikeRepository,
+  ISpotRepository,
+  ITouringPlanRepository,
+  ITouringPlanSpotRepository,
+  ITouringRepository,
+  TouringSearchParams,
+} from '@repo/shared-domain'
+import {
   createSpotId,
   createTouringId,
   createTouringPlanId,
@@ -9,17 +22,6 @@ import {
   UserId,
 } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
-import { SpotEntity } from '../entities/SpotEntity'
-import { TouringEntity } from '../entities/TouringEntity'
-import { UserEntity } from '../entities/UserEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { ISpotRepository } from '../interfaces/ISpotRepository'
-import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
-import { ITouringPlanSpotRepository } from '../interfaces/ITouringPlanSpotRepository'
-import { ITouringRepository } from '../interfaces/ITouringRepository'
-import { TouringSearchParams } from '../valueObjects/TouringSearchParams'
 import { computeTouringPlanSpotTimes } from './computeTouringPlanSpotTimes'
 
 type RegisterTouringParams = {
