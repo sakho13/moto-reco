@@ -14,6 +14,16 @@ export const APP_NAME = 'MotoReco'
 export const SITE_URL = 'https://moto-reco.com'
 
 /**
+ * WebアプリのベースURL（実行時オリジン）
+ *
+ * @remarks
+ * OAuth Discoveryメタデータなど、ngrok等のトンネル経由でローカル検証する際に
+ * 実行時のオリジンへ差し替えたい箇所で使用する。
+ * `NEXT_PUBLIC_WEB_URL` が未設定の場合は本番相当の `SITE_URL` にフォールバックする。
+ */
+export const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL ?? SITE_URL
+
+/**
  * GoogleフォームのアンケートフォームURL
  */
 export const GOOGLE_QA_FORM_URL = 'https://forms.gle/WDMmUSyKWUMdnQ8u7'
