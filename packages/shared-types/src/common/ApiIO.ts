@@ -472,7 +472,7 @@ export type ApiResponseFuelInsight = {
 export type NotificationType = 'FOLLOWED'
 
 // アナウンスタイプ
-export type AnnouncementType = 'SYSTEM_MAINTENANCE'
+export type AnnouncementType = 'SYSTEM_MAINTENANCE' | 'RELEASE_ANNOUNCEMENT'
 
 // アナウンスステータス
 export type AnnouncementStatus = 'DRAFT' | 'PUBLISHED' | 'EXPIRED'
@@ -505,6 +505,7 @@ export type ApiResponseAnnouncementItem = {
   type: AnnouncementType
   title: string
   body: string
+  version: string | null
   publishedAt: string
   isRead: boolean
 }
@@ -519,6 +520,7 @@ export type ApiResponseAdminAnnouncementItem = {
   type: AnnouncementType
   title: string
   body: string
+  version: string | null
   status: AnnouncementStatus
   scheduledAt: string | null
   publishedAt: string | null
@@ -533,3 +535,16 @@ export type ApiResponseAdminAnnouncementList = {
 
 export type ApiResponseAdminAnnouncementDetail =
   ApiResponseAdminAnnouncementItem
+
+// リリースノート (公開ページ向け)
+export type ApiResponseReleaseNoteItem = {
+  announcementId: string
+  version: string
+  title: string
+  body: string
+  publishedAt: string
+}
+
+export type ApiResponseReleaseNoteList = {
+  releaseNotes: ApiResponseReleaseNoteItem[]
+}

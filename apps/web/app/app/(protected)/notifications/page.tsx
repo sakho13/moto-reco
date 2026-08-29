@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { stripMarkdownToText } from '@repo/markdown'
 import type {
   ApiResponseAnnouncementList,
   ApiResponseNotificationList,
@@ -54,7 +55,7 @@ function NotificationsPage() {
             id: a.announcementId,
             kind: 'announcement' as const,
             title: a.title,
-            body: a.body,
+            body: stripMarkdownToText(a.body),
             isRead: a.isRead,
             createdAt: a.publishedAt,
           })),

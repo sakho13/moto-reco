@@ -53,6 +53,7 @@ const resources = [
     name: 'announcements',
     list: '/announcements',
     create: '/announcements/create',
+    edit: '/announcements/:id/edit',
     show: '/announcements/:id',
     meta: { label: 'アナウンス' },
   },

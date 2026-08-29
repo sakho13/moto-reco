@@ -39,18 +39,28 @@
   border: 1px solid var(--color-cloud);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  text-decoration: none;
-  color: inherit;
   transition:
-    transform var(--transition-base),
     border-color var(--transition-base),
     box-shadow var(--transition-base);
 }
 
 .item:hover {
-  transform: translateY(-2px);
   border-color: var(--color-product);
   box-shadow: var(--shadow-md);
+}
+
+.itemButton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .itemHeader {
@@ -105,6 +115,91 @@
 
 .item:hover .readMore {
   gap: 8px;
+}
+
+.content {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--color-ink);
+}
+
+.content p {
+  margin: 0 0 1.25em;
+}
+
+.content ul,
+.content ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.25em;
+}
+
+.content ul {
+  list-style-type: disc;
+}
+
+.content ol {
+  list-style-type: decimal;
+}
+
+.content li {
+  margin-bottom: 6px;
+}
+
+.content h1,
+.content h2,
+.content h3 {
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  margin: 1.25em 0 0.75em;
+}
+
+.content code {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-cloud);
+  font-size: 0.9em;
+}
+
+.content pre {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-cloud);
+  overflow-x: auto;
+  margin-bottom: 1.25em;
+}
+
+.content pre code {
+  padding: 0;
+  background: none;
+}
+
+.content blockquote {
+  margin: 0 0 1.25em;
+  padding-left: 1em;
+  border-left: 3px solid var(--color-cloud);
+  color: var(--color-inkLight);
+}
+
+.content a {
+  color: var(--color-product);
+}
+
+.loadMoreButton {
+  align-self: center;
+  margin-top: 8px;
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-cloud);
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.loadMoreButton:hover {
+  background-color: var(--color-cloud);
 }
 
 @media (max-width: 900px) {

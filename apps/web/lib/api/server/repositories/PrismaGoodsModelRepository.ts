@@ -5,7 +5,10 @@ import {
   GoodsModelId,
 } from '@repo/shared-types'
 import { GoodsModelEntity } from '../entities/GoodsModelEntity'
-import { IGoodsModelRepository } from '../interfaces/IGoodsModelRepository'
+import {
+  GoodsModelSitemapEntry,
+  IGoodsModelRepository,
+} from '../interfaces/IGoodsModelRepository'
 import { GoodsModelSearchParams } from '../valueObjects/GoodsModelSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
@@ -94,5 +97,17 @@ export class PrismaGoodsModelRepository
       rakutenItemId: model.rakutenItemId,
       officialUrl: model.officialUrl,
     })
+  }
+
+  async findAllForSitemap(): Promise<GoodsModelSitemapEntry[]> {
+    const models = await this.connection.mGoodsModel.findMany({
+      where: { isActive: true },
+      select: { id: true, updatedAt: true },
+    })
+
+    return models.map((model) => ({
+      id: createGoodsModelId(model.id),
+      updatedAt: model.updatedAt,
+    }))
   }
 }

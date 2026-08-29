@@ -1,11 +1,43 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import { prisma } from '@repo/database'
 import styles from './page.module.css'
-import { getReleaseNotes } from '@/lib/microcms/releaseNote'
+import ReleaseNoteList from './ReleaseNoteList'
+import { PrismaAnnouncementRepository } from '@/lib/api/server/repositories/PrismaAnnouncementRepository'
+import {
+  AnnouncementService,
+  type PublishedReleaseNote,
+} from '@/lib/api/server/services/AnnouncementService'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
-import { stripHtmlToText } from '@/lib/utils/html'
 
 export const revalidate = 300
+
+const RELEASE_NOTES_FETCH_TIMEOUT_MS = 5000
+
+/**
+ * 公開リリースノートを取得する。
+ * ビルド時などDBに接続できない・応答が遅い環境でもページ生成を止めないよう、
+ * 取得失敗・タイムアウト時は空配列にフォールバックする（sitemap.tsと同様の方針）
+ */
+async function getReleaseNotesSafely(
+  service: AnnouncementService
+): Promise<PublishedReleaseNote[]> {
+  try {
+    return await Promise.race([
+      service.getPublishedReleaseNotes(),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('リリースノート取得がタイムアウトしました')),
+          RELEASE_NOTES_FETCH_TIMEOUT_MS
+        )
+      ),
+    ])
+  } catch (error) {
+    console.error('[release-note] 取得失敗', {
+      message: error instanceof Error ? error.message : String(error),
+    })
+    return []
+  }
+}
 
 export const metadata: Metadata = {
   title: `リリースノート`,
@@ -28,7 +60,10 @@ export const metadata: Metadata = {
 }
 
 export default async function ReleaseNotePage() {
-  const releaseNotes = await getReleaseNotes()
+  const service = new AnnouncementService(
+    new PrismaAnnouncementRepository(prisma)
+  )
+  const releaseNotes = await getReleaseNotesSafely(service)
 
   return (
     <div className="public-page-container">
@@ -44,34 +79,7 @@ export default async function ReleaseNotePage() {
           <p>現在、リリースノートはありません。</p>
         </div>
       ) : (
-        <div className={styles.list}>
-          {releaseNotes.map((note) => (
-            <Link
-              key={note.id}
-              href={`/release-note/${note.version}`}
-              className={styles.item}
-            >
-              <div className={styles.itemHeader}>
-                <span className={styles.version}>v{note.version}</span>
-                <time
-                  className={styles.date}
-                  dateTime={note.releaseDate ?? note.createdAt}
-                >
-                  {new Date(
-                    note.releaseDate ?? note.createdAt
-                  ).toLocaleDateString('ja-JP', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </time>
-              </div>
-              <h2 className={styles.itemTitle}>{note.title}</h2>
-              <p className={styles.excerpt}>{stripHtmlToText(note.content)}</p>
-              <span className={styles.readMore}>詳細を見る →</span>
-            </Link>
-          ))}
-        </div>
+        <ReleaseNoteList releaseNotes={releaseNotes} />
       )}
     </div>
   )
