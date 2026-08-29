@@ -10,6 +10,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
   "dependencies": {
     "@repo/shared-types": "workspace:*"
   }
