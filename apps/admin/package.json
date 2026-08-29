@@ -20,6 +20,7 @@
     "@refinedev/simple-rest": "6.0.1",
     "@repo/database": "workspace:*",
     "@repo/firebase-auth-server": "workspace:*",
+    "@repo/markdown": "workspace:*",
     "@repo/shared-types": "workspace:*",
     "@repo/shared-utils": "workspace:*",
     "@tanstack/react-query": "5.102.2",

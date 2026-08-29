@@ -2,6 +2,7 @@
 
 import { Create, useForm } from '@refinedev/antd'
 import { Form, Input, Select } from 'antd'
+import { MarkdownEditor } from '@/components/MarkdownEditor'
 
 export default function AnnouncementCreatePage() {
   const { formProps, saveButtonProps } = useForm({ resource: 'announcements' })
@@ -52,16 +53,16 @@ export default function AnnouncementCreatePage() {
           <Input placeholder="例: 軽微な修正" maxLength={100} />
         </Form.Item>
         <Form.Item
-          label="本文"
+          label="本文 (Markdown)"
           name="body"
           rules={[
             { required: true, message: '本文は必須です' },
             { max: 1000, message: '1000文字以内で入力してください' },
           ]}
         >
-          <Input.TextArea
+          <MarkdownEditor
             rows={6}
-            placeholder="内容を入力してください"
+            placeholder="Markdown形式で入力できます（見出し、リスト、太字など）"
             maxLength={1000}
           />
         </Form.Item>

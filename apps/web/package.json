@@ -25,6 +25,7 @@
     "@repo/database": "workspace:*",
     "@repo/email": "workspace:*",
     "@repo/firebase-auth-server": "workspace:*",
+    "@repo/markdown": "workspace:*",
     "@repo/shared-types": "workspace:*",
     "@repo/shared-utils": "workspace:*",
     "@repo/ui": "workspace:*",

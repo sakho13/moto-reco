@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { MarkdownContent, stripMarkdownToText } from '@repo/markdown'
 import styles from './page.module.css'
-import { stripHtmlToText } from '@/lib/utils/html'
 
 type ReleaseNote = {
   announcementId: string
@@ -56,12 +56,11 @@ export default function ReleaseNoteList({ releaseNotes }: Props) {
               </span>
             </button>
             {expanded ? (
-              <div
-                className={styles.content}
-                dangerouslySetInnerHTML={{ __html: note.body }}
-              />
+              <MarkdownContent className={styles.content}>
+                {note.body}
+              </MarkdownContent>
             ) : (
-              <p className={styles.excerpt}>{stripHtmlToText(note.body)}</p>
+              <p className={styles.excerpt}>{stripMarkdownToText(note.body)}</p>
             )}
           </div>
         )
