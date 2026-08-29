@@ -9,6 +9,14 @@ import type {
   IAnnouncementRepository,
 } from '../interfaces/IAnnouncementRepository'
 
+export type PublishedReleaseNote = {
+  announcementId: string
+  version: string
+  title: string
+  body: string
+  publishedAt: string
+}
+
 export class AnnouncementService {
   constructor(
     private readonly _announcementRepository: IAnnouncementRepository
@@ -76,15 +84,7 @@ export class AnnouncementService {
     }))
   }
 
-  async getPublishedReleaseNotes(): Promise<
-    {
-      announcementId: string
-      version: string
-      title: string
-      body: string
-      publishedAt: string
-    }[]
-  > {
+  async getPublishedReleaseNotes(): Promise<PublishedReleaseNote[]> {
     const rows = await this._announcementRepository.findPublishedByType(
       'RELEASE_ANNOUNCEMENT'
     )

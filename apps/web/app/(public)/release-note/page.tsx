@@ -3,10 +3,41 @@ import { prisma } from '@repo/database'
 import styles from './page.module.css'
 import ReleaseNoteList from './ReleaseNoteList'
 import { PrismaAnnouncementRepository } from '@/lib/api/server/repositories/PrismaAnnouncementRepository'
-import { AnnouncementService } from '@/lib/api/server/services/AnnouncementService'
+import {
+  AnnouncementService,
+  type PublishedReleaseNote,
+} from '@/lib/api/server/services/AnnouncementService'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const revalidate = 300
+
+const RELEASE_NOTES_FETCH_TIMEOUT_MS = 5000
+
+/**
+ * 公開リリースノートを取得する。
+ * ビルド時などDBに接続できない・応答が遅い環境でもページ生成を止めないよう、
+ * 取得失敗・タイムアウト時は空配列にフォールバックする（sitemap.tsと同様の方針）
+ */
+async function getReleaseNotesSafely(
+  service: AnnouncementService
+): Promise<PublishedReleaseNote[]> {
+  try {
+    return await Promise.race([
+      service.getPublishedReleaseNotes(),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('リリースノート取得がタイムアウトしました')),
+          RELEASE_NOTES_FETCH_TIMEOUT_MS
+        )
+      ),
+    ])
+  } catch (error) {
+    console.error('[release-note] 取得失敗', {
+      message: error instanceof Error ? error.message : String(error),
+    })
+    return []
+  }
+}
 
 export const metadata: Metadata = {
   title: `リリースノート`,
@@ -32,7 +63,7 @@ export default async function ReleaseNotePage() {
   const service = new AnnouncementService(
     new PrismaAnnouncementRepository(prisma)
   )
-  const releaseNotes = await service.getPublishedReleaseNotes()
+  const releaseNotes = await getReleaseNotesSafely(service)
 
   return (
     <div className="public-page-container">
