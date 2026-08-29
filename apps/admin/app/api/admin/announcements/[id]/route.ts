@@ -50,3 +50,50 @@ export async function GET(
     })),
   })
 }
+
+async function update(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await requireAdmin(request)
+  if ('error' in auth) return auth.error
+
+  const { id } = await params
+  const existing = await prisma.mSystemAnnouncement.findUnique({
+    where: { id },
+    select: { status: true },
+  })
+  if (!existing) {
+    return NextResponse.json({ message: 'Not found' }, { status: 404 })
+  }
+  if (existing.status !== 'DRAFT') {
+    return NextResponse.json(
+      { message: '下書きのアナウンスのみ編集できます' },
+      { status: 400 }
+    )
+  }
+
+  const body = (await request.json()) as {
+    title?: string
+    body?: string
+    type?: string
+    version?: string | null
+    scheduledAt?: string | null
+  }
+
+  const item = await prisma.mSystemAnnouncement.update({
+    where: { id },
+    data: {
+      title: body.title,
+      body: body.body,
+      type: body.type as never,
+      version: body.version ?? null,
+      scheduledAt: body.scheduledAt ? new Date(body.scheduledAt) : null,
+    },
+  })
+
+  return NextResponse.json(item)
+}
+
+// Refineのdata providerはデフォルトでPATCHを使用するため、PUTと同じ処理をPATCHにも割り当てる
+export { update as PUT, update as PATCH }

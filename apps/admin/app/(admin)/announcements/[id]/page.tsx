@@ -66,6 +66,11 @@ export default function AnnouncementShowPage() {
   const headerButtons = (
     <Space>
       {record?.status === 'DRAFT' && (
+        <Button onClick={() => router.push(`/announcements/${record.id}/edit`)}>
+          編集
+        </Button>
+      )}
+      {record?.status === 'DRAFT' && (
         <Button type="primary" onClick={handlePublish}>
           公開
         </Button>

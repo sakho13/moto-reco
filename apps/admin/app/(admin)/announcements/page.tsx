@@ -1,6 +1,12 @@
 'use client'
 
-import { CreateButton, DateField, List, useTable } from '@refinedev/antd'
+import {
+  CreateButton,
+  DateField,
+  EditButton,
+  List,
+  useTable,
+} from '@refinedev/antd'
 import type { BaseRecord } from '@refinedev/core'
 import { useCustomMutation, useInvalidate } from '@refinedev/core'
 import { Button, Form, Space, Table, Tag } from 'antd'
@@ -102,9 +108,16 @@ export default function AnnouncementListPage() {
         />
         <Table.Column
           title="操作"
-          width={160}
+          width={200}
           render={(_: unknown, record: BaseRecord) => (
             <Space>
+              {record['status'] === 'DRAFT' && (
+                <EditButton
+                  hideText
+                  size="small"
+                  recordItemId={record['id'] as string}
+                />
+              )}
               {record['status'] === 'DRAFT' && (
                 <Button
                   size="small"
