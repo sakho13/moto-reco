@@ -12,7 +12,6 @@ import {
   createUserId,
 } from '@repo/shared-types'
 import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { PrismaApiKeyRepository } from '@/lib/api/server/repositories/PrismaApiKeyRepository'
 import { PrismaFuelLogRepository } from '@/lib/api/server/repositories/PrismaFuelLogRepository'
 import { PrismaMaintenanceLogRepository } from '@/lib/api/server/repositories/PrismaMaintenanceLogRepository'
 import { PrismaMyUserBikeRepository } from '@/lib/api/server/repositories/PrismaMyUserBikeRepository'
@@ -22,7 +21,6 @@ import { PrismaOAuthTokenRepository } from '@/lib/api/server/repositories/Prisma
 import { PrismaTouringPlanRepository } from '@/lib/api/server/repositories/PrismaTouringPlanRepository'
 import { PrismaTouringPlanSpotRepository } from '@/lib/api/server/repositories/PrismaTouringPlanSpotRepository'
 import { PrismaTouringRepository } from '@/lib/api/server/repositories/PrismaTouringRepository'
-import { ApiKeyService } from '@/lib/api/server/services/ApiKeyService'
 import { MaintenanceLogService } from '@/lib/api/server/services/MaintenanceLogService'
 import { OAuthAuthorizationService } from '@/lib/api/server/services/OAuthAuthorizationService'
 import { TouringPlanService } from '@/lib/api/server/services/TouringPlanService'
@@ -75,8 +73,7 @@ class SingleRequestTransport implements Transport {
  * MCPサーバーへのリクエストを認証する
  *
  * @remarks
- * Bearerトークンが `mk_` で始まる場合は既存のAPIキー方式、それ以外はOAuthアクセストークンとして検証する。
- * 既存のAPIキー方式の挙動は変更しない（後方互換）。
+ * Bearerトークンを OAuth アクセストークンとして検証する。
  */
 async function authenticate(
   request: NextRequest
@@ -84,11 +81,6 @@ async function authenticate(
   const authHeader = request.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) return null
   const token = authHeader.slice('Bearer '.length)
-
-  if (token.startsWith('mk_')) {
-    const service = new ApiKeyService(new PrismaApiKeyRepository(prisma))
-    return (await service.verifyApiKey(token)) ?? null
-  }
 
   const oauthService = new OAuthAuthorizationService(
     new PrismaOAuthClientRepository(prisma),
@@ -415,8 +407,7 @@ export async function POST(request: NextRequest) {
         jsonrpc: '2.0',
         error: {
           code: -32001,
-          message:
-            'Unauthorized: 有効なAPIキーまたはOAuthアクセストークンが必要です',
+          message: 'Unauthorized: 有効なOAuthアクセストークンが必要です',
         },
         id: null,
       },

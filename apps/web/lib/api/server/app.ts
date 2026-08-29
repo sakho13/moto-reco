@@ -6,7 +6,6 @@ import { ApiV1Error } from './errors/ApiV1Error'
 import { OAuthError } from './errors/OAuthError'
 import { HonoVariables } from './types/hono'
 import ApiV1 from './v1'
-import apiKeys from './v1/apiKeys'
 import oauth from './v1/oauth'
 
 const app = new Hono<{ Variables: HonoVariables }>()
@@ -32,9 +31,6 @@ app.get('/api/v1/health', async (c) => {
 
 // v1 APIルート
 app.route('/api/v1', ApiV1)
-
-// MCP APIキー管理 (/api/v1/mcp/api-keys)
-app.route('/api/v1/mcp/api-keys', apiKeys)
 
 // MCP OAuth (/api/v1/mcp/oauth)
 app.route('/api/v1/mcp/oauth', oauth)

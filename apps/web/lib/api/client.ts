@@ -366,34 +366,6 @@ type API_EP = {
     DELETE: SuccessResponse<undefined>
   }
 } & {
-  '/api/v1/mcp/api-keys': {
-    GET: SuccessResponse<{
-      apiKeys: {
-        apiKeyId: string
-        name: string
-        prefix: string
-        scopes: string[]
-        createdAt: string
-      }[]
-    }>
-    POST: SuccessResponse<{
-      apiKeyId: string
-      name: string
-      prefix: string
-      scopes: string[]
-      fullKey: string
-      createdAt: string
-    }>
-  }
-} & {
-  [key: `/api/v1/mcp/api-keys/${string}/revoke`]: {
-    PATCH: SuccessResponse<null>
-  }
-} & {
-  [key: `/api/v1/mcp/api-keys/${string}`]: {
-    DELETE: SuccessResponse<null>
-  }
-} & {
   '/api/v1/mcp/oauth/authorize': {
     POST: SuccessResponse<{ redirectUrl: string }>
   }
