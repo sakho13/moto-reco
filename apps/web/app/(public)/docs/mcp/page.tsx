@@ -71,6 +71,31 @@ const claudeDesktopContent = (
   </div>
 )
 
+const claudeAppContent = (
+  <div className={styles.tabContent}>
+    <p className={styles.sectionBody}>
+      Claude.ai（Web/Desktop/Mobile）の「コネクタを追加」機能はOAuth認証に対応しており、
+      APIキーの手動発行・設定は不要です。
+    </p>
+    <ol className={styles.orderedList}>
+      <li>Claude.aiの「設定」→「コネクタ」（Settings → Connectors）を開く</li>
+      <li>
+        「カスタムコネクタを追加」（Add custom connector）を選択し、名前（例:
+        motoreco）とサーバーURL{' '}
+        <code className={styles.inlineCode}>{`${SITE_URL}/api/mcp`}</code>{' '}
+        を入力して保存する
+      </li>
+      <li>
+        自動的にmoto-recoの認可画面が開くので、ログインして「許可」を押す
+      </li>
+      <li>接続が完了し、チャット画面でツールが利用できるようになります</li>
+    </ol>
+    <p className={styles.sectionBody}>
+      ※ APIキー方式（Claude Code向け）とは別の認証方式です。どちらも併用できます。
+    </p>
+  </div>
+)
+
 const chatGptContent = (
   <div className={styles.tabContent}>
     <p className={styles.sectionBody}>
@@ -87,6 +112,9 @@ const chatGptContent = (
         MCPサーバーURLに{' '}
         <code className={styles.inlineCode}>{`${SITE_URL}/api/mcp`}</code>{' '}
         を入力
+      </li>
+      <li>
+        ChatGPTのコネクタも同一のOAuth仕様に対応しています。認証方法で「OAuth」が選択できる場合は、そちらを選ぶことでAPIキーなしで接続できます（自動的にmoto-recoのログイン・認可画面に遷移します）。「OAuth」の選択肢が表示されない場合は、以下の「カスタムヘッダー」方式を使用してください。
       </li>
       <li>
         認証方法で「カスタムヘッダー」（Custom header）を選択し、以下を入力
@@ -132,6 +160,11 @@ export default function McpSetupPage() {
                 id: 'claude-desktop',
                 label: 'Claude Desktop',
                 content: claudeDesktopContent,
+              },
+              {
+                id: 'claude-app',
+                label: 'Claude.ai / Claude Desktop（OAuth）',
+                content: claudeAppContent,
               },
               {
                 id: 'chatgpt',
