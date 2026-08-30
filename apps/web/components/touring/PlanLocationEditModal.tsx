@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseTouringPlanLocation,
   TouringPlanRouteType,
@@ -14,7 +15,6 @@ import { toast } from '@repo/ui/sonner'
 import { ModalBase } from '@/components/common/ModalBase'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { apiPatch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
 type LocationType = 'start' | 'destination'

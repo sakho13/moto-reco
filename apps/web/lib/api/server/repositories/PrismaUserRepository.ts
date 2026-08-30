@@ -1,7 +1,9 @@
+import {
+  AuthProviderEntity,
+  UserEntity,
+  IUserRepository,
+} from '@repo/shared-domain'
 import { createUserId, type UserId } from '@repo/shared-types'
-import { AuthProviderEntity } from '../entities/AuthProviderEntity'
-import { UserEntity } from '../entities/UserEntity'
-import { IUserRepository } from '../interfaces/IUserRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 /** planHistories を含む select の共通定義 */

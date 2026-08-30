@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { BikeSearchParams } from '@repo/shared-domain'
 import {
   ApiResponseManufacturer,
   ApiResponseBikeSearch,
@@ -8,7 +9,6 @@ import {
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { PrismaBikeRepository } from '../repositories/PrismaBikeRepository'
 import { PrismaCompanyRepository } from '../repositories/PrismaCompanyRepository'
-import { BikeSearchParams } from '../valueObjects/BikeSearchParams'
 
 const bikes = new Hono()
 

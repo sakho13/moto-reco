@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
 import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
+import { ApiV1Error } from '@repo/shared-domain'
 import {
   ApiResponseUserFollowList,
   ApiResponseUserProfile,
@@ -18,7 +19,6 @@ import {
   UserProfilePatchRequestSchema,
   createUserId,
 } from '@repo/shared-types'
-import { ApiV1Error } from '../errors/ApiV1Error'
 import {
   honoAuthMiddleware,
   honoOptionalAuthMiddleware,

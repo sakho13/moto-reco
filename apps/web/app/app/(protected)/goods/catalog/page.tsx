@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useState } from 'react'
 import useSWR from 'swr'
 import useSWRInfinite from 'swr/infinite'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseGoodsModelSearch,
   GoodsCategory,
@@ -21,7 +22,6 @@ import {
 } from '@/components/goods/goodsCategoryLabels'
 import { GoodsPurchaseModal } from '@/components/goods/GoodsPurchaseModal'
 import { apiGet, authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 type GoodsModel = ApiResponseGoodsModelSearch['models'][number]

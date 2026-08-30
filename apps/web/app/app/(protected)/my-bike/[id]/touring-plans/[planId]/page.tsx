@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type { TouringPlanRouteType } from '@repo/shared-types'
 import { formatPlanSpotOffsetMinutes, getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
@@ -22,7 +23,6 @@ import {
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 import {

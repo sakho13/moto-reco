@@ -1,5 +1,5 @@
 import { ZodError } from 'zod'
-import { ApiV1Error } from '../errors/ApiV1Error'
+import { ApiV1Error } from '@repo/shared-domain'
 
 /**
  * Zodバリデーションエラーの詳細情報型

@@ -3,6 +3,7 @@
 import { Coffee, Fuel, MapPin, Timer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { getCurrentDate, formatDateTime } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
@@ -13,7 +14,6 @@ import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal
 import TouringDestinationWidget from '@/components/touring/TouringDestinationWidget'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
 type TouringModeViewProps = {

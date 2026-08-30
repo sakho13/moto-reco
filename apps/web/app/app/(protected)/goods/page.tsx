@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import useSWRInfinite from 'swr/infinite'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseUserGoodsList,
   SuccessResponse,
@@ -11,7 +12,6 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { GoodsListSection } from '@/components/goods/GoodsListSection'
 import { authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 function GoodsPage() {

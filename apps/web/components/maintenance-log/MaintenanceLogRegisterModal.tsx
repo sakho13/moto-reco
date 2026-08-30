@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import useSWR, { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
@@ -13,7 +14,6 @@ import {
 } from './MaintenanceLogForm'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 type MaintenanceLogRegisterModalProps = {
   bikeId: string

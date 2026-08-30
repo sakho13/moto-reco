@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
+import { SpotEntity } from '@repo/shared-domain'
 import { createSpotId, createTouringId, Spot } from '@repo/shared-types'
-import { SpotEntity } from '@/lib/api/server/entities/SpotEntity'
 
 const baseProps = (overrides: Partial<Spot> = {}): Spot => ({
   spotId: createSpotId('spot-1'),

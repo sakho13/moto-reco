@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseMaintenanceLogDetail,
   MaintenanceType,
@@ -14,7 +15,6 @@ import {
 } from './MaintenanceLogForm'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPatch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 type MaintenanceLogEditModalProps = {
   bikeId: string

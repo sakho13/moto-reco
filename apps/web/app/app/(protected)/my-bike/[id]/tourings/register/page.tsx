@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
@@ -11,7 +12,6 @@ import {
   type TouringFormData,
 } from '@/components/touring/TouringForm'
 import { apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 function TouringRegisterPage() {

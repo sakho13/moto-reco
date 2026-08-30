@@ -1,18 +1,20 @@
 import {
+  FuelLogEntity,
+  UserEntity,
+  ApiV1Error,
+  IFuelLogRepository,
+  IMyUserBikeRepository,
+  ITouringRepository,
+  IUserBikeRepository,
+  FuelLogSearchParams,
+} from '@repo/shared-domain'
+import {
   createFuelLogId,
   FuelLogId,
   MyUserBikeId,
   TouringId,
   UserId,
 } from '@repo/shared-types'
-import { FuelLogEntity } from '../entities/FuelLogEntity'
-import { UserEntity } from '../entities/UserEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { ITouringRepository } from '../interfaces/ITouringRepository'
-import { IUserBikeRepository } from '../interfaces/IUserBikeRepository'
-import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 
 type RegisterFuelLogParams = {
   myUserBikeId: MyUserBikeId

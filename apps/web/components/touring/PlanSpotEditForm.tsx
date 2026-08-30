@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseTouringPlanSpotDetail,
   TouringPlanRouteType,
@@ -15,7 +16,6 @@ import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { apiDelete, apiPatch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
 interface PlanSpotEditFormProps {

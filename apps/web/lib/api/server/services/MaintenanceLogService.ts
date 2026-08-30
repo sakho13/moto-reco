@@ -1,16 +1,18 @@
 import {
+  MaintenanceLogEntity,
+  UserEntity,
+  ApiV1Error,
+  IMaintenanceLogRepository,
+  IMyUserBikeRepository,
+  MaintenanceLogSearchParams,
+} from '@repo/shared-domain'
+import {
   createMaintenanceLogId,
   MaintenanceLogId,
   MaintenanceLogItem,
   MyUserBikeId,
   UserId,
 } from '@repo/shared-types'
-import { MaintenanceLogEntity } from '../entities/MaintenanceLogEntity'
-import { UserEntity } from '../entities/UserEntity'
-import { ApiV1Error } from '../errors/ApiV1Error'
-import { IMaintenanceLogRepository } from '../interfaces/IMaintenanceLogRepository'
-import { IMyUserBikeRepository } from '../interfaces/IMyUserBikeRepository'
-import { MaintenanceLogSearchParams } from '../valueObjects/MaintenanceLogSearchParams'
 
 type GetMaintenanceLogsParams = {
   myUserBikeId: MyUserBikeId

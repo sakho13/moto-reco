@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import useSWRInfinite from 'swr/infinite'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseAllBikesHistoryList,
   SuccessResponse,
@@ -12,7 +13,6 @@ import styles from './page.module.css'
 import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
 import { HistoryItemCard } from '@/components/history/HistoryItemCard'
 import { authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 const PAGE_SIZE = 10

@@ -1,11 +1,10 @@
+import { TouringPlanEntity, ITouringPlanRepository } from '@repo/shared-domain'
 import {
   createMyUserBikeId,
   createTouringPlanId,
   MyUserBikeId,
   TouringPlanId,
 } from '@repo/shared-types'
-import { TouringPlanEntity } from '../entities/TouringPlanEntity'
-import { ITouringPlanRepository } from '../interfaces/ITouringPlanRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 const touringPlanSelect = {

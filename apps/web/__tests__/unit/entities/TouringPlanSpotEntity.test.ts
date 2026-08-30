@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest'
+import { TouringPlanSpotEntity } from '@repo/shared-domain'
 import {
   createTouringPlanId,
   createTouringPlanSpotId,
   TouringPlanSpot,
 } from '@repo/shared-types'
-import { TouringPlanSpotEntity } from '@/lib/api/server/entities/TouringPlanSpotEntity'
 
 const baseProps = (
   overrides: Partial<TouringPlanSpot> = {}

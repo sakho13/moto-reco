@@ -1,18 +1,20 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
+  MyUserBikeEntity,
+  SpotEntity,
+  TouringEntity,
+  ApiV1Error,
+  IMyUserBikeRepository,
+  ISpotRepository,
+  ITouringRepository,
+} from '@repo/shared-domain'
+import {
   createMyUserBikeId,
   createSpotId,
   createTouringId,
   createUserId,
   Spot,
 } from '@repo/shared-types'
-import { MyUserBikeEntity } from '@/lib/api/server/entities/MyUserBikeEntity'
-import { SpotEntity } from '@/lib/api/server/entities/SpotEntity'
-import { TouringEntity } from '@/lib/api/server/entities/TouringEntity'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { IMyUserBikeRepository } from '@/lib/api/server/interfaces/IMyUserBikeRepository'
-import { ISpotRepository } from '@/lib/api/server/interfaces/ISpotRepository'
-import { ITouringRepository } from '@/lib/api/server/interfaces/ITouringRepository'
 import { SpotService } from '@/lib/api/server/services/SpotService'
 
 const myUserBikeId = createMyUserBikeId('bike-1')

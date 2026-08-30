@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
+  MaintenanceLogEntity,
+  MyUserBikeEntity,
+  ApiV1Error,
+  IMaintenanceLogRepository,
+  IMyUserBikeRepository,
+} from '@repo/shared-domain'
+import {
   createMaintenanceLogId,
   createMyUserBikeId,
   createUserId,
 } from '@repo/shared-types'
-import { MaintenanceLogEntity } from '@/lib/api/server/entities/MaintenanceLogEntity'
-import { MyUserBikeEntity } from '@/lib/api/server/entities/MyUserBikeEntity'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
-import { IMaintenanceLogRepository } from '@/lib/api/server/interfaces/IMaintenanceLogRepository'
-import { IMyUserBikeRepository } from '@/lib/api/server/interfaces/IMyUserBikeRepository'
 import { MaintenanceLogService } from '@/lib/api/server/services/MaintenanceLogService'
 
 const myUserBikeId = createMyUserBikeId('bike-1')

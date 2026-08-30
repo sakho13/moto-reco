@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { AccountLimitsValue } from '@/lib/api/server/valueObjects/AccountLimitsValue'
+import { AccountLimitsValue } from '@repo/shared-domain'
 import {
   FREE_USER_LIMITS,
   GUEST_ACCOUNT_LIMITS,

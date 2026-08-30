@@ -1,5 +1,10 @@
 import { subMonths, subYears } from 'date-fns'
 import {
+  FuelLogEntity,
+  IFuelLogRepository,
+  FuelLogSearchParams,
+} from '@repo/shared-domain'
+import {
   createFuelLogId,
   createMyUserBikeId,
   createTouringId,
@@ -8,9 +13,6 @@ import {
   TouringId,
 } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
-import { FuelLogEntity } from '../entities/FuelLogEntity'
-import { IFuelLogRepository } from '../interfaces/IFuelLogRepository'
-import { FuelLogSearchParams } from '../valueObjects/FuelLogSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaFuelLogRepository

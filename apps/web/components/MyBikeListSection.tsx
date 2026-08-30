@@ -2,12 +2,12 @@
 
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
 import { BikeIcon } from './icons/BikeIcon'
 import styles from './MyBikeListSection.module.css'
 import { NavigationCard } from './NavigationCard'
 import { apiGet } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 export const MyBikeListSection = () => {
   const router = useRouter()

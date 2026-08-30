@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type { ApiResponseSpotDetail } from '@repo/shared-types'
 import { getCurrentDate, formatDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
@@ -22,7 +23,6 @@ import { TouringLocationEditModal } from '@/components/touring/TouringLocationEd
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 import { withAuth } from '@/lib/hoc/withAuth'
 import {
   buildGoogleMapsRouteUrl,

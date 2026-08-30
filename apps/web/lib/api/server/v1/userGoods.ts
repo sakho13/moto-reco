@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { prisma } from '@repo/database'
+import { UserGoodsEntity, UserGoodsSearchParams } from '@repo/shared-domain'
 import {
   ApiResponseUserGoodsDetail,
   ApiResponseUserGoodsList,
@@ -13,7 +14,6 @@ import {
   UserGoodsRegisterRequestSchema,
   UserGoodsUpdateRequestSchema,
 } from '@repo/shared-types'
-import { UserGoodsEntity } from '../entities/UserGoodsEntity'
 import { honoAdminMiddleware } from '../middlewares/honoAdmin'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import {
@@ -25,7 +25,6 @@ import { PrismaGoodsModelRepository } from '../repositories/PrismaGoodsModelRepo
 import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
 import { PrismaUserGoodsRepository } from '../repositories/PrismaUserGoodsRepository'
 import { UserGoodsService } from '../services/UserGoodsService'
-import { UserGoodsSearchParams } from '../valueObjects/UserGoodsSearchParams'
 
 const userGoods = new Hono()
 

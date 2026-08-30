@@ -6,7 +6,7 @@ import { type Locator, type Page } from '@playwright/test'
  * @remarks
  * /app/profile に対応。
  * - プロフィールカード (BaseCard title="プロフィール")
- * - オプションカード (認証情報リンク、プランリンク、MCP APIキー管理リンク)
+ * - オプションカード (認証情報リンク、プランリンク、MCP接続方法リンク)
  * - ログアウトボタン (LogoutButton)
  */
 export class ProfilePage {

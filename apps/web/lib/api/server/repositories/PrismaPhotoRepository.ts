@@ -1,3 +1,4 @@
+import { PhotoEntity, IPhotoRepository } from '@repo/shared-domain'
 import {
   createMyUserBikeId,
   createPhotoId,
@@ -11,8 +12,6 @@ import {
   TouringId,
   UserId,
 } from '@repo/shared-types'
-import { PhotoEntity } from '../entities/PhotoEntity'
-import { IPhotoRepository } from '../interfaces/IPhotoRepository'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 /**

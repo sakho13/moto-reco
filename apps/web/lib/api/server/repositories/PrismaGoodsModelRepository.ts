@@ -1,15 +1,15 @@
 import { Prisma } from '@repo/database'
 import {
+  GoodsModelEntity,
+  GoodsModelSitemapEntry,
+  IGoodsModelRepository,
+  GoodsModelSearchParams,
+} from '@repo/shared-domain'
+import {
   createCompanyId,
   createGoodsModelId,
   GoodsModelId,
 } from '@repo/shared-types'
-import { GoodsModelEntity } from '../entities/GoodsModelEntity'
-import {
-  GoodsModelSitemapEntry,
-  IGoodsModelRepository,
-} from '../interfaces/IGoodsModelRepository'
-import { GoodsModelSearchParams } from '../valueObjects/GoodsModelSearchParams'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export class PrismaGoodsModelRepository

@@ -110,12 +110,6 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     return items
   }
 
-  if (segments[1] === 'settings' && segments[2] === 'api-keys') {
-    items.push({ label: 'プロフィール', href: '/app/profile' })
-    items.push({ label: 'MCP APIキー管理' })
-    return items
-  }
-
   if (segments[1] === 'search') {
     items.push({ label: 'ユーザーを探す' })
     return items

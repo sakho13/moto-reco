@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
 import useSWR from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import { getTodayDateString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { DateInput } from '@repo/ui/dateInput'
@@ -15,7 +16,6 @@ import { Textarea } from '@repo/ui/textarea'
 import styles from './GoodsPurchaseModal.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiGet, apiPost } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 export interface GoodsPurchaseModalModel {
   goodsModelId: string

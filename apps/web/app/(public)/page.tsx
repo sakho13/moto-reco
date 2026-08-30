@@ -241,6 +241,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ===== MCP Banner ===== */}
+      <section className={styles.bannerSection}>
+        <div className={styles.sectionContainer}>
+          <div className={styles.banner}>
+            <div className={styles.bannerContent}>
+              <span className={styles.bannerLabel}>AI連携</span>
+              <h2 className={styles.bannerTitle}>
+                ChatGPT・Claudeから愛車データを確認できます
+              </h2>
+              <p className={styles.bannerDesc}>
+                MCP（Model Context
+                Protocol）に対応。ChatGPTやClaudeのコネクタ機能から、給油記録やツーリング履歴、メンテナンス状況をあなたのAIが確認できます。
+              </p>
+            </div>
+            <Link href="/docs/mcp" className={styles.bannerButton}>
+              MCP接続方法を見る
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ===== Moped Test Banner ===== */}
       <section className={styles.bannerSection}>
         <div className={styles.sectionContainer}>

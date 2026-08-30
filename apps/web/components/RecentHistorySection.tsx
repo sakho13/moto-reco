@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import useSWR from 'swr'
+import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseAllBikesHistoryList,
   SuccessResponse,
@@ -13,7 +14,6 @@ import { FuelLogEditModal } from './fuel-log/FuelLogEditModal'
 import { HistoryItemCard } from './history/HistoryItemCard'
 import styles from './RecentHistorySection.module.css'
 import { authenticatedFetch } from '@/lib/api/client'
-import { ApiV1Error } from '@/lib/api/server/errors/ApiV1Error'
 
 const PAGE_SIZE = 5
 

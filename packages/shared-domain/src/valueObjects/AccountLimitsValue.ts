@@ -5,7 +5,7 @@ import {
   PLAN_ALLOWED_SCOPES,
   PLAN_LIMITS,
   PREMIUM_USER_LIMITS,
-} from '../../../statics'
+} from '../constants/planLimits'
 
 type Role = User['role']
 
