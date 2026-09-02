@@ -22,6 +22,7 @@ import { PrismaMyUserBikeRepository } from './repositories/PrismaMyUserBikeRepos
 import { PrismaOAuthAuthorizationCodeRepository } from './repositories/PrismaOAuthAuthorizationCodeRepository'
 import { PrismaOAuthClientRepository } from './repositories/PrismaOAuthClientRepository'
 import { PrismaOAuthTokenRepository } from './repositories/PrismaOAuthTokenRepository'
+import { PrismaSpotRepository } from './repositories/PrismaSpotRepository'
 import { PrismaTouringPlanRepository } from './repositories/PrismaTouringPlanRepository'
 import { PrismaTouringPlanSpotRepository } from './repositories/PrismaTouringPlanSpotRepository'
 import { PrismaTouringRepository } from './repositories/PrismaTouringRepository'
@@ -292,7 +293,7 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
     server.registerTool(
       'get_touring_history',
       {
-        description: 'ツーリング履歴の詳細を取得します',
+        description: 'ツーリング履歴の詳細（スポット含む）を取得します',
         inputSchema: {
           myUserBikeId: z.string().describe('マイバイクID'),
           touringId: z.string().describe('ツーリング履歴ID'),
@@ -303,6 +304,7 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
           const touringRepo = new PrismaTouringRepository(prisma)
           const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
           const fuelLogRepo = new PrismaFuelLogRepository(prisma)
+          const spotRepo = new PrismaSpotRepository(prisma)
           const service = new TouringService(
             touringRepo,
             myUserBikeRepo,
@@ -314,6 +316,7 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
             createMyUserBikeId(myUserBikeId),
             userId
           )
+          const spots = await spotRepo.findSpotsByTouringId(touring.id)
           return {
             touringId: touring.id,
             touringPlanId: touring.touringPlanId,
@@ -327,6 +330,18 @@ function buildMcpServer(rawUserId: string, scopes: ApiKeyScope[]): McpServer {
             endLatitude: touring.endLatitude,
             endLongitude: touring.endLongitude,
             status: touring.status,
+            spots: spots.map((s) => ({
+              spotId: s.id,
+              type: s.type,
+              name: s.name,
+              memo: s.memo,
+              latitude: s.latitude,
+              longitude: s.longitude,
+              arrivedAt: s.arrivedAt?.toISOString() ?? null,
+              departedAt: s.departedAt?.toISOString() ?? null,
+              isSkipped: s.isSkipped,
+              sortOrder: s.sortOrder,
+            })),
           }
         })
     )

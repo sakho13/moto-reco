@@ -142,7 +142,8 @@ export default function McpSetupPage() {
               指定バイクのツーリング履歴一覧を取得
             </li>
             <li>
-              <strong>get_touring_history</strong> — ツーリング履歴の詳細を取得
+              <strong>get_touring_history</strong> —
+              ツーリング履歴の詳細（スポット含む）を取得
             </li>
             <li>
               <strong>get_maintenance_status</strong> —

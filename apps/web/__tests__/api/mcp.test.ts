@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest'
 import { createGuestUser, createTestUser } from '../helpers/authHelper'
+import { createTestUserBike } from '../helpers/bikeHelper'
 import { issueTestMcpAccessToken } from '../helpers/mcpHelper'
+import { createTestSpot, createTestTouring } from '../helpers/touringHelper'
 import { mcpApp } from '@/lib/api/server/mcpApp'
 
 async function postMcp(body: unknown, accessToken?: string) {
@@ -146,6 +148,48 @@ describe('POST /api/mcp', () => {
     const json = await res.json()
     expect(json.result.isError).toBeUndefined()
     expect(JSON.parse(json.result.content[0].text)).toEqual([])
+  })
+
+  test('get_touring_historyツール呼び出し → 立ち寄りスポットが含まれる', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId)
+    const { myUserBikeId } = await createTestUserBike(user.token, {
+      displacement: 400,
+    })
+    const touringId = await createTestTouring(user.token, myUserBikeId, {
+      title: 'テストツーリング',
+      startDate: '2026-01-01T00:00:00.000Z',
+      endDate: '2026-01-01T10:00:00.000Z',
+    })
+    await createTestSpot(user.token, myUserBikeId, touringId, {
+      name: '道の駅テスト',
+      latitude: 35.0,
+      longitude: 135.0,
+    })
+
+    const res = await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: {
+          name: 'get_touring_history',
+          arguments: { myUserBikeId, touringId },
+        },
+      },
+      accessToken
+    )
+
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.result.isError).toBeUndefined()
+    const result = JSON.parse(json.result.content[0].text)
+    expect(result.spots).toHaveLength(1)
+    expect(result.spots[0]).toMatchObject({
+      name: '道の駅テスト',
+      latitude: 35.0,
+      longitude: 135.0,
+    })
   })
 
   test('存在しないツール呼び出し → isError: trueのレスポンス', async () => {
