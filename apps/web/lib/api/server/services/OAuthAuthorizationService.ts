@@ -50,7 +50,11 @@ export class OAuthAuthorizationService {
    * @remarks
    * `ALLOWED_SCOPES`（OAuth仕様上サポートするscope全体）でのバリデーション後、
    * さらに `allowedScopes`（ユーザーの現在のプランで許可されているscope）との
-   * 積集合を取る。積集合が空の場合はプラン超過のscope要求とみなしエラーとする。
+   * 積集合を取る。積集合が空の場合は、`allowedScopes` にREADが含まれていれば
+   * READのみを付与するフォールバックを行う（例: FREEユーザーがWRITEのみを
+   * 要求した場合、エラーにはせずREADを付与する）。
+   * フォールバックしてもなお付与できるscopeがない場合（`allowedScopes` が
+   * 空配列＝GUESTロール等）のみ invalid_scope エラーとする。
    */
   private parseScopes(
     scope: string | undefined,
@@ -65,11 +69,14 @@ export class OAuthAuthorizationService {
     const validated = requested.filter((s): s is ApiKeyScope =>
       (ALLOWED_SCOPES as string[]).includes(s)
     )
-    const scopes = validated.filter((s) => allowedScopes.includes(s))
-    if (scopes.length === 0) {
-      throw new OAuthError('invalid_scope', '有効なscopeが指定されていません')
+    const effective = validated.filter((s) => allowedScopes.includes(s))
+    if (effective.length > 0) {
+      return Array.from(new Set(effective))
     }
-    return Array.from(new Set(scopes))
+    if (allowedScopes.includes('READ')) {
+      return ['READ']
+    }
+    throw new OAuthError('invalid_scope', '有効なscopeが指定されていません')
   }
 
   /** userIdからUserEntityを取得する（存在しない・退会済みの場合はnull） */

@@ -236,24 +236,26 @@ describe('OAuthAuthorizationService.createAuthorizationCode()', () => {
     )
   })
 
-  test('FREEプランのユーザーがscope:"write"を要求 → WRITEは付与されずscopes:["READ"]にもならず invalid_scope エラー', async () => {
+  test('FREEプランのユーザーがscope:"write"を要求 → WRITEは付与されずREADにフォールバックしてscopes:["READ"]で発行される', async () => {
     const client = buildClientEntity()
     vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
     vi.mocked(userRepository.findById).mockResolvedValue(
       buildUserEntity({ plan: 'FREE' })
     )
+    vi.mocked(codeRepository.create).mockResolvedValue(buildAuthCodeEntity())
 
-    await expect(
-      service.createAuthorizationCode({
-        clientId: client.clientId,
-        userId: 'user-1',
-        redirectUri: 'https://example.com/callback',
-        codeChallenge: CODE_CHALLENGE,
-        codeChallengeMethod: 'S256',
-        scope: 'write',
-      })
-    ).rejects.toMatchObject({ error: 'invalid_scope' })
-    expect(codeRepository.create).not.toHaveBeenCalled()
+    await service.createAuthorizationCode({
+      clientId: client.clientId,
+      userId: 'user-1',
+      redirectUri: 'https://example.com/callback',
+      codeChallenge: CODE_CHALLENGE,
+      codeChallengeMethod: 'S256',
+      scope: 'write',
+    })
+
+    expect(codeRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ scopes: ['READ'] })
+    )
   })
 
   test('FREEプランのユーザーがscope:"read write"を要求 → 許可されるREADのみが付与される', async () => {
@@ -314,6 +316,25 @@ describe('OAuthAuthorizationService.createAuthorizationCode()', () => {
         codeChallengeMethod: 'S256',
       })
     ).rejects.toMatchObject({ error: 'access_denied' })
+    expect(codeRepository.create).not.toHaveBeenCalled()
+  })
+
+  test('GUESTロール（allowedScopes:[]）のユーザー → READへのフォールバックもできず invalid_scope エラー', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ role: 'GUEST' })
+    )
+
+    await expect(
+      service.createAuthorizationCode({
+        clientId: client.clientId,
+        userId: 'user-1',
+        redirectUri: 'https://example.com/callback',
+        codeChallenge: CODE_CHALLENGE,
+        codeChallengeMethod: 'S256',
+      })
+    ).rejects.toMatchObject({ error: 'invalid_scope' })
     expect(codeRepository.create).not.toHaveBeenCalled()
   })
 })
