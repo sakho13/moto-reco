@@ -4,6 +4,7 @@ import type {
   IOAuthClientRepository,
   IOAuthTokenRepository,
   IUserRepository,
+  UserEntity,
 } from '@repo/shared-domain'
 import type { ApiKeyScope } from '@repo/shared-types'
 import { createUserId } from '@repo/shared-types'
@@ -43,20 +44,37 @@ export class OAuthAuthorizationService {
     this._clientService = new OAuthClientService(_clientRepository)
   }
 
-  /** OAuthのscopeパラメータ（スペース区切り文字列）をApiKeyScope[]に変換・検証する */
-  private parseScopes(scope: string | undefined): ApiKeyScope[] {
-    if (!scope) return ['READ']
+  /**
+   * OAuthのscopeパラメータ（スペース区切り文字列）をApiKeyScope[]に変換・検証する
+   *
+   * @remarks
+   * `ALLOWED_SCOPES`（OAuth仕様上サポートするscope全体）でのバリデーション後、
+   * さらに `allowedScopes`（ユーザーの現在のプランで許可されているscope）との
+   * 積集合を取る。積集合が空の場合はプラン超過のscope要求とみなしエラーとする。
+   */
+  private parseScopes(
+    scope: string | undefined,
+    allowedScopes: ApiKeyScope[]
+  ): ApiKeyScope[] {
     const requested = scope
-      .split(' ')
-      .map((s) => s.trim().toUpperCase())
-      .filter((s) => s.length > 0)
-    const scopes = requested.filter((s): s is ApiKeyScope =>
+      ? scope
+          .split(' ')
+          .map((s) => s.trim().toUpperCase())
+          .filter((s) => s.length > 0)
+      : ['READ']
+    const validated = requested.filter((s): s is ApiKeyScope =>
       (ALLOWED_SCOPES as string[]).includes(s)
     )
+    const scopes = validated.filter((s) => allowedScopes.includes(s))
     if (scopes.length === 0) {
       throw new OAuthError('invalid_scope', '有効なscopeが指定されていません')
     }
     return Array.from(new Set(scopes))
+  }
+
+  /** userIdからUserEntityを取得する（存在しない・退会済みの場合はnull） */
+  private async findUser(userId: string): Promise<UserEntity | null> {
+    return this._userRepository.findById(createUserId(userId))
   }
 
   /**
@@ -67,7 +85,7 @@ export class OAuthAuthorizationService {
    * およびゲストアカウントを無効とみなす。
    */
   private async isUsableUser(userId: string): Promise<boolean> {
-    const user = await this._userRepository.findById(createUserId(userId))
+    const user = await this.findUser(userId)
     return user !== null && user.role !== 'GUEST'
   }
 
@@ -98,7 +116,12 @@ export class OAuthAuthorizationService {
       throw new OAuthError('invalid_request', 'code_challenge は必須です')
     }
 
-    const scopes = this.parseScopes(params.scope)
+    const user = await this.findUser(params.userId)
+    if (!user) {
+      throw new OAuthError('access_denied', 'ユーザーが無効です')
+    }
+
+    const scopes = this.parseScopes(params.scope, user.limits.allowedScopes)
 
     const code = randomBytes(32).toString('base64url')
     const codeHash = createHash('sha256').update(code).digest('hex')
