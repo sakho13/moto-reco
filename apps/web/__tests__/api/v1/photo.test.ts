@@ -399,6 +399,25 @@ describe('Photo API Endpoints', () => {
 
       expect(res.status).toBe(404)
     })
+
+    test('DBに保存された古いphotoUrlではなく都度発行した署名付きURLを返す(#514)', async () => {
+      // DBに保存されたphotoUrlは登録時点の署名付きURLで、期限切れになりうる。
+      // 取得のたびに再発行する必要があるため、DB上の値と異なることを確認する。
+      const photoId = await createTestTouringPhoto({ userId, touringId })
+
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      const photo = json.data.find(
+        (p: { photoId: string }) => p.photoId === photoId
+      )
+      expect(photo.photoUrl).toBe('https://storage.example.com/signed-test.jpg')
+      expect(photo.photoUrl).not.toBe('https://storage.example.com/test.jpg')
+    })
   })
 
   // -----------------------------------------------------------------------
@@ -765,6 +784,26 @@ describe('Photo API Endpoints', () => {
       )
 
       expect(res.status).toBe(404)
+    })
+
+    test('DBに保存された古いphotoUrlではなく都度発行した署名付きURLを返す(#514)', async () => {
+      const photoId = await createTestSpotPhoto({ userId, spotId })
+
+      const res = await app.request(
+        `/api/v1/photo/touring/${touringId}/spot/${spotId}`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      const photo = json.data.find(
+        (p: { photoId: string }) => p.photoId === photoId
+      )
+      expect(photo.photoUrl).toBe('https://storage.example.com/signed-test.jpg')
+      expect(photo.photoUrl).not.toBe('https://storage.example.com/test.jpg')
     })
   })
 

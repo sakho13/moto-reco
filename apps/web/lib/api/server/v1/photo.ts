@@ -46,8 +46,8 @@ const createPhotoService = (): PhotoService =>
 const photo = new Hono<{ Variables: HonoVariables }>()
 
 const SIGNED_URL_EXPIRY_MS = 15 * 60 * 1000 // 15分
-// V4署名付きURLの有効期限はGCSの仕様上7日が上限
-const READ_SIGNED_URL_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000
+// 読み取り用署名付きURLは表示のたびに都度発行するため短命でよい
+const READ_SIGNED_URL_EXPIRY_MS = 15 * 60 * 1000
 // Firebase Storage EmulatorのURL(署名付きURLでの書き込みに未対応のため専用エンドポイントを使う)
 const STORAGE_EMULATOR_BASE_URL = 'http://localhost:9199'
 
@@ -57,11 +57,36 @@ const CONTENT_TYPE_TO_EXT: Record<string, string> = {
   'image/webp': 'webp',
 }
 
+const getBucket = () => {
+  const storage = getFirebaseAdminStorage()
+  const bucketName = getStorageBucketName()
+  return storage.bucket(bucketName)
+}
+
+/**
+ * storagePathから読み取り用の署名付きURLを都度発行する。
+ * DBにURLを保存して使い回すと有効期限切れ(GCSのExpiredToken)で
+ * 取得できなくなるため、表示のたびに必ず再生成すること。
+ */
+const generateReadSignedUrl = async (
+  bucket: ReturnType<typeof getBucket>,
+  storagePath: string
+): Promise<string> => {
+  const file = bucket.file(storagePath)
+  const [url] = await file.getSignedUrl({
+    version: 'v4',
+    action: 'read',
+    expires: getCurrentDate().getTime() + READ_SIGNED_URL_EXPIRY_MS,
+  })
+  return url
+}
+
 const toApiResponsePhotoDetail = (
-  entity: PhotoEntity
+  entity: PhotoEntity,
+  photoUrl: string
 ): ApiResponsePhotoDetail => ({
   photoId: entity.id,
-  photoUrl: entity.photoUrl,
+  photoUrl,
   storagePath: entity.storagePath,
   memo: entity.memo,
   takenAt: entity.takenAt.toISOString(),
@@ -95,9 +120,8 @@ photo.post(
     const userId = userEntity.id
     const { files } = c.req.valid('json')
 
-    const storage = getFirebaseAdminStorage()
     const bucketName = getStorageBucketName()
-    const bucket = storage.bucket(bucketName)
+    const bucket = getBucket()
     const useEmulator = process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true'
 
     const urls: ApiResponsePhotoUploadUrl = []
@@ -159,18 +183,11 @@ photo.post(
     }
 
     // Firebase Storage から photoUrl を取得
-    const storage = getFirebaseAdminStorage()
-    const bucketName = getStorageBucketName()
-    const bucket = storage.bucket(bucketName)
+    const bucket = getBucket()
 
     const photosWithUrls = await Promise.all(
       photos.map(async (p) => {
-        const file = bucket.file(p.photoPath)
-        const [url] = await file.getSignedUrl({
-          version: 'v4',
-          action: 'read',
-          expires: getCurrentDate().getTime() + READ_SIGNED_URL_EXPIRY_MS,
-        })
+        const url = await generateReadSignedUrl(bucket, p.photoPath)
         return { ...p, photoUrl: url }
       })
     )
@@ -191,7 +208,9 @@ photo.post(
     return c.json<SuccessResponse<ApiResponseTouringPhotoList>>(
       {
         status: 'success',
-        data: created.map(toApiResponsePhotoDetail),
+        data: created.map((entity) =>
+          toApiResponsePhotoDetail(entity, entity.photoUrl)
+        ),
         message: 'ツーリング写真登録成功',
       },
       201
@@ -218,9 +237,17 @@ photo.get(
       createUserId(userId)
     )
 
+    const bucket = getBucket()
+    const data = await Promise.all(
+      photos.map(async (entity) => {
+        const photoUrl = await generateReadSignedUrl(bucket, entity.storagePath)
+        return toApiResponsePhotoDetail(entity, photoUrl)
+      })
+    )
+
     return c.json<SuccessResponse<ApiResponseTouringPhotoList>>({
       status: 'success',
-      data: photos.map(toApiResponsePhotoDetail),
+      data,
       message: 'ツーリング写真一覧取得成功',
     })
   }
@@ -246,18 +273,11 @@ photo.post(
       validatePhotoPath(p.photoPath, userId)
     }
 
-    const storage = getFirebaseAdminStorage()
-    const bucketName = getStorageBucketName()
-    const bucket = storage.bucket(bucketName)
+    const bucket = getBucket()
 
     const photosWithUrls = await Promise.all(
       photos.map(async (p) => {
-        const file = bucket.file(p.photoPath)
-        const [url] = await file.getSignedUrl({
-          version: 'v4',
-          action: 'read',
-          expires: getCurrentDate().getTime() + READ_SIGNED_URL_EXPIRY_MS,
-        })
+        const url = await generateReadSignedUrl(bucket, p.photoPath)
         return { ...p, photoUrl: url }
       })
     )
@@ -279,7 +299,9 @@ photo.post(
     return c.json<SuccessResponse<ApiResponseSpotPhotoList>>(
       {
         status: 'success',
-        data: created.map(toApiResponsePhotoDetail),
+        data: created.map((entity) =>
+          toApiResponsePhotoDetail(entity, entity.photoUrl)
+        ),
         message: 'スポット写真登録成功',
       },
       201
@@ -308,9 +330,17 @@ photo.get(
       createUserId(userId)
     )
 
+    const bucket = getBucket()
+    const data = await Promise.all(
+      photos.map(async (entity) => {
+        const photoUrl = await generateReadSignedUrl(bucket, entity.storagePath)
+        return toApiResponsePhotoDetail(entity, photoUrl)
+      })
+    )
+
     return c.json<SuccessResponse<ApiResponseSpotPhotoList>>({
       status: 'success',
-      data: photos.map(toApiResponsePhotoDetail),
+      data,
       message: 'スポット写真一覧取得成功',
     })
   }
@@ -335,18 +365,11 @@ photo.post(
       validatePhotoPath(p.photoPath, userId)
     }
 
-    const storage = getFirebaseAdminStorage()
-    const bucketName = getStorageBucketName()
-    const bucket = storage.bucket(bucketName)
+    const bucket = getBucket()
 
     const photosWithUrls = await Promise.all(
       photos.map(async (p) => {
-        const file = bucket.file(p.photoPath)
-        const [url] = await file.getSignedUrl({
-          version: 'v4',
-          action: 'read',
-          expires: getCurrentDate().getTime() + READ_SIGNED_URL_EXPIRY_MS,
-        })
+        const url = await generateReadSignedUrl(bucket, p.photoPath)
         return { ...p, photoUrl: url }
       })
     )
@@ -367,7 +390,9 @@ photo.post(
     return c.json<SuccessResponse<ApiResponseBikePhotoList>>(
       {
         status: 'success',
-        data: created.map(toApiResponsePhotoDetail),
+        data: created.map((entity) =>
+          toApiResponsePhotoDetail(entity, entity.photoUrl)
+        ),
         message: 'バイク写真登録成功',
       },
       201
@@ -394,9 +419,17 @@ photo.get(
       createUserId(userId)
     )
 
+    const bucket = getBucket()
+    const data = await Promise.all(
+      photos.map(async (entity) => {
+        const photoUrl = await generateReadSignedUrl(bucket, entity.storagePath)
+        return toApiResponsePhotoDetail(entity, photoUrl)
+      })
+    )
+
     return c.json<SuccessResponse<ApiResponseBikePhotoList>>({
       status: 'success',
-      data: photos.map(toApiResponsePhotoDetail),
+      data,
       message: 'バイク写真一覧取得成功',
     })
   }
@@ -431,18 +464,29 @@ photo.get('/', honoAuthMiddleware, honoAdminMiddleware, async (c) => {
     pageSize,
   })
 
+  const bucket = getBucket()
+  const data = await Promise.all(
+    photos.map(async (entity) => {
+      const photoUrl = await generateReadSignedUrl(bucket, entity.storagePath)
+      return {
+        ...toApiResponsePhotoDetail(entity, photoUrl),
+        attachments: entity.attachments.map((attachment) =>
+          attachment.type === 'TOURING'
+            ? { type: 'TOURING' as const, touringId: attachment.touringId }
+            : attachment.type === 'SPOT'
+              ? { type: 'SPOT' as const, spotId: attachment.spotId }
+              : {
+                  type: 'BIKE' as const,
+                  myUserBikeId: attachment.myUserBikeId,
+                }
+        ),
+      }
+    })
+  )
+
   return c.json<SuccessResponse<ApiResponseUserPhotoList>>({
     status: 'success',
-    data: photos.map((entity) => ({
-      ...toApiResponsePhotoDetail(entity),
-      attachments: entity.attachments.map((attachment) =>
-        attachment.type === 'TOURING'
-          ? { type: 'TOURING' as const, touringId: attachment.touringId }
-          : attachment.type === 'SPOT'
-            ? { type: 'SPOT' as const, spotId: attachment.spotId }
-            : { type: 'BIKE' as const, myUserBikeId: attachment.myUserBikeId }
-      ),
-    })),
+    data,
     message: 'マイフォト一覧取得成功',
   })
 })
@@ -468,9 +512,7 @@ photo.delete(
     })
 
     // Firebase Storage からファイルを削除
-    const storage = getFirebaseAdminStorage()
-    const bucketName = getStorageBucketName()
-    const bucket = storage.bucket(bucketName)
+    const bucket = getBucket()
     await bucket.file(storagePath).delete({ ignoreNotFound: true })
 
     return c.json<SuccessResponse<undefined>>({
