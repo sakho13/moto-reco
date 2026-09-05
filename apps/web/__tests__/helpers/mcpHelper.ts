@@ -40,3 +40,20 @@ export async function issueTestMcpAccessToken(
 
   return accessToken
 }
+
+/**
+ * テストユーザーのプランを設定する
+ *
+ * @remarks
+ * `TUserPlanHistory` に新規レコードを追加することでプランを変更する。
+ * `PrismaUserRepository.findById` は最新の1件（`changedAt` desc）を
+ * 現在のプランとして参照するため、追記のみで反映される。
+ */
+export async function setTestUserPlan(
+  userId: string,
+  plan: 'FREE' | 'PREMIUM'
+): Promise<void> {
+  await prisma.tUserPlanHistory.create({
+    data: { userId, plan, changedById: userId },
+  })
+}
