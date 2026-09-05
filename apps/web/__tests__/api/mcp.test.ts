@@ -1,10 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { createGuestUser, createTestUser } from '../helpers/authHelper'
 import { createTestUserBike } from '../helpers/bikeHelper'
-import {
-  issueTestMcpAccessToken,
-  setTestUserPlan,
-} from '../helpers/mcpHelper'
+import { issueTestMcpAccessToken, setTestUserPlan } from '../helpers/mcpHelper'
 import { createTestSpot, createTestTouring } from '../helpers/touringHelper'
 import { mcpApp } from '@/lib/api/server/mcpApp'
 
@@ -242,7 +239,12 @@ describe('POST /api/mcp', () => {
     args: Record<string, unknown>
   ): Promise<unknown> {
     const res = await postMcp(
-      { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } },
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name, arguments: args },
+      },
       accessToken
     )
     expect(res.status).toBe(200)
@@ -263,20 +265,16 @@ describe('POST /api/mcp', () => {
     })
 
     // create_touring_plan（出発地・目的地付き）
-    const created = (await callWriteTool(
-      accessToken,
-      'create_touring_plan',
-      {
-        myUserBikeId,
-        title: 'テストツーリングプラン',
-        startLocation: { latitude: 35.0, longitude: 135.0, name: '出発地' },
-        destinationLocation: {
-          latitude: 35.5,
-          longitude: 135.5,
-          name: '目的地',
-        },
-      }
-    )) as {
+    const created = (await callWriteTool(accessToken, 'create_touring_plan', {
+      myUserBikeId,
+      title: 'テストツーリングプラン',
+      startLocation: { latitude: 35.0, longitude: 135.0, name: '出発地' },
+      destinationLocation: {
+        latitude: 35.5,
+        longitude: 135.5,
+        name: '目的地',
+      },
+    })) as {
       touringPlanId: string
       title: string
       startLocation: { name: string } | null

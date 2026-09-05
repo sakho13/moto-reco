@@ -742,12 +742,7 @@ async function buildMcpServer(
           name: z.string().max(100).optional().describe('名称'),
           memo: z.string().max(500).optional().describe('メモ'),
           latitude: z.number().min(-90).max(90).optional().describe('緯度'),
-          longitude: z
-            .number()
-            .min(-180)
-            .max(180)
-            .optional()
-            .describe('経度'),
+          longitude: z.number().min(-180).max(180).optional().describe('経度'),
           stayMinutes: z
             .number()
             .int()
