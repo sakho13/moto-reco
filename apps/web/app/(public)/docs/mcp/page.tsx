@@ -21,7 +21,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/docs/mcp',
   },
-  robots: { index: false },
 }
 
 const claudeCodeContent = (
