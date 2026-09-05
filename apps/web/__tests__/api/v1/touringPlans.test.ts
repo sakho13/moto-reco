@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import { beforeEach, describe, expect, test } from 'vitest'
+import { prisma } from '@repo/database'
 import { createTestUser, testAuthRequired } from '../../helpers/authHelper'
 import { createTestUserBike } from '../../helpers/bikeHelper'
 import {
@@ -564,6 +565,45 @@ describe('TouringPlans API Endpoints', () => {
       const json = await res.json()
       expect(res.status).toBe(404)
       expect404Error(json)
+    })
+
+    test('削除後は一覧取得のレスポンスに含まれない', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      expect(res.status).toBe(200)
+
+      const listRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      const listJson = await listRes.json()
+      expect(listRes.status).toBe(200)
+      expect(listJson.data).toEqual([])
+    })
+
+    test('削除は物理削除ではなく論理削除である', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      expect(res.status).toBe(200)
+
+      const record = await prisma.tUserMyBikeTouringPlan.findUnique({
+        where: { id: touringPlanId },
+      })
+      expect(record).not.toBeNull()
+      expect(record?.deletedAt).not.toBeNull()
     })
   })
 
