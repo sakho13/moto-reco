@@ -46,8 +46,10 @@ const createPhotoService = (): PhotoService =>
 const photo = new Hono<{ Variables: HonoVariables }>()
 
 const SIGNED_URL_EXPIRY_MS = 15 * 60 * 1000 // 15分
-// 読み取り用署名付きURLは表示のたびに都度発行するため短命でよい
-const READ_SIGNED_URL_EXPIRY_MS = 15 * 60 * 1000
+// V4署名付きURLの有効期限はGCSの仕様上7日が上限。
+// 表示のたびに再発行はするが、発行したURL自体の有効期限は
+// クライアント側のキャッシュ保持期間を考慮しこの上限のまま維持する
+const READ_SIGNED_URL_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000
 // Firebase Storage EmulatorのURL(署名付きURLでの書き込みに未対応のため専用エンドポイントを使う)
 const STORAGE_EMULATOR_BASE_URL = 'http://localhost:9199'
 
