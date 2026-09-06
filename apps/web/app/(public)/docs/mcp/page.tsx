@@ -21,7 +21,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/docs/mcp',
   },
-  robots: { index: false },
 }
 
 const claudeCodeContent = (
@@ -124,7 +123,8 @@ export default function McpSetupPage() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>利用可能なツール</h2>
-          <p className={styles.sectionBody}>以下のツールが利用できます：</p>
+
+          <h3 className={styles.subTitle}>読み取り系ツール（全プラン共通）</h3>
           <ul>
             <li>
               <strong>list_bikes</strong> — 登録されているマイバイクの一覧を取得
@@ -148,6 +148,49 @@ export default function McpSetupPage() {
             <li>
               <strong>get_maintenance_status</strong> —
               バイクのメンテナンス状況と次回推奨時期を取得
+            </li>
+          </ul>
+
+          <h3 className={styles.subTitle}>
+            書き込み系ツール（PREMIUMプラン限定）
+          </h3>
+          <p className={styles.sectionBody}>
+            以下のツールはPREMIUMプランのユーザーのみ利用できます。FREEプランでは表示・実行できません。
+          </p>
+          <ul>
+            <li>
+              <strong>create_touring_plan</strong> — ツーリングプランを新規作成
+            </li>
+            <li>
+              <strong>update_touring_plan</strong> —
+              ツーリングプランのタイトルを更新
+            </li>
+            <li>
+              <strong>delete_touring_plan</strong> — ツーリングプランを削除
+            </li>
+            <li>
+              <strong>set_touring_plan_start_location</strong> —
+              ツーリングプランの出発地を設定・更新・解除
+            </li>
+            <li>
+              <strong>set_touring_plan_destination_location</strong> —
+              ツーリングプランの目的地を設定・更新・解除
+            </li>
+            <li>
+              <strong>add_touring_plan_spot</strong> —
+              ツーリングプランに経由地・休憩を追加
+            </li>
+            <li>
+              <strong>update_touring_plan_spot</strong> —
+              ツーリングプランの経由地・休憩を更新
+            </li>
+            <li>
+              <strong>delete_touring_plan_spot</strong> —
+              ツーリングプランの経由地・休憩を削除
+            </li>
+            <li>
+              <strong>reorder_touring_plan_spots</strong> —
+              ツーリングプランの経由地・休憩を並び替え
             </li>
           </ul>
         </section>

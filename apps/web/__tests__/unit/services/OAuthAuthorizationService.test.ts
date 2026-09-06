@@ -78,6 +78,7 @@ const buildUserEntity = (
     id: string
     role: 'USER' | 'ADMIN' | 'GUEST'
     status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
+    plan: 'FREE' | 'PREMIUM' | null
   }> = {}
 ) =>
   new UserEntity(
@@ -89,7 +90,7 @@ const buildUserEntity = (
       notificationEmail: null,
       isProfilePublic: false,
     },
-    null
+    overrides.plan ?? null
   )
 
 const buildClientRepository = (): IOAuthClientRepository => ({
@@ -146,6 +147,7 @@ describe('OAuthAuthorizationService.createAuthorizationCode()', () => {
       tokenRepository,
       userRepository
     )
+    vi.mocked(userRepository.findById).mockResolvedValue(buildUserEntity())
   })
 
   test('クライアントが存在しない → invalid_client エラー', async () => {
@@ -211,6 +213,171 @@ describe('OAuthAuthorizationService.createAuthorizationCode()', () => {
     expect(codeRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: client.id })
     )
+  })
+
+  test('scope未指定 → 従来通りscopes:["READ"]で発行される（デグレ確認）', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ plan: 'FREE' })
+    )
+    vi.mocked(codeRepository.create).mockResolvedValue(buildAuthCodeEntity())
+
+    await service.createAuthorizationCode({
+      clientId: client.clientId,
+      userId: 'user-1',
+      redirectUri: 'https://example.com/callback',
+      codeChallenge: CODE_CHALLENGE,
+      codeChallengeMethod: 'S256',
+    })
+
+    expect(codeRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ scopes: ['READ'] })
+    )
+  })
+
+  test('サポート対象外のscopeのみを要求（scope:"unknown"） → プランに関わらず invalid_scope エラー', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ plan: 'FREE' })
+    )
+
+    await expect(
+      service.createAuthorizationCode({
+        clientId: client.clientId,
+        userId: 'user-1',
+        redirectUri: 'https://example.com/callback',
+        codeChallenge: CODE_CHALLENGE,
+        codeChallengeMethod: 'S256',
+        scope: 'unknown',
+      })
+    ).rejects.toMatchObject({ error: 'invalid_scope' })
+    expect(codeRepository.create).not.toHaveBeenCalled()
+  })
+
+  test('サポート対象外のscopeとwriteを同時に要求（scope:"unknown write"） → FREEプランではREADにフォールバックする', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ plan: 'FREE' })
+    )
+    vi.mocked(codeRepository.create).mockResolvedValue(buildAuthCodeEntity())
+
+    await service.createAuthorizationCode({
+      clientId: client.clientId,
+      userId: 'user-1',
+      redirectUri: 'https://example.com/callback',
+      codeChallenge: CODE_CHALLENGE,
+      codeChallengeMethod: 'S256',
+      scope: 'unknown write',
+    })
+
+    expect(codeRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ scopes: ['READ'] })
+    )
+  })
+
+  test('FREEプランのユーザーがscope:"write"を要求 → WRITEは付与されずREADにフォールバックしてscopes:["READ"]で発行される', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ plan: 'FREE' })
+    )
+    vi.mocked(codeRepository.create).mockResolvedValue(buildAuthCodeEntity())
+
+    await service.createAuthorizationCode({
+      clientId: client.clientId,
+      userId: 'user-1',
+      redirectUri: 'https://example.com/callback',
+      codeChallenge: CODE_CHALLENGE,
+      codeChallengeMethod: 'S256',
+      scope: 'write',
+    })
+
+    expect(codeRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ scopes: ['READ'] })
+    )
+  })
+
+  test('FREEプランのユーザーがscope:"read write"を要求 → 許可されるREADのみが付与される', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ plan: 'FREE' })
+    )
+    vi.mocked(codeRepository.create).mockResolvedValue(buildAuthCodeEntity())
+
+    await service.createAuthorizationCode({
+      clientId: client.clientId,
+      userId: 'user-1',
+      redirectUri: 'https://example.com/callback',
+      codeChallenge: CODE_CHALLENGE,
+      codeChallengeMethod: 'S256',
+      scope: 'read write',
+    })
+
+    expect(codeRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ scopes: ['READ'] })
+    )
+  })
+
+  test('PREMIUMプランのユーザーがscope:"write"を要求 → scopes:["WRITE"]が付与される', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ plan: 'PREMIUM' })
+    )
+    vi.mocked(codeRepository.create).mockResolvedValue(buildAuthCodeEntity())
+
+    await service.createAuthorizationCode({
+      clientId: client.clientId,
+      userId: 'user-1',
+      redirectUri: 'https://example.com/callback',
+      codeChallenge: CODE_CHALLENGE,
+      codeChallengeMethod: 'S256',
+      scope: 'write',
+    })
+
+    expect(codeRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ scopes: ['WRITE'] })
+    )
+  })
+
+  test('ユーザーが見つからない（findByIdがnull） → access_denied エラー', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(null)
+
+    await expect(
+      service.createAuthorizationCode({
+        clientId: client.clientId,
+        userId: 'user-1',
+        redirectUri: 'https://example.com/callback',
+        codeChallenge: CODE_CHALLENGE,
+        codeChallengeMethod: 'S256',
+      })
+    ).rejects.toMatchObject({ error: 'access_denied' })
+    expect(codeRepository.create).not.toHaveBeenCalled()
+  })
+
+  test('GUESTロール（allowedScopes:[]）のユーザー → READへのフォールバックもできず invalid_scope エラー', async () => {
+    const client = buildClientEntity()
+    vi.mocked(clientRepository.findByClientId).mockResolvedValue(client)
+    vi.mocked(userRepository.findById).mockResolvedValue(
+      buildUserEntity({ role: 'GUEST' })
+    )
+
+    await expect(
+      service.createAuthorizationCode({
+        clientId: client.clientId,
+        userId: 'user-1',
+        redirectUri: 'https://example.com/callback',
+        codeChallenge: CODE_CHALLENGE,
+        codeChallengeMethod: 'S256',
+      })
+    ).rejects.toMatchObject({ error: 'invalid_scope' })
+    expect(codeRepository.create).not.toHaveBeenCalled()
   })
 })
 
