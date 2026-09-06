@@ -48,13 +48,15 @@ export class OAuthAuthorizationService {
    * OAuthのscopeパラメータ（スペース区切り文字列）をApiKeyScope[]に変換・検証する
    *
    * @remarks
-   * `ALLOWED_SCOPES`（OAuth仕様上サポートするscope全体）でのバリデーション後、
-   * さらに `allowedScopes`（ユーザーの現在のプランで許可されているscope）との
-   * 積集合を取る。積集合が空の場合は、`allowedScopes` にREADが含まれていれば
-   * READのみを付与するフォールバックを行う（例: FREEユーザーがWRITEのみを
-   * 要求した場合、エラーにはせずREADを付与する）。
-   * フォールバックしてもなお付与できるscopeがない場合（`allowedScopes` が
-   * 空配列＝GUESTロール等）のみ invalid_scope エラーとする。
+   * まず `ALLOWED_SCOPES`（OAuth仕様上サポートするscope全体）で検証し、
+   * 一つも該当しない場合（例: `scope=unknown`）はプランに関わらず
+   * invalid_scope エラーとする（クライアントの設定ミスを隠蔽しない）。
+   * 次に `allowedScopes`（ユーザーの現在のプランで許可されているscope）との
+   * 積集合を取り、積集合が空の場合（＝要求自体は有効だがプランで許可されて
+   * いない）のみ、`allowedScopes` にREADが含まれていればREADへフォールバック
+   * する（例: FREEユーザーがWRITEのみを要求した場合、エラーにはせずREADを
+   * 付与する）。フォールバックしてもなお付与できるscopeがない場合
+   * （`allowedScopes` が空配列＝GUESTロール等）は invalid_scope エラーとする。
    */
   private parseScopes(
     scope: string | undefined,
@@ -69,6 +71,9 @@ export class OAuthAuthorizationService {
     const validated = requested.filter((s): s is ApiKeyScope =>
       (ALLOWED_SCOPES as string[]).includes(s)
     )
+    if (validated.length === 0) {
+      throw new OAuthError('invalid_scope', '有効なscopeが指定されていません')
+    }
     const effective = validated.filter((s) => allowedScopes.includes(s))
     if (effective.length > 0) {
       return Array.from(new Set(effective))
