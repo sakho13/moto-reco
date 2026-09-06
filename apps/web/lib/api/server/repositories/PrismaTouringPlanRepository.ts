@@ -5,6 +5,7 @@ import {
   MyUserBikeId,
   TouringPlanId,
 } from '@repo/shared-types'
+import { getCurrentDate } from '@repo/shared-utils'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 const touringPlanSelect = {
@@ -65,7 +66,7 @@ export class PrismaTouringPlanRepository
 
   async findPlans(myUserBikeId: MyUserBikeId): Promise<TouringPlanEntity[]> {
     const plans = await this.connection.tUserMyBikeTouringPlan.findMany({
-      where: { userMyBikeId: myUserBikeId },
+      where: { userMyBikeId: myUserBikeId, deletedAt: null },
       select: touringPlanSelect,
       orderBy: { createdAt: 'desc' },
     })
@@ -78,7 +79,7 @@ export class PrismaTouringPlanRepository
     myUserBikeId: MyUserBikeId
   ): Promise<TouringPlanEntity | null> {
     const plan = await this.connection.tUserMyBikeTouringPlan.findFirst({
-      where: { id: planId, userMyBikeId: myUserBikeId },
+      where: { id: planId, userMyBikeId: myUserBikeId, deletedAt: null },
       select: touringPlanSelect,
     })
 
@@ -87,18 +88,26 @@ export class PrismaTouringPlanRepository
     return toTouringPlanEntity(plan)
   }
 
+  /**
+   * ツーリングプランを論理削除する
+   *
+   * @remarks
+   * 所有者チェック（id と userMyBikeId の複合条件）を`where`に指定するため、
+   * 一意フィールドのみを`where`に指定できる`update`ではなく`updateMany`を使用する。
+   */
   async deletePlan(
     planId: TouringPlanId,
     myUserBikeId: MyUserBikeId
   ): Promise<void> {
-    await this.connection.tUserMyBikeTouringPlan.deleteMany({
+    await this.connection.tUserMyBikeTouringPlan.updateMany({
       where: { id: planId, userMyBikeId: myUserBikeId },
+      data: { deletedAt: getCurrentDate() },
     })
   }
 
   async countPlans(myUserBikeId: MyUserBikeId): Promise<number> {
     return this.connection.tUserMyBikeTouringPlan.count({
-      where: { userMyBikeId: myUserBikeId },
+      where: { userMyBikeId: myUserBikeId, deletedAt: null },
     })
   }
 }

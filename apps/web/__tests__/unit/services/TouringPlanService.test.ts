@@ -152,6 +152,19 @@ describe('TouringPlanService', () => {
       ).rejects.toThrow(ApiV1Error)
     })
 
+    test('FREEプランで登録件数が上限（10件）に達している場合はINVALID_REQUESTエラーになる', async () => {
+      vi.mocked(touringPlanRepository.countPlans).mockResolvedValue(10)
+
+      await expect(
+        service.registerPlan({
+          myUserBikeId,
+          user: buildUserEntity(),
+          title: '11件目のプラン',
+        })
+      ).rejects.toThrow(ApiV1Error)
+      expect(touringPlanRepository.createPlan).not.toHaveBeenCalled()
+    })
+
     test('出発地・目的地を指定しない場合はプランのみ作成される', async () => {
       const createdPlan = buildPlan()
       vi.mocked(touringPlanRepository.createPlan).mockResolvedValue(createdPlan)

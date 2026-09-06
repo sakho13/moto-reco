@@ -12,7 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ant-design/icons": "6.3.2",
+    "@ant-design/icons": "6.3.4",
     "@ant-design/v5-patch-for-react-19": "1.0.3",
     "@refinedev/antd": "6.0.3",
     "@refinedev/core": "5.0.12",
@@ -23,9 +23,9 @@
     "@repo/markdown": "workspace:*",
     "@repo/shared-types": "workspace:*",
     "@repo/shared-utils": "workspace:*",
-    "@tanstack/react-query": "5.102.2",
-    "antd": "6.5.2",
-    "axios": "1.19.0",
+    "@tanstack/react-query": "5.102.8",
+    "antd": "6.6.2",
+    "axios": "1.20.0",
     "dayjs": "1.11.23",
     "firebase": "catalog:",
     "firebase-admin": "catalog:",
