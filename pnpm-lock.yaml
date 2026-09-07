@@ -298,8 +298,8 @@ importers:
         specifier: 'catalog:'
         version: 0.561.0(react@19.2.1)
       microcms-js-sdk:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.5.0
+        version: 3.5.0
       next:
         specifier: 'catalog:'
         version: 16.0.7(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -5275,8 +5275,8 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
-  microcms-js-sdk@3.4.0:
-    resolution: {integrity: sha512-WJDHNHZlgyO7tzcEnnUaKOZDD3l5tnQjqDb32zWYt4H4auLbx+yc9yHHzcNn1vIGkF4xFW5gbLlZnlIDnMq0+A==}
+  microcms-js-sdk@3.5.0:
+    resolution: {integrity: sha512-W3Od6XuZ/N5wYOV/QAXK7Md0dckNwnafQ5QJjJilBGuwdIrQ1AlKs0mHLR7BibXCJAsxe1lrDhTevLRmguNJew==}
     engines: {node: '>=18.0.0'}
 
   micromark-core-commonmark@2.0.3:
@@ -11938,7 +11938,7 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  microcms-js-sdk@3.4.0:
+  microcms-js-sdk@3.5.0:
     dependencies:
       async-retry: 1.3.3
 
