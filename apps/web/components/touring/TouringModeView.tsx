@@ -13,6 +13,7 @@ import styles from './TouringModeView.module.css'
 import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal'
 import TouringDestinationWidget from '@/components/touring/TouringDestinationWidget'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
+import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
@@ -161,10 +162,21 @@ export const TouringModeView = ({
           longitude: geoPosition?.lng,
         }
       )
+      trackEvent('touring_spot_create', {
+        has_name: spotName.trim() !== '',
+        has_memo: spotMemo.trim() !== '',
+        has_location: geoPosition != null,
+      })
 
       toast.success('スポットを記録しました')
       setShowSpotModal(false)
     } catch (error) {
+      trackEvent('touring_error', {
+        operation: 'spot_create',
+        ...(error instanceof ApiV1Error
+          ? { error_code: error.errorCode, error_message: error.message }
+          : {}),
+      })
       if (error instanceof ApiV1Error) {
         toast.error(error.message)
       } else {
@@ -182,9 +194,16 @@ export const TouringModeView = ({
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots` as const,
         { type: 'BREAK', arrivedAt: getCurrentDate() }
       )
+      trackEvent('touring_break_start')
       await mutateSpots()
       toast.success('休憩を開始しました')
     } catch (error) {
+      trackEvent('touring_error', {
+        operation: 'break_start',
+        ...(error instanceof ApiV1Error
+          ? { error_code: error.errorCode, error_message: error.message }
+          : {}),
+      })
       toast.error(
         error instanceof ApiV1Error ? error.message : '休憩の開始に失敗しました'
       )
@@ -201,9 +220,16 @@ export const TouringModeView = ({
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${currentBreak.spotId}` as const,
         { departedAt: getCurrentDate() }
       )
+      trackEvent('touring_break_end')
       await mutateSpots()
       toast.success('休憩を終了しました')
     } catch (error) {
+      trackEvent('touring_error', {
+        operation: 'break_end',
+        ...(error instanceof ApiV1Error
+          ? { error_code: error.errorCode, error_message: error.message }
+          : {}),
+      })
       toast.error(
         error instanceof ApiV1Error ? error.message : '休憩の終了に失敗しました'
       )
@@ -219,9 +245,16 @@ export const TouringModeView = ({
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${nextDestinationSpot.spotId}` as const,
         { arrivedAt: getCurrentDate() }
       )
+      trackEvent('touring_spot_arrive')
       await mutateSpots()
       toast.success('スポットへの到着を記録しました')
     } catch (error) {
+      trackEvent('touring_error', {
+        operation: 'spot_arrive',
+        ...(error instanceof ApiV1Error
+          ? { error_code: error.errorCode, error_message: error.message }
+          : {}),
+      })
       toast.error(
         error instanceof ApiV1Error ? error.message : '到着の記録に失敗しました'
       )
@@ -238,9 +271,16 @@ export const TouringModeView = ({
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/${nextDestinationSpot.spotId}` as const,
         { isSkipped: true }
       )
+      trackEvent('touring_spot_skip')
       await mutateSpots()
       toast.success('スポットをスキップしました')
     } catch (error) {
+      trackEvent('touring_error', {
+        operation: 'spot_skip',
+        ...(error instanceof ApiV1Error
+          ? { error_code: error.errorCode, error_message: error.message }
+          : {}),
+      })
       toast.error(
         error instanceof ApiV1Error ? error.message : 'スキップに失敗しました'
       )

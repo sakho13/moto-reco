@@ -14,6 +14,7 @@ import { Select } from '@repo/ui/select'
 import { toast } from '@repo/ui/sonner'
 import { ModalBase } from '@/components/common/ModalBase'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
+import { trackEvent } from '@/lib/analytics'
 import { apiPatch } from '@/lib/api/client'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
@@ -111,10 +112,22 @@ export function PlanLocationEditModal({
               routeTypeFromPrev: routeTypeFromPrev,
             }),
       })
+      trackEvent('touring_plan_location_update', {
+        location_type: type,
+        cleared: false,
+        has_travel_minutes: !isStart && travelMinutesFromPrev !== '',
+        route_type: !isStart ? routeTypeFromPrev : undefined,
+      })
       await Promise.all([mutate(detailUrl), mutate(spotsUrl)])
       toast.success(`${isStart ? '出発地' : '目的地'}を更新しました`)
       onSuccess()
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'location_update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : '保存に失敗しました')
     } finally {
       setIsSaving(false)
@@ -126,10 +139,20 @@ export function PlanLocationEditModal({
     setIsSaving(true)
     try {
       await apiPatch(endpoint, null)
+      trackEvent('touring_plan_location_update', {
+        location_type: type,
+        cleared: true,
+      })
       await Promise.all([mutate(detailUrl), mutate(spotsUrl)])
       toast.success(`${isStart ? '出発地' : '目的地'}を解除しました`)
       onSuccess()
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'location_update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : '解除に失敗しました')
     } finally {
       setIsSaving(false)

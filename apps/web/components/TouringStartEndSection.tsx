@@ -10,6 +10,7 @@ import { toast } from '@repo/ui/sonner'
 import { BikeIcon } from './icons/BikeIcon'
 import { TouringIcon } from './icons/TouringIcon'
 import styles from './TouringStartEndSection.module.css'
+import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -88,11 +89,22 @@ export const TouringStartEndSection = () => {
           startMileage,
         }
       )
+      trackEvent('touring_start', {
+        from_touring_plan: false,
+        has_position: position != null,
+        has_start_mileage: startMileage !== undefined,
+      })
 
       toast.success('ツーリングを開始しました')
       // SWR再検証
       await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
     } catch (error) {
+      trackEvent('touring_error', {
+        operation: 'start',
+        ...(error instanceof ApiV1Error
+          ? { error_code: error.errorCode, error_message: error.message }
+          : {}),
+      })
       if (error instanceof ApiV1Error) {
         toast.error(error.message)
       } else {

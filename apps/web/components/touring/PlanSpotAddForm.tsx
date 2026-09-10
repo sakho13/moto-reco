@@ -11,6 +11,7 @@ import { Select } from '@repo/ui/select'
 import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
+import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
@@ -108,6 +109,15 @@ export function PlanSpotAddForm({
           routeTypeFromPrev: formState.routeTypeFromPrev,
         }
       )
+      trackEvent('touring_plan_spot_create', {
+        spot_type: formState.type,
+        has_name: formState.name !== '',
+        has_memo: formState.memo !== '',
+        has_location: location != null,
+        has_stay_minutes: formState.stayMinutes !== '',
+        has_travel_minutes: formState.travelMinutesFromPrev !== '',
+        route_type: formState.routeTypeFromPrev,
+      })
 
       await Promise.all([
         mutate(
@@ -118,6 +128,12 @@ export function PlanSpotAddForm({
       toast.success(isBreak ? '休憩を追加しました' : 'スポットを追加しました')
       onSuccess()
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'spot_create',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)

@@ -5,6 +5,7 @@ import { mutate } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import { toast } from '@repo/ui/sonner'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
+import { trackEvent } from '@/lib/analytics'
 import { apiPatch } from '@/lib/api/client'
 
 type LocationType = 'start' | 'end'
@@ -47,10 +48,17 @@ export function TouringLocationEditModal({
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`,
         body
       )
+      trackEvent('touring_location_update', { location_type: type })
       await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`)
       toast.success(`${type === 'start' ? '出発地' : '終着地'}を更新しました`)
       onSuccess()
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'location_update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error ? err.message : '保存に失敗しました'
       )

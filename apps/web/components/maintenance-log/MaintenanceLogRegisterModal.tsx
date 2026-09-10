@@ -13,6 +13,7 @@ import {
   type MaintenanceLogFormData,
 } from './MaintenanceLogForm'
 import { ModalBase } from '@/components/common/ModalBase'
+import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
 
 type MaintenanceLogRegisterModalProps = {
@@ -62,11 +63,22 @@ export function MaintenanceLogRegisterModal({
         })),
         updateTotalMileage: formData.updateTotalMileage,
       })
+      trackEvent('maintenance_log_create', {
+        has_memo: memo.length > 0,
+        item_count: formData.selectedItems.length,
+        update_total_mileage: formData.updateTotalMileage,
+      })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/maintenance-logs`)
       toast.success('メンテナンス履歴を登録しました')
       onSuccess()
     } catch (err) {
+      trackEvent('maintenance_log_error', {
+        operation: 'create',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)

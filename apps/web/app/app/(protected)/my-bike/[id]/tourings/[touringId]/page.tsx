@@ -22,6 +22,7 @@ import { TouringFuelLogLinkModal } from '@/components/touring/TouringFuelLogLink
 import { TouringLocationEditModal } from '@/components/touring/TouringLocationEditModal'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
+import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import {
@@ -260,11 +261,18 @@ function TouringDetailPage() {
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`,
         { type: 'BREAK', arrivedAt: getCurrentDate() }
       )
+      trackEvent('touring_break_start')
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
       )
       toast.success('休憩を開始しました')
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'break_start',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error ? err.message : '休憩の開始に失敗しました'
       )
@@ -281,11 +289,18 @@ function TouringDetailPage() {
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots/${currentBreak.spotId}`,
         { departedAt: getCurrentDate() }
       )
+      trackEvent('touring_break_end')
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
       )
       toast.success('休憩を終了しました')
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'break_end',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error ? err.message : '休憩の終了に失敗しました'
       )

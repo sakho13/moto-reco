@@ -10,6 +10,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
 import { ModalBase } from '@/components/common/ModalBase'
+import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 
 interface PlanEditModalProps {
@@ -53,10 +54,17 @@ export function PlanEditModal({
     setIsSubmitting(true)
     try {
       await apiPatch(detailUrl, { title })
+      trackEvent('touring_plan_update', { title_changed: title !== plan.title })
       await Promise.all([mutate(detailUrl), mutate(listUrl)])
       toast.success('更新しました')
       onSuccess('update')
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
@@ -67,10 +75,19 @@ export function PlanEditModal({
     setIsDeleting(true)
     try {
       await apiDelete(detailUrl)
+      trackEvent('touring_plan_delete', {
+        linked_touring_count: plan.touringIds?.length ?? 0,
+      })
       await mutate(listUrl)
       toast.success('プランを削除しました')
       onSuccess('delete')
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'delete',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error ? err.message : '削除に失敗しました'
       )

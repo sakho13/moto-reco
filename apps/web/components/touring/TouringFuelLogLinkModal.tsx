@@ -12,6 +12,7 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import { toast } from '@repo/ui/sonner'
 import { FuelLogLinkPicker } from './FuelLogLinkPicker'
 import { ModalBase } from '@/components/common/ModalBase'
+import { trackEvent } from '@/lib/analytics'
 import { authenticatedFetch, apiPatch } from '@/lib/api/client'
 
 /**
@@ -74,6 +75,9 @@ export function TouringFuelLogLinkModal({
       await apiPatch(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`, {
         fuelLogIds: selectedFuelLogIds,
       })
+      trackEvent('touring_fuel_log_link', {
+        linked_fuel_log_count: selectedFuelLogIds.length,
+      })
 
       await mutate(detailUrl)
       await mutate(
@@ -82,6 +86,12 @@ export function TouringFuelLogLinkModal({
       toast.success('給油履歴の紐づけを更新しました')
       onSuccess()
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'fuel_log_link',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)

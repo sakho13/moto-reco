@@ -15,6 +15,7 @@ import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
+import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 import { buildGoogleMapsTwoPointUrl } from '@/lib/utils/googleMaps'
 
@@ -112,9 +113,19 @@ export function PlanSpotEditForm({
         { latitude: lat, longitude: lng }
       )
       setCurrentLocation({ lat, lng })
+      trackEvent('touring_plan_spot_update', {
+        spot_type: spot.type,
+        field: 'location',
+      })
       await mutate(spotsUrl)
       toast.success('位置を更新しました')
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'spot_update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error ? err.message : '位置の保存に失敗しました'
       )
@@ -129,10 +140,17 @@ export function PlanSpotEditForm({
       await apiDelete(
         `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots/${spot.touringPlanSpotId}`
       )
+      trackEvent('touring_plan_spot_delete', { spot_type: spot.type })
       await Promise.all([mutate(spotsUrl), mutate(detailUrl)])
       toast.success(`${label}を削除しました`)
       onDelete?.()
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'spot_delete',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error ? err.message : `${label}の削除に失敗しました`
       )
@@ -162,11 +180,25 @@ export function PlanSpotEditForm({
           routeTypeFromPrev: formState.routeTypeFromPrev,
         }
       )
+      trackEvent('touring_plan_spot_update', {
+        spot_type: spot.type,
+        has_name: formState.name !== '',
+        has_memo: formState.memo !== '',
+        has_stay_minutes: formState.stayMinutes !== '',
+        has_travel_minutes: formState.travelMinutesFromPrev !== '',
+        route_type: formState.routeTypeFromPrev,
+      })
 
       await Promise.all([mutate(spotsUrl), mutate(detailUrl)])
       toast.success(`${label}を更新しました`)
       onSuccess()
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'spot_update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
