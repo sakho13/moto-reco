@@ -24,6 +24,7 @@ import {
   PhotoUploadUrlRequestSchema,
   SuccessResponse,
 } from '@repo/shared-types'
+import type { AllowedPhotoContentType } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
 import { honoAdminMiddleware } from '../middlewares/honoAdmin'
 import { honoAuthMiddleware } from '../middlewares/honoAuth'
@@ -32,6 +33,7 @@ import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepo
 import { PrismaPhotoRepository } from '../repositories/PrismaPhotoRepository'
 import { PrismaSpotRepository } from '../repositories/PrismaSpotRepository'
 import { PrismaTouringRepository } from '../repositories/PrismaTouringRepository'
+import { ImageResizeService } from '../services/ImageResizeService'
 import { PhotoService } from '../services/PhotoService'
 import { HonoVariables } from '../types/hono'
 
@@ -58,6 +60,19 @@ const CONTENT_TYPE_TO_EXT: Record<string, string> = {
   'image/png': 'png',
   'image/webp': 'webp',
 }
+
+// CONTENT_TYPE_TO_EXTの逆引きマップ（拡張子からcontentTypeを推測する用）
+// 未知の拡張子の場合のフォールバックはimage/jpegとする
+const EXT_TO_CONTENT_TYPE: Record<string, AllowedPhotoContentType> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+}
+
+const DEFAULT_PHOTO_CONTENT_TYPE: AllowedPhotoContentType = 'image/jpeg'
+
+const imageResizeService = new ImageResizeService()
 
 const getBucket = () => {
   const storage = getFirebaseAdminStorage()
@@ -106,6 +121,54 @@ const validatePhotoPath = (photoPath: string, userId: string): void => {
       '無効な写真パスです。自分のストレージパスのみ指定できます'
     )
   }
+}
+
+/**
+ * photoPathの拡張子からcontentTypeを推測する
+ *
+ * @remarks
+ * リクエストスキーマにcontentTypeは含まれず、またStorage Emulator環境では
+ * 単純アップロード方式のためStorage上のメタデータも確実ではない。
+ * `/upload-url` でサーバー自身がCONTENT_TYPE_TO_EXTを使い発行した拡張子付き
+ * パスであるため、拡張子からの逆引きは信頼できる。
+ * 未知の拡張子の場合はimage/jpegへフォールバックする。
+ *
+ * @param photoPath - Storage上の写真パス
+ * @returns 推測したcontentType
+ */
+const inferContentTypeFromPath = (photoPath: string): AllowedPhotoContentType => {
+  const ext = photoPath.split('.').pop()?.toLowerCase() ?? ''
+  return EXT_TO_CONTENT_TYPE[ext] ?? DEFAULT_PHOTO_CONTENT_TYPE
+}
+
+/**
+ * Storage上の写真を並列でダウンロードし、ImageResizeServiceでリサイズ・圧縮した上で
+ * 同一パスへ書き戻す
+ *
+ * @remarks
+ * DB登録前に実行することで、以後のAPIレスポンスやDB上のphotoUrlには
+ * 影響を与えずに実体ファイルのみをコンパクト化する。
+ * 写真登録は1リクエストあたり最大{@link PHOTO_MAX_COUNT}件のため並列実行数の上限は設けない。
+ *
+ * @param bucket - 対象のStorageバケット
+ * @param photoPaths - リサイズ・書き戻し対象の写真パス一覧
+ */
+const resizeAndReplaceStoredPhotos = async (
+  bucket: ReturnType<typeof getBucket>,
+  photoPaths: string[]
+): Promise<void> => {
+  await Promise.all(
+    photoPaths.map(async (photoPath) => {
+      const file = bucket.file(photoPath)
+      const [buffer] = await file.download()
+      const contentType = inferContentTypeFromPath(photoPath)
+      const resizedBuffer = await imageResizeService.resize(buffer, contentType)
+      await file.save(resizedBuffer, {
+        contentType,
+        resumable: false,
+      })
+    })
+  )
 }
 
 /**
@@ -186,6 +249,12 @@ photo.post(
 
     // Firebase Storage から photoUrl を取得
     const bucket = getBucket()
+
+    // Storage上の実体ファイルをリサイズ・圧縮して同一パスへ書き戻す
+    await resizeAndReplaceStoredPhotos(
+      bucket,
+      photos.map((p) => p.photoPath)
+    )
 
     const photosWithUrls = await Promise.all(
       photos.map(async (p) => {
@@ -276,6 +345,12 @@ photo.post(
     }
 
     const bucket = getBucket()
+
+    // Storage上の実体ファイルをリサイズ・圧縮して同一パスへ書き戻す
+    await resizeAndReplaceStoredPhotos(
+      bucket,
+      photos.map((p) => p.photoPath)
+    )
 
     const photosWithUrls = await Promise.all(
       photos.map(async (p) => {
@@ -368,6 +443,12 @@ photo.post(
     }
 
     const bucket = getBucket()
+
+    // Storage上の実体ファイルをリサイズ・圧縮して同一パスへ書き戻す
+    await resizeAndReplaceStoredPhotos(
+      bucket,
+      photos.map((p) => p.photoPath)
+    )
 
     const photosWithUrls = await Promise.all(
       photos.map(async (p) => {

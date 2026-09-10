@@ -10,6 +10,20 @@ import {
 import { createTestTouring, createTestSpot } from '../../helpers/touringHelper'
 import { app } from '@/lib/api/server/app'
 
+// bucket().file() はエンドポイントごとに新しいオブジェクトを返すが、
+// download/save/resize の呼び出し検証のためモック関数自体はテストファイル内で
+// 共有インスタンスとして保持する。vi.mock() はファイル先頭へ巻き上げられるため、
+// ファクトリ内から参照する変数は vi.hoisted() で明示的に巻き上げる必要がある。
+const { mockFileDownload, mockFileSave, mockResize } = vi.hoisted(() => ({
+  mockFileDownload: vi
+    .fn()
+    .mockResolvedValue([Buffer.from('fake-image-data')]),
+  mockFileSave: vi.fn().mockResolvedValue(undefined),
+  mockResize: vi
+    .fn()
+    .mockResolvedValue(Buffer.from('resized-fake-image-data')),
+}))
+
 vi.mock('@repo/firebase-auth-server', async (importOriginal) => ({
   ...(await importOriginal()),
   getFirebaseAdminStorage: () => ({
@@ -19,13 +33,37 @@ vi.mock('@repo/firebase-auth-server', async (importOriginal) => ({
           .fn()
           .mockResolvedValue(['https://storage.example.com/signed-test.jpg']),
         delete: vi.fn().mockResolvedValue([{}]),
+        download: mockFileDownload,
+        save: mockFileSave,
       }),
     }),
   }),
   getStorageBucketName: () => 'test-bucket',
 }))
 
+// sharpによる実画像加工（Buffer.from('fake-image-data')は有効な画像バイナリではなく
+// sharpが例外を投げる）を避けるため、リサイズ処理自体はモック化する。
+// 「リサイズ処理が呼ばれること」「レスポンス形式に影響がないこと」の検証が目的で、
+// 実際の画像加工結果の正しさはImageResizeService自体の単体テストで担保する。
+vi.mock('@/lib/api/server/services/ImageResizeService', () => ({
+  ImageResizeService: vi.fn().mockImplementation(() => ({
+    resize: mockResize,
+  })),
+}))
+
 describe('Photo API Endpoints', () => {
+  // 各テストの afterEach で vi.restoreAllMocks() を呼ぶため、
+  // vi.fn() ベースの共有モック（元実装を持たない）は呼び出しごとに
+  // undefined 化してしまう。次のテストの前に必ずデフォルト実装へ戻す。
+  beforeEach(() => {
+    mockFileDownload.mockClear()
+    mockFileDownload.mockResolvedValue([Buffer.from('fake-image-data')])
+    mockFileSave.mockClear()
+    mockFileSave.mockResolvedValue(undefined)
+    mockResize.mockClear()
+    mockResize.mockResolvedValue(Buffer.from('resized-fake-image-data'))
+  })
+
   afterEach(() => {
     vi.restoreAllMocks()
   })
@@ -192,6 +230,46 @@ describe('Photo API Endpoints', () => {
         where: { userId, storagePath: photoPath },
       })
       expect(dbPhoto).not.toBeNull()
+    })
+
+    test('写真登録時にStorageからダウンロードして加工後のファイルを同一パスへ書き戻す(#560)', async () => {
+      const photoPath = `users/${userId}/photos/resize-test.jpg`
+
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
+
+      expect(res.status).toBe(201)
+      // Storageからのダウンロード・リサイズ・書き戻しが行われたことを検証
+      expect(mockFileDownload).toHaveBeenCalledTimes(1)
+      expect(mockResize).toHaveBeenCalledWith(
+        Buffer.from('fake-image-data'),
+        'image/jpeg'
+      )
+      expect(mockFileSave).toHaveBeenCalledWith(
+        Buffer.from('resized-fake-image-data'),
+        { contentType: 'image/jpeg', resumable: false }
+      )
+
+      // リサイズ処理が追加されてもレスポンス形式に変化がないことを確認
+      const json = await res.json()
+      expect(json.data[0]).toMatchObject({
+        photoId: expect.any(String),
+        photoUrl: expect.any(String),
+        storagePath: photoPath,
+      })
     })
 
     test('複数枚登録すると全件作成される', async () => {
@@ -501,6 +579,47 @@ describe('Photo API Endpoints', () => {
       expect(dbPhoto).not.toBeNull()
     })
 
+    test('写真登録時にStorageからダウンロードして加工後のファイルを同一パスへ書き戻す(#560)', async () => {
+      const photoPath = `users/${userId}/photos/resize-spot-test.png`
+
+      const res = await app.request(
+        `/api/v1/photo/touring/${touringId}/spot/${spotId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photos: [
+              {
+                photoPath,
+                takenAt: '2024-06-01T11:00:00.000Z',
+              },
+            ],
+          }),
+        }
+      )
+
+      expect(res.status).toBe(201)
+      expect(mockFileDownload).toHaveBeenCalledTimes(1)
+      // 拡張子(.png)からcontentTypeが推測されていることを検証
+      expect(mockResize).toHaveBeenCalledWith(
+        Buffer.from('fake-image-data'),
+        'image/png'
+      )
+      expect(mockFileSave).toHaveBeenCalledWith(
+        Buffer.from('resized-fake-image-data'),
+        { contentType: 'image/png', resumable: false }
+      )
+
+      const json = await res.json()
+      expect(json.data[0]).toMatchObject({
+        photoId: expect.any(String),
+        storagePath: photoPath,
+      })
+    })
+
     test('存在しないtouringIdは404になる', async () => {
       const res = await app.request(
         `/api/v1/photo/touring/non-existent-id/spot/${spotId}`,
@@ -804,6 +923,131 @@ describe('Photo API Endpoints', () => {
       )
       expect(photo.photoUrl).toBe('https://storage.example.com/signed-test.jpg')
       expect(photo.photoUrl).not.toBe('https://storage.example.com/test.jpg')
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // POST /api/v1/photo/bike/:myUserBikeId
+  // -----------------------------------------------------------------------
+  describe('POST /api/v1/photo/bike/:myUserBikeId', () => {
+    let token: string
+    let userId: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      await createAdminUser(user.token, user.userId)
+      token = user.token
+      userId = user.userId
+      const bikeId = await getTestBikeId()
+      const bike = await createTestUserBike(token, { bikeId })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(`/api/v1/photo/bike/${myUserBikeId}`, 'POST', {
+        photos: [
+          {
+            photoPath: `users/${userId}/photos/test.jpg`,
+            takenAt: '2024-06-01T10:00:00.000Z',
+          },
+        ],
+      })
+    })
+
+    test('1枚の写真を登録するとDBにレコードが作成される', async () => {
+      const photoPath = `users/${userId}/photos/bike-test.jpg`
+
+      const res = await app.request(`/api/v1/photo/bike/${myUserBikeId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.status).toBe('success')
+      expect(json.data).toHaveLength(1)
+      expect(json.data[0]).toMatchObject({
+        photoId: expect.any(String),
+        photoUrl: expect.any(String),
+      })
+
+      const dbPhoto = await prisma.tUserPhoto.findFirst({
+        where: { userId, storagePath: photoPath },
+      })
+      expect(dbPhoto).not.toBeNull()
+    })
+
+    test('写真登録時にStorageからダウンロードして加工後のファイルを同一パスへ書き戻す(#560)', async () => {
+      const photoPath = `users/${userId}/photos/resize-bike-test.webp`
+
+      const res = await app.request(`/api/v1/photo/bike/${myUserBikeId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
+
+      expect(res.status).toBe(201)
+      expect(mockFileDownload).toHaveBeenCalledTimes(1)
+      // 拡張子(.webp)からcontentTypeが推測されていることを検証
+      expect(mockResize).toHaveBeenCalledWith(
+        Buffer.from('fake-image-data'),
+        'image/webp'
+      )
+      expect(mockFileSave).toHaveBeenCalledWith(
+        Buffer.from('resized-fake-image-data'),
+        { contentType: 'image/webp', resumable: false }
+      )
+
+      const json = await res.json()
+      expect(json.data[0]).toMatchObject({
+        photoId: expect.any(String),
+        photoUrl: expect.any(String),
+        storagePath: photoPath,
+      })
+    })
+
+    test('他ユーザーのphotoPathは400になる', async () => {
+      const otherUser = await createTestUser()
+
+      const res = await app.request(`/api/v1/photo/bike/${myUserBikeId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath: `users/${otherUser.userId}/photos/test.jpg`,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
+
+      expect(res.status).toBe(400)
     })
   })
 
