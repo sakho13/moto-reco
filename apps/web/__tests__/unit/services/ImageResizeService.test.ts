@@ -49,9 +49,7 @@ describe('ImageResizeService', () => {
       const metadata = await sharp(result).metadata()
 
       expect(metadata.width).toBeLessThanOrEqual(IMAGE_RESIZE_MAX_DIMENSION_PX)
-      expect(metadata.height).toBeLessThanOrEqual(
-        IMAGE_RESIZE_MAX_DIMENSION_PX
-      )
+      expect(metadata.height).toBeLessThanOrEqual(IMAGE_RESIZE_MAX_DIMENSION_PX)
       // アスペクト比 3000:2000 = 3:2 を維持したまま長辺が上限になる
       expect(metadata.width).toBe(IMAGE_RESIZE_MAX_DIMENSION_PX)
       expect(metadata.height).toBe(1280)
@@ -129,9 +127,9 @@ describe('ImageResizeService', () => {
     test('不正なバイナリを渡すとApiV1Errorが投げられる', async () => {
       const invalidBuffer = Buffer.from('not-an-image')
 
-      await expect(
-        service.resize(invalidBuffer, 'image/jpeg')
-      ).rejects.toThrow(ApiV1Error)
+      await expect(service.resize(invalidBuffer, 'image/jpeg')).rejects.toThrow(
+        ApiV1Error
+      )
     })
   })
 })

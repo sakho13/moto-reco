@@ -136,7 +136,9 @@ const validatePhotoPath = (photoPath: string, userId: string): void => {
  * @param photoPath - Storage上の写真パス
  * @returns 推測したcontentType
  */
-const inferContentTypeFromPath = (photoPath: string): AllowedPhotoContentType => {
+const inferContentTypeFromPath = (
+  photoPath: string
+): AllowedPhotoContentType => {
   const ext = photoPath.split('.').pop()?.toLowerCase() ?? ''
   return EXT_TO_CONTENT_TYPE[ext] ?? DEFAULT_PHOTO_CONTENT_TYPE
 }

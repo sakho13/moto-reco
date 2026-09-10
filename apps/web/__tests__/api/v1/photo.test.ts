@@ -15,13 +15,9 @@ import { app } from '@/lib/api/server/app'
 // 共有インスタンスとして保持する。vi.mock() はファイル先頭へ巻き上げられるため、
 // ファクトリ内から参照する変数は vi.hoisted() で明示的に巻き上げる必要がある。
 const { mockFileDownload, mockFileSave, mockResize } = vi.hoisted(() => ({
-  mockFileDownload: vi
-    .fn()
-    .mockResolvedValue([Buffer.from('fake-image-data')]),
+  mockFileDownload: vi.fn().mockResolvedValue([Buffer.from('fake-image-data')]),
   mockFileSave: vi.fn().mockResolvedValue(undefined),
-  mockResize: vi
-    .fn()
-    .mockResolvedValue(Buffer.from('resized-fake-image-data')),
+  mockResize: vi.fn().mockResolvedValue(Buffer.from('resized-fake-image-data')),
 }))
 
 vi.mock('@repo/firebase-auth-server', async (importOriginal) => ({
