@@ -54,6 +54,20 @@ sequenceDiagram
     alt パス不正
         Server-->>Client: 400 INVALID_REQUEST
     end
+    end
+
+    rect rgb(245, 235, 255)
+    Note over Server,Storage: 3.5. 写真のコンパクト化（#560）
+    loop 対象写真ごとに並列実行（最大10枚）
+        Server->>Server: photoPathの拡張子からcontentTypeを推測
+        Server->>Storage: Admin SDK で photoPath をダウンロード
+        Storage-->>Server: 元画像のBuffer
+        Server->>Server: ImageResizeServiceでリサイズ・圧縮<br/>（EXIF回転補正 → 長辺1920px上限 → JPEG/WebP品質80、PNGは透過維持）
+        Server->>Storage: 加工後のBufferを同一photoPathへ書き戻し（save）
+    end
+    end
+
+    rect rgb(235, 255, 240)
     Server->>Storage: Admin SDK で photoPath → 署名付き読取URLを生成（7日有効）
     Storage-->>Server: photoUrl
     Server->>DB: TUserPhoto + 中間テーブル（TUserMyBikeTouringPhoto 等）を作成
@@ -61,6 +75,8 @@ sequenceDiagram
     Server-->>Client: 201 Created [{ photoId, photoUrl, storagePath, memo, takenAt }]
     end
 ```
+
+> **写真のコンパクト化について（#560）**: クライアント直接PUTのフロー自体は変更せず、「写真を紐づけるAPI」（`POST /photo/touring/:touringId` 等）の中でリサイズ・圧縮する方式を採用している。元サイズのまま保存されレンダリングが遅くなる問題を、既存アーキテクチャを維持したまま解消するため。contentTypeはリクエストスキーマに含まれないため、`photoPath` の拡張子（サーバーが `/upload-url` 発行時に決定したもの）から推測する。詳細は「制約・仕様」節を参照。
 
 ---
 
@@ -282,7 +298,8 @@ spot / バイク本体への登録も同じ検証順序（認証 → ADMIN確認
 | ファイル                                                        | 役割                                               |
 | --------------------------------------------------------------- | -------------------------------------------------- |
 | `apps/web/lib/firebase/adminStorage.ts`                         | Firebase Admin Storage クライアント初期化          |
-| `apps/web/lib/api/server/v1/photo.ts`                           | エンドポイント定義・Storage 操作                   |
+| `apps/web/lib/api/server/v1/photo.ts`                           | エンドポイント定義・Storage 操作・リサイズ処理の呼び出し |
+| `apps/web/lib/api/server/services/ImageResizeService.ts`        | 写真のリサイズ・圧縮（Buffer→Bufferの純粋な画像加工、Storage操作は含まない） |
 | `apps/web/lib/api/server/services/PhotoService.ts`              | ビジネスロジック（登録・取得・削除の権限チェック） |
 | `apps/web/lib/api/server/interfaces/IPhotoRepository.ts`        | リポジトリインターフェース                         |
 | `apps/web/lib/api/server/repositories/PrismaPhotoRepository.ts` | DB アクセス                                        |
@@ -308,6 +325,9 @@ spot / バイク本体への登録も同じ検証順序（認証 → ADMIN確認
 | 署名付き読取URLの有効期限            | 7日（GCS V4署名付きURLの仕様上の上限）                         |
 | アップロード方式                     | 本番: 署名付きPUT / Storage Emulator: 単純アップロード（POST） |
 | マイフォト・ギャラリーのページサイズ | 30件（省略時）、最大100件                                      |
+| リサイズ後の長辺上限                 | 1920px（`fit: 'inside', withoutEnlargement: true`、アップスケールしない）|
+| リサイズ後の品質（JPEG/WebP）        | 80                                                              |
+| リサイズ時のPNG扱い                  | 透過を維持しリサイズのみ（JPEG変換はしない）                   |
 
 ---
 
