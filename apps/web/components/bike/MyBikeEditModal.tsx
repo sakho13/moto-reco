@@ -90,7 +90,7 @@ export function MyBikeEditModal({
       await Promise.all([
         mutate(`/api/v1/user-bike/bike/${bikeId}`),
         mutate('/api/v1/user-bike/bikes'),
-      ])
+      ]).catch(() => {})
       onSuccess()
     } catch (err) {
       trackEvent('bike_error', {

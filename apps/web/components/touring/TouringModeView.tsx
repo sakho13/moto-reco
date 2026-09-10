@@ -195,7 +195,7 @@ export const TouringModeView = ({
         { type: 'BREAK', arrivedAt: getCurrentDate() }
       )
       trackEvent('touring_break_start')
-      await mutateSpots()
+      await mutateSpots().catch(() => {})
       toast.success('休憩を開始しました')
     } catch (error) {
       trackEvent('touring_error', {
@@ -221,7 +221,7 @@ export const TouringModeView = ({
         { departedAt: getCurrentDate() }
       )
       trackEvent('touring_break_end')
-      await mutateSpots()
+      await mutateSpots().catch(() => {})
       toast.success('休憩を終了しました')
     } catch (error) {
       trackEvent('touring_error', {
@@ -246,7 +246,7 @@ export const TouringModeView = ({
         { arrivedAt: getCurrentDate() }
       )
       trackEvent('touring_spot_arrive')
-      await mutateSpots()
+      await mutateSpots().catch(() => {})
       toast.success('スポットへの到着を記録しました')
     } catch (error) {
       trackEvent('touring_error', {
@@ -272,7 +272,7 @@ export const TouringModeView = ({
         { isSkipped: true }
       )
       trackEvent('touring_spot_skip')
-      await mutateSpots()
+      await mutateSpots().catch(() => {})
       toast.success('スポットをスキップしました')
     } catch (error) {
       trackEvent('touring_error', {

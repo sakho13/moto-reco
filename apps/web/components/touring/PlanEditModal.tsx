@@ -55,7 +55,7 @@ export function PlanEditModal({
     try {
       await apiPatch(detailUrl, { title })
       trackEvent('touring_plan_update', { title_changed: title !== plan.title })
-      await Promise.all([mutate(detailUrl), mutate(listUrl)])
+      await Promise.all([mutate(detailUrl), mutate(listUrl)]).catch(() => {})
       toast.success('更新しました')
       onSuccess('update')
     } catch (err) {
@@ -78,7 +78,7 @@ export function PlanEditModal({
       trackEvent('touring_plan_delete', {
         linked_touring_count: plan.touringIds?.length ?? 0,
       })
-      await mutate(listUrl)
+      await mutate(listUrl).catch(() => {})
       toast.success('プランを削除しました')
       onSuccess('delete')
     } catch (err) {

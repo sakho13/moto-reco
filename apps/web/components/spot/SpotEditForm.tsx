@@ -103,7 +103,7 @@ export function SpotEditForm({
       })
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
-      )
+      ).catch(() => {})
       toast.success('位置を更新しました')
     } catch (err) {
       trackEvent('touring_error', {
@@ -129,7 +129,7 @@ export function SpotEditForm({
       trackEvent('touring_spot_delete', { spot_type: spot.type })
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
-      )
+      ).catch(() => {})
       toast.success(`${label}を削除しました`)
       onDelete?.()
     } catch (err) {
@@ -175,7 +175,7 @@ export function SpotEditForm({
 
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
-      )
+      ).catch(() => {})
       toast.success(`${label}を更新しました`)
       onSuccess()
     } catch (err) {

@@ -60,7 +60,7 @@ function BikeRegisterPage() {
         has_purchase_mileage: !!formData.purchaseMileage,
       })
 
-      await mutate('/api/v1/user-bike/bikes')
+      await mutate('/api/v1/user-bike/bikes').catch(() => {})
       toast.success('バイクを登録しました', {
         description: 'マイページへ移動します。',
       })

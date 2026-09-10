@@ -264,7 +264,7 @@ function TouringDetailPage() {
       trackEvent('touring_break_start')
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
-      )
+      ).catch(() => {})
       toast.success('休憩を開始しました')
     } catch (err) {
       trackEvent('touring_error', {
@@ -292,7 +292,7 @@ function TouringDetailPage() {
       trackEvent('touring_break_end')
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
-      )
+      ).catch(() => {})
       toast.success('休憩を終了しました')
     } catch (err) {
       trackEvent('touring_error', {

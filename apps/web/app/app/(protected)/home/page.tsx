@@ -73,7 +73,7 @@ function Page() {
       })
 
       toast.success('ツーリングを終了しました')
-      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
+      await mutate('/api/v1/user-bike/bikes/ongoing-tourings').catch(() => {})
     } catch (error) {
       trackEvent('touring_error', {
         operation: 'end',

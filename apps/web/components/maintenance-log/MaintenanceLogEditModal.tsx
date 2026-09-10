@@ -74,7 +74,9 @@ export function MaintenanceLogEditModal({
         update_total_mileage: formData.updateTotalMileage,
       })
 
-      await mutate(`/api/v1/user-bike/bike/${bikeId}/maintenance-logs`)
+      await mutate(`/api/v1/user-bike/bike/${bikeId}/maintenance-logs`).catch(
+        () => {}
+      )
       toast.success('メンテナンス履歴を更新しました')
       onSuccess()
     } catch (err) {

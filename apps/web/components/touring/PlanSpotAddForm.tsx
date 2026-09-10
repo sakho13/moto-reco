@@ -124,7 +124,7 @@ export function PlanSpotAddForm({
           `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`
         ),
         mutate(detailUrl),
-      ])
+      ]).catch(() => {})
       toast.success(isBreak ? '休憩を追加しました' : 'スポットを追加しました')
       onSuccess()
     } catch (err) {

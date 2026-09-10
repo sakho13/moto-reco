@@ -88,8 +88,8 @@ export function TouringEditForm({
 
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
-      )
-      await mutate(detailUrl)
+      ).catch(() => {})
+      await mutate(detailUrl).catch(() => {})
       toast.success('更新しました')
       onSuccess('update')
     } catch (err) {
@@ -116,7 +116,7 @@ export function TouringEditForm({
       })
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
-      )
+      ).catch(() => {})
       onSuccess('delete')
     } catch (err) {
       trackEvent('touring_error', {

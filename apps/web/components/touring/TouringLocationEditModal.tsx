@@ -49,7 +49,9 @@ export function TouringLocationEditModal({
         body
       )
       trackEvent('touring_location_update', { location_type: type })
-      await mutate(`/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`)
+      await mutate(
+        `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}`
+      ).catch(() => {})
       toast.success(`${type === 'start' ? '出発地' : '終着地'}を更新しました`)
       onSuccess()
     } catch (err) {

@@ -47,7 +47,7 @@ function TouringRegisterPage() {
 
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
-      )
+      ).catch(() => {})
 
       toast.success('ツーリング履歴を登録しました', {
         description: 'ツーリング一覧へ移動します。',

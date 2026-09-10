@@ -117,7 +117,7 @@ export function PlanSpotEditForm({
         spot_type: spot.type,
         field: 'location',
       })
-      await mutate(spotsUrl)
+      await mutate(spotsUrl).catch(() => {})
       toast.success('位置を更新しました')
     } catch (err) {
       trackEvent('touring_plan_error', {
@@ -141,7 +141,7 @@ export function PlanSpotEditForm({
         `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots/${spot.touringPlanSpotId}`
       )
       trackEvent('touring_plan_spot_delete', { spot_type: spot.type })
-      await Promise.all([mutate(spotsUrl), mutate(detailUrl)])
+      await Promise.all([mutate(spotsUrl), mutate(detailUrl)]).catch(() => {})
       toast.success(`${label}を削除しました`)
       onDelete?.()
     } catch (err) {
@@ -189,7 +189,7 @@ export function PlanSpotEditForm({
         route_type: formState.routeTypeFromPrev,
       })
 
-      await Promise.all([mutate(spotsUrl), mutate(detailUrl)])
+      await Promise.all([mutate(spotsUrl), mutate(detailUrl)]).catch(() => {})
       toast.success(`${label}を更新しました`)
       onSuccess()
     } catch (err) {

@@ -404,7 +404,7 @@ function TouringPlanDetailPage() {
         has_position: position != null,
       })
       toast.success('ツーリングを開始しました')
-      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
+      await mutate('/api/v1/user-bike/bikes/ongoing-tourings').catch(() => {})
       router.push('/app/home')
     } catch (err) {
       trackEvent('touring_error', {

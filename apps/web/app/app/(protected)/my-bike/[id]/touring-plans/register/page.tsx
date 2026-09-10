@@ -36,7 +36,9 @@ function TouringPlanRegisterPage() {
       )
       trackEvent('touring_plan_create')
 
-      await mutate(`/api/v1/user-bike/bike/${bikeId}/touring-plans`)
+      await mutate(`/api/v1/user-bike/bike/${bikeId}/touring-plans`).catch(
+        () => {}
+      )
 
       toast.success('ツーリングプランを作成しました', {
         description: 'プラン詳細へ移動します。',

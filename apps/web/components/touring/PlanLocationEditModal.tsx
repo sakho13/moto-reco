@@ -118,7 +118,7 @@ export function PlanLocationEditModal({
         has_travel_minutes: !isStart && travelMinutesFromPrev !== '',
         route_type: !isStart ? routeTypeFromPrev : undefined,
       })
-      await Promise.all([mutate(detailUrl), mutate(spotsUrl)])
+      await Promise.all([mutate(detailUrl), mutate(spotsUrl)]).catch(() => {})
       toast.success(`${isStart ? '出発地' : '目的地'}を更新しました`)
       onSuccess()
     } catch (err) {
@@ -143,7 +143,7 @@ export function PlanLocationEditModal({
         location_type: type,
         cleared: true,
       })
-      await Promise.all([mutate(detailUrl), mutate(spotsUrl)])
+      await Promise.all([mutate(detailUrl), mutate(spotsUrl)]).catch(() => {})
       toast.success(`${isStart ? '出発地' : '目的地'}を解除しました`)
       onSuccess()
     } catch (err) {

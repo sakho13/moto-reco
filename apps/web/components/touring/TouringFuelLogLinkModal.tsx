@@ -79,10 +79,10 @@ export function TouringFuelLogLinkModal({
         linked_fuel_log_count: selectedFuelLogIds.length,
       })
 
-      await mutate(detailUrl)
+      await mutate(detailUrl).catch(() => {})
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
-      )
+      ).catch(() => {})
       toast.success('給油履歴の紐づけを更新しました')
       onSuccess()
     } catch (err) {

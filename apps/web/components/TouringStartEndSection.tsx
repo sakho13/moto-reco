@@ -97,7 +97,7 @@ export const TouringStartEndSection = () => {
 
       toast.success('ツーリングを開始しました')
       // SWR再検証
-      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
+      await mutate('/api/v1/user-bike/bikes/ongoing-tourings').catch(() => {})
     } catch (error) {
       trackEvent('touring_error', {
         operation: 'start',
