@@ -14,11 +14,17 @@ import { app } from '@/lib/api/server/app'
 // download/save/resize の呼び出し検証のためモック関数自体はテストファイル内で
 // 共有インスタンスとして保持する。vi.mock() はファイル先頭へ巻き上げられるため、
 // ファクトリ内から参照する変数は vi.hoisted() で明示的に巻き上げる必要がある。
-const { mockFileDownload, mockFileSave, mockResize } = vi.hoisted(() => ({
-  mockFileDownload: vi.fn().mockResolvedValue([Buffer.from('fake-image-data')]),
-  mockFileSave: vi.fn().mockResolvedValue(undefined),
-  mockResize: vi.fn().mockResolvedValue(Buffer.from('resized-fake-image-data')),
-}))
+const { mockFileDownload, mockFileSave, mockFileGetMetadata, mockResize } =
+  vi.hoisted(() => ({
+    mockFileDownload: vi
+      .fn()
+      .mockResolvedValue([Buffer.from('fake-image-data')]),
+    mockFileSave: vi.fn().mockResolvedValue(undefined),
+    mockFileGetMetadata: vi.fn().mockResolvedValue([{ size: 1000 }]),
+    mockResize: vi
+      .fn()
+      .mockResolvedValue(Buffer.from('resized-fake-image-data')),
+  }))
 
 vi.mock('@repo/firebase-auth-server', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -31,6 +37,7 @@ vi.mock('@repo/firebase-auth-server', async (importOriginal) => ({
         delete: vi.fn().mockResolvedValue([{}]),
         download: mockFileDownload,
         save: mockFileSave,
+        getMetadata: mockFileGetMetadata,
       }),
     }),
   }),
@@ -56,6 +63,8 @@ describe('Photo API Endpoints', () => {
     mockFileDownload.mockResolvedValue([Buffer.from('fake-image-data')])
     mockFileSave.mockClear()
     mockFileSave.mockResolvedValue(undefined)
+    mockFileGetMetadata.mockClear()
+    mockFileGetMetadata.mockResolvedValue([{ size: 1000 }])
     mockResize.mockClear()
     mockResize.mockResolvedValue(Buffer.from('resized-fake-image-data'))
   })
@@ -119,6 +128,27 @@ describe('Photo API Endpoints', () => {
         body: JSON.stringify({
           files: [
             { contentType: 'image/gif', fileName: 'a.gif', fileSize: 1000 },
+          ],
+        }),
+      })
+
+      expect(res.status).toBe(400)
+    })
+
+    test('fileSizeが上限(20MB)超過はバリデーションエラーになる(#560)', async () => {
+      const res = await app.request('/api/v1/photo/upload-url', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          files: [
+            {
+              contentType: 'image/jpeg',
+              fileName: 'huge.jpg',
+              fileSize: 20 * 1024 * 1024 + 1,
+            },
           ],
         }),
       })
@@ -318,6 +348,9 @@ describe('Photo API Endpoints', () => {
       })
 
       expect(res.status).toBe(404)
+      // 所有権確認より先にStorageへ副作用を与えないことを検証(#560)
+      expect(mockFileDownload).not.toHaveBeenCalled()
+      expect(mockFileSave).not.toHaveBeenCalled()
     })
 
     test('他ユーザーのtouringIdは404になる', async () => {
@@ -353,6 +386,38 @@ describe('Photo API Endpoints', () => {
       })
 
       expect(res.status).toBe(404)
+      // 所有権確認より先にStorageへ副作用を与えないことを検証(#560)
+      expect(mockFileDownload).not.toHaveBeenCalled()
+      expect(mockFileSave).not.toHaveBeenCalled()
+    })
+
+    test('ファイルサイズが上限を超える場合は400になり、Storageへ書き戻されない(#560)', async () => {
+      mockFileGetMetadata.mockResolvedValue([{ size: 20 * 1024 * 1024 + 1 }])
+
+      const res = await app.request(`/api/v1/photo/touring/${touringId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          photos: [
+            {
+              photoPath: `users/${userId}/photos/too-large.jpg`,
+              takenAt: '2024-06-01T10:00:00.000Z',
+            },
+          ],
+        }),
+      })
+
+      expect(res.status).toBe(400)
+      expect(mockFileDownload).not.toHaveBeenCalled()
+      expect(mockFileSave).not.toHaveBeenCalled()
+
+      const dbPhoto = await prisma.tUserPhoto.findFirst({
+        where: { userId, storagePath: `users/${userId}/photos/too-large.jpg` },
+      })
+      expect(dbPhoto).toBeNull()
     })
 
     test('他ユーザーのphotoPathは400になる', async () => {
@@ -637,6 +702,9 @@ describe('Photo API Endpoints', () => {
       )
 
       expect(res.status).toBe(404)
+      // 所有権確認より先にStorageへ副作用を与えないことを検証(#560)
+      expect(mockFileDownload).not.toHaveBeenCalled()
+      expect(mockFileSave).not.toHaveBeenCalled()
     })
 
     test('存在しないspotIdは404になる', async () => {
@@ -660,6 +728,9 @@ describe('Photo API Endpoints', () => {
       )
 
       expect(res.status).toBe(404)
+      // 所有権確認より先にStorageへ副作用を与えないことを検証(#560)
+      expect(mockFileDownload).not.toHaveBeenCalled()
+      expect(mockFileSave).not.toHaveBeenCalled()
     })
 
     test('他のtouringIdに属するspotIdは404になる', async () => {
@@ -689,6 +760,9 @@ describe('Photo API Endpoints', () => {
       )
 
       expect(res.status).toBe(404)
+      // 所有権確認より先にStorageへ副作用を与えないことを検証(#560)
+      expect(mockFileDownload).not.toHaveBeenCalled()
+      expect(mockFileSave).not.toHaveBeenCalled()
     })
 
     test('他ユーザーのtouringId・spotIdは404になる', async () => {
@@ -737,6 +811,9 @@ describe('Photo API Endpoints', () => {
       )
 
       expect(res.status).toBe(404)
+      // 所有権確認より先にStorageへ副作用を与えないことを検証(#560)
+      expect(mockFileDownload).not.toHaveBeenCalled()
+      expect(mockFileSave).not.toHaveBeenCalled()
     })
 
     test('他ユーザーのphotoPathは400になる', async () => {
@@ -1044,6 +1121,38 @@ describe('Photo API Endpoints', () => {
       })
 
       expect(res.status).toBe(400)
+    })
+
+    test('他ユーザーのmyUserBikeIdは404になる', async () => {
+      const otherUser = await createTestUser()
+      const otherBikeId = await getTestBikeId()
+      const otherBike = await createTestUserBike(otherUser.token, {
+        bikeId: otherBikeId,
+      })
+
+      const res = await app.request(
+        `/api/v1/photo/bike/${otherBike.myUserBikeId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            photos: [
+              {
+                photoPath: `users/${userId}/photos/test.jpg`,
+                takenAt: '2024-06-01T10:00:00.000Z',
+              },
+            ],
+          }),
+        }
+      )
+
+      expect(res.status).toBe(404)
+      // 所有権確認より先にStorageへ副作用を与えないことを検証(#560)
+      expect(mockFileDownload).not.toHaveBeenCalled()
+      expect(mockFileSave).not.toHaveBeenCalled()
     })
   })
 
