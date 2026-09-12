@@ -11,6 +11,7 @@ import {
   TouringForm,
   type TouringFormData,
 } from '@/components/touring/TouringForm'
+import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -39,16 +40,26 @@ function TouringRegisterPage() {
           : {}),
         status: 'COMPLETED',
       })
+      trackEvent('touring_create', {
+        has_start_mileage: !!formData.startMileage,
+        has_end_mileage: !!formData.endMileage,
+      })
 
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
-      )
+      ).catch(() => {})
 
       toast.success('ツーリング履歴を登録しました', {
         description: 'ツーリング一覧へ移動します。',
       })
       router.push(`/app/my-bike/${bikeId}/tourings`)
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'create',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
