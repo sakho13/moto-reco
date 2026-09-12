@@ -341,8 +341,9 @@ spot / バイク本体への登録も同じ検証順序（認証 → ADMIN確認
 | リサイズ後の長辺上限                 | 1920px（`fit: 'inside', withoutEnlargement: true`、アップスケールしない）|
 | リサイズ後の品質（JPEG/WebP）        | 80                                                              |
 | リサイズ時のPNG扱い                  | 透過を維持しリサイズのみ（JPEG変換はしない）                   |
-| アップロード可能な1ファイルの最大サイズ | 20MB（`PHOTO_MAX_FILE_SIZE_BYTES`）。`/upload-url` 申告時の `fileSize` バリデーションに加え、登録時に `file.getMetadata()` でStorage上の実サイズも検証する |
+| アップロード可能な1ファイルの最大サイズ | 20MB（`PHOTO_MAX_FILE_SIZE_BYTES`）。`/upload-url` 申告時の `fileSize` バリデーション（公開OpenAPI仕様にも反映）に加え、登録時に `file.getMetadata()` でStorage上の実サイズも検証する |
 | リサイズ処理の並列実行数上限         | 3件（`RESIZE_CONCURRENCY`）。対象写真は最大10枚だが、同時Buffer展開によるメモリ圧迫を避けるためチャンク分割して処理する |
+| アニメーション画像（アニメーションWebP等）の扱い | 非対応。`sharp(buffer, { animated: true })` で読み込んだ `metadata().pages` が2以上の場合はリサイズ自体を行わずエラー（先頭フレームのみ残す静止画化による不可逆なフレーム損失を防ぐため） |
 
 ---
 

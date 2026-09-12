@@ -131,5 +131,41 @@ describe('ImageResizeService', () => {
         ApiV1Error
       )
     })
+
+    test('アニメーションWebPを渡すとApiV1Errorが投げられ、フレームが失われない(#560)', async () => {
+      const frame1 = await sharp({
+        create: {
+          width: 8,
+          height: 8,
+          channels: 3,
+          background: { r: 255, g: 0, b: 0 },
+        },
+      })
+        .png()
+        .toBuffer()
+      const frame2 = await sharp({
+        create: {
+          width: 8,
+          height: 8,
+          channels: 3,
+          background: { r: 0, g: 255, b: 0 },
+        },
+      })
+        .png()
+        .toBuffer()
+      const animatedWebp = await sharp([frame1, frame2], {
+        join: { animated: true },
+      })
+        .webp()
+        .toBuffer()
+
+      // 前提: 生成した画像が実際に2フレームのアニメーションであること
+      const metadata = await sharp(animatedWebp, { animated: true }).metadata()
+      expect(metadata.pages).toBe(2)
+
+      await expect(service.resize(animatedWebp, 'image/webp')).rejects.toThrow(
+        ApiV1Error
+      )
+    })
   })
 })
