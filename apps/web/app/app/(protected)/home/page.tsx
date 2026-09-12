@@ -9,6 +9,7 @@ import { QuickFuelSection } from '@/components/QuickFuelSection'
 import { RecentHistorySection } from '@/components/RecentHistorySection'
 import { TouringModeView } from '@/components/touring/TouringModeView'
 import { TouringStartEndSection } from '@/components/TouringStartEndSection'
+import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -66,10 +67,20 @@ function Page() {
           endMileage,
         }
       )
+      trackEvent('touring_end', {
+        has_position: position != null,
+        has_end_mileage: endMileage !== undefined,
+      })
 
       toast.success('ツーリングを終了しました')
-      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
+      await mutate('/api/v1/user-bike/bikes/ongoing-tourings').catch(() => {})
     } catch (error) {
+      trackEvent('touring_error', {
+        operation: 'end',
+        ...(error instanceof ApiV1Error
+          ? { error_code: error.errorCode, error_message: error.message }
+          : {}),
+      })
       if (error instanceof ApiV1Error) {
         toast.error(error.message)
       } else {

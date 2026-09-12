@@ -7,6 +7,7 @@ import { Checkbox } from '@repo/ui/checkbox'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { ModalBase } from '@/components/common/ModalBase'
+import { trackEvent } from '@/lib/analytics'
 import { apiPatch } from '@/lib/api/client'
 
 interface ProfileEditModalProps {
@@ -55,12 +56,26 @@ export function ProfileEditModal({
         notificationEmail: notificationEmail.trim() || null,
         isProfilePublic,
       })
+      trackEvent('profile_update', {
+        changed_name: trimmedName !== initialName,
+        changed_notification_email:
+          (notificationEmail.trim() || null) !== initialNotificationEmail,
+        changed_is_profile_public: isProfilePublic !== initialIsProfilePublic,
+        is_profile_public: isProfilePublic,
+        is_guest: isGuest,
+      })
       onSuccess({
         name: response.data.name,
         notificationEmail: response.data.notificationEmail,
         isProfilePublic: response.data.isProfilePublic,
       })
     } catch (err) {
+      trackEvent('profile_error', {
+        operation: 'update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(
         err instanceof ApiV1Error
           ? err.message

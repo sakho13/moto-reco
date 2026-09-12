@@ -22,6 +22,7 @@ import {
 } from '@/components/touring/RouteTimeline'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
+import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
@@ -398,10 +399,20 @@ function TouringPlanDetailPage() {
         startLatitude: position?.latitude,
         startLongitude: position?.longitude,
       })
+      trackEvent('touring_start', {
+        from_touring_plan: true,
+        has_position: position != null,
+      })
       toast.success('ツーリングを開始しました')
-      await mutate('/api/v1/user-bike/bikes/ongoing-tourings')
+      await mutate('/api/v1/user-bike/bikes/ongoing-tourings').catch(() => {})
       router.push('/app/home')
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'start',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error
           ? err.message
