@@ -60,7 +60,7 @@ export class PhotoService {
   ) {}
 
   /** ツーリングがユーザー本人の所有物であることを検証し、見つからなければ404を投げる */
-  private async requireTouringOwnership(
+  public async requireTouringOwnership(
     touringId: TouringId,
     userId: UserId
   ): Promise<TouringEntity> {
@@ -77,7 +77,7 @@ export class PhotoService {
   }
 
   /** スポットが指定ツーリング配下かつユーザー本人の所有物であることを検証し、見つからなければ404を投げる */
-  private async requireSpotOwnership(
+  public async requireSpotOwnership(
     spotId: SpotId,
     touringId: TouringId,
     userId: UserId
@@ -91,7 +91,7 @@ export class PhotoService {
   }
 
   /** バイクがユーザー本人の所有物であることを検証し、見つからなければ404を投げる */
-  private async requireMyUserBikeOwnership(
+  public async requireMyUserBikeOwnership(
     myUserBikeId: MyUserBikeId,
     userId: UserId
   ): Promise<void> {

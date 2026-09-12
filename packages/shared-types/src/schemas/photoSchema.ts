@@ -2,6 +2,9 @@ import { z } from 'zod'
 
 export const PHOTO_MAX_COUNT = 10
 
+/** アップロード可能な1ファイルあたりの最大サイズ（20MB） */
+export const PHOTO_MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024
+
 export const ALLOWED_PHOTO_CONTENT_TYPES = [
   'image/jpeg',
   'image/png',
@@ -26,7 +29,11 @@ const UploadFileItemSchema = z.object({
       invalid_type_error: 'ファイルサイズは数値で指定してください',
     })
     .int('ファイルサイズは整数で指定してください')
-    .positive('ファイルサイズは1以上で指定してください'),
+    .positive('ファイルサイズは1以上で指定してください')
+    .max(
+      PHOTO_MAX_FILE_SIZE_BYTES,
+      `ファイルサイズは${PHOTO_MAX_FILE_SIZE_BYTES}バイト以内で指定してください`
+    ),
 })
 
 /**
