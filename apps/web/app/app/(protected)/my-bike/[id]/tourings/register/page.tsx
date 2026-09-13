@@ -13,6 +13,7 @@ import {
 } from '@/components/touring/TouringForm'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
+import { mutateHistoryLists } from '@/lib/api/mutateHistory'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 function TouringRegisterPage() {
@@ -48,6 +49,7 @@ function TouringRegisterPage() {
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings?sort-by=start-date&sort-order=desc`
       ).catch(() => {})
+      await mutateHistoryLists()
 
       toast.success('ツーリング履歴を登録しました', {
         description: 'ツーリング一覧へ移動します。',

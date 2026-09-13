@@ -11,6 +11,7 @@ import { TouringModeView } from '@/components/touring/TouringModeView'
 import { TouringStartEndSection } from '@/components/TouringStartEndSection'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
+import { mutateHistoryLists } from '@/lib/api/mutateHistory'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
@@ -74,6 +75,7 @@ function Page() {
 
       toast.success('ツーリングを終了しました')
       await mutate('/api/v1/user-bike/bikes/ongoing-tourings').catch(() => {})
+      await mutateHistoryLists()
     } catch (error) {
       trackEvent('touring_error', {
         operation: 'end',
