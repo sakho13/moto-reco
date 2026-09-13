@@ -7,6 +7,7 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { isUnsetDate } from '@repo/shared-utils'
 import { MyBikeEditForm, type MyBikeEditFormData } from './MyBikeEditForm'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
@@ -24,7 +25,7 @@ export function MyBikeEditModal({
   onSuccess,
 }: MyBikeEditModalProps) {
   const toDateInputValue = (date: string | null): string => {
-    if (!date) return ''
+    if (!date || isUnsetDate(date)) return ''
     return date.slice(0, 10)
   }
 

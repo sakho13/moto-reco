@@ -22,7 +22,7 @@ type RegisterUserBikeParams = {
   serialNumber?: string | null
   user: UserEntity
   nickname?: string
-  purchaseDate?: Date
+  purchaseDate?: Date | null
   purchasePrice?: number | null
   purchaseMileage?: number | null
   totalMileage?: number

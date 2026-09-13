@@ -4,6 +4,7 @@ import {
   formatPlanSpotOffsetMinutes,
   getNowLocalDateTimeString,
   getTodayDateString,
+  isUnsetDate,
   toLocalDateTimeString,
 } from '@repo/shared-utils'
 
@@ -116,5 +117,36 @@ describe('formatInUserTimezone', () => {
     const isoStr = '2024-06-15T15:00:00.000Z'
     const result = formatInUserTimezone(isoStr, 'Asia/Tokyo', 'HH:mm')
     expect(result).toBe('00:00')
+  })
+})
+
+describe('isUnsetDate', () => {
+  it('null は未設定と判定される', () => {
+    expect(isUnsetDate(null)).toBe(true)
+  })
+
+  it('undefined は未設定と判定される', () => {
+    expect(isUnsetDate(undefined)).toBe(true)
+  })
+
+  it('UTCエポック(1970-01-01T00:00:00.000Z)は未設定と判定される', () => {
+    expect(isUnsetDate('1970-01-01T00:00:00.000Z')).toBe(true)
+    expect(isUnsetDate(new Date('1970-01-01T00:00:00.000Z'))).toBe(true)
+  })
+
+  it('タイムゾーンのずれで生じる1969-12-31や1970-01-01 09:00も未設定と判定される', () => {
+    // JSTで1970-01-01 09:00:00 として保存された場合のUTC表現
+    expect(isUnsetDate('1970-01-01T09:00:00.000Z')).toBe(true)
+    // タイムゾーンのずれで1969-12-31になるケース
+    expect(isUnsetDate('1969-12-31T15:00:00.000Z')).toBe(true)
+  })
+
+  it('通常の日付は未設定と判定されない', () => {
+    expect(isUnsetDate('2024-01-01T00:00:00.000Z')).toBe(false)
+    expect(isUnsetDate(new Date('2024-01-01T00:00:00.000Z'))).toBe(false)
+  })
+
+  it('不正な日付文字列は未設定として扱わない', () => {
+    expect(isUnsetDate('invalid-date')).toBe(false)
   })
 })

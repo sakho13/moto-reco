@@ -146,6 +146,51 @@ describe('UserBike API Endpoints', () => {
       expect(registeredBike?.displacement).toBeGreaterThan(0)
     })
 
+    test('purchaseDateにnullを指定した場合は購入日が未設定で登録される（1970/01/01にならない）', async () => {
+      const res = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bikeId,
+          nickname: '購入日未設定バイク',
+          purchaseDate: null,
+          totalMileage: 1000,
+        }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.status).toBe('success')
+      expect(json.data.purchaseDate).toBeNull()
+
+      const myUserBikeRecord = await prisma.tUserMyBike.findUnique({
+        where: { id: json.data.myUserBikeId },
+      })
+      expect(myUserBikeRecord?.purchaseDate).toBeNull()
+    })
+
+    test('purchaseDateを指定しない場合も購入日が未設定で登録される', async () => {
+      const res = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bikeId,
+          nickname: '購入日省略バイク',
+          totalMileage: 1000,
+        }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.purchaseDate).toBeNull()
+    })
+
     test('車台番号を指定しなくても登録できる', async () => {
       const res = await app.request('/api/v1/user-bike/register', {
         method: 'POST',
@@ -590,6 +635,29 @@ describe('UserBike API Endpoints', () => {
       expect(myUserBikeRecord?.purchasePrice).toBe(450000)
       expect(myUserBikeRecord?.purchaseMileage).toBe(1300)
       expect(userBikeRecord?.totalMileage).toBe(2100)
+    })
+
+    test('purchaseDateにnullを指定すると購入日を未設定にクリアできる（1970/01/01にならない）', async () => {
+      const res = await app.request(`/api/v1/user-bike/bike/${myUserBikeId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          purchaseDate: null,
+        }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.data.purchaseDate).toBeNull()
+
+      const myUserBikeRecord = await prisma.tUserMyBike.findUnique({
+        where: { id: myUserBikeId },
+      })
+      expect(myUserBikeRecord?.purchaseDate).toBeNull()
     })
 
     test('排気量のみで登録したバイクの排気量を更新できる', async () => {

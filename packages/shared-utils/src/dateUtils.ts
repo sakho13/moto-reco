@@ -67,6 +67,35 @@ export const formatDateTime = (date: Date | string): string => {
 }
 
 /**
+ * 「未設定」とみなす日付の上限（UTC 1970-01-02T00:00:00.000Z）
+ *
+ * @remarks
+ * `z.coerce.date()` に `null` を渡すと `new Date(null)` が
+ * UTC エポック（1970-01-01T00:00:00.000Z）に変換されてしまう不具合により
+ * 保存されてしまったレコードを吸収するための閾値。
+ * タイムゾーンの差で 1969-12-31 や 1970-01-01 09:00 などにずれるケースも
+ * 拾えるように、エポック前後1日分を許容範囲としている。
+ */
+const UNSET_DATE_THRESHOLD_MS = Date.UTC(1970, 0, 2)
+
+/**
+ * 日付が「未設定」とみなせるか判定する
+ *
+ * @remarks
+ * `null` / `undefined` に加えて、UTC エポック付近（1970-01-02 より前）の
+ * 日付も「未設定」として扱う。不正な日付文字列など `Date` に変換できない
+ * 値は「未設定」ではない（＝表示側で別途エラーとして扱う）ものとして `false` を返す。
+ */
+export const isUnsetDate = (
+  date: Date | string | null | undefined
+): boolean => {
+  if (date === null || date === undefined) return true
+  const d = typeof date === 'string' ? new Date(date) : date
+  if (Number.isNaN(d.getTime())) return false
+  return d.getTime() < UNSET_DATE_THRESHOLD_MS
+}
+
+/**
  * UTC 日時を指定タイムゾーンでフォーマットする
  *
  * @param date - UTC の Date または ISO 文字列
