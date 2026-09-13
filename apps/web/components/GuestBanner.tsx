@@ -1,6 +1,8 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Button } from '@repo/ui/button'
+import styles from './GuestBanner.module.css'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
@@ -29,26 +31,26 @@ export function GuestBanner() {
     : null
 
   return (
-    <div className="w-full max-w-2xl bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 flex items-center justify-between gap-4 text-sm">
-      <div className="flex flex-col gap-0.5">
-        <span className="font-semibold text-amber-800">
-          ゲストモードで利用中
-        </span>
-        <span className="text-amber-700">
+    <div className={styles.banner}>
+      <div className={styles.textContainer}>
+        <span className={styles.title}>ゲストモードで利用中</span>
+        <span className={styles.description}>
           {daysLeft !== null
             ? `有効期限まで残り${daysLeft}日 • バイク1台・給油5件・ツーリング2件まで`
             : 'バイク1台・給油5件・ツーリング2件まで'}
         </span>
       </div>
-      <button
+      <Button
+        variant="primary"
+        size="sm"
+        className={styles.action}
         onClick={async () => {
           await signOut()
           router.push('/app/register')
         }}
-        className="shrink-0 bg-amber-600 text-white px-3 py-1.5 rounded-md font-medium hover:bg-amber-700 transition-colors"
       >
         ログアウトして本登録する
-      </button>
+      </Button>
     </div>
   )
 }
