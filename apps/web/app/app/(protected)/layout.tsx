@@ -3,6 +3,7 @@ import { DesktopHeader } from '@/components/Navigation/DesktopHeader'
 import { DesktopSidebar } from '@/components/Navigation/DesktopSidebar'
 import { MobileHeader } from '@/components/Navigation/MobileHeader'
 import { MobileNavigation } from '@/components/Navigation/MobileNavigation'
+import { ActiveBikeProvider } from '@/lib/contexts/ActiveBikeContext'
 
 type Props = {
   children: React.ReactNode
@@ -10,7 +11,7 @@ type Props = {
 
 export default function Layout({ children }: Props) {
   return (
-    <>
+    <ActiveBikeProvider>
       <MobileHeader />
       <DesktopHeader />
       <DesktopSidebar />
@@ -20,6 +21,6 @@ export default function Layout({ children }: Props) {
         <GuestBanner />
         {children}
       </div>
-    </>
+    </ActiveBikeProvider>
   )
 }
