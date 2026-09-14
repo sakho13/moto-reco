@@ -1,0 +1,87 @@
+.keypad {
+  display: flex;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-1);
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-md);
+}
+
+.grid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-2);
+}
+
+.key {
+  min-height: var(--spacing-12);
+  min-width: var(--spacing-12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloudHover);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-ink);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.key:active {
+  background-color: var(--color-cloud);
+}
+
+.key:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.keySub {
+  color: var(--color-inkLight);
+  font-size: var(--font-size-md);
+}
+
+.advanceKey {
+  flex-shrink: 0;
+  width: var(--spacing-16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-2);
+  background-color: var(--color-product);
+  color: var(--color-productInk);
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.advanceKey:active {
+  background-color: var(--color-productHover);
+}
+
+.advanceKey:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 360px) {
+  .advanceKey {
+    width: var(--spacing-12);
+    font-size: var(--font-size-xs);
+  }
+}
