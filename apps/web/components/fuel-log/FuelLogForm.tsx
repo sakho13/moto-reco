@@ -18,6 +18,7 @@ export interface FuelLogFormData {
   amount: string
   totalPrice: string
   memo: string
+  isFullTank: boolean
   updateTotalMileage: boolean
 }
 
@@ -45,6 +46,7 @@ export const FuelLogForm = ({
     amount: '',
     totalPrice: '',
     memo: '',
+    isFullTank: true,
     updateTotalMileage: true,
   })
   const [isUpdateTotalMileageManual, setIsUpdateTotalMileageManual] =
@@ -184,6 +186,22 @@ export const FuelLogForm = ({
           required
           disabled={isSubmitting}
           placeholder="例: 10.5"
+        />
+      </FormField>
+
+      <FormField label="" htmlFor="isFullTank">
+        <Checkbox
+          id="isFullTank"
+          label="満タン給油（オフの場合は継ぎ足し給油）"
+          checked={formData.isFullTank}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              isFullTank: e.target.checked,
+            }))
+          }
+          disabled={isSubmitting}
+          helperText="継ぎ足し給油の燃費は、次回の満タン給油時にまとめて算出されます"
         />
       </FormField>
 
