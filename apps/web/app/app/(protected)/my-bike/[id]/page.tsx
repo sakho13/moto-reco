@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import type {
@@ -21,12 +21,14 @@ import { NavigationCard } from '@/components/NavigationCard'
 import { BikePhotosCard } from '@/components/photo/BikePhotosCard'
 import { apiGet, authenticatedFetch } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
+import { useActiveBike } from '@/lib/hooks/useActiveBike'
 
 function BikeDetailPage() {
   const params = useParams()
   const router = useRouter()
   const id = params.id as string
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const { setActiveBikeId } = useActiveBike()
 
   const { data: profile } = useSWR('/api/v1/user/profile', async (url) => {
     const response = await apiGet(url)
@@ -50,6 +52,13 @@ function BikeDetailPage() {
       return json.data
     }
   )
+
+  // マイバイク一覧からバイク詳細へ遷移した際、アクティブ車両をこのバイクに同期する
+  useEffect(() => {
+    if (data) {
+      setActiveBikeId(id)
+    }
+  }, [data, id, setActiveBikeId])
 
   if (isLoading) {
     return (

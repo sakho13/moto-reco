@@ -2,39 +2,30 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import useSWR from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
 import { FuelLogRegisterModal } from './fuel-log/FuelLogRegisterModal'
 import { BikeIcon } from './icons/BikeIcon'
 import { FuelIcon } from './icons/FuelIcon'
 import styles from './QuickFuelSection.module.css'
-import { apiGet } from '@/lib/api/client'
+import { getBikeDisplayName } from '@/lib/bike'
+import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 export const QuickFuelSection = () => {
   const router = useRouter()
   const { isGuest } = useAuth()
-  const [selectedBikeId, setSelectedBikeId] = useState<string | null>(null)
-
-  const { data, error, isLoading } = useSWR(
-    '/api/v1/user-bike/bikes',
-    async (url) => {
-      const response = await apiGet(url)
-      return response.data
-    }
-  )
-
-  const bikes = data?.bikes ?? []
+  const { activeBike, bikes, isLoading, error } = useActiveBike()
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // ゲストアカウントの給油上限チェック（バイク一覧レスポンスのカウントを利用）
   const isAtGuestFuelLimit =
-    isGuest && (bikes[0]?.fuelLogCount ?? 0) >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
+    isGuest && (activeBike?.fuelLogCount ?? 0) >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
 
-  const handleBikeClick = (bikeId: string) => {
+  const handleOpenModal = () => {
     if (isAtGuestFuelLimit) return
-    setSelectedBikeId(bikeId)
+    setIsModalOpen(true)
   }
 
   if (error) {
@@ -85,7 +76,7 @@ export const QuickFuelSection = () => {
     )
   }
 
-  if (bikes.length === 0) {
+  if (bikes.length === 0 || !activeBike) {
     return (
       <div className={styles.container} data-testid="fuel-section">
         <div className={styles.header}>
@@ -101,13 +92,15 @@ export const QuickFuelSection = () => {
     )
   }
 
+  const title = getBikeDisplayName(activeBike)
+
   return (
     <>
-      {selectedBikeId && (
+      {isModalOpen && (
         <FuelLogRegisterModal
-          bikeId={selectedBikeId}
-          onClose={() => setSelectedBikeId(null)}
-          onSuccess={() => setSelectedBikeId(null)}
+          bikeId={activeBike.myUserBikeId}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={() => setIsModalOpen(false)}
         />
       )}
 
@@ -128,29 +121,20 @@ export const QuickFuelSection = () => {
 
         <div className={styles.bikeSelectionSection}>
           <div className={styles.bikeGrid}>
-            {bikes.map((bike) => {
-              const title =
-                bike.nickname ||
-                `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
-
-              return (
-                <button
-                  key={bike.myUserBikeId}
-                  type="button"
-                  onClick={() => handleBikeClick(bike.myUserBikeId)}
-                  className={`${styles.bikeCard} ${isAtGuestFuelLimit ? styles.bikeCardDisabled : ''}`}
-                  aria-label={`${title}の給油を登録`}
-                  disabled={isAtGuestFuelLimit}
-                >
-                  <div className={styles.bikeIconContainer}>
-                    <BikeIcon />
-                  </div>
-                  <div className={styles.bikeTextContainer}>
-                    <h4 className={styles.bikeTitle}>{title}</h4>
-                  </div>
-                </button>
-              )
-            })}
+            <button
+              type="button"
+              onClick={handleOpenModal}
+              className={`${styles.bikeCard} ${isAtGuestFuelLimit ? styles.bikeCardDisabled : ''}`}
+              aria-label={`${title}の給油を登録`}
+              disabled={isAtGuestFuelLimit}
+            >
+              <div className={styles.bikeIconContainer}>
+                <BikeIcon />
+              </div>
+              <div className={styles.bikeTextContainer}>
+                <h4 className={styles.bikeTitle}>{title}</h4>
+              </div>
+            </button>
           </div>
         </div>
       </div>

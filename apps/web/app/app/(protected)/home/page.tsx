@@ -12,6 +12,7 @@ import { TouringStartEndSection } from '@/components/TouringStartEndSection'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { mutateHistoryLists } from '@/lib/api/mutateHistory'
+import { getBikeDisplayName } from '@/lib/bike'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
@@ -39,13 +40,12 @@ function Page() {
   const activeBikeEntry = ongoingTourings.find((b) => b.ongoingTouring !== null)
   const activeTouring = activeBikeEntry?.ongoingTouring ?? null
 
-  // バイク名を組み立てる（TouringStartEndSection と同じロジック）
+  // バイク名を組み立てる（進行中ツーリングを持つバイクの名称。アクティブ車両とは独立）
   const activeBikeInfo = activeBikeEntry
     ? bikes.find((b) => b.myUserBikeId === activeBikeEntry.myUserBikeId)
     : null
   const activeBikeName = activeBikeInfo
-    ? activeBikeInfo.nickname ||
-      `${activeBikeInfo.manufacturerName || ''} ${activeBikeInfo.modelName || '不明なバイク'}`.trim()
+    ? getBikeDisplayName(activeBikeInfo)
     : ''
 
   const handleEndTouring = async (

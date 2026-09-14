@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import useSWR, { mutate } from 'swr'
+import { mutate } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import { getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
@@ -11,64 +11,32 @@ import { BikeIcon } from './icons/BikeIcon'
 import { TouringIcon } from './icons/TouringIcon'
 import styles from './TouringStartEndSection.module.css'
 import { trackEvent } from '@/lib/analytics'
-import { apiGet, apiPost } from '@/lib/api/client'
+import { apiPost } from '@/lib/api/client'
+import { getBikeDisplayName } from '@/lib/bike'
+import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
-type BikeWithTouring = {
-  myUserBikeId: string
-  bikeName: string
-  totalMileage: number
-}
-
 export const TouringStartEndSection = () => {
   const router = useRouter()
   const { isGuest } = useAuth()
-  const [loadingBikeId, setLoadingBikeId] = useState<string | null>(null)
+  const { activeBike, bikes, isLoading, error } = useActiveBike()
+  const [isStarting, setIsStarting] = useState(false)
   const { getCurrentPosition } = useGeolocation()
-  const [pendingStartBike, setPendingStartBike] = useState<{
-    myUserBikeId: string
-    bikeName: string
-    totalMileage: number
-  } | null>(null)
+  const [isMileageModalOpen, setIsMileageModalOpen] = useState(false)
   const [startMileageInput, setStartMileageInput] = useState('')
-
-  // バイク一覧取得
-  const {
-    data: bikesData,
-    error: bikesError,
-    isLoading: bikesLoading,
-  } = useSWR('/api/v1/user-bike/bikes', async (url) => {
-    const response = await apiGet(url)
-    return response.data
-  })
-
-  const bikes = bikesData?.bikes ?? []
 
   // ゲストアカウントのツーリング上限チェック（バイク一覧レスポンスのカウントを利用）
   const isAtGuestTouringLimit =
-    isGuest && (bikes[0]?.touringCount ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
+    isGuest && (activeBike?.touringCount ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
 
-  // バイク情報を整形
-  const bikesWithTouring: BikeWithTouring[] = bikes.map((bike) => {
-    const bikeName =
-      bike.nickname ||
-      `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
+  const handleStartTouring = async (startMileage?: number) => {
+    if (!activeBike) return
+    const myUserBikeId = activeBike.myUserBikeId
+    const bikeName = getBikeDisplayName(activeBike)
 
-    return {
-      myUserBikeId: bike.myUserBikeId,
-      bikeName,
-      totalMileage: bike.totalMileage,
-    }
-  })
-
-  const handleStartTouring = async (
-    myUserBikeId: string,
-    bikeName: string,
-    startMileage?: number
-  ) => {
-    setLoadingBikeId(myUserBikeId)
+    setIsStarting(true)
     try {
       const now = getCurrentDate()
       const defaultTitle = `${bikeName} ${now.toLocaleDateString('ja-JP', {
@@ -98,49 +66,40 @@ export const TouringStartEndSection = () => {
       toast.success('ツーリングを開始しました')
       // SWR再検証
       await mutate('/api/v1/user-bike/bikes/ongoing-tourings').catch(() => {})
-    } catch (error) {
+    } catch (err) {
       trackEvent('touring_error', {
         operation: 'start',
-        ...(error instanceof ApiV1Error
-          ? { error_code: error.errorCode, error_message: error.message }
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
           : {}),
       })
-      if (error instanceof ApiV1Error) {
-        toast.error(error.message)
+      if (err instanceof ApiV1Error) {
+        toast.error(err.message)
       } else {
         toast.error('ツーリングの開始に失敗しました')
       }
     } finally {
-      setLoadingBikeId(null)
+      setIsStarting(false)
     }
   }
 
-  const handleOpenStartModal = (
-    myUserBikeId: string,
-    bikeName: string,
-    totalMileage: number
-  ) => {
-    setPendingStartBike({ myUserBikeId, bikeName, totalMileage })
-    setStartMileageInput(String(totalMileage))
+  const handleOpenMileageModal = () => {
+    if (!activeBike) return
+    setStartMileageInput(String(activeBike.totalMileage))
+    setIsMileageModalOpen(true)
   }
 
   const handleConfirmStart = async () => {
-    if (!pendingStartBike) return
     const parsed = parseInt(startMileageInput, 10)
     const mileage =
       startMileageInput !== '' && !isNaN(parsed) ? parsed : undefined
-    setPendingStartBike(null)
-    await handleStartTouring(
-      pendingStartBike.myUserBikeId,
-      pendingStartBike.bikeName,
-      mileage
-    )
+    setIsMileageModalOpen(false)
+    await handleStartTouring(mileage)
   }
 
-  if (bikesError) {
+  if (error) {
     const isUserNotRegisteredError =
-      bikesError instanceof ApiV1Error &&
-      bikesError.errorCode === 'USER_NOT_REGISTERED'
+      error instanceof ApiV1Error && error.errorCode === 'USER_NOT_REGISTERED'
 
     return (
       <div className={styles.container} data-testid="touring-section">
@@ -163,8 +122,8 @@ export const TouringStartEndSection = () => {
             </>
           ) : (
             <p className={styles.errorMessage}>
-              {bikesError instanceof ApiV1Error
-                ? bikesError.message
+              {error instanceof ApiV1Error
+                ? error.message
                 : 'バイク情報の取得に失敗しました'}
             </p>
           )}
@@ -173,7 +132,7 @@ export const TouringStartEndSection = () => {
     )
   }
 
-  if (bikesLoading) {
+  if (isLoading) {
     return (
       <div className={styles.container} data-testid="touring-section">
         <div className={styles.header}>
@@ -186,11 +145,24 @@ export const TouringStartEndSection = () => {
     )
   }
 
-  if (bikes.length === 0) {
-    return null
+  if (bikes.length === 0 || !activeBike) {
+    return (
+      <div className={styles.container} data-testid="touring-section">
+        <div className={styles.header}>
+          <h2 className={styles.title}>ツーリング</h2>
+        </div>
+        <div className={styles.emptyState}>
+          <p>バイクを登録してください</p>
+          <Button onClick={() => router.push('/app/bike/register')} size="sm">
+            バイクを登録
+          </Button>
+        </div>
+      </div>
+    )
   }
 
-  // バイク選択グリッド
+  const bikeName = getBikeDisplayName(activeBike)
+
   return (
     <div className={styles.container} data-testid="touring-section">
       <div className={styles.header}>
@@ -208,43 +180,31 @@ export const TouringStartEndSection = () => {
       )}
 
       <div className={styles.bikeSelectionGrid}>
-        {bikesWithTouring.map((bike) => {
-          const isLoading = loadingBikeId === bike.myUserBikeId
-
-          return (
-            <div key={bike.myUserBikeId} className={styles.compactBikeCard}>
-              <div className={styles.compactBikeHeader}>
-                <div className={styles.compactBikeIcon}>
-                  <BikeIcon />
-                </div>
-                <h4 className={styles.compactBikeName}>{bike.bikeName}</h4>
-              </div>
-
-              <Button
-                onClick={() =>
-                  handleOpenStartModal(
-                    bike.myUserBikeId,
-                    bike.bikeName,
-                    bike.totalMileage
-                  )
-                }
-                disabled={isLoading || isAtGuestTouringLimit}
-                variant="primary"
-                size="sm"
-                className={styles.startButton}
-              >
-                {isLoading ? '開始中...' : '開始'}
-              </Button>
+        <div className={styles.compactBikeCard}>
+          <div className={styles.compactBikeHeader}>
+            <div className={styles.compactBikeIcon}>
+              <BikeIcon />
             </div>
-          )
-        })}
+            <h4 className={styles.compactBikeName}>{bikeName}</h4>
+          </div>
+
+          <Button
+            onClick={handleOpenMileageModal}
+            disabled={isStarting || isAtGuestTouringLimit}
+            variant="primary"
+            size="sm"
+            className={styles.startButton}
+          >
+            {isStarting ? '開始中...' : '開始'}
+          </Button>
+        </div>
       </div>
 
       {/* 開始時 走行距離入力モーダル */}
-      {pendingStartBike && (
+      {isMileageModalOpen && (
         <div
           className={styles.spotModalOverlay}
-          onClick={() => setPendingStartBike(null)}
+          onClick={() => setIsMileageModalOpen(false)}
         >
           <div
             className={styles.spotModal}
@@ -270,10 +230,10 @@ export const TouringStartEndSection = () => {
 
             <div className={styles.spotModalActions}>
               <Button
-                onClick={() => setPendingStartBike(null)}
+                onClick={() => setIsMileageModalOpen(false)}
                 variant="cloud"
                 size="md"
-                disabled={loadingBikeId !== null}
+                disabled={isStarting}
               >
                 キャンセル
               </Button>
@@ -281,7 +241,7 @@ export const TouringStartEndSection = () => {
                 onClick={handleConfirmStart}
                 variant="primary"
                 size="md"
-                disabled={loadingBikeId !== null}
+                disabled={isStarting}
               >
                 開始する
               </Button>
