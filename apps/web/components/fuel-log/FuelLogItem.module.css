@@ -27,6 +27,22 @@
   font-style: italic;
 }
 
+.continuationRefuel {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-warning);
+}
+
+.continuationRefuelNote {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-inkLight);
+  font-style: normal;
+}
+
 .metaInfo {
   flex: 1;
   display: flex;

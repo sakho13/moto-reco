@@ -59,6 +59,7 @@ export function FuelLogEditModal({
         amount: data.amount.toString(),
         totalPrice: data.totalPrice.toString(),
         memo: data.memo ?? '',
+        isFullTank: data.isFullTank,
         updateTotalMileage: false,
       })
     }
@@ -78,6 +79,7 @@ export function FuelLogEditModal({
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
         memo: memo.length > 0 ? memo : null,
+        isFullTank: formData.isFullTank,
       })
       trackEvent('fuel_log_update')
 

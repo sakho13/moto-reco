@@ -22,6 +22,11 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
               {fuelLog.fuelEfficiency.toFixed(1)}{' '}
               <span className={styles.unit}>km/L</span>
             </>
+          ) : !fuelLog.isFullTank ? (
+            <span className={styles.continuationRefuel}>
+              継ぎ足し
+              <span className={styles.continuationRefuelNote}>次回に繰越</span>
+            </span>
           ) : (
             <span className={styles.initialRefuel}>初回給油</span>
           )}

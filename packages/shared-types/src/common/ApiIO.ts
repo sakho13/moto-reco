@@ -249,7 +249,8 @@ export type ApiResponseFuelLogDetail = {
   amount: number
   totalPrice: number
   memo: string | null
-  fuelEfficiency: number | null // km/L (計算不可の場合はnull)
+  isFullTank: boolean // 満タン給油かどうか（false: 継ぎ足し給油）
+  fuelEfficiency: number | null // km/L (継ぎ足し給油、または計算不可の場合はnull)
   pricePerLiter: number | null // 円/L (給油量0の場合はnull)
   touringId: string | null // ツーリングID
   touringTitle: string | null // ツーリングタイトル

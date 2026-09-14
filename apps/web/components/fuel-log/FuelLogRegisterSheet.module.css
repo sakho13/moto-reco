@@ -1,0 +1,216 @@
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ---------- ヘッダー（給油日時チップ） ---------- */
+.headerRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dateChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-3);
+  background-color: var(--color-cloud);
+  border: 1px solid var(--color-cloudHover);
+  border-radius: var(--radius-full);
+  color: var(--color-ink);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.dateChip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dateChipChevron {
+  font-size: 0.6rem;
+  color: var(--color-inkLight);
+}
+
+/* ---------- 3項目の入力欄 ---------- */
+.fieldStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.fieldHeaderRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.fieldLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-inkLight);
+  letter-spacing: 0.04em;
+}
+
+.fieldHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.fieldBox {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-background);
+  border: 2px solid var(--color-cloudHover);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.fieldActive .fieldBox {
+  border-color: var(--color-product);
+  box-shadow: var(--shadow-sm);
+}
+
+.fieldInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  text-align: right;
+  color: var(--color-ink);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.fieldInput::placeholder {
+  color: var(--color-inkLight);
+  opacity: 0.4;
+}
+
+.fieldInput:disabled {
+  opacity: 0.6;
+}
+
+.fieldUnit {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+/* ---------- 満タン／継ぎ足しトグル ---------- */
+.tankToggle {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.tankChip {
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: transparent;
+  border: 1px solid var(--color-cloudHover);
+  border-radius: var(--radius-full);
+  color: var(--color-inkLight);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.tankChip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tankChipActive {
+  background-color: var(--color-cloud);
+  border-color: var(--color-cloudHover);
+  color: var(--color-ink);
+  font-weight: var(--font-weight-bold);
+}
+
+/* ---------- ライブ計器 ---------- */
+.gaugeRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-cloud);
+  padding-block: var(--spacing-2);
+}
+
+.gaugeCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding-inline: var(--spacing-1);
+  border-left: 1px dotted var(--color-cloud);
+}
+
+.gaugeCell:first-child {
+  border-left: none;
+}
+
+.gaugeValue {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.gaugeCellHighlight .gaugeValue {
+  color: var(--color-product);
+}
+
+.gaugeLabel {
+  font-size: 0.6875rem;
+  color: var(--color-inkLight);
+  letter-spacing: 0.04em;
+}
+
+.gaugeNote {
+  margin: calc(-1 * var(--spacing-2)) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  text-align: center;
+}
+
+.touringNote {
+  margin: 0 0 var(--spacing-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+}
+
+/* ---------- 保存ボタン（常に画面内） ---------- */
+.stickyFooter {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-2);
+  margin-top: var(--spacing-2);
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-cloud);
+}
+
+@media (min-width: 641px) {
+  .fieldInput {
+    font-size: var(--font-size-xl);
+  }
+}

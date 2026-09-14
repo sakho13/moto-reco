@@ -55,6 +55,10 @@ export class FuelLogEntity {
     return this._value.totalPrice
   }
 
+  public get isFullTank(): boolean {
+    return this._value.isFullTank
+  }
+
   public get memo(): string | null {
     return this._value.memo
   }
@@ -65,24 +69,6 @@ export class FuelLogEntity {
 
   public get touringTitle(): string | null {
     return this._value.touringTitle
-  }
-
-  /**
-   * 今回給油での走行距離
-   */
-  public get distance(): number {
-    return this.mileage - this.previousMileage
-  }
-
-  /**
-   * 燃費（km/L）。初回給油など計算不可の場合はnull (小数点以下1桁で四捨五入)
-   */
-  public get fuelEfficiency(): number | null {
-    const distance = this.distance
-    if (distance <= 0) {
-      return null
-    }
-    return Math.round((distance / this.amount) * 10) / 10
   }
 
   /**

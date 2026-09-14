@@ -34,6 +34,15 @@ export class PrismaFuelInsightRepository
   extends PrismaRepositoryBase
   implements IFuelInsightRepository
 {
+  /**
+   * @remarks
+   * `averageFuelEfficiency` は「期間内の総走行距離 ÷ 総給油量」で算出しており、
+   * 継ぎ足し給油（isFullTank: false）を除外する特別な絞り込みは行っていない。
+   * これは意図的な設計判断で、区間距離・給油量は個々のレコードを合計しても
+   * テレスコープして「期間内の総距離・総燃料」に一致するため、
+   * 満タン／継ぎ足しの区分に関わらず正しい値になる
+   * （P1: 満タン／継ぎ足しの区別 で導入。詳細はPR説明を参照）。
+   */
   async getFuelInsight(
     myUserBikeId: MyUserBikeId,
     period: FuelInsightPeriod

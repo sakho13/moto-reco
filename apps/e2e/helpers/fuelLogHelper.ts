@@ -13,6 +13,8 @@ export async function registerTestFuelLog(
     amount?: number
     totalPrice?: number
     memo?: string
+    /** 満タン給油かどうか（省略時はAPI既定のtrue） */
+    isFullTank?: boolean
     touringId?: string | null
   }
 ): Promise<string> {
@@ -31,6 +33,7 @@ export async function registerTestFuelLog(
         amount: fuelLog.amount ?? 10,
         totalPrice: fuelLog.totalPrice ?? 1500,
         memo: fuelLog.memo ?? null,
+        isFullTank: fuelLog.isFullTank ?? true,
         updateTotalMileage: false,
         touringId: fuelLog.touringId ?? null,
       }),

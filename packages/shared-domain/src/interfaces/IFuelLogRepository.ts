@@ -32,4 +32,10 @@ export interface IFuelLogRepository {
     touringId: TouringId | null
   ): Promise<void>
   countFuelLogs(myUserBikeId: MyUserBikeId): Promise<number>
+  /**
+   * 燃費計算のため、指定バイクの給油履歴をページングなし・mileage昇順で全件取得する
+   */
+  findAllFuelLogsOrderedByMileage(
+    myUserBikeId: MyUserBikeId
+  ): Promise<FuelLogEntity[]>
 }

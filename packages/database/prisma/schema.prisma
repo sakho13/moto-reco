@@ -302,6 +302,7 @@ model TUserMyBikeFuelLog {
   price           Int      @map("price") // 給油価格/円
   mileage         Int      @map("mileage") // 給油時総走行距離/km
   previousMileage Int      @map("previous_mileage") // 前回給油時総走行距離/km
+  isFullTank      Boolean  @default(true) @map("is_full_tank") // 満タン給油かどうか
   refueledAt      DateTime @map("refueled_at") @db.Timestamptz // 給油日時
   memo            String?  @map("memo") // メモ
   touringId       String?  @map("touring_id") // ツーリングID
