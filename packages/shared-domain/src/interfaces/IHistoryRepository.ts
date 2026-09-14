@@ -32,6 +32,7 @@ export type PublicHistoryDetail = {
     previousMileage: number
     amount: number
     price: number
+    isFullTank: boolean
     memo: string | null
     touringId: string | null
   } | null
