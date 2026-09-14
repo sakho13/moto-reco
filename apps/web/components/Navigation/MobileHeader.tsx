@@ -1,5 +1,6 @@
 'use client'
 
+import { BikeSwitcher } from './BikeSwitcher'
 import { BreadcrumbNav } from './BreadcrumbNav'
 import styles from './MobileHeader.module.css'
 import { BellButton } from '@/components/notification/BellButton'
@@ -10,6 +11,7 @@ export function MobileHeader() {
     <header className={styles.header} aria-label="モバイルヘッダー">
       <BreadcrumbNav />
       <div className={styles.actions}>
+        <BikeSwitcher />
         <BellButton />
         <ThemeToggleButton />
       </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { BikeSwitcher } from './BikeSwitcher'
 import { BreadcrumbNav } from './BreadcrumbNav'
 import styles from './DesktopHeader.module.css'
 import { BellButton } from '@/components/notification/BellButton'
@@ -10,6 +11,7 @@ export function DesktopHeader() {
     <header className={styles.header} aria-label="ヘッダー">
       <BreadcrumbNav />
       <div className={styles.actions}>
+        <BikeSwitcher />
         <BellButton />
         <ThemeToggleButton />
       </div>
