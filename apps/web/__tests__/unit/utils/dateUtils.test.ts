@@ -146,6 +146,13 @@ describe('isUnsetDate', () => {
     expect(isUnsetDate(new Date('2024-01-01T00:00:00.000Z'))).toBe(false)
   })
 
+  it('エポックより前でも正当に古い日付は未設定と判定されない', () => {
+    // 旧車の購入日がエポック誤変換と誤判定されると、
+    // 表示が消えるだけでなく編集時に実データまで消去されてしまう
+    expect(isUnsetDate('1960-05-18T00:00:00.000Z')).toBe(false)
+    expect(isUnsetDate(new Date('1969-06-01T00:00:00.000Z'))).toBe(false)
+  })
+
   it('不正な日付文字列は未設定として扱わない', () => {
     expect(isUnsetDate('invalid-date')).toBe(false)
   })
