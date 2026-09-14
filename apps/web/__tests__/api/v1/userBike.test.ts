@@ -2254,8 +2254,8 @@ describe('UserBike API Endpoints', () => {
       const secondFullTankLog = json.data.find(
         (log: { mileage: number }) => log.mileage === 1250
       )
-      // 区間距離: 1250-1000=250, 給油量: 3(継ぎ足し)+8(満タン)=11 => 250/11=22.727... -> 22.7
-      expect(secondFullTankLog.fuelEfficiency).toBeCloseTo(22.7, 5)
+      // 区間距離: 1250-1000=250, 給油量: 3(継ぎ足し)+8(満タン)=11 => 250/11（丸めない生の値）
+      expect(secondFullTankLog.fuelEfficiency).toBeCloseTo(250 / 11, 10)
     })
 
     test('すべて満タンの場合、従来の(mileage-previousMileage)/amountと同じ燃費になる（リグレッション防止）', async () => {
@@ -2303,10 +2303,10 @@ describe('UserBike API Endpoints', () => {
       const log3 = json.data.find(
         (log: { mileage: number }) => log.mileage === 2000
       )
-      // (1500-1000)/12 = 41.666... -> 41.7
-      expect(log2.fuelEfficiency).toBeCloseTo(41.7, 5)
-      // (2000-1500)/11.5 = 43.478... -> 43.5
-      expect(log3.fuelEfficiency).toBeCloseTo(43.5, 5)
+      // (1500-1000)/12 = 41.6666...（丸めない生の値）
+      expect(log2.fuelEfficiency).toBeCloseTo(500 / 12, 10)
+      // (2000-1500)/11.5 = 43.4782...
+      expect(log3.fuelEfficiency).toBeCloseTo(500 / 11.5, 10)
     })
 
     test('PATCHでisFullTankを更新できる', async () => {

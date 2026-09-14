@@ -28,8 +28,12 @@ export class FuelEfficiencyCalculationService {
   /**
    * 給油履歴（mileage昇順）から、各給油ログの燃費（km/L）を算出する
    *
+   * @remarks
+   * 丸め処理は行わず生の値を返す。表示桁数の丸めは表示側（UI）の責務とする
+   * （グラフの精度低下や集計への丸め誤差混入を避けるため）。
+   *
    * @param logsOrderedByMileageAsc 同一バイクの給油履歴。mileage昇順に並んでいること
-   * @returns fuelLogIdをキーとした燃費（km/L, 小数点以下1桁で四捨五入）のMap。計算不可の場合はnull
+   * @returns fuelLogIdをキーとした燃費（km/L, 丸めなしの生の値）のMap。計算不可の場合はnull
    */
   public calculate(
     logsOrderedByMileageAsc: readonly FuelEfficiencyCalculationTarget[]
@@ -49,14 +53,12 @@ export class FuelEfficiencyCalculationService {
       }
 
       const distance =
-        lastFullTankMileage === null
-          ? null
-          : log.mileage - lastFullTankMileage
+        lastFullTankMileage === null ? null : log.mileage - lastFullTankMileage
 
       result.set(
         log.fuelLogId,
         distance !== null && distance > 0
-          ? Math.round((distance / amountSinceLastFullTank) * 10) / 10
+          ? distance / amountSinceLastFullTank
           : null
       )
 

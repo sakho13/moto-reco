@@ -80,9 +80,7 @@ export class FuelLogService {
     myUserBikeId: MyUserBikeId
   ): Promise<Map<string, number | null>> {
     const allLogs =
-      await this.fuelLogRepository.findAllFuelLogsOrderedByMileage(
-        myUserBikeId
-      )
+      await this.fuelLogRepository.findAllFuelLogsOrderedByMileage(myUserBikeId)
 
     return this.fuelEfficiencyCalculationService.calculate(
       allLogs.map((log) => ({
@@ -165,9 +163,7 @@ export class FuelLogService {
       )
     }
 
-    const efficiencyMap = await this.buildFuelEfficiencyMap(
-      params.myUserBikeId
-    )
+    const efficiencyMap = await this.buildFuelEfficiencyMap(params.myUserBikeId)
 
     return {
       fuelLog: createdFuelLog,
@@ -272,9 +268,7 @@ export class FuelLogService {
       })
 
       // 4. 更新実行
-      const result = await this.fuelLogRepository.updateFuelLog(
-        updatedFuelLog
-      )
+      const result = await this.fuelLogRepository.updateFuelLog(updatedFuelLog)
 
       const efficiencyMap = await this.buildFuelEfficiencyMap(
         params.myUserBikeId

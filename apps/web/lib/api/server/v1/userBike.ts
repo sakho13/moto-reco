@@ -445,9 +445,7 @@ userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
   })
 
   // 燃費計算は「直前の満タン給油」を含むバイク単位の給油履歴全体が必要なため、事前算出しておく
-  const fuelEfficiencyMaps = await buildFuelEfficiencyMapsByBike([
-    myUserBikeId,
-  ])
+  const fuelEfficiencyMaps = await buildFuelEfficiencyMapsByBike([myUserBikeId])
   const fuelEfficiencyMap =
     fuelEfficiencyMaps.get(myUserBikeId) ?? new Map<string, number | null>()
 
