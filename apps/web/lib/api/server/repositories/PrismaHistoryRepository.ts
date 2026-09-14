@@ -91,6 +91,7 @@ export class PrismaHistoryRepository
             previousMileage: true,
             amount: true,
             price: true,
+            isFullTank: true,
             memo: true,
             touringId: true,
           },

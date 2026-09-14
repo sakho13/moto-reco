@@ -68,7 +68,7 @@ userBikeFuelLogs.get(
     return c.json<SuccessResponse<ApiResponseFuelLogList>>(
       {
         status: 'success',
-        data: fuelLogs.map((log) => {
+        data: fuelLogs.map(({ fuelLog: log, fuelEfficiency }) => {
           return {
             fuelLogId: log.id,
             refueledAt: log.refueledAt.toISOString(),
@@ -77,7 +77,8 @@ userBikeFuelLogs.get(
             amount: log.amount,
             totalPrice: log.totalPrice,
             memo: log.memo,
-            fuelEfficiency: log.fuelEfficiency,
+            isFullTank: log.isFullTank,
+            fuelEfficiency,
             pricePerLiter: log.pricePerLiter,
             touringId: log.touringId,
             touringTitle: log.touringTitle,
@@ -109,7 +110,7 @@ userBikeFuelLogs.get(
       touringRepo
     )
 
-    const fuelLog = await fuelLogService.getFuelLogDetail(
+    const { fuelLog, fuelEfficiency } = await fuelLogService.getFuelLogDetail(
       createFuelLogId(params.fuelLogId),
       createMyUserBikeId(params.myUserBikeId),
       userEntity.id
@@ -125,7 +126,8 @@ userBikeFuelLogs.get(
         amount: fuelLog.amount,
         totalPrice: fuelLog.totalPrice,
         memo: fuelLog.memo,
-        fuelEfficiency: fuelLog.fuelEfficiency,
+        isFullTank: fuelLog.isFullTank,
+        fuelEfficiency,
         pricePerLiter: fuelLog.pricePerLiter,
         touringId: fuelLog.touringId,
         touringTitle: fuelLog.touringTitle,
@@ -156,7 +158,7 @@ userBikeFuelLogs.post(
         touringRepo
       )
 
-      const fuelLog = await service.registerFuelLog({
+      const registered = await service.registerFuelLog({
         myUserBikeId: createMyUserBikeId(myUserBikeId),
         user: userEntity,
         refueledAt: body.refueledAt,
@@ -164,6 +166,7 @@ userBikeFuelLogs.post(
         previousMileage: body.previousMileage,
         amount: body.amount,
         totalPrice: body.totalPrice,
+        isFullTank: body.isFullTank,
         memo: body.memo,
         updateTotalMileage: body.updateTotalMileage,
         touringId: body.touringId,
@@ -174,28 +177,29 @@ userBikeFuelLogs.post(
         userId: userEntity.id,
         userMyBikeId: createMyUserBikeId(myUserBikeId),
         type: 'FUEL_LOG',
-        occurredAt: fuelLog.refueledAt,
-        fuelLogId: fuelLog.id,
+        occurredAt: registered.fuelLog.refueledAt,
+        fuelLogId: registered.fuelLog.id,
       })
 
-      return fuelLog
+      return registered
     })
 
     return c.json<SuccessResponse<ApiResponseFuelLogDetail>>(
       {
         status: 'success',
         data: {
-          fuelLogId: result.id,
-          refueledAt: result.refueledAt.toISOString(),
-          mileage: result.mileage,
-          previousMileage: result.previousMileage,
-          amount: result.amount,
-          totalPrice: result.totalPrice,
-          memo: result.memo,
+          fuelLogId: result.fuelLog.id,
+          refueledAt: result.fuelLog.refueledAt.toISOString(),
+          mileage: result.fuelLog.mileage,
+          previousMileage: result.fuelLog.previousMileage,
+          amount: result.fuelLog.amount,
+          totalPrice: result.fuelLog.totalPrice,
+          memo: result.fuelLog.memo,
+          isFullTank: result.fuelLog.isFullTank,
           fuelEfficiency: result.fuelEfficiency,
-          pricePerLiter: result.pricePerLiter,
-          touringId: result.touringId,
-          touringTitle: result.touringTitle,
+          pricePerLiter: result.fuelLog.pricePerLiter,
+          touringId: result.fuelLog.touringId,
+          touringTitle: result.fuelLog.touringTitle,
         },
         message: '燃料ログ登録成功',
       },
@@ -235,6 +239,7 @@ userBikeFuelLogs.patch(
         previousMileage: body.previousMileage,
         amount: body.amount,
         totalPrice: body.totalPrice,
+        isFullTank: body.isFullTank,
         memo: body.memo,
       })
 
@@ -242,7 +247,7 @@ userBikeFuelLogs.patch(
       if (body.refueledAt !== undefined) {
         await historyRepo.updateOccurredAtByFuelLogId(
           createFuelLogId(body.fuelLogId),
-          updated.refueledAt
+          updated.fuelLog.refueledAt
         )
       }
 
@@ -253,17 +258,18 @@ userBikeFuelLogs.patch(
       {
         status: 'success',
         data: {
-          fuelLogId: result.id,
-          refueledAt: result.refueledAt.toISOString(),
-          mileage: result.mileage,
-          previousMileage: result.previousMileage,
-          amount: result.amount,
-          totalPrice: result.totalPrice,
-          memo: result.memo,
+          fuelLogId: result.fuelLog.id,
+          refueledAt: result.fuelLog.refueledAt.toISOString(),
+          mileage: result.fuelLog.mileage,
+          previousMileage: result.fuelLog.previousMileage,
+          amount: result.fuelLog.amount,
+          totalPrice: result.fuelLog.totalPrice,
+          memo: result.fuelLog.memo,
+          isFullTank: result.fuelLog.isFullTank,
           fuelEfficiency: result.fuelEfficiency,
-          pricePerLiter: result.pricePerLiter,
-          touringId: result.touringId,
-          touringTitle: result.touringTitle,
+          pricePerLiter: result.fuelLog.pricePerLiter,
+          touringId: result.fuelLog.touringId,
+          touringTitle: result.fuelLog.touringTitle,
         },
         message: '燃料ログ更新成功',
       },
