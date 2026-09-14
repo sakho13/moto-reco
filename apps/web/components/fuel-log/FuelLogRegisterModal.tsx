@@ -9,13 +9,18 @@ import type {
   SuccessResponse,
 } from '@repo/shared-types'
 import { toast } from '@repo/ui/sonner'
-import { ToggleSection } from '@repo/ui/toggleSection'
-import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
-import styles from './FuelLogRegisterModal.module.css'
+import {
+  FuelLogRegisterSheet,
+  type FuelLogRegisterSheetSubmitValues,
+} from './FuelLogRegisterSheet'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
 import { mutateHistoryLists } from '@/lib/api/mutateHistory'
+import {
+  resolveSubmitPreviousMileage,
+  shouldUpdateTotalMileage,
+} from '@/lib/fuelLogSheet'
 
 interface FuelLogRegisterModalProps {
   bikeId: string
@@ -68,27 +73,39 @@ export function FuelLogRegisterModal({
       return json.data
     }
   )
-  const previousFuelLog = fuelLogs?.[0]
+  const previousFuelLog = fuelLogs?.[0] ?? null
 
-  const handleFormSubmit = async (formData: FuelLogFormData) => {
+  const handleFormSubmit = async (values: FuelLogRegisterSheetSubmitValues) => {
     setError('')
     setIsSubmitting(true)
 
     try {
-      const memo = formData.memo.trim()
+      const memo = values.memo.trim()
+      const previousMileage = resolveSubmitPreviousMileage({
+        previousLog: previousFuelLog,
+        totalMileage: bike?.totalMileage,
+        mileage: values.mileage,
+      })
+      const updateTotalMileage = shouldUpdateTotalMileage(
+        values.mileage,
+        bike?.totalMileage
+      )
+
       await apiPost(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
-        refueledAt: new Date(formData.refueledAt),
-        mileage: Number(formData.mileage),
-        previousMileage: Number(formData.previousMileage),
-        amount: Number(formData.amount),
-        totalPrice: Number(formData.totalPrice),
+        refueledAt: new Date(values.refueledAt),
+        mileage: values.mileage,
+        previousMileage,
+        amount: values.amount,
+        totalPrice: values.totalPrice,
+        isFullTank: values.isFullTank,
         memo: memo.length > 0 ? memo : null,
-        updateTotalMileage: formData.updateTotalMileage,
+        updateTotalMileage,
         touringId: touringId ?? null,
       })
       trackEvent('fuel_log_create', {
         has_memo: memo.length > 0,
-        update_total_mileage: formData.updateTotalMileage,
+        update_total_mileage: updateTotalMileage,
+        is_full_tank: values.isFullTank,
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
@@ -111,80 +128,21 @@ export function FuelLogRegisterModal({
     }
   }
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    } catch {
-      return dateString
-    }
-  }
-
   return (
-    <ModalBase title="給油履歴を登録" onClose={onClose}>
-      {previousFuelLog && (
-        <div className={styles.previousLog}>
-          <ToggleSection title="前回の給油履歴">
-            <dl
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'auto 1fr',
-                gap: 'var(--spacing-2)',
-                fontSize: 'var(--font-size-sm)',
-              }}
-            >
-              <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                給油日:
-              </dt>
-              <dd style={{ color: 'var(--color-ink)' }}>
-                {formatDate(previousFuelLog.refueledAt)}
-              </dd>
-              <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                走行距離:
-              </dt>
-              <dd style={{ color: 'var(--color-ink)' }}>
-                {previousFuelLog.mileage.toLocaleString()} km
-              </dd>
-              <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                給油量:
-              </dt>
-              <dd style={{ color: 'var(--color-ink)' }}>
-                {previousFuelLog.amount.toFixed(2)} L
-              </dd>
-              <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                給油価格:
-              </dt>
-              <dd style={{ color: 'var(--color-ink)' }}>
-                ¥{previousFuelLog.totalPrice.toLocaleString()}
-              </dd>
-              {previousFuelLog.memo && (
-                <>
-                  <dt style={{ color: 'var(--color-ink)', opacity: 0.7 }}>
-                    メモ:
-                  </dt>
-                  <dd
-                    style={{
-                      color: 'var(--color-ink)',
-                      whiteSpace: 'pre-wrap',
-                    }}
-                  >
-                    {previousFuelLog.memo}
-                  </dd>
-                </>
-              )}
-            </dl>
-          </ToggleSection>
-        </div>
-      )}
-
-      <FuelLogForm
-        onSubmit={handleFormSubmit}
+    <ModalBase title="給油を記録" onClose={onClose}>
+      <FuelLogRegisterSheet
+        previousFuelLog={
+          previousFuelLog
+            ? {
+                mileage: previousFuelLog.mileage,
+                isFullTank: previousFuelLog.isFullTank,
+              }
+            : null
+        }
+        hasTouring={Boolean(touringId)}
         isSubmitting={isSubmitting}
         error={error}
-        totalMileage={bike?.totalMileage}
+        onSubmit={handleFormSubmit}
       />
     </ModalBase>
   )
