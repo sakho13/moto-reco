@@ -47,9 +47,7 @@ test.describe('ツーリング中TOPページ（全画面モード）', () => {
     ).toBeVisible()
 
     // 通常セクション（主アクション）は表示されない
-    await expect(
-      page.locator('[data-testid="home-actions"]')
-    ).not.toBeVisible()
+    await expect(page.locator('[data-testid="home-actions"]')).not.toBeVisible()
   })
 
   test('ツーリング中に「ツーリングを終了」ボタンが表示される', async ({

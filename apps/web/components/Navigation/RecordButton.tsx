@@ -31,15 +31,19 @@ export function RecordButton({
   variant = 'nav',
 }: RecordButtonProps) {
   const router = useRouter()
-  const { activeBike, isLoading } = useActiveBike()
+  const { activeBike, bikes, isLoading } = useActiveBike()
   const [isOpen, setIsOpen] = useState(false)
 
   const handleClick = () => {
     if (isLoading) return
-    if (!activeBike) {
+    if (bikes.length === 0) {
       router.push('/app/bike/register')
       return
     }
+    // バイクは存在するがアクティブ車両IDの解決待ち（ActiveBikeProviderの
+    // useEffectが未反映）の一瞬だけ activeBike が null になりうる。
+    // ここで誤ってバイク登録へ飛ばさないよう、何もせず次のクリックを待つ。
+    if (!activeBike) return
     setIsOpen(true)
   }
 

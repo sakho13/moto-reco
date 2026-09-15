@@ -24,9 +24,7 @@ export const RecentHistorySection = () => {
   const { activeBike } = useActiveBike()
   const bikeId = activeBike?.myUserBikeId ?? null
 
-  const [editingFuelLogId, setEditingFuelLogId] = useState<string | null>(
-    null
-  )
+  const [editingFuelLogId, setEditingFuelLogId] = useState<string | null>(null)
 
   const { data, error, isLoading } = useBikeHistory(bikeId)
 

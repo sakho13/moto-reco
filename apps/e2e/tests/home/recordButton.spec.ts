@@ -26,6 +26,11 @@ test.describe('ナビゲーション中央の記録ボタン(#575)', () => {
     const homePage = new HomePage(page)
     await homePage.goto()
 
+    // アクティブ車両の解決を待つ（HomeActionsの「給油を記録」ボタンが
+    // 表示される＝ActiveBikeContextが解決済み）。解決前に記録ボタンを押すと
+    // バイク未登録と区別できない一瞬の状態と重なる可能性があるため
+    await expect(homePage.fuelButton).toBeVisible()
+
     // ナビ中央の「記録」ボタンから給油シートを開く（マイバイクの給油履歴画面を経由しない）
     await homePage.recordNavButton.click()
 

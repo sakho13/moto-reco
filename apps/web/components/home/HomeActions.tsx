@@ -213,9 +213,7 @@ export function HomeActions() {
             <h3 className={styles.modalTitle}>出発時の走行距離</h3>
 
             <div className={styles.modalField}>
-              <label className={styles.modalLabel}>
-                現在の走行距離（km）
-              </label>
+              <label className={styles.modalLabel}>現在の走行距離（km）</label>
               <input
                 type="number"
                 inputMode="numeric"

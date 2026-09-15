@@ -51,7 +51,11 @@ test.describe('アクティブ車両の切り替え(#575)', () => {
     await homePage.goto()
 
     const bikeSwitcher = new BikeSwitcherPage(page)
-    await expect(page.getByText('単独バイク').first()).toBeVisible()
+    // BikeSwitcherはモバイル・デスクトップ両方のヘッダーに配置され、
+    // CSSで一方のみ表示される（非表示側はdisplay:noneでアクセシビリティ
+    // ツリーから除外される）。getByText は非表示要素も拾ってしまうため、
+    // ロールで一意に定まる表示中のヘッダーに絞り込んで検証する
+    await expect(page.getByRole('banner').getByText('単独バイク')).toBeVisible()
     await expect(bikeSwitcher.trigger).toHaveCount(0)
   })
 })

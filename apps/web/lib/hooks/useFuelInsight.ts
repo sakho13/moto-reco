@@ -2,7 +2,10 @@
 
 import useSWR, { type SWRResponse } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
-import type { ApiResponseFuelInsight, SuccessResponse } from '@repo/shared-types'
+import type {
+  ApiResponseFuelInsight,
+  SuccessResponse,
+} from '@repo/shared-types'
 import { authenticatedFetch } from '../api/client'
 
 /**

@@ -23,7 +23,10 @@ const DASH = '—'
 export function RecentRecordRow({ item, onClick }: Props) {
   const kpi =
     item.type === 'FUEL_LOG' ? (
-      <FuelKpi fuelEfficiency={item.fuelLog.fuelEfficiency} isFullTank={item.fuelLog.isFullTank} />
+      <FuelKpi
+        fuelEfficiency={item.fuelLog.fuelEfficiency}
+        isFullTank={item.fuelLog.isFullTank}
+      />
     ) : (
       <TouringKpi
         startMileage={item.touring.startMileage}
