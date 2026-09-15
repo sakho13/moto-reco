@@ -39,7 +39,9 @@ export function BikeGauges({ bikeId, totalMileage }: Props) {
 
   const lastFuelLog = fuelLogs[0] ?? null
   const distanceSinceLastFuelLog =
-    lastFuelLog === null ? null : Math.max(totalMileage - lastFuelLog.mileage, 0)
+    lastFuelLog === null
+      ? null
+      : Math.max(totalMileage - lastFuelLog.mileage, 0)
 
   const now = new Date()
   const thisMonthFuelCost =
@@ -71,7 +73,9 @@ export function BikeGauges({ bikeId, totalMileage }: Props) {
 
       <div className={styles.gauge}>
         <p className={styles.value}>
-          {thisMonthFuelCost === null ? DASH : thisMonthFuelCost.toLocaleString()}
+          {thisMonthFuelCost === null
+            ? DASH
+            : thisMonthFuelCost.toLocaleString()}
           <span className={styles.unit}>円</span>
         </p>
         <p className={styles.label}>今月の燃料費</p>

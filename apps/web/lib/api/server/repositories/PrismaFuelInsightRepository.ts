@@ -112,9 +112,13 @@ export class PrismaFuelInsightRepository
       averageTotalPrice: average(rows.map((row) => row.price)),
       averagePricePerLiter: average(pricePerLiterValues),
       minPricePerLiter:
-        pricePerLiterValues.length > 0 ? Math.min(...pricePerLiterValues) : null,
+        pricePerLiterValues.length > 0
+          ? Math.min(...pricePerLiterValues)
+          : null,
       maxPricePerLiter:
-        pricePerLiterValues.length > 0 ? Math.max(...pricePerLiterValues) : null,
+        pricePerLiterValues.length > 0
+          ? Math.max(...pricePerLiterValues)
+          : null,
     })
   }
 }

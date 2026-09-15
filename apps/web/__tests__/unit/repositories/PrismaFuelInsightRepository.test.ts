@@ -32,7 +32,9 @@ describe('PrismaFuelInsightRepository', () => {
     queryRaw = vi.fn()
     repository = new PrismaFuelInsightRepository({
       $queryRaw: queryRaw,
-    } as unknown as ConstructorParameters<typeof PrismaFuelInsightRepository>[0])
+    } as unknown as ConstructorParameters<
+      typeof PrismaFuelInsightRepository
+    >[0])
   })
 
   test('初回給油のみ登録されている場合、averageFuelEfficiencyは0ではなくnullになる', async () => {
