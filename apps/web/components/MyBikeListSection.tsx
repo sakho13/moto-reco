@@ -26,7 +26,7 @@ export const MyBikeListSection = () => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2 className={styles.title}>マイバイク</h2>
+          <h2 className={styles.title}>愛車</h2>
         </div>
         <div className={styles.errorContainer}>
           <p className={styles.errorMessage}>
@@ -43,7 +43,7 @@ export const MyBikeListSection = () => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2 className={styles.title}>マイバイク</h2>
+          <h2 className={styles.title}>愛車</h2>
         </div>
         <div className={styles.loadingContainer}>
           <p>読み込み中...</p>
@@ -55,7 +55,7 @@ export const MyBikeListSection = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>マイバイク</h2>
+        <h2 className={styles.title}>愛車</h2>
       </div>
 
       {bikes.length === 0 ? (

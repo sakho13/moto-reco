@@ -74,7 +74,7 @@ export const FuelLogListSection = ({
             <>
               <p>給油履歴がまだありません</p>
               <Button onClick={onRegister} variant="primary">
-                最初の給油履歴を登録
+                最初の給油を記録
               </Button>
             </>
           )}

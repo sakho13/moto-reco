@@ -119,7 +119,7 @@ export function GoodsPurchaseModal({
           gap: 'var(--spacing-4)',
         }}
       >
-        <FormField label="マイバイク" htmlFor="userMyBikeId">
+        <FormField label="愛車" htmlFor="userMyBikeId">
           <Select
             id="userMyBikeId"
             options={bikeOptions}
