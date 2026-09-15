@@ -185,7 +185,7 @@ function FuelLogsPage() {
             variant="primary"
             disabled={isAtGuestFuelLimit}
           >
-            給油履歴を登録
+            給油を記録
           </Button>
         </div>
         {isGuest && !isLoading && (

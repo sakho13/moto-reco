@@ -72,4 +72,51 @@ describe('FuelEfficiencyCalculationService', () => {
     const result = service.calculate([])
     expect(result.size).toBe(0)
   })
+
+  describe('calculateAverageEfficiency', () => {
+    test('初回給油のみの場合はnullになる（区間距離・給油量とも母数から除外）', () => {
+      const result = service.calculateAverageEfficiency([
+        { fuelLogId: 'log-1', mileage: 1000, amount: 10, isFullTank: true },
+      ])
+
+      expect(result).toBeNull()
+    })
+
+    test('給油履歴が0件の場合はnullになる', () => {
+      expect(service.calculateAverageEfficiency([])).toBeNull()
+    })
+
+    test('継ぎ足し給油のみの場合はnullになる（次に満タン給油が無く区間が完結しない）', () => {
+      const result = service.calculateAverageEfficiency([
+        { fuelLogId: 'partial-1', mileage: 1000, amount: 3, isFullTank: false },
+        { fuelLogId: 'partial-2', mileage: 1100, amount: 4, isFullTank: false },
+      ])
+
+      expect(result).toBeNull()
+    })
+
+    test('満タン給油が2件以上の場合、従来どおり総距離÷総給油量の平均になる', () => {
+      const result = service.calculateAverageEfficiency([
+        { fuelLogId: 'full-1', mileage: 1000, amount: 10, isFullTank: true },
+        { fuelLogId: 'full-2', mileage: 1500, amount: 12, isFullTank: true },
+        { fuelLogId: 'full-3', mileage: 2000, amount: 11.5, isFullTank: true },
+      ])
+
+      // full-1は初回給油のため母数から除外。(2000-1000)/(12+11.5)
+      expect(result).toBeCloseTo(1000 / 23.5, 10)
+    })
+
+    test('満タン→継ぎ足し→満タン→継ぎ足しの場合、末尾の継ぎ足しは除外され、途中の継ぎ足し分の給油量は分母に含まれる', () => {
+      const result = service.calculateAverageEfficiency([
+        { fuelLogId: 'full-1', mileage: 1000, amount: 10, isFullTank: true },
+        { fuelLogId: 'partial-1', mileage: 1100, amount: 3, isFullTank: false },
+        { fuelLogId: 'full-2', mileage: 1250, amount: 8, isFullTank: true },
+        { fuelLogId: 'partial-2', mileage: 1300, amount: 2, isFullTank: false },
+      ])
+
+      // 距離: 最初の満タン(1000)〜最後の満タン(1250) = 250
+      // 給油量: 継ぎ足し(3) + 満タン(8) = 11（末尾のpartial-2は次の満タンが無いため除外）
+      expect(result).toBeCloseTo(250 / 11, 10)
+    })
+  })
 })

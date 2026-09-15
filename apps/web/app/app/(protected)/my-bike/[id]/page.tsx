@@ -1,32 +1,40 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
-import useSWR, { mutate } from 'swr'
+import { useParams } from 'next/navigation'
+import { useEffect } from 'react'
+import useSWR from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
-import { formatDate, isUnsetDate } from '@repo/shared-utils'
-import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
-import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
-import { EditIcon } from '@/components/icons/EditIcon'
-import { FuelIcon } from '@/components/icons/FuelIcon'
-import { GoodsIcon } from '@/components/icons/GoodsIcon'
-import { TouringIcon } from '@/components/icons/TouringIcon'
-import { WrenchIcon } from '@/components/icons/WrenchIcon'
-import { NavigationCard } from '@/components/NavigationCard'
+import styles from './page.module.css'
+import { BikeGauges } from '@/components/bike/BikeGauges'
+import { BikeHeroSection } from '@/components/bike/BikeHeroSection'
+import { BikePrimaryAction } from '@/components/bike/BikePrimaryAction'
+import { BikeRecordLinks } from '@/components/bike/BikeRecordLinks'
+import { MaintenanceScheduleSection } from '@/components/bike/MaintenanceScheduleSection'
 import { BikePhotosCard } from '@/components/photo/BikePhotosCard'
 import { apiGet, authenticatedFetch } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
+import { useActiveBike } from '@/lib/hooks/useActiveBike'
+import { useAuth } from '@/lib/hooks/useAuth'
 
+/**
+ * 愛車の詳細（カルテ）
+ *
+ * @remarks
+ * 一覧を挟まずアクティブ車両の詳細を直接開く構成（Issue #575）の詳細ページ本体。
+ * 見出し・諸元 → 計器 → 点検の予定 → 主アクション → 記録へのリンクの順に構成する
+ * （画面案の並び順は、モバイルモック「愛車」の視覚的な流れ：ヒーロー→CTA→行リスト
+ * を優先し、CTAを記録へのリンクより先に置いている）。
+ */
 function BikeDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const id = params.id as string
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const { isGuest } = useAuth()
+  const { setActiveBikeId } = useActiveBike()
 
   const { data: profile } = useSWR('/api/v1/user/profile', async (url) => {
     const response = await apiGet(url)
@@ -51,12 +59,18 @@ function BikeDetailPage() {
     }
   )
 
+  // このバイクの詳細を開いたら、アクティブ車両をこのバイクに同期する
+  // （ヘッダーのBikeSwitcher・ホームなどアプリ全体が参照する）
+  useEffect(() => {
+    if (data) {
+      setActiveBikeId(id)
+    }
+  }, [data, id, setActiveBikeId])
+
   if (isLoading) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-100">
-          <p className="text-lg">読み込み中...</p>
-        </div>
+      <div className={styles.page}>
+        <p className={styles.centerMessage}>読み込み中...</p>
       </div>
     )
   }
@@ -66,25 +80,21 @@ function BikeDetailPage() {
       error instanceof ApiV1Error && error.errorCode === 'NOT_FOUND'
 
     return (
-      <div className="w-full max-w-2xl">
-        <div className="mb-4">
-          <Button onClick={() => router.push('/app/home')} variant="cloud">
-            ← 戻る
-          </Button>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">
+      <div className={styles.page}>
+        <div className={styles.errorBox}>
+          <h1 className={styles.errorTitle}>
             {isNotFound ? 'バイクが見つかりません' : 'エラー'}
           </h1>
-          <p className="text-gray-700 mb-4">
+          <p className={styles.errorMessage}>
             {isNotFound
               ? '指定されたバイクは存在しないか、削除されています。'
               : error instanceof ApiV1Error
                 ? error.message
                 : 'バイク情報の取得に失敗しました'}
           </p>
-          <Button onClick={() => router.push('/app/home')}>ホームに戻る</Button>
+          <Button onClick={() => (window.location.href = '/app/home')}>
+            ホームに戻る
+          </Button>
         </div>
       </div>
     )
@@ -95,95 +105,30 @@ function BikeDetailPage() {
   }
 
   const bike = data
-  const displayTitle =
-    bike.nickname ||
-    `${bike.manufacturerName || ''} ${bike.modelName || '不明なバイク'}`.trim()
 
   return (
-    <>
-      {isEditModalOpen && (
-        <MyBikeEditModal
-          bikeId={id}
-          onClose={() => setIsEditModalOpen(false)}
-          onSuccess={() => {
-            setIsEditModalOpen(false)
-            mutate(`/api/v1/user-bike/bike/${id}`)
-          }}
-        />
-      )}
+    <div className={styles.page}>
+      <BikeHeroSection bike={bike} />
 
-      <div className="w-full max-w-md mb-4">
-        <Button variant="cloud" onClick={() => router.push('/app/my-bike')}>
-          ← 戻る
-        </Button>
-      </div>
+      <BikeGauges bikeId={id} totalMileage={bike.totalMileage} />
 
-      <div className="w-full max-w-md flex flex-col gap-4">
-        <BaseCard
-          title={displayTitle}
-          headerAction={
-            <Button
-              onClick={() => setIsEditModalOpen(true)}
-              variant="cloud"
-              size="sm"
-              aria-label="バイク情報を編集"
-            >
-              <EditIcon />
-            </Button>
-          }
-        >
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm select-none">
-            <span>総走行距離: {bike.totalMileage.toLocaleString()}km</span>
-            <span>
-              排気量: {bike.displacement ? `${bike.displacement}cc` : '不明'}
-            </span>
-            <span>
-              購入日:{' '}
-              {bike.purchaseDate && !isUnsetDate(bike.purchaseDate)
-                ? formatDate(bike.purchaseDate)
-                : '未設定'}
-            </span>
-            <span>給油回数: {bike.fuelLogCount}回</span>
-            <span>ツーリング回数: {bike.touringCount}回</span>
-          </div>
-        </BaseCard>
+      <MaintenanceScheduleSection bikeId={id} />
 
-        {isAdmin && <BikePhotosCard myUserBikeId={id} />}
-      </div>
+      <BikePrimaryAction
+        bikeId={id}
+        fuelLogCount={bike.fuelLogCount}
+        isGuest={isGuest}
+      />
 
-      {/* 履歴管理セクション */}
-      <div className="w-full max-w-md flex flex-col gap-4 mb-20">
-        <NavigationCard
-          href={`/app/my-bike/${id}/fuel-logs`}
-          title="給油履歴"
-          description="給油履歴を確認・管理できます"
-          icon={<FuelIcon />}
-        />
+      <BikeRecordLinks
+        bikeId={id}
+        fuelLogCount={bike.fuelLogCount}
+        touringCount={bike.touringCount}
+        isAdmin={isAdmin}
+      />
 
-        <NavigationCard
-          href={`/app/my-bike/${id}/tourings`}
-          title="ツーリング"
-          description="ツーリング履歴・プランを確認・管理できます"
-          icon={<TouringIcon />}
-        />
-
-        <NavigationCard
-          href={`/app/my-bike/${id}/maintenance-logs`}
-          title="メンテナンス履歴"
-          description="メンテナンス履歴を確認・管理できます"
-          icon={<WrenchIcon />}
-        />
-
-        {isAdmin && (
-          <NavigationCard
-            href={`/app/my-bike/${id}/goods`}
-            title="取り付けアクセサリ"
-            description="取り付けたグッズを確認・管理できます"
-            icon={<GoodsIcon />}
-          />
-        )}
-      </div>
-    </>
+      {isAdmin && <BikePhotosCard myUserBikeId={id} />}
+    </div>
   )
 }
 

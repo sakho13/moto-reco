@@ -1,5 +1,13 @@
 import type { GoodsCategory } from '../domain/goods'
+import type {
+  MaintenanceCategory,
+  MaintenanceType,
+} from '../domain/maintenance'
 import type { MaintenanceLogItem } from '../domain/maintenanceLog'
+import type {
+  MaintenanceScheduleBasis,
+  MaintenanceScheduleStatus,
+} from '../domain/maintenanceSchedule'
 import type {
   TouringPlanRouteType,
   TouringPlanSpotType,
@@ -267,6 +275,39 @@ export type ApiResponseMaintenanceLogDetail = {
 }
 
 export type ApiResponseMaintenanceLogList = ApiResponseMaintenanceLogDetail[]
+
+/**
+ * 点検予定（メンテナンス項目1件分）
+ *
+ * @remarks
+ * Issue #575「2. 点検の予定」の仕様に基づく。ユーザーごとの交換サイクル設定は
+ * 持たず、メンテナンス項目マスタの既定値（`recommendedMileageInterval` /
+ * `recommendedPeriodMonths`）と直近の整備記録から算出する。
+ */
+export type ApiResponseMaintenanceScheduleItem = {
+  type: MaintenanceType
+  category: MaintenanceCategory
+  typeName: string
+  categoryName: string
+  /** 採用した基準。算出不能（記録なし・推奨間隔未設定）の場合は null */
+  basis: MaintenanceScheduleBasis | null
+  /** 残り走行距離（km）。basisが MILEAGE の場合のみ non-null。超過時は負値 */
+  remainingMileage: number | null
+  /** 次回予定日（ISO 8601形式）。basisが PERIOD の場合のみ non-null */
+  dueDate: string | null
+  /** 次回予定日までの残り日数。basisが PERIOD の場合のみ non-null。超過時は負値 */
+  remainingDays: number | null
+  /** 算出根拠となった直近の整備記録。記録がない場合は null */
+  lastRecord: {
+    performedAt: string
+    mileage: number
+  } | null
+  status: MaintenanceScheduleStatus
+}
+
+/** 残りが少ない順（＝到来が早い順）に並んだ点検予定一覧 */
+export type ApiResponseMaintenanceScheduleList =
+  ApiResponseMaintenanceScheduleItem[]
 
 export type ApiResponsePhotoDetail = {
   photoId: string

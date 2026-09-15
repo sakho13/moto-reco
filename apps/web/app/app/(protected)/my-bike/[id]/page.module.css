@@ -1,0 +1,43 @@
+/*
+ * 愛車の詳細（カルテ）ページ全体のレイアウト。
+ * 「手帳であって管理画面ではない」（Issue #575「03 再設計の原則」）ため、
+ * PCの広い紙面でも1カラムのまま間延びさせず、諸元は2列・計器は横並びで
+ * 密度を作る。そのため本文の最大幅はダッシュボードよりもだいぶ狭く抑える。
+ */
+.page {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  padding-bottom: var(--spacing-8);
+}
+
+.centerMessage {
+  padding: var(--spacing-8) 0;
+  text-align: center;
+  color: var(--color-inkLight);
+}
+
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+}
+
+.errorTitle {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  margin: 0;
+  color: var(--color-inkLight);
+}

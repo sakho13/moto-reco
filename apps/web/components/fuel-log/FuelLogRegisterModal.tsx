@@ -110,7 +110,7 @@ export function FuelLogRegisterModal({
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
       await mutateHistoryLists()
-      toast.success('給油履歴を登録しました')
+      toast.success('給油を記録しました')
       onSuccess()
     } catch (err) {
       trackEvent('fuel_log_error', {

@@ -5,13 +5,14 @@ import useSWR, { mutate } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import { getCurrentDate } from '@repo/shared-utils'
 import { toast } from '@repo/ui/sonner'
-import { QuickFuelSection } from '@/components/QuickFuelSection'
+import { HomeActions } from '@/components/home/HomeActions'
+import { HomeGauges } from '@/components/home/HomeGauges'
 import { RecentHistorySection } from '@/components/RecentHistorySection'
 import { TouringModeView } from '@/components/touring/TouringModeView'
-import { TouringStartEndSection } from '@/components/TouringStartEndSection'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { mutateHistoryLists } from '@/lib/api/mutateHistory'
+import { getBikeDisplayName } from '@/lib/bike'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
 
@@ -39,13 +40,12 @@ function Page() {
   const activeBikeEntry = ongoingTourings.find((b) => b.ongoingTouring !== null)
   const activeTouring = activeBikeEntry?.ongoingTouring ?? null
 
-  // バイク名を組み立てる（TouringStartEndSection と同じロジック）
+  // バイク名を組み立てる（進行中ツーリングを持つバイクの名称。アクティブ車両とは独立）
   const activeBikeInfo = activeBikeEntry
     ? bikes.find((b) => b.myUserBikeId === activeBikeEntry.myUserBikeId)
     : null
   const activeBikeName = activeBikeInfo
-    ? activeBikeInfo.nickname ||
-      `${activeBikeInfo.manufacturerName || ''} ${activeBikeInfo.modelName || '不明なバイク'}`.trim()
+    ? getBikeDisplayName(activeBikeInfo)
     : ''
 
   const handleEndTouring = async (
@@ -121,13 +121,13 @@ function Page() {
 
   return (
     <div className="w-full max-w-lg">
-      {/* ツーリング開始停止（上） */}
-      <TouringStartEndSection />
+      {/* 計器（直近燃費・平均燃費・前回単価） */}
+      <HomeGauges />
 
-      {/* 給油クイック登録 */}
-      <QuickFuelSection />
+      {/* 主アクション（給油を記録・ツーリングを開始） */}
+      <HomeActions />
 
-      {/* 最新ヒストリー */}
+      {/* 最近の記録 */}
       <RecentHistorySection />
     </div>
   )

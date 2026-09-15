@@ -19,7 +19,7 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const items: BreadcrumbItem[] = []
 
   if (segments[1] === 'my-bike') {
-    items.push({ label: 'マイバイク', href: '/app/my-bike' })
+    items.push({ label: '愛車', href: '/app/my-bike' })
 
     if (segments.length >= 3) {
       items.push({ label: 'バイク詳細', href: `/app/my-bike/${segments[2]}` })

@@ -39,6 +39,7 @@ import { UserBikeService } from '../services/UserBikeService'
 import { buildFuelEfficiencyMapsByBike } from '../utils/fuelEfficiencyMap'
 import userBikeFuelLogs from './userBike/fuelLogs'
 import userBikeMaintenanceLogs from './userBike/maintenanceLogs'
+import userBikeMaintenanceSchedule from './userBike/maintenanceSchedule'
 import userBikeTouringPlans from './userBike/touringPlans'
 import userBikeTourings from './userBike/tourings'
 
@@ -558,6 +559,8 @@ userBike.get(
 )
 
 userBike.route('/', userBikeMaintenanceLogs)
+
+userBike.route('/', userBikeMaintenanceSchedule)
 
 userBike.route('/', userBikeTourings)
 

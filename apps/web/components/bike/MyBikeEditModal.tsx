@@ -107,7 +107,7 @@ export function MyBikeEditModal({
   }
 
   return (
-    <ModalBase title="マイバイク情報を編集" onClose={onClose}>
+    <ModalBase title="愛車情報を編集" onClose={onClose}>
       {isLoading && <p>読み込み中...</p>}
 
       {!isLoading && initialData && (

@@ -7,8 +7,12 @@
  * 文字は ink / inkLight を使い、ライト・ダーク双方で読める組み合わせにする。
  */
 .banner {
+  /*
+   * Issue #575: 幅は独自のブレークポイントを持たず、レイアウト側
+   * （(protected)/layout.module.css の `.page`、最大1200px）に委ねる。
+   * こうすることで本文と同じ基準線・同じ上限幅に揃う。
+   */
   width: 100%;
-  max-width: 42rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
