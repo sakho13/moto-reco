@@ -322,8 +322,8 @@ export class MaintenanceScheduleCalculationService {
       (a, b) => statusRank(a.status) - statusRank(b.status)
     )
 
-    return [...sortedWithSchedule, ...sortedWithoutSchedule].map(
-      (forecast) => this.toPublicForecast(forecast)
+    return [...sortedWithSchedule, ...sortedWithoutSchedule].map((forecast) =>
+      this.toPublicForecast(forecast)
     )
   }
 

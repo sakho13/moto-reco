@@ -57,7 +57,9 @@ describe('MaintenanceScheduleCalculationService', () => {
       currentMileage: 25000,
       now: new Date('2024-06-01T00:00:00.000Z'),
       masterItems: [driveChainItem],
-      maintenanceLogs: [logOf('2024-01-01T00:00:00.000Z', 10000, ['DRIVE_CHAIN'])],
+      maintenanceLogs: [
+        logOf('2024-01-01T00:00:00.000Z', 10000, ['DRIVE_CHAIN']),
+      ],
     })
 
     expect(result).toMatchObject({
@@ -184,9 +186,7 @@ describe('MaintenanceScheduleCalculationService', () => {
       currentMileage: 14000,
       now: new Date('2024-06-01T00:00:00.000Z'),
       masterItems: [driveChainItem],
-      maintenanceLogs: [
-        logOf('2024-01-01T00:00:00.000Z', 0, ['DRIVE_CHAIN']),
-      ],
+      maintenanceLogs: [logOf('2024-01-01T00:00:00.000Z', 0, ['DRIVE_CHAIN'])],
     })
 
     expect(result).toMatchObject({
@@ -199,9 +199,7 @@ describe('MaintenanceScheduleCalculationService', () => {
       currentMileage: 21000,
       now: new Date('2024-06-01T00:00:00.000Z'),
       masterItems: [driveChainItem],
-      maintenanceLogs: [
-        logOf('2024-01-01T00:00:00.000Z', 0, ['DRIVE_CHAIN']),
-      ],
+      maintenanceLogs: [logOf('2024-01-01T00:00:00.000Z', 0, ['DRIVE_CHAIN'])],
     })
 
     expect(overdue).toMatchObject({

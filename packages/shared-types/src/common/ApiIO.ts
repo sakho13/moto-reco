@@ -1,5 +1,8 @@
 import type { GoodsCategory } from '../domain/goods'
-import type { MaintenanceCategory, MaintenanceType } from '../domain/maintenance'
+import type {
+  MaintenanceCategory,
+  MaintenanceType,
+} from '../domain/maintenance'
 import type { MaintenanceLogItem } from '../domain/maintenanceLog'
 import type {
   MaintenanceScheduleBasis,
