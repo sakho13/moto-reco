@@ -1,0 +1,64 @@
+/**
+ * Issue #575: PCの「シェル」レイアウト。
+ *
+ * @remarks
+ * - `.appRoot`  ヘッダー・サイドバー・本文をすべて包む。共通のボタン最大幅
+ *               ルールをここに置くことで、`components/Navigation/` 配下の
+ *               ボタン（例: サイドバーの「記録」）から開いたモーダルにも、
+ *               ページ本文から開いたモーダルにも同じ上限が効く。
+ * - `.shell`    本文の外側の余白（綴じ代 + ガター）を確保するだけの箱。
+ *               モバイル（〜639px）は既存の見た目（p-4 / items-center 等）を
+ *               そのまま維持する。
+ * - `.page`     紙面本体。最大1200pxで、左端を `--app-gutter` 分の
+ *               1本の基準線に揃える（`margin-inline: 0` で中央寄せしない）。
+ */
+
+.appRoot {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  /*
+   * ツーリング中の「スポットを記録」等、@repo/ui の Button に fullWidth を
+   * 指定している箇所がPCでコンテナ幅いっぱいに伸びるのを防ぐ共通の上限。
+   * packages/ui 自体は変更せず、シェル側のCSSで上限だけを効かせる。
+   */
+  .appRoot button {
+    max-width: 320px;
+  }
+}
+
+.shell {
+  min-height: 100vh;
+  width: 100%;
+  padding: var(--spacing-4);
+  padding-top: 5rem;
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .shell {
+    padding-top: 4rem;
+    padding-bottom: var(--spacing-4);
+    padding-left: calc(var(--app-sidebar-w) + var(--app-gutter));
+    padding-right: var(--app-gutter);
+  }
+}
+
+.page {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-6);
+}
+
+@media (min-width: 640px) {
+  .page {
+    /* 基準の左端を1本にする: 紙面を中央寄せせず綴じ代側へ寄せる */
+    margin-inline: 0;
+    align-items: flex-start;
+  }
+}

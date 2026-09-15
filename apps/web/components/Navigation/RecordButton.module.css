@@ -42,10 +42,21 @@
 }
 
 /* デスクトップのサイドバーは縦積みのため、中央ナビのようなせり出しはさせない */
+.sidebarVariant {
+  width: 100%;
+}
+
 .sidebarVariant .iconCircle {
   margin-top: 0;
   width: 3rem;
   height: 3rem;
+}
+
+/* タブレット幅（綴じ代を折りたたむ）: ラベルを隠しアイコンのみにする */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .sidebarVariant .label {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
