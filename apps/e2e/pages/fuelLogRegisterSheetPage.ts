@@ -5,7 +5,7 @@ import { type Locator, type Page } from '@playwright/test'
  *
  * @remarks
  * `FuelLogRegisterModal` 内の `FuelLogRegisterSheet`（#575 P1）に対応。
- * `/app/my-bike/{bikeId}/fuel-logs` の「給油履歴を登録」ボタンから開く。
+ * `/app/my-bike/{bikeId}/fuel-logs` の「給油を記録」ボタンから開く。
  * 入力はODO・給油量・支払金額の3項目のみで、それ以外（満タン/継ぎ足し・日時・
  * メモ）は既定値のまま送信できる。
  */
@@ -41,7 +41,7 @@ export class FuelLogRegisterSheetPage {
   /** バイクの給油履歴ページから、給油登録シートを開く */
   async goto(bikeId: string): Promise<void> {
     await this.page.goto(`/app/my-bike/${bikeId}/fuel-logs`)
-    await this.page.getByRole('button', { name: '給油履歴を登録' }).click()
+    await this.page.getByRole('button', { name: '給油を記録' }).click()
     await this.sheet.waitFor({ state: 'visible' })
   }
 

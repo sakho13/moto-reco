@@ -43,7 +43,7 @@ test.describe('給油シート - 登録フロー(#575 P1)', () => {
 
     await sheet.submit()
 
-    await expect(page.getByText('給油履歴を登録しました')).toBeVisible({
+    await expect(page.getByText('給油を記録しました')).toBeVisible({
       timeout: 10_000,
     })
     await expect(sheet.sheet).not.toBeVisible()
