@@ -2423,12 +2423,75 @@ describe('UserBike API Endpoints', () => {
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
       expect(json.message).toBe('燃費インサイト取得成功')
-      expect(json.data.averageFuelEfficiency).toBeCloseTo(700 / 33, 5)
+      // 1件目は初回給油（直前の満タン給油が無い）のため、距離・給油量とも母数から除外される。
+      // 区間距離: (1300-1000)+(1600-1300)=600, 区間給油量: 12+11=23
+      expect(json.data.averageFuelEfficiency).toBeCloseTo(600 / 23, 5)
       expect(json.data.averageAmount).toBeCloseTo(11, 5)
       expect(json.data.averageTotalPrice).toBeCloseTo(1833.3333, 3)
       expect(json.data.averagePricePerLiter).toBeCloseTo(166.6666, 3)
       expect(json.data.minPricePerLiter).toBeCloseTo(150, 5)
       expect(json.data.maxPricePerLiter).toBeCloseTo(200, 5)
+    })
+
+    test('初回給油のみ登録されている場合、平均燃費は0ではなくnullになる', async () => {
+      const freshUser = await createTestUser()
+      const freshBike = await createTestUserBike(freshUser.token, {
+        displacement: 250,
+        nickname: '初回給油のみのバイク',
+        totalMileage: 900,
+      })
+
+      await createTestFuelLog(freshUser.token, freshBike.myUserBikeId, {
+        refueledAt: '2024-01-01T10:00:00.000Z',
+        mileage: 1000,
+        previousMileage: 900,
+        amount: 10.0,
+        totalPrice: 1500,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${freshBike.myUserBikeId}/fuel-insights`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${freshUser.token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.averageFuelEfficiency).toBeNull()
+      // 燃費とは無関係な集計（1回あたりの給油量・価格）は初回給油も母数に含まれる
+      expect(json.data.averageAmount).toBeCloseTo(10, 5)
+      expect(json.data.averageTotalPrice).toBeCloseTo(1500, 5)
+    })
+
+    test('給油履歴が無い場合、全ての集計値がnullになる', async () => {
+      const freshUser = await createTestUser()
+      const freshBike = await createTestUserBike(freshUser.token, {
+        displacement: 250,
+        nickname: '給油履歴なしバイク',
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${freshBike.myUserBikeId}/fuel-insights`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${freshUser.token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.averageFuelEfficiency).toBeNull()
+      expect(json.data.averageAmount).toBeNull()
+      expect(json.data.averageTotalPrice).toBeNull()
+      expect(json.data.averagePricePerLiter).toBeNull()
+      expect(json.data.minPricePerLiter).toBeNull()
+      expect(json.data.maxPricePerLiter).toBeNull()
     })
   })
 

@@ -9,6 +9,21 @@ export type FuelEfficiencyCalculationTarget = {
 }
 
 /**
+ * 満タン法で算出した1区間の詳細
+ *
+ * @remarks
+ * `distance / amount` が燃費（km/L）になる。平均燃費など、燃費を算出できる
+ * 区間だけを母数にした集計を行う際に、距離・給油量を個別に必要とするため
+ * {@link FuelEfficiencyCalculationService.calculateDetails} が返す。
+ */
+export type FuelEfficiencyInterval = {
+  /** 直前の満タン給油からの区間距離（km） */
+  distance: number
+  /** 区間距離に対応する給油量（継ぎ足し給油分を含む合計, L） */
+  amount: number
+}
+
+/**
  * 満タン法による燃費計算を担うサービス
  *
  * @remarks
@@ -38,7 +53,34 @@ export class FuelEfficiencyCalculationService {
   public calculate(
     logsOrderedByMileageAsc: readonly FuelEfficiencyCalculationTarget[]
   ): Map<string, number | null> {
+    const details = this.calculateDetails(logsOrderedByMileageAsc)
     const result = new Map<string, number | null>()
+
+    for (const [fuelLogId, interval] of details) {
+      result.set(
+        fuelLogId,
+        interval !== null ? interval.distance / interval.amount : null
+      )
+    }
+
+    return result
+  }
+
+  /**
+   * 給油履歴（mileage昇順）から、各給油ログの区間詳細（区間距離・区間給油量）を算出する
+   *
+   * @remarks
+   * {@link calculate} は燃費（km/L）の比率のみを返すが、平均燃費などの集計
+   * （FuelInsight）では「燃費を算出できる区間」の距離・給油量をそれぞれ合計する
+   * 必要があるため、内訳を個別に取得できるメソッドとして分離している。
+   *
+   * @param logsOrderedByMileageAsc 同一バイクの給油履歴。mileage昇順に並んでいること
+   * @returns fuelLogIdをキーとした区間詳細のMap。計算不可の場合はnull
+   */
+  public calculateDetails(
+    logsOrderedByMileageAsc: readonly FuelEfficiencyCalculationTarget[]
+  ): Map<string, FuelEfficiencyInterval | null> {
+    const result = new Map<string, FuelEfficiencyInterval | null>()
 
     let lastFullTankMileage: number | null = null
     let amountSinceLastFullTank = 0
@@ -58,7 +100,7 @@ export class FuelEfficiencyCalculationService {
       result.set(
         log.fuelLogId,
         distance !== null && distance > 0
-          ? distance / amountSinceLastFullTank
+          ? { distance, amount: amountSinceLastFullTank }
           : null
       )
 
@@ -67,5 +109,38 @@ export class FuelEfficiencyCalculationService {
     }
 
     return result
+  }
+
+  /**
+   * 給油履歴（mileage昇順）から、期間全体の平均燃費（km/L）を算出する
+   *
+   * @remarks
+   * 燃費を算出できる区間（直前に満タン給油が存在し、区間距離が正の満タン給油）
+   * のみを母数とし、区間距離の合計 ÷ 区間給油量の合計（距離加重平均）で算出する。
+   * 初回給油（直前の満タン給油が無い）や継ぎ足し給油単独は距離・給油量とも
+   * 母数から除外されるが、継ぎ足し給油の給油量は次の満タン給油の区間に
+   * 繰り込まれるため捨てられることはない。
+   * 燃費を算出できる区間が1件も無い場合は `0` ではなく `null` を返す。
+   *
+   * @param logsOrderedByMileageAsc 同一バイクの給油履歴。mileage昇順に並んでいること
+   * @returns 平均燃費（km/L, 丸めなしの生の値）。算出不可の場合はnull
+   */
+  public calculateAverageEfficiency(
+    logsOrderedByMileageAsc: readonly FuelEfficiencyCalculationTarget[]
+  ): number | null {
+    const details = this.calculateDetails(logsOrderedByMileageAsc)
+
+    let totalDistance = 0
+    let totalAmount = 0
+
+    for (const interval of details.values()) {
+      if (interval === null) {
+        continue
+      }
+      totalDistance += interval.distance
+      totalAmount += interval.amount
+    }
+
+    return totalAmount > 0 ? totalDistance / totalAmount : null
   }
 }

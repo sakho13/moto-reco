@@ -1,15 +1,19 @@
 import { Prisma } from '@repo/database'
-import { FuelInsightEntity, IFuelInsightRepository } from '@repo/shared-domain'
+import {
+  FuelEfficiencyCalculationService,
+  FuelInsightEntity,
+  IFuelInsightRepository,
+} from '@repo/shared-domain'
 import { FuelInsightPeriod, MyUserBikeId } from '@repo/shared-types'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
-type FuelInsightRow = {
-  averageFuelEfficiency: number | null
-  averageAmount: number | null
-  averageTotalPrice: number | null
-  averagePricePerLiter: number | null
-  minPricePerLiter: number | null
-  maxPricePerLiter: number | null
+type FuelInsightSourceRow = {
+  id: string
+  amount: number
+  price: number
+  mileage: number
+  isFullTank: boolean
+  refueledAt: Date
 }
 
 const buildPeriodCondition = (period: FuelInsightPeriod) => {
@@ -30,72 +34,87 @@ const buildPeriodCondition = (period: FuelInsightPeriod) => {
 const buildLimitClause = (period: FuelInsightPeriod) =>
   period === 'last-5' ? Prisma.sql`LIMIT 5` : Prisma.empty
 
+/**
+ * 数値配列の単純平均を返す。空配列の場合はnull
+ */
+const average = (values: readonly number[]): number | null =>
+  values.length === 0
+    ? null
+    : values.reduce((sum, value) => sum + value, 0) / values.length
+
 export class PrismaFuelInsightRepository
   extends PrismaRepositoryBase
   implements IFuelInsightRepository
 {
+  private readonly fuelEfficiencyCalculationService =
+    new FuelEfficiencyCalculationService()
+
   /**
    * @remarks
-   * `averageFuelEfficiency` は「期間内の総走行距離 ÷ 総給油量」で算出しており、
-   * 継ぎ足し給油（isFullTank: false）を除外する特別な絞り込みは行っていない。
-   * これは意図的な設計判断で、区間距離・給油量は個々のレコードを合計しても
-   * テレスコープして「期間内の総距離・総燃料」に一致するため、
-   * 満タン／継ぎ足しの区分に関わらず正しい値になる
-   * （P1: 満タン／継ぎ足しの区別 で導入。詳細はPR説明を参照）。
+   * `averageFuelEfficiency` は満タン法（{@link FuelEfficiencyCalculationService}）で
+   * 燃費を算出できる区間（直前に満タン給油が存在し、区間距離が正の満タン給油）のみを
+   * 母数にする。初回給油（直前の満タン給油が無い）は距離・給油量とも母数から除外し、
+   * 継ぎ足し給油（isFullTank: false）は単独では除外しつつ、その給油量は次の満タン
+   * 給油の区間に繰り込む。燃費を算出できる区間が1件も無い場合は `0` ではなく `null`
+   * を返す（呼び出し側で「算出不可」を表示するため）。
+   *
+   * `averageAmount` / `averageTotalPrice` / `averagePricePerLiter` /
+   * `minPricePerLiter` / `maxPricePerLiter` は走行距離・燃費とは無関係な
+   * 「1回の給油イベントあたり」の集計のため、初回給油・継ぎ足し給油を含む
+   * 期間内の給油ログ全件を母数にする（燃費が算出できるかどうかに関わらず、
+   * 給油量・価格の実績としては有効な値であるため）。
    */
   async getFuelInsight(
     myUserBikeId: MyUserBikeId,
     period: FuelInsightPeriod
   ): Promise<FuelInsightEntity> {
-    const rows = await this.connection.$queryRaw<FuelInsightRow[]>(
+    const rows = await this.connection.$queryRaw<FuelInsightSourceRow[]>(
       Prisma.sql`
-        WITH filtered AS (
-          SELECT
-            "amount",
-            "price",
-            "mileage",
-            "previous_mileage",
-            "refueled_at"
-          FROM "TUserMyBikeFuelLog"
-          WHERE "my_bike_id" = ${myUserBikeId}
-          ${buildPeriodCondition(period)}
-          ORDER BY "refueled_at" DESC
-          ${buildLimitClause(period)}
-        ),
-        stats AS (
-          SELECT
-            SUM(GREATEST("mileage" - "previous_mileage", 0))::float AS total_distance,
-            SUM("amount")::float AS total_amount,
-            AVG("amount")::float AS average_amount,
-            AVG("price")::float AS average_price,
-            AVG("price"::float / NULLIF("amount", 0)) AS average_price_per_liter,
-            MIN("price"::float / NULLIF("amount", 0)) AS min_price_per_liter,
-            MAX("price"::float / NULLIF("amount", 0)) AS max_price_per_liter
-          FROM filtered
-        )
         SELECT
-          CASE
-            WHEN total_amount IS NULL OR total_amount = 0 THEN NULL
-            ELSE total_distance / total_amount
-          END AS "averageFuelEfficiency",
-          average_amount AS "averageAmount",
-          average_price AS "averageTotalPrice",
-          average_price_per_liter AS "averagePricePerLiter",
-          min_price_per_liter AS "minPricePerLiter",
-          max_price_per_liter AS "maxPricePerLiter"
-        FROM stats
+          "id",
+          "amount",
+          "price",
+          "mileage",
+          "is_full_tank" AS "isFullTank",
+          "refueled_at" AS "refueledAt"
+        FROM "TUserMyBikeFuelLog"
+        WHERE "my_bike_id" = ${myUserBikeId}
+        ${buildPeriodCondition(period)}
+        ORDER BY "refueled_at" DESC
+        ${buildLimitClause(period)}
       `
     )
 
-    const [row] = rows
+    // 満タン法の区間判定にはmileage昇順である必要がある
+    const orderedByMileageAsc = [...rows].sort(
+      (a, b) =>
+        a.mileage - b.mileage || a.refueledAt.getTime() - b.refueledAt.getTime()
+    )
+
+    const averageFuelEfficiency =
+      this.fuelEfficiencyCalculationService.calculateAverageEfficiency(
+        orderedByMileageAsc.map((row) => ({
+          fuelLogId: row.id,
+          mileage: row.mileage,
+          amount: row.amount,
+          isFullTank: row.isFullTank,
+        }))
+      )
+
+    // amountは常に0より大きい値が保証されている（FuelLogEntity参照）が、念のため防御的に除外する
+    const pricePerLiterValues = rows
+      .filter((row) => row.amount > 0)
+      .map((row) => row.price / row.amount)
 
     return new FuelInsightEntity({
-      averageFuelEfficiency: row?.averageFuelEfficiency ?? null,
-      averageAmount: row?.averageAmount ?? null,
-      averageTotalPrice: row?.averageTotalPrice ?? null,
-      averagePricePerLiter: row?.averagePricePerLiter ?? null,
-      minPricePerLiter: row?.minPricePerLiter ?? null,
-      maxPricePerLiter: row?.maxPricePerLiter ?? null,
+      averageFuelEfficiency,
+      averageAmount: average(rows.map((row) => row.amount)),
+      averageTotalPrice: average(rows.map((row) => row.price)),
+      averagePricePerLiter: average(pricePerLiterValues),
+      minPricePerLiter:
+        pricePerLiterValues.length > 0 ? Math.min(...pricePerLiterValues) : null,
+      maxPricePerLiter:
+        pricePerLiterValues.length > 0 ? Math.max(...pricePerLiterValues) : null,
     })
   }
 }
