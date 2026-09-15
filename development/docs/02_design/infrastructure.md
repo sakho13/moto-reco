@@ -189,10 +189,12 @@ GitHubリポジトリの Settings > Secrets and variables > Actions で設定。
 
 本番環境は **Blue-Greenデプロイ** で運用する。トラフィック切り替えを手動で行うことで、デプロイ後の動作確認を経てから本番反映できる。
 
+リリースタグは `release/x.y.z` 形式。旧AWS時代の `release/0.0.0`〜`release/0.0.9`、GCP移管後の `gcp-release/0.0.x` が履歴として残っているため、バージョンは既存タグの続き（`gcp-release` の最新バージョンの次）から採番する。
+
 ```
 1. タグ作成
-   git tag gcp-release/x.y.z
-   git push origin gcp-release/x.y.z
+   git tag release/x.y.z
+   git push origin release/x.y.z
          │
          ▼
 2. [自動] deploy-gcp-production.yml 実行
@@ -217,7 +219,7 @@ GitHubリポジトリの Settings > Secrets and variables > Actions で設定。
 
 | ファイル | トリガー | 内容 |
 |---------|---------|------|
-| `deploy-gcp-production.yml` | `gcp-release/*` タグ作成 | イメージビルド＆新リビジョンデプロイ（no-traffic） |
+| `deploy-gcp-production.yml` | `release/*` タグ作成 | イメージビルド＆新リビジョンデプロイ（no-traffic） |
 | `run-migration.yml` | 手動（workflow_dispatch） | Cloud Run JobsでPrismaマイグレーション実行 |
 | `switch-traffic.yml` | 手動（workflow_dispatch） | 指定リビジョンへトラフィック100%切り替え |
 | `every-pr-check.yml` | PRオープン/更新 | lint・build・test（PostgreSQL / LocalStack / Firebase Emulator使用） |
