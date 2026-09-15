@@ -1,0 +1,59 @@
+.recordButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.iconCircle {
+  width: 3.25rem;
+  height: 3.25rem;
+  margin-top: -1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background-color: var(--color-product);
+  color: var(--color-productInk);
+  box-shadow: var(--shadow-md);
+  transition:
+    background-color var(--transition-base),
+    transform var(--transition-fast);
+}
+
+.recordButton:hover .iconCircle {
+  background-color: var(--color-productHover);
+}
+
+.recordButton:active .iconCircle {
+  transform: scale(0.96);
+}
+
+.label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+/* デスクトップのサイドバーは縦積みのため、中央ナビのようなせり出しはさせない */
+.sidebarVariant .iconCircle {
+  margin-top: 0;
+  width: 3rem;
+  height: 3rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconCircle {
+    transition: none !important;
+  }
+
+  .recordButton:active .iconCircle {
+    transform: none !important;
+  }
+}
