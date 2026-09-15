@@ -11,6 +11,7 @@ import {
   TouringPlanForm,
   type TouringPlanFormData,
 } from '@/components/touring/TouringPlanForm'
+import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -33,8 +34,11 @@ function TouringPlanRegisterPage() {
           title: formData.title,
         }
       )
+      trackEvent('touring_plan_create')
 
-      await mutate(`/api/v1/user-bike/bike/${bikeId}/touring-plans`)
+      await mutate(`/api/v1/user-bike/bike/${bikeId}/touring-plans`).catch(
+        () => {}
+      )
 
       toast.success('ツーリングプランを作成しました', {
         description: 'プラン詳細へ移動します。',
@@ -43,6 +47,12 @@ function TouringPlanRegisterPage() {
         `/app/my-bike/${bikeId}/touring-plans/${response.data.touringPlanId}`
       )
     } catch (err) {
+      trackEvent('touring_plan_error', {
+        operation: 'create',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)

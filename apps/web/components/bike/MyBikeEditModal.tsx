@@ -9,6 +9,7 @@ import type {
 } from '@repo/shared-types'
 import { MyBikeEditForm, type MyBikeEditFormData } from './MyBikeEditForm'
 import { ModalBase } from '@/components/common/ModalBase'
+import { trackEvent } from '@/lib/analytics'
 import { authenticatedFetch, apiPatch } from '@/lib/api/client'
 
 interface MyBikeEditModalProps {
@@ -77,13 +78,27 @@ export function MyBikeEditModal({
           ? { displacement: Number(formData.displacement) }
           : {}),
       })
+      trackEvent('bike_update', {
+        has_nickname: !!formData.nickname.trim(),
+        has_purchase_date: !!formData.purchaseDate,
+        is_displacement_editable: isDisplacementEditable,
+        displacement_changed:
+          isDisplacementEditable &&
+          initialData?.displacement !== formData.displacement,
+      })
 
       await Promise.all([
         mutate(`/api/v1/user-bike/bike/${bikeId}`),
         mutate('/api/v1/user-bike/bikes'),
-      ])
+      ]).catch(() => {})
       onSuccess()
     } catch (err) {
+      trackEvent('bike_error', {
+        operation: 'update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)

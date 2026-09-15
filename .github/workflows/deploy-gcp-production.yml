@@ -3,7 +3,7 @@ name: Deploy to GCP Production
 on:
   push:
     tags:
-      - "gcp-release/*"
+      - "release/*"
   workflow_dispatch:
 
 permissions:
@@ -53,8 +53,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
-          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          # バージョン番号の抽出 (release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/release\///')
 
           WEB_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.WEB_REPOSITORY }}/web"
 
@@ -75,8 +75,8 @@ jobs:
 
       - name: Build and push migration image
         run: |
-          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
-          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          # バージョン番号の抽出 (release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/release\///')
 
           MIGRATION_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.MIGRATION_REPOSITORY }}/migration"
 
@@ -104,8 +104,8 @@ jobs:
       - name: Deploy to Cloud Run (no traffic)
         id: deploy
         run: |
-          # バージョン番号の抽出 (gcp-release/1.0.0 → 1.0.0)
-          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          # バージョン番号の抽出 (release/1.0.0 → 1.0.0)
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/release\///')
           WEB_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.WEB_REPOSITORY }}/web:${APP_VERSION}"
 
           # GCPラベル値への変換（ドット→ハイフン）
@@ -197,8 +197,8 @@ jobs:
           echo "Creating PR: develop → main"
           echo "=========================================="
 
-          # リリースバージョンの抽出 (gcp-release/1.0.0 → 1.0.0)
-          VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          # リリースバージョンの抽出 (release/1.0.0 → 1.0.0)
+          VERSION=$(echo "${{ github.ref_name }}" | sed 's/release\///')
           echo "Release version: $VERSION"
 
           # 既存のPRをチェック
@@ -249,10 +249,10 @@ jobs:
           echo ""
           echo "Creating pull request..."
 
-          PR_TITLE="🚀 Sync main with develop (gcp-release/$VERSION)"
+          PR_TITLE="🚀 Sync main with develop (release/$VERSION)"
           PR_BODY="## GCPデプロイ完了後の同期PR
 
-          このPRは、\`gcp-release/$VERSION\` のデプロイ成功後に自動作成されました。
+          このPRは、\`release/$VERSION\` のデプロイ成功後に自動作成されました。
 
           ### 変更内容
           - develop ブランチの内容を main ブランチに同期します
@@ -298,7 +298,7 @@ jobs:
             echo ""
             echo "Deployment was successful, but PR creation failed."
             echo "Please create the sync PR manually:"
-            echo "  gh pr create --base main --head develop --title \"🚀 Sync main with develop (gcp-release/$VERSION)\""
+            echo "  gh pr create --base main --head develop --title \"🚀 Sync main with develop (release/$VERSION)\""
             echo ""
             echo "Job will continue as successful since deployment completed."
           fi
@@ -333,7 +333,7 @@ jobs:
 
       - name: Build and push Admin Docker image
         run: |
-          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/release\///')
           ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin"
 
           docker build -f apps/admin/Dockerfile \
@@ -351,7 +351,7 @@ jobs:
 
       - name: Deploy Admin to Cloud Run
         run: |
-          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/gcp-release\///')
+          APP_VERSION=$(echo "${{ github.ref_name }}" | sed 's/release\///')
           ADMIN_IMAGE="${{ env.ARTIFACT_REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.ADMIN_REPOSITORY }}/admin:${APP_VERSION}"
 
           APP_VERSION_LABEL=$(echo "$APP_VERSION" | sed 's/\./-/g' | tr '[:upper:]' '[:lower:]' | cut -c1-63)

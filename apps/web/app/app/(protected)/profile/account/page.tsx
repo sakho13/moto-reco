@@ -8,6 +8,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { Textarea } from '@repo/ui/textarea'
 import { ModalBase } from '@/components/common/ModalBase'
+import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -61,6 +62,13 @@ function AccountPage() {
       const result = await apiPost('/api/v1/user/auth/quit', {
         quitReason: quitReason.trim(),
       })
+      trackEvent('account_quit', {
+        has_reason: quitReason.trim().length > 0,
+        provider: isGuest
+          ? 'guest'
+          : (user?.providerData[0]?.providerId ?? 'unknown'),
+        is_guest: isGuest,
+      })
       // サインアウトは遷移先の /app/quit-complete で行う。
       // ここで signOut すると withAuth のリダイレクトが先に発火し、
       // quit-complete への遷移と競合してログイン画面に飛ばされてしまう。
@@ -68,6 +76,11 @@ function AccountPage() {
         `/app/quit-complete?token=${encodeURIComponent(result.data.recoveryToken)}`
       )
     } catch (e) {
+      trackEvent('account_quit_error', {
+        ...(e instanceof ApiV1Error
+          ? { error_code: e.errorCode, error_message: e.message }
+          : {}),
+      })
       setError(
         e instanceof ApiV1Error
           ? e.message

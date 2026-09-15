@@ -13,6 +13,7 @@ import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
+import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 
 interface SpotEditFormProps {
@@ -96,11 +97,21 @@ export function SpotEditForm({
         { latitude: lat, longitude: lng }
       )
       setCurrentLocation({ lat, lng })
+      trackEvent('touring_spot_update', {
+        spot_type: spot.type,
+        field: 'location',
+      })
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
-      )
+      ).catch(() => {})
       toast.success('位置を更新しました')
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'spot_update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error ? err.message : '位置の保存に失敗しました'
       )
@@ -115,12 +126,19 @@ export function SpotEditForm({
       await apiDelete(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots/${spot.spotId}`
       )
+      trackEvent('touring_spot_delete', { spot_type: spot.type })
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
-      )
+      ).catch(() => {})
       toast.success(`${label}を削除しました`)
       onDelete?.()
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'spot_delete',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       toast.error(
         err instanceof ApiV1Error ? err.message : `${label}の削除に失敗しました`
       )
@@ -147,13 +165,26 @@ export function SpotEditForm({
             formState.departedAt !== '' ? new Date(formState.departedAt) : null,
         }
       )
+      trackEvent('touring_spot_update', {
+        spot_type: spot.type,
+        has_name: formState.name !== '',
+        has_memo: formState.memo !== '',
+        has_arrived_at: formState.arrivedAt !== '',
+        has_departed_at: formState.departedAt !== '',
+      })
 
       await mutate(
         `/api/v1/user-bike/bike/${bikeId}/tourings/${touringId}/spots`
-      )
+      ).catch(() => {})
       toast.success(`${label}を更新しました`)
       onSuccess()
     } catch (err) {
+      trackEvent('touring_error', {
+        operation: 'spot_update',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)

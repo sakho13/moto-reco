@@ -13,6 +13,7 @@ import {
 } from '@/components/bike/BikeRegisterForm'
 import { InfoBox } from '@/components/bike/InfoBox'
 import { StepIndicator } from '@/components/bike/StepIndicator'
+import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -52,13 +53,25 @@ function BikeRegisterPage() {
           : null,
         totalMileage: Number(formData.totalMileage) || 0,
       })
+      trackEvent('bike_register', {
+        has_nickname: !!formData.nickname,
+        has_purchase_date: !!formData.purchaseDate,
+        has_purchase_price: !!formData.purchasePrice,
+        has_purchase_mileage: !!formData.purchaseMileage,
+      })
 
-      await mutate('/api/v1/user-bike/bikes')
+      await mutate('/api/v1/user-bike/bikes').catch(() => {})
       toast.success('バイクを登録しました', {
         description: 'マイページへ移動します。',
       })
       router.push('/app/home')
     } catch (err) {
+      trackEvent('bike_error', {
+        operation: 'create',
+        ...(err instanceof ApiV1Error
+          ? { error_code: err.errorCode, error_message: err.message }
+          : {}),
+      })
       setError(err instanceof ApiV1Error ? err.message : 'エラーが発生しました')
     } finally {
       setIsSubmitting(false)
