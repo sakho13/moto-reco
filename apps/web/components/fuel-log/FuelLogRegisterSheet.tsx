@@ -42,6 +42,16 @@ export interface FuelLogRegisterSheetProps {
   previousFuelLog: PreviousFuelLogDetail | null
   /** 直近数件の平均燃費（PC版控え欄の「平均より」比較に使用。算出不可なら null） */
   averageFuelEfficiency: number | null
+  /**
+   * `averageFuelEfficiency` の母数（直近何件を平均したか）
+   *
+   * @remarks
+   * PC版控え欄の「直近N回の平均より」の文言に反映する。愛車画面の「平均燃費」
+   * （期間フィルタ全体が母数）と母数が異なるため、母数を明示して数値の
+   * 食い違いに見えないようにする。呼び出し元（`FuelLogRegisterModal`）の
+   * `RECENT_FUEL_LOG_COUNT` をそのまま渡す。
+   */
+  recentAverageCount: number
   /** 現在の総走行距離（PC版控え欄の更新後の値の案内に使用） */
   currentTotalMileage: number | undefined
   /** ツーリング中に開いた場合、自動で紐づく旨を表示する */
@@ -82,6 +92,7 @@ export function FuelLogRegisterSheet({
   vehicleName,
   previousFuelLog,
   averageFuelEfficiency,
+  recentAverageCount,
   currentTotalMileage,
   hasTouring,
   isSubmitting,
@@ -240,13 +251,14 @@ export function FuelLogRegisterSheet({
     [liveGauge.fuelEfficiency, previousFuelLog, averageFuelEfficiency]
   )
   const comparisonNote = formatFuelEfficiencyComparisonNote(
-    fuelEfficiencyComparison
+    fuelEfficiencyComparison,
+    recentAverageCount
   )
 
   const totalMileageNote =
     mileageNum !== null &&
     shouldUpdateTotalMileage(mileageNum, currentTotalMileage)
-      ? `記帳すると、総走行距離が ${mileageNum.toLocaleString('ja-JP')} km に更新されます。`
+      ? `記録すると、総走行距離が ${mileageNum.toLocaleString('ja-JP')} km に更新されます。`
       : currentTotalMileage !== undefined
         ? `現在の総走行距離: ${currentTotalMileage.toLocaleString('ja-JP')} km`
         : null
@@ -621,7 +633,7 @@ export function FuelLogRegisterSheet({
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <div className={styles.slipActions}>
-          <span className={styles.slipHint}>Tab で次の欄 ／ Enter で記帳</span>
+          <span className={styles.slipHint}>Tab で次の欄 ／ Enter で記録</span>
           <Button
             type="button"
             variant="cloud"
@@ -636,7 +648,7 @@ export function FuelLogRegisterSheet({
             disabled={isSubmitting || !canSubmit}
             loading={isSubmitting}
           >
-            {isSubmitting ? '記帳中...' : '記帳する ⏎'}
+            {isSubmitting ? '登録中...' : '記録する ⏎'}
           </Button>
         </div>
       </div>

@@ -149,11 +149,17 @@ export function FuelLogRegisterModal({
   }
 
   return (
-    <ModalBase title="給油を記録" onClose={onClose} size="lg">
+    <ModalBase
+      title="給油を記録"
+      onClose={onClose}
+      size="lg"
+      hideTitleOnDesktop
+    >
       <FuelLogRegisterSheet
         vehicleName={bike ? getBikeDisplayName(bike) : null}
         previousFuelLog={previousFuelLog}
         averageFuelEfficiency={averageFuelEfficiency}
+        recentAverageCount={RECENT_FUEL_LOG_COUNT}
         currentTotalMileage={bike?.totalMileage}
         hasTouring={Boolean(touringId)}
         isSubmitting={isSubmitting}

@@ -324,39 +324,63 @@ describe('calculateFuelEfficiencyComparison', () => {
 })
 
 describe('formatFuelEfficiencyComparisonNote', () => {
-  test('前回比・平均比がともに伸びている場合の文言', () => {
+  test('前回比・平均比がともに伸びている場合の文言（平均の母数を明示する）', () => {
     expect(
-      formatFuelEfficiencyComparisonNote({
-        previousDiff: 1.8,
-        averageDiff: 0.8,
-      })
-    ).toBe('前回より 1.8 伸びた ／ 平均より 0.8 伸びた')
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: 1.8,
+          averageDiff: 0.8,
+        },
+        6
+      )
+    ).toBe('前回より 1.8 伸びた ／ 直近6回の平均より 0.8 伸びた')
+  })
+
+  test('母数(recentAverageCount)が変わると文言にも反映される', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: null,
+          averageDiff: 0.8,
+        },
+        4
+      )
+    ).toBe('直近4回の平均より 0.8 伸びた')
   })
 
   test('縮んだ場合は「縮んだ」になる', () => {
     expect(
-      formatFuelEfficiencyComparisonNote({
-        previousDiff: -1.2,
-        averageDiff: null,
-      })
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: -1.2,
+          averageDiff: null,
+        },
+        6
+      )
     ).toBe('前回より 1.2 縮んだ')
   })
 
   test('差が±0.05km/L未満は「同じ」になる', () => {
     expect(
-      formatFuelEfficiencyComparisonNote({
-        previousDiff: 0.02,
-        averageDiff: null,
-      })
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: 0.02,
+          averageDiff: null,
+        },
+        6
+      )
     ).toBe('前回と同じ')
   })
 
   test('両方 null なら null', () => {
     expect(
-      formatFuelEfficiencyComparisonNote({
-        previousDiff: null,
-        averageDiff: null,
-      })
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: null,
+          averageDiff: null,
+        },
+        6
+      )
     ).toBeNull()
   })
 })

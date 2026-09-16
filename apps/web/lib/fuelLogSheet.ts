@@ -161,21 +161,30 @@ export function calculateFuelEfficiencyComparison(params: {
 }
 
 /**
- * 燃費の比較結果を「前回より 1.8 伸びた ／ 平均より 0.8 伸びた」のような文言に整形する
+ * 燃費の比較結果を「前回より 1.8 伸びた ／ 直近6回の平均より 0.8 伸びた」のような文言に整形する
  *
  * @remarks
  * 前回比・平均比のいずれか片方しか無い場合はその1文だけを返す。両方無ければ null。
  * 差が ±0.05 km/L 未満は「同じ」として扱う。
+ * 平均の母数（`recentAverageCount`。呼び出し元は `FuelLogRegisterModal` の
+ * `RECENT_FUEL_LOG_COUNT`）は、愛車画面の「平均燃費」（期間フィルタ全体が母数）とは
+ * 異なる。単に「平均」とだけ表示すると数値の食い違いに見えるため、母数を明示する。
  */
 export function formatFuelEfficiencyComparisonNote(
-  comparison: FuelEfficiencyComparison
+  comparison: FuelEfficiencyComparison,
+  recentAverageCount: number
 ): string | null {
   const clauses: string[] = []
   if (comparison.previousDiff !== null) {
     clauses.push(formatComparisonClause('前回', comparison.previousDiff))
   }
   if (comparison.averageDiff !== null) {
-    clauses.push(formatComparisonClause('平均', comparison.averageDiff))
+    clauses.push(
+      formatComparisonClause(
+        `直近${recentAverageCount}回の平均`,
+        comparison.averageDiff
+      )
+    )
   }
   return clauses.length > 0 ? clauses.join(' ／ ') : null
 }
