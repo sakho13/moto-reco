@@ -17,10 +17,16 @@ import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
 import { mutateFuelLogLists, mutateHistoryLists } from '@/lib/api/mutateHistory'
+import { getBikeDisplayName } from '@/lib/bike'
 import {
+  calculateAverageFuelEfficiency,
   resolveSubmitPreviousMileage,
   shouldUpdateTotalMileage,
+  type PreviousFuelLogDetail,
 } from '@/lib/fuelLogSheet'
+
+/** PC版「控え」の平均燃費に使う直近件数（「直近6回」という文言と対応させる） */
+const RECENT_FUEL_LOG_COUNT = 6
 
 interface FuelLogRegisterModalProps {
   bikeId: string
@@ -55,9 +61,11 @@ export function FuelLogRegisterModal({
     }
   )
 
+  // 直近N件を取得する。fuelLogs[0] が前回給油（前回値の初期値・PC版控え欄に使用）、
+  // 残りはPC版控え欄の「平均より」比較用（燃費を算出できなかったログは平均の対象外）。
   const { data: fuelLogs } = useSWR(
     bikeId
-      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?per-size=1&sort-order=desc`
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?per-size=${RECENT_FUEL_LOG_COUNT}&sort-order=desc`
       : null,
     async (url) => {
       const response = await authenticatedFetch(url, { method: 'GET' })
@@ -73,7 +81,19 @@ export function FuelLogRegisterModal({
       return json.data
     }
   )
-  const previousFuelLog = fuelLogs?.[0] ?? null
+  const previousFuelLogEntry = fuelLogs?.[0] ?? null
+  const previousFuelLog: PreviousFuelLogDetail | null = previousFuelLogEntry
+    ? {
+        mileage: previousFuelLogEntry.mileage,
+        isFullTank: previousFuelLogEntry.isFullTank,
+        refueledAt: previousFuelLogEntry.refueledAt,
+        amount: previousFuelLogEntry.amount,
+        totalPrice: previousFuelLogEntry.totalPrice,
+        fuelEfficiency: previousFuelLogEntry.fuelEfficiency,
+        pricePerLiter: previousFuelLogEntry.pricePerLiter,
+      }
+    : null
+  const averageFuelEfficiency = calculateAverageFuelEfficiency(fuelLogs ?? [])
 
   const handleFormSubmit = async (values: FuelLogRegisterSheetSubmitValues) => {
     setError('')
@@ -129,20 +149,17 @@ export function FuelLogRegisterModal({
   }
 
   return (
-    <ModalBase title="給油を記録" onClose={onClose}>
+    <ModalBase title="給油を記録" onClose={onClose} size="lg">
       <FuelLogRegisterSheet
-        previousFuelLog={
-          previousFuelLog
-            ? {
-                mileage: previousFuelLog.mileage,
-                isFullTank: previousFuelLog.isFullTank,
-              }
-            : null
-        }
+        vehicleName={bike ? getBikeDisplayName(bike) : null}
+        previousFuelLog={previousFuelLog}
+        averageFuelEfficiency={averageFuelEfficiency}
+        currentTotalMileage={bike?.totalMileage}
         hasTouring={Boolean(touringId)}
         isSubmitting={isSubmitting}
         error={error}
         onSubmit={handleFormSubmit}
+        onClose={onClose}
       />
     </ModalBase>
   )

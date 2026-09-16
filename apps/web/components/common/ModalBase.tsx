@@ -12,7 +12,14 @@ interface ModalBaseProps {
   title: string
   onClose: () => void
   children: React.ReactNode
-  size?: 'md' | 'sm'
+  /**
+   * モーダルの最大幅バリアント
+   *
+   * @remarks
+   * `lg` はPC幅（1024px〜）専用の2カラムコンテンツ（例: 給油記入票）向け。
+   * 768〜1023pxでは `md` と同じ幅のまま（`ModalBase.module.css` 参照）。
+   */
+  size?: 'md' | 'sm' | 'lg'
 }
 
 export function ModalBase({
@@ -43,7 +50,7 @@ export function ModalBase({
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
-        className={`${styles.modal} ${size === 'sm' ? styles.modalSm : ''}`}
+        className={`${styles.modal} ${size === 'sm' ? styles.modalSm : ''} ${size === 'lg' ? styles.modalLg : ''}`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

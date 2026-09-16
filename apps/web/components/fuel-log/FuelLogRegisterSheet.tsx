@@ -12,14 +12,18 @@ import styles from './FuelLogRegisterSheet.module.css'
 import { NumericKeypad } from './NumericKeypad'
 import {
   appendNumericKey,
+  calculateFuelEfficiencyComparison,
   calculateLiveGauges,
+  formatFuelEfficiencyComparisonNote,
   formatIntegerDisplay,
+  formatPreviousStubHeading,
   formatRefueledAtChipLabel,
   FUEL_EFFICIENCY_STATUS_MESSAGES,
   parseFieldNumber,
   sanitizeNumericInput,
+  shouldUpdateTotalMileage,
   type NumericFieldConstraints,
-  type PreviousFuelLogSummary,
+  type PreviousFuelLogDetail,
 } from '@/lib/fuelLogSheet'
 
 export interface FuelLogRegisterSheetSubmitValues {
@@ -32,13 +36,21 @@ export interface FuelLogRegisterSheetSubmitValues {
 }
 
 export interface FuelLogRegisterSheetProps {
+  /** 車両名（PC版ヘッダーの車両チップに表示。取得前は null） */
+  vehicleName: string | null
   /** 直近の給油履歴（無ければ初回給油） */
-  previousFuelLog: PreviousFuelLogSummary | null
+  previousFuelLog: PreviousFuelLogDetail | null
+  /** 直近数件の平均燃費（PC版控え欄の「平均より」比較に使用。算出不可なら null） */
+  averageFuelEfficiency: number | null
+  /** 現在の総走行距離（PC版控え欄の更新後の値の案内に使用） */
+  currentTotalMileage: number | undefined
   /** ツーリング中に開いた場合、自動で紐づく旨を表示する */
   hasTouring: boolean
   isSubmitting: boolean
   error: string
   onSubmit: (values: FuelLogRegisterSheetSubmitValues) => Promise<void>
+  /** PC版の「やめる」ボタンから呼ばれる */
+  onClose: () => void
 }
 
 type FieldKey = 'mileage' | 'amount' | 'totalPrice'
@@ -50,6 +62,7 @@ const FIELD_CONSTRAINTS: Record<FieldKey, NumericFieldConstraints> = {
 }
 
 const COMPACT_MEDIA_QUERY = '(max-width: 640px)'
+const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)'
 
 /**
  * 給油シート（登録用）
@@ -59,13 +72,22 @@ const COMPACT_MEDIA_QUERY = '(max-width: 640px)'
  * 入力はODO・給油量・支払金額の3項目のみ。狭幅（〜640px）では専用テンキーを表示し、
  * OSキーボードを介さずに「次へ」で連続入力できるようにする。
  * 641px以上では専用テンキーを出さず、通常の数値入力（Tab送り・Enter保存）にする。
+ *
+ * PC幅（1024px〜）では見た目の器だけを「給油記入票」（伝票）に差し替える
+ * （Issue #575「05 画面案 ─ PC」給油記入票）。状態・バリデーション・ライブ計器の
+ * 算出ロジックはモバイルと完全に共通で、`isDesktop` によって描画するJSXの
+ * ツリーを丸ごと切り替えるだけにとどめている（ロジックの二重実装を避けるため）。
  */
 export function FuelLogRegisterSheet({
+  vehicleName,
   previousFuelLog,
+  averageFuelEfficiency,
+  currentTotalMileage,
   hasTouring,
   isSubmitting,
   error,
   onSubmit,
+  onClose,
 }: FuelLogRegisterSheetProps) {
   const [refueledAt, setRefueledAt] = useState(() =>
     getNowLocalDateTimeString(1)
@@ -81,6 +103,10 @@ export function FuelLogRegisterSheet({
     if (typeof window === 'undefined') return false
     return window.matchMedia(COMPACT_MEDIA_QUERY).matches
   })
+  const [isDesktop, setIsDesktop] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia(DESKTOP_MEDIA_QUERY).matches
+  })
 
   const formRef = useRef<HTMLFormElement>(null)
   const mileageRef = useRef<HTMLInputElement>(null)
@@ -95,16 +121,28 @@ export function FuelLogRegisterSheet({
     totalPrice: totalPriceRef,
   }
 
-  // 開いた瞬間から最初の数字が打てるよう、走行距離欄にフォーカスする
+  // 開いた瞬間から最初の数字が打てるよう、走行距離欄にフォーカスする。
+  // isDesktop の判定はマウント後（useEffect）に確定するため、モバイル/PCで
+  // JSXツリーが丸ごと入れ替わる（＝inputのDOMノードが作り直される）と
+  // フォーカスが失われる。isDesktop の確定・変化のたびに再フォーカスする。
   useEffect(() => {
     mileageRef.current?.focus()
-  }, [])
+  }, [isDesktop])
 
   // 狭幅かどうかをJSでも判定する（readOnly/inputModeの切り替えにはCSSだけでは不十分なため）
   useEffect(() => {
     const mql = window.matchMedia(COMPACT_MEDIA_QUERY)
     setIsCompact(mql.matches)
     const handleChange = (e: MediaQueryListEvent) => setIsCompact(e.matches)
+    mql.addEventListener('change', handleChange)
+    return () => mql.removeEventListener('change', handleChange)
+  }, [])
+
+  // PC幅（1024px〜）かどうかをJSでも判定する。「給油記入票」への丸ごと差し替えの判定に使う。
+  useEffect(() => {
+    const mql = window.matchMedia(DESKTOP_MEDIA_QUERY)
+    setIsDesktop(mql.matches)
+    const handleChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
     mql.addEventListener('change', handleChange)
     return () => mql.removeEventListener('change', handleChange)
   }, [])
@@ -192,6 +230,27 @@ export function FuelLogRegisterSheet({
     [mileageNum, amountNum, totalPriceNum, isFullTank, previousFuelLog]
   )
 
+  const fuelEfficiencyComparison = useMemo(
+    () =>
+      calculateFuelEfficiencyComparison({
+        currentFuelEfficiency: liveGauge.fuelEfficiency,
+        previousFuelEfficiency: previousFuelLog?.fuelEfficiency ?? null,
+        averageFuelEfficiency,
+      }),
+    [liveGauge.fuelEfficiency, previousFuelLog, averageFuelEfficiency]
+  )
+  const comparisonNote = formatFuelEfficiencyComparisonNote(
+    fuelEfficiencyComparison
+  )
+
+  const totalMileageNote =
+    mileageNum !== null &&
+    shouldUpdateTotalMileage(mileageNum, currentTotalMileage)
+      ? `記帳すると、総走行距離が ${mileageNum.toLocaleString('ja-JP')} km に更新されます。`
+      : currentTotalMileage !== undefined
+        ? `現在の総走行距離: ${currentTotalMileage.toLocaleString('ja-JP')} km`
+        : null
+
   const canSubmit =
     mileageNum !== null &&
     amountNum !== null &&
@@ -211,18 +270,108 @@ export function FuelLogRegisterSheet({
     })
   }
 
-  const renderField = (params: {
+  /** フィールドの表示値・制約をまとめる（入力欄のJSXはモバイル/PCで別々に組むが、値の算出ロジックはここに集約する） */
+  const getFieldDisplay = (field: FieldKey) => {
+    const constraints = FIELD_CONSTRAINTS[field]
+    const raw = rawValues[field]
+    const displayValue =
+      isCompact && !constraints.allowDecimal ? formatIntegerDisplay(raw) : raw
+    return { constraints, displayValue }
+  }
+
+  const renderFieldInput = (params: {
+    field: FieldKey
+    id: string
+    placeholder?: string
+    className: string
+  }) => {
+    const { field, id, placeholder = '0', className } = params
+    const { constraints, displayValue } = getFieldDisplay(field)
+
+    return (
+      <input
+        id={id}
+        ref={fieldRefs[field]}
+        type="text"
+        inputMode={
+          isCompact ? 'none' : constraints.allowDecimal ? 'decimal' : 'numeric'
+        }
+        readOnly={isCompact}
+        value={displayValue}
+        placeholder={placeholder}
+        autoComplete="off"
+        disabled={isSubmitting}
+        className={className}
+        onFocus={() => setActiveField(field)}
+        onKeyDown={(e) => handleFieldKeyDown(e, field)}
+        onChange={(e) => handleFieldChange(field, e.target.value)}
+      />
+    )
+  }
+
+  const renderTankToggle = () => (
+    <div
+      className={styles.tankToggle}
+      role="group"
+      aria-label="満タン・継ぎ足しの切り替え"
+    >
+      <button
+        type="button"
+        aria-pressed={isFullTank}
+        className={`${styles.tankChip} ${isFullTank ? styles.tankChipActive : ''}`}
+        onClick={() => setIsFullTank(true)}
+        disabled={isSubmitting}
+      >
+        満タン
+      </button>
+      <button
+        type="button"
+        aria-pressed={!isFullTank}
+        className={`${styles.tankChip} ${!isFullTank ? styles.tankChipActive : ''}`}
+        onClick={() => setIsFullTank(false)}
+        disabled={isSubmitting}
+      >
+        継ぎ足し
+      </button>
+    </div>
+  )
+
+  const dateChipButton = (
+    <button
+      type="button"
+      className={styles.dateChip}
+      aria-expanded={isDateEditorOpen}
+      onClick={() => setIsDateEditorOpen((v) => !v)}
+      disabled={isSubmitting}
+    >
+      {formatRefueledAtChipLabel(refueledAt)}
+      <span aria-hidden="true" className={styles.dateChipChevron}>
+        ▾
+      </span>
+    </button>
+  )
+
+  const dateEditor = isDateEditorOpen && (
+    <FormField label="給油日時" htmlFor="fuelSheetRefueledAt">
+      <DateTimeInput
+        id="fuelSheetRefueledAt"
+        value={refueledAt}
+        minuteStep={1}
+        max={getNowLocalDateTimeString()}
+        onChange={(e) => setRefueledAt(e.target.value)}
+        disabled={isSubmitting}
+      />
+    </FormField>
+  )
+
+  const renderMobileField = (params: {
     field: FieldKey
     id: string
     label: string
     unit: string
     placeholder?: string
   }) => {
-    const { field, id, label, unit, placeholder = '0' } = params
-    const constraints = FIELD_CONSTRAINTS[field]
-    const raw = rawValues[field]
-    const displayValue =
-      isCompact && !constraints.allowDecimal ? formatIntegerDisplay(raw) : raw
+    const { field, id, label, unit, placeholder } = params
 
     return (
       <div
@@ -239,111 +388,73 @@ export function FuelLogRegisterSheet({
                 : '初回の記録です'}
             </span>
           )}
-          {field === 'amount' && (
-            <div
-              className={styles.tankToggle}
-              role="group"
-              aria-label="満タン・継ぎ足しの切り替え"
-            >
-              <button
-                type="button"
-                aria-pressed={isFullTank}
-                className={`${styles.tankChip} ${isFullTank ? styles.tankChipActive : ''}`}
-                onClick={() => setIsFullTank(true)}
-                disabled={isSubmitting}
-              >
-                満タン
-              </button>
-              <button
-                type="button"
-                aria-pressed={!isFullTank}
-                className={`${styles.tankChip} ${!isFullTank ? styles.tankChipActive : ''}`}
-                onClick={() => setIsFullTank(false)}
-                disabled={isSubmitting}
-              >
-                継ぎ足し
-              </button>
-            </div>
-          )}
+          {field === 'amount' && renderTankToggle()}
         </div>
 
         <div className={styles.fieldBox}>
-          <input
-            id={id}
-            ref={fieldRefs[field]}
-            type="text"
-            inputMode={
-              isCompact
-                ? 'none'
-                : constraints.allowDecimal
-                  ? 'decimal'
-                  : 'numeric'
-            }
-            readOnly={isCompact}
-            value={displayValue}
-            placeholder={placeholder}
-            autoComplete="off"
-            disabled={isSubmitting}
-            className={styles.fieldInput}
-            onFocus={() => setActiveField(field)}
-            onKeyDown={(e) => handleFieldKeyDown(e, field)}
-            onChange={(e) => handleFieldChange(field, e.target.value)}
-          />
+          {renderFieldInput({
+            field,
+            id,
+            placeholder,
+            className: styles.fieldInput,
+          })}
           <span className={styles.fieldUnit}>{unit}</span>
         </div>
       </div>
     )
   }
 
-  return (
-    <form
-      ref={formRef}
-      onSubmit={handleSubmit}
-      className={styles.sheet}
-      data-testid="fuel-log-register-sheet"
-    >
-      <div className={styles.headerRow}>
-        <button
-          type="button"
-          className={styles.dateChip}
-          aria-expanded={isDateEditorOpen}
-          onClick={() => setIsDateEditorOpen((v) => !v)}
-          disabled={isSubmitting}
-        >
-          {formatRefueledAtChipLabel(refueledAt)}
-          <span aria-hidden="true" className={styles.dateChipChevron}>
-            ▾
-          </span>
-        </button>
-      </div>
+  const renderSlipField = (params: {
+    field: FieldKey
+    id: string
+    label: string
+    unit: string
+    hint?: string
+  }) => {
+    const { field, id, label, unit, hint } = params
 
-      {isDateEditorOpen && (
-        <FormField label="給油日時" htmlFor="fuelSheetRefueledAt">
-          <DateTimeInput
-            id="fuelSheetRefueledAt"
-            value={refueledAt}
-            minuteStep={1}
-            max={getNowLocalDateTimeString()}
-            onChange={(e) => setRefueledAt(e.target.value)}
-            disabled={isSubmitting}
-          />
-        </FormField>
-      )}
+    return (
+      <div
+        className={`${styles.slipField} ${activeField === field ? styles.slipFieldActive : ''}`}
+      >
+        <label htmlFor={id} className={styles.slipFieldLabel}>
+          {label}
+        </label>
+        <div className={styles.slipFieldValueRow}>
+          <div className={styles.slipFieldValue}>
+            {renderFieldInput({
+              field,
+              id,
+              className: styles.slipFieldInput,
+            })}
+            <span className={styles.slipFieldUnit}>{unit}</span>
+          </div>
+          {hint && <span className={styles.slipFieldHint}>{hint}</span>}
+        </div>
+      </div>
+    )
+  }
+
+  const renderMobileSheet = () => (
+    <>
+      <div className={styles.headerRow}>{dateChipButton}</div>
+
+      {dateEditor}
 
       <div className={styles.fieldStack}>
-        {renderField({
+        {renderMobileField({
           field: 'mileage',
           id: 'fuelSheetMileage',
           label: '走行距離 ODO',
           unit: 'km',
         })}
-        {renderField({
+        {renderMobileField({
           field: 'amount',
           id: 'fuelSheetAmount',
           label: '給油量',
           unit: 'L',
         })}
-        {renderField({
+        {renderMobileField({
           field: 'totalPrice',
           id: 'fuelSheetTotalPrice',
           label: '支払金額',
@@ -431,6 +542,201 @@ export function FuelLogRegisterSheet({
           {isSubmitting ? '登録中...' : '記録する'}
         </Button>
       </div>
+    </>
+  )
+
+  const renderDesktopSlip = () => (
+    <div className={styles.slip}>
+      <div className={styles.slipMain}>
+        <div className={styles.slipHead}>
+          <span className={styles.slipTitle}>給油記入票</span>
+          <div className={styles.slipHeadChips}>
+            {vehicleName && <span className={styles.chip}>{vehicleName}</span>}
+            {dateChipButton}
+          </div>
+        </div>
+
+        {dateEditor}
+
+        <div className={styles.slipFields}>
+          {renderSlipField({
+            field: 'mileage',
+            id: 'fuelSheetMileage',
+            label: '走行距離 ODO',
+            unit: 'km',
+            hint: previousFuelLog
+              ? `前回 ${previousFuelLog.mileage.toLocaleString('ja-JP')}`
+              : '初回の記録です',
+          })}
+          {renderSlipField({
+            field: 'amount',
+            id: 'fuelSheetAmount',
+            label: '給油量',
+            unit: 'L',
+          })}
+          <div className={styles.slipField}>
+            <span className={styles.slipFieldLabel}>区分</span>
+            <div className={styles.slipFieldValueRow}>
+              <div className={styles.slipFieldValue}>{renderTankToggle()}</div>
+            </div>
+          </div>
+          {renderSlipField({
+            field: 'totalPrice',
+            id: 'fuelSheetTotalPrice',
+            label: '支払金額',
+            unit: '円',
+          })}
+          <div className={styles.slipField}>
+            <label htmlFor="fuelSheetMemo" className={styles.slipFieldLabel}>
+              摘要
+            </label>
+            <div className={styles.slipFieldValueRow}>
+              <div className={styles.slipFieldValue}>
+                <textarea
+                  id="fuelSheetMemo"
+                  className={styles.slipMemoInput}
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  disabled={isSubmitting}
+                  placeholder="例: ハイオク満タン"
+                />
+              </div>
+              <span className={styles.slipFieldHint}>{memo.length}/500</span>
+            </div>
+          </div>
+          <div className={styles.slipField}>
+            <span className={styles.slipFieldLabel}>ツーリング</span>
+            <div className={styles.slipFieldValueRow}>
+              <span className={styles.slipTouringNote}>
+                {hasTouring
+                  ? '現在のツーリングに紐づけて記録します'
+                  : '紐づけません'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+
+        <div className={styles.slipActions}>
+          <span className={styles.slipHint}>Tab で次の欄 ／ Enter で記帳</span>
+          <Button
+            type="button"
+            variant="cloud"
+            outline
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            やめる
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSubmitting || !canSubmit}
+            loading={isSubmitting}
+          >
+            {isSubmitting ? '記帳中...' : '記帳する ⏎'}
+          </Button>
+        </div>
+      </div>
+
+      <aside className={styles.stub} data-testid="fuel-log-slip-stub">
+        <div className={styles.stubBlock}>
+          <h3 className={styles.stubHeading}>
+            {previousFuelLog
+              ? formatPreviousStubHeading(previousFuelLog.refueledAt)
+              : '前回の控え'}
+          </h3>
+          {previousFuelLog ? (
+            <div className={styles.stubRows}>
+              <div className={styles.stubRow}>
+                <span>走行距離</span>
+                <span>
+                  {previousFuelLog.mileage.toLocaleString('ja-JP')} km
+                </span>
+              </div>
+              <div className={styles.stubRow}>
+                <span>給油量</span>
+                <span>{previousFuelLog.amount.toLocaleString('ja-JP')} L</span>
+              </div>
+              <div className={styles.stubRow}>
+                <span>金額</span>
+                <span>
+                  ¥{previousFuelLog.totalPrice.toLocaleString('ja-JP')}
+                </span>
+              </div>
+              <div className={styles.stubRow}>
+                <span>単価</span>
+                <span>
+                  {previousFuelLog.pricePerLiter !== null
+                    ? `${Math.round(previousFuelLog.pricePerLiter).toLocaleString('ja-JP')} 円/L`
+                    : '—'}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <p className={styles.stubEmpty}>初回の記録です</p>
+          )}
+        </div>
+
+        <div className={styles.stubBlock}>
+          <h3 className={styles.stubHeading}>この記入で決まる値</h3>
+          <div className={styles.stubResult}>
+            <div className={styles.stubResultItem}>
+              <span className={styles.stubResultLabel}>区間距離</span>
+              <span className={styles.stubResultValue}>
+                {liveGauge.intervalKm !== null
+                  ? liveGauge.intervalKm.toLocaleString('ja-JP')
+                  : '—'}
+                <em>km</em>
+              </span>
+            </div>
+            <div
+              className={`${styles.stubResultItem} ${styles.stubResultItemLead}`}
+            >
+              <span className={styles.stubResultLabel}>燃費</span>
+              <span className={styles.stubResultValue}>
+                {liveGauge.fuelEfficiency !== null
+                  ? liveGauge.fuelEfficiency.toFixed(1)
+                  : '—'}
+                <em>km/L</em>
+              </span>
+            </div>
+            {comparisonNote ? (
+              <p className={styles.stubResultMemo}>{comparisonNote}</p>
+            ) : liveGauge.efficiencyStatus !== 'calculated' ? (
+              <p className={styles.stubResultMemo}>
+                {FUEL_EFFICIENCY_STATUS_MESSAGES[liveGauge.efficiencyStatus]}
+              </p>
+            ) : null}
+            <div className={styles.stubResultItem}>
+              <span className={styles.stubResultLabel}>単価</span>
+              <span className={styles.stubResultValue}>
+                {liveGauge.pricePerLiter !== null
+                  ? Math.round(liveGauge.pricePerLiter).toLocaleString('ja-JP')
+                  : '—'}
+                <em>円/L</em>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {totalMileageNote && (
+          <p className={styles.stubFooter}>{totalMileageNote}</p>
+        )}
+      </aside>
+    </div>
+  )
+
+  return (
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      className={styles.sheet}
+      data-testid="fuel-log-register-sheet"
+    >
+      {isDesktop ? renderDesktopSlip() : renderMobileSheet()}
     </form>
   )
 }

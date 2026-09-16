@@ -14,6 +14,23 @@ export type PreviousFuelLogSummary = {
   isFullTank: boolean
 }
 
+/**
+ * PC版「給油記入票」の控え欄（前回の給油の再掲）に必要な、直近の給油履歴の情報
+ *
+ * @remarks
+ * `PreviousFuelLogSummary` のスーパーセット。ライブ計器の算出（`calculateLiveGauges`）には
+ * 使わない表示専用フィールド（給油日時・給油量・金額・サーバー確定済みの燃費/単価）を追加する。
+ */
+export type PreviousFuelLogDetail = PreviousFuelLogSummary & {
+  refueledAt: string
+  amount: number
+  totalPrice: number
+  /** サーバー確定済みの燃費 (km/L)。継ぎ足し等で算出できなかった場合は null */
+  fuelEfficiency: number | null
+  /** サーバー確定済みの単価 (円/L) */
+  pricePerLiter: number | null
+}
+
 /** 燃費が算出できない場合の理由 */
 export type FuelEfficiencyStatus =
   | 'calculated'
@@ -87,6 +104,120 @@ export const FUEL_EFFICIENCY_STATUS_MESSAGES: Record<
   'continuation-selected': '燃費は次回の満タン給油で計算されます',
   'no-previous-log': '初回給油のため、燃費は次回から算出されます',
   'previous-was-continuation': '前回が継ぎ足しのため、保存後に確定します',
+}
+
+/**
+ * 直近の給油ログ群から平均燃費を算出する（PC版「給油記入票」控え欄の「平均より」比較に使用）
+ *
+ * @remarks
+ * 継ぎ足し給油など燃費を算出できなかったログ（`fuelEfficiency === null`）は平均の対象から除く。
+ * 対象が1件も無い場合は null を返す。
+ */
+export function calculateAverageFuelEfficiency(
+  logs: readonly { fuelEfficiency: number | null }[]
+): number | null {
+  const values = logs
+    .map((log) => log.fuelEfficiency)
+    .filter((v): v is number => v !== null)
+  if (values.length === 0) return null
+  return values.reduce((sum, v) => sum + v, 0) / values.length
+}
+
+/** 今回の燃費と「前回」「平均」との差分 (km/L)。算出できない場合は null */
+export type FuelEfficiencyComparison = {
+  previousDiff: number | null
+  averageDiff: number | null
+}
+
+/**
+ * 今回のライブ計器の燃費を、前回給油・直近の平均燃費と比較する
+ *
+ * @remarks
+ * 今回の燃費が算出できていない（`currentFuelEfficiency === null`）場合は両方 null を返す。
+ */
+export function calculateFuelEfficiencyComparison(params: {
+  currentFuelEfficiency: number | null
+  previousFuelEfficiency: number | null
+  averageFuelEfficiency: number | null
+}): FuelEfficiencyComparison {
+  const {
+    currentFuelEfficiency,
+    previousFuelEfficiency,
+    averageFuelEfficiency,
+  } = params
+  if (currentFuelEfficiency === null) {
+    return { previousDiff: null, averageDiff: null }
+  }
+  return {
+    previousDiff:
+      previousFuelEfficiency !== null
+        ? currentFuelEfficiency - previousFuelEfficiency
+        : null,
+    averageDiff:
+      averageFuelEfficiency !== null
+        ? currentFuelEfficiency - averageFuelEfficiency
+        : null,
+  }
+}
+
+/**
+ * 燃費の比較結果を「前回より 1.8 伸びた ／ 平均より 0.8 伸びた」のような文言に整形する
+ *
+ * @remarks
+ * 前回比・平均比のいずれか片方しか無い場合はその1文だけを返す。両方無ければ null。
+ * 差が ±0.05 km/L 未満は「同じ」として扱う。
+ */
+export function formatFuelEfficiencyComparisonNote(
+  comparison: FuelEfficiencyComparison
+): string | null {
+  const clauses: string[] = []
+  if (comparison.previousDiff !== null) {
+    clauses.push(formatComparisonClause('前回', comparison.previousDiff))
+  }
+  if (comparison.averageDiff !== null) {
+    clauses.push(formatComparisonClause('平均', comparison.averageDiff))
+  }
+  return clauses.length > 0 ? clauses.join(' ／ ') : null
+}
+
+function formatComparisonClause(label: string, diff: number): string {
+  const abs = Math.abs(diff)
+  if (abs < 0.05) return `${label}と同じ`
+  const verb = diff > 0 ? '伸びた' : '縮んだ'
+  return `${label}より ${abs.toFixed(1)} ${verb}`
+}
+
+/**
+ * 基準日から見て、対象の日時が何日前かを算出する（時刻は無視し、日付のみで比較する）
+ *
+ * @returns 日数（0以上の整数）。不正な日時の場合は null
+ */
+export function calculateDaysAgo(
+  target: string,
+  now: Date = new Date()
+): number | null {
+  const date = new Date(target)
+  if (Number.isNaN(date.getTime())) return null
+  const startOfDay = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const diffMs = startOfDay(now) - startOfDay(date)
+  return Math.max(0, Math.round(diffMs / (24 * 60 * 60 * 1000)))
+}
+
+/**
+ * PC版「給油記入票」控え欄の見出し（例: 「前回の控え ─ 9月1日（12日前）」）を組み立てる
+ */
+export function formatPreviousStubHeading(
+  refueledAt: string,
+  now: Date = new Date()
+): string {
+  const date = new Date(refueledAt)
+  if (Number.isNaN(date.getTime())) return '前回の控え'
+  const dateLabel = `${date.getMonth() + 1}月${date.getDate()}日`
+  const daysAgo = calculateDaysAgo(refueledAt, now)
+  if (daysAgo === null) return `前回の控え ─ ${dateLabel}`
+  if (daysAgo === 0) return `前回の控え ─ ${dateLabel}（今日）`
+  return `前回の控え ─ ${dateLabel}（${daysAgo}日前）`
 }
 
 /**

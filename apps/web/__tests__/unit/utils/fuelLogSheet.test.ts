@@ -1,8 +1,13 @@
 import { describe, expect, test } from 'vitest'
 import {
   appendNumericKey,
+  calculateAverageFuelEfficiency,
+  calculateDaysAgo,
+  calculateFuelEfficiencyComparison,
   calculateLiveGauges,
+  formatFuelEfficiencyComparisonNote,
   formatIntegerDisplay,
+  formatPreviousStubHeading,
   formatRefueledAtChipLabel,
   parseFieldNumber,
   resolveSubmitPreviousMileage,
@@ -265,5 +270,125 @@ describe('formatRefueledAtChipLabel', () => {
   test('今日以外の日時は「M/D HH:mm」になる', () => {
     const now = new Date(2026, 8, 13, 14, 15)
     expect(formatRefueledAtChipLabel('2026-09-01T09:40', now)).toBe('9/1 09:40')
+  })
+})
+
+describe('calculateAverageFuelEfficiency', () => {
+  test('燃費が算出できたログのみで平均を取る', () => {
+    const avg = calculateAverageFuelEfficiency([
+      { fuelEfficiency: 22.0 },
+      { fuelEfficiency: null }, // 継ぎ足しなど
+      { fuelEfficiency: 20.2 },
+    ])
+    expect(avg).toBeCloseTo(21.1)
+  })
+
+  test('対象が1件も無い場合は null', () => {
+    expect(
+      calculateAverageFuelEfficiency([{ fuelEfficiency: null }])
+    ).toBeNull()
+    expect(calculateAverageFuelEfficiency([])).toBeNull()
+  })
+})
+
+describe('calculateFuelEfficiencyComparison', () => {
+  test('今回の燃費・前回・平均が揃っていれば両方の差分を返す', () => {
+    const result = calculateFuelEfficiencyComparison({
+      currentFuelEfficiency: 22.0,
+      previousFuelEfficiency: 20.2,
+      averageFuelEfficiency: 21.2,
+    })
+    expect(result.previousDiff).toBeCloseTo(1.8)
+    expect(result.averageDiff).toBeCloseTo(0.8)
+  })
+
+  test('今回の燃費が算出できない場合は両方 null', () => {
+    const result = calculateFuelEfficiencyComparison({
+      currentFuelEfficiency: null,
+      previousFuelEfficiency: 20.2,
+      averageFuelEfficiency: 21.2,
+    })
+    expect(result.previousDiff).toBeNull()
+    expect(result.averageDiff).toBeNull()
+  })
+
+  test('前回・平均のいずれかが無ければその差分のみ null', () => {
+    const result = calculateFuelEfficiencyComparison({
+      currentFuelEfficiency: 22.0,
+      previousFuelEfficiency: null,
+      averageFuelEfficiency: 21.2,
+    })
+    expect(result.previousDiff).toBeNull()
+    expect(result.averageDiff).toBeCloseTo(0.8)
+  })
+})
+
+describe('formatFuelEfficiencyComparisonNote', () => {
+  test('前回比・平均比がともに伸びている場合の文言', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote({
+        previousDiff: 1.8,
+        averageDiff: 0.8,
+      })
+    ).toBe('前回より 1.8 伸びた ／ 平均より 0.8 伸びた')
+  })
+
+  test('縮んだ場合は「縮んだ」になる', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote({
+        previousDiff: -1.2,
+        averageDiff: null,
+      })
+    ).toBe('前回より 1.2 縮んだ')
+  })
+
+  test('差が±0.05km/L未満は「同じ」になる', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote({
+        previousDiff: 0.02,
+        averageDiff: null,
+      })
+    ).toBe('前回と同じ')
+  })
+
+  test('両方 null なら null', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote({
+        previousDiff: null,
+        averageDiff: null,
+      })
+    ).toBeNull()
+  })
+})
+
+describe('calculateDaysAgo', () => {
+  test('日付のみで比較し、時刻は無視する', () => {
+    const now = new Date(2026, 8, 13, 23, 59)
+    expect(calculateDaysAgo('2026-09-01T00:00', now)).toBe(12)
+  })
+
+  test('同じ日なら0', () => {
+    const now = new Date(2026, 8, 13, 23, 59)
+    expect(calculateDaysAgo('2026-09-13T00:05', now)).toBe(0)
+  })
+
+  test('不正な日時は null', () => {
+    expect(calculateDaysAgo('invalid-date')).toBeNull()
+  })
+})
+
+describe('formatPreviousStubHeading', () => {
+  test('前回の給油日と経過日数を組み立てる', () => {
+    const now = new Date(2026, 8, 13, 14, 15)
+    expect(formatPreviousStubHeading('2026-09-01T09:40', now)).toBe(
+      '前回の控え ─ 9月1日（12日前）'
+    )
+  })
+
+  test('当日の場合は「今日」になる', () => {
+    const now = new Date(2026, 8, 13, 14, 15)
+    expect(formatPreviousStubHeading('2026-09-13T09:40', now)).toBe(
+      '前回の控え ─ 9月13日（今日）'
+    )
   })
 })
