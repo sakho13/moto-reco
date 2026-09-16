@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import useSWR from 'swr'
+import type { UserPlan } from '@repo/shared-types'
 import { getTodayDateString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { DateInput } from '@repo/ui/dateInput'
@@ -8,8 +10,39 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { InfoBox } from './InfoBox'
+import { apiGet } from '@/lib/api/client'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { FREE_USER_LIMITS, GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
+import {
+  FREE_USER_LIMITS,
+  GUEST_ACCOUNT_LIMITS,
+  PREMIUM_USER_LIMITS,
+} from '@/lib/statics'
+
+/**
+ * バイク登録台数の上限案内文言を、ロール・プラン・プラン取得状態に応じて返す
+ *
+ * @remarks
+ * プラン取得中にプレミアムユーザーへ誤って無料プランの上限を表示しないよう、
+ * ローディング中は台数を含まない案内文言を返す。
+ */
+const getBikeLimitText = (params: {
+  isGuest: boolean
+  isProfileLoading: boolean
+  plan: UserPlan | null | undefined
+}): string => {
+  const { isGuest, isProfileLoading, plan } = params
+
+  if (isGuest) {
+    return `ゲストアカウントではバイクを${GUEST_ACCOUNT_LIMITS.BIKE}台まで登録できます`
+  }
+  if (isProfileLoading) {
+    return '登録可能な台数を確認しています…'
+  }
+  if (plan === 'PREMIUM') {
+    return `プレミアムプランでは${PREMIUM_USER_LIMITS.BIKE}台まで登録できます`
+  }
+  return `無料プランでは${FREE_USER_LIMITS.BIKE}台まで登録できます`
+}
 
 export interface BikeFormData {
   nickname: string
@@ -38,9 +71,18 @@ export const BikeRegisterForm = ({
   error,
 }: BikeRegisterFormProps) => {
   const { isGuest } = useAuth()
-  const bikeLimitText = isGuest
-    ? `ゲストアカウントではバイクを${GUEST_ACCOUNT_LIMITS.BIKE}台まで登録できます`
-    : `無料プランでは${FREE_USER_LIMITS.BIKE}台まで登録できます`
+  const { data: profile, isLoading: isProfileLoading } = useSWR(
+    isGuest ? null : '/api/v1/user/profile',
+    async (url) => {
+      const response = await apiGet(url)
+      return response.data
+    }
+  )
+  const bikeLimitText = getBikeLimitText({
+    isGuest,
+    isProfileLoading,
+    plan: profile?.plan,
+  })
 
   const [formData, setFormData] = useState<BikeFormData>({
     nickname: '',
