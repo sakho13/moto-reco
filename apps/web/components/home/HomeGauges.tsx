@@ -1,6 +1,8 @@
 'use client'
 
+import { getCurrentDate } from '@repo/shared-utils'
 import styles from './HomeGauges.module.css'
+import { buildMonthlySummary } from './monthlySummary'
 import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useBikeHistory } from '@/lib/hooks/useBikeHistory'
 import { useFuelInsight } from '@/lib/hooks/useFuelInsight'
@@ -61,6 +63,14 @@ export function HomeGauges() {
   const lastPricePerLiter = fuelLogs[0]?.pricePerLiter ?? null
   const averageEfficiency = insight?.averageFuelEfficiency ?? null
 
+  // 「今月の燃料費」はPC幅（見開きの添え数値）でのみ表示する4つ目の計器。
+  // 新しい集計APIは作らず、既存のヒストリー全件をクライアント側で当月分に絞って合算する。
+  const monthlySummary = buildMonthlySummary(
+    history ?? [],
+    activeBike?.totalMileage ?? null,
+    getCurrentDate()
+  )
+
   return (
     <div className={styles.gauges} data-testid="home-gauges">
       <div className={styles.gauge}>
@@ -86,6 +96,15 @@ export function HomeGauges() {
           <span className={styles.unit}>円/L</span>
         </p>
         <p className={styles.label}>前回の単価</p>
+      </div>
+
+      {/* PC幅（見開き）専用の4つ目の計器。モバイルは計器3つのまま変えない */}
+      <div className={`${styles.gauge} ${styles.monthlyGauge}`}>
+        <p className={styles.value}>
+          {monthlySummary.totalFuelCost.toLocaleString()}
+          <span className={styles.unit}>円</span>
+        </p>
+        <p className={styles.label}>今月の燃料費</p>
       </div>
     </div>
   )

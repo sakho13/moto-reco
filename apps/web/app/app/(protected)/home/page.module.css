@@ -1,0 +1,96 @@
+/*
+ * Issue #575「05 画面案 ─ PC」ホームの「今日」見開き。
+ *
+ * @remarks
+ * 各コンポーネント自身はブレークポイントを意識せず、配置（表示/非表示・並び順）
+ * はすべてこのファイルに閉じる。
+ *
+ * - モバイル（〜1023px）: 既存の縦積みのまま変えない。`.home` は単なる箱で、
+ *   直下の可視な子要素（計器・主アクション・最近の記録）が通常のブロックの
+ *   流れで積み上がる。PC専用の子要素（見出し罫・オドメーター・書き足す/
+ *   点検の予定）は `display: none` で場所を取らない。
+ * - PC幅（1024px〜）: `.home` を2カラムのCSS Gridに切り替え、DOMの並び順とは
+ *   独立に `grid-area` で「見出し罫→オドメーター→添え数値→記帳(左)/レール(右)」
+ *   の見開きを組む。DOM順を変えないのは、モバイルの表示順
+ *   （計器→主アクション→最近の記録）を崩さないため。
+ */
+.home {
+  width: 100%;
+  max-width: 32rem; /* 512px。既存の max-w-lg 相当（モバイル〜タブレット幅） */
+}
+
+.head,
+.odo,
+.railWrite,
+.railMaint {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .home {
+    max-width: none;
+    display: grid;
+    grid-template-columns: 1fr 214px;
+    column-gap: var(--spacing-6);
+    row-gap: var(--spacing-4);
+    align-items: start;
+    grid-template-areas:
+      'head head'
+      'odo odo'
+      'figs figs'
+      'ledger railActions'
+      'ledger railWrite'
+      'ledger railMaint';
+  }
+
+  .head,
+  .odo,
+  .railWrite,
+  .railMaint {
+    display: block;
+  }
+
+  .head {
+    grid-area: head;
+  }
+
+  .odo {
+    grid-area: odo;
+  }
+
+  .figs {
+    grid-area: figs;
+  }
+
+  .ledger {
+    grid-area: ledger;
+    min-width: 0;
+  }
+
+  .railActions {
+    grid-area: railActions;
+  }
+
+  .railWrite {
+    grid-area: railWrite;
+  }
+
+  .railMaint {
+    grid-area: railMaint;
+  }
+}
+
+.railLabel {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .railLabel {
+    display: block;
+    margin: 0 0 var(--spacing-2);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.04em;
+    color: var(--color-inkLight);
+  }
+}

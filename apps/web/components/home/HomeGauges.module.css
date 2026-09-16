@@ -61,3 +61,25 @@
     font-size: var(--font-size-lg);
   }
 }
+
+/*
+ * Issue #575「05 画面案 ─ PC」の添え数値。
+ * モバイルは計器3つのまま変えず、PC幅でだけ4つ目（今月の燃料費）を出す。
+ */
+.monthlyGauge {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .gauges {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .monthlyGauge {
+    display: block;
+  }
+
+  .value {
+    font-size: var(--font-size-2xl);
+  }
+}

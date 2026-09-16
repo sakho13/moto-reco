@@ -79,3 +79,49 @@
   height: 1rem;
   color: var(--color-inkLight);
 }
+
+/*
+ * Issue #575「05 画面案 ─ PC」の記帳（台帳）。
+ * モバイルのDOM・テキストは変えず、PC幅でのみ「日付が左に立つ」体裁と
+ * 給油の内訳を追加する。
+ */
+.dateBadge {
+  display: none;
+}
+
+.ledgerDetail {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .dateBadge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    color: var(--color-inkLight);
+  }
+
+  .dateWeekday {
+    font-size: var(--font-size-xs);
+  }
+
+  .dateDay {
+    font-family: var(--font-family-display);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    color: var(--color-ink);
+  }
+
+  .ledgerDetail {
+    display: block;
+    margin: 1px 0 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-inkLight);
+  }
+
+  .chevron {
+    display: none;
+  }
+}

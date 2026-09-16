@@ -5,8 +5,13 @@ import useSWR, { mutate } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import { getCurrentDate } from '@repo/shared-utils'
 import { toast } from '@repo/ui/sonner'
+import styles from './page.module.css'
 import { HomeActions } from '@/components/home/HomeActions'
 import { HomeGauges } from '@/components/home/HomeGauges'
+import { HomeOdometer } from '@/components/home/HomeOdometer'
+import { TodaySheetHead } from '@/components/home/TodaySheetHead'
+import { UpcomingMaintenanceRail } from '@/components/home/UpcomingMaintenanceRail'
+import { WriteMoreActions } from '@/components/home/WriteMoreActions'
 import { RecentHistorySection } from '@/components/RecentHistorySection'
 import { TouringModeView } from '@/components/touring/TouringModeView'
 import { trackEvent } from '@/lib/analytics'
@@ -120,15 +125,42 @@ function Page() {
   }
 
   return (
-    <div className="w-full max-w-lg">
-      {/* 計器（直近燃費・平均燃費・前回単価） */}
-      <HomeGauges />
+    <div className={styles.home}>
+      {/* 見出し罫（今日の日付・当月サマリ）。PC専用（モバイルは非表示） */}
+      <div className={styles.head}>
+        <TodaySheetHead />
+      </div>
 
-      {/* 主アクション（給油を記録・ツーリングを開始） */}
-      <HomeActions />
+      {/* オドメーター（総走行距離のプレート表示）。PC専用（モバイルは非表示） */}
+      <div className={styles.odo}>
+        <HomeOdometer />
+      </div>
 
-      {/* 最近の記録 */}
-      <RecentHistorySection />
+      {/* 計器（直近燃費・平均燃費・前回単価。PC幅では今月の燃料費も加わる） */}
+      <div className={styles.figs}>
+        <HomeGauges />
+      </div>
+
+      {/* 主アクション（給油を記録・ツーリングを開始）。PC幅ではレール上段に配置される */}
+      <div className={styles.railActions}>
+        <p className={styles.railLabel}>書き足す</p>
+        <HomeActions />
+      </div>
+
+      {/* 書き足す（整備）。PC専用（モバイルは非表示） */}
+      <div className={styles.railWrite}>
+        <WriteMoreActions />
+      </div>
+
+      {/* 点検の予定。PC専用（モバイルは非表示） */}
+      <div className={styles.railMaint}>
+        <UpcomingMaintenanceRail />
+      </div>
+
+      {/* 最近の記録（記帳）。PC幅では左カラムの台帳になる */}
+      <div className={styles.ledger}>
+        <RecentHistorySection />
+      </div>
     </div>
   )
 }

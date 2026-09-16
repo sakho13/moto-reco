@@ -1,0 +1,97 @@
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-cloud);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  color: var(--color-inkLight);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.rowHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.name {
+  font-size: var(--font-size-xs);
+  color: var(--color-ink);
+}
+
+.remaining {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.remainingUpcoming {
+  composes: remaining;
+  color: var(--color-warning);
+}
+
+.remainingOverdue {
+  composes: remaining;
+  color: var(--color-danger);
+}
+
+.bar {
+  margin-top: var(--spacing-1);
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-cloud);
+  overflow: hidden;
+}
+
+.barOk,
+.barUpcoming,
+.barOverdue {
+  display: block;
+  height: 100%;
+}
+
+.barOk {
+  background: var(--color-inkLight);
+}
+
+.barUpcoming {
+  background: var(--color-warning);
+}
+
+.barOverdue {
+  background: var(--color-danger);
+}
+
+.footerLink {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}
