@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseFuelLogList,
@@ -16,7 +16,7 @@ import {
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
-import { mutateHistoryLists } from '@/lib/api/mutateHistory'
+import { mutateFuelLogLists, mutateHistoryLists } from '@/lib/api/mutateHistory'
 import {
   resolveSubmitPreviousMileage,
   shouldUpdateTotalMileage,
@@ -108,7 +108,7 @@ export function FuelLogRegisterModal({
         is_full_tank: values.isFullTank,
       })
 
-      await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      await mutateFuelLogLists(bikeId)
       await mutateHistoryLists()
       toast.success('給油を記録しました')
       onSuccess()
