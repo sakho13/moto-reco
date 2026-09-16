@@ -8,6 +8,12 @@ import { type Locator, type Page } from '@playwright/test'
  * `/app/my-bike/{bikeId}/fuel-logs` の「給油を記録」ボタンから開く。
  * 入力はODO・給油量・支払金額の3項目のみで、それ以外（満タン/継ぎ足し・日時・
  * メモ）は既定値のまま送信できる。
+ *
+ * PC幅（1024px〜。Playwrightの既定ビューポート1280x720はこれに該当）では
+ * 「給油記入票」（伝票形式の2カラム）に表示が丸ごと差し替わる（#575 PC）。
+ * ODO・給油量・支払金額のラベルや満タン/継ぎ足しチップの役割名は共通だが、
+ * 送信ボタンの文言のみ「記録する」（〜1023px）／「記帳する」（1024px〜）で
+ * 異なるため、`submitButton` は正規表現でどちらにもマッチさせる。
  */
 export class FuelLogRegisterSheetPage {
   readonly page: Page
@@ -35,7 +41,7 @@ export class FuelLogRegisterSheetPage {
       exact: true,
     })
     this.liveGauge = page.getByTestId('fuel-log-live-gauge')
-    this.submitButton = page.getByRole('button', { name: '記録する' })
+    this.submitButton = page.getByRole('button', { name: /記(録|帳)する/ })
   }
 
   /** バイクの給油履歴ページから、給油登録シートを開く */

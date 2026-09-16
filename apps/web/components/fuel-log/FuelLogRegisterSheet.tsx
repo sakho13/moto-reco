@@ -682,7 +682,7 @@ export function FuelLogRegisterSheet({
 
         <div className={styles.stubBlock}>
           <h3 className={styles.stubHeading}>この記入で決まる値</h3>
-          <div className={styles.stubResult}>
+          <div className={styles.stubResult} data-testid="fuel-log-live-gauge">
             <div className={styles.stubResultItem}>
               <span className={styles.stubResultLabel}>区間距離</span>
               <span className={styles.stubResultValue}>
