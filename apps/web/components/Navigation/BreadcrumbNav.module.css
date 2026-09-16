@@ -1,11 +1,12 @@
 .wrapper {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .list {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.25rem;
   list-style: none;
@@ -13,6 +14,8 @@
   padding: 0;
   font-size: var(--font-size-sm);
   color: var(--color-inkLight);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .item {
@@ -21,6 +24,24 @@
   gap: 0.25rem;
   min-width: 0;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+/* 先頭階層（例: 「愛車」）は常に短い固定文言のため縮めない。
+   2階層目以降（現在地に近いほうから）が幅不足時に縮小・省略される */
+.item:first-child {
+  flex-shrink: 0;
+}
+
+.item:not(:first-child) {
+  flex-shrink: 1;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .link {
@@ -34,4 +55,5 @@
 
 .separator {
   opacity: 0.6;
+  flex-shrink: 0;
 }

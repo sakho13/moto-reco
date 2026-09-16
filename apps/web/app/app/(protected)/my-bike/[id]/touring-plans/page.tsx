@@ -65,7 +65,7 @@ function TouringPlansPage() {
               : 'ツーリングプランの取得に失敗しました'}
           </p>
           <Button onClick={() => router.push(`/app/my-bike/${bikeId}`)}>
-            バイク詳細に戻る
+            愛車に戻る
           </Button>
         </div>
       </>

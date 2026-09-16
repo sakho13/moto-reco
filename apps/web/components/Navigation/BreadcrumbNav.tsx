@@ -19,21 +19,23 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const items: BreadcrumbItem[] = []
 
   if (segments[1] === 'my-bike') {
-    items.push({ label: '愛車', href: '/app/my-bike' })
-
-    if (segments.length >= 3) {
-      items.push({ label: 'バイク詳細', href: `/app/my-bike/${segments[2]}` })
-    }
+    const bikeId = segments[2]
+    const detailHref = bikeId ? `/app/my-bike/${bikeId}` : undefined
+    // 愛車の詳細は一覧を廃して直行するため、詳細ページ自体は
+    // 「愛車」の単一階層で表す（「バイク詳細」という別階層は作らない）
+    const isDetailPage = segments.length === 3
 
     if (segments[3] === 'edit') {
+      items.push({ label: '愛車', href: detailHref })
       items.push({ label: '編集' })
       return items
     }
 
     if (segments[3] === 'fuel-logs') {
+      items.push({ label: '愛車', href: detailHref })
       items.push({
         label: '給油履歴',
-        href: `/app/my-bike/${segments[2]}/fuel-logs`,
+        href: `/app/my-bike/${bikeId}/fuel-logs`,
       })
       if (segments[4] === 'register') {
         items.push({ label: '登録' })
@@ -44,14 +46,16 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     }
 
     if (segments[3] === 'goods') {
+      items.push({ label: '愛車', href: detailHref })
       items.push({ label: '取り付けアクセサリ' })
       return items
     }
 
     if (segments[3] === 'tourings') {
+      items.push({ label: '愛車', href: detailHref })
       items.push({
         label: 'ツーリング一覧',
-        href: `/app/my-bike/${segments[2]}/tourings`,
+        href: `/app/my-bike/${bikeId}/tourings`,
       })
       if (segments[4] === 'register') {
         items.push({ label: 'ツーリング登録' })
@@ -61,10 +65,7 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
       return items
     }
 
-    if (segments.length === 3) {
-      items[items.length - 1] = { label: 'バイク詳細' }
-    }
-
+    items.push({ label: '愛車', href: isDetailPage ? undefined : detailHref })
     return items
   }
 
@@ -146,11 +147,17 @@ export function BreadcrumbNav() {
           return (
             <li key={`${item.label}-${index}`} className={styles.item}>
               {item.href && !isLast ? (
-                <Link href={item.href} className={styles.link}>
+                <Link
+                  href={item.href}
+                  className={`${styles.label} ${styles.link}`}
+                >
                   {item.label}
                 </Link>
               ) : (
-                <span aria-current={isLast ? 'page' : undefined}>
+                <span
+                  className={styles.label}
+                  aria-current={isLast ? 'page' : undefined}
+                >
                   {item.label}
                 </span>
               )}
