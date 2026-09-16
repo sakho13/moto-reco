@@ -8,6 +8,8 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { InfoBox } from './InfoBox'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { FREE_USER_LIMITS, GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 export interface BikeFormData {
   nickname: string
@@ -35,6 +37,11 @@ export const BikeRegisterForm = ({
   isSubmitting,
   error,
 }: BikeRegisterFormProps) => {
+  const { isGuest } = useAuth()
+  const bikeLimitText = isGuest
+    ? `ゲストアカウントではバイクを${GUEST_ACCOUNT_LIMITS.BIKE}台まで登録できます`
+    : `無料プランでは${FREE_USER_LIMITS.BIKE}台まで登録できます`
+
   const [formData, setFormData] = useState<BikeFormData>({
     nickname: '',
     purchaseDate: '',
@@ -91,7 +98,7 @@ export const BikeRegisterForm = ({
       )}
 
       <InfoBox variant="info" style={{ marginTop: 'var(--spacing-4)' }}>
-        無料プランでは2台まで登録できます
+        {bikeLimitText}
       </InfoBox>
 
       <form

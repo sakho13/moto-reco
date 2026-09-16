@@ -537,7 +537,7 @@ export function FuelLogRegisterSheet({
         {isCompact && (
           <NumericKeypad
             decimalDisabled={!FIELD_CONSTRAINTS[activeField].allowDecimal}
-            advanceLabel={activeField === 'totalPrice' ? '記録する' : '次へ'}
+            advanceLabel={activeField === 'totalPrice' ? '記録' : '次へ'}
             advanceDisabled={activeField === 'totalPrice' && !canSubmit}
             onDigit={(digit) => applyKey(activeField, digit)}
             onDecimal={() => applyKey(activeField, '.')}
@@ -551,7 +551,7 @@ export function FuelLogRegisterSheet({
           fullWidth
           loading={isSubmitting}
         >
-          {isSubmitting ? '登録中...' : '記録する'}
+          {isSubmitting ? '記録中...' : '記録'}
         </Button>
       </div>
     </>
@@ -648,7 +648,7 @@ export function FuelLogRegisterSheet({
             disabled={isSubmitting || !canSubmit}
             loading={isSubmitting}
           >
-            {isSubmitting ? '登録中...' : '記録する ⏎'}
+            {isSubmitting ? '記録中...' : '記録 ⏎'}
           </Button>
         </div>
       </div>
