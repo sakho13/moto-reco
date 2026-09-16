@@ -15,6 +15,7 @@ import { FuelEfficiencyChart } from '@repo/ui/fuelEfficiencyChart'
 import { Select } from '@repo/ui/select'
 import type { SelectOption } from '@repo/ui/select'
 import styles from './page.module.css'
+import { FuelLedgerSection } from '@/components/bike/FuelLedgerSection'
 import { InfoBox } from '@/components/bike/InfoBox'
 import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
 import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
@@ -171,7 +172,7 @@ function FuelLogsPage() {
         />
       )}
 
-      <div className="w-full max-w-md flex flex-col gap-2">
+      <div className={`${styles.topBar} flex flex-col gap-2`}>
         <div className="flex flex-row gap-2">
           <Button
             onClick={() => router.push(`/app/my-bike/${bikeId}`)}
@@ -227,18 +228,28 @@ function FuelLogsPage() {
           )}
         </div>
 
-        {/* 右カラム（モバイルでは下）: リスト */}
+        {/* 右カラム（モバイルでは下）: リスト。PC（1024px〜）は台帳に差し替える */}
         <div className={styles.listSection}>
-          <FuelLogListSection
-            fuelLogs={fuelLogs}
-            onEdit={handleEdit}
-            onRegister={handleRegister}
-            onLoadMore={handleLoadMore}
-            canLoadMore={canLoadMore}
-            isLoadingMore={isLoadingMore}
-            onSearch={handleSearch}
-            isSearchActive={keyword.length > 0}
-          />
+          <div className={styles.mobileOnly}>
+            <FuelLogListSection
+              fuelLogs={fuelLogs}
+              onEdit={handleEdit}
+              onRegister={handleRegister}
+              onLoadMore={handleLoadMore}
+              canLoadMore={canLoadMore}
+              isLoadingMore={isLoadingMore}
+              onSearch={handleSearch}
+              isSearchActive={keyword.length > 0}
+            />
+          </div>
+
+          <div className={styles.desktopOnly}>
+            <FuelLedgerSection
+              bikeId={bikeId}
+              period={chartPeriod}
+              onEdit={handleEdit}
+            />
+          </div>
         </div>
       </div>
     </>

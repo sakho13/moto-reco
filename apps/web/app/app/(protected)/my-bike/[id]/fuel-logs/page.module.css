@@ -1,3 +1,17 @@
+/*
+ * ヘッダー操作列（戻る・給油を記録）。PC（1024px〜）では下の `.pageLayout` と
+ * 同じ最大幅に揃え、448px幅のまま孤立しないようにする。
+ */
+.topBar {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .topBar {
+    max-width: 960px;
+  }
+}
+
 /* ページ全体のレイアウト */
 .pageLayout {
   display: grid;
@@ -43,6 +57,40 @@
 .chartPlaceholder > p {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
+}
+
+/*
+ * PC（1024px〜）: 給油の台帳（Issue #575「05 画面案 ─ PC」）。
+ * 2カラム（グラフ｜カード）をやめ、グラフ→台帳の縦の流れにする
+ * （「手帳の見開き」であって、枠付きパネルの左右2分割の管理画面にはしない）。
+ */
+@media (min-width: 1024px) {
+  .pageLayout {
+    grid-template-columns: 1fr;
+    max-width: 960px;
+    gap: var(--spacing-8);
+  }
+}
+
+/* モバイル/タブレットのみ表示（カードの縦1列。PCでは台帳に差し替える） */
+.mobileOnly {
+}
+
+@media (min-width: 1024px) {
+  .mobileOnly {
+    display: none;
+  }
+}
+
+/* PC（1024px〜）のみ表示 */
+.desktopOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktopOnly {
+    display: block;
+  }
 }
 
 /* モバイル: 上下配置 */
