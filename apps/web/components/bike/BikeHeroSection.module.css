@@ -33,6 +33,17 @@
   color: var(--color-inkLight);
 }
 
+.editLabel {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .editLabel {
+    display: inline;
+    margin-left: var(--spacing-1);
+  }
+}
+
 .spec {
   margin: 0;
   display: grid;

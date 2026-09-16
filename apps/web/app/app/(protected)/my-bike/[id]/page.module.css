@@ -13,6 +13,39 @@
   padding-bottom: var(--spacing-8);
 }
 
+/*
+ * PC幅（1024px〜）は紙面をもっと広く使う（Issue #575「05 画面案 ─ PC」）。
+ * タブレット幅（640〜1023px）はモバイルと同じ640pxのまま据え置く。
+ */
+@media (min-width: 1024px) {
+  .page {
+    max-width: 900px;
+  }
+}
+
+/* モバイル/タブレットのみ表示（PCでは同じ内容をPC向けの構成に差し替える） */
+.mobileOnly {
+}
+
+@media (min-width: 1024px) {
+  .mobileOnly {
+    display: none;
+  }
+}
+
+/* PC（1024px〜）のみ表示 */
+.desktopOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktopOnly {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+  }
+}
+
 .centerMessage {
   padding: var(--spacing-8) 0;
   text-align: center;
