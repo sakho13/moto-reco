@@ -141,20 +141,29 @@ function Page() {
         <HomeGauges />
       </div>
 
-      {/* 主アクション（給油を記録・ツーリングを開始）。PC幅ではレール上段に配置される */}
-      <div className={styles.railActions}>
-        <p className={styles.railLabel}>書き足す</p>
-        <HomeActions />
-      </div>
+      {/*
+        「書き足す」レール（主アクション・整備の記入・点検の予定）。
+        PC幅ではこの3つをひとつの grid-area にまとめて内側をflexで積むことで、
+        台帳（ledger）の高さに引き伸ばされて項目間に空白ができるのを防ぐ
+        （`page.module.css` の `.rail` 参照）。モバイルはこのラッパー自体に
+        スタイルが無いため、これまでどおり railActions のみ表示される。
+      */}
+      <div className={styles.rail}>
+        {/* 主アクション（給油を記録・ツーリングを開始） */}
+        <div className={styles.railActions}>
+          <p className={styles.railLabel}>書き足す</p>
+          <HomeActions />
+        </div>
 
-      {/* 書き足す（整備）。PC専用（モバイルは非表示） */}
-      <div className={styles.railWrite}>
-        <WriteMoreActions />
-      </div>
+        {/* 書き足す（整備）。PC専用（モバイルは非表示） */}
+        <div className={styles.railWrite}>
+          <WriteMoreActions />
+        </div>
 
-      {/* 点検の予定。PC専用（モバイルは非表示） */}
-      <div className={styles.railMaint}>
-        <UpcomingMaintenanceRail />
+        {/* 点検の予定。PC専用（モバイルは非表示） */}
+        <div className={styles.railMaint}>
+          <UpcomingMaintenanceRail />
+        </div>
       </div>
 
       {/* 最近の記録（記帳）。PC幅では左カラムの台帳になる */}

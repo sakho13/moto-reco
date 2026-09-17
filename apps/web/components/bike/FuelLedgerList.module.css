@@ -8,20 +8,15 @@
   flex-direction: column;
 }
 
-.headRow {
-  display: grid;
-  grid-template-columns: 64px 1fr auto;
-  gap: var(--spacing-3);
+.countRow {
+  display: flex;
+  justify-content: flex-end;
   padding-bottom: var(--spacing-2);
   border-bottom: 1px solid var(--color-ink);
   font-family: var(--font-family-body);
   font-size: var(--font-size-xs);
   letter-spacing: 0.08em;
   color: var(--color-inkLight);
-}
-
-.headRow span:last-child {
-  text-align: right;
 }
 
 .list {
@@ -44,6 +39,16 @@
   align-items: start;
   gap: var(--spacing-3);
   width: 100%;
+  /*
+   * `.row` は <button> のため、`app/app/(protected)/layout.module.css` の
+   * `.appRoot button { max-width: 320px }`（fullWidthなButtonがPCで伸び過ぎない
+   * ようにする共通ルール）が意図せず適用され、PCで台帳の行が320pxに潰れて
+   * ヘッダーと本文の桁がずれてしまう。台帳の行はそのルールの対象外にする。
+   * `.appRoot button` は要素セレクタを含む分 `.row` 単体より詳細度が高い
+   * （(0,1,1) > (0,1,0)）ため、`max-width: none` を書くだけでは負けてしまう。
+   * ここだけは `!important` で確実に上書きする。
+   */
+  max-width: none !important;
   padding-block: var(--spacing-3);
   background: none;
   border: none;

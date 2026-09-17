@@ -38,9 +38,7 @@
       'head head'
       'odo odo'
       'figs figs'
-      'ledger railActions'
-      'ledger railWrite'
-      'ledger railMaint';
+      'ledger rail';
   }
 
   .head,
@@ -67,16 +65,21 @@
     min-width: 0;
   }
 
-  .railActions {
-    grid-area: railActions;
-  }
-
-  .railWrite {
-    grid-area: railWrite;
-  }
-
-  .railMaint {
-    grid-area: railMaint;
+  /*
+   * 「書き足す」レール（主アクション・整備の記入・点検の予定）をひとつの
+   * grid-area にまとめ、内側はflexで積む。railActions/railWrite/railMaintを
+   * それぞれ別のgrid行にすると、台帳（ledger）が長いほどその行が
+   * 引き伸ばされ、レールの項目間に台帳の高さに比例した空白ができてしまう
+   * （grid-template-rowsが `ledger` の複数行スパンに合わせて自動配分される
+   * ため）。1つのgrid-areaに集約しflexで積めば、レールの高さは自身の
+   * 内容量だけで決まり、台帳の長さに引きずられない。
+   */
+  .rail {
+    grid-area: rail;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+    min-width: 0;
   }
 }
 

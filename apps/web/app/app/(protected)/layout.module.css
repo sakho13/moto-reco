@@ -9,8 +9,11 @@
  * - `.shell`    本文の外側の余白（綴じ代 + ガター）を確保するだけの箱。
  *               モバイル（〜639px）は既存の見た目（p-4 / items-center 等）を
  *               そのまま維持する。
- * - `.page`     紙面本体。最大1200pxで、左端を `--app-gutter` 分の
- *               1本の基準線に揃える（`margin-inline: 0` で中央寄せしない）。
+ * - `.page`     紙面本体。最大 `--app-page-w`（1200px、`app/globals.css` で
+ *               定義）で、左端を `--app-gutter` 分の1本の基準線に揃える
+ *               （`margin-inline: 0` で中央寄せしない）。狭くする画面
+ *               （愛車カルテ・給油履歴）は `calc(var(--app-page-w) * N)` の
+ *               形でこのトークンを基準に決める。
  */
 
 .appRoot {
@@ -47,7 +50,7 @@
 
 .page {
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--app-page-w);
   margin-inline: auto;
   display: flex;
   flex-direction: column;
