@@ -51,6 +51,26 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
       return items
     }
 
+    if (segments[3] === 'maintenance-logs') {
+      items.push({ label: '愛車', href: detailHref })
+      items.push({ label: 'メンテナンス履歴' })
+      return items
+    }
+
+    if (segments[3] === 'touring-plans') {
+      items.push({ label: '愛車', href: detailHref })
+      items.push({
+        label: 'ツーリングプラン一覧',
+        href: `/app/my-bike/${bikeId}/touring-plans`,
+      })
+      if (segments[4] === 'register') {
+        items.push({ label: 'ツーリングプラン登録' })
+      } else if (segments[4]) {
+        items.push({ label: 'ツーリングプラン詳細' })
+      }
+      return items
+    }
+
     if (segments[3] === 'tourings') {
       items.push({ label: '愛車', href: detailHref })
       items.push({
