@@ -8,6 +8,58 @@
  * 前回給油が継ぎ足しの場合は燃費を算出しない（サーバーの確定値と一致しないため）。
  */
 
+import { FuelEfficiencyCalculationService } from '@repo/shared-domain'
+
+const fuelEfficiencyCalculationService = new FuelEfficiencyCalculationService()
+
+/** {@link calculateBridgedAverageEfficiency} の対象1件の最小情報 */
+export type BridgedAverageEfficiencyTarget = {
+  fuelLogId: string
+  mileage: number
+  amount: number
+  isFullTank: boolean
+}
+
+/**
+ * 期間フィルタの境界をまたぐ区間も正しく満タン法で算出できるようにした、
+ * 距離加重平均の燃費 (km/L)
+ *
+ * @remarks
+ * 愛車カルテの「平均燃費」（`BikeStatsSection`）は、期間フィルタで絞った
+ * 給油履歴だけを満タン法（{@link FuelEfficiencyCalculationService}）に渡すと、
+ * 期間の先頭にある給油が実際には期間より前の満タン給油から続く区間だった
+ * 場合に、直前の満タン給油を参照できず「初回給油」相当として区間が誤って
+ * 除外されてしまう（Issue #575 Codexの指摘#5）。
+ *
+ * サーバー側の `PrismaFuelInsightRepository.findBridgeRows`（境界より前の
+ * 記録を取得し、区間判定にのみ使う仕組み）と同じ考え方をクライアント側にも
+ * 適用する。区間判定（直前の満タン給油の参照）は期間フィルタ前の給油履歴
+ * 全件（`allLogs`）で行い、平均の母数（分母・分子）は期間フィルタ済みの
+ * 給油ログ（`inPeriodFuelLogIds` に含まれるもの）のみに限定する。
+ *
+ * @param allLogs 期間フィルタ前の給油履歴全件（順不同で可）
+ * @param inPeriodFuelLogIds 平均の母数に含める給油ログID（期間フィルタ後）の集合
+ * @returns 距離加重平均の燃費 (km/L)。算出できる区間が無ければ null
+ */
+export function calculateBridgedAverageEfficiency(
+  allLogs: readonly BridgedAverageEfficiencyTarget[],
+  inPeriodFuelLogIds: ReadonlySet<string>
+): number | null {
+  const orderedByMileageAsc = [...allLogs].sort((a, b) => a.mileage - b.mileage)
+  const details =
+    fuelEfficiencyCalculationService.calculateDetails(orderedByMileageAsc)
+
+  let totalDistance = 0
+  let totalAmount = 0
+  for (const [fuelLogId, interval] of details) {
+    if (interval === null || !inPeriodFuelLogIds.has(fuelLogId)) continue
+    totalDistance += interval.distance
+    totalAmount += interval.amount
+  }
+
+  return totalAmount > 0 ? totalDistance / totalAmount : null
+}
+
 /** ライブ計器の算出に必要な、直近の給油履歴の最小情報 */
 export type PreviousFuelLogSummary = {
   mileage: number

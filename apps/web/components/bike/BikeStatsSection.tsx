@@ -1,16 +1,30 @@
 'use client'
 
-import { FuelEfficiencyCalculationService } from '@repo/shared-domain'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import styles from './BikeStatsSection.module.css'
+import { calculateBridgedAverageEfficiency } from '@/lib/fuelLogSheet'
 
 const DASH = '—'
-
-const fuelEfficiencyCalculationService = new FuelEfficiencyCalculationService()
 
 type Props = {
   /** 期間・満タンフィルタ適用後の給油履歴（順不同で可） */
   fuelLogs: ApiResponseFuelLogDetail[]
+  /**
+   * 平均燃費の満タン法区間判定にのみ使う、期間フィルタ・満タンフィルタの
+   * いずれも適用前の給油履歴全件（順不同で可）
+   *
+   * @remarks
+   * `fuelLogs`（期間フィルタ済み）だけを満タン法に渡すと、期間の先頭にある
+   * 給油が実際には期間より前の満タン給油から続く区間だった場合に、直前の
+   * 満タン給油を参照できず区間が誤って除外されてしまう（Issue #575
+   * Codexの指摘#5）。`calculateBridgedAverageEfficiency`
+   * （`PrismaFuelInsightRepository.findBridgeRows` と同じ考え方）に渡し、
+   * 区間判定にのみ使う。母数（分母・分子）は `fuelLogs` に含まれる
+   * 給油ログのみに限定されるため、期間内の集計は変わらない。
+   * 継ぎ足し給油を含む全件を渡す必要がある（除外すると、区間をまたぐ
+   * 継ぎ足しの給油量が次の満タン給油の区間から失われてしまうため）。
+   */
+  allFuelLogs: ApiResponseFuelLogDetail[]
   isLoading: boolean
 }
 
@@ -26,29 +40,22 @@ type Props = {
  * 新しいAPIは追加せず、既存の給油履歴一覧APIから取得した期間内のデータを
  * クライアント側で集計する。
  */
-export function BikeStatsSection({ fuelLogs, isLoading }: Props) {
+export function BikeStatsSection({ fuelLogs, allFuelLogs, isLoading }: Props) {
   const validLogs = fuelLogs.filter(
     (log): log is ApiResponseFuelLogDetail & { fuelEfficiency: number } =>
       log.fuelEfficiency !== null
   )
 
   // 平均燃費は区間ごとの燃費値の単純平均ではなく、距離加重平均
-  // （総距離 ÷ 総給油量）で算出する。区間ごとに距離・給油量が異なる場合、
-  // 単純平均は期間全体の実際の燃費と一致しないため
-  // （ホームの計器・燃費インサイトと同じ FuelEfficiencyCalculationService を使用し、
-  // 算出方法を揃える）。
-  const orderedByMileageAsc = [...fuelLogs].sort(
-    (a, b) => a.mileage - b.mileage
+  // （総距離 ÷ 総給油量）で算出する。区間判定（直前の満タン給油の参照）は
+  // 期間フィルタ前の全件（`allFuelLogs`）で行い、期間の先頭で区間が境界を
+  // またぐ場合の精度低下を防ぐ。集計対象は `fuelLogs`（期間フィルタ済み）
+  // に含まれる給油ログのみに限定する。
+  const inPeriodFuelLogIds = new Set(fuelLogs.map((log) => log.fuelLogId))
+  const averageEfficiency = calculateBridgedAverageEfficiency(
+    allFuelLogs,
+    inPeriodFuelLogIds
   )
-  const averageEfficiency =
-    fuelEfficiencyCalculationService.calculateAverageEfficiency(
-      orderedByMileageAsc.map((log) => ({
-        fuelLogId: log.fuelLogId,
-        mileage: log.mileage,
-        amount: log.amount,
-        isFullTank: log.isFullTank,
-      }))
-    )
 
   const bestEfficiency =
     validLogs.length > 0

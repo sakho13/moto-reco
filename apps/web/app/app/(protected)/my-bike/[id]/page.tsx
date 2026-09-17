@@ -31,6 +31,20 @@ import { useAuth } from '@/lib/hooks/useAuth'
 // `BikeFuelLedgerExcerpt` の再検証キーと揃える必要がある。
 const PERIOD_FETCH_SIZE = 100
 
+async function fetchFuelLogList(url: string): Promise<ApiResponseFuelLogList> {
+  const response = await authenticatedFetch(url, { method: 'GET' })
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new ApiV1Error(
+      errorData.errorCode || 'SERVER_ERROR',
+      errorData.message || '給油履歴の取得に失敗しました'
+    )
+  }
+  const json =
+    (await response.json()) as SuccessResponse<ApiResponseFuelLogList>
+  return json.data
+}
+
 /**
  * 愛車の詳細（カルテ）
  *
@@ -80,25 +94,31 @@ function BikeDetailPage() {
       id
         ? `/api/v1/user-bike/bike/${id}/fuel-logs?sort-by=refueled-at&sort-order=asc&per-size=${PERIOD_FETCH_SIZE}&period=${period}`
         : null,
-      async (url: string) => {
-        const response = await authenticatedFetch(url, { method: 'GET' })
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new ApiV1Error(
-            errorData.errorCode || 'SERVER_ERROR',
-            errorData.message || '給油履歴の取得に失敗しました'
-          )
-        }
-        const json =
-          (await response.json()) as SuccessResponse<ApiResponseFuelLogList>
-        return json.data
-      }
+      fetchFuelLogList
     )
+
+  // 平均燃費（`BikeStatsSection`）の満タン法区間判定にのみ使う、期間フィルタ
+  // 前の給油履歴全件（Issue #575 Codexの指摘#5。`PrismaFuelInsightRepository`
+  // の `findBridgeRows` と同じ考え方）。新しいAPIは追加せず、既存の給油履歴
+  // 一覧APIを期間指定なし（全期間）で取得する。
+  const { data: allFuelLogsRaw, isLoading: isAllFuelLogsLoading } = useSWR(
+    id
+      ? `/api/v1/user-bike/bike/${id}/fuel-logs?sort-by=mileage&sort-order=asc&per-size=${PERIOD_FETCH_SIZE}`
+      : null,
+    fetchFuelLogList
+  )
 
   const periodFuelLogs = useMemo(() => {
     const logs = periodFuelLogsRaw ?? []
     return fullTankOnly ? logs.filter((log) => log.isFullTank) : logs
   }, [periodFuelLogsRaw, fullTankOnly])
+
+  // 区間判定（満タン法）には常に「満タンのみ」フィルタ適用前の全件を使う。
+  // 継ぎ足し給油は元々どの区間でも算出対象にならない（`calculateDetails` が
+  // 継ぎ足し単体には常に null を返す）ため、ここでフィルタして除いてしまうと、
+  // 区間をまたぐ継ぎ足しの給油量が次の満タン給油の区間から失われ、
+  // かえって平均燃費が不正確になる。
+  const allFuelLogs = allFuelLogsRaw ?? []
 
   // このバイクの詳細を開いたら、アクティブ車両をこのバイクに同期する
   // （ヘッダーのBikeSwitcher・ホームなどアプリ全体が参照する）
@@ -169,7 +189,8 @@ function BikeDetailPage() {
         />
         <BikeStatsSection
           fuelLogs={periodFuelLogs}
-          isLoading={isPeriodFuelLogsLoading}
+          allFuelLogs={allFuelLogs}
+          isLoading={isPeriodFuelLogsLoading || isAllFuelLogsLoading}
         />
         <BikeFuelGraphSection fuelLogs={periodFuelLogs} />
       </div>

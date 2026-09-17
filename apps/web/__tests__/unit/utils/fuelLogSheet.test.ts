@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import {
   appendNumericKey,
   calculateAverageFuelEfficiency,
+  calculateBridgedAverageEfficiency,
   calculateDaysAgo,
   calculateFuelEfficiencyComparison,
   calculateLiveGauges,
@@ -495,5 +496,91 @@ describe('formatPreviousStubHeading', () => {
     expect(formatPreviousStubHeading('2026-09-13T09:40', now)).toBe(
       '前回の控え ─ 9月13日（今日）'
     )
+  })
+})
+
+describe('calculateBridgedAverageEfficiency', () => {
+  test('期間の先頭が境界をまたぐ区間でも、境界より前の満タン給油を参照して算出する', () => {
+    // 回帰再現（Issue #575 Codexの指摘#5）: bが期間の先頭。直前の満タン給油a
+    // は期間より前にあるが、区間判定にはallLogsとして渡すため正しく算出できる
+    const allLogs = [
+      { fuelLogId: 'a', mileage: 12500, amount: 11.2, isFullTank: true },
+      { fuelLogId: 'b', mileage: 12750, amount: 12.4, isFullTank: true },
+      { fuelLogId: 'c', mileage: 13010, amount: 11.8, isFullTank: true },
+    ]
+    const inPeriodFuelLogIds = new Set(['b', 'c'])
+
+    const result = calculateBridgedAverageEfficiency(
+      allLogs,
+      inPeriodFuelLogIds
+    )
+
+    // b: 距離250/給油12.4L, c: 距離260/給油11.8L → 距離加重平均
+    expect(result).toBeCloseTo((250 + 260) / (12.4 + 11.8))
+  })
+
+  test('境界より前の記録（bridge）を渡さない場合、期間先頭の区間は母数から漏れる', () => {
+    // bridgeRows相当のaを渡さないと、bは「直前の満タン給油が無い」扱いになり
+    // 区間が算出できない（従来のバグと同じ状態を確認する対照実験）
+    const inPeriodOnly = [
+      { fuelLogId: 'b', mileage: 12750, amount: 12.4, isFullTank: true },
+      { fuelLogId: 'c', mileage: 13010, amount: 11.8, isFullTank: true },
+    ]
+    const inPeriodFuelLogIds = new Set(['b', 'c'])
+
+    const result = calculateBridgedAverageEfficiency(
+      inPeriodOnly,
+      inPeriodFuelLogIds
+    )
+
+    // cの区間（260/11.8）のみが母数になり、bは含まれない
+    expect(result).toBeCloseTo(260 / 11.8)
+  })
+
+  test('境界より前に継ぎ足し給油を挟んでいても、その給油量は境界をまたぐ区間に繰り込まれる', () => {
+    const allLogs = [
+      { fuelLogId: 'a', mileage: 12500, amount: 11.2, isFullTank: true },
+      // 継ぎ足し（期間より前）。距離・給油量ともbの区間に繰り込まれる
+      { fuelLogId: 'x', mileage: 12600, amount: 3.0, isFullTank: false },
+      { fuelLogId: 'b', mileage: 12750, amount: 12.4, isFullTank: true },
+    ]
+    const inPeriodFuelLogIds = new Set(['b'])
+
+    const result = calculateBridgedAverageEfficiency(
+      allLogs,
+      inPeriodFuelLogIds
+    )
+
+    // bの区間: 距離250 ／ 給油量は継ぎ足し3.0Lを含む 12.4+3.0=15.4L
+    expect(result).toBeCloseTo(250 / (12.4 + 3.0))
+  })
+
+  test('境界より前に満タン給油が無い場合、期間先頭は従来どおり初回給油扱いになる', () => {
+    const allLogs = [
+      { fuelLogId: 'b', mileage: 12750, amount: 12.4, isFullTank: true },
+      { fuelLogId: 'c', mileage: 13010, amount: 11.8, isFullTank: true },
+    ]
+    const inPeriodFuelLogIds = new Set(['b', 'c'])
+
+    const result = calculateBridgedAverageEfficiency(
+      allLogs,
+      inPeriodFuelLogIds
+    )
+
+    expect(result).toBeCloseTo(260 / 11.8)
+  })
+
+  test('算出できる区間が1件も無い場合はnull', () => {
+    const allLogs = [
+      { fuelLogId: 'a', mileage: 12500, amount: 11.2, isFullTank: true },
+    ]
+
+    expect(
+      calculateBridgedAverageEfficiency(allLogs, new Set(['a']))
+    ).toBeNull()
+  })
+
+  test('空配列はnull', () => {
+    expect(calculateBridgedAverageEfficiency([], new Set())).toBeNull()
   })
 })
