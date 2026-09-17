@@ -49,6 +49,21 @@ export async function mutateFuelLogLists(bikeId: string): Promise<void> {
 }
 
 /**
+ * アクティブ車両一覧（`/api/v1/user-bike/bikes`）のSWRキーを再検証する
+ *
+ * @remarks
+ * `ActiveBikeContext`（ヘッダーのBikeSwitcher・ホームのODO計器などアプリ全体が
+ * 参照する `activeBike.totalMileage`）の取得元。`updateTotalMileage` を伴う
+ * 給油登録（`FuelLogRegisterModal`）は履歴系キー（`mutateFuelLogLists` /
+ * `mutateHistoryLists`）しか再検証しておらず、このキーは対象外だったため、
+ * 登録直後はホームのODOが古い値のまま（「前回の給油から」も負値判定で「—」の
+ * まま）になる不具合があった（Issue #575「05 画面案 ─ PC」）。
+ */
+export async function mutateActiveBikeList(): Promise<void> {
+  await mutate('/api/v1/user-bike/bikes').catch(() => {})
+}
+
+/**
  * 点検予定（`/api/v1/user-bike/bike/{id}/maintenance-schedule`）のSWRキーを再検証する
  *
  * @remarks

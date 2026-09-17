@@ -229,25 +229,49 @@ export function formatPreviousStubHeading(
   return `前回の控え ─ ${dateLabel}（${daysAgo}日前）`
 }
 
+/** `resolveSubmitPreviousMileage` が基準ログ探索に使う、給油履歴の最小情報 */
+export type FuelLogReferenceEntry = {
+  mileage: number
+  refueledAt: string
+}
+
 /**
  * 登録リクエストに含める previousMileage を補完する
  *
  * @remarks
  * previousMileage はAPIスキーマ上必須（`previousMileage <= mileage` の制約あり）だが、
- * 満タン法による燃費算出には使われなくなった参考値。
- * 直近の給油履歴があればその走行距離をそのまま使う（入力ミスは
- * サーバーのバリデーションエラーとしてユーザーに返す）。
- * 直近の給油履歴が無い（初回給油）場合のみ、バリデーションを必ず満たすように
- * 総走行距離と入力ODOの小さい方に丸める。
+ * 満タン法による燃費算出には使われなくなった参考値。ただし台帳・履歴の「区間距離」
+ * 表示（`mileage - previousMileage`）には使われるため、値そのものの妥当性は保ちたい。
+ *
+ * 日時チップから過去の給油を選んで入力した場合、常に「直近の給油ログ」（最新のもの）
+ * を基準にすると、その走行距離が今回の入力ODOを上回り
+ * `previousMileage <= mileage` のバリデーションに必ず違反する回帰があったため、
+ * `logs` の中から選択した給油日時（`refueledAt`）以前で最も新しいログを基準にする。
+ * 該当するログが無い（選択した日時がどの既存ログよりも古い＝実質的な初回給油）
+ * 場合のみ、バリデーションを満たすように総走行距離と入力ODOの小さい方に丸める。
  */
 export function resolveSubmitPreviousMileage(params: {
-  previousLog: PreviousFuelLogSummary | null
-  totalMileage: number | undefined
+  refueledAt: string
   mileage: number
+  logs: readonly FuelLogReferenceEntry[]
+  totalMileage: number | undefined
 }): number {
-  const { previousLog, totalMileage, mileage } = params
-  if (previousLog !== null) {
-    return previousLog.mileage
+  const { refueledAt, mileage, logs, totalMileage } = params
+  const targetTime = new Date(refueledAt).getTime()
+
+  let closest: FuelLogReferenceEntry | null = null
+  for (const log of logs) {
+    const logTime = new Date(log.refueledAt).getTime()
+    if (logTime > targetTime) continue
+    if (closest === null || logTime > new Date(closest.refueledAt).getTime()) {
+      closest = log
+    }
+  }
+
+  if (closest !== null) {
+    // 入力ミスによる前回以下のmileageもそのまま返す（サーバー側のバリデーション
+    // エラーとしてユーザーに返す。ここで無言に補正すると入力ミスに気づけない）
+    return closest.mileage
   }
   if (totalMileage !== undefined) {
     return Math.min(totalMileage, mileage)

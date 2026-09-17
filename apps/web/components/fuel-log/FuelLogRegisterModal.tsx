@@ -16,7 +16,11 @@ import {
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
-import { mutateFuelLogLists, mutateHistoryLists } from '@/lib/api/mutateHistory'
+import {
+  mutateActiveBikeList,
+  mutateFuelLogLists,
+  mutateHistoryLists,
+} from '@/lib/api/mutateHistory'
 import { getBikeDisplayName } from '@/lib/bike'
 import {
   calculateAverageFuelEfficiency,
@@ -102,9 +106,10 @@ export function FuelLogRegisterModal({
     try {
       const memo = values.memo.trim()
       const previousMileage = resolveSubmitPreviousMileage({
-        previousLog: previousFuelLog,
-        totalMileage: bike?.totalMileage,
+        refueledAt: values.refueledAt,
         mileage: values.mileage,
+        logs: fuelLogs ?? [],
+        totalMileage: bike?.totalMileage,
       })
       const updateTotalMileage = shouldUpdateTotalMileage(
         values.mileage,
@@ -130,6 +135,11 @@ export function FuelLogRegisterModal({
 
       await mutateFuelLogLists(bikeId)
       await mutateHistoryLists()
+      if (updateTotalMileage) {
+        // 総走行距離が更新された場合、ActiveBikeContext（ホームのODO計器等）が
+        // 参照するアクティブ車両一覧も再検証しないと古いODOが残ってしまう
+        await mutateActiveBikeList()
+      }
       toast.success('給油を記録しました')
       onSuccess()
     } catch (err) {
