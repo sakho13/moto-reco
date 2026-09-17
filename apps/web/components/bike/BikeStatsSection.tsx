@@ -105,7 +105,8 @@ export function BikeStatsSection({ fuelLogs, isLoading }: Props) {
       <div className={styles.fig}>
         <span className={styles.label}>燃料費</span>
         <span className={styles.value}>
-          {showDash ? DASH : `¥${totalCost.toLocaleString()}`}
+          {showDash ? DASH : totalCost.toLocaleString()}
+          <span className={styles.unit}>円</span>
         </span>
         <span className={styles.note}>
           1kmあたり{' '}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatDate,
   formatInUserTimezone,
   formatPlanSpotOffsetMinutes,
   getNowLocalDateTimeString,
@@ -7,6 +8,20 @@ import {
   isUnsetDate,
   toLocalDateTimeString,
 } from '@repo/shared-utils'
+
+describe('formatDate', () => {
+  it('yyyy年M月d日 形式の文字列を返す', () => {
+    expect(formatDate('2024-05-18T00:00:00')).toBe('2024年5月18日')
+  })
+
+  it('一桁の月・日はゼロ埋めしない', () => {
+    expect(formatDate('2026-01-05T00:00:00')).toBe('2026年1月5日')
+  })
+
+  it('Date オブジェクトを受け取れる', () => {
+    expect(formatDate(new Date(2026, 8, 17))).toBe('2026年9月17日')
+  })
+})
 
 describe('toLocalDateTimeString', () => {
   it('UTC ISO 文字列をブラウザローカルタイムの datetime-local 形式に変換する', () => {

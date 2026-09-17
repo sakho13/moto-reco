@@ -27,8 +27,9 @@ type Props = {
  * 愛車のカルテ内の「給油の台帳」抜粋（Issue #575「05 画面案 ─ PC」愛車）
  *
  * @remarks
- * 直近 {@link EXCERPT_COUNT} 件のみを表示し、「すべて見る」で
+ * 直近 {@link EXCERPT_COUNT} 件のみを表示し、「すべて見る →」で
  * `/app/my-bike/{id}/fuel-logs`（PC版の全件台帳）へ遷移する。
+ * リンク文言は `components/RecentHistorySection.tsx`（ホームの記帳）と揃えている。
  * 行をクリックすると既存の `FuelLogEditModal`（`components/fuel-log/`。
  * 変更はしていない）を開いて編集できる。
  */
@@ -61,7 +62,7 @@ export function BikeFuelLedgerExcerpt({ bikeId, period, fuelLogs }: Props) {
       <div className={styles.head}>
         <h2 className={styles.title}>給油の台帳</h2>
         <Link href={`/app/my-bike/${bikeId}/fuel-logs`} className={styles.more}>
-          すべて見る
+          すべて見る →
         </Link>
       </div>
 
