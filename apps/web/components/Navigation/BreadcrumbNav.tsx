@@ -47,7 +47,10 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
 
     if (segments[3] === 'goods') {
       items.push({ label: '愛車', href: detailHref })
-      items.push({ label: '取り付けアクセサリ' })
+      // 愛車カルテの行リンク（`BikeRecordLinks`）・グローバルの `/app/goods`
+      // パンくず（後述）と同じ「グッズ」に統一する（以前は「取り付けアクセサリ」
+      // という別名だった）
+      items.push({ label: 'グッズ' })
       return items
     }
 
@@ -63,10 +66,12 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
         label: 'ツーリングプラン一覧',
         href: `/app/my-bike/${bikeId}/touring-plans`,
       })
+      // 子階層は「給油履歴 / 登録 / 編集」と同じく接頭辞を繰り返さない
+      // （以前は「ツーリングプラン登録」のように親と同じ名詞を重ねていた）
       if (segments[4] === 'register') {
-        items.push({ label: 'ツーリングプラン登録' })
+        items.push({ label: '登録' })
       } else if (segments[4]) {
-        items.push({ label: 'ツーリングプラン詳細' })
+        items.push({ label: '詳細' })
       }
       return items
     }
@@ -77,10 +82,12 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
         label: 'ツーリング一覧',
         href: `/app/my-bike/${bikeId}/tourings`,
       })
+      // 子階層は「給油履歴 / 登録 / 編集」と同じく接頭辞を繰り返さない
+      // （以前は「ツーリング登録」のように親と同じ名詞を重ねていた）
       if (segments[4] === 'register') {
-        items.push({ label: 'ツーリング登録' })
+        items.push({ label: '登録' })
       } else if (segments[4]) {
-        items.push({ label: 'ツーリング詳細' })
+        items.push({ label: '詳細' })
       }
       return items
     }
