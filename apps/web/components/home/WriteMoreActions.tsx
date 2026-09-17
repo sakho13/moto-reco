@@ -48,7 +48,7 @@ export function WriteMoreActions() {
       >
         <span className={styles.buttonContent}>
           <WrenchIcon />
-          整備を記入
+          整備を記録
         </span>
       </Button>
     </div>

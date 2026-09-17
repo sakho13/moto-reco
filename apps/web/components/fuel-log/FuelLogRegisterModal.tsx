@@ -159,12 +159,7 @@ export function FuelLogRegisterModal({
   }
 
   return (
-    <ModalBase
-      title="給油を記録"
-      onClose={onClose}
-      size="lg"
-      hideTitleOnDesktop
-    >
+    <ModalBase title="給油" onClose={onClose} size="lg" hideTitleOnDesktop>
       <FuelLogRegisterSheet
         vehicleName={bike ? getBikeDisplayName(bike) : null}
         previousFuelLog={previousFuelLog}

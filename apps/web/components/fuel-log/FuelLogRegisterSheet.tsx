@@ -449,7 +449,16 @@ export function FuelLogRegisterSheet({
 
   const renderMobileSheet = () => (
     <>
-      <div className={styles.headerRow}>{dateChipButton}</div>
+      <div className={styles.headerRow}>
+        {/*
+          複数台持ちのとき、モーダルがヘッダー（アクティブ車両表示）を覆うため、
+          どのバイクに記録しているかシート上で確認できるよう車両チップを出す
+          （PC版の給油記入票と同じ `.chip` を再利用。Issue #575「05 画面案 ─ PC」
+          のモバイル案 `✕ 給油 [テスト号 ▾] [今 14:15 ▾]` にも対応する）。
+        */}
+        {vehicleName && <span className={styles.chip}>{vehicleName}</span>}
+        {dateChipButton}
+      </div>
 
       {dateEditor}
 
@@ -705,10 +714,20 @@ export function FuelLogRegisterSheet({
               </span>
             </div>
             <div
-              className={`${styles.stubResultItem} ${styles.stubResultItemLead}`}
+              className={
+                liveGauge.fuelEfficiency !== null
+                  ? `${styles.stubResultItem} ${styles.stubResultItemLead}`
+                  : styles.stubResultItem
+              }
             >
               <span className={styles.stubResultLabel}>燃費</span>
-              <span className={styles.stubResultValue}>
+              <span
+                className={
+                  liveGauge.fuelEfficiency !== null
+                    ? styles.stubResultValue
+                    : styles.stubResultValueGhost
+                }
+              >
                 {liveGauge.fuelEfficiency !== null
                   ? liveGauge.fuelEfficiency.toFixed(1)
                   : '—'}

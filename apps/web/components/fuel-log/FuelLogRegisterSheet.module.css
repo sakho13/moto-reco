@@ -4,10 +4,12 @@
   gap: var(--spacing-4);
 }
 
-/* ---------- ヘッダー（給油日時チップ） ---------- */
+/* ---------- ヘッダー（車両チップ・給油日時チップ） ---------- */
 .headerRow {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: var(--spacing-2);
 }
 
 .dateChip {
@@ -481,6 +483,29 @@
 .stubResultItemLead .stubResultValue {
   color: var(--color-product);
   font-size: var(--font-size-3xl);
+}
+
+/*
+ * 燃費が未確定（入力前・継ぎ足しで算出対象外など）の「—」用。
+ * `.stubResultItemLead` を外した状態で使うため、アクセント色・大サイズにはせず
+ * 区間距離・単価と同じ inkLight・通常サイズにする。強調色の太いダッシュが
+ * エラー表示の赤い横棒のように見えてしまうのを防ぐ。
+ */
+.stubResultValueGhost {
+  color: var(--color-inkLight);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.stubResultValueGhost em {
+  margin-left: 2px;
+  color: var(--color-inkLight);
+  font-style: normal;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
 }
 
 .stubResultMemo {
