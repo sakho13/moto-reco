@@ -244,11 +244,7 @@ function FuelLogsPage() {
           </div>
 
           <div className={styles.desktopOnly}>
-            <FuelLedgerSection
-              bikeId={bikeId}
-              period={chartPeriod}
-              onEdit={handleEdit}
-            />
+            <FuelLedgerSection bikeId={bikeId} onEdit={handleEdit} />
           </div>
         </div>
       </div>
