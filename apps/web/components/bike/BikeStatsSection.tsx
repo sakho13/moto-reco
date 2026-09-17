@@ -1,9 +1,12 @@
 'use client'
 
+import { FuelEfficiencyCalculationService } from '@repo/shared-domain'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import styles from './BikeStatsSection.module.css'
 
 const DASH = '—'
+
+const fuelEfficiencyCalculationService = new FuelEfficiencyCalculationService()
 
 type Props = {
   /** 期間・満タンフィルタ適用後の給油履歴（順不同で可） */
@@ -29,11 +32,23 @@ export function BikeStatsSection({ fuelLogs, isLoading }: Props) {
       log.fuelEfficiency !== null
   )
 
+  // 平均燃費は区間ごとの燃費値の単純平均ではなく、距離加重平均
+  // （総距離 ÷ 総給油量）で算出する。区間ごとに距離・給油量が異なる場合、
+  // 単純平均は期間全体の実際の燃費と一致しないため
+  // （ホームの計器・燃費インサイトと同じ FuelEfficiencyCalculationService を使用し、
+  // 算出方法を揃える）。
+  const orderedByMileageAsc = [...fuelLogs].sort(
+    (a, b) => a.mileage - b.mileage
+  )
   const averageEfficiency =
-    validLogs.length > 0
-      ? validLogs.reduce((sum, log) => sum + log.fuelEfficiency, 0) /
-        validLogs.length
-      : null
+    fuelEfficiencyCalculationService.calculateAverageEfficiency(
+      orderedByMileageAsc.map((log) => ({
+        fuelLogId: log.fuelLogId,
+        mileage: log.mileage,
+        amount: log.amount,
+        isFullTank: log.isFullTank,
+      }))
+    )
 
   const bestEfficiency =
     validLogs.length > 0
