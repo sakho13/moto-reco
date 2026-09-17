@@ -17,6 +17,14 @@ type Props = {
    * 給油以外の項目、燃費が算出できている行・継ぎ足し行では使わない。
    */
   efficiencyUnavailableReason?: SavedFuelLogEfficiencyReason
+  /**
+   * 車両名（複数車両を横断する一覧でのみ指定する）
+   *
+   * @remarks
+   * `/app/history`（全バイク横断のヒストリー）でどの車両の記録かを区別するために使う。
+   * ホーム「最近の記録」はアクティブ車両のみを表示するため指定しない。
+   */
+  bikeName?: string
   onClick?: () => void
 }
 
@@ -55,6 +63,7 @@ function formatLedgerDate(occurredAt: string): {
 export function RecentRecordRow({
   item,
   efficiencyUnavailableReason,
+  bikeName,
   onClick,
 }: Props) {
   const { weekday, monthDay } = formatLedgerDate(item.occurredAt)
@@ -79,6 +88,7 @@ export function RecentRecordRow({
         <p className={styles.title}>
           給油 {item.fuelLog.amount.toFixed(1)}L ¥
           {item.fuelLog.totalPrice.toLocaleString()}
+          {bikeName && <span className={styles.bikeName}>・{bikeName}</span>}
         </p>
         <p className={styles.meta}>
           {formatDate(item.fuelLog.refueledAt)} ・{' '}
@@ -96,7 +106,10 @@ export function RecentRecordRow({
       </>
     ) : (
       <>
-        <p className={styles.title}>{item.touring.title}</p>
+        <p className={styles.title}>
+          {item.touring.title}
+          {bikeName && <span className={styles.bikeName}>・{bikeName}</span>}
+        </p>
         <p className={styles.meta}>
           {formatDate(item.touring.startDate)} 〜{' '}
           {formatDate(item.touring.endDate)}

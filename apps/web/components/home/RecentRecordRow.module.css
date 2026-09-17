@@ -94,6 +94,16 @@
   white-space: nowrap;
 }
 
+/*
+ * 複数車両を横断する一覧（/app/history）でのみ表示する車両名。
+ * ホーム「最近の記録」（アクティブ車両のみ）では bikeName を渡さないため描画されない。
+ */
+.bikeName {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-inkLight);
+}
+
 .meta {
   margin: 0;
   font-size: var(--font-size-xs);
