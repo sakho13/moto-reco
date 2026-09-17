@@ -2,15 +2,8 @@
 
 import type { FuelLogPeriod } from '@repo/shared-types'
 import { Select } from '@repo/ui/select'
-import type { SelectOption } from '@repo/ui/select'
 import styles from './BikeCarteControls.module.css'
-
-const PERIOD_OPTIONS: SelectOption[] = [
-  { value: 'latest-year', label: '最新の履歴から1年' },
-  { value: 'latest-month', label: '最新の履歴から1ヶ月' },
-  { value: 'past-year', label: '現在日時から直近1年' },
-  { value: 'past-month', label: '現在日時から直近1ヶ月' },
-]
+import { FUEL_LOG_PERIOD_OPTIONS } from '@/lib/statics'
 
 type Props = {
   period: FuelLogPeriod
@@ -39,7 +32,7 @@ export function BikeCarteControls({
         id="bike-carte-period"
         aria-label="期間"
         className={styles.periodSelect}
-        options={PERIOD_OPTIONS}
+        options={FUEL_LOG_PERIOD_OPTIONS}
         value={period}
         onChange={(event) =>
           onPeriodChange(event.target.value as FuelLogPeriod)

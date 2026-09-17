@@ -1,6 +1,9 @@
 /*
  * ヘッダー操作列（戻る・給油を記録）。PC（1024px〜）では下の `.pageLayout` と
  * 同じ最大幅に揃え、448px幅のまま孤立しないようにする。
+ * 960px は共通トークン `--app-page-w`（1200px、`app/globals.css`）の80%。
+ * 画面ごとに独立した値を書かず、この1本のトークンの倍数で決めることで、
+ * 改修済み画面どうしで右端の基準がばらつかないようにする。
  */
 .topBar {
   width: 100%;
@@ -8,8 +11,62 @@
 
 @media (min-width: 1024px) {
   .topBar {
-    max-width: 960px;
+    max-width: calc(var(--app-page-w) * 0.8);
   }
+}
+
+/*
+ * 読み込み中・エラー時のフォールバック表示。以前は Tailwind の `max-w-2xl`
+ * （672px）を直に指定しており、本文（`.topBar` / `.pageLayout`）と基準幅が
+ * ずれていた。ここも同じ `calc(var(--app-page-w) * 0.8)` に揃える。
+ */
+.fallback {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .fallback {
+    max-width: calc(var(--app-page-w) * 0.8);
+  }
+}
+
+.loadingBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25rem;
+}
+
+.loadingText {
+  font-size: var(--font-size-lg);
+  color: var(--color-ink);
+}
+
+.errorActions {
+  margin-bottom: var(--spacing-4);
+}
+
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+}
+
+.errorTitle {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  margin: 0;
+  color: var(--color-inkLight);
 }
 
 /* ページ全体のレイアウト */
@@ -67,7 +124,7 @@
 @media (min-width: 1024px) {
   .pageLayout {
     grid-template-columns: 1fr;
-    max-width: 960px;
+    max-width: calc(var(--app-page-w) * 0.8);
     gap: var(--spacing-8);
   }
 }
@@ -82,14 +139,21 @@
   }
 }
 
-/* PC（1024px〜）のみ表示 */
+/*
+ * PC（1024px〜）のみ表示。
+ * グラフ側（燃費の推移＝`BikeCarteControls` + `BikeFuelGraphSection`）は
+ * 縦に2要素並ぶため、愛車カルテと同じ間隔でflex積みにする
+ * （リスト側は `FuelLedgerSection` 1要素のみのため見た目に影響しない）。
+ */
 .desktopOnly {
   display: none;
 }
 
 @media (min-width: 1024px) {
   .desktopOnly {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
   }
 }
 

@@ -14,6 +14,7 @@ import { FuelLedgerList } from './FuelLedgerList'
 import styles from './FuelLedgerSection.module.css'
 import { KeywordSearchBar } from '@/components/common/KeywordSearchBar'
 import { authenticatedFetch } from '@/lib/api/client'
+import { FUEL_LOG_PERIOD_OPTIONS } from '@/lib/statics'
 
 const PER_SIZE = 100
 
@@ -28,12 +29,11 @@ const SORT_ITEMS: { key: SortKey; label: string }[] = [
 /** 台帳自身の期間フィルタ（グラフの期間フィルタとは独立） */
 type LedgerPeriod = FuelLogPeriod | 'all'
 
+// 「全期間」は台帳固有の選択肢のため先頭に追加し、それ以外は愛車カルテ
+// （`BikeCarteControls`）と共通の `FUEL_LOG_PERIOD_OPTIONS` を単一の情報源にする
 const PERIOD_OPTIONS: SelectOption[] = [
   { value: 'all', label: '全期間' },
-  { value: 'latest-year', label: '最新の履歴から1年' },
-  { value: 'latest-month', label: '最新の履歴から1ヶ月' },
-  { value: 'past-year', label: '現在日時から直近1年' },
-  { value: 'past-month', label: '現在日時から直近1ヶ月' },
+  ...FUEL_LOG_PERIOD_OPTIONS,
 ]
 
 type Props = {

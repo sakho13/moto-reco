@@ -1,3 +1,5 @@
+import type { FuelLogPeriod } from '@repo/shared-types'
+
 /**
  * アプリバージョン
  */
@@ -42,3 +44,23 @@ export {
   PLAN_ALLOWED_SCOPES,
   PLAN_LIMITS,
 } from '@repo/shared-domain'
+
+/**
+ * 給油履歴の期間フィルタの選択肢
+ *
+ * @remarks
+ * `components/bike/BikeCarteControls`（愛車カルテ）・給油履歴ページの
+ * モバイル版グラフの期間セレクト・`components/bike/FuelLedgerSection`
+ * （PC版台帳。独自の「全期間」を先頭に足して使う）が共有する単一の情報源。
+ * 以前はこの配列を画面ごとに個別に持っており、月数の表記が一部だけ
+ * 「か月」になるなど、同じ選択肢のはずが表記ずれを起こしていた。
+ */
+export const FUEL_LOG_PERIOD_OPTIONS: {
+  value: FuelLogPeriod
+  label: string
+}[] = [
+  { value: 'latest-year', label: '最新の履歴から1年' },
+  { value: 'latest-month', label: '最新の履歴から1ヶ月' },
+  { value: 'past-year', label: '現在日時から直近1年' },
+  { value: 'past-month', label: '現在日時から直近1ヶ月' },
+]
