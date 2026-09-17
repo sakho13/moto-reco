@@ -3,17 +3,6 @@
   align-items: center;
   gap: var(--spacing-3);
   width: 100%;
-  /*
-   * `.row` は <button> のため、`app/app/(protected)/layout.module.css` の
-   * `.appRoot button { max-width: 320px }`（fullWidthなButtonがPCで伸び過ぎない
-   * ようにする共通ルール）が意図せず適用され、PCで記帳の行が320pxに潰れて
-   * しまう（`components/bike/FuelLedgerList.module.css` と同じ原因）。
-   * この行はそのルールの対象外にする。
-   * `.appRoot button` は要素セレクタを含む分 `.row` 単体より詳細度が高い
-   * （(0,1,1) > (0,1,0)）ため、`max-width: none` を書くだけでは負けてしまう。
-   * ここだけは `!important` で確実に上書きする。
-   */
-  max-width: none !important;
   padding: var(--spacing-2) 0;
   background: none;
   border: none;

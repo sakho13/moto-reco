@@ -39,16 +39,6 @@
   align-items: start;
   gap: var(--spacing-3);
   width: 100%;
-  /*
-   * `.row` は <button> のため、`app/app/(protected)/layout.module.css` の
-   * `.appRoot button { max-width: 320px }`（fullWidthなButtonがPCで伸び過ぎない
-   * ようにする共通ルール）が意図せず適用され、PCで台帳の行が320pxに潰れて
-   * ヘッダーと本文の桁がずれてしまう。台帳の行はそのルールの対象外にする。
-   * `.appRoot button` は要素セレクタを含む分 `.row` 単体より詳細度が高い
-   * （(0,1,1) > (0,1,0)）ため、`max-width: none` を書くだけでは負けてしまう。
-   * ここだけは `!important` で確実に上書きする。
-   */
-  max-width: none !important;
   padding-block: var(--spacing-3);
   background: none;
   border: none;
