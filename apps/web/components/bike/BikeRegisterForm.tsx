@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
+import { AccountLimitsValue } from '@repo/shared-domain'
 import type { UserPlan } from '@repo/shared-types'
 import { getTodayDateString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
@@ -12,11 +13,6 @@ import { Input } from '@repo/ui/input'
 import { InfoBox } from './InfoBox'
 import { apiGet } from '@/lib/api/client'
 import { useAuth } from '@/lib/hooks/useAuth'
-import {
-  FREE_USER_LIMITS,
-  GUEST_ACCOUNT_LIMITS,
-  PREMIUM_USER_LIMITS,
-} from '@/lib/statics'
 
 /**
  * バイク登録台数の上限案内文言を、ロール・プラン・プラン取得状態に応じて返す
@@ -24,6 +20,11 @@ import {
  * @remarks
  * プラン取得中にプレミアムユーザーへ誤って無料プランの上限を表示しないよう、
  * ローディング中は台数を含まない案内文言を返す。
+ * 文言そのものは `AccountLimitsValue.limitMessage('bike')` を唯一の出所にする
+ * （実際に上限超過で登録APIが返すエラーメッセージと同じ生成元）。以前は
+ * このファイルで「ゲストアカウントでは」「無料プランでは」のように文言を
+ * 個別に持っていたため、サーバー側のメッセージ（「ゲストアカウントは」
+ * 「無料ユーザーは」）と表現が揃っていなかった。
  */
 const getBikeLimitText = (params: {
   isGuest: boolean
@@ -33,15 +34,12 @@ const getBikeLimitText = (params: {
   const { isGuest, isProfileLoading, plan } = params
 
   if (isGuest) {
-    return `ゲストアカウントではバイクを${GUEST_ACCOUNT_LIMITS.BIKE}台まで登録できます`
+    return AccountLimitsValue.from('GUEST', null).limitMessage('bike')
   }
   if (isProfileLoading) {
     return '登録可能な台数を確認しています…'
   }
-  if (plan === 'PREMIUM') {
-    return `プレミアムプランでは${PREMIUM_USER_LIMITS.BIKE}台まで登録できます`
-  }
-  return `無料プランでは${FREE_USER_LIMITS.BIKE}台まで登録できます`
+  return AccountLimitsValue.from('USER', plan ?? null).limitMessage('bike')
 }
 
 export interface BikeFormData {
