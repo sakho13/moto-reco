@@ -75,11 +75,7 @@ export function HomeGauges() {
 
   // 「今月の燃料費」はPC幅（見開きの添え数値）でのみ表示する4つ目の計器。
   // 新しい集計APIは作らず、既存のヒストリー全件をクライアント側で当月分に絞って合算する。
-  const monthlySummary = buildMonthlySummary(
-    history ?? [],
-    activeBike?.totalMileage ?? null,
-    getCurrentDate()
-  )
+  const monthlySummary = buildMonthlySummary(history ?? [], getCurrentDate())
 
   return (
     <div className={styles.gauges} data-testid="home-gauges">
