@@ -3,6 +3,7 @@
 import { getCurrentDate } from '@repo/shared-utils'
 import styles from './HomeGauges.module.css'
 import { buildMonthlySummary } from './monthlySummary'
+import { roundToOneDecimal } from '@/lib/fuelLogSheet'
 import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useBikeHistory } from '@/lib/hooks/useBikeHistory'
 import { useFuelInsight } from '@/lib/hooks/useFuelInsight'
@@ -19,6 +20,13 @@ function formatEfficiency(value: number | null): string {
  * @remarks
  * 「▲1.8」のような前期比表記ではなく「前回より 1.8 伸びた」のように文章で表す
  * （Issue #575「03 再設計の原則」）。比較対象が無ければ何も返さない。
+ *
+ * 差分は丸め前の生値ではなく、画面に表示する値（小数点1桁に丸めた値）どうしで
+ * 取る。例えば直近22.0339…（表示22.0）と前回20.1613…（表示20.2）の場合、
+ * 生値の差は1.8726（丸めると1.9）だが、ユーザーには22.0と20.2しか見えないため
+ * 差は1.8でなければ表示と文章が噛み合わない（`lib/fuelLogSheet.ts` の
+ * `formatComparisonClause` も同様の理由で丸めた値の差を取る）。
+ * マイナス方向の動詞は「縮んだ」で揃える（`lib/fuelLogSheet.ts` と表記統一）。
  */
 function buildEfficiencyDiffText(
   latest: number | null,
@@ -26,9 +34,11 @@ function buildEfficiencyDiffText(
 ): string | null {
   if (latest === null || previous === null) return null
 
-  const diff = Math.round((latest - previous) * 10) / 10
+  const diff = roundToOneDecimal(
+    roundToOneDecimal(latest) - roundToOneDecimal(previous)
+  )
   if (diff > 0) return `前回より ${diff.toFixed(1)} 伸びた`
-  if (diff < 0) return `前回より ${Math.abs(diff).toFixed(1)} 落ちた`
+  if (diff < 0) return `前回より ${Math.abs(diff).toFixed(1)} 縮んだ`
   return '前回と同じ'
 }
 

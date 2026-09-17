@@ -106,6 +106,56 @@ export const FUEL_EFFICIENCY_STATUS_MESSAGES: Record<
   'previous-was-continuation': '前回が継ぎ足しのため、保存後に確定します',
 }
 
+/** 保存済みの満タン給油ログで燃費が算出できない理由 */
+export type SavedFuelLogEfficiencyReason =
+  | 'no-previous-log'
+  | 'previous-was-continuation'
+
+/** 保存済みログ一覧で理由を判定する際に必要な最小情報 */
+export type SavedFuelLogReferenceEntry = {
+  fuelLogId: string
+  mileage: number
+  isFullTank: boolean
+}
+
+/**
+ * 保存済みの満タン給油（`isFullTank: true` かつ `fuelEfficiency: null`）について、
+ * 燃費が算出できない理由を「初回給油」と「前回が継ぎ足し」に区別する
+ *
+ * @remarks
+ * `FuelEfficiencyCalculationService` は「直前の満タン給油が無い」を単一の
+ * null 理由として扱うため、そのままでは「そもそも前の記録が無い（本当の初回給油）」
+ * と「前の記録はあるが継ぎ足しだった」を画面側で区別できず、後者にも
+ * 「初回給油」という誤ったラベルが付いてしまう。
+ * 同一バイクの給油履歴をmileage昇順に並べたとき、対象の直前のログの有無・
+ * 区分だけで区別できるため、ここで判定する。
+ *
+ * `logs` に対象より前のログが含まれない場合（期間フィルタ・ページング・
+ * 直近N件抜粋などで対象外になっている場合を含む）は、区別する材料が無いため
+ * `'no-previous-log'` 側にフォールバックする。
+ */
+export function resolveSavedFuelLogEfficiencyReason(
+  logsOrderedByMileageAsc: readonly SavedFuelLogReferenceEntry[],
+  targetFuelLogId: string
+): SavedFuelLogEfficiencyReason {
+  const index = logsOrderedByMileageAsc.findIndex(
+    (log) => log.fuelLogId === targetFuelLogId
+  )
+  const previous = index > 0 ? logsOrderedByMileageAsc[index - 1] : null
+  return previous && !previous.isFullTank
+    ? 'previous-was-continuation'
+    : 'no-previous-log'
+}
+
+/** {@link resolveSavedFuelLogEfficiencyReason} の判定結果を短い表示文言にする */
+export const SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS: Record<
+  SavedFuelLogEfficiencyReason,
+  string
+> = {
+  'no-previous-log': '初回給油',
+  'previous-was-continuation': '前回が継ぎ足し',
+}
+
 /**
  * 直近の給油ログ群から平均燃費を算出する（PC版「給油記入票」控え欄の「平均より」比較に使用）
  *
@@ -130,10 +180,26 @@ export type FuelEfficiencyComparison = {
 }
 
 /**
+ * km/L の値を画面表示と同じ小数点1桁に丸める
+ *
+ * @remarks
+ * 燃費の差分表示（本ファイルの `formatComparisonClause` ・
+ * `components/home/HomeGauges.tsx` の `buildEfficiencyDiffText`）は、
+ * 丸め前の生値どうしの差ではなく、この関数で丸めた値どうしの差を取る。
+ * 例えば22.0339…（表示22.0）と20.1613…（表示20.2）の差は、生値では
+ * 1.8726（丸めると1.9）だが、ユーザーには22.0と20.2しか見えないため
+ * 表示と文章を一致させるには丸めた値どうしで引く必要がある（差は1.8）。
+ */
+export function roundToOneDecimal(value: number): number {
+  return Math.round(value * 10) / 10
+}
+
+/**
  * 今回のライブ計器の燃費を、前回給油・直近の平均燃費と比較する
  *
  * @remarks
  * 今回の燃費が算出できていない（`currentFuelEfficiency === null`）場合は両方 null を返す。
+ * 差分は表示値と同じ丸め後の値どうしで取る（{@link roundToOneDecimal} 参照）。
  */
 export function calculateFuelEfficiencyComparison(params: {
   currentFuelEfficiency: number | null
@@ -148,14 +214,15 @@ export function calculateFuelEfficiencyComparison(params: {
   if (currentFuelEfficiency === null) {
     return { previousDiff: null, averageDiff: null }
   }
+  const roundedCurrent = roundToOneDecimal(currentFuelEfficiency)
   return {
     previousDiff:
       previousFuelEfficiency !== null
-        ? currentFuelEfficiency - previousFuelEfficiency
+        ? roundedCurrent - roundToOneDecimal(previousFuelEfficiency)
         : null,
     averageDiff:
       averageFuelEfficiency !== null
-        ? currentFuelEfficiency - averageFuelEfficiency
+        ? roundedCurrent - roundToOneDecimal(averageFuelEfficiency)
         : null,
   }
 }

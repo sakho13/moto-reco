@@ -10,7 +10,9 @@ import {
   formatPreviousStubHeading,
   formatRefueledAtChipLabel,
   parseFieldNumber,
+  resolveSavedFuelLogEfficiencyReason,
   resolveSubmitPreviousMileage,
+  roundToOneDecimal,
   sanitizeNumericInput,
   shouldUpdateTotalMileage,
 } from '@/lib/fuelLogSheet'
@@ -352,6 +354,53 @@ describe('calculateFuelEfficiencyComparison', () => {
     })
     expect(result.previousDiff).toBeNull()
     expect(result.averageDiff).toBeCloseTo(0.8)
+  })
+
+  test('丸め前の生値ではなく、表示値（小数点1桁）どうしの差を返す', () => {
+    // 22.0339…（表示22.0）と20.1613…（表示20.2）の差は、生値では1.8726
+    // （丸めると1.9）だが、表示と一致させるには丸めた値どうしの差1.8にする
+    const result = calculateFuelEfficiencyComparison({
+      currentFuelEfficiency: 22.0339,
+      previousFuelEfficiency: 20.1613,
+      averageFuelEfficiency: null,
+    })
+    expect(result.previousDiff).toBeCloseTo(1.8)
+  })
+})
+
+describe('roundToOneDecimal', () => {
+  test('小数点1桁に四捨五入する', () => {
+    expect(roundToOneDecimal(22.0339)).toBeCloseTo(22.0)
+    expect(roundToOneDecimal(20.1613)).toBeCloseTo(20.2)
+  })
+})
+
+describe('resolveSavedFuelLogEfficiencyReason', () => {
+  test('直前のログが継ぎ足しなら「前回が継ぎ足し」と判定する', () => {
+    const logs = [
+      { fuelLogId: 'a', mileage: 12500, isFullTank: false }, // 継ぎ足し
+      { fuelLogId: 'b', mileage: 13000, isFullTank: true },
+    ]
+    expect(resolveSavedFuelLogEfficiencyReason(logs, 'b')).toBe(
+      'previous-was-continuation'
+    )
+  })
+
+  test('直前のログが無ければ「初回給油」と判定する', () => {
+    const logs = [{ fuelLogId: 'a', mileage: 12500, isFullTank: true }]
+    expect(resolveSavedFuelLogEfficiencyReason(logs, 'a')).toBe(
+      'no-previous-log'
+    )
+  })
+
+  test('直前のログが満タンなら「初回給油」（このケースは通常fuelEfficiencyが算出されるため呼ばれない）', () => {
+    const logs = [
+      { fuelLogId: 'a', mileage: 12500, isFullTank: true },
+      { fuelLogId: 'b', mileage: 13000, isFullTank: true },
+    ]
+    expect(resolveSavedFuelLogEfficiencyReason(logs, 'b')).toBe(
+      'no-previous-log'
+    )
   })
 })
 

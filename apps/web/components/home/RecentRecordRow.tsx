@@ -4,9 +4,19 @@ import { ChevronRight } from 'lucide-react'
 import type { ApiResponseBikeHistoryItem } from '@repo/shared-types'
 import { formatDate } from '@repo/shared-utils'
 import styles from './RecentRecordRow.module.css'
+import {
+  SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS,
+  type SavedFuelLogEfficiencyReason,
+} from '@/lib/fuelLogSheet'
 
 type Props = {
   item: ApiResponseBikeHistoryItem
+  /**
+   * 燃費が算出できない満タン給油（`isFullTank: true` かつ `fuelEfficiency: null`）
+   * について、「初回給油」／「前回が継ぎ足し」のどちらの表示にするかの判定結果。
+   * 給油以外の項目、燃費が算出できている行・継ぎ足し行では使わない。
+   */
+  efficiencyUnavailableReason?: SavedFuelLogEfficiencyReason
   onClick?: () => void
 }
 
@@ -42,7 +52,11 @@ function formatLedgerDate(occurredAt: string): {
  * 給油の内訳（区間・給油量・単価）を追加で出す（CSSでのみ出し分け、
  * DOM構造・既存のテキストはモバイルと共通のまま変えない）。
  */
-export function RecentRecordRow({ item, onClick }: Props) {
+export function RecentRecordRow({
+  item,
+  efficiencyUnavailableReason,
+  onClick,
+}: Props) {
   const { weekday, monthDay } = formatLedgerDate(item.occurredAt)
 
   const kpi =
@@ -50,6 +64,7 @@ export function RecentRecordRow({ item, onClick }: Props) {
       <FuelKpi
         fuelEfficiency={item.fuelLog.fuelEfficiency}
         isFullTank={item.fuelLog.isFullTank}
+        efficiencyUnavailableReason={efficiencyUnavailableReason}
       />
     ) : (
       <TouringKpi
@@ -112,9 +127,11 @@ export function RecentRecordRow({ item, onClick }: Props) {
 function FuelKpi({
   fuelEfficiency,
   isFullTank,
+  efficiencyUnavailableReason,
 }: {
   fuelEfficiency: number | null
   isFullTank: boolean
+  efficiencyUnavailableReason?: SavedFuelLogEfficiencyReason
 }) {
   if (fuelEfficiency !== null) {
     return (
@@ -125,11 +142,23 @@ function FuelKpi({
     )
   }
 
+  // 継ぎ足し給油自体（燃費は次回の満タン給油で確定する）
   if (!isFullTank) {
-    return <span className={styles.kpiNote}>継ぎ足し</span>
+    return (
+      <span className={styles.kpiNoteStack}>
+        <span className={styles.kpiNote}>継ぎ足し</span>
+        <span className={styles.kpiNoteSub}>次回に繰越</span>
+      </span>
+    )
   }
 
-  return <span className={styles.kpiNote}>初回給油</span>
+  // 満タン給油だが燃費が算出できない（初回給油、または前回が継ぎ足し）
+  const reason = efficiencyUnavailableReason ?? 'no-previous-log'
+  return (
+    <span className={styles.kpiNote}>
+      {SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS[reason]}
+    </span>
+  )
 }
 
 function TouringKpi({
