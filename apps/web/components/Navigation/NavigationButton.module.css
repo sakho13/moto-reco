@@ -27,7 +27,7 @@
   color: var(--color-productInk);
 }
 
-.withLabel {
+.navButton.withLabel {
   width: auto;
   height: auto;
   flex-direction: column;

@@ -8,7 +8,7 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
-import { formatDate } from '@repo/shared-utils'
+import { formatDate, isUnsetDate } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { MyBikeEditModal } from '@/components/bike/MyBikeEditModal'
@@ -139,7 +139,9 @@ function BikeDetailPage() {
             </span>
             <span>
               購入日:{' '}
-              {bike.purchaseDate ? formatDate(bike.purchaseDate) : '未設定'}
+              {bike.purchaseDate && !isUnsetDate(bike.purchaseDate)
+                ? formatDate(bike.purchaseDate)
+                : '未設定'}
             </span>
             <span>給油回数: {bike.fuelLogCount}回</span>
             <span>ツーリング回数: {bike.touringCount}回</span>

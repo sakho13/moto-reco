@@ -15,6 +15,7 @@ import styles from './FuelLogRegisterModal.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
+import { mutateHistoryLists } from '@/lib/api/mutateHistory'
 
 interface FuelLogRegisterModalProps {
   bikeId: string
@@ -91,6 +92,7 @@ export function FuelLogRegisterModal({
       })
 
       await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      await mutateHistoryLists()
       toast.success('給油履歴を登録しました')
       onSuccess()
     } catch (err) {
