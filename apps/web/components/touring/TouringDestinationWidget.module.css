@@ -104,7 +104,7 @@
   width: 100%;
   padding: var(--spacing-3);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   border-radius: var(--radius-md);
   border: 1.5px solid var(--color-product);
   background-color: color-mix(in srgb, var(--color-product) 10%, transparent);

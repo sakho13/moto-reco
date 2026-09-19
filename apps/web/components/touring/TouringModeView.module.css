@@ -116,7 +116,7 @@ html[data-theme-mode='dark'] .container {
 
 .touringTitle {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--card-text-muted);
   word-break: break-word;
   margin-bottom: var(--spacing-1);
@@ -180,7 +180,7 @@ html[data-theme-mode='dark'] .container {
   border: 1.5px solid var(--color-product);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-product);
 }
 
@@ -337,7 +337,7 @@ html[data-theme-mode='dark'] .container {
 
 .spotModalTitle {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-ink);
   margin-bottom: var(--spacing-4);
 }
@@ -357,7 +357,7 @@ html[data-theme-mode='dark'] .container {
 .spotModalInput {
   width: 100%;
   padding: var(--spacing-2) var(--spacing-3);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   border: 1px solid var(--color-cloud);
   border-radius: var(--radius-md);
   background-color: var(--color-background);
@@ -373,7 +373,7 @@ html[data-theme-mode='dark'] .container {
 .spotModalTextarea {
   width: 100%;
   padding: var(--spacing-2) var(--spacing-3);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   border: 1px solid var(--color-cloud);
   border-radius: var(--radius-md);
   background-color: var(--color-background);
@@ -468,7 +468,7 @@ html[data-theme-mode='dark'] .container {
   }
 
   .touringTitle {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-md);
   }
 
   /* SP でも経過時間の右にウィジェットを横並び表示するため column は使わない */

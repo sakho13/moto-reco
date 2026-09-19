@@ -154,7 +154,7 @@ export const MaintenanceLogForm = ({
         <p
           style={{
             fontSize: 'var(--font-size-sm)',
-            fontWeight: 'var(--font-weight-semibold)',
+            fontWeight: 'var(--font-weight-medium)',
             marginBottom: 'var(--spacing-2)',
             color: 'var(--color-ink)',
           }}
@@ -175,7 +175,7 @@ export const MaintenanceLogForm = ({
               <p
                 style={{
                   fontSize: 'var(--font-size-xs)',
-                  fontWeight: 'var(--font-weight-semibold)',
+                  fontWeight: 'var(--font-weight-medium)',
                   color: 'var(--color-ink)',
                   opacity: 0.6,
                   marginBottom: 'var(--spacing-1)',

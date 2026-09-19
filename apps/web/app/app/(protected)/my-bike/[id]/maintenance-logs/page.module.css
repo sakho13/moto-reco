@@ -9,7 +9,7 @@
   flex: 1;
   padding: var(--spacing-2) var(--spacing-4);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
   background-color: transparent;
   border: none;
@@ -24,7 +24,7 @@
 }
 
 .toggleButton.active {
-  background-color: var(--color-primary);
-  color: white;
+  background-color: var(--color-product);
+  color: var(--color-productInk);
   opacity: 1;
 }

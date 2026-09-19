@@ -101,7 +101,7 @@ export const BikeRegisterForm = ({
       <h2
         style={{
           fontSize: 'var(--font-size-lg)',
-          fontWeight: 'var(--font-weight-semibold)',
+          fontWeight: 'var(--font-weight-bold)',
           marginBottom: 'var(--spacing-4)',
           color: 'var(--color-ink)',
         }}
@@ -113,7 +113,7 @@ export const BikeRegisterForm = ({
         <InfoBox variant="info">
           <p
             style={{
-              fontWeight: 'var(--font-weight-semibold)',
+              fontWeight: 'var(--font-weight-medium)',
               marginBottom: 'var(--spacing-1)',
             }}
           >
@@ -127,7 +127,7 @@ export const BikeRegisterForm = ({
         <InfoBox>
           <p
             style={{
-              fontWeight: 'var(--font-weight-semibold)',
+              fontWeight: 'var(--font-weight-medium)',
               marginBottom: 'var(--spacing-1)',
             }}
           >
