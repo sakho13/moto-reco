@@ -16,11 +16,13 @@ type Props = {
 }
 
 /**
- * 所有期間を「○年○か月」形式の文字列にする
+ * 所有期間を「○年○ヶ月」形式の文字列にする
  *
  * @remarks
  * 購入日が未設定の場合は算出根拠が無いため「未設定」を返す。
- * 1か月未満の場合は「1か月未満」とする。
+ * 1ヶ月未満の場合は「1ヶ月未満」とする。
+ * 「ヶ月」表記はアプリ内の他の月数表示（`BikeCarteControls` の期間選択肢、
+ * 整備間隔の「◯ヶ月毎」等）と揃えている（「か月」表記とは混在させない）。
  */
 function formatOwnershipDuration(purchaseDate: string | null): string {
   if (!purchaseDate || isUnsetDate(purchaseDate)) return UNSET
@@ -34,14 +36,14 @@ function formatOwnershipDuration(purchaseDate: string | null): string {
   if (now.getDate() < start.getDate()) months -= 1
   if (months < 0) return UNSET
 
-  if (months < 1) return '1か月未満'
+  if (months < 1) return '1ヶ月未満'
 
   const years = Math.floor(months / 12)
   const remainMonths = months % 12
 
-  if (years === 0) return `${remainMonths}か月`
+  if (years === 0) return `${remainMonths}ヶ月`
   if (remainMonths === 0) return `${years}年`
-  return `${years}年${remainMonths}か月`
+  return `${years}年${remainMonths}ヶ月`
 }
 
 /**
@@ -117,6 +119,9 @@ export function BikeHeroSection({ bike }: Props) {
           onClick={() => setIsEditModalOpen(true)}
         >
           <EditIcon />
+          {/* PC（1024px〜）のみラベルを出す。aria-labelは共通のため、
+              モバイルの `愛車情報を編集` ボタンとしてのテストには影響しない */}
+          <span className={styles.editLabel}>諸元を直す</span>
         </Button>
       </div>
 

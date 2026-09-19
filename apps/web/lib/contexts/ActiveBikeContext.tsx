@@ -1,6 +1,13 @@
 'use client'
 
-import { createContext, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import useSWR from 'swr'
 import { apiGet } from '../api/client'
 import { useAuth } from '../hooks/useAuth'
@@ -118,9 +125,14 @@ export const ActiveBikeProvider = ({ children }: ActiveBikeProviderProps) => {
     [bikes, activeBikeId]
   )
 
-  const setActiveBikeId = (bikeId: string) => {
+  // useCallbackで参照を安定させる。安定化しないと Provider が再レンダーする
+  // たびに新しい関数参照になり、これを依存配列に含む呼び出し側の useEffect
+  // （例: 愛車詳細ページの「開いたら自身をアクティブにする」処理）が再実行され、
+  // BikeSwitcher で切り替えた直後のアクティブ車両を元の車両へ強制的に
+  // 戻してしまう不具合があった。
+  const setActiveBikeId = useCallback((bikeId: string) => {
     setActiveBikeIdState(bikeId)
-  }
+  }, [])
 
   const value: ActiveBikeContextType = {
     activeBikeId,

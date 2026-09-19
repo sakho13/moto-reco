@@ -62,15 +62,12 @@ export function QuitCompleteCard() {
         <p className="text-sm">
           退会手続きが完了しました。ご登録のメールアドレスに復帰用のご案内メールを送信しました。
         </p>
-        <p
-          className="text-sm"
-          style={{ color: 'var(--color-muted-foreground)' }}
-        >
+        <p className="text-sm" style={{ color: 'var(--color-inkLight)' }}>
           30日間は下記の復帰用URL、または案内メール内のリンクから復帰できます。以降は完全に削除され復帰できません。
         </p>
         <div
           style={{
-            backgroundColor: 'var(--color-muted)',
+            backgroundColor: 'var(--color-cloud)',
             borderRadius: 'var(--radius-md)',
             padding: 'var(--spacing-3)',
             fontFamily: 'monospace',

@@ -15,7 +15,7 @@
 
 .category {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
   opacity: 0.6;
   text-transform: uppercase;
@@ -24,7 +24,7 @@
 
 .name {
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-ink);
 }
 

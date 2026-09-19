@@ -7,7 +7,11 @@
 
 .arrivedWidget {
   border-color: var(--color-product);
-  background-color: color-mix(in srgb, var(--color-product) 8%, var(--card-surface));
+  background-color: color-mix(
+    in srgb,
+    var(--color-product) 8%,
+    var(--card-surface)
+  );
 }
 
 .label {
@@ -100,7 +104,7 @@
   width: 100%;
   padding: var(--spacing-3);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   border-radius: var(--radius-md);
   border: 1.5px solid var(--color-product);
   background-color: color-mix(in srgb, var(--color-product) 10%, transparent);
@@ -113,6 +117,19 @@
   transition:
     background-color 0.15s,
     border-color 0.15s;
+}
+
+@media (min-width: 640px) {
+  /*
+   * `@repo/ui` の Button を使わない独自CSSの全幅ボタンのため、
+   * `app/app/(protected)/layout.module.css` の `.appRoot button[class*="fullWidth"]`
+   * （@repo/ui の fullWidth 修飾クラスだけに絞った共通の上限）の対象外になる。
+   * ツーリング中画面（`TouringModeView`）はまだPC専用の幅に絞っていないため、
+   * ここだけ個別に上限を持たせて画面幅いっぱいの帯にならないようにする。
+   */
+  .arrivalButton {
+    max-width: 320px;
+  }
 }
 
 .arrivalButton:hover:not(:disabled) {

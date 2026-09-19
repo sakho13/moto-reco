@@ -58,7 +58,7 @@
 .statusBadgeStarted,
 .statusBadgeCompleted {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   white-space: nowrap;

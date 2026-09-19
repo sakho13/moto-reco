@@ -48,9 +48,14 @@ test.describe('給油シート - 登録フロー(#575 P1)', () => {
     })
     await expect(sheet.sheet).not.toBeVisible()
 
-    // 保存後、一覧に燃費付きで反映されている（リロードしてサーバーの確定値を確認する）
-    await page.reload()
-    const registeredCard = page.getByRole('button', { name: /13,010km/ })
+    // 保存後、一覧に燃費付きで反映されている（リロードしてサーバーの確定値を確認する）。
+    // Playwrightの既定ビューポート（1280x720）はPC幅のため台帳（`fuel-ledger-section`）
+    // が表示される。モバイル用カードは `display:none` でDOM上に残るだけで
+    // 同じ文言を含みうる（`display:none` は `getByRole` の除外対象にならない）ため、
+    // 台帳側に明示的にスコープする。
+    const registeredCard = page
+      .getByTestId('fuel-ledger-section')
+      .getByRole('button', { name: /13,010km/ })
     await expect(registeredCard).toBeVisible({ timeout: 10_000 })
     await expect(registeredCard).toContainText('22.0')
   })

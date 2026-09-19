@@ -32,7 +32,7 @@ export const FuelLogCard = ({ fuelLog, onEdit }: FuelLogCardProps) => {
           <p
             style={{
               fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
+              fontWeight: 'var(--font-weight-bold)',
               color: 'var(--color-ink)',
               marginBottom: 'var(--spacing-1)',
             }}

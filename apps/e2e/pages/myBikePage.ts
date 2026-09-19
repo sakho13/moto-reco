@@ -16,6 +16,7 @@ export class MyBikePage {
   readonly primaryFuelButton: Locator
   readonly maintenanceScheduleSection: Locator
   readonly maintenanceMoreLink: Locator
+  readonly recordLinksSection: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -28,9 +29,14 @@ export class MyBikePage {
     this.maintenanceScheduleSection = page.getByTestId(
       'maintenance-schedule-section'
     )
-    this.maintenanceMoreLink = page.getByRole('link', {
-      name: 'メンテナンス履歴を見る',
-    })
+    this.maintenanceMoreLink = this.maintenanceScheduleSection.getByRole(
+      'link',
+      { name: 'メンテナンス履歴を見る' }
+    )
+    // 件数付きの記録リンク行（`BikeRecordLinks`）。テストIDでスコープしないと、
+    // 「メンテナンス」は点検の予定セクションの「メンテナンス履歴を見る」リンク
+    // （`maintenanceMoreLink`）ともマッチしてしまう。
+    this.recordLinksSection = page.getByTestId('bike-record-links')
   }
 
   /** マイバイクのエントリーポイントへ遷移する（アクティブ車両の詳細へ直行する） */
@@ -50,6 +56,8 @@ export class MyBikePage {
 
   /** 記録へのリンク行（例:「給油履歴」「ツーリング」「メンテナンス」）のロケーターを取得する */
   recordLink(label: string): Locator {
-    return this.page.getByRole('link', { name: new RegExp(label) })
+    return this.recordLinksSection.getByRole('link', {
+      name: new RegExp(label),
+    })
   }
 }

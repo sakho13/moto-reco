@@ -30,7 +30,7 @@ function ProfileEditPage() {
             className="flex justify-between items-center text-sm py-2 border-b last:border-b-0"
           >
             <span>認証情報</span>
-            <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
+            <span style={{ color: 'var(--color-inkLight)' }}>›</span>
           </Link>
           {isAdmin && (
             <Link
@@ -38,7 +38,7 @@ function ProfileEditPage() {
               className="flex justify-between items-center text-sm py-2 border-b last:border-b-0"
             >
               <span>フォト</span>
-              <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
+              <span style={{ color: 'var(--color-inkLight)' }}>›</span>
             </Link>
           )}
           {!isGuest && (
@@ -47,7 +47,7 @@ function ProfileEditPage() {
               className="flex justify-between items-center text-sm py-2 border-b last:border-b-0"
             >
               <span>プラン</span>
-              <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
+              <span style={{ color: 'var(--color-inkLight)' }}>›</span>
             </Link>
           )}
           <Link
@@ -55,7 +55,7 @@ function ProfileEditPage() {
             className="flex justify-between items-center text-sm py-2 border-b last:border-b-0"
           >
             <span>MCP接続方法</span>
-            <span style={{ color: 'var(--color-muted-foreground)' }}>›</span>
+            <span style={{ color: 'var(--color-inkLight)' }}>›</span>
           </Link>
         </div>
       </BaseCard>

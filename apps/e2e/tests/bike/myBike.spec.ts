@@ -72,8 +72,15 @@ test.describe('愛車ページ', () => {
     await expect(authenticatedPage.getByText('現在ODO')).toBeVisible()
     await expect(authenticatedPage.getByText('10,000 km')).toBeVisible()
 
-    // 計器（導出値。給油記録が無いため「—」表示になる）
-    await expect(authenticatedPage.getByText('平均燃費')).toBeVisible()
+    // 計器（導出値。給油記録が無いため「—」表示になる）。
+    // Playwrightの既定ビューポート（1280x720）はPC幅（1024px以上）に該当するため、
+    // モバイル用の`BikeGauges`（テストID `bike-gauges`）は非表示になり、
+    // PC用の添え数値`BikeStatsSection`（テストID `bike-stats-section`）が表示される
+    // （Issue #575「05 画面案 ─ PC」愛車）。同じ「平均燃費」ラベルが両方に
+    // 存在するため、非表示要素とのDOM上の衝突を避けるためテストIDで絞り込む。
+    await expect(
+      authenticatedPage.getByTestId('bike-stats-section').getByText('平均燃費')
+    ).toBeVisible()
 
     // 記録へのリンク（件数付きの行リスト）
     await expect(myBikePage.recordLink('給油履歴')).toBeVisible()

@@ -23,7 +23,7 @@
 
 .categoryLabel {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
   opacity: 0.5;
   text-transform: uppercase;
@@ -59,7 +59,7 @@
 
 .itemName {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-ink);
   flex-shrink: 0;
   display: flex;
@@ -102,7 +102,7 @@
 
 .remainingMileage {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-ink);
 }
 

@@ -111,7 +111,7 @@ function AccountPage() {
               <p
                 style={{
                   fontSize: 'var(--font-size-sm)',
-                  color: 'var(--color-muted-foreground)',
+                  color: 'var(--color-inkLight)',
                 }}
               >
                 退会理由を教えてください（今後のサービス改善に活用します）
@@ -148,7 +148,7 @@ function AccountPage() {
               <p
                 style={{
                   fontSize: 'var(--font-size-sm)',
-                  color: 'var(--color-muted-foreground)',
+                  color: 'var(--color-inkLight)',
                 }}
               >
                 退会日から30日間は、ご登録のメールアドレスに送信される案内メールから復帰できます。30日を過ぎるとアカウント情報は完全に削除され、復帰できなくなります。
@@ -199,7 +199,7 @@ function AccountPage() {
       {!isGuest && (
         <BaseCard title="退会">
           <div className="flex flex-col gap-3 text-sm">
-            <p style={{ color: 'var(--color-muted-foreground)' }}>
+            <p style={{ color: 'var(--color-inkLight)' }}>
               退会すると、すべてのデータが利用できなくなります。30日間は復帰可能です。
             </p>
             <Button variant="danger" outline onClick={handleOpenQuitModal}>

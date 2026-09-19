@@ -6,6 +6,7 @@ import { Button } from '@repo/ui/button'
 import { FuelLogItem } from './FuelLogItem'
 import styles from './FuelLogListSection.module.css'
 import { KeywordSearchBar } from '@/components/common/KeywordSearchBar'
+import { resolveSavedFuelLogEfficiencyReason } from '@/lib/fuelLogSheet'
 
 export interface FuelLogListSectionProps {
   /**
@@ -81,13 +82,26 @@ export const FuelLogListSection = ({
         </div>
       ) : (
         <div className={styles.listContainer}>
-          {fuelLogs.map((fuelLog) => (
-            <FuelLogItem
-              key={fuelLog.fuelLogId}
-              fuelLog={fuelLog}
-              onEdit={onEdit}
-            />
-          ))}
+          {(() => {
+            // 「初回給油」／「前回が継ぎ足し」の判定は、表示順（日付降順）ではなく
+            // mileage昇順での直前ログを見る必要があるため、判定用のコピーを1つ作る。
+            // ページングで未取得の、より古いログは対象に含められない
+            // （その場合は「初回給油」側にフォールバックする）。
+            const byMileageAsc = [...fuelLogs].sort(
+              (a, b) => a.mileage - b.mileage
+            )
+            return fuelLogs.map((fuelLog) => (
+              <FuelLogItem
+                key={fuelLog.fuelLogId}
+                fuelLog={fuelLog}
+                efficiencyUnavailableReason={resolveSavedFuelLogEfficiencyReason(
+                  byMileageAsc,
+                  fuelLog.fuelLogId
+                )}
+                onEdit={onEdit}
+              />
+            ))
+          })()}
           {canLoadMore && onLoadMore && (
             <div className={styles.loadMore}>
               <Button

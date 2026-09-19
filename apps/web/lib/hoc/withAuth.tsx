@@ -65,16 +65,16 @@ export function withAuth<P extends object>(
             style={{
               width: '3rem',
               height: '3rem',
-              border: '4px solid var(--color-border)',
-              borderTopColor: 'var(--color-primary)',
+              border: '4px solid var(--color-cloud)',
+              borderTopColor: 'var(--color-product)',
               borderRadius: 'var(--radius-full)',
               animation: 'spin 1s linear infinite',
             }}
           />
           <p
             style={{
-              fontSize: 'var(--font-size-base)',
-              color: 'var(--color-muted-foreground)',
+              fontSize: 'var(--font-size-md)',
+              color: 'var(--color-inkLight)',
             }}
           >
             認証確認中...

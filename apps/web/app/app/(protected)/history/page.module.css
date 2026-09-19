@@ -1,7 +1,39 @@
-.historyList {
+/*
+ * ヒストリー（全バイク横断）。Issue #575「03 再設計の原則」「04/05 画面案」。
+ * 枠付きカードの二重入れ子（BaseCard + HistoryItemCard）をやめ、ホーム
+ * 「最近の記録」（`RecentHistorySection`）・愛車の「給油の台帳」
+ * （`FuelLedgerList`）と同じ「行の区切りは下罫線のみ・行を枠で囲わない」
+ * 台帳の語彙に揃える。PC（1024px〜）では紙面幅（`--app-page-w`）まで使う。
+ */
+.page {
+  width: 100%;
+  max-width: 28rem; /* モバイル・タブレットは従来どおりの読みやすい幅 */
+}
+
+@media (min-width: 1024px) {
+  .page {
+    max-width: var(--app-page-w);
+  }
+}
+
+.header {
+  padding-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+  border-bottom: 2px solid var(--color-ink);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .empty {
@@ -17,21 +49,10 @@
   font-size: 14px;
 }
 
-.errorCard {
-  background: var(--color-background);
-  border: 1px solid var(--color-cloud);
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  padding: 24px;
-}
-
-.errorTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: var(--color-danger);
+.errorBox {
+  padding: var(--spacing-6) 0;
 }
 
 .errorMessage {
-  color: var(--color-ink);
+  color: var(--color-danger);
 }
