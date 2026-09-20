@@ -4,6 +4,7 @@ import styles from './DesktopSidebar.module.css'
 import { NavigationButton } from './NavigationButton'
 import { navigationItems } from './navigationItems'
 import { RecordButton } from './RecordButton'
+import { SidebarBikeRecordLinks } from './SidebarBikeRecordLinks'
 import { APP_NAME } from '@/lib/statics'
 
 /**
@@ -14,6 +15,8 @@ import { APP_NAME } from '@/lib/statics'
  * 画面の左端から立ち上がり、紙面（本文）と罫で接する。タブレット幅
  * （640〜1023px）はアイコンのみに折りたたみ、デスクトップ幅（1024px〜）で
  * ラベル付きに展開する（幅は `--app-sidebar-w` を参照。globals.css で定義）。
+ * 既存項目の下には、アクティブ車両の記録（給油・ツーリング・メンテナンス）
+ * への件数付きリンクを区切って並べる（{@link SidebarBikeRecordLinks}）。
  */
 export function DesktopSidebar() {
   const [homeItem, myBikeItem, historyItem] = navigationItems
@@ -47,6 +50,8 @@ export function DesktopSidebar() {
           showLabel
         />
       </div>
+
+      <SidebarBikeRecordLinks />
 
       <div className={styles.foot}>
         <RecordButton variant="sidebar" showLabel />
