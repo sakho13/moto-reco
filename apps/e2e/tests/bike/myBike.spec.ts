@@ -52,7 +52,7 @@ test.describe('愛車ページ', () => {
     await expect(myBikePage.heading('E2Eテストバイク')).toBeVisible()
   })
 
-  test('バイク詳細に諸元・計器・記録へのリンク・主アクションが表示される', async ({
+  test('バイク詳細に車両情報・計器・記録へのリンク・主アクションが表示される', async ({
     authenticatedPage,
     authToken,
   }) => {
@@ -68,7 +68,7 @@ test.describe('愛車ページ', () => {
     await expect(myBikePage.heading('詳細確認用バイク')).toBeVisible()
     await expect(myBikePage.editButton).toBeVisible()
 
-    // 諸元（罫線区切りの2列リスト）
+    // 車両情報（罫線区切りの2列リスト）
     await expect(authenticatedPage.getByText('現在ODO')).toBeVisible()
     await expect(authenticatedPage.getByText('10,000 km')).toBeVisible()
 

@@ -47,7 +47,7 @@ function formatOwnershipDuration(purchaseDate: string | null): string {
 }
 
 /**
- * 愛車の見出しと諸元（Issue #575「04 画面案」a）
+ * 愛車の見出しと車両情報（Issue #575「04 画面案」a）
  *
  * @remarks
  * 総走行距離・排気量・購入日という登録情報の再掲だが、枠付きカードの羅列ではなく
@@ -121,7 +121,7 @@ export function BikeHeroSection({ bike }: Props) {
           <EditIcon />
           {/* PC（1024px〜）のみラベルを出す。aria-labelは共通のため、
               モバイルの `愛車情報を編集` ボタンとしてのテストには影響しない */}
-          <span className={styles.editLabel}>諸元を直す</span>
+          <span className={styles.editLabel}>編集</span>
         </Button>
       </div>
 
