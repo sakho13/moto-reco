@@ -21,7 +21,12 @@ export class BikeSwitcherPage {
   constructor(page: Page) {
     this.page = page
     this.trigger = page.getByRole('button', { name: /^アクティブ車両: / })
-    this.addBikeButton = page.getByRole('button', { name: 'バイクを追加' })
+    // exact指定が無いと、トリガーのaria-label（「タップしてバイクを追加する」を
+    // 含む）にも部分一致してしまい strict mode violation になる
+    this.addBikeButton = page.getByRole('button', {
+      name: 'バイクを追加',
+      exact: true,
+    })
   }
 
   /** ドロップダウンを開く */
