@@ -7,16 +7,21 @@ import { type Locator, type Page } from '@playwright/test'
  * `components/Navigation/BikeSwitcher.tsx` に対応。モバイル・デスクトップ両方の
  * ヘッダーに配置されているが、CSSで一方のみが表示されるため、
  * `getByRole` は常に表示中の1要素にマッチする。
- * バイクが2台以上登録されているときのみトリガーボタンが表示される
- * （1台のみの場合は名称のみが表示され、切り替えUIは出ない）。
+ * バイクが1台以上登録されていればトリガーボタンが表示されドロップダウンを
+ * 開ける（1台のときは車両の切り替え先はないが、「バイクを追加」導線として
+ * 開ける必要があるため）。ドロップダウン最下部には常に「バイクを追加」が
+ * あり、`/app/bike/register` へ遷移できる。台数上限に達している場合は
+ * 押せない状態になる。
  */
 export class BikeSwitcherPage {
   readonly page: Page
   readonly trigger: Locator
+  readonly addBikeButton: Locator
 
   constructor(page: Page) {
     this.page = page
     this.trigger = page.getByRole('button', { name: /^アクティブ車両: / })
+    this.addBikeButton = page.getByRole('button', { name: 'バイクを追加' })
   }
 
   /** ドロップダウンを開く */

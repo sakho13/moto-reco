@@ -1,5 +1,6 @@
 import { expect, test } from '../../fixtures/authenticatedPage'
 import { registerTestBike } from '../../helpers/bikeHelper'
+import { BikeRegisterPage } from '../../pages/bikeRegisterPage'
 import { BikeSwitcherPage } from '../../pages/bikeSwitcherPage'
 import { HomePage } from '../../pages/homePage'
 import { MyBikePage } from '../../pages/myBikePage'
@@ -75,21 +76,64 @@ test.describe('アクティブ車両の切り替え(#575)', () => {
     await expect(myBikePage.heading(bikeAName)).toBeVisible()
   })
 
-  test('バイクが1台のみの場合、ヘッダーに切り替えトリガーは表示されない', async ({
+  test('バイクが1台のみの場合でも、ヘッダーのトリガーからドロップダウンを開ける', async ({
     authenticatedPage: page,
     authToken,
   }) => {
+    // 以前は2台以上のときしかトリガーが表示されず、1台のときに2台目を
+    // 追加する導線がどこにも無かった（Issue #575で `/app/my-bike` の一覧が
+    // 廃止された際に失われた回帰）。1台でもトリガーは表示され、開ける。
     await registerTestBike(authToken, { nickname: '単独バイク' })
 
     const homePage = new HomePage(page)
     await homePage.goto()
 
     const bikeSwitcher = new BikeSwitcherPage(page)
-    // BikeSwitcherはモバイル・デスクトップ両方のヘッダーに配置され、
-    // CSSで一方のみ表示される（非表示側はdisplay:noneでアクセシビリティ
-    // ツリーから除外される）。getByText は非表示要素も拾ってしまうため、
-    // ロールで一意に定まる表示中のヘッダーに絞り込んで検証する
-    await expect(page.getByRole('banner').getByText('単独バイク')).toBeVisible()
-    await expect(bikeSwitcher.trigger).toHaveCount(0)
+    await expect(bikeSwitcher.trigger).toBeVisible()
+    await expect(bikeSwitcher.trigger).toHaveAccessibleName(/単独バイク/)
+
+    await bikeSwitcher.open()
+    await expect(page.getByRole('option', { name: '単独バイク' })).toBeVisible()
+    await expect(bikeSwitcher.addBikeButton).toBeVisible()
+    await expect(bikeSwitcher.addBikeButton).toBeEnabled()
+  })
+})
+
+test.describe('2台目以降のバイク追加導線(#575)', () => {
+  test('バイクを1台登録済みの状態から、車両セレクタ経由で2台目の登録画面に到達できる', async ({
+    authenticatedPage: page,
+    authToken,
+  }) => {
+    // Issue #575で `/app/my-bike` の一覧ページ（「バイクを登録」ボタン常設）が
+    // 廃止されて以降、2台目以降を追加する導線がアプリのどこにも無かった回帰。
+    // ヘッダーの車両セレクタのドロップダウン最下部に導線を復活させた。
+    await registerTestBike(authToken, { nickname: '1台目の相棒' })
+
+    const homePage = new HomePage(page)
+    await homePage.goto()
+
+    const bikeSwitcher = new BikeSwitcherPage(page)
+    await bikeSwitcher.open()
+    await bikeSwitcher.addBikeButton.click()
+
+    await expect(page).toHaveURL(/\/app\/bike\/register/)
+    const bikeRegisterPage = new BikeRegisterPage(page)
+    await expect(bikeRegisterPage.heading).toBeVisible()
+
+    // 実際に2台目を登録し、ヘッダーの車両セレクタが2台構成に更新されることも
+    // 合わせて確認する（追加導線が最後まで機能することの裏付け）。
+    await bikeRegisterPage.advanceToStep3()
+    await bikeRegisterPage.fillAndSubmit(250, 3000, '2台目の新入り')
+
+    await expect(page).toHaveURL(/\/app\/home/, { timeout: 15_000 })
+    await expect(bikeSwitcher.trigger).toBeVisible()
+
+    await bikeSwitcher.open()
+    await expect(
+      page.getByRole('option', { name: '1台目の相棒' })
+    ).toBeVisible()
+    await expect(
+      page.getByRole('option', { name: '2台目の新入り' })
+    ).toBeVisible()
   })
 })
