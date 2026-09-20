@@ -114,14 +114,11 @@ export function BikeHeroSection({ bike }: Props) {
         <Button
           type="button"
           variant="cloud"
-          size="sm"
+          size="icon"
           aria-label="愛車情報を編集"
           onClick={() => setIsEditModalOpen(true)}
         >
           <EditIcon />
-          {/* PC（1024px〜）のみラベルを出す。aria-labelは共通のため、
-              モバイルの `愛車情報を編集` ボタンとしてのテストには影響しない */}
-          <span className={styles.editLabel}>編集</span>
         </Button>
       </div>
 
