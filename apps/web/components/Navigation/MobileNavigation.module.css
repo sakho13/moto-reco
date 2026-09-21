@@ -6,7 +6,6 @@
   z-index: 50;
   display: flex;
   align-items: center;
-  justify-content: space-around;
   padding: var(--spacing-1) var(--spacing-2);
   padding-bottom: max(var(--spacing-2), env(safe-area-inset-bottom));
   height: 4rem;
@@ -14,6 +13,28 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid color-mix(in srgb, var(--color-cloudHover) 50%, transparent);
+}
+
+/*
+ * 左右のリンクスロット。`flex: 1 1 0` で常に等幅にすることで、
+ * 中に何個項目が並んでも左右の幅が一致し、中央の記録ボタンが
+ * 画面の実際の中心に来る（左右対称）。将来項目が増えても
+ * 左右の枠数さえ揃えれば対称を保てる。
+ */
+.navSlot {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+/* 中央の記録ボタン用スロット。左右スロットの幅計算に影響しないよう固定幅にする */
+.recordSlot {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media (min-width: 640px) {

@@ -19,7 +19,7 @@ import { APP_NAME } from '@/lib/statics'
  * への件数付きリンクを区切って並べる（{@link SidebarBikeRecordLinks}）。
  */
 export function DesktopSidebar() {
-  const [homeItem, myBikeItem, historyItem] = navigationItems
+  const [homeItem, myBikeItem] = navigationItems
 
   return (
     <nav className={styles.sidebar} aria-label="メインナビゲーション">
@@ -40,13 +40,6 @@ export function DesktopSidebar() {
           href={myBikeItem.href}
           label={myBikeItem.label}
           icon={myBikeItem.icon}
-          showLabel
-        />
-        <NavigationButton
-          variant="rail"
-          href={historyItem.href}
-          label={historyItem.label}
-          icon={historyItem.icon}
           showLabel
         />
       </div>
