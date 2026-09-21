@@ -1,36 +1,5 @@
-.viewToggle {
-  display: flex;
-  border: 1px solid var(--color-cloud);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.toggleButton {
-  flex: 1;
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-ink);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-  opacity: 0.6;
-}
-
-.toggleButton:hover {
-  background-color: var(--color-cloud);
-  opacity: 1;
-}
-
-.toggleButton.active {
-  background-color: var(--color-product);
-  color: var(--color-productInk);
-  opacity: 1;
-}
-
 /*
- * ヘッダー操作列（戻る・メンテナンスを登録）とビュー切替タブ。PC（1024px〜）では
+ * ヘッダー操作列（戻る・ツーリングを作成・プラン一覧）。PC（1024px〜）では
  * 下の `.listLayout` と同じ最大幅に揃える。給油履歴（`fuel-logs/page.module.css`）
  * と同じ `--app-page-w` の80%を使い、改修済み画面どうしで右端の基準を揃える。
  */
@@ -93,6 +62,10 @@
   color: var(--color-inkLight);
 }
 
+.info {
+  width: 100%;
+}
+
 .listLayout {
   width: 100%;
 }
@@ -107,7 +80,7 @@
   }
 }
 
-/* PC（1024px〜）: メンテナンスの台帳（Issue #575「05 画面案 ─ PC」） */
+/* PC（1024px〜）: ツーリングの台帳（Issue #575「05 画面案 ─ PC」） */
 .desktopOnly {
   display: none;
 }
@@ -117,7 +90,7 @@
     display: block;
   }
 
-  .topBar,
+  .info,
   .listLayout {
     max-width: calc(var(--app-page-w) * 0.8);
   }

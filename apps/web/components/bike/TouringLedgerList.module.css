@@ -1,0 +1,147 @@
+/*
+ * ツーリングの台帳（PC）。Issue #575「05 画面案 ─ PC」の記帳と同じ語彙。
+ * 枠線ヘッダーのデータテーブルにはせず、行の区切りは下罫線のみ。
+ * 行を枠で囲わない。数字（距離）は明朝で組む。
+ */
+.table {
+  display: flex;
+  flex-direction: column;
+}
+
+.countRow {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--color-ink);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  color: var(--color-inkLight);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  border-bottom: 1px solid var(--color-cloudHover);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: start;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding-block: var(--spacing-3);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.row:hover {
+  background-color: var(--color-cloud);
+}
+
+.date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.dateWeekday {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.dateDay {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-md);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.typeLine {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.tagStarted,
+.tagCompleted {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  padding: 0 var(--spacing-2);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-cloudHover);
+  color: var(--color-inkLight);
+  white-space: nowrap;
+}
+
+.tagStarted {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.title {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
+.detailLine {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.value {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.valueNumber {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.valueUnit {
+  margin-left: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.valueNoteMuted {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  font-style: italic;
+}
+
+.emptyMessage {
+  padding: var(--spacing-6) 0;
+  text-align: center;
+  color: var(--color-inkLight);
+}

@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
+import { TouringPlanLedgerList } from '@/components/bike/TouringPlanLedgerList'
 import { PlanCard } from '@/components/touring/PlanCard'
 import { apiGet } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -38,9 +39,9 @@ function TouringPlansPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-100">
-          <p className="text-lg">読み込み中...</p>
+      <div className={styles.fallback}>
+        <div className={styles.loadingBox}>
+          <p className={styles.loadingText}>読み込み中...</p>
         </div>
       </div>
     )
@@ -48,8 +49,8 @@ function TouringPlansPage() {
 
   if (error) {
     return (
-      <>
-        <div className="mb-4">
+      <div className={styles.fallback}>
+        <div className={styles.errorActions}>
           <Button
             onClick={() => router.push(`/app/my-bike/${bikeId}`)}
             variant="cloud"
@@ -57,9 +58,10 @@ function TouringPlansPage() {
             ← 戻る
           </Button>
         </div>
-        <div className={styles.card}>
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className={`mb-4 ${styles.bodyText}`}>
+
+        <div className={styles.errorBox}>
+          <h1 className={styles.errorTitle}>エラー</h1>
+          <p className={styles.errorMessage}>
             {error instanceof ApiV1Error
               ? error.message
               : 'ツーリングプランの取得に失敗しました'}
@@ -68,13 +70,13 @@ function TouringPlansPage() {
             愛車に戻る
           </Button>
         </div>
-      </>
+      </div>
     )
   }
 
   return (
     <>
-      <div className="w-full max-w-md flex flex-row gap-2">
+      <div className={`${styles.topBar} flex flex-row flex-wrap gap-2`}>
         <Button
           onClick={() => router.push(`/app/my-bike/${bikeId}`)}
           variant="cloud"
@@ -92,22 +94,29 @@ function TouringPlansPage() {
         </Button>
       </div>
 
-      <div className="w-full max-w-md mt-3">
-        <div className={styles.card}>
-          {plans && plans.length > 0 ? (
-            plans.map((plan) => (
-              <PlanCard
-                key={plan.touringPlanId}
-                plan={plan}
-                onClick={handleDetail}
-              />
-            ))
-          ) : (
-            <p className={`text-sm ${styles.mutedText}`}>
-              ツーリングプランはまだ登録されていません
-            </p>
-          )}
-        </div>
+      <div className={`${styles.listLayout} mt-3`}>
+        {plans && plans.length > 0 ? (
+          <>
+            <div className={styles.mobileOnly}>
+              <div className={styles.card}>
+                {plans.map((plan) => (
+                  <PlanCard
+                    key={plan.touringPlanId}
+                    plan={plan}
+                    onClick={handleDetail}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className={styles.desktopOnly}>
+              <TouringPlanLedgerList plans={plans} onSelect={handleDetail} />
+            </div>
+          </>
+        ) : (
+          <p className={`text-sm ${styles.mutedText}`}>
+            ツーリングプランはまだ登録されていません
+          </p>
+        )}
       </div>
     </>
   )
