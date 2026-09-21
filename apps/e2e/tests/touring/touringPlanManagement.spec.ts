@@ -66,7 +66,13 @@ test.describe('ツーリングプラン管理', () => {
     )
 
     // 編集ボタン（最初のものがプラン情報の編集）をクリックして編集モーダルを開く
-    await page.getByRole('button', { name: '編集' }).first().click()
+    // exact指定必須: このテストのバイクニックネーム「編集テストバイク」自体が
+    // 「編集」を含むため、部分一致だとヘッダーの車両セレクタ（aria-label
+    // 「アクティブ車両: 編集テストバイク。...」）を誤って拾ってしまう
+    await page
+      .getByRole('button', { name: '編集', exact: true })
+      .first()
+      .click()
     await expect(
       page.getByRole('heading', { name: 'プランを編集' })
     ).toBeVisible({ timeout: 5_000 })
