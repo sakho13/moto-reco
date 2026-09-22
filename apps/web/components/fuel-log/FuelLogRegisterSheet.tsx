@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import useSWR from 'swr'
 import { getNowLocalDateTimeString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { DateTimeInput } from '@repo/ui/dateTimeInput'
@@ -10,8 +11,10 @@ import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
 import styles from './FuelLogRegisterSheet.module.css'
 import { NumericKeypad } from './NumericKeypad'
+import { fetchPreviousFuelLog } from '@/lib/api/fuelLogs'
 import {
   appendNumericKey,
+  buildPreviousFuelLogQuery,
   calculateFuelEfficiencyComparison,
   calculateLiveGauges,
   formatFuelEfficiencyComparisonNote,
@@ -20,10 +23,10 @@ import {
   formatRefueledAtChipLabel,
   FUEL_EFFICIENCY_STATUS_MESSAGES,
   parseFieldNumber,
+  resolveSubmitPreviousMileage,
   sanitizeNumericInput,
   shouldUpdateTotalMileage,
   type NumericFieldConstraints,
-  type PreviousFuelLogDetail,
 } from '@/lib/fuelLogSheet'
 
 export interface FuelLogRegisterSheetSubmitValues {
@@ -33,13 +36,20 @@ export interface FuelLogRegisterSheetSubmitValues {
   totalPrice: number
   isFullTank: boolean
   memo: string
+  /**
+   * 選択した給油日時（過去に遡って記録するバックデート入力を含む）を基準に
+   * 解決済みのpreviousMileage。ライブ計器・「前回の控え」パネルの表示に使った
+   * のと同じ解決結果（サーバーへの直接問い合わせ）から算出するため、画面表示と
+   * 送信値が食い違わない（Issue #575 レビュー指摘）。
+   */
+  previousMileage: number
 }
 
 export interface FuelLogRegisterSheetProps {
+  /** 対象バイクID。選択中の給油日時に応じた前回ログの解決に使う */
+  bikeId: string
   /** 車両名（PC版ヘッダーの車両チップに表示。取得前は null） */
   vehicleName: string | null
-  /** 直近の給油履歴（無ければ初回給油） */
-  previousFuelLog: PreviousFuelLogDetail | null
   /** 直近数件の平均燃費（PC版控え欄の「平均より」比較に使用。算出不可なら null） */
   averageFuelEfficiency: number | null
   /**
@@ -89,8 +99,8 @@ const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)'
  * ツリーを丸ごと切り替えるだけにとどめている（ロジックの二重実装を避けるため）。
  */
 export function FuelLogRegisterSheet({
+  bikeId,
   vehicleName,
-  previousFuelLog,
   averageFuelEfficiency,
   recentAverageCount,
   currentTotalMileage,
@@ -104,6 +114,26 @@ export function FuelLogRegisterSheet({
     getNowLocalDateTimeString(1)
   )
   const [isDateEditorOpen, setIsDateEditorOpen] = useState(false)
+
+  // 選択中の給油日時（refueledAt）に応じた「前回ログ」をサーバーへ直接問い合わせて
+  // 解決する（作業1 `fetchPreviousFuelLog` / `buildPreviousFuelLogQuery` の再利用）。
+  // 日時チップで日付を変えるたびに再解決されるため、ライブ計器・「前回の控え」
+  // パネルは常に選択中の日時に追従する。previousMileage の送信値もこの解決結果
+  // から算出するため、画面表示と保存値が食い違わない（Issue #575 レビュー指摘）。
+  const isRefueledAtValid = !Number.isNaN(new Date(refueledAt).getTime())
+  const previousLogQueryKey =
+    bikeId && isRefueledAtValid
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?${buildPreviousFuelLogQuery(refueledAt)}`
+      : null
+  const {
+    data: resolvedPreviousLog,
+    error: previousLogFetchError,
+    isLoading: isPreviousLogLoading,
+  } = useSWR(previousLogQueryKey, () =>
+    fetchPreviousFuelLog(bikeId, refueledAt)
+  )
+  const previousLog = resolvedPreviousLog ?? null
+  const isPreviousLogError = previousLogFetchError !== undefined
   const [mileageRaw, setMileageRaw] = useState('')
   const [amountRaw, setAmountRaw] = useState('')
   const [totalPriceRaw, setTotalPriceRaw] = useState('')
@@ -236,19 +266,19 @@ export function FuelLogRegisterSheet({
         amount: amountNum,
         totalPrice: totalPriceNum,
         isFullTank,
-        previousLog: previousFuelLog,
+        previousLog,
       }),
-    [mileageNum, amountNum, totalPriceNum, isFullTank, previousFuelLog]
+    [mileageNum, amountNum, totalPriceNum, isFullTank, previousLog]
   )
 
   const fuelEfficiencyComparison = useMemo(
     () =>
       calculateFuelEfficiencyComparison({
         currentFuelEfficiency: liveGauge.fuelEfficiency,
-        previousFuelEfficiency: previousFuelLog?.fuelEfficiency ?? null,
+        previousFuelEfficiency: previousLog?.fuelEfficiency ?? null,
         averageFuelEfficiency,
       }),
-    [liveGauge.fuelEfficiency, previousFuelLog, averageFuelEfficiency]
+    [liveGauge.fuelEfficiency, previousLog, averageFuelEfficiency]
   )
   const comparisonNote = formatFuelEfficiencyComparisonNote(
     fuelEfficiencyComparison,
@@ -263,15 +293,26 @@ export function FuelLogRegisterSheet({
         ? `現在の総走行距離: ${currentTotalMileage.toLocaleString('ja-JP')} km`
         : null
 
+  // 前回ログの解決が完了（かつ成功）していない間は送信させない。解決中に送信
+  // すると previousLog が一時的に null（＝前回ログ無し扱い）のままになり、
+  // 無言でmileage自身にフォールバックしてしまう（作業1と同種の不具合）ため、
+  // 解決中・解決失敗のいずれも送信をブロックする。
   const canSubmit =
     mileageNum !== null &&
     amountNum !== null &&
     amountNum > 0 &&
-    totalPriceNum !== null
+    totalPriceNum !== null &&
+    !isPreviousLogLoading &&
+    !isPreviousLogError
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit || isSubmitting) return
+    const previousMileage = resolveSubmitPreviousMileage({
+      mileage: mileageNum as number,
+      resolvedPreviousLog: previousLog,
+      totalMileage: currentTotalMileage,
+    })
     await onSubmit({
       refueledAt,
       mileage: mileageNum as number,
@@ -279,6 +320,7 @@ export function FuelLogRegisterSheet({
       totalPrice: totalPriceNum as number,
       isFullTank,
       memo,
+      previousMileage,
     })
   }
 
@@ -395,8 +437,8 @@ export function FuelLogRegisterSheet({
           </label>
           {field === 'mileage' && (
             <span className={styles.fieldHint}>
-              {previousFuelLog
-                ? `前回 ${previousFuelLog.mileage.toLocaleString('ja-JP')} km`
+              {previousLog
+                ? `前回 ${previousLog.mileage.toLocaleString('ja-JP')} km`
                 : '初回の記録です'}
             </span>
           )}
@@ -540,6 +582,11 @@ export function FuelLogRegisterSheet({
         </FormField>
       </ToggleSection>
 
+      {isPreviousLogError && (
+        <ErrorMessage>
+          前回の給油履歴の確認に失敗しました。通信状態を確認して再度お試しください。
+        </ErrorMessage>
+      )}
       {error && <ErrorMessage>{error}</ErrorMessage>}
 
       <div className={styles.stickyFooter}>
@@ -585,8 +632,8 @@ export function FuelLogRegisterSheet({
             id: 'fuelSheetMileage',
             label: '走行距離 ODO',
             unit: 'km',
-            hint: previousFuelLog
-              ? `前回 ${previousFuelLog.mileage.toLocaleString('ja-JP')}`
+            hint: previousLog
+              ? `前回 ${previousLog.mileage.toLocaleString('ja-JP')}`
               : '初回の記録です',
           })}
           {renderSlipField({
@@ -639,6 +686,11 @@ export function FuelLogRegisterSheet({
           </div>
         </div>
 
+        {isPreviousLogError && (
+          <ErrorMessage>
+            前回の給油履歴の確認に失敗しました。通信状態を確認して再度お試しください。
+          </ErrorMessage>
+        )}
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <div className={styles.slipActions}>
@@ -665,33 +717,29 @@ export function FuelLogRegisterSheet({
       <aside className={styles.stub} data-testid="fuel-log-slip-stub">
         <div className={styles.stubBlock}>
           <h3 className={styles.stubHeading}>
-            {previousFuelLog
-              ? formatPreviousStubHeading(previousFuelLog.refueledAt)
+            {previousLog
+              ? formatPreviousStubHeading(previousLog.refueledAt)
               : '前回の控え'}
           </h3>
-          {previousFuelLog ? (
+          {previousLog ? (
             <div className={styles.stubRows}>
               <div className={styles.stubRow}>
                 <span>走行距離</span>
-                <span>
-                  {previousFuelLog.mileage.toLocaleString('ja-JP')} km
-                </span>
+                <span>{previousLog.mileage.toLocaleString('ja-JP')} km</span>
               </div>
               <div className={styles.stubRow}>
                 <span>給油量</span>
-                <span>{previousFuelLog.amount.toLocaleString('ja-JP')} L</span>
+                <span>{previousLog.amount.toLocaleString('ja-JP')} L</span>
               </div>
               <div className={styles.stubRow}>
                 <span>金額</span>
-                <span>
-                  ¥{previousFuelLog.totalPrice.toLocaleString('ja-JP')}
-                </span>
+                <span>¥{previousLog.totalPrice.toLocaleString('ja-JP')}</span>
               </div>
               <div className={styles.stubRow}>
                 <span>単価</span>
                 <span>
-                  {previousFuelLog.pricePerLiter !== null
-                    ? `${Math.round(previousFuelLog.pricePerLiter).toLocaleString('ja-JP')} 円/L`
+                  {previousLog.pricePerLiter !== null
+                    ? `${Math.round(previousLog.pricePerLiter).toLocaleString('ja-JP')} 円/L`
                     : '—'}
                 </span>
               </div>
