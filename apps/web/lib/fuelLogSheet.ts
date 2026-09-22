@@ -18,6 +18,11 @@ export type BridgedAverageEfficiencyTarget = {
   mileage: number
   amount: number
   isFullTank: boolean
+  /**
+   * 給油日時（ISO文字列）。同一 `mileage` の給油ログが複数ある場合の
+   * 並び替えタイブレークに使う（{@link calculateBridgedAverageEfficiency} 参照）。
+   */
+  refueledAt: string
 }
 
 /**
@@ -37,6 +42,13 @@ export type BridgedAverageEfficiencyTarget = {
  * 全件（`allLogs`）で行い、平均の母数（分母・分子）は期間フィルタ済みの
  * 給油ログ（`inPeriodFuelLogIds` に含まれるもの）のみに限定する。
  *
+ * 同一 `mileage` の給油ログが複数存在する場合、並び順が確定しないと満タン法の
+ * 区間判定結果（＝算出される平均燃費）が変わり得る。サーバー側
+ * （`PrismaFuelInsightRepository.getFuelInsight` の `orderedByMileageAsc`）は
+ * `mileage` 昇順に加えて `refueledAt` 昇順でタイブレークしているため、
+ * ここでも同じ規則で揃える（揃えないと同一ページ内でサーバー表示値と
+ * クライアント表示値が乖離する。Issue #575 レビュー指摘）。
+ *
  * @param allLogs 期間フィルタ前の給油履歴全件（順不同で可）
  * @param inPeriodFuelLogIds 平均の母数に含める給油ログID（期間フィルタ後）の集合
  * @returns 距離加重平均の燃費 (km/L)。算出できる区間が無ければ null
@@ -45,7 +57,11 @@ export function calculateBridgedAverageEfficiency(
   allLogs: readonly BridgedAverageEfficiencyTarget[],
   inPeriodFuelLogIds: ReadonlySet<string>
 ): number | null {
-  const orderedByMileageAsc = [...allLogs].sort((a, b) => a.mileage - b.mileage)
+  const orderedByMileageAsc = [...allLogs].sort(
+    (a, b) =>
+      a.mileage - b.mileage ||
+      new Date(a.refueledAt).getTime() - new Date(b.refueledAt).getTime()
+  )
   const details =
     fuelEfficiencyCalculationService.calculateDetails(orderedByMileageAsc)
 
