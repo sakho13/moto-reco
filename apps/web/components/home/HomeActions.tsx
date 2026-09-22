@@ -164,7 +164,16 @@ export function HomeActions() {
         <FuelLogRegisterModal
           bikeId={activeBike.myUserBikeId}
           onClose={() => setIsFuelModalOpen(false)}
-          onSuccess={() => setIsFuelModalOpen(false)}
+          onSuccess={() => {
+            setIsFuelModalOpen(false)
+            // 給油登録はモーダル内で給油履歴・燃費インサイトのSWRキーを再検証
+            // するが、`activeBike`（このコンポーネントが `isAtGuestFuelLimit`
+            // 判定に使う `fuelLogCount` の取得元）は再検証されない。ホーム画面
+            // から離脱せずに給油登録を繰り返すと、古い `fuelLogCount` のまま
+            // ゲストの給油上限を超えて登録できてしまうため、`BikePrimaryAction`
+            // と同様にここで明示的に再検証する（Issue #575 レビュー指摘）。
+            void mutate('/api/v1/user-bike/bikes')
+          }}
         />
       )}
 
