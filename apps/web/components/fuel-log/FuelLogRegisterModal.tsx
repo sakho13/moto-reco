@@ -16,6 +16,7 @@ import {
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
+import { fetchPreviousFuelLog } from '@/lib/api/fuelLogs'
 import {
   mutateActiveBikeList,
   mutateFuelLogLists,
@@ -105,10 +106,20 @@ export function FuelLogRegisterModal({
 
     try {
       const memo = values.memo.trim()
+      // previousMileage は選択した給油日時（過去に遡って記録するバックデート
+      // 入力を含む）を条件にサーバーへ直接問い合わせて解決する。直近数件の
+      // ウィンドウ（fuelLogs）内を検索すると、ウィンドウの外まで遡った場合に
+      // 該当ログを見つけられず区間距離が無言で0kmになる不具合があったため、
+      // ここでは解決結果に依存せずウィンドウを使わない（Issue #575 レビュー指摘）。
+      // 問い合わせ自体が失敗した場合は catch 節でエラー表示のみ行い、
+      // 無言のフォールバックはせず保存を中止する。
+      const resolvedPreviousLog = await fetchPreviousFuelLog(
+        bikeId,
+        values.refueledAt
+      )
       const previousMileage = resolveSubmitPreviousMileage({
-        refueledAt: values.refueledAt,
         mileage: values.mileage,
-        logs: fuelLogs ?? [],
+        resolvedPreviousLog,
         totalMileage: bike?.totalMileage,
       })
       const updateTotalMileage = shouldUpdateTotalMileage(

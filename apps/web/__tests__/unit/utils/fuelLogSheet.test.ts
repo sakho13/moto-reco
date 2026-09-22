@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import {
   appendNumericKey,
+  buildPreviousFuelLogQuery,
   calculateAverageFuelEfficiency,
   calculateBridgedAverageEfficiency,
   calculateDaysAgo,
@@ -106,40 +107,62 @@ describe('calculateLiveGauges', () => {
   })
 })
 
+describe('buildPreviousFuelLogQuery', () => {
+  test('選択日時をendDateに、UNIXエポックをstartDateに指定したクエリを組み立てる', () => {
+    const query = buildPreviousFuelLogQuery('2024-06-15T09:00:00')
+    const params = new URLSearchParams(query)
+
+    expect(params.get('startDate')).toBe(new Date(0).toISOString())
+    expect(params.get('endDate')).toBe(
+      new Date('2024-06-15T09:00:00').toISOString()
+    )
+    expect(params.get('sort-order')).toBe('desc')
+    expect(params.get('per-size')).toBe('1')
+  })
+
+  test('大きく過去に遡った日時（直近ウィンドウの外）でもendDateはそのまま反映される', () => {
+    // 回帰再現: 従来は直近数件のウィンドウ内だけを検索していたため、ウィンドウの
+    // 外まで遡ると該当ログを見つけられなかった。このクエリはウィンドウの件数に
+    // 一切依存せず、選択日時をそのままendDateとしてサーバーに問い合わせるため、
+    // どれだけ過去に遡っても「選択日時以前で最も新しいログ」を確実に取得できる。
+    const query = buildPreviousFuelLogQuery('2019-01-01T00:00:00')
+    const params = new URLSearchParams(query)
+
+    expect(params.get('endDate')).toBe(
+      new Date('2019-01-01T00:00:00').toISOString()
+    )
+    expect(params.get('startDate')).toBe(new Date(0).toISOString())
+  })
+})
+
 describe('resolveSubmitPreviousMileage', () => {
-  test('直近の給油ログがあればその走行距離をそのまま使う（通常の登録）', () => {
+  test('サーバーへの問い合わせで前回ログが解決できていれば、その走行距離をそのまま使う（通常の登録）', () => {
     const value = resolveSubmitPreviousMileage({
-      refueledAt: '2024-06-15T09:00:00',
       mileage: 13010,
-      logs: [{ mileage: 12750, refueledAt: '2024-06-01T09:00:00' }],
+      resolvedPreviousLog: { mileage: 12750 },
       totalMileage: 12800,
     })
     expect(value).toBe(12750)
   })
 
-  test('過去日時での登録（バックフィル）では、選択した給油日時以前で最も新しいログを基準にする', () => {
-    // 回帰再現: 最新ログが13,000kmの状態で、日時チップから過去の
-    // 12,700kmの給油を追加入力するケース。常に最新ログ（13,000km）を
-    // 基準にすると previousMileage(13000) > mileage(12700) となり
-    // 登録スキーマの previousMileage <= mileage に違反して必ず失敗していた。
+  test('過去日時での登録（バックフィル）でも、サーバーが解決した「選択日時以前で最も新しいログ」をそのまま使う', () => {
+    // 回帰再現: 従来は直近数件のウィンドウ内を検索しており、ウィンドウの外まで
+    // 遡ると該当ログを見つけられず previousMileage が mileage 自身にフォール
+    // バックして区間距離が無言で0kmになっていた。現在はウィンドウに依存しない
+    // サーバー問い合わせ（buildPreviousFuelLogQuery）の解決結果を渡されるだけ
+    // なので、ウィンドウの件数に関わらず正しい前回ログの走行距離が使われる。
     const value = resolveSubmitPreviousMileage({
-      refueledAt: '2024-06-10T09:00:00',
       mileage: 12700,
-      logs: [
-        { mileage: 13000, refueledAt: '2024-06-20T09:00:00' }, // 最新（選択日時より後）
-        { mileage: 12500, refueledAt: '2024-06-05T09:00:00' }, // 選択日時より前で最新
-        { mileage: 12000, refueledAt: '2024-05-01T09:00:00' },
-      ],
-      totalMileage: 13000,
+      resolvedPreviousLog: { mileage: 12500 }, // サーバーが解決した「選択日時以前で最新」のログ
+      totalMileage: 13000, // 最新ログ（選択日時より後）の走行距離。これに引きずられない
     })
     expect(value).toBe(12500)
   })
 
-  test('選択した給油日時が既存のどのログよりも古い場合は総走行距離とmileageの小さい方を使う', () => {
+  test('選択した給油日時以前にログが存在しないとサーバーが解決した場合、総走行距離とmileageの小さい方を使う', () => {
     const value = resolveSubmitPreviousMileage({
-      refueledAt: '2024-01-01T09:00:00',
       mileage: 4800,
-      logs: [{ mileage: 12750, refueledAt: '2024-06-01T09:00:00' }],
+      resolvedPreviousLog: null,
       totalMileage: 5000,
     })
     expect(value).toBe(4800)
@@ -147,29 +170,17 @@ describe('resolveSubmitPreviousMileage', () => {
 
   test('基準ログがあり、入力ミスで前回以下のmileageでもそのまま返す（サーバー側エラーに委ねる）', () => {
     const value = resolveSubmitPreviousMileage({
-      refueledAt: '2024-06-15T09:00:00',
       mileage: 12000,
-      logs: [{ mileage: 12750, refueledAt: '2024-06-01T09:00:00' }],
+      resolvedPreviousLog: { mileage: 12750 },
       totalMileage: undefined,
     })
     expect(value).toBe(12750)
   })
 
-  test('既存ログが無い場合は総走行距離とmileageの小さい方を使う', () => {
+  test('前回ログも総走行距離も無い場合はmileage自身を使う', () => {
     const value = resolveSubmitPreviousMileage({
-      refueledAt: '2024-06-15T09:00:00',
-      mileage: 4800,
-      logs: [],
-      totalMileage: 5000,
-    })
-    expect(value).toBe(4800)
-  })
-
-  test('既存ログも総走行距離も無い場合はmileage自身を使う', () => {
-    const value = resolveSubmitPreviousMileage({
-      refueledAt: '2024-06-15T09:00:00',
       mileage: 100,
-      logs: [],
+      resolvedPreviousLog: null,
       totalMileage: undefined,
     })
     expect(value).toBe(100)

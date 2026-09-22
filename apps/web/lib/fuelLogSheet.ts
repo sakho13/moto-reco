@@ -348,10 +348,36 @@ export function formatPreviousStubHeading(
   return `前回の控え ─ ${dateLabel}（${daysAgo}日前）`
 }
 
-/** `resolveSubmitPreviousMileage` が基準ログ探索に使う、給油履歴の最小情報 */
-export type FuelLogReferenceEntry = {
+/** `resolveSubmitPreviousMileage` が基準にする、サーバーへの問い合わせで解決済みの前回ログ */
+export type ResolvedPreviousFuelLog = {
   mileage: number
-  refueledAt: string
+}
+
+/**
+ * 「選択した給油日時（refueledAt）以前で最も新しいログ」を1件だけ取得するための
+ * `/fuel-logs` 一覧APIのクエリ文字列を組み立てる
+ *
+ * @remarks
+ * {@link resolveSubmitPreviousMileage} の解決に使う。以前は直近数件のウィンドウ
+ * （`per-size` を絞った一覧）の中から該当ログを検索していたが、日時チップで
+ * ウィンドウの外まで遡って過去の給油を記録すると該当ログを見つけられず、
+ * `Math.min(totalMileage, mileage)`（≒mileage自身）に無言でフォールバックして
+ * 区間距離が0kmとして記録される不具合があった（Issue #575 レビュー指摘）。
+ *
+ * ウィンドウ内を探す代わりに、`startDate`（UNIXエポック。API仕様上 `endDate` と
+ * セットでの指定が必須なため、実質的に下限なしとして扱うために指定する）〜
+ * `endDate`（選択日時。inclusive）の範囲を `sort-order=desc`・`per-size=1` で
+ * 問い合わせる。既存の給油履歴が何件あっても、取得済みのウィンドウサイズに
+ * 関係なく「選択日時以前で最も新しいログ」を確実に取得できる。
+ */
+export function buildPreviousFuelLogQuery(refueledAt: string): string {
+  const params = new URLSearchParams({
+    startDate: new Date(0).toISOString(),
+    endDate: new Date(refueledAt).toISOString(),
+    'sort-order': 'desc',
+    'per-size': '1',
+  })
+  return params.toString()
 }
 
 /**
@@ -362,35 +388,26 @@ export type FuelLogReferenceEntry = {
  * 満タン法による燃費算出には使われなくなった参考値。ただし台帳・履歴の「区間距離」
  * 表示（`mileage - previousMileage`）には使われるため、値そのものの妥当性は保ちたい。
  *
- * 日時チップから過去の給油を選んで入力した場合、常に「直近の給油ログ」（最新のもの）
- * を基準にすると、その走行距離が今回の入力ODOを上回り
- * `previousMileage <= mileage` のバリデーションに必ず違反する回帰があったため、
- * `logs` の中から選択した給油日時（`refueledAt`）以前で最も新しいログを基準にする。
- * 該当するログが無い（選択した日時がどの既存ログよりも古い＝実質的な初回給油）
- * 場合のみ、バリデーションを満たすように総走行距離と入力ODOの小さい方に丸める。
+ * `resolvedPreviousLog` は {@link buildPreviousFuelLogQuery} で組み立てたクエリを
+ * サーバーへ直接問い合わせて解決した結果を呼び出し元から渡してもらう前提とする
+ * （ウィンドウ内の検索はもう行わない）。`resolvedPreviousLog` が null になるのは
+ * 「選択日時以前に給油記録が存在しない（実質的な初回給油）」ことがサーバーへの
+ * 問い合わせで確認できた場合のみであり、その場合のみバリデーションを満たすように
+ * 総走行距離と入力ODOの小さい方に丸める。問い合わせ自体が失敗した場合はこの関数を
+ * 呼び出さず、呼び出し元でエラーを表示して保存を中止すること（無言のフォールバック
+ * はしない）。
  */
 export function resolveSubmitPreviousMileage(params: {
-  refueledAt: string
   mileage: number
-  logs: readonly FuelLogReferenceEntry[]
+  resolvedPreviousLog: ResolvedPreviousFuelLog | null
   totalMileage: number | undefined
 }): number {
-  const { refueledAt, mileage, logs, totalMileage } = params
-  const targetTime = new Date(refueledAt).getTime()
+  const { mileage, resolvedPreviousLog, totalMileage } = params
 
-  let closest: FuelLogReferenceEntry | null = null
-  for (const log of logs) {
-    const logTime = new Date(log.refueledAt).getTime()
-    if (logTime > targetTime) continue
-    if (closest === null || logTime > new Date(closest.refueledAt).getTime()) {
-      closest = log
-    }
-  }
-
-  if (closest !== null) {
+  if (resolvedPreviousLog !== null) {
     // 入力ミスによる前回以下のmileageもそのまま返す（サーバー側のバリデーション
     // エラーとしてユーザーに返す。ここで無言に補正すると入力ミスに気づけない）
-    return closest.mileage
+    return resolvedPreviousLog.mileage
   }
   if (totalMileage !== undefined) {
     return Math.min(totalMileage, mileage)
