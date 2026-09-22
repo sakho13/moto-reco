@@ -26,10 +26,7 @@ import { apiGet, authenticatedFetch } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useAuth } from '@/lib/hooks/useAuth'
-
-// 添え数値・方眼グラフ・給油の台帳（抜粋）が共有する期間フェッチの件数。
-// `BikeFuelLedgerExcerpt` の再検証キーと揃える必要がある。
-const PERIOD_FETCH_SIZE = 100
+import { BIKE_CARTE_PERIOD_FETCH_SIZE } from '@/lib/statics'
 
 async function fetchFuelLogList(url: string): Promise<ApiResponseFuelLogList> {
   const response = await authenticatedFetch(url, { method: 'GET' })
@@ -92,7 +89,7 @@ function BikeDetailPage() {
   const { data: periodFuelLogsRaw, isLoading: isPeriodFuelLogsLoading } =
     useSWR(
       id
-        ? `/api/v1/user-bike/bike/${id}/fuel-logs?sort-by=refueled-at&sort-order=asc&per-size=${PERIOD_FETCH_SIZE}&period=${period}`
+        ? `/api/v1/user-bike/bike/${id}/fuel-logs?sort-by=refueled-at&sort-order=asc&per-size=${BIKE_CARTE_PERIOD_FETCH_SIZE}&period=${period}`
         : null,
       fetchFuelLogList
     )
@@ -103,7 +100,7 @@ function BikeDetailPage() {
   // 一覧APIを期間指定なし（全期間）で取得する。
   const { data: allFuelLogsRaw, isLoading: isAllFuelLogsLoading } = useSWR(
     id
-      ? `/api/v1/user-bike/bike/${id}/fuel-logs?sort-by=mileage&sort-order=asc&per-size=${PERIOD_FETCH_SIZE}`
+      ? `/api/v1/user-bike/bike/${id}/fuel-logs?sort-by=mileage&sort-order=asc&per-size=${BIKE_CARTE_PERIOD_FETCH_SIZE}`
       : null,
     fetchFuelLogList
   )

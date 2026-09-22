@@ -10,11 +10,9 @@ import type {
 import styles from './BikeFuelLedgerExcerpt.module.css'
 import { FuelLedgerList } from './FuelLedgerList'
 import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
+import { BIKE_CARTE_PERIOD_FETCH_SIZE } from '@/lib/statics'
 
 const EXCERPT_COUNT = 5
-// page.tsx の期間フィルタ取得と同じ per-size。値がずれるとキャッシュキーが
-// 一致せず再検証が効かなくなるため、変更する場合は両方を揃えること。
-const PERIOD_FETCH_SIZE = 100
 
 type Props = {
   bikeId: string
@@ -40,7 +38,7 @@ export function BikeFuelLedgerExcerpt({ bikeId, period, fuelLogs }: Props) {
 
   const revalidate = () => {
     void mutate(
-      `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=asc&per-size=${PERIOD_FETCH_SIZE}&period=${period}`
+      `/api/v1/user-bike/bike/${bikeId}/fuel-logs?sort-by=refueled-at&sort-order=asc&per-size=${BIKE_CARTE_PERIOD_FETCH_SIZE}&period=${period}`
     )
     void mutate(`/api/v1/user-bike/bike/${bikeId}`)
   }
