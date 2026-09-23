@@ -133,14 +133,17 @@ export function FuelLedgerSection({ bikeId, onEdit }: Props) {
             onSearch={setKeyword}
             testId="fuel-ledger-search"
           />
-          <Select
-            id="fuel-ledger-period"
-            aria-label="期間"
-            className={styles.periodSelect}
-            options={PERIOD_OPTIONS}
-            value={period}
-            onChange={(event) => setPeriod(event.target.value as LedgerPeriod)}
-          />
+          <div className={styles.periodSelect}>
+            <Select
+              id="fuel-ledger-period"
+              aria-label="期間"
+              options={PERIOD_OPTIONS}
+              value={period}
+              onChange={(event) =>
+                setPeriod(event.target.value as LedgerPeriod)
+              }
+            />
+          </div>
         </div>
 
         <div className={styles.sortRow} role="group" aria-label="並べ替え">

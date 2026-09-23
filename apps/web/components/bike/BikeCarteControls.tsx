@@ -28,16 +28,17 @@ export function BikeCarteControls({
 }: Props) {
   return (
     <div className={styles.bar} data-testid="bike-carte-controls">
-      <Select
-        id="bike-carte-period"
-        aria-label="期間"
-        className={styles.periodSelect}
-        options={FUEL_LOG_PERIOD_OPTIONS}
-        value={period}
-        onChange={(event) =>
-          onPeriodChange(event.target.value as FuelLogPeriod)
-        }
-      />
+      <div className={styles.periodSelect}>
+        <Select
+          id="bike-carte-period"
+          aria-label="期間"
+          options={FUEL_LOG_PERIOD_OPTIONS}
+          value={period}
+          onChange={(event) =>
+            onPeriodChange(event.target.value as FuelLogPeriod)
+          }
+        />
+      </div>
       <button
         type="button"
         className={
