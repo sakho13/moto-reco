@@ -118,7 +118,9 @@ function TouringPlanDetailPage() {
           </Button>
         </div>
         <div className={styles.card}>
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
+          <h1 className={`text-2xl font-bold mb-4 ${styles.errorTitle}`}>
+            エラー
+          </h1>
           <p className={`mb-4 ${styles.bodyText}`}>
             {planError instanceof ApiV1Error
               ? planError.message

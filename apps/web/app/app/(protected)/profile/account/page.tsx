@@ -7,6 +7,7 @@ import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { Textarea } from '@repo/ui/textarea'
+import styles from './page.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
@@ -186,11 +187,11 @@ function AccountPage() {
       <BaseCard title="アカウント認証">
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500">認証方式</span>
+            <span className={styles.itemLabel}>認証方式</span>
             <span>{providerLabel}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">メールアドレス</span>
+            <span className={styles.itemLabel}>メールアドレス</span>
             <span>{user?.email ?? '-'}</span>
           </div>
         </div>

@@ -129,3 +129,7 @@
 .breakEndButton {
   flex-shrink: 0;
 }
+
+.errorTitle {
+  color: var(--color-danger);
+}
