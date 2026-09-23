@@ -50,13 +50,18 @@
   justify-content: center;
 }
 
+/*
+ * success には対になるインク色トークンが無いため塗りにできない。
+ * 地色の面 + アクセントの枠線 + アクセントの文字（Button の success と同じ様式）。
+ */
 .startBadge {
   flex-shrink: 0;
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 9999px;
-  background-color: #10b981;
-  color: white;
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-success);
+  color: var(--color-success);
   font-size: 0.6rem;
   font-weight: bold;
   display: flex;
@@ -69,8 +74,8 @@
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 9999px;
-  background-color: #ef4444;
-  color: white;
+  background-color: var(--color-danger);
+  color: var(--color-dangerInk);
   font-size: 0.6rem;
   font-weight: bold;
   display: flex;
@@ -78,13 +83,15 @@
   justify-content: center;
 }
 
+/* 文字色は warning ではなく warningActive。ライトテーマの warning は地色に対して 2.6:1 しかない */
 .breakBadge {
   flex-shrink: 0;
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 9999px;
-  background-color: var(--color-warning);
-  color: #fff;
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-warning);
+  color: var(--color-warningActive);
   font-size: 0.75rem;
   font-weight: bold;
   display: flex;

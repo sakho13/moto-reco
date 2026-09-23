@@ -63,9 +63,14 @@
   white-space: nowrap;
 }
 
+/*
+ * success には対になるインク色トークンが無いため塗りにできない。
+ * 地色の面 + アクセントの枠線 + アクセントの文字（Button の success と同じ様式）。
+ */
 .statusBadgeStarted {
-  background-color: #10b981;
-  color: white;
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-success);
+  color: var(--color-success);
 }
 
 .statusBadgeCompleted {

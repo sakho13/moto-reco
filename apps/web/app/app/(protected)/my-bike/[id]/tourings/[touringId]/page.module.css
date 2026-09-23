@@ -16,9 +16,14 @@
   opacity: 0.5;
 }
 
+/*
+ * success には対になるインク色トークンが無いため塗りにできない。
+ * 地色の面 + アクセントの枠線 + アクセントの文字（Button の success と同じ様式）。
+ */
 .statusStarted {
-  background-color: #10b981;
-  color: white;
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-success);
+  color: var(--color-success);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
   padding: 0.125rem 0.5rem;
@@ -62,6 +67,7 @@
   position: relative;
 }
 
+/* 地図タイルの上に載る Google マップへの導線。Google のブランド配色を使うためテーマには追従させない */
 .googleMapsLink {
   position: absolute;
   top: 8px;
