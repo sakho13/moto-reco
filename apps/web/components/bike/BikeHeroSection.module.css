@@ -1,0 +1,83 @@
+/*
+ * 愛車の見出しと車両情報。
+ * 登録情報の再掲を「枠付きカードの羅列」にせず、罫線で区切った2列のリストにする
+ * （Issue #575「03 再設計の原則」）。
+ */
+.section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding-block: var(--spacing-2) 0;
+}
+
+.heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  color: var(--color-ink);
+  line-height: 1.3;
+}
+
+.subtitle {
+  margin: var(--spacing-1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.spec {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 var(--spacing-6);
+  padding-block: var(--spacing-1);
+  border-top: 1px solid var(--color-cloudHover);
+  border-bottom: 1px solid var(--color-cloudHover);
+}
+
+.specRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  padding-block: var(--spacing-2);
+  border-bottom: 1px dotted var(--color-cloud);
+}
+
+/*
+ * 車両情報は5項目固定（2列 × 2行 + 最終行1項目）のため、
+ * 最終行は常に最後の1項目だけになる。:last-childのみで罫線を消せる。
+ */
+.specRow:last-child {
+  border-bottom: none;
+}
+
+.specLabel {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  white-space: nowrap;
+}
+
+.specValue {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+@media (max-width: 420px) {
+  .spec {
+    grid-template-columns: 1fr;
+  }
+}

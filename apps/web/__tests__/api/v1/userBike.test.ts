@@ -844,7 +844,9 @@ describe('UserBike API Endpoints', () => {
           amount: 10.5,
           totalPrice: 1800,
           memo,
-          fuelEfficiency: 9.5, // 小数点以下1桁で四捨五入
+          isFullTank: true,
+          // このバイクにとって最初の給油ログのため、直前の満タン給油が存在せずnull
+          fuelEfficiency: null,
           pricePerLiter: 171.4, // 小数点以下1桁で四捨五入
           touringId: null,
           touringTitle: null,
@@ -2131,6 +2133,218 @@ describe('UserBike API Endpoints', () => {
     })
   })
 
+  describe('満タン／継ぎ足しの区別（Issue #575 P1）', () => {
+    let token: string
+    let myUserBikeId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: '満タン継ぎ足しテスト用バイク',
+        totalMileage: 1000,
+      })
+      myUserBikeId = bike.myUserBikeId
+    })
+
+    test('isFullTankを省略した場合はtrue（満タン）として登録される', async () => {
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            refueledAt: '2024-01-01T10:00:00.000Z',
+            mileage: 1000,
+            previousMileage: 1000,
+            amount: 10,
+            totalPrice: 1500,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(201)
+      expect(json.data.isFullTank).toBe(true)
+
+      const fuelLogRecord = await prisma.tUserMyBikeFuelLog.findUnique({
+        where: { id: json.data.fuelLogId },
+      })
+      expect(fuelLogRecord?.isFullTank).toBe(true)
+    })
+
+    test('継ぎ足し給油のfuelEfficiencyはnullになる', async () => {
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-01-01T10:00:00.000Z',
+        mileage: 1000,
+        previousMileage: 1000,
+        amount: 10,
+        totalPrice: 1500,
+        isFullTank: true,
+      })
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-01-10T10:00:00.000Z',
+        mileage: 1100,
+        previousMileage: 1000,
+        amount: 3,
+        totalPrice: 450,
+        isFullTank: false,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+
+      const partialLog = json.data.find(
+        (log: { mileage: number }) => log.mileage === 1100
+      )
+      expect(partialLog.isFullTank).toBe(false)
+      expect(partialLog.fuelEfficiency).toBeNull()
+    })
+
+    test('満タン→継ぎ足し→満タンの順で記録すると、2回目の満タンの燃費は「1回目の満タンからの距離 ÷ (継ぎ足し量 + 今回量)」になる', async () => {
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-01-01T10:00:00.000Z',
+        mileage: 1000,
+        previousMileage: 1000,
+        amount: 10,
+        totalPrice: 1500,
+        isFullTank: true,
+      })
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-01-10T10:00:00.000Z',
+        mileage: 1100,
+        previousMileage: 1000,
+        amount: 3,
+        totalPrice: 450,
+        isFullTank: false,
+      })
+      await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-01-20T10:00:00.000Z',
+        mileage: 1250,
+        previousMileage: 1100,
+        amount: 8,
+        totalPrice: 1200,
+        isFullTank: true,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+
+      const secondFullTankLog = json.data.find(
+        (log: { mileage: number }) => log.mileage === 1250
+      )
+      // 区間距離: 1250-1000=250, 給油量: 3(継ぎ足し)+8(満タン)=11 => 250/11（丸めない生の値）
+      expect(secondFullTankLog.fuelEfficiency).toBeCloseTo(250 / 11, 10)
+    })
+
+    test('すべて満タンの場合、従来の(mileage-previousMileage)/amountと同じ燃費になる（リグレッション防止）', async () => {
+      await createMultipleFuelLogs(token, myUserBikeId, [
+        {
+          refueledAt: '2024-01-01T10:00:00.000Z',
+          mileage: 1000,
+          previousMileage: 1000,
+          amount: 10,
+          totalPrice: 1500,
+          isFullTank: true,
+        },
+        {
+          refueledAt: '2024-02-01T10:00:00.000Z',
+          mileage: 1500,
+          previousMileage: 1000,
+          amount: 12,
+          totalPrice: 1800,
+          isFullTank: true,
+        },
+        {
+          refueledAt: '2024-03-01T10:00:00.000Z',
+          mileage: 2000,
+          previousMileage: 1500,
+          amount: 11.5,
+          totalPrice: 1700,
+          isFullTank: true,
+        },
+      ])
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+
+      const log2 = json.data.find(
+        (log: { mileage: number }) => log.mileage === 1500
+      )
+      const log3 = json.data.find(
+        (log: { mileage: number }) => log.mileage === 2000
+      )
+      // (1500-1000)/12 = 41.6666...（丸めない生の値）
+      expect(log2.fuelEfficiency).toBeCloseTo(500 / 12, 10)
+      // (2000-1500)/11.5 = 43.4782...
+      expect(log3.fuelEfficiency).toBeCloseTo(500 / 11.5, 10)
+    })
+
+    test('PATCHでisFullTankを更新できる', async () => {
+      const fuelLogId = await createTestFuelLog(token, myUserBikeId, {
+        refueledAt: '2024-01-01T10:00:00.000Z',
+        mileage: 1000,
+        previousMileage: 1000,
+        amount: 10,
+        totalPrice: 1500,
+        isFullTank: true,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/fuel-logs`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            fuelLogId,
+            isFullTank: false,
+          }),
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.isFullTank).toBe(false)
+
+      const fuelLogRecord = await prisma.tUserMyBikeFuelLog.findUnique({
+        where: { id: fuelLogId },
+      })
+      expect(fuelLogRecord?.isFullTank).toBe(false)
+    })
+  })
+
   describe('GET /api/v1/user-bike/bike/:myUserBikeId/fuel-insights', () => {
     let token: string
     let myUserBikeId: string
@@ -2209,12 +2423,75 @@ describe('UserBike API Endpoints', () => {
       expect(res.status).toBe(200)
       expect(json.status).toBe('success')
       expect(json.message).toBe('燃費インサイト取得成功')
-      expect(json.data.averageFuelEfficiency).toBeCloseTo(700 / 33, 5)
+      // 1件目は初回給油（直前の満タン給油が無い）のため、距離・給油量とも母数から除外される。
+      // 区間距離: (1300-1000)+(1600-1300)=600, 区間給油量: 12+11=23
+      expect(json.data.averageFuelEfficiency).toBeCloseTo(600 / 23, 5)
       expect(json.data.averageAmount).toBeCloseTo(11, 5)
       expect(json.data.averageTotalPrice).toBeCloseTo(1833.3333, 3)
       expect(json.data.averagePricePerLiter).toBeCloseTo(166.6666, 3)
       expect(json.data.minPricePerLiter).toBeCloseTo(150, 5)
       expect(json.data.maxPricePerLiter).toBeCloseTo(200, 5)
+    })
+
+    test('初回給油のみ登録されている場合、平均燃費は0ではなくnullになる', async () => {
+      const freshUser = await createTestUser()
+      const freshBike = await createTestUserBike(freshUser.token, {
+        displacement: 250,
+        nickname: '初回給油のみのバイク',
+        totalMileage: 900,
+      })
+
+      await createTestFuelLog(freshUser.token, freshBike.myUserBikeId, {
+        refueledAt: '2024-01-01T10:00:00.000Z',
+        mileage: 1000,
+        previousMileage: 900,
+        amount: 10.0,
+        totalPrice: 1500,
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${freshBike.myUserBikeId}/fuel-insights`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${freshUser.token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.averageFuelEfficiency).toBeNull()
+      // 燃費とは無関係な集計（1回あたりの給油量・価格）は初回給油も母数に含まれる
+      expect(json.data.averageAmount).toBeCloseTo(10, 5)
+      expect(json.data.averageTotalPrice).toBeCloseTo(1500, 5)
+    })
+
+    test('給油履歴が無い場合、全ての集計値がnullになる', async () => {
+      const freshUser = await createTestUser()
+      const freshBike = await createTestUserBike(freshUser.token, {
+        displacement: 250,
+        nickname: '給油履歴なしバイク',
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${freshBike.myUserBikeId}/fuel-insights`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${freshUser.token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.averageFuelEfficiency).toBeNull()
+      expect(json.data.averageAmount).toBeNull()
+      expect(json.data.averageTotalPrice).toBeNull()
+      expect(json.data.averagePricePerLiter).toBeNull()
+      expect(json.data.minPricePerLiter).toBeNull()
+      expect(json.data.maxPricePerLiter).toBeNull()
     })
   })
 
@@ -4038,7 +4315,9 @@ describe('UserBike API Endpoints', () => {
           amount: 12.5,
           totalPrice: 2000,
           memo,
-          fuelEfficiency: 16, // (2000 - 1800) / 12.5
+          isFullTank: true,
+          // このバイクにとって唯一（最初）の給油ログのため、直前の満タン給油が存在せずnull
+          fuelEfficiency: null,
           pricePerLiter: 160, // 2000 / 12.5
           touringId: null,
           touringTitle: null,

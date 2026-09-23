@@ -1,7 +1,27 @@
+.section {
+  width: 100%;
+  padding-block: var(--spacing-2) var(--spacing-4);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  color: var(--color-inkLight);
+}
+
 .historyList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .empty {
@@ -15,8 +35,6 @@
   color: var(--color-inkLight);
   font-size: 14px;
   text-decoration: none;
-  margin-top: 4px;
-  margin-right: 4px;
 }
 
 .moreLink:hover {

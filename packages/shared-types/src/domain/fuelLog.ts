@@ -12,6 +12,7 @@ export type FuelLog = {
   previousMileage: number // 前回給油時走行距離 (km)
   amount: number // 給油量 (L)
   totalPrice: number // 合計価格 (円)
+  isFullTank: boolean // 満タン給油かどうか（false: 継ぎ足し給油）
   memo: string | null // メモ
   touringId: TouringId | null // ツーリングID
   touringTitle: string | null // ツーリング名（JOIN用）

@@ -125,7 +125,7 @@ function BikeRegisterPage() {
             <h2
               style={{
                 fontSize: 'var(--font-size-lg)',
-                fontWeight: 'var(--font-weight-semibold)',
+                fontWeight: 'var(--font-weight-bold)',
                 marginBottom: 'var(--spacing-4)',
                 color: 'var(--color-ink)',
               }}
@@ -158,7 +158,7 @@ function BikeRegisterPage() {
             <h2
               style={{
                 fontSize: 'var(--font-size-lg)',
-                fontWeight: 'var(--font-weight-semibold)',
+                fontWeight: 'var(--font-weight-bold)',
                 marginBottom: 'var(--spacing-4)',
                 color: 'var(--color-ink)',
               }}

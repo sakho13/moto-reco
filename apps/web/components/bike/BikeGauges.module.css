@@ -1,0 +1,57 @@
+/*
+ * 愛車の計器（平均燃費・前回給油からの距離・今月の燃料費）。
+ * KPIカードの均等グリッドにはせず、上下を罫線で挟み、
+ * 縦の区切りは点線に留める（Issue #575「03 再設計の原則」）。
+ * `components/home/HomeGauges.module.css` と同じ語彙で揃える。
+ */
+.gauges {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  padding-block: var(--spacing-3) var(--spacing-2);
+  border-top: 1px solid var(--color-cloudHover);
+  border-bottom: 1px solid var(--color-cloudHover);
+}
+
+.gauge {
+  padding-inline: var(--spacing-3);
+  border-left: 1px dotted var(--color-cloud);
+}
+
+.gauge:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+.value {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+  line-height: 1.2;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.unit {
+  margin-left: 2px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-inkLight);
+}
+
+.label {
+  margin: 2px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+@media (max-width: 400px) {
+  .gauge {
+    padding-inline: var(--spacing-2);
+  }
+
+  .value {
+    font-size: var(--font-size-lg);
+  }
+}

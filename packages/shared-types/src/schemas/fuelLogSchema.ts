@@ -43,6 +43,11 @@ export const FuelLogRegisterRequestSchema = z
       .max(500, 'メモは500文字以内で指定してください')
       .nullable()
       .optional(),
+    isFullTank: z
+      .boolean({
+        invalid_type_error: '満タン給油かどうかは真偽値で指定してください',
+      })
+      .default(true),
     updateTotalMileage: z.boolean().default(false),
     touringId: z
       .string({
@@ -208,6 +213,11 @@ export const FuelLogUpdateRequestSchema = z
       .max(500, 'メモは500文字以内で指定してください')
       .nullable()
       .optional(),
+    isFullTank: z
+      .boolean({
+        invalid_type_error: '満タン給油かどうかは真偽値で指定してください',
+      })
+      .optional(),
   })
   .refine(
     (data) =>
@@ -216,7 +226,8 @@ export const FuelLogUpdateRequestSchema = z
       data.previousMileage !== undefined ||
       data.amount !== undefined ||
       data.totalPrice !== undefined ||
-      data.memo !== undefined,
+      data.memo !== undefined ||
+      data.isFullTank !== undefined,
     {
       message: 'いずれかの更新項目を指定してください',
     }

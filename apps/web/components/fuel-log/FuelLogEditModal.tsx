@@ -14,7 +14,7 @@ import { FuelLogForm, type FuelLogFormData } from './FuelLogForm'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch, authenticatedFetch } from '@/lib/api/client'
-import { mutateHistoryLists } from '@/lib/api/mutateHistory'
+import { mutateFuelLogLists, mutateHistoryLists } from '@/lib/api/mutateHistory'
 
 interface FuelLogEditModalProps {
   bikeId: string
@@ -59,6 +59,7 @@ export function FuelLogEditModal({
         amount: data.amount.toString(),
         totalPrice: data.totalPrice.toString(),
         memo: data.memo ?? '',
+        isFullTank: data.isFullTank,
         updateTotalMileage: false,
       })
     }
@@ -78,10 +79,11 @@ export function FuelLogEditModal({
         amount: Number(formData.amount),
         totalPrice: Number(formData.totalPrice),
         memo: memo.length > 0 ? memo : null,
+        isFullTank: formData.isFullTank,
       })
       trackEvent('fuel_log_update')
 
-      await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      await mutateFuelLogLists(bikeId)
       await mutate(detailUrl)
       await mutateHistoryLists()
       toast.success('給油履歴を更新しました')
@@ -116,7 +118,7 @@ export function FuelLogEditModal({
         fuelLogId,
       })
       trackEvent('fuel_log_delete')
-      await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      await mutateFuelLogLists(bikeId)
       await mutate(detailUrl)
       await mutateHistoryLists()
       toast.success('給油履歴を削除しました')

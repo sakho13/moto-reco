@@ -940,6 +940,62 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 
+  /api/v1/user-bike/bike/{my-user-bike-id}/maintenance-schedule:
+    get:
+      summary: ユーザー所有バイクの点検予定取得
+      description: |-
+        メンテナンス項目マスタの既定値（推奨走行距離間隔・推奨期間間隔）と、
+        直近の該当整備記録・現在の総走行距離から、各項目の次回点検時期を算出して
+        残りが少ない順（＝到来が早い順）に返す。
+        該当する整備記録が無い項目は記録なし（NO_RECORD）として区別できる形で含まれる。
+      tags:
+        - user-bikes
+      parameters:
+        - in: path
+          name: my-user-bike-id
+          required: true
+          schema:
+            type: string
+          description: ユーザー所有バイクID
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 19
+          description: 上位N件に絞り込む（任意）
+      responses:
+        '200':
+          description: 点検予定取得成功
+          headers:
+            Authorization:
+              $ref: '#/components/headers/Authorization'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MyUserBikeMaintenanceScheduleItem'
+                  message:
+                    type: string
+                    example: 点検予定取得成功
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+
   /api/v1/user-bike/bike/{my-user-bike-id}/fuel-insights:
     get:
       summary: ユーザー所有バイクの燃費インサイト取得
@@ -2278,11 +2334,14 @@ components:
           nullable: true
           maxLength: 500
           description: メモ
+        isFullTank:
+          type: boolean
+          description: '満タン給油かどうか（false: 継ぎ足し給油）'
         fuelEfficiency:
           type: number
           format: float
           nullable: true
-          description: 燃費（km/L）。初回給油など計算不可の場合はnull
+          description: 燃費（km/L）。継ぎ足し給油、または初回給油など計算不可の場合はnull
         pricePerLiter:
           type: number
           format: float
@@ -2314,6 +2373,10 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        isFullTank:
+          type: boolean
+          description: '満タン給油かどうか（false: 継ぎ足し給油）。未指定時はtrue（満タン）'
+          default: true
         memo:
           type: string
           nullable: true
@@ -2348,6 +2411,9 @@ components:
           type: number
           format: integer
           description: 合計価格（円）
+        isFullTank:
+          type: boolean
+          description: '満タン給油かどうか（false: 継ぎ足し給油）'
         memo:
           type: string
           nullable: true
@@ -2450,6 +2516,67 @@ components:
           type: boolean
           description: メンテナンス履歴更新後にユーザー所有バイクの総走行距離を更新するかどうか。更新する値が現在の総走行距離よりも小さい場合は更新されません。
           default: false
+
+    MyUserBikeMaintenanceScheduleLastRecord:
+      type: object
+      properties:
+        performedAt:
+          type: string
+          description: 直近の該当整備記録の実施日時（ISO 8601形式）
+        mileage:
+          type: integer
+          description: 直近の該当整備記録の走行距離（km）
+
+    MyUserBikeMaintenanceScheduleItem:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/MaintenanceType'
+        category:
+          $ref: '#/components/schemas/MaintenanceCategory'
+        typeName:
+          type: string
+          description: メンテナンス項目の表示名
+        categoryName:
+          type: string
+          description: カテゴリの表示名
+        basis:
+          type: string
+          nullable: true
+          enum:
+            - MILEAGE
+            - PERIOD
+          description: |-
+            採用した算出基準。走行距離・期間の両方が設定されている場合は
+            早く到来する方が採用される。算出不能（記録なし・推奨間隔未設定）の場合はnull
+        remainingMileage:
+          type: integer
+          nullable: true
+          description: 残り走行距離（km）。basisがMILEAGEの場合のみ非null。超過時は負値
+        dueDate:
+          type: string
+          nullable: true
+          description: 次回点検予定日（ISO 8601形式）。basisがPERIODの場合のみ非null
+        remainingDays:
+          type: integer
+          nullable: true
+          description: 次回点検予定日までの残り日数。basisがPERIODの場合のみ非null。超過時は負値
+        lastRecord:
+          allOf:
+            - $ref: '#/components/schemas/MyUserBikeMaintenanceScheduleLastRecord'
+          nullable: true
+          description: 算出根拠となった直近の整備記録。該当記録が無い場合はnull
+        status:
+          type: string
+          enum:
+            - OVERDUE
+            - UPCOMING
+            - OK
+            - NO_RECORD
+            - NO_INTERVAL
+          description: |-
+            点検予定のステータス。OVERDUE=超過, UPCOMING=まもなく, OK=余裕あり,
+            NO_RECORD=該当する整備記録なし, NO_INTERVAL=推奨間隔未設定
 
     MyUserBikeTouringDetail:
       type: object
@@ -3012,6 +3139,15 @@ components:
         - LIGHT
         - TURN_SIGNAL
         - HORN
+
+    MaintenanceCategory:
+      type: string
+      enum:
+        - BRAKE
+        - ENGINE
+        - TRANSMISSION
+        - TIRE
+        - ELECTRIC
 
   responses:
     Error400:

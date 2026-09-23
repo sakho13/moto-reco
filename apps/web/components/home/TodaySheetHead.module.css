@@ -1,0 +1,39 @@
+/*
+ * Issue #575「05 画面案 ─ PC」見出し罫。
+ * KPIカードにはせず、太い罫線1本で当月サマリと区切る。
+ */
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 2px solid var(--color-ink);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xl);
+  color: var(--color-ink);
+  letter-spacing: 0.06em;
+}
+
+.date {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-inkLight);
+  margin-left: var(--spacing-2);
+}
+
+.summary {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

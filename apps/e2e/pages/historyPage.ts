@@ -5,9 +5,9 @@ import { type Locator, type Page } from '@playwright/test'
  *
  * @remarks
  * /app/history に対応。
- * - BaseCard title="ヒストリー"
+ * - 見出し "ヒストリー"
  * - 空状態: "ヒストリーはまだありません"
- * - HistoryItemCard のリスト
+ * - 全バイク横断の記録一覧（`RecentRecordRow` の再利用。台帳の語彙）
  */
 export class HistoryPage {
   readonly page: Page

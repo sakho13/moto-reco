@@ -1,0 +1,59 @@
+/*
+ * Issue #575「05 画面案 ─ PC」オドメーター。
+ * 専用のmonoトークンが無いため、桁の位置揃えは font-variant-numeric の
+ * tabular-nums に任せ、本文書体（--font-family-body）で組む。
+ */
+.odo {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.14em;
+  color: var(--color-inkLight);
+  padding-bottom: var(--spacing-2);
+}
+
+.digits {
+  display: flex;
+  gap: 2px;
+}
+
+.plate {
+  display: inline-block;
+  min-width: 1ch;
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-2xl);
+  line-height: 1.2;
+  background: var(--color-ink);
+  color: var(--color-background);
+  padding: 2px var(--spacing-2);
+  border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.sep {
+  align-self: flex-end;
+  color: var(--color-inkLight);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  padding-bottom: 4px;
+}
+
+.unit {
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+  padding-bottom: var(--spacing-2);
+}
+
+.since {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  padding-bottom: var(--spacing-2);
+  white-space: nowrap;
+}

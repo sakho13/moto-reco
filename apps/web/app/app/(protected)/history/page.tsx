@@ -1,18 +1,21 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWRInfinite from 'swr/infinite'
 import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseAllBikesHistoryList,
   SuccessResponse,
 } from '@repo/shared-types'
-import { BaseCard } from '@repo/ui/baseCard'
 import styles from './page.module.css'
 import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
-import { HistoryItemCard } from '@/components/history/HistoryItemCard'
+import { RecentRecordRow } from '@/components/home/RecentRecordRow'
 import { authenticatedFetch } from '@/lib/api/client'
+import {
+  resolveSavedFuelLogEfficiencyReason,
+  type SavedFuelLogReferenceEntry,
+} from '@/lib/fuelLogSheet'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 const PAGE_SIZE = 10
@@ -50,6 +53,28 @@ function HistoryPage() {
   const canLoadMore = lastPageCount === PAGE_SIZE
   const isLoadingMore = isValidating && !isLoading && size > 0
 
+  // 「初回給油」／「前回が継ぎ足し」の判定は同一車両内でのmileage昇順の
+  // 直前ログを見る必要があるため、車両ごとに分けたmileage昇順の給油ログ一覧を
+  // 用意する（全車両横断ページのため、`RecentHistorySection` のように
+  // 単一車両のフィルタ済みリストをそのまま使えない）。
+  // ページング（1ページ10件）で対象より前のログが未取得の場合は、
+  // `resolveSavedFuelLogEfficiencyReason` の仕様どおり「初回給油」側に
+  // フォールバックする。
+  const fuelLogsByBikeMileageAsc = useMemo(() => {
+    const map = new Map<string, SavedFuelLogReferenceEntry[]>()
+    for (const item of historyItems) {
+      if (item.type !== 'FUEL_LOG') continue
+      const list = map.get(item.bikeId) ?? []
+      list.push(item.fuelLog)
+      map.set(item.bikeId, list)
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => a.mileage - b.mileage)
+    }
+    return map
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
+
   const sentinelRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!sentinelRef.current || !canLoadMore) return
@@ -65,65 +90,60 @@ function HistoryPage() {
     return () => observer.disconnect()
   }, [canLoadMore, isLoadingMore, setSize])
 
-  if (isLoading) {
-    return (
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-100">
-          <p className="text-lg">読み込み中...</p>
-        </div>
+  return (
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>ヒストリー</h1>
       </div>
-    )
-  }
 
-  if (error) {
-    return (
-      <div className="w-full max-w-2xl">
-        <div className={styles.errorCard}>
-          <h1 className={styles.errorTitle}>エラー</h1>
+      {isLoading ? (
+        <p className={styles.empty}>読み込み中...</p>
+      ) : error ? (
+        <div className={styles.errorBox}>
           <p className={styles.errorMessage}>
             {error instanceof ApiV1Error
               ? error.message
               : 'ヒストリーの取得に失敗しました'}
           </p>
         </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="w-full max-w-md">
-      <BaseCard title="ヒストリー">
-        {historyItems.length > 0 ? (
-          <div className={styles.historyList}>
-            {historyItems.map((item) => (
-              <HistoryItemCard
-                key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.touring.touringId}`}
-                item={item}
-                onClick={
-                  item.type === 'FUEL_LOG'
+      ) : historyItems.length > 0 ? (
+        <div className={styles.list}>
+          {historyItems.map((item) => (
+            <RecentRecordRow
+              key={`${item.type}-${item.occurredAt}-${item.type === 'FUEL_LOG' ? item.fuelLog.fuelLogId : item.touring.touringId}`}
+              item={item}
+              bikeName={item.bikeName}
+              efficiencyUnavailableReason={
+                item.type === 'FUEL_LOG'
+                  ? resolveSavedFuelLogEfficiencyReason(
+                      fuelLogsByBikeMileageAsc.get(item.bikeId) ?? [],
+                      item.fuelLog.fuelLogId
+                    )
+                  : undefined
+              }
+              onClick={
+                item.type === 'FUEL_LOG'
+                  ? () =>
+                      setEditingFuelLog({
+                        bikeId: item.bikeId,
+                        fuelLogId: item.fuelLog.fuelLogId,
+                      })
+                  : item.type === 'TOURING'
                     ? () =>
-                        setEditingFuelLog({
-                          bikeId: item.bikeId,
-                          fuelLogId: item.fuelLog.fuelLogId,
-                        })
-                    : item.type === 'TOURING'
-                      ? () =>
-                          router.push(
-                            `/app/my-bike/${item.bikeId}/tourings/${item.touring.touringId}`
-                          )
-                      : undefined
-                }
-              />
-            ))}
-            <div ref={sentinelRef} />
-            {isLoadingMore && (
-              <p className={styles.loadingMore}>読み込み中...</p>
-            )}
-          </div>
-        ) : (
-          <p className={styles.empty}>ヒストリーはまだありません</p>
-        )}
-      </BaseCard>
+                        router.push(
+                          `/app/my-bike/${item.bikeId}/tourings/${item.touring.touringId}`
+                        )
+                    : undefined
+              }
+            />
+          ))}
+          <div ref={sentinelRef} />
+          {isLoadingMore && <p className={styles.loadingMore}>読み込み中...</p>}
+        </div>
+      ) : (
+        <p className={styles.empty}>ヒストリーはまだありません</p>
+      )}
+
       {editingFuelLog && (
         <FuelLogEditModal
           bikeId={editingFuelLog.bikeId}

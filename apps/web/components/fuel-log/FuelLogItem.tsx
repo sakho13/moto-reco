@@ -5,13 +5,26 @@ import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import { formatDate } from '@repo/shared-utils'
 import styles from './FuelLogItem.module.css'
 import { ClickableListCard } from '@/components/ClickableListCard'
+import {
+  SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS,
+  type SavedFuelLogEfficiencyReason,
+} from '@/lib/fuelLogSheet'
 
 export interface FuelLogItemProps {
   fuelLog: ApiResponseFuelLogDetail
+  /**
+   * 燃費が算出できない満タン給油（`isFullTank: true` かつ `fuelEfficiency: null`）
+   * について、「初回給油」／「前回が継ぎ足し」のどちらの表示にするかの判定結果。
+   */
+  efficiencyUnavailableReason?: SavedFuelLogEfficiencyReason
   onEdit: (fuelLogId: string) => void
 }
 
-export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
+export const FuelLogItem = ({
+  fuelLog,
+  efficiencyUnavailableReason = 'no-previous-log',
+  onEdit,
+}: FuelLogItemProps) => {
   return (
     <ClickableListCard onClick={() => onEdit(fuelLog.fuelLogId)}>
       {/* 行1: メイン情報（燃費・総走行距離・日付） */}
@@ -22,8 +35,19 @@ export const FuelLogItem = ({ fuelLog, onEdit }: FuelLogItemProps) => {
               {fuelLog.fuelEfficiency.toFixed(1)}{' '}
               <span className={styles.unit}>km/L</span>
             </>
+          ) : !fuelLog.isFullTank ? (
+            <span className={styles.continuationRefuel}>
+              継ぎ足し
+              <span className={styles.continuationRefuelNote}>次回に繰越</span>
+            </span>
           ) : (
-            <span className={styles.initialRefuel}>初回給油</span>
+            <span className={styles.initialRefuel}>
+              {
+                SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS[
+                  efficiencyUnavailableReason
+                ]
+              }
+            </span>
           )}
         </div>
 

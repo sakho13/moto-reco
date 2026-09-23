@@ -20,7 +20,7 @@
   background-color: #10b981;
   color: white;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
   white-space: nowrap;
@@ -31,7 +31,7 @@
   color: var(--color-ink);
   opacity: 0.7;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
   white-space: nowrap;

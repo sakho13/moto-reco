@@ -1,0 +1,137 @@
+.container {
+  position: relative;
+}
+
+.trigger {
+  max-width: 11rem;
+}
+
+.triggerContent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: max-content;
+  min-width: 220px;
+  max-width: 280px;
+  padding: var(--spacing-1) 0;
+  background-color: var(--color-cloud);
+  border: 1px solid var(--color-cloudHover);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.optionList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  background: none;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+.option:hover {
+  background-color: var(--color-cloudHover);
+}
+
+.optionActive {
+  background-color: color-mix(in srgb, var(--color-product) 12%, transparent);
+  border-left: 3px solid var(--color-product);
+}
+
+.optionName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.optionMeta {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.divider {
+  height: 1px;
+  margin: var(--spacing-1) var(--spacing-2);
+  background-color: var(--color-cloudHover);
+}
+
+.addOption {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  background: none;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-product);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.addOption:hover:not(:disabled) {
+  background-color: var(--color-cloudHover);
+}
+
+.addOption:disabled {
+  color: var(--color-inkLight);
+  cursor: not-allowed;
+}
+
+.limitNote {
+  margin: 0;
+  padding: 0 var(--spacing-3) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+@media (max-width: 639px) {
+  .trigger {
+    max-width: 7.5rem;
+  }
+}
+
+/* 極小幅ではヘッダーの他要素（パンくず・通知・テーマ切り替え）と衝突するため、
+   アイコンのみの表示に切り詰める。車両名はaria-label／titleで参照できる */
+@media (max-width: 359px) {
+  .trigger {
+    max-width: none;
+  }
+
+  .name {
+    display: none;
+  }
+}
