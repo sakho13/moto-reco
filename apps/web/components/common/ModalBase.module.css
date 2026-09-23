@@ -27,6 +27,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  /*
+   * `margin-left: auto` で常に右端に固定する。`.header` の
+   * `justify-content: space-between` は2要素前提だが、`hideTitleOnDesktop` で
+   * 見出し（h2）が非表示（display: none）になり実質1要素になった場合でも、
+   * auto marginがある要素は space-between による配置より優先されるため、
+   * 見出しの有無に関わらず閉じるボタンの位置がずれない。
+   */
+  margin-left: auto;
   padding: 0.25rem;
   border-radius: var(--radius-md);
   color: var(--color-ink);
@@ -58,5 +66,25 @@
 
   .modalSm {
     max-width: 20rem;
+  }
+}
+
+/*
+ * PC幅（1024px〜）専用の広い変種。Issue #575「給油記入票（PC）」のように
+ * 2カラムのコンテンツを伝票の形で組む場合に使う。768〜1023pxは`.modal`と
+ * 同じ幅（28rem）のまま据え置き、1024px以降だけ広げる。
+ */
+@media (min-width: 1024px) {
+  .modalLg {
+    max-width: 960px;
+  }
+
+  /*
+   * `hideTitleOnDesktop` 指定時、PC幅では見出し（h2）を非表示にする
+   * （子要素側の見出しと二重表示になるのを防ぐ）。`dialog` のアクセシブルネームは
+   * `aria-label` で別途担保しているため、ここで消えても失われない。
+   */
+  .titleHiddenOnDesktop {
+    display: none;
   }
 }

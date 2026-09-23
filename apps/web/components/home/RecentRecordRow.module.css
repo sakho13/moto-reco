@@ -1,0 +1,153 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-2) 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--color-cloud);
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:disabled {
+  cursor: default;
+}
+
+.kpi {
+  flex-shrink: 0;
+  min-width: 4.5rem;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.kpiValue {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.kpiUnit {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.kpiNote {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-inkLight);
+}
+
+/*
+ * 継ぎ足し給油の表示（「継ぎ足し」＋「次回に繰越」）。
+ * `components/fuel-log/FuelLogItem.tsx` の `.continuationRefuel` /
+ * `.continuationRefuelNote` と同じ2行構成にして表記を揃える。
+ */
+.kpiNoteStack {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.kpiNoteSub {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * 複数車両を横断する一覧（/app/history）でのみ表示する車両名。
+ * ホーム「最近の記録」（アクティブ車両のみ）では bikeName を渡さないため描画されない。
+ */
+.bikeName {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-inkLight);
+}
+
+.meta {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.chevron {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-inkLight);
+}
+
+/*
+ * Issue #575「05 画面案 ─ PC」の記帳（台帳）。
+ * モバイルのDOM・テキストは変えず、PC幅でのみ「日付が左に立つ」体裁と
+ * 給油の内訳を追加する。
+ */
+.dateBadge {
+  display: none;
+}
+
+.ledgerDetail {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .dateBadge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    color: var(--color-inkLight);
+  }
+
+  .dateWeekday {
+    font-size: var(--font-size-xs);
+  }
+
+  .dateDay {
+    font-family: var(--font-family-display);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    color: var(--color-ink);
+  }
+
+  .ledgerDetail {
+    display: block;
+    margin: 1px 0 0;
+    font-size: var(--font-size-xs);
+    color: var(--color-inkLight);
+  }
+
+  .chevron {
+    display: none;
+  }
+}

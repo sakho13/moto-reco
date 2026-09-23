@@ -43,6 +43,51 @@
   text-align: center;
 }
 
+/* ===== rail: デスクトップサイドバーの横積みインデックス行 ===== */
+.navButton.rail {
+  width: 100%;
+  height: auto;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  border-bottom: 1px solid var(--color-cloudHover);
+}
+
+.navButton.rail:hover {
+  transform: none;
+}
+
+.navButton.rail .label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* 現在地は紙面（本文）と同じ背景にして、右端の境界が消えて見えるようにする */
+.navButton.rail.active {
+  background-color: var(--color-background);
+  color: var(--color-ink);
+  font-weight: var(--font-weight-bold);
+  margin-right: -1px;
+}
+
+.navButton.rail.active:hover {
+  background-color: var(--color-background);
+}
+
+/* タブレット幅（綴じ代を折りたたむ）: ラベルを隠しアイコンのみにする */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .navButton.rail {
+    justify-content: center;
+    padding: var(--spacing-3) 0;
+  }
+
+  .navButton.rail .label {
+    display: none;
+  }
+}
+
 /* アクセシビリティ: モーション削減 */
 @media (prefers-reduced-motion: reduce) {
   .navButton {

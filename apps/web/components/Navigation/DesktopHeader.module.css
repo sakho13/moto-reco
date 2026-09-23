@@ -7,7 +7,8 @@
   display: none;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem 0 6rem;
+  gap: var(--spacing-4);
+  padding: 0 var(--app-gutter) 0 calc(var(--app-sidebar-w) + var(--app-gutter));
   height: 3rem;
   background-color: color-mix(in srgb, var(--color-background) 80%, transparent);
   backdrop-filter: blur(12px);

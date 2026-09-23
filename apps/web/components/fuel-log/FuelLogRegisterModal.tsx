@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import useSWR, { mutate } from 'swr'
+import useSWR from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import type {
   ApiResponseFuelLogList,
@@ -16,11 +16,19 @@ import {
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost, authenticatedFetch } from '@/lib/api/client'
-import { mutateHistoryLists } from '@/lib/api/mutateHistory'
 import {
-  resolveSubmitPreviousMileage,
+  mutateActiveBikeList,
+  mutateFuelLogLists,
+  mutateHistoryLists,
+} from '@/lib/api/mutateHistory'
+import { getBikeDisplayName } from '@/lib/bike'
+import {
+  calculateAverageFuelEfficiency,
   shouldUpdateTotalMileage,
 } from '@/lib/fuelLogSheet'
+
+/** PC版「控え」の平均燃費に使う直近件数（「直近6回」という文言と対応させる） */
+const RECENT_FUEL_LOG_COUNT = 6
 
 interface FuelLogRegisterModalProps {
   bikeId: string
@@ -55,9 +63,13 @@ export function FuelLogRegisterModal({
     }
   )
 
+  // 直近N件を取得する（PC版控え欄の「平均より」比較用。燃費を算出できなかった
+  // ログは平均の対象外）。「前回給油」自体は `FuelLogRegisterSheet` が選択中の
+  // 給油日時に応じてサーバーへ直接問い合わせて解決するため、ここでは使わない
+  // （Issue #575 レビュー指摘: ライブ計器の表示と保存値の食い違い対策）。
   const { data: fuelLogs } = useSWR(
     bikeId
-      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?per-size=1&sort-order=desc`
+      ? `/api/v1/user-bike/bike/${bikeId}/fuel-logs?per-size=${RECENT_FUEL_LOG_COUNT}&sort-order=desc`
       : null,
     async (url) => {
       const response = await authenticatedFetch(url, { method: 'GET' })
@@ -73,7 +85,7 @@ export function FuelLogRegisterModal({
       return json.data
     }
   )
-  const previousFuelLog = fuelLogs?.[0] ?? null
+  const averageFuelEfficiency = calculateAverageFuelEfficiency(fuelLogs ?? [])
 
   const handleFormSubmit = async (values: FuelLogRegisterSheetSubmitValues) => {
     setError('')
@@ -81,11 +93,11 @@ export function FuelLogRegisterModal({
 
     try {
       const memo = values.memo.trim()
-      const previousMileage = resolveSubmitPreviousMileage({
-        previousLog: previousFuelLog,
-        totalMileage: bike?.totalMileage,
-        mileage: values.mileage,
-      })
+      // previousMileage は `FuelLogRegisterSheet` が選択中の給油日時（過去に
+      // 遡って記録するバックデート入力を含む）を基準にサーバーへ直接問い合わせて
+      // 解決済みの値をそのまま使う。ライブ計器・「前回の控え」パネルの表示に
+      // 使ったのと同じ解決結果のため、画面表示と保存値が食い違わない
+      // （Issue #575 レビュー指摘）。
       const updateTotalMileage = shouldUpdateTotalMileage(
         values.mileage,
         bike?.totalMileage
@@ -94,7 +106,7 @@ export function FuelLogRegisterModal({
       await apiPost(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`, {
         refueledAt: new Date(values.refueledAt),
         mileage: values.mileage,
-        previousMileage,
+        previousMileage: values.previousMileage,
         amount: values.amount,
         totalPrice: values.totalPrice,
         isFullTank: values.isFullTank,
@@ -108,9 +120,14 @@ export function FuelLogRegisterModal({
         is_full_tank: values.isFullTank,
       })
 
-      await mutate(`/api/v1/user-bike/bike/${bikeId}/fuel-logs`)
+      await mutateFuelLogLists(bikeId)
       await mutateHistoryLists()
-      toast.success('給油履歴を登録しました')
+      if (updateTotalMileage) {
+        // 総走行距離が更新された場合、ActiveBikeContext（ホームのODO計器等）が
+        // 参照するアクティブ車両一覧も再検証しないと古いODOが残ってしまう
+        await mutateActiveBikeList()
+      }
+      toast.success('給油を記録しました')
       onSuccess()
     } catch (err) {
       trackEvent('fuel_log_error', {
@@ -129,20 +146,18 @@ export function FuelLogRegisterModal({
   }
 
   return (
-    <ModalBase title="給油を記録" onClose={onClose}>
+    <ModalBase title="給油" onClose={onClose} size="lg" hideTitleOnDesktop>
       <FuelLogRegisterSheet
-        previousFuelLog={
-          previousFuelLog
-            ? {
-                mileage: previousFuelLog.mileage,
-                isFullTank: previousFuelLog.isFullTank,
-              }
-            : null
-        }
+        bikeId={bikeId}
+        vehicleName={bike ? getBikeDisplayName(bike) : null}
+        averageFuelEfficiency={averageFuelEfficiency}
+        recentAverageCount={RECENT_FUEL_LOG_COUNT}
+        currentTotalMileage={bike?.totalMileage}
         hasTouring={Boolean(touringId)}
         isSubmitting={isSubmitting}
         error={error}
         onSubmit={handleFormSubmit}
+        onClose={onClose}
       />
     </ModalBase>
   )

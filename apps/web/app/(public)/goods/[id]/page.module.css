@@ -43,13 +43,13 @@
 
 .manufacturer {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-inkLight);
 }
 
 .category {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-inkLight);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -96,7 +96,7 @@
   border-radius: var(--radius-md);
   font-family: var(--font-family-display);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-productInk);
   text-decoration: none;
   box-shadow:

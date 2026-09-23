@@ -17,6 +17,11 @@ type MaintenanceLogByItemSectionProps = {
   logs: ApiResponseMaintenanceLogDetail[]
   currentMileage?: number
   onRegister: () => void
+  /**
+   * PC（1024px〜）の台帳（Issue #575「05 画面案 ─ PC」）から使う場合に
+   * `true` を渡す。枠線・影付きのカードをやめ、罫線と余白だけの見開きに揃える。
+   */
+  noBorder?: boolean
 }
 
 const CATEGORY_ORDER = ['BRAKE', 'ENGINE', 'TRANSMISSION', 'TIRE', 'ELECTRIC']
@@ -72,6 +77,7 @@ export const MaintenanceLogByItemSection = ({
   logs,
   currentMileage,
   onRegister,
+  noBorder,
 }: MaintenanceLogByItemSectionProps) => {
   const historyMap = buildItemHistoryMap(logs)
 
@@ -82,7 +88,7 @@ export const MaintenanceLogByItemSection = ({
   }))
 
   return (
-    <BaseCard title="項目別メンテナンス状況">
+    <BaseCard title="項目別メンテナンス状況" noBorder={noBorder}>
       {logs.length === 0 ? (
         <div className={styles.emptyState}>
           <p>メンテナンス履歴がまだありません</p>

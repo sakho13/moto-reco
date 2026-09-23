@@ -72,7 +72,7 @@ function GoodsPage() {
               : 'グッズ一覧の取得に失敗しました'}
           </ErrorMessage>
           <Button onClick={() => router.push('/app/my-bike')}>
-            マイバイク一覧に戻る
+            愛車一覧に戻る
           </Button>
         </BaseCard>
       </div>
