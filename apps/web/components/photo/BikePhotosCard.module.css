@@ -37,6 +37,21 @@
   transition: opacity 0.15s;
 }
 
+/*
+ * 見た目は22px角のまま、タップ目標だけ44px角に広げる。
+ * `.photoWrapper` が overflow: hidden のため、中央寄せではなく写真の右上角に
+ * 合わせて（top/right を -4px ＝ `.deleteButton` のオフセット分だけ外へ）置き、
+ * 44px角すべてが写真の内側に収まるようにする。
+ */
+.deleteButton::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 44px;
+  height: 44px;
+}
+
 .photoWrapper:hover .deleteButton {
   opacity: 1;
 }
