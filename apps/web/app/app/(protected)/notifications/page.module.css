@@ -10,23 +10,10 @@
   margin: 0;
 }
 
-.readAllBtn {
-  font-size: 0.8125rem;
-  color: var(--color-product);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.readAllBtn:hover {
-  text-decoration: underline;
-}
-
 .empty {
   padding: 1.5rem;
   text-align: center;
-  color: var(--color-inkLight, #6b7280);
+  color: var(--color-inkLight);
   font-size: 0.875rem;
 }
 
@@ -75,13 +62,13 @@
 
 .itemBody {
   font-size: 0.8125rem;
-  color: var(--color-inkLight, #6b7280);
+  color: var(--color-inkLight);
   margin: 0 0 4px;
 }
 
 .itemTime {
   font-size: 0.75rem;
-  color: var(--color-inkLight, #9ca3af);
+  color: var(--color-inkLight);
   margin: 0;
 }
 

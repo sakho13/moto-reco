@@ -7,6 +7,7 @@ import {
   MopedTestAnswerOption,
 } from '@repo/shared-types'
 import { getCurrentDate, formatDateTime } from '@repo/shared-utils'
+import { Button } from '@repo/ui/button'
 import { HistorySection } from './HistorySection'
 import styles from './page.module.css'
 import { SwipeCardDeck } from './SwipeCardDeck'
@@ -199,13 +200,15 @@ export function MopedTestClient() {
           </p>
         )}
         {history.length > 0 && (
-          <button
+          <Button
             type="button"
+            variant="quiet"
+            size="sm"
+            aria-expanded={showHistory}
             onClick={onToggleHistory}
-            className={styles.historyToggleButton}
           >
             {showHistory ? '履歴を閉じる' : `履歴を見る（${history.length}件）`}
-          </button>
+          </Button>
         )}
       </header>
 
@@ -263,22 +266,19 @@ export function MopedTestClient() {
           </div>
 
           <footer className={styles.resultFooter}>
-            <button
-              type="button"
-              onClick={onReset}
-              className={styles.retryButton}
-            >
+            <Button type="button" variant="primary" onClick={onReset}>
               もう一度挑戦
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="quiet"
+              aria-expanded={showHistory}
               onClick={onToggleHistory}
-              className={styles.historyToggleButton}
             >
               {showHistory
                 ? '履歴を閉じる'
                 : `履歴を見る（${history.length}件）`}
-            </button>
+            </Button>
           </footer>
 
           {showHistory && (

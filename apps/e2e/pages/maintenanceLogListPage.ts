@@ -5,9 +5,22 @@ import { type Locator, type Page } from '@playwright/test'
  *
  * @remarks
  * /app/my-bike/{bikeId}/maintenance-logs に対応（日付順ビュー）。
+ *
+ * Issue #575「05 画面案 ─ PC」により、PC幅（1024px以上）ではカードの縦1列
+ * （`MaintenanceLogListSection`）ではなく台帳（`MaintenanceLedgerSection`）を
+ * 表示する。Playwrightの既定ビューポート（Desktop Chrome, 1280x720）はPC幅に
+ * 該当するため、このPOMは既定でPC版の台帳を対象にする。
+ *
+ * 注意: `display:none` の要素は Playwright の `getByRole` / `getByText` の
+ * マッチ対象から自動的には除外されない。モバイル用のカード
+ * （`MaintenanceLogItem`）とPC用の台帳の行（`MaintenanceLedgerList`）は同じ
+ * 履歴に対して同じ文言（メモなど）を含みうるため、ロケーターは必ず
+ * `maintenance-ledger-section` テストID配下に明示的にスコープしている
+ * （`fuelLogListPage.ts` と同じ方針）。
  */
 export class MaintenanceLogListPage {
   readonly page: Page
+  readonly ledgerSection: Locator
   readonly searchSection: Locator
   readonly searchInput: Locator
   readonly searchButton: Locator
@@ -16,7 +29,8 @@ export class MaintenanceLogListPage {
 
   constructor(page: Page) {
     this.page = page
-    this.searchSection = page.getByTestId('maintenance-log-search')
+    this.ledgerSection = page.getByTestId('maintenance-ledger-section')
+    this.searchSection = page.getByTestId('maintenance-ledger-search')
     this.searchInput = this.searchSection.getByRole('textbox', {
       name: 'メモで検索',
     })
@@ -26,7 +40,7 @@ export class MaintenanceLogListPage {
     this.clearButton = this.searchSection.getByRole('button', {
       name: 'クリア',
     })
-    this.noResultMessage = page.getByText(
+    this.noResultMessage = this.ledgerSection.getByText(
       '該当するメンテナンス履歴が見つかりませんでした'
     )
   }
@@ -47,8 +61,15 @@ export class MaintenanceLogListPage {
     await this.clearButton.click()
   }
 
-  /** メモ等（部分一致可）でメンテナンス履歴カードを取得する */
+  /**
+   * メモ等（部分一致可）でメンテナンス履歴の行（PC版の台帳）を取得する
+   *
+   * @remarks
+   * `display:none` のモバイル用カード（`MaintenanceLogItem`）も同じ文言を
+   * 含みうるため、台帳（`maintenance-ledger-section`）配下に明示的に
+   * スコープしている。
+   */
   maintenanceLogCard(pattern: string | RegExp): Locator {
-    return this.page.getByRole('button', { name: pattern })
+    return this.ledgerSection.getByRole('button', { name: pattern })
   }
 }

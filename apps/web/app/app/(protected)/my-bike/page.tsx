@@ -1,64 +1,57 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import useSWR from 'swr'
+import { useEffect } from 'react'
 import { Button } from '@repo/ui/button'
-import { MyBikeListSection } from '@/components/MyBikeListSection'
-import { apiGet } from '@/lib/api/client'
+import styles from './page.module.css'
 import { withAuth } from '@/lib/hoc/withAuth'
-import { useAuth } from '@/lib/hooks/useAuth'
-import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
+import { useActiveBike } from '@/lib/hooks/useActiveBike'
 
+/**
+ * 愛車（マイバイク）のエントリーポイント
+ *
+ * @remarks
+ * 「マイバイク」一覧は中継ページ化していた（Issue #575「02 所見」）ため廃止し、
+ * アクティブ車両の詳細（`/app/my-bike/{id}`）へ直接送る。複数台の切り替えは
+ * ヘッダーの `BikeSwitcher` に任せ、一覧はここでは再実装しない。
+ * `/app/my-bike/{id}` というURL自体はE2E・既存リンクが使うため維持する。
+ */
 function Page() {
   const router = useRouter()
-  const { isGuest } = useAuth()
+  const { activeBikeId, bikes, isLoading, error } = useActiveBike()
 
-  const { data: profile } = useSWR('/api/v1/user/profile', async (url) => {
-    const response = await apiGet(url)
-    return response.data
-  })
-  const isAdmin = profile?.role === 'ADMIN'
-
-  // MyBikeListSection と同じ SWR キーを使いキャッシュを共有する
-  const { data: bikesData, isLoading: bikesLoading } = useSWR(
-    '/api/v1/user-bike/bikes',
-    async (url) => {
-      const response = await apiGet(url)
-      return response.data
+  useEffect(() => {
+    if (!isLoading && activeBikeId) {
+      router.replace(`/app/my-bike/${activeBikeId}`)
     }
-  )
-  const bikes = bikesData?.bikes ?? []
-  const isAtGuestBikeLimit =
-    isGuest && !bikesLoading && bikes.length >= GUEST_ACCOUNT_LIMITS.BIKE
+  }, [isLoading, activeBikeId, router])
 
-  return (
-    <>
-      <div className="w-full max-w-md flex flex-col gap-2">
-        <div className="flex flex-row gap-2">
-          <Button
-            onClick={() => router.push('/app/bike/register')}
-            disabled={isAtGuestBikeLimit}
-          >
-            バイクを登録
+  if (!isLoading && error) {
+    return (
+      <div className={styles.page}>
+        <p className={styles.centerMessage}>バイク情報の取得に失敗しました</p>
+      </div>
+    )
+  }
+
+  if (!isLoading && bikes.length === 0) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.emptyState}>
+          <p className={styles.emptyMessage}>まだバイクが登録されていません</p>
+          <Button onClick={() => router.push('/app/bike/register')} size="sm">
+            最初のバイクを登録
           </Button>
-          {isAdmin && (
-            <Button variant="cloud" onClick={() => router.push('/app/goods')}>
-              グッズ一覧
-            </Button>
-          )}
         </div>
-        {isAtGuestBikeLimit && (
-          <p className="text-sm text-gray-500">
-            ゲストアカウントはバイクを{GUEST_ACCOUNT_LIMITS.BIKE}
-            台まで登録できます。
-          </p>
-        )}
       </div>
+    )
+  }
 
-      <div className="w-full max-w-lg">
-        <MyBikeListSection />
-      </div>
-    </>
+  // ロード中、またはアクティブ車両決定後のリダイレクト待ち
+  return (
+    <div className={styles.page}>
+      <p className={styles.centerMessage}>読み込み中...</p>
+    </div>
   )
 }
 

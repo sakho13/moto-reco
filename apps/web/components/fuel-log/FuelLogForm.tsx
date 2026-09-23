@@ -10,6 +10,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
+import styles from './FuelLogForm.module.css'
 
 export interface FuelLogFormData {
   refueledAt: string
@@ -18,6 +19,7 @@ export interface FuelLogFormData {
   amount: string
   totalPrice: string
   memo: string
+  isFullTank: boolean
   updateTotalMileage: boolean
 }
 
@@ -45,6 +47,7 @@ export const FuelLogForm = ({
     amount: '',
     totalPrice: '',
     memo: '',
+    isFullTank: true,
     updateTotalMileage: true,
   })
   const [isUpdateTotalMileageManual, setIsUpdateTotalMileageManual] =
@@ -80,14 +83,7 @@ export const FuelLogForm = ({
     Number(formData.mileage) <= totalMileage
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--spacing-4)',
-      }}
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col">
       <FormField label="給油日時" htmlFor="refueledAt" required>
         <DateTimeInput
           id="refueledAt"
@@ -141,6 +137,7 @@ export const FuelLogForm = ({
       <ToggleSection
         title={`前回の走行距離: ${formData.previousMileage.toLocaleString()} km（自動設定）`}
         defaultOpen={false}
+        className={styles.toggleSection}
       >
         <FormField
           label="前回の給油時走行距離 (km)"
@@ -184,6 +181,22 @@ export const FuelLogForm = ({
           required
           disabled={isSubmitting}
           placeholder="例: 10.5"
+        />
+      </FormField>
+
+      <FormField label="" htmlFor="isFullTank">
+        <Checkbox
+          id="isFullTank"
+          label="満タン給油（オフの場合は継ぎ足し給油）"
+          checked={formData.isFullTank}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              isFullTank: e.target.checked,
+            }))
+          }
+          disabled={isSubmitting}
+          helperText="継ぎ足し給油の燃費は、次回の満タン給油時にまとめて算出されます"
         />
       </FormField>
 

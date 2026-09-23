@@ -1,6 +1,7 @@
 import { expect, test } from '../../fixtures/authenticatedPage'
 import { registerTestBike } from '../../helpers/bikeHelper'
 import { registerTestTouringPlan } from '../../helpers/touringPlanHelper'
+import { TouringPlanListPage } from '../../pages/touringPlanListPage'
 
 test.describe('ツーリングプラン管理', () => {
   test('プランが無い場合、一覧に案内文と「プランを作成」ボタンが表示される', async ({
@@ -11,11 +12,12 @@ test.describe('ツーリングプラン管理', () => {
       nickname: '一覧テストバイク',
     })
 
-    await page.goto(`/app/my-bike/${myUserBikeId}/touring-plans`)
+    const touringPlanListPage = new TouringPlanListPage(page)
+    await touringPlanListPage.goto(myUserBikeId)
 
-    await expect(
-      page.getByText('ツーリングプランはまだ登録されていません')
-    ).toBeVisible({ timeout: 10_000 })
+    await expect(touringPlanListPage.noPlansMessage).toBeVisible({
+      timeout: 10_000,
+    })
     await expect(
       page.getByRole('button', { name: 'プランを作成' })
     ).toBeVisible()
@@ -42,10 +44,13 @@ test.describe('ツーリングプラン管理', () => {
       page.getByRole('heading', { name: '新ツーリングプラン' })
     ).toBeVisible()
 
-    await page.goto(`/app/my-bike/${myUserBikeId}/touring-plans`)
-    await expect(page.getByText('新ツーリングプラン')).toBeVisible({
-      timeout: 10_000,
-    })
+    const touringPlanListPage = new TouringPlanListPage(page)
+    await touringPlanListPage.goto(myUserBikeId)
+    await expect(touringPlanListPage.planRow('新ツーリングプラン')).toBeVisible(
+      {
+        timeout: 10_000,
+      }
+    )
   })
 
   test('プラン詳細ページでタイトルを編集できる', async ({
@@ -66,7 +71,13 @@ test.describe('ツーリングプラン管理', () => {
     )
 
     // 編集ボタン（最初のものがプラン情報の編集）をクリックして編集モーダルを開く
-    await page.getByRole('button', { name: '編集' }).first().click()
+    // exact指定必須: このテストのバイクニックネーム「編集テストバイク」自体が
+    // 「編集」を含むため、部分一致だとヘッダーの車両セレクタ（aria-label
+    // 「アクティブ車両: 編集テストバイク。...」）を誤って拾ってしまう
+    await page
+      .getByRole('button', { name: '編集', exact: true })
+      .first()
+      .click()
     await expect(
       page.getByRole('heading', { name: 'プランを編集' })
     ).toBeVisible({ timeout: 5_000 })

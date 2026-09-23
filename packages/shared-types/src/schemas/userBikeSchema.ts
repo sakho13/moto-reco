@@ -35,6 +35,7 @@ export const UserBikeRegisterRequestSchema = z
       .date({
         invalid_type_error: '購入日は日付形式で指定してください',
       })
+      .nullable()
       .optional(),
     purchasePrice: z
       .number({ invalid_type_error: '購入価格は数値で指定してください' })

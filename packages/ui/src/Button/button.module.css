@@ -4,18 +4,17 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-2);
+  /* button 要素は font-family を継承しない */
   font-family: inherit;
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-tight);
-  border: none;
+  /* 枠線を持つバリアントと総高を揃えるため、塗りのバリアントも同じ幅の透明枠を持つ */
+  border: 1.5px solid transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  /*
-   * transform は押し込みの手応えに直結するため、`all` ではなく個別に短く指定する。
-   * 色の変化だけ通常速度、動きは即応させる。
-   */
   transition:
     background-color var(--transition-base),
+    border-color var(--transition-base),
     color var(--transition-base),
     transform var(--transition-fast),
     box-shadow var(--transition-fast);
@@ -32,9 +31,8 @@
   cursor: not-allowed;
 }
 
-/* ===== Variants ===== */
+/* ===== Variants（塗り） ===== */
 
-/* Primary */
 .button.primary {
   background-color: var(--color-product);
   color: var(--color-productInk);
@@ -44,7 +42,6 @@
   background-color: var(--color-productHover);
 }
 
-/* Danger */
 .button.danger {
   background-color: var(--color-danger);
   color: var(--color-dangerInk);
@@ -54,7 +51,6 @@
   background-color: var(--color-dangerHover);
 }
 
-/* Social */
 .button.social {
   background-color: var(--color-social);
   color: var(--color-socialInk);
@@ -64,7 +60,6 @@
   background-color: var(--color-socialHover);
 }
 
-/* Cloud */
 .button.cloud {
   background-color: var(--color-cloud);
   color: var(--color-ink);
@@ -74,27 +69,97 @@
   background-color: var(--color-cloudHover);
 }
 
+/* ===== Variants（枠線） ===== */
+
+/*
+ * success / warning には対になるインク色トークンが無いため塗りにできない。
+ * 地色の面 + アクセントの枠線 + アクセントの文字で構成する
+ * （ErrorMessage / GuestBanner と同じ様式）。
+ */
+.button.success {
+  background-color: var(--color-background);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.button.success:hover:not(:disabled) {
+  background-color: oklch(from var(--color-success) l c h / 0.12);
+  border-color: var(--color-successHover);
+}
+
+/* 文字色は warning ではなく warningActive。ライトテーマの warning は地色に対して 2.6:1 しかない */
+.button.warning {
+  background-color: var(--color-background);
+  border-color: var(--color-warning);
+  color: var(--color-warningActive);
+}
+
+.button.warning:hover:not(:disabled) {
+  background-color: oklch(from var(--color-warning) l c h / 0.12);
+  border-color: var(--color-warningHover);
+}
+
+/*
+ * 弱いアクション（並び替え・絞り込み・チップ・タブ・アイコン操作）用。
+ * 入力欄（下線のみ・角丸なし）と紛れないよう、四辺の枠線を必ず持たせる。
+ */
+.button.quiet {
+  background-color: transparent;
+  border-color: var(--color-cloudHover);
+  color: var(--color-inkLight);
+}
+
+.button.quiet:hover:not(:disabled) {
+  background-color: var(--color-cloud);
+  border-color: var(--color-cloudActive);
+  color: var(--color-ink);
+}
+
+/* 選択中のチップ・タブ。呼び出し側は aria-pressed を指定する */
+.button.quiet[aria-pressed='true'] {
+  background-color: var(--color-cloud);
+  border-color: var(--color-cloudActive);
+  color: var(--color-ink);
+  font-weight: var(--font-weight-bold);
+}
+
 /* ===== Outline Modifier ===== */
 
 .button.outline {
   background-color: transparent;
-  border: 1.5px solid currentColor;
+  border-color: currentColor;
 }
 
-.button.outline:hover:not(:disabled) {
+.button.primary.outline {
+  color: var(--color-product);
+}
+
+.button.primary.outline:hover:not(:disabled) {
+  background-color: oklch(from var(--color-product) l c h / 0.12);
+}
+
+.button.danger.outline {
+  color: var(--color-danger);
+}
+
+.button.danger.outline:hover:not(:disabled) {
+  background-color: oklch(from var(--color-danger) l c h / 0.12);
+}
+
+.button.social.outline {
+  color: var(--color-social);
+}
+
+.button.social.outline:hover:not(:disabled) {
+  background-color: oklch(from var(--color-social) l c h / 0.12);
+}
+
+.button.cloud.outline:hover:not(:disabled) {
   background-color: var(--color-cloud);
 }
 
-.button.primary.outline { color: var(--color-product); }
-.button.danger.outline  { color: var(--color-danger); }
-.button.social.outline  { color: var(--color-social); }
-
 /* ===== 塗装された金属の質感 ===== */
 
-/*
- * 上面のハイライトと下端の厚みで、塗装されたパネルに見せる。
- * outline は板ではなく罫線の表現なので、この質感は適用しない。
- */
 .button.primary:not(.outline),
 .button.danger:not(.outline),
 .button.social:not(.outline) {
@@ -114,14 +179,17 @@
     0 2px 0 var(--color-cloudActive);
 }
 
-/* 押すと下端の厚みが潰れて沈み込む */
-.button:active:not(:disabled):not(.outline) {
-  transform: translateY(2px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+.button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
-.button.outline:active:not(:disabled) {
-  transform: translateY(1px);
+/* 厚みを持つ塗りのバリアントだけ、下端が潰れる分だけ深く沈む */
+.button.primary:not(.outline):active:not(:disabled),
+.button.danger:not(.outline):active:not(:disabled),
+.button.social:not(.outline):active:not(:disabled),
+.button.cloud:not(.outline):active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -136,28 +204,27 @@
 
 /* ===== Sizes ===== */
 
-/* Small */
+/* 縦横の padding から枠線 1.5px を差し引き、枠線の有無で総寸が変わらないようにする */
+
 .button.sm {
-  padding: var(--spacing-2) var(--spacing-3);
+  padding: calc(var(--spacing-2) - 1.5px) calc(var(--spacing-3) - 1.5px);
   font-size: var(--font-size-sm);
   min-height: 2rem;
 }
 
-/* Medium (default) */
+/* 既定サイズ。min-height は入力コントロール（field.module.css）と同じ 44px */
 .button.md {
-  padding: var(--spacing-3) var(--spacing-4);
+  padding: calc(var(--spacing-3) - 1.5px) calc(var(--spacing-4) - 1.5px);
   font-size: var(--font-size-md);
-  min-height: 2.5rem;
+  min-height: 2.75rem;
 }
 
-/* Large */
 .button.lg {
-  padding: var(--spacing-4) var(--spacing-6);
+  padding: calc(var(--spacing-4) - 1.5px) calc(var(--spacing-6) - 1.5px);
   font-size: var(--font-size-lg);
   min-height: 3rem;
 }
 
-/* Icon */
 .button.icon {
   padding: var(--spacing-3);
   width: 3rem;
@@ -165,7 +232,19 @@
   flex-shrink: 0;
 }
 
-/* ===== Full Width ===== */
+/* 行内・ヘッダー内のアイコン操作用 */
+.button.iconSm {
+  padding: var(--spacing-1);
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+}
+
+/* ===== Shape / Width Modifiers ===== */
+
+.button.pill {
+  border-radius: var(--radius-full);
+}
 
 .button.fullWidth {
   width: 100%;
@@ -181,7 +260,6 @@
   opacity: 0;
 }
 
-/* Spinner */
 .spinner {
   position: absolute;
   display: flex;
@@ -195,7 +273,8 @@
   animation: spin 1s linear infinite;
 }
 
-.button.sm .spinnerSvg {
+.button.sm .spinnerSvg,
+.button.iconSm .spinnerSvg {
   width: 1rem;
   height: 1rem;
 }
@@ -213,7 +292,6 @@
   opacity: 0.75;
 }
 
-/* Spinner Animation */
 @keyframes spin {
   from {
     transform: rotate(0deg);

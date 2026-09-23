@@ -13,6 +13,7 @@ import { Input } from '@repo/ui/input'
 import { Select } from '@repo/ui/select'
 import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
+import styles from './PlanSpotEditForm.module.css'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { trackEvent } from '@/lib/analytics'
@@ -244,7 +245,7 @@ export function PlanSpotEditForm({
             href={routeLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-blue-600 underline"
+            className={`text-sm underline ${styles.externalLink}`}
           >
             Googleマップで経路を確認
           </a>
@@ -328,7 +329,7 @@ export function PlanSpotEditForm({
           </div>
         </FormField>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className={`text-sm ${styles.errorText}`}>{error}</p>}
 
         <Button
           type="submit"

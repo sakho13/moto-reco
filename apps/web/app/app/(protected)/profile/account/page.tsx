@@ -7,6 +7,7 @@ import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { Textarea } from '@repo/ui/textarea'
+import styles from './page.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
@@ -111,7 +112,7 @@ function AccountPage() {
               <p
                 style={{
                   fontSize: 'var(--font-size-sm)',
-                  color: 'var(--color-muted-foreground)',
+                  color: 'var(--color-inkLight)',
                 }}
               >
                 退会理由を教えてください（今後のサービス改善に活用します）
@@ -148,7 +149,7 @@ function AccountPage() {
               <p
                 style={{
                   fontSize: 'var(--font-size-sm)',
-                  color: 'var(--color-muted-foreground)',
+                  color: 'var(--color-inkLight)',
                 }}
               >
                 退会日から30日間は、ご登録のメールアドレスに送信される案内メールから復帰できます。30日を過ぎるとアカウント情報は完全に削除され、復帰できなくなります。
@@ -186,11 +187,11 @@ function AccountPage() {
       <BaseCard title="アカウント認証">
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500">認証方式</span>
+            <span className={styles.itemLabel}>認証方式</span>
             <span>{providerLabel}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">メールアドレス</span>
+            <span className={styles.itemLabel}>メールアドレス</span>
             <span>{user?.email ?? '-'}</span>
           </div>
         </div>
@@ -199,7 +200,7 @@ function AccountPage() {
       {!isGuest && (
         <BaseCard title="退会">
           <div className="flex flex-col gap-3 text-sm">
-            <p style={{ color: 'var(--color-muted-foreground)' }}>
+            <p style={{ color: 'var(--color-inkLight)' }}>
               退会すると、すべてのデータが利用できなくなります。30日間は復帰可能です。
             </p>
             <Button variant="danger" outline onClick={handleOpenQuitModal}>

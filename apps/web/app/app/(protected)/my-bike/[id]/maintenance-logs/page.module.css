@@ -1,30 +1,102 @@
 .viewToggle {
   display: flex;
-  border: 1px solid var(--color-cloud);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  gap: var(--spacing-1);
 }
 
 .toggleButton {
   flex: 1;
-  padding: var(--spacing-2) var(--spacing-4);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+}
+
+/*
+ * ヘッダー操作列（戻る・メンテナンスを登録）とビュー切替タブ。PC（1024px〜）では
+ * 下の `.listLayout` と同じ最大幅に揃える。給油履歴（`fuel-logs/page.module.css`）
+ * と同じ `--app-page-w` の80%を使い、改修済み画面どうしで右端の基準を揃える。
+ */
+.topBar {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .topBar {
+    max-width: calc(var(--app-page-w) * 0.8);
+  }
+}
+
+.fallback {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .fallback {
+    max-width: calc(var(--app-page-w) * 0.8);
+  }
+}
+
+.loadingBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25rem;
+}
+
+.loadingText {
+  font-size: var(--font-size-lg);
   color: var(--color-ink);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
-  opacity: 0.6;
 }
 
-.toggleButton:hover {
-  background-color: var(--color-cloud);
-  opacity: 1;
+.errorActions {
+  margin-bottom: var(--spacing-4);
 }
 
-.toggleButton.active {
-  background-color: var(--color-primary);
-  color: white;
-  opacity: 1;
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+}
+
+.errorTitle {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  margin: 0;
+  color: var(--color-inkLight);
+}
+
+.listLayout {
+  width: 100%;
+}
+
+/* モバイル/タブレットのみ表示（カードの縦1列。PCでは台帳に差し替える） */
+.mobileOnly {
+}
+
+@media (min-width: 1024px) {
+  .mobileOnly {
+    display: none;
+  }
+}
+
+/* PC（1024px〜）: メンテナンスの台帳（Issue #575「05 画面案 ─ PC」） */
+.desktopOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktopOnly {
+    display: block;
+  }
+
+  .topBar,
+  .listLayout {
+    max-width: calc(var(--app-page-w) * 0.8);
+  }
 }

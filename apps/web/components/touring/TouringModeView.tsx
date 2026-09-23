@@ -320,13 +320,17 @@ export const TouringModeView = ({
       <div className={styles.container} data-testid="touring-mode-view">
         {/* 右上: ツーリング終了ボタン */}
         <div className={styles.endCornerArea}>
-          <button
+          <Button
+            type="button"
+            variant="danger"
+            outline
+            size="sm"
+            className={styles.endCornerButton}
             onClick={handleOpenEndMileageModal}
             disabled={isLoading}
-            className={styles.endCornerButton}
           >
             {isLoading ? '終了中...' : 'ツーリングを終了'}
-          </button>
+          </Button>
         </div>
 
         {/* バイク名 */}
@@ -418,33 +422,42 @@ export const TouringModeView = ({
 
           <div className={styles.bottomRow}>
             {currentBreak ? (
-              <button
+              <Button
+                type="button"
+                variant="quiet"
+                size="sm"
+                className={styles.bottomRowButton}
                 onClick={handleQuickBreakEnd}
                 disabled={isBreakLoading || isLoading}
-                className={styles.breakButton}
               >
                 <Timer size={15} />
                 {isBreakLoading ? '...' : '休憩を終了'}
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
+                type="button"
+                variant="quiet"
+                size="sm"
+                className={styles.bottomRowButton}
                 onClick={handleQuickBreakStart}
                 disabled={isBreakLoading || isLoading || spotLoading}
-                className={styles.breakButton}
               >
                 <Coffee size={15} />
                 {isBreakLoading ? '...' : '休憩を始める'}
-              </button>
+              </Button>
             )}
 
-            <button
+            <Button
+              type="button"
+              variant="quiet"
+              size="sm"
+              className={styles.bottomRowButton}
               onClick={() => setShowFuelLogModal(true)}
               disabled={isLoading}
-              className={styles.fuelButton}
             >
               <Fuel size={15} />
               給油を記録
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -600,7 +613,7 @@ export const TouringModeView = ({
                 size="md"
                 disabled={spotLoading || geoStatus === 'loading'}
               >
-                {spotLoading ? '記録中...' : '記録する'}
+                {spotLoading ? '記録中...' : '記録'}
               </Button>
             </div>
           </div>

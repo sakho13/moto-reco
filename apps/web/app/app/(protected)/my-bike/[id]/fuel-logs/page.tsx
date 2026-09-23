@@ -13,8 +13,10 @@ import type {
 import { Button } from '@repo/ui/button'
 import { FuelEfficiencyChart } from '@repo/ui/fuelEfficiencyChart'
 import { Select } from '@repo/ui/select'
-import type { SelectOption } from '@repo/ui/select'
 import styles from './page.module.css'
+import { BikeCarteControls } from '@/components/bike/BikeCarteControls'
+import { BikeFuelGraphSection } from '@/components/bike/BikeFuelGraphSection'
+import { FuelLedgerSection } from '@/components/bike/FuelLedgerSection'
 import { InfoBox } from '@/components/bike/InfoBox'
 import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
 import { FuelLogListSection } from '@/components/fuel-log/FuelLogListSection'
@@ -22,7 +24,7 @@ import { FuelLogRegisterModal } from '@/components/fuel-log/FuelLogRegisterModal
 import { authenticatedFetch } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
+import { FUEL_LOG_PERIOD_OPTIONS, GUEST_ACCOUNT_LIMITS } from '@/lib/statics'
 
 function FuelLogsPage() {
   const params = useParams()
@@ -30,16 +32,16 @@ function FuelLogsPage() {
   const { isGuest } = useAuth()
   const bikeId = params.id as string
   const [chartPeriod, setChartPeriod] = useState<FuelLogPeriod>('latest-year')
+  // PC（1024px〜）の「燃費の推移」（`BikeCarteControls` の満タンフィルタ）専用。
+  // モバイルの角丸カード版グラフには満タンフィルタが無いため影響しない。
+  const [chartFullTankOnly, setChartFullTankOnly] = useState(false)
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
   const [editingFuelLogId, setEditingFuelLogId] = useState<string | null>(null)
   const [keyword, setKeyword] = useState('')
 
-  const chartPeriodOptions: SelectOption[] = [
-    { value: 'latest-year', label: '最新の履歴から1年' },
-    { value: 'latest-month', label: '最新の履歴から1ヶ月' },
-    { value: 'past-year', label: '現在日時から直近1年' },
-    { value: 'past-month', label: '現在日時から直近1ヶ月' },
-  ]
+  // 愛車カルテ（`BikeCarteControls`）・台帳（`FuelLedgerSection`）と共通の
+  // 選択肢（`lib/statics.ts` を単一の情報源にし、表記ずれを防ぐ）
+  const chartPeriodOptions = FUEL_LOG_PERIOD_OPTIONS
 
   const fetchFuelLogs = async (url: string) => {
     const response = await authenticatedFetch(url, { method: 'GET' })
@@ -97,9 +99,9 @@ function FuelLogsPage() {
 
   if (isLoading && !data) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-100">
-          <p className="text-lg">読み込み中...</p>
+      <div className={styles.fallback}>
+        <div className={styles.loadingBox}>
+          <p className={styles.loadingText}>読み込み中...</p>
         </div>
       </div>
     )
@@ -107,8 +109,8 @@ function FuelLogsPage() {
 
   if (error) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="mb-4">
+      <div className={styles.fallback}>
+        <div className={styles.errorActions}>
           <Button
             onClick={() => router.push(`/app/my-bike/${bikeId}`)}
             variant="cloud"
@@ -117,15 +119,15 @@ function FuelLogsPage() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">
+        <div className={styles.errorBox}>
+          <h1 className={styles.errorTitle}>エラー</h1>
+          <p className={styles.errorMessage}>
             {error instanceof ApiV1Error
               ? error.message
               : '給油履歴の取得に失敗しました'}
           </p>
           <Button onClick={() => router.push(`/app/my-bike/${bikeId}`)}>
-            バイク詳細に戻る
+            愛車に戻る
           </Button>
         </div>
       </div>
@@ -141,10 +143,16 @@ function FuelLogsPage() {
 
   const chartFuelLogs = chartData || []
 
-  // 有効な燃費データが2件以上あるかチェック
+  // 有効な燃費データが2件以上あるかチェック（モバイルの角丸カード版グラフ用）
   const validChartFuelLogs = chartFuelLogs.filter(
     (log) => log.fuelEfficiency !== null
   )
+
+  // PC（1024px〜）の「燃費の推移」（`BikeFuelGraphSection`）用。満タンフィルタは
+  // 愛車カルテと同じ `BikeCarteControls` から適用する（モバイル版グラフには無い）。
+  const desktopChartFuelLogs = chartFullTankOnly
+    ? chartFuelLogs.filter((log) => log.isFullTank)
+    : chartFuelLogs
 
   return (
     <>
@@ -171,7 +179,7 @@ function FuelLogsPage() {
         />
       )}
 
-      <div className="w-full max-w-md flex flex-col gap-2">
+      <div className={`${styles.topBar} flex flex-col gap-2`}>
         <div className="flex flex-row gap-2">
           <Button
             onClick={() => router.push(`/app/my-bike/${bikeId}`)}
@@ -185,7 +193,7 @@ function FuelLogsPage() {
             variant="primary"
             disabled={isAtGuestFuelLimit}
           >
-            給油履歴を登録
+            給油を記録
           </Button>
         </div>
         {isGuest && !isLoading && (
@@ -200,45 +208,72 @@ function FuelLogsPage() {
       <div className={styles.pageLayout}>
         {/* 左カラム（モバイルでは上）: グラフ */}
         <div className={styles.chartSection}>
-          <div className={styles.chartControls}>
-            <Select
-              id="chart-period"
-              options={chartPeriodOptions}
-              value={chartPeriod}
-              onChange={(event) =>
-                setChartPeriod(event.target.value as FuelLogPeriod)
-              }
-            />
+          {/*
+            モバイル/タブレット（〜1023px）: 既存の角丸カード＋内蔵見出し
+            「燃費推移グラフ」のまま変更しない。
+          */}
+          <div className={styles.mobileOnly}>
+            <div className={styles.chartControls}>
+              <Select
+                id="chart-period"
+                options={chartPeriodOptions}
+                value={chartPeriod}
+                onChange={(event) =>
+                  setChartPeriod(event.target.value as FuelLogPeriod)
+                }
+              />
+            </div>
+            {isChartLoading ? (
+              <div className={styles.chartPlaceholder}>
+                <p>燃費グラフを読み込み中...</p>
+              </div>
+            ) : chartError ? (
+              <div className={styles.chartPlaceholder}>
+                <p>燃費グラフの取得に失敗しました</p>
+              </div>
+            ) : validChartFuelLogs.length >= 2 ? (
+              <FuelEfficiencyChart fuelLogs={chartFuelLogs} />
+            ) : (
+              <div className={styles.chartPlaceholder}>
+                <p>グラフ表示には2回以上の給油履歴が必要です</p>
+              </div>
+            )}
           </div>
-          {isChartLoading ? (
-            <div className={styles.chartPlaceholder}>
-              <p>燃費グラフを読み込み中...</p>
-            </div>
-          ) : chartError ? (
-            <div className={styles.chartPlaceholder}>
-              <p>燃費グラフの取得に失敗しました</p>
-            </div>
-          ) : validChartFuelLogs.length >= 2 ? (
-            <FuelEfficiencyChart fuelLogs={chartFuelLogs} />
-          ) : (
-            <div className={styles.chartPlaceholder}>
-              <p>グラフ表示には2回以上の給油履歴が必要です</p>
-            </div>
-          )}
+
+          {/*
+            PC（1024px〜）: 愛車カルテの「燃費の推移」（方眼紙・`BikeCarteControls`）
+            と同じ見た目・見出しに揃える。同じ内容が2つの見た目・2つの名称で
+            存在していた不一致を解消する。
+          */}
+          <div className={styles.desktopOnly}>
+            <BikeCarteControls
+              period={chartPeriod}
+              onPeriodChange={setChartPeriod}
+              fullTankOnly={chartFullTankOnly}
+              onFullTankOnlyChange={setChartFullTankOnly}
+            />
+            <BikeFuelGraphSection fuelLogs={desktopChartFuelLogs} />
+          </div>
         </div>
 
-        {/* 右カラム（モバイルでは下）: リスト */}
+        {/* 右カラム（モバイルでは下）: リスト。PC（1024px〜）は台帳に差し替える */}
         <div className={styles.listSection}>
-          <FuelLogListSection
-            fuelLogs={fuelLogs}
-            onEdit={handleEdit}
-            onRegister={handleRegister}
-            onLoadMore={handleLoadMore}
-            canLoadMore={canLoadMore}
-            isLoadingMore={isLoadingMore}
-            onSearch={handleSearch}
-            isSearchActive={keyword.length > 0}
-          />
+          <div className={styles.mobileOnly}>
+            <FuelLogListSection
+              fuelLogs={fuelLogs}
+              onEdit={handleEdit}
+              onRegister={handleRegister}
+              onLoadMore={handleLoadMore}
+              canLoadMore={canLoadMore}
+              isLoadingMore={isLoadingMore}
+              onSearch={handleSearch}
+              isSearchActive={keyword.length > 0}
+            />
+          </div>
+
+          <div className={styles.desktopOnly}>
+            <FuelLedgerSection bikeId={bikeId} onEdit={handleEdit} />
+          </div>
         </div>
       </div>
     </>

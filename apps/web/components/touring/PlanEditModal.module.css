@@ -1,0 +1,27 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.divider {
+  margin: 0;
+  border: none;
+  border-top: 1px solid var(--color-cloud);
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.confirmText {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+}
+
+.confirmActions {
+  display: flex;
+  gap: var(--spacing-2);
+}

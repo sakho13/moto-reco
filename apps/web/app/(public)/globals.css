@@ -20,18 +20,6 @@ a {
   text-decoration: none;
 }
 
-.imgDark {
-  display: none;
-}
-
-html[data-theme-mode='dark'] .imgLight {
-  display: none;
-}
-
-html[data-theme-mode='dark'] .imgDark {
-  display: unset;
-}
-
 .public-page-container {
   color: var(--color-ink);
   background: var(--color-background);

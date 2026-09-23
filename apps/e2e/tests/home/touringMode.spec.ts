@@ -46,10 +46,8 @@ test.describe('ツーリング中TOPページ（全画面モード）', () => {
       page.locator('[data-testid="touring-mode-view"]')
     ).toBeVisible()
 
-    // 通常セクション（ツーリング開始グリッド）は表示されない
-    await expect(
-      page.locator('[data-testid="touring-section"]')
-    ).not.toBeVisible()
+    // 通常セクション（主アクション）は表示されない
+    await expect(page.locator('[data-testid="home-actions"]')).not.toBeVisible()
   })
 
   test('ツーリング中に「ツーリングを終了」ボタンが表示される', async ({
@@ -100,7 +98,7 @@ test.describe('ツーリング中TOPページ（全画面モード）', () => {
 
     await page.reload()
 
-    // 通常のホームページに戻る（touring-section が表示される）
-    await expect(page.locator('[data-testid="touring-section"]')).toBeVisible()
+    // 通常のホームページに戻る（home-actions が表示される）
+    await expect(page.locator('[data-testid="home-actions"]')).toBeVisible()
   })
 })

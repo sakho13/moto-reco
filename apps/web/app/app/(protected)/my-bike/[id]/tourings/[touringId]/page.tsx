@@ -149,7 +149,9 @@ function TouringDetailPage() {
           </Button>
         </div>
         <div className={styles.card}>
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
+          <h1 className={`text-2xl font-bold mb-4 ${styles.errorTitle}`}>
+            エラー
+          </h1>
           <p className={`mb-4 ${styles.bodyText}`}>
             {touringError instanceof ApiV1Error
               ? touringError.message
@@ -445,14 +447,16 @@ function TouringDetailPage() {
     <div className={styles.card}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">スポット・休憩</h2>
-        <button
+        <Button
+          type="button"
+          variant="quiet"
+          size="iconSm"
           onClick={() => setAddModalType('SPOT')}
-          className={styles.editButton}
           aria-label="スポットを追加"
           title="スポット・休憩を追加"
         >
           ＋
-        </button>
+        </Button>
       </div>
 
       {touring?.status === 'STARTED' && (
@@ -462,22 +466,27 @@ function TouringDetailPage() {
               <span className={styles.breakBannerText}>
                 休憩中 {formatVisitedAt(currentBreak.arrivedAt)}〜
               </span>
-              <button
+              <Button
+                type="button"
+                variant="warning"
+                size="sm"
+                className={styles.breakEndButton}
                 onClick={handleQuickBreakEnd}
                 disabled={isBreakLoading}
-                className={styles.breakEndButton}
               >
                 休憩終了
-              </button>
+              </Button>
             </div>
           ) : (
-            <button
+            <Button
+              type="button"
+              variant="warning"
+              fullWidth
               onClick={handleQuickBreakStart}
               disabled={isBreakLoading}
-              className={styles.breakStartButton}
             >
               休憩を始める
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -519,21 +528,27 @@ function TouringDetailPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold truncate">{touring.title}</h1>
               <span className={statusBadgeClass}>{statusLabel}</span>
-              <button
+              <Button
+                type="button"
+                variant="quiet"
+                size="iconSm"
+                className={styles.iconButton}
                 onClick={() => setIsEditModalOpen(true)}
-                className={styles.editButton}
                 aria-label="編集"
               >
                 <EditIcon />
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
+                variant="quiet"
+                size="iconSm"
+                className={styles.iconButton}
                 onClick={() => setIsFuelLogLinkModalOpen(true)}
-                className={styles.editButton}
                 aria-label="給油履歴の紐づけ"
                 title="給油履歴の紐づけ"
               >
                 <FuelIcon />
-              </button>
+              </Button>
             </div>
             <p className={`text-xs mt-1 ${styles.mutedText}`}>
               {formatDate(touring.startDate)} → {formatDate(touring.endDate)}
@@ -582,7 +597,6 @@ function TouringDetailPage() {
                 touringId={touringId}
                 cardClassName={styles.card}
                 mutedTextClassName={styles.mutedText}
-                editButtonClassName={styles.editButton}
               />
             )}
           </div>
@@ -595,7 +609,6 @@ function TouringDetailPage() {
               touringId={touringId}
               cardClassName={styles.card}
               mutedTextClassName={styles.mutedText}
-              editButtonClassName={styles.editButton}
             />
           )}
         </div>

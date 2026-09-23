@@ -12,6 +12,7 @@ export async function createTestFuelLog(
     previousMileage?: number
     amount: number
     totalPrice: number
+    isFullTank?: boolean
     memo?: string | null
     updateTotalMileage?: boolean
     touringId?: string | null
@@ -49,6 +50,7 @@ export async function createMultipleFuelLogs(
     previousMileage?: number
     amount: number
     totalPrice: number
+    isFullTank?: boolean
     memo?: string | null
   }>
 ): Promise<string[]> {

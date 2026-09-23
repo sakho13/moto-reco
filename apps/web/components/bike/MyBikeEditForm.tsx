@@ -42,14 +42,7 @@ export const MyBikeEditForm = ({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--spacing-4)',
-      }}
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col">
       {!isDisplacementEditable && (
         <InfoBox variant="warning">
           登録済みモデルのため、排気量は編集できません。

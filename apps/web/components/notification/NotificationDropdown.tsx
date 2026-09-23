@@ -1,12 +1,13 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import type {
   ApiResponseAnnouncementList,
   ApiResponseNotificationList,
   SuccessResponse,
 } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import styles from './NotificationDropdown.module.css'
 import { authenticatedFetch } from '@/lib/api/client'
 
@@ -24,7 +25,6 @@ type Props = {
 }
 
 export function NotificationDropdown({ onClose }: Props) {
-  const router = useRouter()
   const [items, setItems] = useState<NotificationItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedItem, setSelectedItem] = useState<NotificationItem | null>(
@@ -106,33 +106,30 @@ export function NotificationDropdown({ onClose }: Props) {
     onClose()
   }
 
-  function handleViewAll() {
-    router.push('/app/notifications')
-    onClose()
-  }
-
   return (
     <div className={styles.dropdown} role="dialog" aria-label="通知">
       <div className={styles.header}>
         {selectedItem ? (
-          <button
+          <Button
             type="button"
-            className={styles.backButton}
+            variant="quiet"
+            size="sm"
             onClick={() => setSelectedItem(null)}
           >
             ← 戻る
-          </button>
+          </Button>
         ) : (
           <span className={styles.title}>通知</span>
         )}
         {!selectedItem && (
-          <button
+          <Button
             type="button"
-            className={styles.readAllButton}
+            variant="quiet"
+            size="sm"
             onClick={handleMarkAllRead}
           >
             全既読
-          </button>
+          </Button>
         )}
       </div>
 
@@ -167,13 +164,13 @@ export function NotificationDropdown({ onClose }: Props) {
                 </button>
               ))}
           </div>
-          <button
-            type="button"
-            className={styles.viewAllButton}
-            onClick={handleViewAll}
+          <Link
+            href="/app/notifications"
+            className={styles.viewAllLink}
+            onClick={onClose}
           >
             すべての通知を見る
-          </button>
+          </Link>
         </>
       )}
     </div>

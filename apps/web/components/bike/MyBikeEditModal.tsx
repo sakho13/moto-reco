@@ -7,6 +7,7 @@ import type {
   ApiResponseUserBikeDetail,
   SuccessResponse,
 } from '@repo/shared-types'
+import { isUnsetDate } from '@repo/shared-utils'
 import { MyBikeEditForm, type MyBikeEditFormData } from './MyBikeEditForm'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
@@ -24,7 +25,7 @@ export function MyBikeEditModal({
   onSuccess,
 }: MyBikeEditModalProps) {
   const toDateInputValue = (date: string | null): string => {
-    if (!date) return ''
+    if (!date || isUnsetDate(date)) return ''
     return date.slice(0, 10)
   }
 
@@ -106,7 +107,7 @@ export function MyBikeEditModal({
   }
 
   return (
-    <ModalBase title="マイバイク情報を編集" onClose={onClose}>
+    <ModalBase title="愛車情報を編集" onClose={onClose}>
       {isLoading && <p>読み込み中...</p>}
 
       {!isLoading && initialData && (

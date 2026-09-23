@@ -11,6 +11,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
+import styles from './SpotEditForm.module.css'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
 import { trackEvent } from '@/lib/analytics'
@@ -276,7 +277,7 @@ export function SpotEditForm({
           </div>
         </FormField>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className={`text-sm ${styles.errorText}`}>{error}</p>}
 
         <Button
           type="submit"

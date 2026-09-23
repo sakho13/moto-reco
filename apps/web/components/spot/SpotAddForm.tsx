@@ -13,6 +13,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
 import { Textarea } from '@repo/ui/textarea'
+import styles from './SpotAddForm.module.css'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { apiPost } from '@/lib/api/client'
 
@@ -124,9 +125,10 @@ export function SpotAddForm({
   return (
     <>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <FormField label="種別" htmlFor="spotType">
-          <div className="flex gap-3">
-            <label className="flex items-center gap-1.5 cursor-pointer">
+        <fieldset className={styles.radioGroup}>
+          <legend className={styles.radioGroupLegend}>種別</legend>
+          <div className={styles.radioGroupOptions}>
+            <label className={styles.radioOption}>
               <input
                 type="radio"
                 name="spotType"
@@ -137,9 +139,9 @@ export function SpotAddForm({
                 }
                 disabled={isSubmitting}
               />
-              <span className="text-sm">立ち寄り</span>
+              <span>立ち寄り</span>
             </label>
-            <label className="flex items-center gap-1.5 cursor-pointer">
+            <label className={styles.radioOption}>
               <input
                 type="radio"
                 name="spotType"
@@ -150,10 +152,10 @@ export function SpotAddForm({
                 }
                 disabled={isSubmitting}
               />
-              <span className="text-sm">休憩</span>
+              <span>休憩</span>
             </label>
           </div>
-        </FormField>
+        </fieldset>
 
         <FormField label={isBreak ? '場所名' : 'スポット名'} htmlFor="spotName">
           <Input
@@ -237,7 +239,7 @@ export function SpotAddForm({
           </div>
         </FormField>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className={`text-sm ${styles.errorText}`}>{error}</p>}
 
         <Button
           type="submit"

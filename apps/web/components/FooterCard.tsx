@@ -17,10 +17,10 @@ export function FooterCard() {
             alignItems: 'center',
             padding: 'var(--spacing-2) var(--spacing-5)',
             borderRadius: '999px',
-            background: 'var(--color-primary)',
-            color: 'var(--color-paper)',
+            background: 'var(--color-product)',
+            color: 'var(--color-productInk)',
             fontSize: 'var(--font-size-sm)',
-            fontWeight: 'var(--font-weight-semibold)',
+            fontWeight: 'var(--font-weight-medium)',
             textDecoration: 'none',
           }}
           aria-label="アンケートを新しいタブで開く"

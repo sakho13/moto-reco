@@ -7,6 +7,7 @@ import {
   ITouringRepository,
   IUserBikeRepository,
   FuelLogSearchParams,
+  FuelEfficiencyCalculationService,
 } from '@repo/shared-domain'
 import {
   createFuelLogId,
@@ -24,6 +25,7 @@ type RegisterFuelLogParams = {
   previousMileage: number
   amount: number
   totalPrice: number
+  isFullTank: boolean
   memo?: string | null
   updateTotalMileage: boolean
   touringId?: string | null
@@ -38,6 +40,7 @@ type UpdateFuelLogParams = {
   previousMileage?: number
   amount?: number
   totalPrice?: number
+  isFullTank?: boolean
   memo?: string | null
 }
 
@@ -47,7 +50,22 @@ type DeleteFuelLogParams = {
   userId: UserId
 }
 
+/**
+ * 給油ログと、算出済みの燃費（km/L）のペア
+ *
+ * @remarks
+ * 燃費は同一バイクの給油履歴全体（満タン／継ぎ足しの区分）に依存するため、
+ * FuelLogEntity単体ではなくサービス層で算出してペアで返す。
+ */
+export type FuelLogWithEfficiency = {
+  fuelLog: FuelLogEntity
+  fuelEfficiency: number | null
+}
+
 export class FuelLogService {
+  private readonly fuelEfficiencyCalculationService =
+    new FuelEfficiencyCalculationService()
+
   constructor(
     private fuelLogRepository: IFuelLogRepository,
     private myUserBikeRepository: IMyUserBikeRepository,
@@ -55,9 +73,28 @@ export class FuelLogService {
     private touringRepository: ITouringRepository
   ) {}
 
+  /**
+   * 指定バイクの給油履歴全体から、燃費（km/L）のMapを算出する
+   */
+  private async buildFuelEfficiencyMap(
+    myUserBikeId: MyUserBikeId
+  ): Promise<Map<string, number | null>> {
+    const allLogs =
+      await this.fuelLogRepository.findAllFuelLogsOrderedByMileage(myUserBikeId)
+
+    return this.fuelEfficiencyCalculationService.calculate(
+      allLogs.map((log) => ({
+        fuelLogId: log.id,
+        mileage: log.mileage,
+        amount: log.amount,
+        isFullTank: log.isFullTank,
+      }))
+    )
+  }
+
   public async registerFuelLog(
     params: RegisterFuelLogParams
-  ): Promise<FuelLogEntity> {
+  ): Promise<FuelLogWithEfficiency> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
       params.user.id
@@ -111,6 +148,7 @@ export class FuelLogService {
       previousMileage: params.previousMileage,
       amount: params.amount,
       totalPrice: params.totalPrice,
+      isFullTank: params.isFullTank,
       memo: params.memo ?? null,
       touringId,
       touringTitle,
@@ -125,14 +163,19 @@ export class FuelLogService {
       )
     }
 
-    return createdFuelLog
+    const efficiencyMap = await this.buildFuelEfficiencyMap(params.myUserBikeId)
+
+    return {
+      fuelLog: createdFuelLog,
+      fuelEfficiency: efficiencyMap.get(createdFuelLog.id) ?? null,
+    }
   }
 
   public async getFuelLogs(
     myUserBikeId: MyUserBikeId,
     userId: UserId,
     searchParams: FuelLogSearchParams
-  ): Promise<FuelLogEntity[]> {
+  ): Promise<FuelLogWithEfficiency[]> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       myUserBikeId,
       userId
@@ -142,14 +185,22 @@ export class FuelLogService {
       throw new ApiV1Error('NOT_FOUND', '指定されたバイクが見つかりません')
     }
 
-    return await this.fuelLogRepository.findFuelLogs(myUserBikeId, searchParams)
+    const [fuelLogs, efficiencyMap] = await Promise.all([
+      this.fuelLogRepository.findFuelLogs(myUserBikeId, searchParams),
+      this.buildFuelEfficiencyMap(myUserBikeId),
+    ])
+
+    return fuelLogs.map((fuelLog) => ({
+      fuelLog,
+      fuelEfficiency: efficiencyMap.get(fuelLog.id) ?? null,
+    }))
   }
 
   public async getFuelLogDetail(
     fuelLogId: FuelLogId,
     myUserBikeId: MyUserBikeId,
     userId: UserId
-  ): Promise<FuelLogEntity> {
+  ): Promise<FuelLogWithEfficiency> {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       myUserBikeId,
       userId
@@ -168,12 +219,17 @@ export class FuelLogService {
       throw new ApiV1Error('NOT_FOUND', '指定された燃料ログが見つかりません')
     }
 
-    return fuelLog
+    const efficiencyMap = await this.buildFuelEfficiencyMap(myUserBikeId)
+
+    return {
+      fuelLog,
+      fuelEfficiency: efficiencyMap.get(fuelLog.id) ?? null,
+    }
   }
 
   public async updateFuelLog(
     params: UpdateFuelLogParams
-  ): Promise<FuelLogEntity> {
+  ): Promise<FuelLogWithEfficiency> {
     // 1. バイクの所有権確認
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
       params.myUserBikeId,
@@ -205,13 +261,23 @@ export class FuelLogService {
           params.previousMileage ?? existingFuelLog.previousMileage,
         amount: params.amount ?? existingFuelLog.amount,
         totalPrice: params.totalPrice ?? existingFuelLog.totalPrice,
+        isFullTank: params.isFullTank ?? existingFuelLog.isFullTank,
         memo: params.memo ?? existingFuelLog.memo,
         touringId: existingFuelLog.touringId,
         touringTitle: existingFuelLog.touringTitle,
       })
 
       // 4. 更新実行
-      return await this.fuelLogRepository.updateFuelLog(updatedFuelLog)
+      const result = await this.fuelLogRepository.updateFuelLog(updatedFuelLog)
+
+      const efficiencyMap = await this.buildFuelEfficiencyMap(
+        params.myUserBikeId
+      )
+
+      return {
+        fuelLog: result,
+        fuelEfficiency: efficiencyMap.get(result.id) ?? null,
+      }
     } catch (error) {
       if (error instanceof Error) {
         throw new ApiV1Error('INVALID_REQUEST', error.message)

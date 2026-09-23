@@ -17,13 +17,13 @@
    ======================================== */
 
 .container {
-  /* ライトモード: 白カード + グレーサーフェスで階層を明確に */
-  --card-bg: var(--color-background);      /* #FFFFFF */
-  --card-surface: var(--color-cloud);      /* #F7F7F7 — 内側要素の背景 */
-  --card-border: var(--color-cloudActive); /* #CFCFCF — コントラスト強めの境界線 */
-  --card-text: var(--color-inkDark);       /* #0B0C0F — 最大コントラスト */
-  --card-text-muted: var(--color-ink);     /* #324256 — セカンダリ */
-  --card-text-dim: var(--color-inkLight);  /* #4E5C6F — ターシャリ */
+  /* カード内の面・文字の呼び名。参照先はすべてテーマトークン */
+  --card-bg: var(--color-background);
+  --card-surface: var(--color-cloud);
+  --card-border: var(--color-cloudActive);
+  --card-text: var(--color-inkDark);
+  --card-text-muted: var(--color-ink);
+  --card-text-dim: var(--color-inkLight);
 
   position: relative;
   width: 100%;
@@ -39,14 +39,6 @@
   gap: var(--spacing-4);
 }
 
-/* ダークモード: 専用ダークサーフェスで上書き（cloud=#676767は使えないため） */
-html[data-theme-mode='dark'] .container {
-  --card-bg: #1e293b;
-  --card-surface: #273548;
-  --card-border: rgba(255, 255, 255, 0.1);
-  /* --card-text 系は var(--color-ink*) がダーク値に自動切替するためそのまま */
-}
-
 /* ========================================
    レイアウト
    ======================================== */
@@ -59,27 +51,7 @@ html[data-theme-mode='dark'] .container {
 }
 
 .endCornerButton {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: 0.35rem 0.9rem;
-  border-radius: var(--radius-md);
-  background-color: transparent;
-  border: 1.5px solid var(--color-danger);
-  color: var(--color-danger);
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    opacity 0.15s;
   white-space: nowrap;
-}
-
-.endCornerButton:hover:not(:disabled) {
-  background-color: rgba(204, 0, 0, 0.06);
-}
-
-.endCornerButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 .bikeInfoArea {
@@ -114,7 +86,7 @@ html[data-theme-mode='dark'] .container {
 
 .touringTitle {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--card-text-muted);
   word-break: break-word;
   margin-bottom: var(--spacing-1);
@@ -170,11 +142,15 @@ html[data-theme-mode='dark'] .container {
   align-items: center;
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-4);
-  background-color: color-mix(in srgb, var(--color-product) 10%, var(--card-surface));
+  background-color: color-mix(
+    in srgb,
+    var(--color-product) 10%,
+    var(--card-surface)
+  );
   border: 1.5px solid var(--color-product);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-product);
 }
 
@@ -210,72 +186,35 @@ html[data-theme-mode='dark'] .container {
   gap: var(--spacing-2);
 }
 
-.breakButton {
+/*
+ * `.bottomRow` の2つを等幅に並べる。Button の fullWidth を使っていないため
+ * `app/app/(protected)/layout.module.css` の
+ * `.appRoot button[class*="fullWidth"]`（共通の320px上限）の対象外になる。
+ * ツーリング中画面はまだPC専用の幅に絞っていないため、ここだけ個別に
+ * 上限を持たせて画面幅いっぱいの帯にならないようにする。
+ */
+.bottomRowButton {
   flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-1);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  padding: var(--spacing-3) var(--spacing-2);
-  border-radius: var(--radius-md);
-  background-color: var(--card-surface);
-  border: 1.5px solid var(--card-border);
-  color: var(--card-text-muted);
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    border-color 0.15s;
   white-space: nowrap;
-  min-height: 2.5rem;
 }
 
-.breakButton:hover:not(:disabled) {
-  background-color: var(--color-cloudHover);
-  border-color: var(--color-cloudActive);
+.bottomRowButton svg {
+  /* Tailwind preflight が svg { display: block } を設定するため inline-flex 内で改行される問題を修正 */
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--spacing-1);
 }
 
-.breakButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+@media (min-width: 640px) {
+  .bottomRowButton {
+    max-width: 320px;
+  }
 }
 
 .breakStatus {
   font-size: var(--font-size-xs);
   color: var(--card-text-dim);
   text-align: center;
-}
-
-.fuelButton {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-1);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  padding: var(--spacing-3) var(--spacing-2);
-  border-radius: var(--radius-md);
-  background-color: var(--card-surface);
-  border: 1.5px solid var(--card-border);
-  color: var(--card-text-muted);
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    border-color 0.15s;
-  white-space: nowrap;
-  min-height: 2.5rem;
-}
-
-.fuelButton:hover:not(:disabled) {
-  background-color: var(--color-cloudHover);
-  border-color: var(--color-cloudActive);
-}
-
-.fuelButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 /* ========================================
@@ -285,7 +224,7 @@ html[data-theme-mode='dark'] .container {
 .spotModalOverlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: oklch(from var(--color-background) 0.12 c h / 0.82);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -310,7 +249,7 @@ html[data-theme-mode='dark'] .container {
 
 .spotModalTitle {
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-ink);
   margin-bottom: var(--spacing-4);
 }
@@ -330,7 +269,7 @@ html[data-theme-mode='dark'] .container {
 .spotModalInput {
   width: 100%;
   padding: var(--spacing-2) var(--spacing-3);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   border: 1px solid var(--color-cloud);
   border-radius: var(--radius-md);
   background-color: var(--color-background);
@@ -346,7 +285,7 @@ html[data-theme-mode='dark'] .container {
 .spotModalTextarea {
   width: 100%;
   padding: var(--spacing-2) var(--spacing-3);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   border: 1px solid var(--color-cloud);
   border-radius: var(--radius-md);
   background-color: var(--color-background);
@@ -441,7 +380,7 @@ html[data-theme-mode='dark'] .container {
   }
 
   .touringTitle {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-md);
   }
 
   /* SP でも経過時間の右にウィジェットを横並び表示するため column は使わない */

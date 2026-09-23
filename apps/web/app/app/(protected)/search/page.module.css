@@ -1,0 +1,9 @@
+.emptyMessage {
+  color: var(--color-inkLight);
+}
+
+/* 頭文字を出すアバター代替。cloud の上では inkLight のコントラストが足りない */
+.avatarInitial {
+  color: var(--color-ink);
+  background-color: var(--color-cloud);
+}

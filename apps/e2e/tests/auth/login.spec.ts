@@ -50,8 +50,8 @@ test.describe('ログインフロー', () => {
     await loginPage.waitForRedirectToHome()
 
     const homePage = new HomePage(page)
-    await expect(homePage.touringSection).toBeVisible()
-    await expect(homePage.fuelSection).toBeVisible()
+    await expect(homePage.gaugesSection).toBeVisible()
+    await expect(homePage.actionsSection).toBeVisible()
     await expect(homePage.historySection).toBeVisible()
   })
 

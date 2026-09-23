@@ -209,6 +209,7 @@ user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
                 amount: item.fuelLog.amount,
                 totalPrice: item.fuelLog.price,
                 memo: item.fuelLog.memo,
+                isFullTank: item.fuelLog.isFullTank,
                 fuelEfficiency: null,
                 pricePerLiter: null,
                 touringId: item.fuelLog.touringId,

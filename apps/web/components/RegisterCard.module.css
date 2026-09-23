@@ -1,0 +1,10 @@
+.policyNote {
+  margin-top: var(--spacing-4);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-inkLight);
+}
+
+.policyLink {
+  text-decoration: underline;
+}

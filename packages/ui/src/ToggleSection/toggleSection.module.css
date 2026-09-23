@@ -14,14 +14,14 @@
   background: transparent;
   border: none;
   color: var(--color-ink);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
   text-align: left;
 }
 
 .toggleButton:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-product);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }

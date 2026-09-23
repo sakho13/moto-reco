@@ -54,7 +54,16 @@ export const formatPlanSpotOffsetMinutes = (minutes: number | null): string => {
   return `出発から${hours}時間${mins}分後`
 }
 
-/** ローカル時刻で `yyyy/mm/dd` 形式に変換する */
+/**
+ * ローカル時刻で `yyyy/mm/dd` 形式に変換する
+ *
+ * @remarks
+ * 日付+時刻の表示（`formatDateTime`、履歴一覧のタイムスタンプなど）とは
+ * 別に、単独の日付表示（購入日・所有期間の起点・グッズの購入日など）を
+ * 統一する。月・日はゼロ埋めし、`formatDateTime` の日付部分と桁を揃える。
+ * 台帳の「9/13」のような「日付が左に立つ」独自の表記は本関数を使わず、
+ * 各コンポーネント側で個別に組んでいるため対象外。
+ */
 export const formatDate = (date: Date | string): string => {
   const d = typeof date === 'string' ? new Date(date) : date
   return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`
@@ -64,6 +73,38 @@ export const formatDate = (date: Date | string): string => {
 export const formatDateTime = (date: Date | string): string => {
   const d = typeof date === 'string' ? new Date(date) : date
   return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+/**
+ * 日付が「未設定」とみなせるか判定する
+ *
+ * @remarks
+ * `null` / `undefined` に加えて、UTC エポック（1970-01-01T00:00:00.000Z、
+ * ミリ秒値でちょうど `0`）に厳密一致する日付も「未設定」として扱う。
+ * `z.coerce.date()` に `null` を渡すと `new Date(null)` がこのUTCエポックに
+ * 変換されてしまう不具合により保存されてしまったレコードを吸収するための判定。
+ * 不正な日付文字列など `Date` に変換できない値は「未設定」ではない
+ * （＝表示側で別途エラーとして扱う）ものとして `false` を返す。
+ *
+ * 以前はUTCエポックの前後1日を許容範囲としていたが、この範囲に実際の購入日
+ * （1969-12-31〜1970-01-02）が入っていた場合、編集モーダルで日付欄が空欄に
+ * なり、他の項目だけ保存すると `purchaseDate: null` が送信されて実データが
+ * 消えてしまう不具合があった。購入日欄は `<input type="date">`（日付のみ）
+ * 由来のため、実際の値は常にUTC 0時ちょうど（例: 1969-12-31T00:00:00.000Z）
+ * になる。「時刻成分が0時ちょうどか」では誤変換されたエポックと区別できない
+ * （どちらも0時ちょうどのため）が、「エポックのミリ秒値そのものと厳密一致するか」
+ * であれば、隣接日（1969-12-31・1970-01-02）を巻き込まずに済む。
+ * 1970-01-01 ちょうどを実際の購入日とする極端なケースのみ、依然として
+ * 誤変換と区別できず「未設定」として扱われる（データ形式上避けられない
+ * 既知の限界であり、他のフィールドと同様に別途登録し直せば解消する）。
+ */
+export const isUnsetDate = (
+  date: Date | string | null | undefined
+): boolean => {
+  if (date === null || date === undefined) return true
+  const d = typeof date === 'string' ? new Date(date) : date
+  if (Number.isNaN(d.getTime())) return false
+  return d.getTime() === 0
 }
 
 /**

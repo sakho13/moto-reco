@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { formatDateTime } from '@repo/shared-utils'
+import { Button } from '@repo/ui/button'
 import type { TestSession } from './MopedTestClient'
 import styles from './page.module.css'
 
@@ -36,13 +37,15 @@ export function HistorySection({ history, onClearHistory }: Props) {
     <section className={styles.historySection}>
       <div className={styles.historyHeader}>
         <h2 className={styles.historyTitle}>回答履歴</h2>
-        <button
+        <Button
           type="button"
+          variant="danger"
+          outline
+          size="sm"
           onClick={onClearHistory}
-          className={styles.clearHistoryButton}
         >
           履歴をリセット
-        </button>
+        </Button>
       </div>
 
       {/* スコア推移グラフ */}

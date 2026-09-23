@@ -1,0 +1,38 @@
+/* FormField 相当の1フィールドとして扱うチェックボックス群 */
+.itemsSection {
+  margin-bottom: var(--spacing-5);
+}
+
+.itemsLabel {
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ink);
+}
+
+.itemsRequired {
+  margin-left: var(--spacing-1);
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.categoryLabel {
+  margin-bottom: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-inkLight);
+}
+
+.categoryItems {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-1);
+}

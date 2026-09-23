@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { Input } from '@repo/ui/input'
+import styles from './page.module.css'
 import { apiDelete, apiGet, apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -86,7 +87,7 @@ function SearchPage() {
       {searched && (
         <BaseCard title={`検索結果 ${total > 0 ? `（${total} 件）` : ''}`}>
           {results.length === 0 ? (
-            <p className="text-sm text-gray-500">
+            <p className={`text-sm ${styles.emptyMessage}`}>
               ユーザーが見つかりませんでした
             </p>
           ) : (
@@ -100,7 +101,9 @@ function SearchPage() {
                     href={`/app/users/${user.userId}`}
                     className="flex items-center gap-2 hover:opacity-70"
                   >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-600">
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold ${styles.avatarInitial}`}
+                    >
                       {user.name.charAt(0)}
                     </div>
                     <span className="text-sm font-medium">{user.name}</span>

@@ -187,19 +187,6 @@
 .loadMoreButton {
   align-self: center;
   margin-top: 8px;
-  padding: 10px 24px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-cloud);
-  background: transparent;
-  color: var(--color-ink);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color var(--transition-fast);
-}
-
-.loadMoreButton:hover {
-  background-color: var(--color-cloud);
 }
 
 @media (max-width: 900px) {
