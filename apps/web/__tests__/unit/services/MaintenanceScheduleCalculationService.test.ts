@@ -96,6 +96,51 @@ describe('MaintenanceScheduleCalculationService', () => {
     expect(result?.dueDate).toEqual(new Date('2024-07-01T00:00:00.000Z'))
   })
 
+  test('整備日が月末で加算先の月が短い場合、翌月へオーバーフローせず月末に丸められる', () => {
+    // 8/31 に6か月を単純加算すると、2月は28日までしか無いため
+    // setUTCMonthがオーバーフローし翌年3月上旬になってしまう回帰の再現。
+    // カレンダー月として正しくは「翌年2月末（末日）」になるべき。
+    const [result] = service.calculate({
+      currentMileage: 10000, // recommendedMileageIntervalがnullのため影響しない
+      now: new Date('2024-09-01T00:00:00.000Z'),
+      masterItems: [brakeFluidItem], // 6か月
+      maintenanceLogs: [
+        logOf('2024-08-31T00:00:00.000Z', 9000, ['BRAKE_FLUID']),
+      ],
+    })
+
+    expect(result?.dueDate).toEqual(new Date('2025-02-28T00:00:00.000Z'))
+    // 2024-09-01 → 2025-02-28 は 180日
+    expect(result?.remainingDays).toBe(180)
+  })
+
+  test('うるう年をまたぐ月末加算は、うるう年の2月29日に丸められる', () => {
+    const [result] = service.calculate({
+      currentMileage: 10000,
+      now: new Date('2023-09-01T00:00:00.000Z'),
+      masterItems: [brakeFluidItem], // 6か月
+      maintenanceLogs: [
+        logOf('2023-08-31T00:00:00.000Z', 9000, ['BRAKE_FLUID']),
+      ],
+    })
+
+    // 2023-08-31 + 6か月 → 2024年（うるう年）2月29日
+    expect(result?.dueDate).toEqual(new Date('2024-02-29T00:00:00.000Z'))
+  })
+
+  test('月末以外の日付は、従来どおり同じ日にちのまま月だけ進む', () => {
+    const [result] = service.calculate({
+      currentMileage: 10000,
+      now: new Date('2024-04-01T00:00:00.000Z'),
+      masterItems: [brakeFluidItem], // 6か月
+      maintenanceLogs: [
+        logOf('2024-01-15T00:00:00.000Z', 9000, ['BRAKE_FLUID']),
+      ],
+    })
+
+    expect(result?.dueDate).toEqual(new Date('2024-07-15T00:00:00.000Z'))
+  })
+
   test('両方設定されている項目は、走行距離側の進捗が早い場合は走行距離基準が採用される', () => {
     const [result] = service.calculate({
       currentMileage: 12800,

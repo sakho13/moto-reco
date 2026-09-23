@@ -600,7 +600,7 @@ export const TouringModeView = ({
                 size="md"
                 disabled={spotLoading || geoStatus === 'loading'}
               >
-                {spotLoading ? '記録中...' : '記録する'}
+                {spotLoading ? '記録中...' : '記録'}
               </Button>
             </div>
           </div>

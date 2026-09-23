@@ -4,7 +4,6 @@ import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import useSWR from 'swr'
 import type {
-  ApiResponseMaintenanceLogList,
   ApiResponseUserGoodsList,
   SuccessResponse,
 } from '@repo/shared-types'
@@ -14,6 +13,8 @@ import { GoodsIcon } from '@/components/icons/GoodsIcon'
 import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
 import { authenticatedFetch } from '@/lib/api/client'
+import { useMaintenanceLogCount } from '@/lib/hooks/useMaintenanceLogCount'
+import { formatRecordCount } from '@/lib/recordCount'
 
 // 一覧APIは総件数を返さないため、上限いっぱい（100件）まで取得して件数の
 // 近似値とする。`AttachedGoodsSection` / メンテナンス履歴画面の「項目別ビュー」で
@@ -25,28 +26,6 @@ type Props = {
   fuelLogCount: number
   touringCount: number
   isAdmin: boolean
-}
-
-/**
- * 件数取得中・取得失敗時は「—」を出す。0件確定時のみ「0件」と表示する
- */
-function formatCount(count: number | undefined): string {
-  if (count === undefined) return '—'
-  return `${count.toLocaleString()}件`
-}
-
-function useMaintenanceLogCount(bikeId: string): number | undefined {
-  const { data } = useSWR(
-    `/api/v1/user-bike/bike/${bikeId}/maintenance-logs?per-size=${COUNT_FETCH_SIZE}`,
-    async (url: string) => {
-      const response = await authenticatedFetch(url, { method: 'GET' })
-      if (!response.ok) throw new Error('failed')
-      const json =
-        (await response.json()) as SuccessResponse<ApiResponseMaintenanceLogList>
-      return json.data.length
-    }
-  )
-  return data
 }
 
 function useGoodsCount(bikeId: string, enabled: boolean): number | undefined {
@@ -86,19 +65,19 @@ export function BikeRecordLinks({
       href: `/app/my-bike/${bikeId}/fuel-logs`,
       icon: <FuelIcon />,
       label: '給油履歴',
-      count: formatCount(fuelLogCount),
+      count: formatRecordCount(fuelLogCount),
     },
     {
       href: `/app/my-bike/${bikeId}/tourings`,
       icon: <TouringIcon />,
       label: 'ツーリング',
-      count: formatCount(touringCount),
+      count: formatRecordCount(touringCount),
     },
     {
       href: `/app/my-bike/${bikeId}/maintenance-logs`,
       icon: <WrenchIcon />,
       label: 'メンテナンス',
-      count: formatCount(maintenanceLogCount),
+      count: formatRecordCount(maintenanceLogCount),
     },
     ...(isAdmin
       ? [
@@ -106,7 +85,7 @@ export function BikeRecordLinks({
             href: `/app/my-bike/${bikeId}/goods`,
             icon: <GoodsIcon />,
             label: 'グッズ',
-            count: formatCount(goodsCount),
+            count: formatRecordCount(goodsCount),
           },
         ]
       : []),

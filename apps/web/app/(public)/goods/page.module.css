@@ -56,7 +56,7 @@
   );
   color: var(--color-ink);
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
@@ -146,13 +146,13 @@
 
 .cardManufacturer {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-inkLight);
 }
 
 .cardCategory {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-inkLight);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -161,7 +161,7 @@
 .cardTitle {
   font-family: var(--font-family-display);
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   color: var(--color-ink);
   margin-top: var(--spacing-1);
 }

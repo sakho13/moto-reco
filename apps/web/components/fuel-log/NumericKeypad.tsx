@@ -9,13 +9,13 @@ export interface NumericKeypadProps {
   onDecimal: () => void
   /** ⌫ が押された */
   onBackspace: () => void
-  /** 「次へ」/「記録する」が押された */
+  /** 「次へ」/「記録」が押された */
   onAdvance: () => void
   /** 現在フォーカス中のフィールドが小数点を受け付けないか */
   decimalDisabled: boolean
-  /** 「次へ」/「記録する」ボタンのラベル */
+  /** 「次へ」/「記録」ボタンのラベル */
   advanceLabel: string
-  /** 「次へ」/「記録する」ボタンを無効化するか */
+  /** 「次へ」/「記録」ボタンを無効化するか */
   advanceDisabled?: boolean
 }
 

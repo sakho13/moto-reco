@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import useSWR from 'swr'
+import { AccountLimitsValue } from '@repo/shared-domain'
+import type { UserPlan } from '@repo/shared-types'
 import { getTodayDateString } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { DateInput } from '@repo/ui/dateInput'
@@ -8,6 +11,36 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { InfoBox } from './InfoBox'
+import { apiGet } from '@/lib/api/client'
+import { useAuth } from '@/lib/hooks/useAuth'
+
+/**
+ * バイク登録台数の上限案内文言を、ロール・プラン・プラン取得状態に応じて返す
+ *
+ * @remarks
+ * プラン取得中にプレミアムユーザーへ誤って無料プランの上限を表示しないよう、
+ * ローディング中は台数を含まない案内文言を返す。
+ * 文言そのものは `AccountLimitsValue.limitMessage('bike')` を唯一の出所にする
+ * （実際に上限超過で登録APIが返すエラーメッセージと同じ生成元）。以前は
+ * このファイルで「ゲストアカウントでは」「無料プランでは」のように文言を
+ * 個別に持っていたため、サーバー側のメッセージ（「ゲストアカウントは」
+ * 「無料ユーザーは」）と表現が揃っていなかった。
+ */
+const getBikeLimitText = (params: {
+  isGuest: boolean
+  isProfileLoading: boolean
+  plan: UserPlan | null | undefined
+}): string => {
+  const { isGuest, isProfileLoading, plan } = params
+
+  if (isGuest) {
+    return AccountLimitsValue.from('GUEST', null).limitMessage('bike')
+  }
+  if (isProfileLoading) {
+    return '登録可能な台数を確認しています…'
+  }
+  return AccountLimitsValue.from('USER', plan ?? null).limitMessage('bike')
+}
 
 export interface BikeFormData {
   nickname: string
@@ -35,6 +68,20 @@ export const BikeRegisterForm = ({
   isSubmitting,
   error,
 }: BikeRegisterFormProps) => {
+  const { isGuest } = useAuth()
+  const { data: profile, isLoading: isProfileLoading } = useSWR(
+    isGuest ? null : '/api/v1/user/profile',
+    async (url) => {
+      const response = await apiGet(url)
+      return response.data
+    }
+  )
+  const bikeLimitText = getBikeLimitText({
+    isGuest,
+    isProfileLoading,
+    plan: profile?.plan,
+  })
+
   const [formData, setFormData] = useState<BikeFormData>({
     nickname: '',
     purchaseDate: '',
@@ -54,7 +101,7 @@ export const BikeRegisterForm = ({
       <h2
         style={{
           fontSize: 'var(--font-size-lg)',
-          fontWeight: 'var(--font-weight-semibold)',
+          fontWeight: 'var(--font-weight-bold)',
           marginBottom: 'var(--spacing-4)',
           color: 'var(--color-ink)',
         }}
@@ -66,7 +113,7 @@ export const BikeRegisterForm = ({
         <InfoBox variant="info">
           <p
             style={{
-              fontWeight: 'var(--font-weight-semibold)',
+              fontWeight: 'var(--font-weight-medium)',
               marginBottom: 'var(--spacing-1)',
             }}
           >
@@ -80,7 +127,7 @@ export const BikeRegisterForm = ({
         <InfoBox>
           <p
             style={{
-              fontWeight: 'var(--font-weight-semibold)',
+              fontWeight: 'var(--font-weight-medium)',
               marginBottom: 'var(--spacing-1)',
             }}
           >
@@ -91,7 +138,7 @@ export const BikeRegisterForm = ({
       )}
 
       <InfoBox variant="info" style={{ marginTop: 'var(--spacing-4)' }}>
-        無料プランでは2台まで登録できます
+        {bikeLimitText}
       </InfoBox>
 
       <form

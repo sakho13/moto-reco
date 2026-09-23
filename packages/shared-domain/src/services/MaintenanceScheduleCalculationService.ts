@@ -84,10 +84,36 @@ type InternalForecast = MaintenanceScheduleForecast & {
  * @remarks
  * サーバーの実行タイムゾーンに依存せず決定的な結果になるよう、
  * ローカルタイムではなくUTCのカレンダー月で計算する。
+ *
+ * `Date#setUTCMonth` をそのまま使うと、元の日が加算先の月の末日を超える場合
+ * （例: 8/31 に6か月加算）に日が月末へ丸められず翌月へオーバーフローする
+ * （8/31 + 6か月が翌年3月上旬になってしまう）。そのため、日を一旦1日にして
+ * から月を進めて対象月を決め、元の日と対象月の末日の小さい方を採用する
+ * カレンダー月として正しい加算にする。
  */
 function addMonths(date: Date, months: number): Date {
-  const result = new Date(date.getTime())
-  result.setUTCMonth(result.getUTCMonth() + months)
+  const originalDay = date.getUTCDate()
+
+  const firstOfTargetMonth = new Date(date.getTime())
+  firstOfTargetMonth.setUTCDate(1)
+  firstOfTargetMonth.setUTCMonth(firstOfTargetMonth.getUTCMonth() + months)
+
+  const lastDayOfTargetMonth = new Date(
+    Date.UTC(
+      firstOfTargetMonth.getUTCFullYear(),
+      firstOfTargetMonth.getUTCMonth() + 1,
+      0
+    )
+  ).getUTCDate()
+
+  const result = new Date(firstOfTargetMonth.getTime())
+  result.setUTCDate(Math.min(originalDay, lastDayOfTargetMonth))
+  result.setUTCHours(
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds(),
+    date.getUTCMilliseconds()
+  )
   return result
 }
 

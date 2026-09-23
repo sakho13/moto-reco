@@ -1,11 +1,20 @@
 import { describe, expect, test } from 'vitest'
 import {
   appendNumericKey,
+  buildPreviousFuelLogQuery,
+  calculateAverageFuelEfficiency,
+  calculateBridgedAverageEfficiency,
+  calculateDaysAgo,
+  calculateFuelEfficiencyComparison,
   calculateLiveGauges,
+  formatFuelEfficiencyComparisonNote,
   formatIntegerDisplay,
+  formatPreviousStubHeading,
   formatRefueledAtChipLabel,
   parseFieldNumber,
+  resolveSavedFuelLogEfficiencyReason,
   resolveSubmitPreviousMileage,
+  roundToOneDecimal,
   sanitizeNumericInput,
   shouldUpdateTotalMileage,
 } from '@/lib/fuelLogSheet'
@@ -98,39 +107,81 @@ describe('calculateLiveGauges', () => {
   })
 })
 
+describe('buildPreviousFuelLogQuery', () => {
+  test('選択日時をendDateに、UNIXエポックをstartDateに指定したクエリを組み立てる', () => {
+    const query = buildPreviousFuelLogQuery('2024-06-15T09:00:00')
+    const params = new URLSearchParams(query)
+
+    expect(params.get('startDate')).toBe(new Date(0).toISOString())
+    expect(params.get('endDate')).toBe(
+      new Date('2024-06-15T09:00:00').toISOString()
+    )
+    expect(params.get('sort-order')).toBe('desc')
+    expect(params.get('per-size')).toBe('1')
+  })
+
+  test('大きく過去に遡った日時（直近ウィンドウの外）でもendDateはそのまま反映される', () => {
+    // 回帰再現: 従来は直近数件のウィンドウ内だけを検索していたため、ウィンドウの
+    // 外まで遡ると該当ログを見つけられなかった。このクエリはウィンドウの件数に
+    // 一切依存せず、選択日時をそのままendDateとしてサーバーに問い合わせるため、
+    // どれだけ過去に遡っても「選択日時以前で最も新しいログ」を確実に取得できる。
+    const query = buildPreviousFuelLogQuery('2019-01-01T00:00:00')
+    const params = new URLSearchParams(query)
+
+    expect(params.get('endDate')).toBe(
+      new Date('2019-01-01T00:00:00').toISOString()
+    )
+    expect(params.get('startDate')).toBe(new Date(0).toISOString())
+  })
+})
+
 describe('resolveSubmitPreviousMileage', () => {
-  test('前回給油があればその走行距離をそのまま使う', () => {
+  test('サーバーへの問い合わせで前回ログが解決できていれば、その走行距離をそのまま使う（通常の登録）', () => {
     const value = resolveSubmitPreviousMileage({
-      previousLog: { mileage: 12750, isFullTank: true },
-      totalMileage: 12800,
       mileage: 13010,
+      resolvedPreviousLog: { mileage: 12750 },
+      totalMileage: 12800,
     })
     expect(value).toBe(12750)
   })
 
-  test('前回給油があり、入力ミスで前回以下のmileageでもそのまま返す（サーバー側エラーに委ねる）', () => {
+  test('過去日時での登録（バックフィル）でも、サーバーが解決した「選択日時以前で最も新しいログ」をそのまま使う', () => {
+    // 回帰再現: 従来は直近数件のウィンドウ内を検索しており、ウィンドウの外まで
+    // 遡ると該当ログを見つけられず previousMileage が mileage 自身にフォール
+    // バックして区間距離が無言で0kmになっていた。現在はウィンドウに依存しない
+    // サーバー問い合わせ（buildPreviousFuelLogQuery）の解決結果を渡されるだけ
+    // なので、ウィンドウの件数に関わらず正しい前回ログの走行距離が使われる。
     const value = resolveSubmitPreviousMileage({
-      previousLog: { mileage: 12750, isFullTank: true },
-      totalMileage: undefined,
-      mileage: 12000,
+      mileage: 12700,
+      resolvedPreviousLog: { mileage: 12500 }, // サーバーが解決した「選択日時以前で最新」のログ
+      totalMileage: 13000, // 最新ログ（選択日時より後）の走行距離。これに引きずられない
     })
-    expect(value).toBe(12750)
+    expect(value).toBe(12500)
   })
 
-  test('前回給油が無い場合は総走行距離とmileageの小さい方を使う', () => {
+  test('選択した給油日時以前にログが存在しないとサーバーが解決した場合、総走行距離とmileageの小さい方を使う', () => {
     const value = resolveSubmitPreviousMileage({
-      previousLog: null,
-      totalMileage: 5000,
       mileage: 4800,
+      resolvedPreviousLog: null,
+      totalMileage: 5000,
     })
     expect(value).toBe(4800)
   })
 
-  test('前回給油も総走行距離も無い場合はmileage自身を使う', () => {
+  test('基準ログがあり、入力ミスで前回以下のmileageでもそのまま返す（サーバー側エラーに委ねる）', () => {
     const value = resolveSubmitPreviousMileage({
-      previousLog: null,
+      mileage: 12000,
+      resolvedPreviousLog: { mileage: 12750 },
       totalMileage: undefined,
+    })
+    expect(value).toBe(12750)
+  })
+
+  test('前回ログも総走行距離も無い場合はmileage自身を使う', () => {
+    const value = resolveSubmitPreviousMileage({
       mileage: 100,
+      resolvedPreviousLog: null,
+      totalMileage: undefined,
     })
     expect(value).toBe(100)
   })
@@ -265,5 +316,402 @@ describe('formatRefueledAtChipLabel', () => {
   test('今日以外の日時は「M/D HH:mm」になる', () => {
     const now = new Date(2026, 8, 13, 14, 15)
     expect(formatRefueledAtChipLabel('2026-09-01T09:40', now)).toBe('9/1 09:40')
+  })
+})
+
+describe('calculateAverageFuelEfficiency', () => {
+  test('燃費が算出できたログのみで平均を取る', () => {
+    const avg = calculateAverageFuelEfficiency([
+      { fuelEfficiency: 22.0 },
+      { fuelEfficiency: null }, // 継ぎ足しなど
+      { fuelEfficiency: 20.2 },
+    ])
+    expect(avg).toBeCloseTo(21.1)
+  })
+
+  test('対象が1件も無い場合は null', () => {
+    expect(
+      calculateAverageFuelEfficiency([{ fuelEfficiency: null }])
+    ).toBeNull()
+    expect(calculateAverageFuelEfficiency([])).toBeNull()
+  })
+})
+
+describe('calculateFuelEfficiencyComparison', () => {
+  test('今回の燃費・前回・平均が揃っていれば両方の差分を返す', () => {
+    const result = calculateFuelEfficiencyComparison({
+      currentFuelEfficiency: 22.0,
+      previousFuelEfficiency: 20.2,
+      averageFuelEfficiency: 21.2,
+    })
+    expect(result.previousDiff).toBeCloseTo(1.8)
+    expect(result.averageDiff).toBeCloseTo(0.8)
+  })
+
+  test('今回の燃費が算出できない場合は両方 null', () => {
+    const result = calculateFuelEfficiencyComparison({
+      currentFuelEfficiency: null,
+      previousFuelEfficiency: 20.2,
+      averageFuelEfficiency: 21.2,
+    })
+    expect(result.previousDiff).toBeNull()
+    expect(result.averageDiff).toBeNull()
+  })
+
+  test('前回・平均のいずれかが無ければその差分のみ null', () => {
+    const result = calculateFuelEfficiencyComparison({
+      currentFuelEfficiency: 22.0,
+      previousFuelEfficiency: null,
+      averageFuelEfficiency: 21.2,
+    })
+    expect(result.previousDiff).toBeNull()
+    expect(result.averageDiff).toBeCloseTo(0.8)
+  })
+
+  test('丸め前の生値ではなく、表示値（小数点1桁）どうしの差を返す', () => {
+    // 22.0339…（表示22.0）と20.1613…（表示20.2）の差は、生値では1.8726
+    // （丸めると1.9）だが、表示と一致させるには丸めた値どうしの差1.8にする
+    const result = calculateFuelEfficiencyComparison({
+      currentFuelEfficiency: 22.0339,
+      previousFuelEfficiency: 20.1613,
+      averageFuelEfficiency: null,
+    })
+    expect(result.previousDiff).toBeCloseTo(1.8)
+  })
+})
+
+describe('roundToOneDecimal', () => {
+  test('小数点1桁に四捨五入する', () => {
+    expect(roundToOneDecimal(22.0339)).toBeCloseTo(22.0)
+    expect(roundToOneDecimal(20.1613)).toBeCloseTo(20.2)
+  })
+})
+
+describe('resolveSavedFuelLogEfficiencyReason', () => {
+  test('直前のログが継ぎ足しなら「前回が継ぎ足し」と判定する', () => {
+    const logs = [
+      { fuelLogId: 'a', mileage: 12500, isFullTank: false }, // 継ぎ足し
+      { fuelLogId: 'b', mileage: 13000, isFullTank: true },
+    ]
+    expect(resolveSavedFuelLogEfficiencyReason(logs, 'b')).toBe(
+      'previous-was-continuation'
+    )
+  })
+
+  test('直前のログが無ければ「初回給油」と判定する', () => {
+    const logs = [{ fuelLogId: 'a', mileage: 12500, isFullTank: true }]
+    expect(resolveSavedFuelLogEfficiencyReason(logs, 'a')).toBe(
+      'no-previous-log'
+    )
+  })
+
+  test('直前のログが満タンなら「初回給油」（このケースは通常fuelEfficiencyが算出されるため呼ばれない）', () => {
+    const logs = [
+      { fuelLogId: 'a', mileage: 12500, isFullTank: true },
+      { fuelLogId: 'b', mileage: 13000, isFullTank: true },
+    ]
+    expect(resolveSavedFuelLogEfficiencyReason(logs, 'b')).toBe(
+      'no-previous-log'
+    )
+  })
+})
+
+describe('formatFuelEfficiencyComparisonNote', () => {
+  test('前回比・平均比がともに伸びている場合の文言（平均の母数を明示する）', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: 1.8,
+          averageDiff: 0.8,
+        },
+        6
+      )
+    ).toBe('前回より 1.8 伸びた ／ 直近6回の平均より 0.8 伸びた')
+  })
+
+  test('母数(recentAverageCount)が変わると文言にも反映される', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: null,
+          averageDiff: 0.8,
+        },
+        4
+      )
+    ).toBe('直近4回の平均より 0.8 伸びた')
+  })
+
+  test('縮んだ場合は「縮んだ」になる', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: -1.2,
+          averageDiff: null,
+        },
+        6
+      )
+    ).toBe('前回より 1.2 縮んだ')
+  })
+
+  test('差が±0.05km/L未満は「同じ」になる', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: 0.02,
+          averageDiff: null,
+        },
+        6
+      )
+    ).toBe('前回と同じ')
+  })
+
+  test('両方 null なら null', () => {
+    expect(
+      formatFuelEfficiencyComparisonNote(
+        {
+          previousDiff: null,
+          averageDiff: null,
+        },
+        6
+      )
+    ).toBeNull()
+  })
+})
+
+describe('calculateDaysAgo', () => {
+  test('日付のみで比較し、時刻は無視する', () => {
+    const now = new Date(2026, 8, 13, 23, 59)
+    expect(calculateDaysAgo('2026-09-01T00:00', now)).toBe(12)
+  })
+
+  test('同じ日なら0', () => {
+    const now = new Date(2026, 8, 13, 23, 59)
+    expect(calculateDaysAgo('2026-09-13T00:05', now)).toBe(0)
+  })
+
+  test('不正な日時は null', () => {
+    expect(calculateDaysAgo('invalid-date')).toBeNull()
+  })
+})
+
+describe('formatPreviousStubHeading', () => {
+  test('前回の給油日と経過日数を組み立てる', () => {
+    const now = new Date(2026, 8, 13, 14, 15)
+    expect(formatPreviousStubHeading('2026-09-01T09:40', now)).toBe(
+      '前回の控え ─ 9月1日（12日前）'
+    )
+  })
+
+  test('当日の場合は「今日」になる', () => {
+    const now = new Date(2026, 8, 13, 14, 15)
+    expect(formatPreviousStubHeading('2026-09-13T09:40', now)).toBe(
+      '前回の控え ─ 9月13日（今日）'
+    )
+  })
+})
+
+describe('calculateBridgedAverageEfficiency', () => {
+  test('期間の先頭が境界をまたぐ区間でも、境界より前の満タン給油を参照して算出する', () => {
+    // 回帰再現（Issue #575 Codexの指摘#5）: bが期間の先頭。直前の満タン給油a
+    // は期間より前にあるが、区間判定にはallLogsとして渡すため正しく算出できる
+    const allLogs = [
+      {
+        fuelLogId: 'a',
+        mileage: 12500,
+        amount: 11.2,
+        isFullTank: true,
+        refueledAt: '2024-01-01T09:00:00',
+      },
+      {
+        fuelLogId: 'b',
+        mileage: 12750,
+        amount: 12.4,
+        isFullTank: true,
+        refueledAt: '2024-02-01T09:00:00',
+      },
+      {
+        fuelLogId: 'c',
+        mileage: 13010,
+        amount: 11.8,
+        isFullTank: true,
+        refueledAt: '2024-03-01T09:00:00',
+      },
+    ]
+    const inPeriodFuelLogIds = new Set(['b', 'c'])
+
+    const result = calculateBridgedAverageEfficiency(
+      allLogs,
+      inPeriodFuelLogIds
+    )
+
+    // b: 距離250/給油12.4L, c: 距離260/給油11.8L → 距離加重平均
+    expect(result).toBeCloseTo((250 + 260) / (12.4 + 11.8))
+  })
+
+  test('境界より前の記録（bridge）を渡さない場合、期間先頭の区間は母数から漏れる', () => {
+    // bridgeRows相当のaを渡さないと、bは「直前の満タン給油が無い」扱いになり
+    // 区間が算出できない（従来のバグと同じ状態を確認する対照実験）
+    const inPeriodOnly = [
+      {
+        fuelLogId: 'b',
+        mileage: 12750,
+        amount: 12.4,
+        isFullTank: true,
+        refueledAt: '2024-02-01T09:00:00',
+      },
+      {
+        fuelLogId: 'c',
+        mileage: 13010,
+        amount: 11.8,
+        isFullTank: true,
+        refueledAt: '2024-03-01T09:00:00',
+      },
+    ]
+    const inPeriodFuelLogIds = new Set(['b', 'c'])
+
+    const result = calculateBridgedAverageEfficiency(
+      inPeriodOnly,
+      inPeriodFuelLogIds
+    )
+
+    // cの区間（260/11.8）のみが母数になり、bは含まれない
+    expect(result).toBeCloseTo(260 / 11.8)
+  })
+
+  test('境界より前に継ぎ足し給油を挟んでいても、その給油量は境界をまたぐ区間に繰り込まれる', () => {
+    const allLogs = [
+      {
+        fuelLogId: 'a',
+        mileage: 12500,
+        amount: 11.2,
+        isFullTank: true,
+        refueledAt: '2024-01-01T09:00:00',
+      },
+      // 継ぎ足し（期間より前）。距離・給油量ともbの区間に繰り込まれる
+      {
+        fuelLogId: 'x',
+        mileage: 12600,
+        amount: 3.0,
+        isFullTank: false,
+        refueledAt: '2024-01-15T09:00:00',
+      },
+      {
+        fuelLogId: 'b',
+        mileage: 12750,
+        amount: 12.4,
+        isFullTank: true,
+        refueledAt: '2024-02-01T09:00:00',
+      },
+    ]
+    const inPeriodFuelLogIds = new Set(['b'])
+
+    const result = calculateBridgedAverageEfficiency(
+      allLogs,
+      inPeriodFuelLogIds
+    )
+
+    // bの区間: 距離250 ／ 給油量は継ぎ足し3.0Lを含む 12.4+3.0=15.4L
+    expect(result).toBeCloseTo(250 / (12.4 + 3.0))
+  })
+
+  test('境界より前に満タン給油が無い場合、期間先頭は従来どおり初回給油扱いになる', () => {
+    const allLogs = [
+      {
+        fuelLogId: 'b',
+        mileage: 12750,
+        amount: 12.4,
+        isFullTank: true,
+        refueledAt: '2024-02-01T09:00:00',
+      },
+      {
+        fuelLogId: 'c',
+        mileage: 13010,
+        amount: 11.8,
+        isFullTank: true,
+        refueledAt: '2024-03-01T09:00:00',
+      },
+    ]
+    const inPeriodFuelLogIds = new Set(['b', 'c'])
+
+    const result = calculateBridgedAverageEfficiency(
+      allLogs,
+      inPeriodFuelLogIds
+    )
+
+    expect(result).toBeCloseTo(260 / 11.8)
+  })
+
+  test('算出できる区間が1件も無い場合はnull', () => {
+    const allLogs = [
+      {
+        fuelLogId: 'a',
+        mileage: 12500,
+        amount: 11.2,
+        isFullTank: true,
+        refueledAt: '2024-01-01T09:00:00',
+      },
+    ]
+
+    expect(
+      calculateBridgedAverageEfficiency(allLogs, new Set(['a']))
+    ).toBeNull()
+  })
+
+  test('空配列はnull', () => {
+    expect(calculateBridgedAverageEfficiency([], new Set())).toBeNull()
+  })
+
+  test('同一mileageの給油ログが複数ある場合、refueledAt昇順でタイブレークする（サーバーと同じ規則）', () => {
+    // 回帰再現（Issue #575 レビュー指摘）: サーバー（PrismaFuelInsightRepository.
+    // getFuelInsight）は mileage 昇順に加えて refueledAt 昇順でタイブレークして
+    // いるが、クライアント側は従来 mileage のみでソートしておりタイブレーク
+    // 規則が無かった。mileageが同値のログが複数あると、どちらを先に区間判定
+    // するかで「距離0区間」（満タン法では null 扱いになり、その給油量も次の
+    // 区間へ繰り越されず捨てられる）になる側が変わり、平均燃費の値自体が
+    // 変わってしまう（後述のとおり b が先なら 26.5625、c が先なら 30.357…）。
+    // これがサーバー表示値とクライアント表示値の食い違いの原因だった。
+    const allLogs = [
+      {
+        fuelLogId: 'a',
+        mileage: 12500,
+        amount: 11.2,
+        isFullTank: true,
+        refueledAt: '2024-01-01T09:00:00',
+      },
+      // 入力順をrefueledAtの昇順と逆にしても、ソートが正しくタイブレーク
+      // すれば結果は変わらないことを確認する（入力順に依存しないことの検証）
+      {
+        fuelLogId: 'c',
+        mileage: 12750,
+        amount: 5.0,
+        isFullTank: true,
+        refueledAt: '2024-02-10T09:00:00',
+      },
+      {
+        fuelLogId: 'b',
+        mileage: 12750,
+        amount: 7.4,
+        isFullTank: true,
+        refueledAt: '2024-02-01T09:00:00',
+      },
+      {
+        fuelLogId: 'd',
+        mileage: 13010,
+        amount: 11.8,
+        isFullTank: true,
+        refueledAt: '2024-03-01T09:00:00',
+      },
+    ]
+    const inPeriodFuelLogIds = new Set(['b', 'c', 'd'])
+
+    const result = calculateBridgedAverageEfficiency(
+      allLogs,
+      inPeriodFuelLogIds
+    )
+
+    // refueledAtが早いbを先に区間判定すると、a→b: 距離250・給油7.4L、
+    // b→c: 距離0（同一mileage）で満タン法上は無効な区間となりcの給油量5.0Lは
+    // 捨てられる、c→d: 距離260・給油11.8L → 有効な区間はb・dのみ
+    expect(result).toBeCloseTo((250 + 260) / (7.4 + 11.8))
   })
 })

@@ -1,7 +1,7 @@
 /*
  * 愛車の詳細（カルテ）ページ全体のレイアウト。
  * 「手帳であって管理画面ではない」（Issue #575「03 再設計の原則」）ため、
- * PCの広い紙面でも1カラムのまま間延びさせず、諸元は2列・計器は横並びで
+ * PCの広い紙面でも1カラムのまま間延びさせず、車両情報は2列・計器は横並びで
  * 密度を作る。そのため本文の最大幅はダッシュボードよりもだいぶ狭く抑える。
  */
 .page {
@@ -11,6 +11,42 @@
   flex-direction: column;
   gap: var(--spacing-5);
   padding-bottom: var(--spacing-8);
+}
+
+/*
+ * PC幅（1024px〜）は紙面をもっと広く使う（Issue #575「05 画面案 ─ PC」）。
+ * タブレット幅（640〜1023px）はモバイルと同じ640pxのまま据え置く。
+ * 900px は共通トークン `--app-page-w`（1200px、`app/globals.css`）の75%。
+ * 画面ごとに独立した値を書かず、この1本のトークンの倍数で決めることで、
+ * 改修済み画面どうしで右端の基準がばらつかないようにする。
+ */
+@media (min-width: 1024px) {
+  .page {
+    max-width: calc(var(--app-page-w) * 0.75);
+  }
+}
+
+/* モバイル/タブレットのみ表示（PCでは同じ内容をPC向けの構成に差し替える） */
+.mobileOnly {
+}
+
+@media (min-width: 1024px) {
+  .mobileOnly {
+    display: none;
+  }
+}
+
+/* PC（1024px〜）のみ表示 */
+.desktopOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktopOnly {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+  }
 }
 
 .centerMessage {

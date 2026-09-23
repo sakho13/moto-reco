@@ -9,7 +9,9 @@ import type {
   SuccessResponse,
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
+import styles from './page.module.css'
 import { InfoBox } from '@/components/bike/InfoBox'
+import { TouringLedgerSection } from '@/components/bike/TouringLedgerSection'
 import { TouringListSection } from '@/components/touring/TouringListSection'
 import { authenticatedFetch } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -67,9 +69,9 @@ function TouringsPage() {
 
   if (isLoading && !tourings) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-100">
-          <p className="text-lg">読み込み中...</p>
+      <div className={styles.fallback}>
+        <div className={styles.loadingBox}>
+          <p className={styles.loadingText}>読み込み中...</p>
         </div>
       </div>
     )
@@ -77,8 +79,8 @@ function TouringsPage() {
 
   if (error) {
     return (
-      <>
-        <div className="mb-4">
+      <div className={styles.fallback}>
+        <div className={styles.errorActions}>
           <Button
             onClick={() => router.push(`/app/my-bike/${bikeId}`)}
             variant="cloud"
@@ -86,24 +88,25 @@ function TouringsPage() {
             ← 戻る
           </Button>
         </div>
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">
+
+        <div className={styles.errorBox}>
+          <h1 className={styles.errorTitle}>エラー</h1>
+          <p className={styles.errorMessage}>
             {error instanceof ApiV1Error
               ? error.message
               : 'ツーリング履歴の取得に失敗しました'}
           </p>
           <Button onClick={() => router.push(`/app/my-bike/${bikeId}`)}>
-            バイク詳細に戻る
+            愛車に戻る
           </Button>
         </div>
-      </>
+      </div>
     )
   }
 
   return (
     <>
-      <div className="w-full max-w-md flex flex-row gap-2">
+      <div className={`${styles.topBar} flex flex-row flex-wrap gap-2`}>
         <Button
           onClick={() => router.push(`/app/my-bike/${bikeId}`)}
           variant="cloud"
@@ -121,18 +124,24 @@ function TouringsPage() {
         </Button>
       </div>
 
-      <InfoBox variant="info" className="w-full max-w-md mt-3 text-sm">
+      <InfoBox variant="info" className={`${styles.info} mt-3 text-sm`}>
         開始・終了地点の位置情報は本人のみ閲覧でき、他のユーザーには公開されません。
       </InfoBox>
 
-      <div className="w-full max-w-md mt-3">
-        <TouringListSection
-          tourings={sortedTourings}
-          onDetail={handleDetail}
-          onRegister={handleRegisterHistory}
-          onSearch={setKeyword}
-          isSearchActive={keyword.length > 0}
-        />
+      <div className={`${styles.listLayout} mt-3`}>
+        <div className={styles.mobileOnly}>
+          <TouringListSection
+            tourings={sortedTourings}
+            onDetail={handleDetail}
+            onRegister={handleRegisterHistory}
+            onSearch={setKeyword}
+            isSearchActive={keyword.length > 0}
+          />
+        </div>
+
+        <div className={styles.desktopOnly}>
+          <TouringLedgerSection bikeId={bikeId} onSelect={handleDetail} />
+        </div>
       </div>
     </>
   )

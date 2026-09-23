@@ -1,0 +1,46 @@
+/*
+ * 愛車のカルテ（PC）の燃費グラフ。
+ * 「枠付きパネルではなく方眼紙に線を引く」（Issue #575「05 画面案 ─ PC」愛車）。
+ * `packages/ui` の `FuelEfficiencyChart` 自体は変更せず、直下の1要素
+ * （`chartContainer`）の枠・背景・角丸だけをページ側から打ち消し、
+ * 方眼の背景に差し替える。内蔵の見出し（h2「燃費推移グラフ」）は非表示にし、
+ * 代わりに `.title` を使う。
+ */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  color: var(--color-ink);
+}
+
+.gridPaper {
+  background-image:
+    linear-gradient(var(--color-cloud) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-cloud) 1px, transparent 1px);
+  background-size: 24px 24px;
+  border-radius: var(--radius-md);
+}
+
+.gridPaper > div {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.gridPaper h2 {
+  display: none;
+}
+
+.empty {
+  padding: var(--spacing-6) 0;
+  text-align: center;
+  color: var(--color-inkLight);
+}

@@ -13,6 +13,7 @@ import type {
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
+import { MaintenanceLedgerSection } from '@/components/bike/MaintenanceLedgerSection'
 import { MaintenanceLogByItemSection } from '@/components/maintenance-log/MaintenanceLogByItemSection'
 import { MaintenanceLogEditModal } from '@/components/maintenance-log/MaintenanceLogEditModal'
 import { MaintenanceLogListSection } from '@/components/maintenance-log/MaintenanceLogListSection'
@@ -83,9 +84,9 @@ function MaintenanceLogsPage() {
 
   if (isLoading && !data) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-100">
-          <p className="text-lg">読み込み中...</p>
+      <div className={styles.fallback}>
+        <div className={styles.loadingBox}>
+          <p className={styles.loadingText}>読み込み中...</p>
         </div>
       </div>
     )
@@ -93,8 +94,8 @@ function MaintenanceLogsPage() {
 
   if (error) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="mb-4">
+      <div className={styles.fallback}>
+        <div className={styles.errorActions}>
           <Button
             onClick={() => router.push(`/app/my-bike/${bikeId}`)}
             variant="cloud"
@@ -103,15 +104,15 @@ function MaintenanceLogsPage() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-          <h1 className="text-2xl font-bold mb-4 text-red-600">エラー</h1>
-          <p className="text-gray-700 mb-4">
+        <div className={styles.errorBox}>
+          <h1 className={styles.errorTitle}>エラー</h1>
+          <p className={styles.errorMessage}>
             {error instanceof ApiV1Error
               ? error.message
               : 'メンテナンス履歴の取得に失敗しました'}
           </p>
           <Button onClick={() => router.push(`/app/my-bike/${bikeId}`)}>
-            バイク詳細に戻る
+            愛車に戻る
           </Button>
         </div>
       </div>
@@ -162,7 +163,7 @@ function MaintenanceLogsPage() {
         />
       )}
 
-      <div className="w-full max-w-md flex flex-row gap-2">
+      <div className={`${styles.topBar} flex flex-row flex-wrap gap-2`}>
         <Button
           onClick={() => router.push(`/app/my-bike/${bikeId}`)}
           variant="cloud"
@@ -176,7 +177,7 @@ function MaintenanceLogsPage() {
       </div>
 
       {/* ビュー切替タブ */}
-      <div className={`w-full max-w-md ${styles.viewToggle}`}>
+      <div className={`${styles.topBar} ${styles.viewToggle} mt-3`}>
         <button
           className={`${styles.toggleButton} ${viewMode === 'date' ? styles.active : ''}`}
           onClick={() => setViewMode('date')}
@@ -191,28 +192,47 @@ function MaintenanceLogsPage() {
         </button>
       </div>
 
-      <div className="w-full max-w-md">
+      <div className={`${styles.listLayout} mt-3`}>
         {viewMode === 'date' ? (
-          <MaintenanceLogListSection
-            logs={logs}
-            onEdit={handleEdit}
-            onRegister={() => setIsRegisterModalOpen(true)}
-            onLoadMore={() => setSize(size + 1)}
-            canLoadMore={canLoadMore}
-            isLoadingMore={isLoadingMore}
-            onSearch={handleSearch}
-            isSearchActive={keyword.length > 0}
-          />
+          <>
+            <div className={styles.mobileOnly}>
+              <MaintenanceLogListSection
+                logs={logs}
+                onEdit={handleEdit}
+                onRegister={() => setIsRegisterModalOpen(true)}
+                onLoadMore={() => setSize(size + 1)}
+                canLoadMore={canLoadMore}
+                isLoadingMore={isLoadingMore}
+                onSearch={handleSearch}
+                isSearchActive={keyword.length > 0}
+              />
+            </div>
+            <div className={styles.desktopOnly}>
+              <MaintenanceLedgerSection bikeId={bikeId} onSelect={handleEdit} />
+            </div>
+          </>
         ) : isAllLoading ? (
           <div className="flex items-center justify-center p-8">
             <p>読み込み中...</p>
           </div>
         ) : (
-          <MaintenanceLogByItemSection
-            logs={allLogs ?? []}
-            currentMileage={bikeData?.totalMileage}
-            onRegister={() => setIsRegisterModalOpen(true)}
-          />
+          <>
+            <div className={styles.mobileOnly}>
+              <MaintenanceLogByItemSection
+                logs={allLogs ?? []}
+                currentMileage={bikeData?.totalMileage}
+                onRegister={() => setIsRegisterModalOpen(true)}
+              />
+            </div>
+            <div className={styles.desktopOnly}>
+              <MaintenanceLogByItemSection
+                logs={allLogs ?? []}
+                currentMileage={bikeData?.totalMileage}
+                onRegister={() => setIsRegisterModalOpen(true)}
+                noBorder
+              />
+            </div>
+          </>
         )}
       </div>
     </>

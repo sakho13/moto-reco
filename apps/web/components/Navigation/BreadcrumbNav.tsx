@@ -19,21 +19,23 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
   const items: BreadcrumbItem[] = []
 
   if (segments[1] === 'my-bike') {
-    items.push({ label: '愛車', href: '/app/my-bike' })
-
-    if (segments.length >= 3) {
-      items.push({ label: 'バイク詳細', href: `/app/my-bike/${segments[2]}` })
-    }
+    const bikeId = segments[2]
+    const detailHref = bikeId ? `/app/my-bike/${bikeId}` : undefined
+    // 愛車の詳細は一覧を廃して直行するため、詳細ページ自体は
+    // 「愛車」の単一階層で表す（「バイク詳細」という別階層は作らない）
+    const isDetailPage = segments.length === 3
 
     if (segments[3] === 'edit') {
+      items.push({ label: '愛車', href: detailHref })
       items.push({ label: '編集' })
       return items
     }
 
     if (segments[3] === 'fuel-logs') {
+      items.push({ label: '愛車', href: detailHref })
       items.push({
         label: '給油履歴',
-        href: `/app/my-bike/${segments[2]}/fuel-logs`,
+        href: `/app/my-bike/${bikeId}/fuel-logs`,
       })
       if (segments[4] === 'register') {
         items.push({ label: '登録' })
@@ -44,27 +46,53 @@ function buildBreadcrumbs(pathname: string): BreadcrumbItem[] {
     }
 
     if (segments[3] === 'goods') {
-      items.push({ label: '取り付けアクセサリ' })
+      items.push({ label: '愛車', href: detailHref })
+      // 愛車カルテの行リンク（`BikeRecordLinks`）・グローバルの `/app/goods`
+      // パンくず（後述）と同じ「グッズ」に統一する（以前は「取り付けアクセサリ」
+      // という別名だった）
+      items.push({ label: 'グッズ' })
       return items
     }
 
-    if (segments[3] === 'tourings') {
+    if (segments[3] === 'maintenance-logs') {
+      items.push({ label: '愛車', href: detailHref })
+      items.push({ label: 'メンテナンス履歴' })
+      return items
+    }
+
+    if (segments[3] === 'touring-plans') {
+      items.push({ label: '愛車', href: detailHref })
       items.push({
-        label: 'ツーリング一覧',
-        href: `/app/my-bike/${segments[2]}/tourings`,
+        label: 'ツーリングプラン一覧',
+        href: `/app/my-bike/${bikeId}/touring-plans`,
       })
+      // 子階層は「給油履歴 / 登録 / 編集」と同じく接頭辞を繰り返さない
+      // （以前は「ツーリングプラン登録」のように親と同じ名詞を重ねていた）
       if (segments[4] === 'register') {
-        items.push({ label: 'ツーリング登録' })
+        items.push({ label: '登録' })
       } else if (segments[4]) {
-        items.push({ label: 'ツーリング詳細' })
+        items.push({ label: '詳細' })
       }
       return items
     }
 
-    if (segments.length === 3) {
-      items[items.length - 1] = { label: 'バイク詳細' }
+    if (segments[3] === 'tourings') {
+      items.push({ label: '愛車', href: detailHref })
+      items.push({
+        label: 'ツーリング一覧',
+        href: `/app/my-bike/${bikeId}/tourings`,
+      })
+      // 子階層は「給油履歴 / 登録 / 編集」と同じく接頭辞を繰り返さない
+      // （以前は「ツーリング登録」のように親と同じ名詞を重ねていた）
+      if (segments[4] === 'register') {
+        items.push({ label: '登録' })
+      } else if (segments[4]) {
+        items.push({ label: '詳細' })
+      }
+      return items
     }
 
+    items.push({ label: '愛車', href: isDetailPage ? undefined : detailHref })
     return items
   }
 
@@ -146,11 +174,17 @@ export function BreadcrumbNav() {
           return (
             <li key={`${item.label}-${index}`} className={styles.item}>
               {item.href && !isLast ? (
-                <Link href={item.href} className={styles.link}>
+                <Link
+                  href={item.href}
+                  className={`${styles.label} ${styles.link}`}
+                >
                   {item.label}
                 </Link>
               ) : (
-                <span aria-current={isLast ? 'page' : undefined}>
+                <span
+                  className={styles.label}
+                  aria-current={isLast ? 'page' : undefined}
+                >
                   {item.label}
                 </span>
               )}

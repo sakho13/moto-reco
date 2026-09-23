@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatDate,
   formatInUserTimezone,
   formatPlanSpotOffsetMinutes,
   getNowLocalDateTimeString,
@@ -7,6 +8,20 @@ import {
   isUnsetDate,
   toLocalDateTimeString,
 } from '@repo/shared-utils'
+
+describe('formatDate', () => {
+  it('yyyy年M月d日 形式の文字列を返す', () => {
+    expect(formatDate('2024-05-18T00:00:00')).toBe('2024年5月18日')
+  })
+
+  it('一桁の月・日はゼロ埋めしない', () => {
+    expect(formatDate('2026-01-05T00:00:00')).toBe('2026年1月5日')
+  })
+
+  it('Date オブジェクトを受け取れる', () => {
+    expect(formatDate(new Date(2026, 8, 17))).toBe('2026年9月17日')
+  })
+})
 
 describe('toLocalDateTimeString', () => {
   it('UTC ISO 文字列をブラウザローカルタイムの datetime-local 形式に変換する', () => {
@@ -134,11 +149,14 @@ describe('isUnsetDate', () => {
     expect(isUnsetDate(new Date('1970-01-01T00:00:00.000Z'))).toBe(true)
   })
 
-  it('タイムゾーンのずれで生じる1969-12-31や1970-01-01 09:00も未設定と判定される', () => {
-    // JSTで1970-01-01 09:00:00 として保存された場合のUTC表現
-    expect(isUnsetDate('1970-01-01T09:00:00.000Z')).toBe(true)
-    // タイムゾーンのずれで1969-12-31になるケース
-    expect(isUnsetDate('1969-12-31T15:00:00.000Z')).toBe(true)
+  it('UTCエポックのミリ秒値と厳密一致しない場合は未設定と判定されない', () => {
+    // 回帰再現（Issue #575 レビュー指摘）: 以前はUTCエポックの前後1日を
+    // 許容範囲としていたため、時刻成分が0時ちょうどでない
+    // 1970-01-01T09:00:00.000Zや1969-12-31T15:00:00.000Zも「未設定」と
+    // 誤判定していた。エポックのミリ秒値そのものと厳密一致する場合のみを
+    // 未設定とみなすよう判定を絞ったため、これらは未設定と判定されない。
+    expect(isUnsetDate('1970-01-01T09:00:00.000Z')).toBe(false)
+    expect(isUnsetDate('1969-12-31T15:00:00.000Z')).toBe(false)
   })
 
   it('通常の日付は未設定と判定されない', () => {
@@ -151,6 +169,20 @@ describe('isUnsetDate', () => {
     // 表示が消えるだけでなく編集時に実データまで消去されてしまう
     expect(isUnsetDate('1960-05-18T00:00:00.000Z')).toBe(false)
     expect(isUnsetDate(new Date('1969-06-01T00:00:00.000Z'))).toBe(false)
+  })
+
+  it('エポック隣接日（1969-12-31・1970-01-02）ちょうど0時の実際の購入日は未設定と判定されない', () => {
+    // 回帰再現（Issue #575 レビュー指摘）: 購入日欄は<input type="date">
+    // （日付のみ）由来のため、実際の値は常にUTC 0時ちょうどになる。以前は
+    // エポックの前後1日を丸ごと「未設定」扱いにしていたため、1969-12-31や
+    // 1970-01-02を実際の購入日とする車両で、編集モーダルの日付欄が空欄になり
+    // 他の項目だけ保存するとpurchaseDate: nullが送信されて実データが消えて
+    // いた。<input type="date">が生成する値と同じ「日付のみ・0時ちょうど」の
+    // 形式で検証する。
+    expect(isUnsetDate('1969-12-31T00:00:00.000Z')).toBe(false)
+    expect(isUnsetDate(new Date('1969-12-31T00:00:00.000Z'))).toBe(false)
+    expect(isUnsetDate('1970-01-02T00:00:00.000Z')).toBe(false)
+    expect(isUnsetDate(new Date('1970-01-02T00:00:00.000Z'))).toBe(false)
   })
 
   it('不正な日付文字列は未設定として扱わない', () => {

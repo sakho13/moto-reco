@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { mutate } from 'swr'
-import { ApiV1Error } from '@repo/shared-domain'
+import { AccountLimitsValue, ApiV1Error } from '@repo/shared-domain'
 import { getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
@@ -42,6 +42,11 @@ export function HomeActions() {
     isGuest && (activeBike?.fuelLogCount ?? 0) >= GUEST_ACCOUNT_LIMITS.FUEL_LOG
   const isAtGuestTouringLimit =
     isGuest && (activeBike?.touringCount ?? 0) >= GUEST_ACCOUNT_LIMITS.TOURING
+  // 上限案内の文言は `AccountLimitsValue`（実際に登録APIが上限超過時に返す
+  // メッセージと同じ生成元）を唯一の出所にする。以前はこのファイルで
+  // 「ゲストアカウントは給油履歴を5件まで登録できます。」のように文言を
+  // 個別に組んでおり、句読点の有無などサーバー側のメッセージと揃っていなかった。
+  const guestLimits = AccountLimitsValue.from('GUEST', null)
 
   const handleStartTouring = async (startMileage?: number) => {
     if (!activeBike) return
@@ -159,7 +164,16 @@ export function HomeActions() {
         <FuelLogRegisterModal
           bikeId={activeBike.myUserBikeId}
           onClose={() => setIsFuelModalOpen(false)}
-          onSuccess={() => setIsFuelModalOpen(false)}
+          onSuccess={() => {
+            setIsFuelModalOpen(false)
+            // 給油登録はモーダル内で給油履歴・燃費インサイトのSWRキーを再検証
+            // するが、`activeBike`（このコンポーネントが `isAtGuestFuelLimit`
+            // 判定に使う `fuelLogCount` の取得元）は再検証されない。ホーム画面
+            // から離脱せずに給油登録を繰り返すと、古い `fuelLogCount` のまま
+            // ゲストの給油上限を超えて登録できてしまうため、`BikePrimaryAction`
+            // と同様にここで明示的に再検証する（Issue #575 レビュー指摘）。
+            void mutate('/api/v1/user-bike/bikes')
+          }}
         />
       )}
 
@@ -178,8 +192,7 @@ export function HomeActions() {
       </Button>
       {isAtGuestFuelLimit && (
         <p className={styles.limitNote}>
-          ゲストアカウントは給油履歴を{GUEST_ACCOUNT_LIMITS.FUEL_LOG}
-          件まで登録できます。
+          {guestLimits.limitMessage('fuelLog')}
         </p>
       )}
 
@@ -199,8 +212,7 @@ export function HomeActions() {
       </Button>
       {isAtGuestTouringLimit && (
         <p className={styles.limitNote}>
-          ゲストアカウントはツーリングを{GUEST_ACCOUNT_LIMITS.TOURING}
-          件まで登録できます。
+          {guestLimits.limitMessage('touring')}
         </p>
       )}
 
