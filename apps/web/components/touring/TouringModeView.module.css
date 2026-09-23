@@ -17,15 +17,13 @@
    ======================================== */
 
 .container {
-  /* ライトモード: 白カード + グレーサーフェスで階層を明確に */
-  --card-bg: var(--color-background); /* #FFFFFF */
-  --card-surface: var(--color-cloud); /* #F7F7F7 — 内側要素の背景 */
-  --card-border: var(
-    --color-cloudActive
-  ); /* #CFCFCF — コントラスト強めの境界線 */
-  --card-text: var(--color-inkDark); /* #0B0C0F — 最大コントラスト */
-  --card-text-muted: var(--color-ink); /* #324256 — セカンダリ */
-  --card-text-dim: var(--color-inkLight); /* #4E5C6F — ターシャリ */
+  /* カード内の面・文字の呼び名。参照先はすべてテーマトークン */
+  --card-bg: var(--color-background);
+  --card-surface: var(--color-cloud);
+  --card-border: var(--color-cloudActive);
+  --card-text: var(--color-inkDark);
+  --card-text-muted: var(--color-ink);
+  --card-text-dim: var(--color-inkLight);
 
   position: relative;
   width: 100%;
@@ -39,14 +37,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
-}
-
-/* ダークモード: 専用ダークサーフェスで上書き（cloud=#676767は使えないため） */
-html[data-theme-mode='dark'] .container {
-  --card-bg: #1e293b;
-  --card-surface: #273548;
-  --card-border: rgba(255, 255, 255, 0.1);
-  /* --card-text 系は var(--color-ink*) がダーク値に自動切替するためそのまま */
 }
 
 /* ========================================
