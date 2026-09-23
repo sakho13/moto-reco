@@ -231,7 +231,7 @@ function SortableTimelineRow({ item, badge }: SortableTimelineRowProps) {
           <button
             {...attributes}
             {...listeners}
-            className={`${styles.editButton} cursor-grab active:cursor-grabbing shrink-0`}
+            className={`${styles.dragHandle} cursor-grab active:cursor-grabbing shrink-0`}
             aria-label="ドラッグして並び替え"
           >
             <DragHandleIcon />
