@@ -1,49 +1,45 @@
+/*
+ * タブの見た目は「受け皿（トレイ）に選択中のタブだけが板として載っている」構造で作る。
+ * 面の色・文字色はすべてテーマトークンに寄せてある。
+ * テーマを切り替えるとトークンの値そのものが差し替わるため、
+ * CSS側でテーマモードを条件に値を出し分ける記述は書かない。
+ */
+
 .list {
   display: inline-flex;
-  background: rgba(23, 23, 23, 0.06);
-  border-radius: 8px;
-  padding: 4px;
-  gap: 2px;
-  margin-bottom: 16px;
+  /* 一段凹んだ受け皿。地色（--color-background）とは別の面であることを示す */
+  background: var(--color-cloud);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-1);
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-4);
 }
 
 .trigger {
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  /* button 要素は font-family を継承しないため、明示しないとUA既定の書体になる */
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
   border: none;
   background: transparent;
-  color: rgba(23, 23, 23, 0.6);
+  color: var(--color-inkLight);
   cursor: pointer;
-  transition: all 0.15s ease;
-  line-height: 1.5;
+  transition: all var(--transition-fast);
 }
 
 .trigger:hover {
-  color: rgba(23, 23, 23, 0.9);
+  color: var(--color-ink);
 }
 
 .trigger.active {
-  background: #fff;
-  color: rgba(23, 23, 23, 0.95);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-html[data-theme-mode='dark'] .list {
-  background: rgba(237, 237, 237, 0.08);
-}
-
-html[data-theme-mode='dark'] .trigger {
-  color: rgba(237, 237, 237, 0.5);
-}
-
-html[data-theme-mode='dark'] .trigger:hover {
-  color: rgba(237, 237, 237, 0.85);
-}
-
-html[data-theme-mode='dark'] .trigger.active {
-  background: rgba(237, 237, 237, 0.1);
-  color: rgba(237, 237, 237, 0.95);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  /*
+   * 選択中のタブだけを地色（＝直下のパネルと同じ面）にすることで、
+   * 受け皿から一枚浮いてパネルとつながって見せる。
+   */
+  background: var(--color-background);
+  color: var(--color-inkDark);
+  box-shadow: var(--shadow-sm);
 }
