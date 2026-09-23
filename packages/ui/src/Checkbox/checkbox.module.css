@@ -40,8 +40,8 @@
 
 .labelText {
   color: var(--color-ink);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
 }
 
 .helperText {
