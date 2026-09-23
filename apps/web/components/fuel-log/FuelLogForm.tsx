@@ -10,6 +10,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
 import { ToggleSection } from '@repo/ui/toggleSection'
+import styles from './FuelLogForm.module.css'
 
 export interface FuelLogFormData {
   refueledAt: string
@@ -82,14 +83,7 @@ export const FuelLogForm = ({
     Number(formData.mileage) <= totalMileage
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--spacing-4)',
-      }}
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col">
       <FormField label="給油日時" htmlFor="refueledAt" required>
         <DateTimeInput
           id="refueledAt"
@@ -143,6 +137,7 @@ export const FuelLogForm = ({
       <ToggleSection
         title={`前回の走行距離: ${formData.previousMileage.toLocaleString()} km（自動設定）`}
         defaultOpen={false}
+        className={styles.toggleSection}
       >
         <FormField
           label="前回の給油時走行距離 (km)"

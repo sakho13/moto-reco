@@ -89,6 +89,10 @@
   background: var(--color-cloud);
 }
 
+.cardImageFit {
+  object-fit: contain;
+}
+
 .cardImagePlaceholder {
   color: var(--color-inkLight);
   opacity: 0.5;

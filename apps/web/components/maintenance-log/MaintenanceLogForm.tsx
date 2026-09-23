@@ -10,6 +10,7 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Textarea } from '@repo/ui/textarea'
+import styles from './MaintenanceLogForm.module.css'
 import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 
 export type MaintenanceLogFormData = {
@@ -99,14 +100,7 @@ export const MaintenanceLogForm = ({
   }))
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--spacing-4)',
-      }}
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col">
       <FormField label="実施日" htmlFor="performedAt" required>
         <DateInput
           id="performedAt"
@@ -150,48 +144,19 @@ export const MaintenanceLogForm = ({
         />
       </FormField>
 
-      <div>
-        <p
-          style={{
-            fontSize: 'var(--font-size-sm)',
-            fontWeight: 'var(--font-weight-medium)',
-            marginBottom: 'var(--spacing-2)',
-            color: 'var(--color-ink)',
-          }}
-        >
-          メンテナンス項目{' '}
-          <span style={{ color: 'var(--color-danger)' }}>*</span>
+      <div className={styles.itemsSection}>
+        <p className={styles.itemsLabel}>
+          メンテナンス項目
+          <span className={styles.itemsRequired} aria-label="必須">
+            *
+          </span>
         </p>
 
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--spacing-4)',
-          }}
-        >
+        <div className={styles.categories}>
           {itemsByCategory.map(({ category, label, items }) => (
             <div key={category}>
-              <p
-                style={{
-                  fontSize: 'var(--font-size-xs)',
-                  fontWeight: 'var(--font-weight-medium)',
-                  color: 'var(--color-ink)',
-                  opacity: 0.6,
-                  marginBottom: 'var(--spacing-1)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                {label}
-              </p>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: 'var(--spacing-1)',
-                }}
-              >
+              <p className={styles.categoryLabel}>{label}</p>
+              <div className={styles.categoryItems}>
                 {items.map((item) => (
                   <Checkbox
                     key={item.type}

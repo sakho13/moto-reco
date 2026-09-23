@@ -1,0 +1,11 @@
+.stepTitle {
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+.infoBoxTitle {
+  margin-bottom: var(--spacing-1);
+  font-weight: var(--font-weight-medium);
+}

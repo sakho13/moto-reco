@@ -144,7 +144,7 @@ export default async function PublicGoodsPage({
                       alt={model.name}
                       fill
                       sizes="(max-width: 900px) 100vw, 320px"
-                      style={{ objectFit: 'contain' }}
+                      className={styles.cardImageFit}
                       unoptimized
                     />
                   ) : (

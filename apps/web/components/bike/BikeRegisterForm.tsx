@@ -10,6 +10,7 @@ import { DateInput } from '@repo/ui/dateInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import styles from './BikeRegisterForm.module.css'
 import { InfoBox } from './InfoBox'
 import { apiGet } from '@/lib/api/client'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -98,25 +99,11 @@ export const BikeRegisterForm = ({
 
   return (
     <>
-      <h2
-        style={{
-          fontSize: 'var(--font-size-lg)',
-          fontWeight: 'var(--font-weight-bold)',
-          marginBottom: 'var(--spacing-4)',
-          color: 'var(--color-ink)',
-        }}
-      >
-        ステップ3: 登録情報を入力
-      </h2>
+      <h2 className={styles.stepTitle}>ステップ3: 登録情報を入力</h2>
 
       {selectedBike ? (
         <InfoBox variant="info">
-          <p
-            style={{
-              fontWeight: 'var(--font-weight-medium)',
-              marginBottom: 'var(--spacing-1)',
-            }}
-          >
+          <p className={styles.infoBoxTitle}>
             選択したバイク: {selectedBike.modelName}
           </p>
           <p>
@@ -125,30 +112,14 @@ export const BikeRegisterForm = ({
         </InfoBox>
       ) : (
         <InfoBox>
-          <p
-            style={{
-              fontWeight: 'var(--font-weight-medium)',
-              marginBottom: 'var(--spacing-1)',
-            }}
-          >
-            モデル未選択
-          </p>
+          <p className={styles.infoBoxTitle}>モデル未選択</p>
           <p>排気量を手動で入力してください</p>
         </InfoBox>
       )}
 
-      <InfoBox variant="info" style={{ marginTop: 'var(--spacing-4)' }}>
-        {bikeLimitText}
-      </InfoBox>
+      <InfoBox variant="info">{bikeLimitText}</InfoBox>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-4)',
-        }}
-      >
+      <form onSubmit={handleSubmit} className="flex flex-col">
         {!selectedBike && (
           <FormField label="排気量 (cc)" htmlFor="displacement" required>
             <Input

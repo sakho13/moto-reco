@@ -10,3 +10,8 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-ink);
 }
+
+/* フォーム外に置く削除ボタン。送信ボタンとの間隔を作る */
+.deleteButton {
+  margin-top: var(--spacing-2);
+}
