@@ -25,13 +25,7 @@
 }
 
 .closeButton {
-  /*
-   * `margin-left: auto` で常に右端に固定する。`.header` の
-   * `justify-content: space-between` は2要素前提だが、`hideTitleOnDesktop` で
-   * 見出し（h2）が非表示（display: none）になり実質1要素になった場合でも、
-   * auto marginがある要素は space-between による配置より優先されるため、
-   * 見出しの有無に関わらず閉じるボタンの位置がずれない。
-   */
+  /* auto margin は space-between より優先されるため、見出しが消えても右端に残る */
   margin-left: auto;
 }
 
