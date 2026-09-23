@@ -112,10 +112,10 @@ importers:
         version: 6.3.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@ant-design/v5-patch-for-react-19':
         specifier: 1.0.3
-        version: 1.0.3(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        version: 1.0.3(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@refinedev/antd':
         specifier: 6.0.3
-        version: 6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.103.1(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(dayjs@1.11.23)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        version: 6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.103.1(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(dayjs@1.11.23)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@refinedev/core':
         specifier: 5.0.12
         version: 5.0.12(@tanstack/react-query@5.103.1(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -144,8 +144,8 @@ importers:
         specifier: 5.103.1
         version: 5.103.1(react@19.2.1)
       antd:
-        specifier: 6.6.4
-        version: 6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: 6.6.5
+        version: 6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       axios:
         specifier: 1.20.0
         version: 1.20.0
@@ -3880,8 +3880,8 @@ packages:
     resolution: {integrity: sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA==}
     engines: {node: '>=10'}
 
-  antd@6.6.4:
-    resolution: {integrity: sha512-nKFi2oY+KrsfAkU8/KwgS0MPKpryIPTVIgoLQRGiT/BcCMakBf5+G8MPy90RdHjEwb0/bulNJV1dxLhHm9cg7w==}
+  antd@6.6.5:
+    resolution: {integrity: sha512-biJB/aORNU2lvZZCX783S/g8atfE8akrEKRjRrsXVttoMtJbSHLf/Z29niv0blzt6H3BgKvhkQgHoUn5MgCx7w==}
     peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -7213,16 +7213,16 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
-  '@ant-design/pro-layout@7.22.7(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@ant-design/pro-layout@7.22.7(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@ant-design/cssinjs': 1.24.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@ant-design/icons': 5.6.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@ant-design/pro-provider': 2.16.2(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@ant-design/pro-utils': 2.18.0(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@ant-design/pro-provider': 2.16.2(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@ant-design/pro-utils': 2.18.0(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@babel/runtime': 7.29.7
       '@umijs/route-utils': 4.0.3
       '@umijs/use-params': 1.0.9(react@19.2.1)
-      antd: 6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      antd: 6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       classnames: 2.5.1
       lodash: 4.17.21
       lodash-es: 4.18.1
@@ -7234,24 +7234,24 @@ snapshots:
       swr: 2.5.1(react@19.2.1)
       warning: 4.0.3
 
-  '@ant-design/pro-provider@2.16.2(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@ant-design/pro-provider@2.16.2(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@ant-design/cssinjs': 1.24.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@babel/runtime': 7.29.7
       '@ctrl/tinycolor': 3.6.1
-      antd: 6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      antd: 6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       dayjs: 1.11.23
       rc-util: 5.44.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       swr: 2.5.1(react@19.2.1)
 
-  '@ant-design/pro-utils@2.18.0(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@ant-design/pro-utils@2.18.0(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@ant-design/icons': 5.6.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@ant-design/pro-provider': 2.16.2(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@ant-design/pro-provider': 2.16.2(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@babel/runtime': 7.29.7
-      antd: 6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      antd: 6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       classnames: 2.5.1
       dayjs: 1.11.23
       lodash: 4.17.21
@@ -7271,9 +7271,9 @@ snapshots:
       react-dom: 19.2.1(react@19.2.1)
       throttle-debounce: 5.0.2
 
-  '@ant-design/v5-patch-for-react-19@1.0.3(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@ant-design/v5-patch-for-react-19@1.0.3(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
-      antd: 6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      antd: 6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
@@ -9114,16 +9114,16 @@ snapshots:
       react: 19.2.1
       react-redux: 9.3.0(@types/react@19.2.2)(react@19.2.1)(redux@5.0.1)
 
-  '@refinedev/antd@6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.103.1(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(dayjs@1.11.23)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@refinedev/antd@6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.103.1(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(dayjs@1.11.23)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@ant-design/icons': 5.6.1(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@ant-design/pro-layout': 7.22.7(antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@ant-design/pro-layout': 7.22.7(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@refinedev/core': 5.0.12(@tanstack/react-query@5.103.1(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@refinedev/ui-types': 2.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.103.1(react@19.2.1))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@tanstack/react-query': 5.103.1(react@19.2.1)
       '@types/react': 19.2.2
       '@types/react-dom': 19.2.2(@types/react@19.2.2)
-      antd: 6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      antd: 6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       dayjs: 1.11.23
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
@@ -10371,7 +10371,7 @@ snapshots:
 
   ansi-styles@5.2.0: {}
 
-  antd@6.6.4(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+  antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
     dependencies:
       '@ant-design/colors': 8.0.1
       '@ant-design/cssinjs': 2.1.2(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
