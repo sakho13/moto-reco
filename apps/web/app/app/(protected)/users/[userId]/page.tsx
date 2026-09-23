@@ -125,22 +125,26 @@ function UserPageContent() {
         }
       >
         <div className={styles.followStats}>
-          <button
-            className={styles.followStatButton}
-            onClick={() => changeTab('followers')}
+          <Link
+            href={`/app/users/${userId}?tab=followers`}
+            replace
+            scroll={false}
+            className={styles.followStatLink}
           >
             <span className={styles.followStatCount}>{data.followerCount}</span>{' '}
             フォロワー
-          </button>
-          <button
-            className={styles.followStatButton}
-            onClick={() => changeTab('following')}
+          </Link>
+          <Link
+            href={`/app/users/${userId}?tab=following`}
+            replace
+            scroll={false}
+            className={styles.followStatLink}
           >
             <span className={styles.followStatCount}>
               {data.followingCount}
             </span>{' '}
             フォロー中
-          </button>
+          </Link>
         </div>
       </BaseCard>
 

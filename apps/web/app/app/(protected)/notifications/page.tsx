@@ -9,6 +9,7 @@ import type {
 } from '@repo/shared-types'
 import { formatDateTime } from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
+import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
 import { authenticatedFetch } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
@@ -114,13 +115,14 @@ function NotificationsPage() {
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>通知</h1>
         {unreadCount > 0 && (
-          <button
+          <Button
             type="button"
-            className={styles.readAllBtn}
+            variant="quiet"
+            size="sm"
             onClick={handleMarkAllRead}
           >
             全て既読にする
-          </button>
+          </Button>
         )}
       </div>
 
