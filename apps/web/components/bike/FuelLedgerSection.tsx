@@ -8,6 +8,7 @@ import type {
   FuelLogPeriod,
   SuccessResponse,
 } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import { Select } from '@repo/ui/select'
 import type { SelectOption } from '@repo/ui/select'
 import { FuelLedgerList } from './FuelLedgerList'
@@ -133,29 +134,33 @@ export function FuelLedgerSection({ bikeId, onEdit }: Props) {
             onSearch={setKeyword}
             testId="fuel-ledger-search"
           />
-          <Select
-            id="fuel-ledger-period"
-            aria-label="期間"
-            className={styles.periodSelect}
-            options={PERIOD_OPTIONS}
-            value={period}
-            onChange={(event) => setPeriod(event.target.value as LedgerPeriod)}
-          />
+          <div className={styles.periodSelect}>
+            <Select
+              id="fuel-ledger-period"
+              aria-label="期間"
+              options={PERIOD_OPTIONS}
+              value={period}
+              onChange={(event) =>
+                setPeriod(event.target.value as LedgerPeriod)
+              }
+            />
+          </div>
         </div>
 
         <div className={styles.sortRow} role="group" aria-label="並べ替え">
           {SORT_ITEMS.map((item) => (
-            <button
+            <Button
               key={item.key}
               type="button"
-              className={
-                sortBy === item.key ? styles.sortBtnActive : styles.sortBtn
-              }
+              variant="quiet"
+              size="sm"
+              pill
+              aria-pressed={sortBy === item.key}
               onClick={() => handleSortClick(item.key)}
             >
               {item.label}
               {sortBy === item.key ? (sortOrder === 'asc' ? ' ▲' : ' ▼') : ''}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

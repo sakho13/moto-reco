@@ -11,6 +11,7 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
+import styles from './RegisterCard.module.css'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
@@ -240,12 +241,10 @@ export function RegisterCard() {
         >
           登録する
         </Button>
-        <p className="mt-4 text-xs leading-relaxed text-gray-500">
+        <p className={styles.policyNote}>
           登録することで
           <Link
-            style={{
-              textDecoration: 'underline',
-            }}
+            className={styles.policyLink}
             href="/privacy-policy"
             target="_blank"
             rel="noreferrer"

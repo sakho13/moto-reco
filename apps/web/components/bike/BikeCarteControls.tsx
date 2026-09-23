@@ -1,6 +1,7 @@
 'use client'
 
 import type { FuelLogPeriod } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import { Select } from '@repo/ui/select'
 import styles from './BikeCarteControls.module.css'
 import { FUEL_LOG_PERIOD_OPTIONS } from '@/lib/statics'
@@ -28,26 +29,27 @@ export function BikeCarteControls({
 }: Props) {
   return (
     <div className={styles.bar} data-testid="bike-carte-controls">
-      <Select
-        id="bike-carte-period"
-        aria-label="期間"
-        className={styles.periodSelect}
-        options={FUEL_LOG_PERIOD_OPTIONS}
-        value={period}
-        onChange={(event) =>
-          onPeriodChange(event.target.value as FuelLogPeriod)
-        }
-      />
-      <button
+      <div className={styles.periodSelect}>
+        <Select
+          id="bike-carte-period"
+          aria-label="期間"
+          options={FUEL_LOG_PERIOD_OPTIONS}
+          value={period}
+          onChange={(event) =>
+            onPeriodChange(event.target.value as FuelLogPeriod)
+          }
+        />
+      </div>
+      <Button
         type="button"
-        className={
-          fullTankOnly ? `${styles.chip} ${styles.chipActive}` : styles.chip
-        }
+        variant="quiet"
+        size="sm"
+        pill
         aria-pressed={fullTankOnly}
         onClick={() => onFullTankOnlyChange(!fullTankOnly)}
       >
         満タンのみ
-      </button>
+      </Button>
     </div>
   )
 }

@@ -85,29 +85,34 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 
     return (
       <div className={styles.container}>
-        <select
-          ref={ref}
-          id={id}
-          className={selectClasses}
-          aria-invalid={error}
-          aria-describedby={helperTextId}
-          {...props}
-        >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
-          {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <div className={styles.selectWrap}>
+          <select
+            ref={ref}
+            id={id}
+            className={selectClasses}
+            aria-invalid={error}
+            aria-describedby={helperTextId}
+            {...props}
+          >
+            {placeholder && (
+              <option value="" disabled>
+                {placeholder}
+              </option>
+            )}
+            {options.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={option.disabled}
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <span aria-hidden="true" className={styles.arrow}>
+            ▾
+          </span>
+        </div>
         {helperText && (
           <p
             id={helperTextId}

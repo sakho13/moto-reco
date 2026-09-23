@@ -39,10 +39,6 @@
    * ここで対象を `fullWidth` 修飾クラスに絞ることで、行・カードなど
    * 「full-widthだが320pxに収めたくない非ボタン的なUI」は最初から対象外になり、
    * 個別の `!important` 打ち消しが不要になる。
-   *
-   * 例外: `components/touring/TouringDestinationWidget.module.css` の
-   * `.arrivalButton`（@repo/ui を使わない独自CSSの全幅ボタン）は、
-   * このセレクタでは対象外になるため、そのファイル側に個別の上限を持たせている。
    */
   .appRoot button[class*='fullWidth'] {
     max-width: 320px;

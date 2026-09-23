@@ -7,6 +7,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import styles from './ResetPasswordCard.module.css'
 import { useAuth } from '@/lib/hooks/useAuth'
 
 export function ResetPasswordCard() {
@@ -54,7 +55,7 @@ export function ResetPasswordCard() {
       )}
 
       {success && (
-        <div className="pb-2 text-sm text-green-600" role="status">
+        <div className={`pb-2 text-sm ${styles.successMessage}`} role="status">
           {success}
         </div>
       )}

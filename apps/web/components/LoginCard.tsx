@@ -10,6 +10,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import styles from './LoginCard.module.css'
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
@@ -307,9 +308,7 @@ export function LoginCard() {
           >
             <UserRound size={20} />
           </Button>
-          <span className="text-xs" style={{ color: 'var(--color-inkLight)' }}>
-            ゲスト
-          </span>
+          <span className={styles.guestLabel}>ゲスト</span>
         </div>
       </div>
     </BaseCard>

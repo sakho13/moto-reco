@@ -111,8 +111,14 @@
   margin-top: auto;
 }
 
+/*
+ * 外部リンクの申込導線。<a> のため @repo/ui の Button（<button> を描画）に
+ * 置き換えられない。隣に並ぶ「準備中」の Button（primary・md）と総高・字送りが
+ * ずれないよう、寸法は button.module.css の .primary / .md と同じ式で揃える。
+ */
 .cta {
   width: 100%;
+  min-height: 2.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -123,10 +129,12 @@
     rgba(0, 0, 0, 0.08)
   );
   color: var(--color-productInk);
-  padding: 14px 24px;
+  padding: calc(var(--spacing-3) - 1.5px) calc(var(--spacing-4) - 1.5px);
+  border: 1.5px solid transparent;
   border-radius: var(--radius-md);
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
   transition:
     background-color var(--transition-base),
     transform var(--transition-fast),
@@ -134,7 +142,6 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     0 2px 0 rgba(0, 0, 0, 0.32);
-  border: none;
   cursor: pointer;
 }
 
@@ -145,20 +152,6 @@
 .cta:active {
   transform: translateY(2px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.ctaDisabled {
-  background-color: var(--color-cloud);
-  background-image: none;
-  color: var(--color-inkLight);
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-.ctaDisabled:hover {
-  background-color: var(--color-cloud);
-  transform: none;
-  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

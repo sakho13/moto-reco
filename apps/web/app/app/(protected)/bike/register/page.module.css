@@ -1,0 +1,35 @@
+.page {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.backRow {
+  margin-bottom: var(--spacing-4);
+}
+
+.card {
+  padding: var(--spacing-6);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  margin-bottom: var(--spacing-6);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+.stepTitle {
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+/* Input は自前の下余白を持たないため、続く操作ボタンに間隔を与える */
+.stepAction {
+  margin-top: var(--spacing-4);
+}

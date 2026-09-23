@@ -1,7 +1,8 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  /* 遮蔽幕。地色の色相・彩度を受け継ぎ、明度だけ暗側に固定する */
+  background: oklch(from var(--color-background) 0.12 c h / 0.82);
   display: flex;
   align-items: stretch;
   justify-content: stretch;
@@ -10,7 +11,7 @@
 
 .modal {
   background: var(--color-background);
-  padding: 1.5rem;
+  padding: var(--spacing-6);
   width: 100%;
   height: 100%;
   overflow-y: auto;
@@ -20,40 +21,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-6);
 }
 
 .closeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /*
-   * `margin-left: auto` で常に右端に固定する。`.header` の
-   * `justify-content: space-between` は2要素前提だが、`hideTitleOnDesktop` で
-   * 見出し（h2）が非表示（display: none）になり実質1要素になった場合でも、
-   * auto marginがある要素は space-between による配置より優先されるため、
-   * 見出しの有無に関わらず閉じるボタンの位置がずれない。
-   */
+  /* auto margin は space-between より優先されるため、見出しが消えても右端に残る */
   margin-left: auto;
-  padding: 0.25rem;
-  border-radius: var(--radius-md);
-  color: var(--color-ink);
-  opacity: 0.5;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.15s;
 }
 
-.closeButton:hover {
-  opacity: 1;
+/* lucide の既定は24px角で、Button の iconSm（2rem角・枠線1.5px）の内寸を超える */
+.closeButton svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 @media (min-width: 768px) {
   .overlay {
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: var(--spacing-4);
   }
 
   .modal {
@@ -61,7 +47,7 @@
     max-width: 28rem;
     max-height: 90vh;
     border-radius: var(--radius-lg);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
   }
 
   .modalSm {

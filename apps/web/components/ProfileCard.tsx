@@ -44,12 +44,20 @@ export function ProfileCard() {
       <BaseCard title="プロフィール">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <div className="h-4 w-20 animate-pulse rounded bg-gray-200" />
-            <div className="h-9 w-full animate-pulse rounded bg-gray-200" />
+            <div
+              className={`h-4 w-20 animate-pulse rounded ${styles.skeleton}`}
+            />
+            <div
+              className={`h-9 w-full animate-pulse rounded ${styles.skeleton}`}
+            />
           </div>
           <div className="flex flex-col gap-1">
-            <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
-            <div className="h-9 w-full animate-pulse rounded bg-gray-200" />
+            <div
+              className={`h-4 w-32 animate-pulse rounded ${styles.skeleton}`}
+            />
+            <div
+              className={`h-9 w-full animate-pulse rounded ${styles.skeleton}`}
+            />
           </div>
         </div>
       </BaseCard>
@@ -87,22 +95,22 @@ export function ProfileCard() {
       >
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-500">名前</span>
+            <span className={styles.itemLabel}>名前</span>
             <span>{data?.name || '未設定'}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">通知メールアドレス</span>
+            <span className={styles.itemLabel}>通知メールアドレス</span>
             <span>{data?.notificationEmail || '未設定'}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">プロフィール公開</span>
+            <span className={styles.itemLabel}>プロフィール公開</span>
             <span>{data?.isProfilePublic ? '公開' : '非公開'}</span>
           </div>
           {data?.isProfilePublic && (
             <div className="pt-1">
               <Link
                 href={`/app/users/${data.userId}`}
-                className="text-blue-500 hover:underline"
+                className={`${styles.publicPageLink} hover:underline`}
               >
                 自分の公開ページを見る →
               </Link>

@@ -1,0 +1,4 @@
+/* FormField の下余白に揃え、折りたたみ節を1フィールド分として積む */
+.toggleSection {
+  margin-bottom: var(--spacing-5);
+}

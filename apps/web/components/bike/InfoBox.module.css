@@ -1,25 +1,26 @@
+/*
+ * 地色の面 + アクセントの枠線。ErrorMessage / GuestBanner と同じ様式。
+ */
+
 .infoBox {
   padding: var(--spacing-4);
   margin-bottom: var(--spacing-4);
-  border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
+  color: var(--color-ink);
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-cloudHover);
+  border-radius: var(--radius-md);
 }
 
 .infoBox.info {
-  background-color: oklch(from var(--color-product) l c h / 0.1);
-  border: 1px solid oklch(from var(--color-product) l c h / 0.3);
-  color: var(--color-productActive);
+  border-color: var(--color-product);
 }
 
 .infoBox.warning {
-  background-color: oklch(from var(--color-social) l c h / 0.1);
-  border: 1px solid oklch(from var(--color-social) l c h / 0.3);
-  color: var(--color-socialActive);
+  border-color: var(--color-warning);
 }
 
 .infoBox.error {
-  background-color: oklch(from var(--color-danger) l c h / 0.1);
-  border: 1px solid oklch(from var(--color-danger) l c h / 0.3);
-  color: var(--color-dangerActive);
+  border-color: var(--color-danger);
 }

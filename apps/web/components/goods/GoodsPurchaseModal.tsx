@@ -111,14 +111,7 @@ export function GoodsPurchaseModal({
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-4)',
-        }}
-      >
+      <form onSubmit={handleSubmit} className="flex flex-col">
         <FormField label="愛車" htmlFor="userMyBikeId">
           <Select
             id="userMyBikeId"

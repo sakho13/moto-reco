@@ -13,7 +13,7 @@ export class NotificationsPage {
   readonly page: Page
   readonly bellButton: Locator
   readonly notificationDropdown: Locator
-  readonly dropdownViewAllButton: Locator
+  readonly dropdownViewAllLink: Locator
   readonly dropdownMarkAllReadButton: Locator
   readonly pageHeading: Locator
   readonly emptyMessage: Locator
@@ -22,7 +22,7 @@ export class NotificationsPage {
     this.page = page
     this.bellButton = page.getByRole('button', { name: /通知/ }).first()
     this.notificationDropdown = page.getByRole('dialog', { name: '通知' })
-    this.dropdownViewAllButton = page.getByRole('button', {
+    this.dropdownViewAllLink = page.getByRole('link', {
       name: 'すべての通知を見る',
     })
     this.dropdownMarkAllReadButton = page.getByRole('button', {
@@ -48,7 +48,7 @@ export class NotificationsPage {
 
   /** 「すべての通知を見る」をクリックして通知ページへ遷移する */
   async viewAll(): Promise<void> {
-    await this.dropdownViewAllButton.click()
+    await this.dropdownViewAllLink.click()
     await this.page.waitForURL(/\/app\/notifications/, { timeout: 10_000 })
   }
 }

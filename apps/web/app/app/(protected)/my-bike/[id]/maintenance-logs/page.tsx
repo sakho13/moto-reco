@@ -177,19 +177,31 @@ function MaintenanceLogsPage() {
       </div>
 
       {/* ビュー切替タブ */}
-      <div className={`${styles.topBar} ${styles.viewToggle} mt-3`}>
-        <button
-          className={`${styles.toggleButton} ${viewMode === 'date' ? styles.active : ''}`}
+      <div
+        className={`${styles.topBar} ${styles.viewToggle} mt-3`}
+        role="group"
+        aria-label="表示の切り替え"
+      >
+        <Button
+          type="button"
+          variant={viewMode === 'date' ? 'primary' : 'quiet'}
+          size="sm"
+          aria-pressed={viewMode === 'date'}
+          className={styles.toggleButton}
           onClick={() => setViewMode('date')}
         >
           日付順
-        </button>
-        <button
-          className={`${styles.toggleButton} ${viewMode === 'item' ? styles.active : ''}`}
+        </Button>
+        <Button
+          type="button"
+          variant={viewMode === 'item' ? 'primary' : 'quiet'}
+          size="sm"
+          aria-pressed={viewMode === 'item'}
+          className={styles.toggleButton}
           onClick={() => setViewMode('item')}
         >
           項目別
-        </button>
+        </Button>
       </div>
 
       <div className={`${styles.listLayout} mt-3`}>

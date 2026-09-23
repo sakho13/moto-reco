@@ -8,6 +8,7 @@ import type {
   ApiResponsePhotoUploadUrl,
   SuccessResponse,
 } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './TouringPhotosCard.module.css'
 import { authenticatedFetch } from '@/lib/api/client'
@@ -16,7 +17,6 @@ type Props = {
   touringId: string
   cardClassName: string
   mutedTextClassName: string
-  editButtonClassName: string
 }
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const
@@ -29,7 +29,6 @@ export function TouringPhotosCard({
   touringId,
   cardClassName,
   mutedTextClassName,
-  editButtonClassName,
 }: Props) {
   const [isUploading, setIsUploading] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -131,15 +130,17 @@ export function TouringPhotosCard({
     <div className={cardClassName}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">写真</h2>
-        <button
+        <Button
+          type="button"
+          variant="quiet"
+          size="iconSm"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className={editButtonClassName}
           aria-label="写真を追加"
           title="写真を追加"
         >
           {isUploading ? '...' : '＋'}
-        </button>
+        </Button>
         <input
           ref={fileInputRef}
           type="file"

@@ -12,23 +12,11 @@
   gap: var(--spacing-2);
 }
 
-.dateChip {
+.dateChipLabel {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
-  padding: var(--spacing-1) var(--spacing-3);
-  background-color: var(--color-cloud);
-  border: 1px solid var(--color-cloudHover);
-  border-radius: var(--radius-full);
-  color: var(--color-ink);
-  font-size: var(--font-size-xs);
   font-variant-numeric: tabular-nums;
-  cursor: pointer;
-}
-
-.dateChip:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .dateChipChevron {
@@ -119,31 +107,6 @@
 .tankToggle {
   display: flex;
   gap: var(--spacing-1);
-}
-
-.tankChip {
-  padding: var(--spacing-1) var(--spacing-2);
-  background-color: transparent;
-  border: 1px solid var(--color-cloudHover);
-  border-radius: var(--radius-full);
-  color: var(--color-inkLight);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.tankChip:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.tankChipActive {
-  background-color: var(--color-cloud);
-  border-color: var(--color-cloudHover);
-  color: var(--color-ink);
-  font-weight: var(--font-weight-bold);
 }
 
 /* ---------- ライブ計器 ---------- */
@@ -263,14 +226,21 @@
   margin-left: auto;
 }
 
+/*
+ * 非インタラクティブな車両名バッジ。隣の日時チップ（@repo/ui の Button の
+ * cloud / sm / pill）と総高を揃えるため、寸法は button.module.css の
+ * .sm と同じ式（padding から枠線1.5pxを差し引く）にしている。
+ */
 .chip {
   display: inline-flex;
   align-items: center;
-  padding: var(--spacing-1) var(--spacing-3);
-  border: 1px solid var(--color-cloudHover);
+  min-height: 2rem;
+  padding: calc(var(--spacing-2) - 1.5px) calc(var(--spacing-3) - 1.5px);
+  border: 1.5px solid var(--color-cloudHover);
   border-radius: var(--radius-full);
   color: var(--color-inkLight);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
   white-space: nowrap;
 }
 

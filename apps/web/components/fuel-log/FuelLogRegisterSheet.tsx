@@ -369,40 +369,48 @@ export function FuelLogRegisterSheet({
       role="group"
       aria-label="満タン・継ぎ足しの切り替え"
     >
-      <button
+      <Button
         type="button"
+        variant="quiet"
+        size="sm"
+        pill
         aria-pressed={isFullTank}
-        className={`${styles.tankChip} ${isFullTank ? styles.tankChipActive : ''}`}
         onClick={() => setIsFullTank(true)}
         disabled={isSubmitting}
       >
         満タン
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="quiet"
+        size="sm"
+        pill
         aria-pressed={!isFullTank}
-        className={`${styles.tankChip} ${!isFullTank ? styles.tankChipActive : ''}`}
         onClick={() => setIsFullTank(false)}
         disabled={isSubmitting}
       >
         継ぎ足し
-      </button>
+      </Button>
     </div>
   )
 
   const dateChipButton = (
-    <button
+    <Button
       type="button"
-      className={styles.dateChip}
+      variant="cloud"
+      size="sm"
+      pill
       aria-expanded={isDateEditorOpen}
       onClick={() => setIsDateEditorOpen((v) => !v)}
       disabled={isSubmitting}
     >
-      {formatRefueledAtChipLabel(refueledAt)}
-      <span aria-hidden="true" className={styles.dateChipChevron}>
-        ▾
+      <span className={styles.dateChipLabel}>
+        {formatRefueledAtChipLabel(refueledAt)}
+        <span aria-hidden="true" className={styles.dateChipChevron}>
+          ▾
+        </span>
       </span>
-    </button>
+    </Button>
   )
 
   const dateEditor = isDateEditorOpen && (

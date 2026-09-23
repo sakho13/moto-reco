@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { Button } from '@repo/ui/button'
 import styles from './ModalBase.module.css'
 import { XIcon } from '@/components/icons/XIcon'
 
@@ -77,13 +78,16 @@ export function ModalBase({
           >
             {title}
           </h2>
-          <button
+          <Button
+            type="button"
+            variant="quiet"
+            size="iconSm"
             onClick={onClose}
             className={styles.closeButton}
             aria-label="閉じる"
           >
             <XIcon />
-          </button>
+          </Button>
         </div>
         {children}
       </div>
