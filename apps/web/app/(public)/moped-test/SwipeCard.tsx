@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ApiResponseMopedTestQuestion } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
 
 type SwipeDirection = 'left' | 'right'
@@ -228,24 +229,29 @@ export function SwipeCard({
           className={styles.hintButtons}
           onPointerDown={(e) => e.stopPropagation()}
         >
-          <button
+          <Button
             type="button"
-            className={styles.hintButtonFalse}
+            variant="danger"
+            outline
+            size="sm"
+            className={styles.hintButton}
             onClick={() => triggerSwipe('left')}
             disabled={!isTop}
             aria-label="誤り"
           >
             ✕ 誤り ←
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className={styles.hintButtonTrue}
+            variant="success"
+            size="sm"
+            className={styles.hintButton}
             onClick={() => triggerSwipe('right')}
             disabled={!isTop}
             aria-label="正しい"
           >
             → ◯ 正しい
-          </button>
+          </Button>
         </div>
       </div>
     </div>

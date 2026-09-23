@@ -175,35 +175,8 @@
   padding-top: 16px;
 }
 
-.hintButtonFalse,
-.hintButtonTrue {
+.hintButton {
   flex: 1;
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  border: 2px solid;
-  background: transparent;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.hintButtonFalse {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
-
-.hintButtonFalse:hover {
-  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
-}
-
-.hintButtonTrue {
-  border-color: var(--color-success);
-  color: var(--color-success);
-}
-
-.hintButtonTrue:hover {
-  background: color-mix(in srgb, var(--color-success) 8%, transparent);
 }
 
 .swipeHint {
@@ -309,47 +282,6 @@
   gap: 12px;
 }
 
-.retryButton {
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 10px 20px;
-  background-color: var(--color-product);
-  background-image: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.16),
-    rgba(0, 0, 0, 0.08)
-  );
-  color: var(--color-productInk);
-  font-size: 15px;
-  cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 2px 0 rgba(0, 0, 0, 0.32);
-  transition:
-    background-color var(--transition-base),
-    transform var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-
-.retryButton:hover {
-  background-color: var(--color-productHover);
-}
-
-.retryButton:active {
-  transform: translateY(2px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .retryButton {
-    transition: none;
-  }
-
-  .retryButton:active {
-    transform: none;
-  }
-}
-
 /* =====================
    共通
    ===================== */
@@ -358,25 +290,6 @@
   font-size: 12px;
   color: var(--color-inkLight);
   margin-bottom: 8px;
-}
-
-/* =====================
-   履歴ボタン（ヘッダー・フッター内）
-   ===================== */
-
-.historyToggleButton {
-  background: none;
-  border: 1px solid var(--color-cloudActive);
-  border-radius: var(--radius-md);
-  padding: 8px 16px;
-  font-size: 14px;
-  color: var(--color-inkLight);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.historyToggleButton:hover {
-  background: var(--color-cloud);
 }
 
 /* =====================
@@ -401,21 +314,6 @@
 .historyTitle {
   font-size: 16px;
   font-weight: 600;
-}
-
-.clearHistoryButton {
-  background: none;
-  border: 1px solid var(--color-danger);
-  border-radius: var(--radius-md);
-  padding: 6px 12px;
-  font-size: 13px;
-  color: var(--color-danger);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.clearHistoryButton:hover {
-  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
 }
 
 /* グラフラッパー */
