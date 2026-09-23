@@ -32,7 +32,7 @@
 .empty {
   padding: 1.5rem 1rem;
   text-align: center;
-  color: var(--color-inkLight, #6b7280);
+  color: var(--color-inkLight);
   font-size: 0.875rem;
 }
 
@@ -73,7 +73,7 @@
 
 .itemBody {
   font-size: 0.75rem;
-  color: var(--color-inkLight, #6b7280);
+  color: var(--color-inkLight);
   margin: 0 0 4px;
   white-space: nowrap;
   overflow: hidden;
@@ -93,13 +93,13 @@
 
 .detailTime {
   font-size: 0.6875rem;
-  color: var(--color-inkLight, #9ca3af);
+  color: var(--color-inkLight);
   margin: 0 0 0.75rem;
 }
 
 .detailBody {
   font-size: 0.8125rem;
-  color: var(--color-inkLight, #6b7280);
+  color: var(--color-inkLight);
   margin: 0;
   white-space: pre-wrap;
   line-height: 1.6;
@@ -107,7 +107,7 @@
 
 .itemTime {
   font-size: 0.6875rem;
-  color: var(--color-inkLight, #9ca3af);
+  color: var(--color-inkLight);
   margin: 0;
 }
 
