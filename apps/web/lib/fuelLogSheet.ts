@@ -9,6 +9,7 @@
  */
 
 import { FuelEfficiencyCalculationService } from '@repo/shared-domain'
+import { formatDate } from '@repo/shared-utils'
 
 const fuelEfficiencyCalculationService = new FuelEfficiencyCalculationService()
 
@@ -349,7 +350,7 @@ export function calculateDaysAgo(
 }
 
 /**
- * PC版「給油記入票」控え欄の見出し（例: 「前回の控え ─ 9月1日（12日前）」）を組み立てる
+ * PC版「給油記入票」控え欄の見出し（例: 「前回の控え ─ 2026/09/01（12日前）」）を組み立てる
  */
 export function formatPreviousStubHeading(
   refueledAt: string,
@@ -357,7 +358,7 @@ export function formatPreviousStubHeading(
 ): string {
   const date = new Date(refueledAt)
   if (Number.isNaN(date.getTime())) return '前回の控え'
-  const dateLabel = `${date.getMonth() + 1}月${date.getDate()}日`
+  const dateLabel = formatDate(date)
   const daysAgo = calculateDaysAgo(refueledAt, now)
   if (daysAgo === null) return `前回の控え ─ ${dateLabel}`
   if (daysAgo === 0) return `前回の控え ─ ${dateLabel}（今日）`

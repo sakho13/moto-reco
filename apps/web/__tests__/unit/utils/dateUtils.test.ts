@@ -10,16 +10,16 @@ import {
 } from '@repo/shared-utils'
 
 describe('formatDate', () => {
-  it('yyyy年M月d日 形式の文字列を返す', () => {
-    expect(formatDate('2024-05-18T00:00:00')).toBe('2024年5月18日')
+  it('yyyy/mm/dd 形式の文字列を返す', () => {
+    expect(formatDate('2024-05-18T00:00:00')).toBe('2024/05/18')
   })
 
-  it('一桁の月・日はゼロ埋めしない', () => {
-    expect(formatDate('2026-01-05T00:00:00')).toBe('2026年1月5日')
+  it('一桁の月・日はゼロ埋めする', () => {
+    expect(formatDate('2026-01-05T00:00:00')).toBe('2026/01/05')
   })
 
   it('Date オブジェクトを受け取れる', () => {
-    expect(formatDate(new Date(2026, 8, 17))).toBe('2026年9月17日')
+    expect(formatDate(new Date(2026, 8, 17))).toBe('2026/09/17')
   })
 })
 

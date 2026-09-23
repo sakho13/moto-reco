@@ -498,14 +498,14 @@ describe('formatPreviousStubHeading', () => {
   test('前回の給油日と経過日数を組み立てる', () => {
     const now = new Date(2026, 8, 13, 14, 15)
     expect(formatPreviousStubHeading('2026-09-01T09:40', now)).toBe(
-      '前回の控え ─ 9月1日（12日前）'
+      '前回の控え ─ 2026/09/01（12日前）'
     )
   })
 
   test('当日の場合は「今日」になる', () => {
     const now = new Date(2026, 8, 13, 14, 15)
     expect(formatPreviousStubHeading('2026-09-13T09:40', now)).toBe(
-      '前回の控え ─ 9月13日（今日）'
+      '前回の控え ─ 2026/09/13（今日）'
     )
   })
 })

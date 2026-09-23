@@ -55,19 +55,18 @@ export const formatPlanSpotOffsetMinutes = (minutes: number | null): string => {
 }
 
 /**
- * ローカル時刻で `yyyy年M月d日` 形式に変換する
+ * ローカル時刻で `yyyy/mm/dd` 形式に変換する
  *
  * @remarks
  * 日付+時刻の表示（`formatDateTime`、履歴一覧のタイムスタンプなど）とは
  * 別に、単独の日付表示（購入日・所有期間の起点・グッズの購入日など）を
- * 統一する。以前はこの関数が `yyyy/mm/dd` を返しており、同じ画面内の他の
- * 日付表記（例: 所有期間の「2年3か月」、ホーム見出しの「2026年9月17日」）と
- * 書式が揃っていなかった。台帳の「9/13」のような「日付が左に立つ」独自の
- * 表記は本関数を使わず、各コンポーネント側で個別に組んでいるため対象外。
+ * 統一する。月・日はゼロ埋めし、`formatDateTime` の日付部分と桁を揃える。
+ * 台帳の「9/13」のような「日付が左に立つ」独自の表記は本関数を使わず、
+ * 各コンポーネント側で個別に組んでいるため対象外。
  */
 export const formatDate = (date: Date | string): string => {
   const d = typeof date === 'string' ? new Date(date) : date
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`
 }
 
 /** ローカル時刻で `yyyy/mm/dd hh:mm` 形式に変換する */

@@ -8,8 +8,11 @@ import { useBikeHistory } from '@/lib/hooks/useBikeHistory'
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'] as const
 
+const pad = (n: number) => String(n).padStart(2, '0')
+
+/** 見出し罫の日付を `yyyy/mm/dd（曜）` 形式に整形する */
 function formatTodayLabel(now: Date): string {
-  return `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日（${WEEKDAYS[now.getDay()]}）`
+  return `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())}（${WEEKDAYS[now.getDay()]}）`
 }
 
 /**
