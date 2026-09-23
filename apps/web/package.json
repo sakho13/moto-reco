@@ -58,7 +58,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@types/recharts": "2.0.1",
-    "@vitest/coverage-v8": "5.0.0",
+    "@vitest/coverage-v8": "5.0.1",
     "@vitest/ui": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
