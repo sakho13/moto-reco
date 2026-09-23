@@ -8,6 +8,7 @@ import type {
   FuelLogPeriod,
   SuccessResponse,
 } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import { Select } from '@repo/ui/select'
 import type { SelectOption } from '@repo/ui/select'
 import { FuelLedgerList } from './FuelLedgerList'
@@ -148,17 +149,18 @@ export function FuelLedgerSection({ bikeId, onEdit }: Props) {
 
         <div className={styles.sortRow} role="group" aria-label="並べ替え">
           {SORT_ITEMS.map((item) => (
-            <button
+            <Button
               key={item.key}
               type="button"
-              className={
-                sortBy === item.key ? styles.sortBtnActive : styles.sortBtn
-              }
+              variant="quiet"
+              size="sm"
+              pill
+              aria-pressed={sortBy === item.key}
               onClick={() => handleSortClick(item.key)}
             >
               {item.label}
               {sortBy === item.key ? (sortOrder === 'asc' ? ' ▲' : ' ▼') : ''}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

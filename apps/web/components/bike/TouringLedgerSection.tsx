@@ -7,6 +7,7 @@ import type {
   ApiResponseTouringList,
   SuccessResponse,
 } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import { TouringLedgerList } from './TouringLedgerList'
 import styles from './TouringLedgerSection.module.css'
 import { KeywordSearchBar } from '@/components/common/KeywordSearchBar'
@@ -113,17 +114,18 @@ export function TouringLedgerSection({ bikeId, onSelect }: Props) {
 
         <div className={styles.sortRow} role="group" aria-label="並べ替え">
           {SORT_ITEMS.map((item) => (
-            <button
+            <Button
               key={item.key}
               type="button"
-              className={
-                sortBy === item.key ? styles.sortBtnActive : styles.sortBtn
-              }
+              variant="quiet"
+              size="sm"
+              pill
+              aria-pressed={sortBy === item.key}
               onClick={() => handleSortClick(item.key)}
             >
               {item.label}
               {sortBy === item.key ? (sortOrder === 'asc' ? ' ▲' : ' ▼') : ''}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
