@@ -1,0 +1,8 @@
+/* Googleマップ（外部サービス）への遷移 */
+.externalLink {
+  color: var(--color-social);
+}
+
+.errorText {
+  color: var(--color-danger);
+}

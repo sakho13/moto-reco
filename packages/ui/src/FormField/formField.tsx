@@ -1,7 +1,6 @@
 'use client'
 
 import { type HTMLAttributes, forwardRef } from 'react'
-import { ErrorMessage } from '../errorMessage'
 import { Label } from '../label'
 import styles from './formField.module.css'
 
@@ -40,8 +39,8 @@ export interface FormFieldProps extends HTMLAttributes<HTMLDivElement> {
  * FormFieldコンポーネント
  *
  * @remarks
- * Label、Input、ErrorMessageを統合したフォームフィールドコンテナ。
- * エラー表示とヘルパーテキストを一元管理。
+ * Label と入力コントロールを束ねるフォームフィールドコンテナ。
+ * フィールド単位のエラーは罫線（入力欄側）と1行のテキストで示す。
  *
  * @example
  * ```tsx
@@ -84,7 +83,11 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(
           </Label>
         )}
         {children}
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {error && (
+          <p className={styles.error} role="alert">
+            {error}
+          </p>
+        )}
         {!error && helperText && (
           <p className={styles.helperText}>{helperText}</p>
         )}

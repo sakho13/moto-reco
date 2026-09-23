@@ -16,148 +16,17 @@
   opacity: 0.5;
 }
 
-.dimText {
-  color: var(--color-ink);
-  opacity: 0.4;
-}
-
-.statusPlanned {
-  background-color: #6366f1;
-  color: white;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  padding: 0.125rem 0.5rem;
-  border-radius: 9999px;
-  white-space: nowrap;
-}
-
-.statusStarted {
-  background-color: #10b981;
-  color: white;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  padding: 0.125rem 0.5rem;
-  border-radius: 9999px;
-  white-space: nowrap;
-}
-
-.statusCompleted {
-  background-color: var(--color-cloud);
-  color: var(--color-ink);
-  opacity: 0.7;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  padding: 0.125rem 0.5rem;
-  border-radius: 9999px;
-  white-space: nowrap;
-}
-
-.spotItem {
-  background-color: var(--color-cloud);
-  border-radius: var(--radius-md);
-  padding: 0.75rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.spotBadge {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  background-color: var(--color-product);
-  color: var(--color-productInk);
-  font-size: 0.75rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.startBadge {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  background-color: #10b981;
-  color: white;
-  font-size: 0.6rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.endBadge {
-  flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  background-color: #ef4444;
-  color: white;
-  font-size: 0.6rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.link {
-  color: var(--color-product);
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-  display: inline-block;
-}
-
-.link:hover {
-  opacity: 0.8;
-}
-
-.routeLink {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.68rem;
-  color: var(--color-product);
-  text-decoration: none;
-  opacity: 0.75;
-}
-
-.routeLink:hover {
-  opacity: 1;
-  text-decoration: underline;
-}
-
-.editButton {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem;
-  border-radius: var(--radius-md);
-  color: var(--color-ink);
-  opacity: 0.5;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.editButton:hover {
-  opacity: 1;
-}
-
-.mapContainer {
-  height: 280px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
+/* lucide の既定は24px角で、Button の iconSm（2rem角・枠線1.5px）の内寸を超える */
+.iconButton svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .mapWrapper {
   position: relative;
 }
 
+/* 地図タイルの上に載る Google マップへの導線。Google のブランド配色を使うためテーマには追従させない */
 .googleMapsLink {
   position: absolute;
   top: 8px;
@@ -203,18 +72,6 @@
   }
 }
 
-.spotsListScroll {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-@media (min-width: 768px) {
-  .spotsListScroll {
-    max-height: calc(100vh - 18rem);
-    padding-right: 0.125rem;
-  }
-}
-
 .mapClickHint {
   margin-top: 0.5rem;
   font-size: 0.75rem;
@@ -250,4 +107,8 @@
   font-size: var(--font-size-sm);
   color: var(--color-ink);
   opacity: 0.5;
+}
+
+.errorTitle {
+  color: var(--color-danger);
 }

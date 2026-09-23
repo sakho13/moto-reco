@@ -1,0 +1,16 @@
+/*
+ * 愛車のカルテ（PC）専用の期間・満タンフィルタ。
+ * 「見出し罫」の右側チップに相当する（Issue #575「05 画面案 ─ PC」愛車）。
+ * PCのみで表示し、モバイルの見た目には影響しない。
+ */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.periodSelect {
+  width: auto;
+  min-width: 9rem;
+}

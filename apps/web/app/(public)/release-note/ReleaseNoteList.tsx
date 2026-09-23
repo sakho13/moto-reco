@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { MarkdownContent, stripMarkdownToText } from '@repo/markdown'
+import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
 
 type ReleaseNote = {
@@ -66,13 +67,15 @@ export default function ReleaseNoteList({ releaseNotes }: Props) {
         )
       })}
       {hasMore && (
-        <button
+        <Button
           type="button"
+          variant="cloud"
+          pill
           className={styles.loadMoreButton}
           onClick={() => setVisibleCount((prev) => prev + INITIAL_COUNT)}
         >
           もっと見る
-        </button>
+        </Button>
       )}
     </div>
   )

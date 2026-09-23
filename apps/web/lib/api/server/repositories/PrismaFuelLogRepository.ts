@@ -87,6 +87,7 @@ export class PrismaFuelLogRepository
         price: fuelLog.totalPrice,
         mileage: fuelLog.mileage,
         previousMileage: fuelLog.previousMileage,
+        isFullTank: fuelLog.isFullTank,
         refueledAt: fuelLog.refueledAt,
         memo: fuelLog.memo,
         touringId: fuelLog.touringId,
@@ -98,6 +99,7 @@ export class PrismaFuelLogRepository
         price: true,
         mileage: true,
         previousMileage: true,
+        isFullTank: true,
         refueledAt: true,
         memo: true,
         touringId: true,
@@ -116,6 +118,7 @@ export class PrismaFuelLogRepository
       totalPrice: created.price,
       mileage: created.mileage,
       previousMileage: created.previousMileage,
+      isFullTank: created.isFullTank,
       refueledAt: created.refueledAt,
       memo: created.memo,
       touringId: created.touringId ? createTouringId(created.touringId) : null,
@@ -194,6 +197,7 @@ export class PrismaFuelLogRepository
         price: true,
         mileage: true,
         previousMileage: true,
+        isFullTank: true,
         refueledAt: true,
         memo: true,
         touringId: true,
@@ -217,6 +221,55 @@ export class PrismaFuelLogRepository
           totalPrice: log.price,
           mileage: log.mileage,
           previousMileage: log.previousMileage,
+          isFullTank: log.isFullTank,
+          refueledAt: log.refueledAt,
+          memo: log.memo,
+          touringId: log.touringId ? createTouringId(log.touringId) : null,
+          touringTitle: log.touring?.title ?? null,
+        })
+    )
+  }
+
+  /**
+   * 燃費計算のため、指定バイクの給油履歴をページングなし・mileage昇順で全件取得する
+   */
+  async findAllFuelLogsOrderedByMileage(
+    myUserBikeId: MyUserBikeId
+  ): Promise<FuelLogEntity[]> {
+    const fuelLogs = await this.connection.tUserMyBikeFuelLog.findMany({
+      where: {
+        userMyBikeId: myUserBikeId,
+      },
+      select: {
+        id: true,
+        userMyBikeId: true,
+        amount: true,
+        price: true,
+        mileage: true,
+        previousMileage: true,
+        isFullTank: true,
+        refueledAt: true,
+        memo: true,
+        touringId: true,
+        touring: {
+          select: {
+            title: true,
+          },
+        },
+      },
+      orderBy: [{ mileage: 'asc' }, { refueledAt: 'asc' }],
+    })
+
+    return fuelLogs.map(
+      (log) =>
+        new FuelLogEntity({
+          fuelLogId: createFuelLogId(log.id),
+          myUserBikeId: createMyUserBikeId(log.userMyBikeId),
+          amount: log.amount,
+          totalPrice: log.price,
+          mileage: log.mileage,
+          previousMileage: log.previousMileage,
+          isFullTank: log.isFullTank,
           refueledAt: log.refueledAt,
           memo: log.memo,
           touringId: log.touringId ? createTouringId(log.touringId) : null,
@@ -241,6 +294,7 @@ export class PrismaFuelLogRepository
         price: true,
         mileage: true,
         previousMileage: true,
+        isFullTank: true,
         refueledAt: true,
         memo: true,
         touringId: true,
@@ -261,6 +315,7 @@ export class PrismaFuelLogRepository
           totalPrice: log.price,
           mileage: log.mileage,
           previousMileage: log.previousMileage,
+          isFullTank: log.isFullTank,
           refueledAt: log.refueledAt,
           memo: log.memo,
           touringId: log.touringId ? createTouringId(log.touringId) : null,
@@ -285,6 +340,7 @@ export class PrismaFuelLogRepository
         price: true,
         mileage: true,
         previousMileage: true,
+        isFullTank: true,
         refueledAt: true,
         memo: true,
         touringId: true,
@@ -307,6 +363,7 @@ export class PrismaFuelLogRepository
       totalPrice: fuelLog.price,
       mileage: fuelLog.mileage,
       previousMileage: fuelLog.previousMileage,
+      isFullTank: fuelLog.isFullTank,
       refueledAt: fuelLog.refueledAt,
       memo: fuelLog.memo,
       touringId: fuelLog.touringId ? createTouringId(fuelLog.touringId) : null,
@@ -324,6 +381,7 @@ export class PrismaFuelLogRepository
         price: fuelLog.totalPrice,
         mileage: fuelLog.mileage,
         previousMileage: fuelLog.previousMileage,
+        isFullTank: fuelLog.isFullTank,
         refueledAt: fuelLog.refueledAt,
         memo: fuelLog.memo,
         touringId: fuelLog.touringId,
@@ -335,6 +393,7 @@ export class PrismaFuelLogRepository
         price: true,
         mileage: true,
         previousMileage: true,
+        isFullTank: true,
         refueledAt: true,
         memo: true,
         touringId: true,
@@ -353,6 +412,7 @@ export class PrismaFuelLogRepository
       totalPrice: updated.price,
       mileage: updated.mileage,
       previousMileage: updated.previousMileage,
+      isFullTank: updated.isFullTank,
       refueledAt: updated.refueledAt,
       memo: updated.memo,
       touringId: updated.touringId ? createTouringId(updated.touringId) : null,
@@ -392,6 +452,7 @@ export class PrismaFuelLogRepository
         price: true,
         mileage: true,
         previousMileage: true,
+        isFullTank: true,
         refueledAt: true,
         memo: true,
         touringId: true,
@@ -410,6 +471,7 @@ export class PrismaFuelLogRepository
       totalPrice: updated.price,
       mileage: updated.mileage,
       previousMileage: updated.previousMileage,
+      isFullTank: updated.isFullTank,
       refueledAt: updated.refueledAt,
       memo: updated.memo,
       touringId: updated.touringId ? createTouringId(updated.touringId) : null,

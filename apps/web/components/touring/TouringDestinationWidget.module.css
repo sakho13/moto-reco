@@ -7,7 +7,11 @@
 
 .arrivedWidget {
   border-color: var(--color-product);
-  background-color: color-mix(in srgb, var(--color-product) 8%, var(--card-surface));
+  background-color: color-mix(
+    in srgb,
+    var(--color-product) 8%,
+    var(--card-surface)
+  );
 }
 
 .label {
@@ -96,56 +100,15 @@
 
 /* ---- 到着ボタン ---- */
 
-.arrivalButton {
-  width: 100%;
-  padding: var(--spacing-3);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--color-product);
-  background-color: color-mix(in srgb, var(--color-product) 10%, transparent);
-  color: var(--color-product);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-2);
-  transition:
-    background-color 0.15s,
-    border-color 0.15s;
-}
-
-.arrivalButton:hover:not(:disabled) {
-  background-color: color-mix(in srgb, var(--color-product) 20%, transparent);
-}
-
-.arrivalButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.arrivalButton svg {
+  /* Tailwind preflight が svg { display: block } を設定するため inline-flex 内で改行される問題を修正 */
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--spacing-2);
 }
 
 /* ---- スキップボタン ---- */
 
 .skipButton {
-  width: 100%;
   margin-top: var(--spacing-2);
-  padding: var(--spacing-1) 0;
-  font-size: var(--font-size-xs);
-  color: var(--card-text-dim);
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-align: center;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color 0.15s;
-}
-
-.skipButton:hover:not(:disabled) {
-  color: var(--card-text-muted);
-}
-
-.skipButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }

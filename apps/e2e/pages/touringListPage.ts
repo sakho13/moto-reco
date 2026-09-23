@@ -5,9 +5,22 @@ import { type Locator, type Page } from '@playwright/test'
  *
  * @remarks
  * /app/my-bike/{bikeId}/tourings に対応。
+ *
+ * Issue #575「05 画面案 ─ PC」により、PC幅（1024px以上）ではカードの縦1列
+ * （`TouringListSection`）ではなく台帳（`TouringLedgerSection`）を表示する。
+ * Playwrightの既定ビューポート（Desktop Chrome, 1280x720）はPC幅に該当するため、
+ * このPOMは既定でPC版の台帳を対象にする。
+ *
+ * 注意: `display:none` の要素は Playwright の `getByRole` / `getByText` の
+ * マッチ対象から自動的には除外されない。モバイル用のカード
+ * （`TouringListItem`）とPC用の台帳の行（`TouringLedgerList`）は同じ
+ * ツーリングに対して同じ文言（タイトルなど）を含みうるため、ロケーターは
+ * 必ず `touring-ledger-section` テストID配下に明示的にスコープしている
+ * （`fuelLogListPage.ts` と同じ方針）。
  */
 export class TouringListPage {
   readonly page: Page
+  readonly ledgerSection: Locator
   readonly searchSection: Locator
   readonly searchInput: Locator
   readonly searchButton: Locator
@@ -16,7 +29,8 @@ export class TouringListPage {
 
   constructor(page: Page) {
     this.page = page
-    this.searchSection = page.getByTestId('touring-search')
+    this.ledgerSection = page.getByTestId('touring-ledger-section')
+    this.searchSection = page.getByTestId('touring-ledger-search')
     this.searchInput = this.searchSection.getByRole('textbox', {
       name: 'タイトルで検索',
     })
@@ -26,7 +40,7 @@ export class TouringListPage {
     this.clearButton = this.searchSection.getByRole('button', {
       name: 'クリア',
     })
-    this.noResultMessage = page.getByText(
+    this.noResultMessage = this.ledgerSection.getByText(
       '該当するツーリングが見つかりませんでした'
     )
   }
@@ -47,8 +61,14 @@ export class TouringListPage {
     await this.clearButton.click()
   }
 
-  /** タイトル（部分一致可）でツーリングカードを取得する */
+  /**
+   * タイトル（部分一致可）でツーリングの行（PC版の台帳）を取得する
+   *
+   * @remarks
+   * `display:none` のモバイル用カード（`TouringListItem`）も同じ文言を含み
+   * うるため、台帳（`touring-ledger-section`）配下に明示的にスコープしている。
+   */
   touringCard(titlePattern: string | RegExp): Locator {
-    return this.page.getByRole('button', { name: titlePattern })
+    return this.ledgerSection.getByRole('button', { name: titlePattern })
   }
 }

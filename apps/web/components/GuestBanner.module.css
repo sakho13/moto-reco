@@ -1,0 +1,45 @@
+/**
+ * ゲストバナー
+ *
+ * @remarks
+ * 警告色（warning）にはインク色が定義されていないため、warning で塗りつぶさず
+ * 「地色の背景 + warning の枠線」で注意を引く構成にしている。
+ * 文字は ink / inkLight を使い、ライト・ダーク双方で読める組み合わせにする。
+ */
+.banner {
+  /*
+   * Issue #575: 幅は独自のブレークポイントを持たず、レイアウト側
+   * （(protected)/layout.module.css の `.page`、最大1200px）に委ねる。
+   * こうすることで本文と同じ基準線・同じ上限幅に揃う。
+   */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-warning);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--font-size-sm);
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.title {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+.description {
+  color: var(--color-inkLight);
+}
+
+.action {
+  flex-shrink: 0;
+}

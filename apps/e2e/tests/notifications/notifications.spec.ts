@@ -24,7 +24,7 @@ test.describe('通知ベルボタン', () => {
 
     await expect(notifPage.notificationDropdown).toBeVisible()
     await expect(notifPage.dropdownMarkAllReadButton).toBeVisible()
-    await expect(notifPage.dropdownViewAllButton).toBeVisible()
+    await expect(notifPage.dropdownViewAllLink).toBeVisible()
   })
 
   test('通知がない場合ドロップダウンに「通知はありません」と表示される', async ({
@@ -38,7 +38,7 @@ test.describe('通知ベルボタン', () => {
     await expect(notifPage.emptyMessage).toBeVisible()
   })
 
-  test('「すべての通知を見る」ボタンで通知ページへ遷移する', async ({
+  test('「すべての通知を見る」リンクで通知ページへ遷移する', async ({
     authenticatedPage,
   }) => {
     await authenticatedPage.goto('/app/home')

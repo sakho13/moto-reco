@@ -16,11 +16,16 @@
   opacity: 0.5;
 }
 
+/*
+ * success には対になるインク色トークンが無いため塗りにできない。
+ * 地色の面 + アクセントの枠線 + アクセントの文字（Button の success と同じ様式）。
+ */
 .statusStarted {
-  background-color: #10b981;
-  color: white;
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-success);
+  color: var(--color-success);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
   white-space: nowrap;
@@ -31,7 +36,7 @@
   color: var(--color-ink);
   opacity: 0.7;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
   white-space: nowrap;
@@ -52,29 +57,17 @@
   text-decoration: underline;
 }
 
-.editButton {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem;
-  border-radius: var(--radius-md);
-  color: var(--color-ink);
-  opacity: 0.5;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.editButton:hover {
-  opacity: 1;
+/* lucide の既定は24px角で、Button の iconSm（2rem角・枠線1.5px）の内寸を超える */
+.iconButton svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .mapWrapper {
   position: relative;
 }
 
+/* 地図タイルの上に載る Google マップへの導線。Google のブランド配色を使うためテーマには追従させない */
 .googleMapsLink {
   position: absolute;
   top: 8px;
@@ -120,65 +113,29 @@
   }
 }
 
+/* 地色の面 + アクセントの枠線。InfoBox / ErrorMessage と同じ様式 */
 .breakBanner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #fffbeb;
-  border: 1px solid #fbbf24;
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-warning);
   border-radius: var(--radius-md);
   padding: 0.5rem 0.75rem;
   gap: 0.75rem;
 }
 
+/* ライトテーマの warning は地色に対して 2.6:1 しかないため warningActive */
 .breakBannerText {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #92400e;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-warningActive);
 }
 
 .breakEndButton {
   flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-md);
-  background-color: #fbbf24;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.15s;
 }
 
-.breakEndButton:hover {
-  opacity: 0.85;
-}
-
-.breakEndButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.breakStartButton {
-  display: block;
-  width: 100%;
-  text-align: center;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  background-color: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fbbf24;
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-
-.breakStartButton:hover {
-  background-color: #fef3c7;
-}
-
-.breakStartButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.errorTitle {
+  color: var(--color-danger);
 }

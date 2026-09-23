@@ -171,7 +171,7 @@ export function BikePhotosCard({ myUserBikeId }: Props) {
       ) : (
         <p
           className="text-sm select-none"
-          style={{ color: 'var(--color-muted-foreground)' }}
+          style={{ color: 'var(--color-inkLight)' }}
         >
           写真はまだ追加されていません
         </p>

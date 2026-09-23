@@ -127,7 +127,7 @@ export default function McpSetupPage() {
           <h3 className={styles.subTitle}>読み取り系ツール（全プラン共通）</h3>
           <ul>
             <li>
-              <strong>list_bikes</strong> — 登録されているマイバイクの一覧を取得
+              <strong>list_bikes</strong> — 登録されている愛車の一覧を取得
             </li>
             <li>
               <strong>list_touring_plans</strong> —

@@ -9,14 +9,32 @@ import styles from './button.module.css'
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * ボタンのバリアント
+   *
+   * @remarks
+   * `primary` / `danger` / `social` / `cloud` は塗り。
+   * `success` / `warning` は対になるインク色トークンが無いため枠線様式。
+   * `quiet` は並び替え・チップ・タブなど弱いアクション用で、
+   * 選択状態は `aria-pressed` で表す。
+   *
    * @default 'primary'
    */
-  variant?: 'primary' | 'danger' | 'social' | 'cloud'
+  variant?:
+    | 'primary'
+    | 'danger'
+    | 'social'
+    | 'cloud'
+    | 'success'
+    | 'warning'
+    | 'quiet'
   /**
    * ボタンのサイズ
+   *
+   * @remarks
+   * `icon` は 3rem 角、`iconSm` は 2rem 角の正方形。
+   *
    * @default 'md'
    */
-  size?: 'sm' | 'md' | 'lg' | 'icon'
+  size?: 'sm' | 'md' | 'lg' | 'icon' | 'iconSm'
   /**
    * ローディング状態
    * @default false
@@ -27,6 +45,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
    * @default false
    */
   outline?: boolean
+  /**
+   * 角丸を全周にする（チップ・タブ用）
+   * @default false
+   */
+  pill?: boolean
   /**
    * フル幅表示
    * @default false
@@ -59,6 +82,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = 'md',
       loading = false,
       outline = false,
+      pill = false,
       fullWidth = false,
       className,
       children,
@@ -72,6 +96,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       styles[variant],
       styles[size],
       outline && styles.outline,
+      pill && styles.pill,
       fullWidth && styles.fullWidth,
       loading && styles.loading,
       className,

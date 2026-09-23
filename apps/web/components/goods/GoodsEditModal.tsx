@@ -123,15 +123,8 @@ export function GoodsEditModal({
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-4)',
-        }}
-      >
-        <FormField label="マイバイク" htmlFor="userMyBikeId">
+      <form onSubmit={handleSubmit} className="flex flex-col">
+        <FormField label="愛車" htmlFor="userMyBikeId">
           <Select
             id="userMyBikeId"
             options={bikeOptions}
@@ -213,7 +206,7 @@ export function GoodsEditModal({
         variant="danger"
         fullWidth
         loading={isDeleting}
-        style={{ marginTop: 'var(--spacing-2)' }}
+        className={styles.deleteButton}
       >
         削除する
       </Button>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Button } from '@repo/ui/button'
 import styles from './PricingCard.module.css'
 
 interface PricingCardProps {
@@ -66,13 +67,15 @@ export function PricingCard({
 
       <div className={styles.ctaWrapper}>
         {isComingSoon ? (
-          <button
-            className={`${styles.cta} ${styles.ctaDisabled}`}
+          <Button
+            type="button"
+            variant="primary"
+            fullWidth
             disabled
             aria-label={`${name}は現在準備中です`}
           >
             {ctaLabel}
-          </button>
+          </Button>
         ) : (
           <Link
             href={ctaHref}

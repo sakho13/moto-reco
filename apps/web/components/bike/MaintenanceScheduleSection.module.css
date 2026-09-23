@@ -1,0 +1,82 @@
+.section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding-block: var(--spacing-2);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  color: var(--color-inkLight);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--spacing-2) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  padding-block: var(--spacing-2);
+  border-bottom: 1px dotted var(--color-cloud);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.name {
+  font-size: var(--font-size-sm);
+  color: var(--color-ink);
+}
+
+.remaining {
+  flex-shrink: 0;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-md);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.remainingUpcoming {
+  composes: remaining;
+  color: var(--color-warning);
+}
+
+.remainingOverdue {
+  composes: remaining;
+  color: var(--color-danger);
+}
+
+.footerLink {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}

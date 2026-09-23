@@ -1,0 +1,100 @@
+/**
+ * 入力コントロール共通スタイル（伝票の罫線様式）
+ *
+ * Input / Textarea / Select が composes で取り込む。
+ */
+
+.field {
+  box-sizing: border-box;
+  width: 100%;
+  /* タップ目標の下限 44px */
+  min-height: 2.75rem;
+  /* 下端の 1px は、下線が 2px になる状態と総高を揃えるための余白 */
+  padding: var(--spacing-2) var(--spacing-1) calc(var(--spacing-2) + 1px);
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--line-height-normal);
+  color: var(--color-ink);
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-cloudHover);
+  border-radius: 0;
+  outline: none;
+  transition: border-color var(--transition-base);
+}
+
+.field::placeholder {
+  color: var(--color-inkLight);
+  opacity: 0.7;
+}
+
+.field:hover:not(:disabled) {
+  border-bottom-color: var(--color-cloudActive);
+}
+
+/* :not(:disabled) は hover 側と詳細度を揃えるために付けている */
+.field:focus:not(:disabled) {
+  padding-bottom: var(--spacing-2);
+  border-bottom-width: 2px;
+  border-bottom-color: var(--color-product);
+}
+
+.field:disabled {
+  color: var(--color-inkLight);
+  cursor: not-allowed;
+  border-bottom-style: dotted;
+  opacity: 0.7;
+}
+
+/* ===== 複数行（Textarea） ===== */
+
+.fieldBlock {
+  min-height: 5rem;
+  padding-right: var(--spacing-2);
+  padding-left: var(--spacing-2);
+  background-color: oklch(from var(--color-cloud) l c h / 0.3);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  resize: vertical;
+}
+
+.fieldBlock:disabled {
+  resize: none;
+}
+
+/* ===== セレクト ===== */
+
+.fieldSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  /* 矢印（selectWrap の ::after 相当）と重ならない右余白 */
+  padding-right: var(--spacing-6);
+  cursor: pointer;
+}
+
+.fieldSelect:disabled {
+  cursor: not-allowed;
+}
+
+/* ===== エラー ===== */
+
+.fieldError,
+.fieldError:hover:not(:disabled),
+.fieldError:focus {
+  padding-bottom: var(--spacing-2);
+  border-bottom-width: 2px;
+  border-bottom-color: var(--color-danger);
+}
+
+/* ===== 補助テキスト ===== */
+
+.helperText {
+  margin-top: var(--spacing-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+  line-height: var(--line-height-normal);
+}
+
+.helperError {
+  color: var(--color-danger);
+}

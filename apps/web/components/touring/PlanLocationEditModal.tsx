@@ -12,6 +12,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Select } from '@repo/ui/select'
 import { toast } from '@repo/ui/sonner'
+import styles from './PlanLocationEditModal.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { trackEvent } from '@/lib/analytics'
@@ -188,7 +189,7 @@ export function PlanLocationEditModal({
                   href={routeLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 underline"
+                  className={`text-sm underline ${styles.externalLink}`}
                 >
                   Googleマップで経路を確認
                 </a>
@@ -232,7 +233,7 @@ export function PlanLocationEditModal({
             </>
           )}
 
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className={`text-sm ${styles.errorText}`}>{error}</p>}
 
           <Button
             type="button"

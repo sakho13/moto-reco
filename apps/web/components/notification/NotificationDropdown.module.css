@@ -24,19 +24,6 @@
   font-size: 0.875rem;
 }
 
-.readAllButton {
-  font-size: 0.75rem;
-  color: var(--color-product);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.readAllButton:hover {
-  text-decoration: underline;
-}
-
 .list {
   max-height: 320px;
   overflow-y: auto;
@@ -45,7 +32,7 @@
 .empty {
   padding: 1.5rem 1rem;
   text-align: center;
-  color: var(--color-inkLight, #6b7280);
+  color: var(--color-inkLight);
   font-size: 0.875rem;
 }
 
@@ -86,25 +73,11 @@
 
 .itemBody {
   font-size: 0.75rem;
-  color: var(--color-inkLight, #6b7280);
+  color: var(--color-inkLight);
   margin: 0 0 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.backButton {
-  font-size: 0.8125rem;
-  color: var(--color-product);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  font-weight: 500;
-}
-
-.backButton:hover {
-  text-decoration: underline;
 }
 
 .detail {
@@ -120,13 +93,13 @@
 
 .detailTime {
   font-size: 0.6875rem;
-  color: var(--color-inkLight, #9ca3af);
+  color: var(--color-inkLight);
   margin: 0 0 0.75rem;
 }
 
 .detailBody {
   font-size: 0.8125rem;
-  color: var(--color-inkLight, #6b7280);
+  color: var(--color-inkLight);
   margin: 0;
   white-space: pre-wrap;
   line-height: 1.6;
@@ -134,25 +107,23 @@
 
 .itemTime {
   font-size: 0.6875rem;
-  color: var(--color-inkLight, #9ca3af);
+  color: var(--color-inkLight);
   margin: 0;
 }
 
-.viewAllButton {
+.viewAllLink {
   display: block;
   width: 100%;
   padding: 0.75rem;
   text-align: center;
   font-size: 0.8125rem;
   color: var(--color-product);
-  background: none;
-  border: none;
   border-top: 1px solid var(--color-cloudHover);
-  cursor: pointer;
+  text-decoration: none;
   font-weight: 500;
 }
 
-.viewAllButton:hover {
+.viewAllLink:hover {
   background-color: var(--color-cloudHover);
 }
 

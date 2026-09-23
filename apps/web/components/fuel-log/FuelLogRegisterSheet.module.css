@@ -1,0 +1,495 @@
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+/* ---------- ヘッダー（車両チップ・給油日時チップ） ---------- */
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+.dateChipLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.dateChipChevron {
+  font-size: 0.6rem;
+  color: var(--color-inkLight);
+}
+
+/* ---------- 3項目の入力欄 ---------- */
+.fieldStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.fieldHeaderRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.fieldLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-inkLight);
+  letter-spacing: 0.04em;
+}
+
+.fieldHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.fieldBox {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: var(--color-background);
+  border: 2px solid var(--color-cloudHover);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.fieldActive .fieldBox {
+  border-color: var(--color-product);
+  box-shadow: var(--shadow-sm);
+}
+
+.fieldInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  text-align: right;
+  color: var(--color-ink);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.fieldInput::placeholder {
+  color: var(--color-inkLight);
+  opacity: 0.4;
+}
+
+.fieldInput:disabled {
+  opacity: 0.6;
+}
+
+.fieldUnit {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+/* ---------- 満タン／継ぎ足しトグル ---------- */
+.tankToggle {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+/* ---------- ライブ計器 ---------- */
+.gaugeRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--color-ink);
+  border-bottom: 1px solid var(--color-cloud);
+  padding-block: var(--spacing-2);
+}
+
+.gaugeCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding-inline: var(--spacing-1);
+  border-left: 1px dotted var(--color-cloud);
+}
+
+.gaugeCell:first-child {
+  border-left: none;
+}
+
+.gaugeValue {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.gaugeCellHighlight .gaugeValue {
+  color: var(--color-product);
+}
+
+.gaugeLabel {
+  font-size: 0.6875rem;
+  color: var(--color-inkLight);
+  letter-spacing: 0.04em;
+}
+
+.gaugeNote {
+  margin: calc(-1 * var(--spacing-2)) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  text-align: center;
+}
+
+.touringNote {
+  margin: 0 0 var(--spacing-3);
+  font-size: var(--font-size-sm);
+  color: var(--color-success);
+}
+
+/* ---------- 保存ボタン（常に画面内） ---------- */
+.stickyFooter {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-2);
+  margin-top: var(--spacing-2);
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-cloud);
+}
+
+@media (min-width: 641px) {
+  .fieldInput {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* =========================================================================
+ * PC版「給油記入票」（1024px〜）
+ * Issue #575「05 画面案 ─ PC」給油記入票。フォームではなく伝票の形にする。
+ * 左が記入欄（罫線で仕切った台帳の行）、ミシン目（破線）の右が「控え」。
+ * 数字は明朝（--font-family-display）で組み、枠で囲うのをやめ罫線で区切る。
+ * ========================================================================= */
+
+.slip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 268px;
+  align-items: start;
+}
+
+.slipMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 0;
+  padding-right: var(--spacing-6);
+}
+
+/* ---------- 見出し（車両チップ・日時チップ） ---------- */
+.slipHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 2px solid var(--color-ink);
+}
+
+.slipTitle {
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+}
+
+.slipHeadChips {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-left: auto;
+}
+
+/*
+ * 非インタラクティブな車両名バッジ。隣の日時チップ（@repo/ui の Button の
+ * cloud / sm / pill）と総高を揃えるため、寸法は button.module.css の
+ * .sm と同じ式（padding から枠線1.5pxを差し引く）にしている。
+ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: calc(var(--spacing-2) - 1.5px) calc(var(--spacing-3) - 1.5px);
+  border: 1.5px solid var(--color-cloudHover);
+  border-radius: var(--radius-full);
+  color: var(--color-inkLight);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+}
+
+/* ---------- 記入欄（罫線で仕切った行） ---------- */
+.slipFields {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-ink);
+}
+
+.slipField {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  align-items: center;
+  border-bottom: 1px solid var(--color-cloudHover);
+  transition: box-shadow var(--transition-fast);
+}
+
+.slipFieldLabel {
+  padding: var(--spacing-2) var(--spacing-3) var(--spacing-2) 0;
+  border-right: 1px solid var(--color-cloud);
+  color: var(--color-inkLight);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+}
+
+.slipFieldValueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2) 0 var(--spacing-2) var(--spacing-3);
+}
+
+.slipFieldValue {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.slipFieldActive .slipFieldValueRow {
+  box-shadow: inset 0 0 0 2px var(--color-product);
+  border-radius: var(--radius-sm);
+}
+
+.slipFieldInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  text-align: right;
+  color: var(--color-ink);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.slipFieldInput::placeholder {
+  color: var(--color-inkLight);
+  opacity: 0.4;
+}
+
+.slipFieldInput:disabled {
+  opacity: 0.6;
+}
+
+.slipFieldUnit {
+  flex-shrink: 0;
+  color: var(--color-inkLight);
+  font-size: var(--font-size-xs);
+}
+
+.slipFieldHint {
+  flex-shrink: 0;
+  color: var(--color-inkLight);
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.slipMemoInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  color: var(--color-ink);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.slipMemoInput::placeholder {
+  color: var(--color-inkLight);
+  opacity: 0.6;
+}
+
+.slipTouringNote {
+  color: var(--color-inkLight);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------- アクション（右下に定位置。ボタンは内容幅のまま） ---------- */
+.slipActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding-top: var(--spacing-2);
+}
+
+.slipHint {
+  margin-right: auto;
+  color: var(--color-inkLight);
+  font-size: var(--font-size-xs);
+}
+
+/* ---------- 控え（ミシン目＝破線で区切る） ---------- */
+.stub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  padding-left: var(--spacing-5);
+  border-left: 2px dashed var(--color-cloudHover);
+}
+
+.stubBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.stubHeading {
+  margin: 0;
+  color: var(--color-inkLight);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+}
+
+.stubEmpty {
+  margin: 0;
+  color: var(--color-inkLight);
+  font-size: var(--font-size-sm);
+}
+
+.stubRows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stubRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  padding-bottom: 2px;
+  border-bottom: 1px dotted var(--color-cloud);
+  color: var(--color-ink);
+  font-size: var(--font-size-xs);
+}
+
+.stubRow span:last-child {
+  color: var(--color-inkLight);
+  font-variant-numeric: tabular-nums;
+}
+
+.stubResult {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.stubResultItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
+.stubResultLabel {
+  color: var(--color-inkLight);
+  font-size: var(--font-size-xs);
+}
+
+.stubResultValue {
+  color: var(--color-ink);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.stubResultValue em {
+  margin-left: 2px;
+  color: var(--color-inkLight);
+  font-style: normal;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+}
+
+.stubResultItemLead .stubResultValue {
+  color: var(--color-product);
+  font-size: var(--font-size-3xl);
+}
+
+/*
+ * 燃費が未確定（入力前・継ぎ足しで算出対象外など）の「—」用。
+ * `.stubResultItemLead` を外した状態で使うため、アクセント色・大サイズにはせず
+ * 区間距離・単価と同じ inkLight・通常サイズにする。強調色の太いダッシュが
+ * エラー表示の赤い横棒のように見えてしまうのを防ぐ。
+ */
+.stubResultValueGhost {
+  color: var(--color-inkLight);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.stubResultValueGhost em {
+  margin-left: 2px;
+  color: var(--color-inkLight);
+  font-style: normal;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-normal);
+}
+
+.stubResultMemo {
+  margin: 0;
+  color: var(--color-success);
+  font-size: var(--font-size-xs);
+  text-align: right;
+}
+
+.stubFooter {
+  margin-top: auto;
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-cloud);
+  color: var(--color-inkLight);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+}

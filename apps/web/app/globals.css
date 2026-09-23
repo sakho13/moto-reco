@@ -15,6 +15,39 @@
     'Yu Mincho', YuMincho, 'Noto Serif JP', 'Noto Serif CJK JP', serif;
 }
 
+/*
+ * Issue #575: PCシェルの「綴じ代」（サイドバー）幅。
+ * (protected)/layout.module.css・DesktopSidebar.module.css・
+ * DesktopHeader.module.css の3箇所が同じ値を参照することで、
+ * 紙面（本文）の左端が常に1本の基準線に揃うようにする。
+ * モバイル（〜639px）はサイドバー自体を表示しないため 0px のまま。
+ */
+:root {
+  --app-sidebar-w: 0px;
+  --app-gutter: 2rem;
+  /*
+   * Issue #575: PC紙面の最大幅（本文12カラム相当）。改修済みの各PC画面は
+   * この1本のトークンを基準にし、狭くする場合も `calc(var(--app-page-w) * 0.8)`
+   * のようにその倍数で決める。以前は画面ごとに 900px / 960px / 1200px を
+   * 個別に書いていたため、画面を移動するたびに右端の基準が動いていた。
+   */
+  --app-page-w: 1200px;
+}
+
+@media (min-width: 640px) {
+  :root {
+    /* タブレット幅: サイドバーは折りたたみ（アイコンのみ） */
+    --app-sidebar-w: 72px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    /* デスクトップ幅: サイドバーを展開（アイコン＋ラベル） */
+    --app-sidebar-w: 240px;
+  }
+}
+
 html,
 body {
   max-width: 100vw;
@@ -54,9 +87,6 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: var(--color-inkDark) !important;
   caret-color: var(--color-inkDark) !important;
   transition: background-color 5000s ease-in-out 0s;
-}
-input:valid {
-  background-color: var(--color-background);
 }
 
 .divider {

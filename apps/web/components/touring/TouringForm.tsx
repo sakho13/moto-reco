@@ -86,14 +86,7 @@ export const TouringForm = ({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 'var(--spacing-4)',
-      }}
-    >
+    <form onSubmit={handleSubmit} className="flex flex-col">
       <FormField label="タイトル" htmlFor="title" required>
         <Input
           id="title"

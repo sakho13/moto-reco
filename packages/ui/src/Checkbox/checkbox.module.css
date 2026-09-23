@@ -1,4 +1,6 @@
 .container {
+  /* チェックボックスの一辺。helperText のインデントもこの値を参照する */
+  --checkbox-size: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-1);
@@ -8,6 +10,8 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
+  /* タップ目標の下限 44px */
+  min-height: 2.75rem;
   cursor: pointer;
   user-select: none;
 }
@@ -18,41 +22,70 @@
 }
 
 .input {
-  width: 20px;
-  height: 20px;
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  margin: 0;
   cursor: pointer;
-  accent-color: var(--color-product);
+  background-color: transparent;
+  border: 1px solid var(--color-cloudActive);
   border-radius: var(--radius-sm);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--color-product);
+}
+
+.input:checked {
+  background-color: var(--color-product);
+  border-color: var(--color-product);
+}
+
+/* 右下だけ残した枠を 45 度倒してチェックマークにする */
+.input:checked::after {
+  content: '';
+  position: absolute;
+  top: 12%;
+  left: 32%;
+  width: 28%;
+  height: 56%;
+  border: solid var(--color-productInk);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .input:disabled {
   cursor: not-allowed;
 }
 
-.input:focus {
+.input:focus-visible {
   outline: 2px solid var(--color-product);
   outline-offset: 2px;
 }
 
 .input.error {
-  outline: 2px solid var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 .labelText {
   color: var(--color-ink);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
 }
 
 .helperText {
   margin: 0;
-  margin-left: calc(20px + var(--spacing-2));
+  margin-left: calc(var(--checkbox-size) + var(--spacing-2));
   font-size: var(--font-size-sm);
-  color: var(--color-ink);
-  opacity: 0.7;
+  color: var(--color-inkLight);
 }
 
 .helperError {
   color: var(--color-danger);
-  opacity: 1;
 }

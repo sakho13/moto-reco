@@ -36,8 +36,10 @@ import { PrismaUserBikeRepository } from '../repositories/PrismaUserBikeReposito
 import { FuelInsightService } from '../services/FuelInsightService'
 import { TouringService } from '../services/TouringService'
 import { UserBikeService } from '../services/UserBikeService'
+import { buildFuelEfficiencyMapsByBike } from '../utils/fuelEfficiencyMap'
 import userBikeFuelLogs from './userBike/fuelLogs'
 import userBikeMaintenanceLogs from './userBike/maintenanceLogs'
+import userBikeMaintenanceSchedule from './userBike/maintenanceSchedule'
 import userBikeTouringPlans from './userBike/touringPlans'
 import userBikeTourings from './userBike/tourings'
 
@@ -328,6 +330,14 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
     take,
   })
 
+  // 燃費計算は「直前の満タン給油」を含むバイク単位の給油履歴全体が必要なため、
+  // このページに含まれる燃料ログのバイクIDごとに事前算出しておく
+  const fuelLogBikeIds = histories
+    .filter((h) => h.type === 'FUEL_LOG' && h.fuelLog)
+    .map((h) => h.userMyBikeId)
+    .filter((id): id is string => id !== null)
+  const fuelEfficiencyMaps = await buildFuelEfficiencyMapsByBike(fuelLogBikeIds)
+
   const historyItems: ApiResponseAllBikesHistoryList = histories.flatMap(
     (h): ApiResponseAllBikesHistoryList => {
       const bikeId = h.userMyBikeId ?? ''
@@ -340,8 +350,8 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
 
       if (h.type === 'FUEL_LOG' && h.fuelLog) {
         const log = h.fuelLog
-        const distance = log.mileage - log.previousMileage
-        const fuelEfficiency = distance > 0 ? distance / log.amount : null
+        const fuelEfficiency =
+          fuelEfficiencyMaps.get(bikeId)?.get(log.id) ?? null
         const pricePerLiter = log.amount > 0 ? log.price / log.amount : null
 
         return [
@@ -358,6 +368,7 @@ userBike.get('/history', honoAuthMiddleware, async (c) => {
               amount: log.amount,
               totalPrice: log.price,
               memo: log.memo,
+              isFullTank: log.isFullTank,
               fuelEfficiency,
               pricePerLiter,
               touringId: log.touringId,
@@ -434,12 +445,16 @@ userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
     orderBy: { occurredAt: 'desc' },
   })
 
+  // 燃費計算は「直前の満タン給油」を含むバイク単位の給油履歴全体が必要なため、事前算出しておく
+  const fuelEfficiencyMaps = await buildFuelEfficiencyMapsByBike([myUserBikeId])
+  const fuelEfficiencyMap =
+    fuelEfficiencyMaps.get(myUserBikeId) ?? new Map<string, number | null>()
+
   const historyItems: ApiResponseBikeHistoryList = histories.flatMap(
     (h): ApiResponseBikeHistoryList => {
       if (h.type === 'FUEL_LOG' && h.fuelLog) {
         const log = h.fuelLog
-        const distance = log.mileage - log.previousMileage
-        const fuelEfficiency = distance > 0 ? distance / log.amount : null
+        const fuelEfficiency = fuelEfficiencyMap.get(log.id) ?? null
         const pricePerLiter = log.amount > 0 ? log.price / log.amount : null
 
         return [
@@ -454,6 +469,7 @@ userBike.get('/bike/:myUserBikeId/history', honoAuthMiddleware, async (c) => {
               amount: log.amount,
               totalPrice: log.price,
               memo: log.memo,
+              isFullTank: log.isFullTank,
               fuelEfficiency,
               pricePerLiter,
               touringId: log.touringId,
@@ -543,6 +559,8 @@ userBike.get(
 )
 
 userBike.route('/', userBikeMaintenanceLogs)
+
+userBike.route('/', userBikeMaintenanceSchedule)
 
 userBike.route('/', userBikeTourings)
 

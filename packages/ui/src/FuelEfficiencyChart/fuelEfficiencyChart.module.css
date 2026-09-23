@@ -34,7 +34,7 @@
 
 .tooltipDate {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
   margin-bottom: var(--spacing-1);
 }
@@ -67,7 +67,7 @@
 
 .emptyState > p:first-child {
   font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   margin-bottom: var(--spacing-2);
 }
 

@@ -71,6 +71,7 @@ const buildFuelLog = (overrides: Partial<FuelLog> = {}) => {
     previousMileage: 1000,
     amount: 10,
     totalPrice: 1500,
+    isFullTank: true,
     memo: null,
     touringId: null,
     touringTitle: null,
@@ -153,6 +154,7 @@ describe('TouringService', () => {
       updateFuelLogTouringId: vi.fn(),
       updateMultipleFuelLogsTouringId: vi.fn(),
       countFuelLogs: vi.fn(),
+      findAllFuelLogsOrderedByMileage: vi.fn().mockResolvedValue([]),
     }
     touringPlanRepository = {
       createPlan: vi.fn(),

@@ -2,6 +2,7 @@
 
 import { Flag } from 'lucide-react'
 import useSWR from 'swr'
+import { Button } from '@repo/ui/button'
 import styles from './TouringDestinationWidget.module.css'
 import { weatherEmoji } from '@/lib/utils/weatherUtils'
 
@@ -117,23 +118,31 @@ const TouringDestinationWidget = ({
             </div>
           </div>
 
-          <button
+          <Button
+            type="button"
+            variant="primary"
+            outline
+            fullWidth
             className={styles.arrivalButton}
             onClick={onArrival}
             disabled={isArrivalLoading || isSkipLoading}
           >
             {!isArrivalLoading && <Flag size={15} />}
             {isArrivalLoading ? '記録中...' : '到着した'}
-          </button>
+          </Button>
 
           {onSkip && (
-            <button
+            <Button
+              type="button"
+              variant="quiet"
+              size="sm"
+              fullWidth
               className={styles.skipButton}
               onClick={onSkip}
               disabled={isArrivalLoading || isSkipLoading}
             >
               {isSkipLoading ? 'スキップ中...' : 'スキップ'}
-            </button>
+            </Button>
           )}
         </>
       )}

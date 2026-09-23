@@ -1,0 +1,97 @@
+/*
+ * ヘッダー操作列（戻る・ツーリングを作成・プラン一覧）。PC（1024px〜）では
+ * 下の `.listLayout` と同じ最大幅に揃える。給油履歴（`fuel-logs/page.module.css`）
+ * と同じ `--app-page-w` の80%を使い、改修済み画面どうしで右端の基準を揃える。
+ */
+.topBar {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .topBar {
+    max-width: calc(var(--app-page-w) * 0.8);
+  }
+}
+
+.fallback {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .fallback {
+    max-width: calc(var(--app-page-w) * 0.8);
+  }
+}
+
+.loadingBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25rem;
+}
+
+.loadingText {
+  font-size: var(--font-size-lg);
+  color: var(--color-ink);
+}
+
+.errorActions {
+  margin-bottom: var(--spacing-4);
+}
+
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
+}
+
+.errorTitle {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-danger);
+}
+
+.errorMessage {
+  margin: 0;
+  color: var(--color-inkLight);
+}
+
+.info {
+  width: 100%;
+}
+
+.listLayout {
+  width: 100%;
+}
+
+/* モバイル/タブレットのみ表示（カードの縦1列。PCでは台帳に差し替える） */
+.mobileOnly {
+}
+
+@media (min-width: 1024px) {
+  .mobileOnly {
+    display: none;
+  }
+}
+
+/* PC（1024px〜）: ツーリングの台帳（Issue #575「05 画面案 ─ PC」） */
+.desktopOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktopOnly {
+    display: block;
+  }
+
+  .info,
+  .listLayout {
+    max-width: calc(var(--app-page-w) * 0.8);
+  }
+}

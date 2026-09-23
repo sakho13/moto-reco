@@ -9,6 +9,7 @@ import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
+import styles from './PlanEditModal.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch } from '@/lib/api/client'
@@ -99,21 +100,8 @@ export function PlanEditModal({
 
   return (
     <ModalBase title="プランを編集" onClose={onClose}>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-4)',
-        }}
-      >
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--spacing-4)',
-          }}
-        >
+      <div className={styles.body}>
+        <form onSubmit={handleSubmit} className="flex flex-col">
           <FormField label="タイトル" htmlFor="planEditTitle" required>
             <Input
               id="planEditTitle"
@@ -138,25 +126,14 @@ export function PlanEditModal({
           </Button>
         </form>
 
-        <hr style={{ borderColor: 'var(--color-cloud)', margin: '0' }} />
+        <hr className={styles.divider} />
 
         {confirmingDelete ? (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 'var(--spacing-2)',
-            }}
-          >
-            <p
-              style={{
-                fontSize: 'var(--font-size-sm)',
-                color: 'var(--color-ink)',
-              }}
-            >
+          <div className={styles.confirm}>
+            <p className={styles.confirmText}>
               このプランを削除しますか？この操作は取り消せません。
             </p>
-            <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+            <div className={styles.confirmActions}>
               <Button
                 onClick={() => setConfirmingDelete(false)}
                 variant="cloud"

@@ -7,6 +7,7 @@ import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
+import styles from './page.module.css'
 import {
   BikeRegisterForm,
   type BikeFormData,
@@ -79,8 +80,8 @@ function BikeRegisterPage() {
   }
 
   return (
-    <div style={{ width: '100%', maxWidth: '28rem' }}>
-      <div style={{ marginBottom: 'var(--spacing-4)' }}>
+    <div className={styles.page}>
+      <div className={styles.backRow}>
         <Button
           onClick={() => {
             if (step === 1) {
@@ -97,41 +98,15 @@ function BikeRegisterPage() {
         </Button>
       </div>
 
-      <div
-        style={{
-          backgroundColor: 'var(--color-background)',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: 'var(--shadow-sm)',
-          padding: 'var(--spacing-6)',
-          border: '1px solid var(--color-cloud)',
-        }}
-      >
-        <h1
-          style={{
-            fontSize: 'var(--font-size-2xl)',
-            fontWeight: 'var(--font-weight-bold)',
-            marginBottom: 'var(--spacing-6)',
-            color: 'var(--color-ink)',
-          }}
-        >
-          バイク登録
-        </h1>
+      <div className={styles.card}>
+        <h1 className={styles.title}>バイク登録</h1>
 
         <StepIndicator currentStep={step} />
 
         {/* ステップ1: メーカー選択 */}
         {step === 1 && (
           <div>
-            <h2
-              style={{
-                fontSize: 'var(--font-size-lg)',
-                fontWeight: 'var(--font-weight-semibold)',
-                marginBottom: 'var(--spacing-4)',
-                color: 'var(--color-ink)',
-              }}
-            >
-              ステップ1: メーカーを選択
-            </h2>
+            <h2 className={styles.stepTitle}>ステップ1: メーカーを選択</h2>
 
             <InfoBox variant="info">
               バイクデータベースの準備中のため、現在メーカー選択は利用できません。
@@ -144,7 +119,7 @@ function BikeRegisterPage() {
               placeholder="メーカーを選択してください（現在利用不可）"
             />
 
-            <div style={{ marginTop: 'var(--spacing-4)' }}>
+            <div className={styles.stepAction}>
               <Button onClick={() => setStep(2)} variant="cloud" fullWidth>
                 次へ
               </Button>
@@ -155,14 +130,7 @@ function BikeRegisterPage() {
         {/* ステップ2: バイク検索 */}
         {step === 2 && (
           <div>
-            <h2
-              style={{
-                fontSize: 'var(--font-size-lg)',
-                fontWeight: 'var(--font-weight-semibold)',
-                marginBottom: 'var(--spacing-4)',
-                color: 'var(--color-ink)',
-              }}
-            >
+            <h2 className={styles.stepTitle}>
               ステップ2: バイクを検索 (現在準備中)
             </h2>
 
@@ -176,7 +144,7 @@ function BikeRegisterPage() {
               placeholder="例: CB400SF（現在利用不可）"
             />
 
-            <div style={{ marginTop: 'var(--spacing-4)' }}>
+            <div className={styles.stepAction}>
               <Button
                 onClick={() => {
                   setSelectedBike(null)

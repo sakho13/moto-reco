@@ -9,6 +9,12 @@ interface NavigationButtonProps {
   label: string
   icon: React.ComponentType
   showLabel?: boolean
+  /**
+   * 表示バリアント
+   * - `tab`: モバイル下部ナビの縦積みタブ（既定）
+   * - `rail`: デスクトップサイドバーの横積みインデックス行
+   */
+  variant?: 'tab' | 'rail'
 }
 
 export function NavigationButton({
@@ -16,6 +22,7 @@ export function NavigationButton({
   label,
   icon: Icon,
   showLabel = false,
+  variant = 'tab',
 }: NavigationButtonProps) {
   const pathname = usePathname()
   const isActive = pathname === href || pathname.startsWith(href + '/')
@@ -23,7 +30,7 @@ export function NavigationButton({
   return (
     <Link
       href={href}
-      className={`${styles.navButton} ${isActive ? styles.active : ''} ${showLabel ? styles.withLabel : ''}`}
+      className={`${styles.navButton} ${variant === 'rail' ? styles.rail : ''} ${isActive ? styles.active : ''} ${showLabel ? styles.withLabel : ''}`}
       aria-label={label}
       aria-current={isActive ? 'page' : undefined}
       title={label}

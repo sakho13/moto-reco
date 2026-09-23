@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { prisma } from '@repo/database'
 import { GoodsModelSearchParams } from '@repo/shared-domain'
 import type { GoodsCategory, GoodsModelId } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
 import {
   GOODS_CATEGORY_LABELS,
@@ -118,9 +119,9 @@ export default async function PublicGoodsPage({
           placeholder="型番・商品名で検索"
           className={styles.searchInput}
         />
-        <button type="submit" className={styles.searchButton}>
+        <Button type="submit" variant="cloud">
           検索
-        </button>
+        </Button>
       </form>
 
       {models.length === 0 ? (
@@ -143,7 +144,7 @@ export default async function PublicGoodsPage({
                       alt={model.name}
                       fill
                       sizes="(max-width: 900px) 100vw, 320px"
-                      style={{ objectFit: 'contain' }}
+                      className={styles.cardImageFit}
                       unoptimized
                     />
                   ) : (
