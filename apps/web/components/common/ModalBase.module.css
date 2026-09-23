@@ -1,7 +1,20 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  /*
+   * 背後のUIを沈める遮蔽幕。
+   *
+   * 「常に暗い幕」を色トークン名の指定だけで表すことはできない。
+   * themes.ts の配色はライト/ダークで明暗が反転するため
+   * （inkDark は #14100B ⇔ #FBF6EA、*Ink 系はその逆）、
+   * どのトークンを選んでも片方のテーマで幕が白く光ってしまう。
+   *
+   * そこで地色（--color-background）の色相・彩度はそのまま受け継ぎ、
+   * 明度だけを暗側に固定する。テーマを切り替えれば元になる
+   * --color-background の値が変わるので、テーマごとの分岐は要らず、
+   * テーマが増えてもその地色に馴染んだ幕が自動で得られる。
+   */
+  background: oklch(from var(--color-background) 0.12 c h / 0.82);
   display: flex;
   align-items: stretch;
   justify-content: stretch;
@@ -10,7 +23,7 @@
 
 .modal {
   background: var(--color-background);
-  padding: 1.5rem;
+  padding: var(--spacing-6);
   width: 100%;
   height: 100%;
   overflow-y: auto;
@@ -20,7 +33,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-6);
 }
 
 .closeButton {
@@ -35,14 +48,14 @@
    * 見出しの有無に関わらず閉じるボタンの位置がずれない。
    */
   margin-left: auto;
-  padding: 0.25rem;
+  padding: var(--spacing-1);
   border-radius: var(--radius-md);
   color: var(--color-ink);
   opacity: 0.5;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-fast);
 }
 
 .closeButton:hover {
@@ -53,7 +66,7 @@
   .overlay {
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: var(--spacing-4);
   }
 
   .modal {
@@ -61,7 +74,8 @@
     max-width: 28rem;
     max-height: 90vh;
     border-radius: var(--radius-lg);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    /* 画面上で最も手前に立つ面なので、カードと同じ最上位の影トークンを当てる */
+    box-shadow: var(--shadow-lg);
   }
 
   .modalSm {
