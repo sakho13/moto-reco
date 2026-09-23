@@ -61,27 +61,7 @@ html[data-theme-mode='dark'] .container {
 }
 
 .endCornerButton {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: 0.35rem 0.9rem;
-  border-radius: var(--radius-md);
-  background-color: transparent;
-  border: 1.5px solid var(--color-danger);
-  color: var(--color-danger);
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    opacity 0.15s;
   white-space: nowrap;
-}
-
-.endCornerButton:hover:not(:disabled) {
-  background-color: rgba(204, 0, 0, 0.06);
-}
-
-.endCornerButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 .bikeInfoArea {
@@ -216,93 +196,35 @@ html[data-theme-mode='dark'] .container {
   gap: var(--spacing-2);
 }
 
-.breakButton {
+/*
+ * `.bottomRow` の2つを等幅に並べる。Button の fullWidth を使っていないため
+ * `app/app/(protected)/layout.module.css` の
+ * `.appRoot button[class*="fullWidth"]`（共通の320px上限）の対象外になる。
+ * ツーリング中画面はまだPC専用の幅に絞っていないため、ここだけ個別に
+ * 上限を持たせて画面幅いっぱいの帯にならないようにする。
+ */
+.bottomRowButton {
   flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-1);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  padding: var(--spacing-3) var(--spacing-2);
-  border-radius: var(--radius-md);
-  background-color: var(--card-surface);
-  border: 1.5px solid var(--card-border);
-  color: var(--card-text-muted);
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    border-color 0.15s;
   white-space: nowrap;
-  min-height: 2.5rem;
+}
+
+.bottomRowButton svg {
+  /* Tailwind preflight が svg { display: block } を設定するため inline-flex 内で改行される問題を修正 */
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: var(--spacing-1);
 }
 
 @media (min-width: 640px) {
-  /*
-   * `@repo/ui` の Button を使わない独自CSSの flex:1 ボタンのため、
-   * `app/app/(protected)/layout.module.css` の `.appRoot button[class*="fullWidth"]`
-   * （@repo/ui の fullWidth 修飾クラスだけに絞った共通の上限）の対象外になる。
-   * ツーリング中画面（`TouringModeView`）はまだPC専用の幅に絞っていないため、
-   * ここだけ個別に上限を持たせて画面幅いっぱいの帯にならないようにする
-   * （`.fuelButton` も同様）。
-   */
-  .breakButton {
+  .bottomRowButton {
     max-width: 320px;
   }
-}
-
-.breakButton:hover:not(:disabled) {
-  background-color: var(--color-cloudHover);
-  border-color: var(--color-cloudActive);
-}
-
-.breakButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 .breakStatus {
   font-size: var(--font-size-xs);
   color: var(--card-text-dim);
   text-align: center;
-}
-
-.fuelButton {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-1);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  padding: var(--spacing-3) var(--spacing-2);
-  border-radius: var(--radius-md);
-  background-color: var(--card-surface);
-  border: 1.5px solid var(--card-border);
-  color: var(--card-text-muted);
-  cursor: pointer;
-  transition:
-    background-color 0.15s,
-    border-color 0.15s;
-  white-space: nowrap;
-  min-height: 2.5rem;
-}
-
-@media (min-width: 640px) {
-  /* `.breakButton` と同じ理由（このファイル冒頭のコメント参照）。 */
-  .fuelButton {
-    max-width: 320px;
-  }
-}
-
-.fuelButton:hover:not(:disabled) {
-  background-color: var(--color-cloudHover);
-  border-color: var(--color-cloudActive);
-}
-
-.fuelButton:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
 }
 
 /* ========================================

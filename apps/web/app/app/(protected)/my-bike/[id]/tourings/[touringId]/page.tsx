@@ -464,22 +464,27 @@ function TouringDetailPage() {
               <span className={styles.breakBannerText}>
                 休憩中 {formatVisitedAt(currentBreak.arrivedAt)}〜
               </span>
-              <button
+              <Button
+                type="button"
+                variant="warning"
+                size="sm"
+                className={styles.breakEndButton}
                 onClick={handleQuickBreakEnd}
                 disabled={isBreakLoading}
-                className={styles.breakEndButton}
               >
                 休憩終了
-              </button>
+              </Button>
             </div>
           ) : (
-            <button
+            <Button
+              type="button"
+              variant="warning"
+              fullWidth
               onClick={handleQuickBreakStart}
               disabled={isBreakLoading}
-              className={styles.breakStartButton}
             >
               休憩を始める
-            </button>
+            </Button>
           )}
         </div>
       )}
