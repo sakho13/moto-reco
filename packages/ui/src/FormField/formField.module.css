@@ -1,10 +1,18 @@
 .formField {
-  margin-bottom: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
 }
 
 .helperText {
-  margin-top: var(--spacing-2);
+  margin-top: var(--spacing-1);
   font-size: var(--font-size-sm);
   color: var(--color-inkLight);
+  line-height: var(--line-height-normal);
+}
+
+/* フィールド単位のエラー。枠付きの ErrorMessage はフォーム全体のエラー用 */
+.error {
+  margin: var(--spacing-1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
   line-height: var(--line-height-normal);
 }
