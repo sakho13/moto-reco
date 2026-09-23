@@ -11,10 +11,14 @@
  * このスクリプトは
  *   1. packages/theme/src/themes.ts のトークン定義（colors / spacing / ...）
  *   2. apps/web/app/globals.css で直接定義されているカスタムプロパティ
- *   3. apps/web 配下の .css / .tsx / .ts でローカルに定義されているカスタム
+ *   3. 走査対象配下の .css / .tsx / .ts でローカルに定義されているカスタム
  *      プロパティ（例: TouringModeView.module.css の --card-*）
- * を「定義済み」として収集し、apps/web 配下の var(--xxx) 参照がそのいずれにも
+ * を「定義済み」として収集し、走査対象の var(--xxx) 参照がそのいずれにも
  * 一致しない場合はエラーとして報告する。
+ *
+ * 走査対象は apps/web だけでなく packages/ui/src も含める。
+ * 共通部品（Tabs / Checkbox / ToggleSection など）側の未定義参照が
+ * apps/web だけを見ていたために検出をすり抜けていたため。
  *
  * 使い方:
  *   node apps/web/scripts/check-css-tokens.mjs
@@ -27,7 +31,14 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '../../..')
-const webRoot = path.resolve(__dirname, '..')
+/**
+ * 走査対象のルート。
+ * 共通部品のCSSも同じテーマトークンを参照するため、packages/ui も対象に含める。
+ */
+const scanRoots = [
+  path.resolve(__dirname, '..'),
+  path.resolve(repoRoot, 'packages/ui/src'),
+]
 
 /**
  * `key: value,` 形式のオブジェクトリテラルから最上位のキー名だけを雑に抜き出す。
@@ -98,11 +109,11 @@ function collectThemeTokens() {
 const TARGET_EXTENSIONS = new Set(['.css', '.ts', '.tsx'])
 const IGNORED_DIRS = new Set(['node_modules', '.next', '.turbo'])
 
-function collectWebFiles(dir, acc = []) {
+function collectFiles(dir, acc = []) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory()) {
       if (IGNORED_DIRS.has(entry.name)) continue
-      collectWebFiles(path.join(dir, entry.name), acc)
+      collectFiles(path.join(dir, entry.name), acc)
       continue
     }
     if (TARGET_EXTENSIONS.has(path.extname(entry.name))) {
@@ -115,7 +126,7 @@ function collectWebFiles(dir, acc = []) {
 async function main() {
   const defined = collectThemeTokens()
 
-  const files = collectWebFiles(webRoot)
+  const files = scanRoots.flatMap((root) => collectFiles(root))
 
   const usages = new Map() // varName -> Set<file>
   const localDefs = new Set()
