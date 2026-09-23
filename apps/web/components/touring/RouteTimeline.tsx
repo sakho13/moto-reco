@@ -18,6 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { Fragment } from 'react'
 import type { TouringPlanRouteType } from '@repo/shared-types'
+import { Button } from '@repo/ui/button'
 import styles from './RouteTimeline.module.css'
 import { DragHandleIcon } from '@/components/icons/DragHandleIcon'
 import { EditIcon } from '@/components/icons/EditIcon'
@@ -168,13 +169,16 @@ function TimelineRow({ item, badge, dragHandle }: TimelineRowProps) {
             )}
           </div>
           {handleEdit && (
-            <button
+            <Button
+              type="button"
+              variant="quiet"
+              size="iconSm"
               onClick={handleEdit}
               className={styles.editButton}
               aria-label="編集"
             >
               <EditIcon />
-            </button>
+            </Button>
           )}
         </div>
         {hasTime ? (

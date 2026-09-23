@@ -445,14 +445,16 @@ function TouringDetailPage() {
     <div className={styles.card}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">スポット・休憩</h2>
-        <button
+        <Button
+          type="button"
+          variant="quiet"
+          size="iconSm"
           onClick={() => setAddModalType('SPOT')}
-          className={styles.editButton}
           aria-label="スポットを追加"
           title="スポット・休憩を追加"
         >
           ＋
-        </button>
+        </Button>
       </div>
 
       {touring?.status === 'STARTED' && (
@@ -519,21 +521,27 @@ function TouringDetailPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold truncate">{touring.title}</h1>
               <span className={statusBadgeClass}>{statusLabel}</span>
-              <button
+              <Button
+                type="button"
+                variant="quiet"
+                size="iconSm"
+                className={styles.iconButton}
                 onClick={() => setIsEditModalOpen(true)}
-                className={styles.editButton}
                 aria-label="編集"
               >
                 <EditIcon />
-              </button>
-              <button
+              </Button>
+              <Button
+                type="button"
+                variant="quiet"
+                size="iconSm"
+                className={styles.iconButton}
                 onClick={() => setIsFuelLogLinkModalOpen(true)}
-                className={styles.editButton}
                 aria-label="給油履歴の紐づけ"
                 title="給油履歴の紐づけ"
               >
                 <FuelIcon />
-              </button>
+              </Button>
             </div>
             <p className={`text-xs mt-1 ${styles.mutedText}`}>
               {formatDate(touring.startDate)} → {formatDate(touring.endDate)}
@@ -582,7 +590,6 @@ function TouringDetailPage() {
                 touringId={touringId}
                 cardClassName={styles.card}
                 mutedTextClassName={styles.mutedText}
-                editButtonClassName={styles.editButton}
               />
             )}
           </div>
@@ -595,7 +602,6 @@ function TouringDetailPage() {
               touringId={touringId}
               cardClassName={styles.card}
               mutedTextClassName={styles.mutedText}
-              editButtonClassName={styles.editButton}
             />
           )}
         </div>

@@ -429,14 +429,16 @@ function TouringPlanDetailPage() {
       <div className={styles.card}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">ルート</h2>
-          <button
+          <Button
+            type="button"
+            variant="quiet"
+            size="iconSm"
             onClick={() => setAddModalType('SPOT')}
-            className={styles.editButton}
             aria-label="経由地・休憩を追加"
             title="経由地・休憩を追加"
           >
             ＋
-          </button>
+          </Button>
         </div>
 
         {spotsLoading ? (
@@ -491,13 +493,16 @@ function TouringPlanDetailPage() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl font-bold truncate">{plan.title}</h1>
-            <button
+            <Button
+              type="button"
+              variant="quiet"
+              size="iconSm"
+              className={styles.iconButton}
               onClick={() => setIsEditModalOpen(true)}
-              className={styles.editButton}
               aria-label="編集"
             >
               <EditIcon />
-            </button>
+            </Button>
           </div>
         </div>
       </div>

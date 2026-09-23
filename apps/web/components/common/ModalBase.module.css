@@ -25,9 +25,6 @@
 }
 
 .closeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   /*
    * `margin-left: auto` で常に右端に固定する。`.header` の
    * `justify-content: space-between` は2要素前提だが、`hideTitleOnDesktop` で
@@ -36,18 +33,12 @@
    * 見出しの有無に関わらず閉じるボタンの位置がずれない。
    */
   margin-left: auto;
-  padding: var(--spacing-1);
-  border-radius: var(--radius-md);
-  color: var(--color-ink);
-  opacity: 0.5;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: opacity var(--transition-fast);
 }
 
-.closeButton:hover {
-  opacity: 1;
+/* lucide の既定は24px角で、Button の iconSm（2rem角・枠線1.5px）の内寸を超える */
+.closeButton svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 @media (min-width: 768px) {
