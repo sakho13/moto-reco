@@ -1,19 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  /*
-   * 背後のUIを沈める遮蔽幕。
-   *
-   * 「常に暗い幕」を色トークン名の指定だけで表すことはできない。
-   * themes.ts の配色はライト/ダークで明暗が反転するため
-   * （inkDark は #14100B ⇔ #FBF6EA、*Ink 系はその逆）、
-   * どのトークンを選んでも片方のテーマで幕が白く光ってしまう。
-   *
-   * そこで地色（--color-background）の色相・彩度はそのまま受け継ぎ、
-   * 明度だけを暗側に固定する。テーマを切り替えれば元になる
-   * --color-background の値が変わるので、テーマごとの分岐は要らず、
-   * テーマが増えてもその地色に馴染んだ幕が自動で得られる。
-   */
+  /* 遮蔽幕。地色の色相・彩度を受け継ぎ、明度だけ暗側に固定する */
   background: oklch(from var(--color-background) 0.12 c h / 0.82);
   display: flex;
   align-items: stretch;
@@ -74,7 +62,6 @@
     max-width: 28rem;
     max-height: 90vh;
     border-radius: var(--radius-lg);
-    /* 画面上で最も手前に立つ面なので、カードと同じ最上位の影トークンを当てる */
     box-shadow: var(--shadow-lg);
   }
 

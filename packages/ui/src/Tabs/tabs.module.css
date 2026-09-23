@@ -1,13 +1,5 @@
-/*
- * タブの見た目は「受け皿（トレイ）に選択中のタブだけが板として載っている」構造で作る。
- * 面の色・文字色はすべてテーマトークンに寄せてある。
- * テーマを切り替えるとトークンの値そのものが差し替わるため、
- * CSS側でテーマモードを条件に値を出し分ける記述は書かない。
- */
-
 .list {
   display: inline-flex;
-  /* 一段凹んだ受け皿。地色（--color-background）とは別の面であることを示す */
   background: var(--color-cloud);
   border-radius: var(--radius-lg);
   padding: var(--spacing-1);
@@ -35,10 +27,6 @@
 }
 
 .trigger.active {
-  /*
-   * 選択中のタブだけを地色（＝直下のパネルと同じ面）にすることで、
-   * 受け皿から一枚浮いてパネルとつながって見せる。
-   */
   background: var(--color-background);
   color: var(--color-inkDark);
   box-shadow: var(--shadow-sm);

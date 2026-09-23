@@ -16,10 +16,6 @@
  * を「定義済み」として収集し、走査対象の var(--xxx) 参照がそのいずれにも
  * 一致しない場合はエラーとして報告する。
  *
- * 走査対象は apps/web だけでなく packages/ui/src も含める。
- * 共通部品（Tabs / Checkbox / ToggleSection など）側の未定義参照が
- * apps/web だけを見ていたために検出をすり抜けていたため。
- *
  * 使い方:
  *   node apps/web/scripts/check-css-tokens.mjs
  *   pnpm --filter web check:css-tokens
@@ -31,10 +27,7 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '../../..')
-/**
- * 走査対象のルート。
- * 共通部品のCSSも同じテーマトークンを参照するため、packages/ui も対象に含める。
- */
+/** 走査対象のルート */
 const scanRoots = [
   path.resolve(__dirname, '..'),
   path.resolve(repoRoot, 'packages/ui/src'),
