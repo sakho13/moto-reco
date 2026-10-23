@@ -1,6 +1,13 @@
 'use client'
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   ThemeMode,
   ThemeName,
@@ -38,7 +45,13 @@ export const ThemeProvider = ({
   initialThemeMode = 'light',
 }: ThemeProviderProps) => {
   const [themeName, setThemeName] = useState<ThemeName>(initialThemeName)
-  const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode)
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(initialThemeMode)
+
+  /** テーマモードを変更し、ユーザーの選択として localStorage に保存する */
+  const setThemeMode = useCallback((nextThemeMode: ThemeMode) => {
+    setThemeModeState(nextThemeMode)
+    window.localStorage.setItem('theme-mode', nextThemeMode)
+  }, [])
 
   const theme: ThemeTokens = useMemo(() => {
     const selectedTheme = themes[themeName]?.[themeMode]
@@ -51,14 +64,14 @@ export const ThemeProvider = ({
 
     const storedMode = window.localStorage.getItem('theme-mode')
     if (storedMode && themeModes.includes(storedMode as ThemeMode)) {
-      setThemeMode(storedMode as ThemeMode)
+      setThemeModeState(storedMode as ThemeMode)
       return
     }
 
     const prefersDark = window.matchMedia(
       '(prefers-color-scheme: dark)'
     ).matches
-    setThemeMode(prefersDark ? 'dark' : 'light')
+    setThemeModeState(prefersDark ? 'dark' : 'light')
   }, [])
 
   useEffect(() => {
@@ -104,10 +117,6 @@ export const ThemeProvider = ({
     root.dataset.themeName = themeName
     root.dataset.themeMode = themeMode
     root.style.colorScheme = themeMode
-
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('theme-mode', themeMode)
-    }
   }, [themeMode, themeName, theme])
 
   return (
