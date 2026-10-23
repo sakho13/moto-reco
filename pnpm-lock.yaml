@@ -115,16 +115,16 @@ importers:
         version: 1.0.3(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
       '@refinedev/antd':
         specifier: 6.0.3
-        version: 6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(dayjs@1.11.23)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+        version: 6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(dayjs@1.11.23)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
       '@refinedev/core':
         specifier: 5.0.12
-        version: 5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+        version: 5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
       '@refinedev/nextjs-router':
         specifier: 7.0.5
-        version: 7.0.5(@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(next@16.4.2(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+        version: 7.0.5(@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(next@16.4.2(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
       '@refinedev/simple-rest':
         specifier: 6.0.1
-        version: 6.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))
+        version: 6.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))
       '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -141,8 +141,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared-utils
       '@tanstack/react-query':
-        specifier: 5.104.1
-        version: 5.104.1(react@19.2.9)
+        specifier: 5.104.5
+        version: 5.104.5(@types/react@19.2.2)(react@19.2.9)
       antd:
         specifier: 6.6.5
         version: 6.6.5(date-fns@4.4.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
@@ -3222,13 +3222,17 @@ packages:
   '@tailwindcss/postcss@4.3.3':
     resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
 
-  '@tanstack/query-core@5.104.1':
-    resolution: {integrity: sha512-TiRghcrGkUTE+M4JBxvpPSpBhxvIzQairw+cksrHYGr+2uwC77yW1SY9nYxnYRYOppvucf8rEg6b5byoz4rTpw==}
+  '@tanstack/query-core@5.104.5':
+    resolution: {integrity: sha512-Q94gI8Opd+CbdVNOdj8ZCyV8WqLYitrDq1t96Xc8WZT6lY0r5iRnJLXYDxMex7EEf2v+mXvn4FcjaBKSxXZQ9A==}
 
-  '@tanstack/react-query@5.104.1':
-    resolution: {integrity: sha512-Zz70EgjahNI7aCz8BZxM3vUGU44ycxEAzMuCUjLeA7SVhhOkg3ZgPjPJPvHjs6Rmky/dtmnu1WzjGHNHmhCoZQ==}
+  '@tanstack/react-query@5.104.5':
+    resolution: {integrity: sha512-RORgFe052U+93weaNuqg7qHq7vNVNzXN/VrXqD4bbAuQCWUqOl2lV5Ui9flWk5CVvMyL/Bh27QWhzwH0aaOx9g==}
     peerDependencies:
+      '@types/react': ^18 || ^19
       react: ^18 || ^19
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   '@testing-library/dom@10.4.0':
     resolution: {integrity: sha512-pemlzrSESWbdAloYml3bAJMEfNh1Z7EduzqPKprCH5S341frlpYnUEW0H72dLxa6IsYr+mPno20GiSm+h9dEdQ==}
@@ -9139,13 +9143,13 @@ snapshots:
       react: 19.2.9
       react-redux: 9.3.0(@types/react@19.2.2)(react@19.2.9)(redux@5.0.1)
 
-  '@refinedev/antd@6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(dayjs@1.11.23)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
+  '@refinedev/antd@6.0.3(@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(dayjs@1.11.23)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
     dependencies:
       '@ant-design/icons': 5.6.1(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
       '@ant-design/pro-layout': 7.22.7(antd@6.6.5(date-fns@4.4.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
-      '@refinedev/core': 5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
-      '@refinedev/ui-types': 2.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
-      '@tanstack/react-query': 5.104.1(react@19.2.9)
+      '@refinedev/core': 5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+      '@refinedev/ui-types': 2.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+      '@tanstack/react-query': 5.104.5(@types/react@19.2.2)(react@19.2.9)
       '@types/react': 19.2.2
       '@types/react-dom': 19.2.2(@types/react@19.2.2)
       antd: 6.6.5(date-fns@4.4.0)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
@@ -9159,10 +9163,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
+  '@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
     dependencies:
       '@refinedev/devtools-internal': 2.0.2(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
-      '@tanstack/react-query': 5.104.1(react@19.2.9)
+      '@tanstack/react-query': 5.104.5(@types/react@19.2.2)(react@19.2.9)
       '@types/react': 19.2.2
       '@types/react-dom': 19.2.2(@types/react@19.2.2)
       lodash: 4.17.21
@@ -9178,7 +9182,7 @@ snapshots:
   '@refinedev/devtools-internal@2.0.2(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
     dependencies:
       '@refinedev/devtools-shared': 2.0.2(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
-      '@tanstack/react-query': 5.104.1(react@19.2.9)
+      '@tanstack/react-query': 5.104.5(@types/react@19.2.2)(react@19.2.9)
       '@types/react': 19.2.2
       '@types/react-dom': 19.2.2(@types/react@19.2.2)
       error-stack-parser: 2.1.4
@@ -9187,16 +9191,16 @@ snapshots:
 
   '@refinedev/devtools-shared@2.0.2(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
     dependencies:
-      '@tanstack/react-query': 5.104.1(react@19.2.9)
+      '@tanstack/react-query': 5.104.5(@types/react@19.2.2)(react@19.2.9)
       '@types/react': 19.2.2
       '@types/react-dom': 19.2.2(@types/react@19.2.2)
       error-stack-parser: 2.1.4
       react: 19.2.9
       react-dom: 19.2.9(react@19.2.9)
 
-  '@refinedev/nextjs-router@7.0.5(@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(next@16.4.2(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
+  '@refinedev/nextjs-router@7.0.5(@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(next@16.4.2(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
     dependencies:
-      '@refinedev/core': 5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+      '@refinedev/core': 5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
       '@types/react': 19.2.2
       '@types/react-dom': 19.2.2(@types/react@19.2.2)
       next: 16.4.2(@opentelemetry/api@1.9.0)(@playwright/test@1.64.1)(@types/node@24.19.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
@@ -9205,18 +9209,18 @@ snapshots:
       react-dom: 19.2.9(react@19.2.9)
       warn-once: 0.1.1
 
-  '@refinedev/simple-rest@6.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))':
+  '@refinedev/simple-rest@6.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))':
     dependencies:
-      '@refinedev/core': 5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+      '@refinedev/core': 5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
       axios: 1.20.0
       query-string: 7.1.3
     transitivePeerDependencies:
       - debug
       - supports-color
 
-  '@refinedev/ui-types@2.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
+  '@refinedev/ui-types@2.0.1(@refinedev/core@5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9))(react-dom@19.2.9(react@19.2.9))(react@19.2.9)':
     dependencies:
-      '@refinedev/core': 5.0.12(@tanstack/react-query@5.104.1(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
+      '@refinedev/core': 5.0.12(@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9))(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
       dayjs: 1.11.23
       react: 19.2.9
       react-dom: 19.2.9(react@19.2.9)
@@ -9643,12 +9647,14 @@ snapshots:
       postcss: 8.5.19
       tailwindcss: 4.3.3
 
-  '@tanstack/query-core@5.104.1': {}
+  '@tanstack/query-core@5.104.5': {}
 
-  '@tanstack/react-query@5.104.1(react@19.2.9)':
+  '@tanstack/react-query@5.104.5(@types/react@19.2.2)(react@19.2.9)':
     dependencies:
-      '@tanstack/query-core': 5.104.1
+      '@tanstack/query-core': 5.104.5
       react: 19.2.9
+    optionalDependencies:
+      '@types/react': 19.2.2
 
   '@testing-library/dom@10.4.0':
     dependencies:
