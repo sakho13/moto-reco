@@ -86,6 +86,7 @@ describe('TouringPlanSpotService', () => {
       findPlans: vi.fn(),
       findPlanById: vi.fn().mockResolvedValue(buildPlan()),
       deletePlan: vi.fn(),
+      countPlans: vi.fn(),
     }
     myUserBikeRepository = {
       createMyUserBike: vi.fn(),

@@ -583,7 +583,7 @@ describe('Photo API Endpoints', () => {
         endDate: '2024-06-01T18:00:00.000Z',
       })
       spotId = await createTestSpot(token, myUserBikeId, touringId, {
-        visitedAt: '2024-06-01T11:00:00.000Z',
+        arrivedAt: '2024-06-01T11:00:00.000Z',
         type: 'SPOT',
         name: 'テストスポット',
       })
@@ -785,7 +785,7 @@ describe('Photo API Endpoints', () => {
         otherBike.myUserBikeId,
         otherTouringId,
         {
-          visitedAt: '2024-06-01T11:00:00.000Z',
+          arrivedAt: '2024-06-01T11:00:00.000Z',
           type: 'SPOT',
           name: '他ユーザーのスポット',
         }
@@ -866,7 +866,7 @@ describe('Photo API Endpoints', () => {
         endDate: '2024-06-01T18:00:00.000Z',
       })
       spotId = await createTestSpot(token, myUserBikeId, touringId, {
-        visitedAt: '2024-06-01T11:00:00.000Z',
+        arrivedAt: '2024-06-01T11:00:00.000Z',
         type: 'SPOT',
         name: 'テストスポット',
       })
@@ -961,7 +961,7 @@ describe('Photo API Endpoints', () => {
         otherBike.myUserBikeId,
         otherTouringId,
         {
-          visitedAt: '2024-06-01T11:00:00.000Z',
+          arrivedAt: '2024-06-01T11:00:00.000Z',
           type: 'SPOT',
           name: '他ユーザーのスポット',
         }
