@@ -59,13 +59,13 @@ describe('getNowLocalDateTimeString', () => {
 
   it('minuteStep=15 で分が 15 の倍数に丸められる', () => {
     const result = getNowLocalDateTimeString(15)
-    const minutes = Number(result.split('T')[1].split(':')[1])
+    const minutes = Number(result.split('T')[1]?.split(':')[1])
     expect(minutes % 15).toBe(0)
   })
 
   it('minuteStep=30 で分が 30 の倍数に丸められる', () => {
     const result = getNowLocalDateTimeString(30)
-    const minutes = Number(result.split('T')[1].split(':')[1])
+    const minutes = Number(result.split('T')[1]?.split(':')[1])
     expect(minutes % 30).toBe(0)
   })
 })
