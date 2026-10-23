@@ -2,6 +2,7 @@
 const nextConfig = {
   transpilePackages: ['@repo/database', '@repo/firebase-auth-server'],
   output: 'standalone',
+  agentRules: false,
 }
 
 export default nextConfig

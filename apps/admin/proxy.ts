@@ -5,13 +5,18 @@ const ALLOWED_IPS = (process.env.ALLOWED_IPS ?? '')
   .map((ip) => ip.trim())
   .filter(Boolean)
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // ALLOWED_IPS 未設定時は制限なし（ローカル開発用）
   if (ALLOWED_IPS.length === 0) return NextResponse.next()
 
-  // Cloud Run は X-Forwarded-For の先頭にクライアントの実IPを付与する
-  const forwarded = request.headers.get('x-forwarded-for')
-  const clientIp = forwarded?.split(',')[0]?.trim() ?? ''
+  // Cloud Run（ドメインマッピング）はクライアント送信の X-Forwarded-For の末尾に実IPを追記する
+  const forwarded = request.headers.get('x-forwarded-for') ?? ''
+  const clientIp =
+    forwarded
+      .split(',')
+      .map((ip) => ip.trim())
+      .filter(Boolean)
+      .at(-1) ?? ''
 
   if (!ALLOWED_IPS.includes(clientIp)) {
     return new NextResponse('Forbidden', { status: 403 })

@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  agentRules: false,
   transpilePackages: [
     '@repo/shared-types',
     '@repo/shared-domain',

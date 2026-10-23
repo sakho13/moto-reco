@@ -33,15 +33,17 @@ const userId = createUserId('user-1')
 const buildUserEntity = (
   overrides: Partial<{ role: 'USER' | 'ADMIN' | 'GUEST' }> = {}
 ) =>
-  new UserEntity({
-    id: userId,
-    name: 'Test User',
-    role: overrides.role ?? 'USER',
-    status: 'ACTIVE',
-    plan: 'FREE',
-    notificationEmail: null,
-    isProfilePublic: true,
-  })
+  new UserEntity(
+    {
+      id: userId,
+      name: 'Test User',
+      role: overrides.role ?? 'USER',
+      status: 'ACTIVE',
+      notificationEmail: null,
+      isProfilePublic: true,
+    },
+    'FREE'
+  )
 
 const buildTouring = (overrides: Partial<Touring> = {}) => {
   return new TouringEntity({
@@ -162,6 +164,7 @@ describe('TouringService', () => {
       findPlans: vi.fn(),
       findPlanById: vi.fn(),
       deletePlan: vi.fn(),
+      countPlans: vi.fn(),
     }
     touringPlanSpotRepository = {
       createPlanSpot: vi.fn(),
