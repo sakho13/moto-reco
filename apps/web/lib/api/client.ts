@@ -10,6 +10,7 @@ import {
   ApiResponseFuelLogList,
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
+  ApiResponseUserAuthProviderSwitch,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
   ApiResponsePublicUserPage,
@@ -219,6 +220,9 @@ type API_EP = {
   }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
+  }
+  '/api/v1/user/auth/provider': {
+    PUT: SuccessResponse<ApiResponseUserAuthProviderSwitch>
   }
   '/api/v1/user/auth/quit': {
     POST: SuccessResponse<ApiResponseUserQuit>

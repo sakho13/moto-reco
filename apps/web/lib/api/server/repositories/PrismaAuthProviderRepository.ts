@@ -1,13 +1,6 @@
-import {
-  ExternalIdUserStatus,
-  IAuthProviderRepository,
-} from '@repo/shared-domain'
-import {
-  ProviderType,
-  UserId,
-  UserPlan,
-  createUserId,
-} from '@repo/shared-types'
+import { IAuthProviderRepository } from '@repo/shared-domain'
+import { ProviderType, UserId, UserPlan } from '@repo/shared-types'
+import { toProviderTypeCondition } from './authProviderTypeCondition'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export type ActiveUserInfo = {
@@ -40,7 +33,7 @@ export class PrismaAuthProviderRepository
       },
       where: {
         externalId: externalId,
-        providerType: providerType,
+        providerType: toProviderTypeCondition(providerType),
         isActive: true,
         user: {
           status: 'ACTIVE',
@@ -79,7 +72,7 @@ export class PrismaAuthProviderRepository
       },
       where: {
         externalId: externalId,
-        providerType: providerType,
+        providerType: toProviderTypeCondition(providerType),
         isActive: true,
         user: {
           status: 'ACTIVE',
@@ -127,7 +120,7 @@ export class PrismaAuthProviderRepository
       },
       where: {
         externalId: externalId,
-        providerType: providerType,
+        providerType: toProviderTypeCondition(providerType),
       },
     })
 
@@ -152,7 +145,7 @@ export class PrismaAuthProviderRepository
       },
       where: {
         externalId: externalId,
-        providerType: providerType,
+        providerType: toProviderTypeCondition(providerType),
       },
     })
 
@@ -160,52 +153,27 @@ export class PrismaAuthProviderRepository
   }
 
   /**
-   * 指定した認証方式のいずれかで外部IDに紐付くユーザーを取得する（ステータス不問）
+   * ユーザーの認証方式を取得する
    */
-  async findUserStatusByExternalId(
-    externalId: string,
-    providerTypes: readonly ProviderType[]
-  ): Promise<ExternalIdUserStatus | null> {
-    const authProvider = await this.connection.mAuthProvider.findFirst({
-      select: {
-        user: {
-          select: {
-            id: true,
-            status: true,
-            userQuit: { select: { status: true } },
-          },
-        },
-      },
-      where: {
-        externalId: externalId,
-        providerType: { in: [...providerTypes] },
-      },
-      orderBy: { createdAt: 'asc' },
+  async findProviderTypeByUserId(userId: UserId): Promise<ProviderType | null> {
+    const authProvider = await this.connection.mAuthProvider.findUnique({
+      select: { providerType: true },
+      where: { userId },
     })
 
-    if (!authProvider?.user) return null
-
-    return {
-      userId: createUserId(authProvider.user.id),
-      status: authProvider.user.status as ExternalIdUserStatus['status'],
-      isQuit: authProvider.user.userQuit?.status === 'QUIT',
-    }
+    return (authProvider?.providerType as ProviderType | undefined) ?? null
   }
 
   /**
-   * ユーザーに認証方式を追加する
-   *
-   * @remarks
-   * 同じ認証方式・外部IDの行が既に存在する場合は何もしない。
+   * ユーザーの認証方式を更新する
    */
-  async addProvider(
+  async updateProviderType(
     userId: UserId,
-    providerType: ProviderType,
-    externalId: string
+    providerType: ProviderType
   ): Promise<void> {
-    await this.connection.mAuthProvider.createMany({
-      data: [{ userId, providerType, externalId, isActive: true }],
-      skipDuplicates: true,
+    await this.connection.mAuthProvider.update({
+      where: { userId },
+      data: { providerType },
     })
   }
 

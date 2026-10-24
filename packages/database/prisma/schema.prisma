@@ -25,7 +25,7 @@ model MAuthProvider {
   user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerType, externalId])
-  @@unique([userId, providerType])
+  @@unique([userId])
   @@index([userId, isActive])
 }
 

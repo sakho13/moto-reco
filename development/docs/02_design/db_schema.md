@@ -4,7 +4,7 @@
 
 ```mermaid
 erDiagram
-    MUser ||--o{ MAuthProvider : "認証"
+    MUser ||--|| MAuthProvider : "認証"
     MUser ||--o{ TMyBike : "所有"
     MUser ||--o| TUserQuit : "退会"
     MUser ||--o{ TUserGoods : "購入グッズ"
@@ -177,11 +177,10 @@ erDiagram
 
 ### 認証方式（MAuthProvider）
 
-- `MAuthProvider`は認証方式ごとの行で、1ユーザー（`MUser`）が複数行を持てる。Firebase Authenticationの認証方式（`FIREBASE_EMAIL` / `FIREBASE_GOOGLE`）は、どの行も`externalId`に同じFirebase UIDを保存する。
-- ユニーク制約: `(providerType, externalId)`、`(userId, providerType)`（1ユーザーにつき認証方式ごとに1行）。
-- 認証時に`(providerType, externalId)`の行が無く、同じ`externalId`を持つ`FIREBASE_EMAIL` / `FIREBASE_GOOGLE`の行があれば、そのユーザーに今回の認証方式の行を追加する（詳細は`01_domain/authorization.md`）。
-- `FIREBASE_ANONYMOUS`（ゲスト）は紐付けの対象外。
-- Firebase側で外れた認証方式（例: メール未確認のユーザーがGoogleでログインした後の`FIREBASE_EMAIL`）の行は削除しない。行は「そのユーザーが使ったことのある認証方式」を表し、ログインできるかどうかはFirebaseが判定する。
+- 1ユーザー（`MUser`）につき1行。`providerType`はそのユーザーが現在使う認証方式を表す。
+- ユニーク制約: `(providerType, externalId)`、`userId`。
+- `FIREBASE_EMAIL` / `FIREBASE_GOOGLE`は`externalId`にFirebase UIDを保存し、認証方式を切り替えると`providerType`のみ更新する（詳細は`01_domain/authorization.md`）。
+- 認証時、`FIREBASE_EMAIL` / `FIREBASE_GOOGLE`のIDトークンは`externalId`が一致する行を認証方式を問わず同一ユーザーとして扱う。
 
 ### 退会・完全削除フロー（TUserQuit / MSystemApiKey）
 
@@ -194,7 +193,7 @@ erDiagram
 | テーブル名       | 説明                                                     | 実装状況 |
 | ---------------- | -------------------------------------------------------- | -------- |
 | MUser            | ユーザー情報を格納するマスターテーブル                   | ✅       |
-| MAuthProvider    | 認証情報を格納するマスターテーブル（認証方式ごとに1行）   | ✅       |
+| MAuthProvider    | 認証情報を格納するマスターテーブル（1ユーザー1行）         | ✅       |
 | MCompany         | 会社マスターテーブル（バイクメーカー/グッズメーカーを`categories`で兼用。旧`MManufacturer`は#464で統合済み） | ✅       |
 | MBike            | バイク車種マスターテーブル（同じシリーズでも年式別）     | ✅       |
 | MMaintenanceType | メンテナンス種類情報を格納するマスターテーブル           | ✅       |

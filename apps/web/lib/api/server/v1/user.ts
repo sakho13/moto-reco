@@ -7,12 +7,14 @@ import {
   ApiResponseUserProfile,
   ApiResponseUserPlanHistory,
   ApiResponsePublicUserPage,
+  ApiResponseUserAuthProviderSwitch,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
   ApiResponseUserSearch,
   ChangePlanRequestSchema,
   GuestRegisterRequestSchema,
   SuccessResponse,
+  UserAuthProviderSwitchRequestSchema,
   UserAuthRecoverRequestSchema,
   UserAuthQuitRequestSchema,
   UserAuthRegisterRequestSchema,
@@ -33,7 +35,7 @@ import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepo
 import { PrismaUserPlanHistoryRepository } from '../repositories/PrismaUserPlanHistoryRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
-import { AuthProviderLinkService } from '../services/AuthProviderLinkService'
+import { AuthProviderSwitchService } from '../services/AuthProviderSwitchService'
 import { UserFollowService } from '../services/UserFollowService'
 import { UserPlanService } from '../services/UserPlanService'
 import { UserQuitService } from '../services/UserQuitService'
@@ -406,10 +408,7 @@ user.post(
 
     const { user, status } = await prisma.$transaction(async (t) => {
       const userRepo = new PrismaUserRepository(t)
-      const service = new UserService(
-        userRepo,
-        new AuthProviderLinkService(new PrismaAuthProviderRepository(t))
-      )
+      const service = new UserService(userRepo)
 
       const user = await service.createUser(authProvider, {
         name: body.name,
@@ -449,6 +448,45 @@ user.post(
       },
       201
     )
+  }
+)
+
+/**
+ * 認証方式切り替えエンドポイント
+ *
+ * @remarks
+ * - 認証必須（honoAuthMiddleware）
+ * - 切り替え先の認証方式が Firebase アカウントに紐付いている必要がある
+ * - 切り替え先以外の認証方式は Firebase アカウントから外す
+ * - GUESTロールは切り替え不可
+ *
+ * @route PUT /api/v1/user/auth/provider
+ */
+user.put(
+  '/auth/provider',
+  honoAuthMiddleware,
+  zodValidateJson(UserAuthProviderSwitchRequestSchema),
+  async (c) => {
+    const { userEntity, externalId } = c.var.user!
+    const body = c.req.valid('json')
+
+    const service = new AuthProviderSwitchService(
+      new PrismaAuthProviderRepository(prisma),
+      new FirebaseAuthRepository()
+    )
+    const result = await service.switchProvider(
+      userEntity,
+      externalId,
+      body.providerType
+    )
+
+    return c.json<SuccessResponse<ApiResponseUserAuthProviderSwitch>>({
+      status: 'success',
+      data: result,
+      message: result.switched
+        ? '認証方式を切り替えました'
+        : '認証方式は変更されていません',
+    })
   }
 )
 
@@ -590,10 +628,7 @@ user.post(
 
     const guestUser = await prisma.$transaction(async (t) => {
       const userRepo = new PrismaUserRepository(t)
-      const service = new UserService(
-        userRepo,
-        new AuthProviderLinkService(new PrismaAuthProviderRepository(t))
-      )
+      const service = new UserService(userRepo)
       return service.createGuestUser(authProvider, { name: body.name })
     })
 

@@ -10,7 +10,7 @@ export type ProviderType =
   (typeof ProviderTypeMap)[keyof typeof ProviderTypeMap]
 
 /**
- * 同一の Firebase UID で1ユーザーに紐付けられる認証方式
+ * 切り替え可能な認証方式（Firebase UID で1ユーザーを特定する対象）
  */
 export const FIREBASE_LINKABLE_PROVIDER_TYPES: readonly ProviderType[] = [
   ProviderTypeMap.FIREBASE_EMAIL,

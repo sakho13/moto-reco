@@ -10,6 +10,7 @@ import {
   signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
+  updatePassword,
 } from 'firebase/auth'
 
 let authInstance: ReturnType<typeof getAuth> | null = null
@@ -86,6 +87,15 @@ export const handleLinkAnonymousWithEmail = async (
   return await linkWithCredential(auth.currentUser, credential)
 }
 
+const createGoogleCredential = (email: string) =>
+  GoogleAuthProvider.credential(
+    JSON.stringify({
+      sub: `google-${email}`,
+      email,
+      email_verified: true,
+    })
+  )
+
 /**
  * Auth Emulator で Google アカウントとしてサインインする
  *
@@ -96,11 +106,31 @@ export const handleLinkAnonymousWithEmail = async (
 export const handleGoogleSignInByFirebase = async (email: string) => {
   const auth = getFirebaseClientAuth()
   if (!auth) throw new Error('Firebase auth is not initialized')
-  const idToken = JSON.stringify({
-    sub: `google-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    email,
-    email_verified: true,
-  })
-  const credential = GoogleAuthProvider.credential(idToken)
-  return await signInWithCredential(auth, credential)
+  return await signInWithCredential(auth, createGoogleCredential(email))
+}
+
+/**
+ * サインイン中のユーザーに Google アカウントを紐付ける
+ */
+export const handleLinkGoogleToCurrentUser = async (email: string) => {
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error('Firebase auth is not initialized')
+  if (!auth.currentUser) throw new Error('No current user to link')
+  return await linkWithCredential(
+    auth.currentUser,
+    createGoogleCredential(email)
+  )
+}
+
+/**
+ * サインイン中のユーザーにパスワードを設定する
+ *
+ * @remarks
+ * パスワード未設定のユーザーには、メールアドレスを使ったメール/パスワードの認証方式が追加される。
+ */
+export const handleSetPasswordToCurrentUser = async (password: string) => {
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error('Firebase auth is not initialized')
+  if (!auth.currentUser) throw new Error('No current user to update')
+  await updatePassword(auth.currentUser, password)
 }
