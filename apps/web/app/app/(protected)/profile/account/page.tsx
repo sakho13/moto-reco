@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { ApiV1Error } from '@repo/shared-domain'
 import { BaseCard } from '@repo/ui/baseCard'
@@ -8,6 +8,7 @@ import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { Textarea } from '@repo/ui/textarea'
 import styles from './page.module.css'
+import { AuthProviderSwitch } from '@/components/AuthProviderSwitch'
 import { ModalBase } from '@/components/common/ModalBase'
 import { trackEvent } from '@/lib/analytics'
 import { apiPost } from '@/lib/api/client'
@@ -21,8 +22,14 @@ const PROVIDER_LABEL: Record<string, string> = {
 
 type QuitStep = 'form' | 'confirm'
 
+/** Googleへの切り替えを有効化するクエリパラメータ `feature` の値 */
+const GOOGLE_LOGIN_FEATURE_FLAG = 'google-login'
+
 function AccountPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isGoogleSwitchEnabled =
+    searchParams.get('feature') === GOOGLE_LOGIN_FEATURE_FLAG
   const { user, isGuest } = useAuth()
 
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false)
@@ -31,12 +38,11 @@ function AccountPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const providerLabel = isGuest
-    ? 'ゲスト'
-    : user?.providerData[0]?.providerId != null
-      ? (PROVIDER_LABEL[user.providerData[0].providerId] ??
-        user.providerData[0].providerId)
-      : '-'
+  const providerLabels = isGuest
+    ? ['ゲスト']
+    : (user?.providerData ?? []).map(
+        ({ providerId }) => PROVIDER_LABEL[providerId] ?? providerId
+      )
 
   const handleOpenQuitModal = () => {
     setQuitStep('form')
@@ -188,13 +194,18 @@ function AccountPage() {
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
             <span className={styles.itemLabel}>認証方式</span>
-            <span>{providerLabel}</span>
+            <span>
+              {providerLabels.length > 0 ? providerLabels.join(' / ') : '-'}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className={styles.itemLabel}>メールアドレス</span>
             <span>{user?.email ?? '-'}</span>
           </div>
         </div>
+        {!isGuest && (
+          <AuthProviderSwitch isGoogleSwitchEnabled={isGoogleSwitchEnabled} />
+        )}
       </BaseCard>
 
       {!isGuest && (

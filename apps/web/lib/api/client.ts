@@ -10,6 +10,7 @@ import {
   ApiResponseFuelLogList,
   ApiResponseMaintenanceLogDetail,
   ApiResponseMaintenanceLogList,
+  ApiResponseUserAuthProviderSwitch,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
   ApiResponsePublicUserPage,
@@ -43,6 +44,7 @@ export const authenticatedFetch = async (
   options: RequestInit = {}
 ): Promise<Response> => {
   const auth = getFirebaseAuth()
+  await auth.authStateReady()
   const user = auth.currentUser
 
   if (!user) {
@@ -218,6 +220,9 @@ type API_EP = {
   }
   '/api/v1/user/auth/register': {
     POST: SuccessResponse<ApiResponseUserProfile>
+  }
+  '/api/v1/user/auth/provider': {
+    PUT: SuccessResponse<ApiResponseUserAuthProviderSwitch>
   }
   '/api/v1/user/auth/quit': {
     POST: SuccessResponse<ApiResponseUserQuit>

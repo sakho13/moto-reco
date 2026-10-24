@@ -15,6 +15,8 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
+  /** reload() で同一参照の User が更新された際に再描画させるためのカウンタ */
+  const [, setProviderVersion] = useState(0)
 
   useEffect(() => {
     const auth = getFirebaseAuth()
@@ -47,6 +49,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return result.user.getIdToken()
   }
 
+  const handleLinkWithGoogle = async () => {
+    await authService.linkWithGoogle()
+  }
+
+  const handleLinkWithEmailPassword = async (password: string) => {
+    await authService.linkWithEmailPassword(password)
+  }
+
+  const handleUnlinkProvidersExcept = async (
+    keepProviderId: authService.SwitchableProviderId
+  ) => {
+    await authService.unlinkProvidersExcept(keepProviderId)
+  }
+
+  const handleReloadUser = async () => {
+    const currentUser = getFirebaseAuth().currentUser
+    if (!currentUser) return
+    await currentUser.reload()
+    setProviderVersion((v) => v + 1)
+  }
+
   const handleSignOut = async () => {
     try {
       await authService.signOut()
@@ -73,6 +96,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     registerWithEmail: handleRegisterWithEmail,
     requestPasswordReset: handleRequestPasswordReset,
     signInWithGoogle: handleSignInWithGoogle,
+    linkWithGoogle: handleLinkWithGoogle,
+    linkWithEmailPassword: handleLinkWithEmailPassword,
+    unlinkProvidersExcept: handleUnlinkProvidersExcept,
+    reloadUser: handleReloadUser,
     signOut: handleSignOut,
     getIdToken: handleGetIdToken,
     signInAsGuest: handleSignInAsGuest,

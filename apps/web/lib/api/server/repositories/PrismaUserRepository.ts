@@ -4,6 +4,7 @@ import {
   IUserRepository,
 } from '@repo/shared-domain'
 import { createUserId, type UserId } from '@repo/shared-types'
+import { toProviderTypeCondition } from './authProviderTypeCondition'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 /** planHistories を含む select の共通定義 */
@@ -73,7 +74,7 @@ export class PrismaUserRepository
       where: {
         authProviders: {
           some: {
-            providerType: authProvider.provider,
+            providerType: toProviderTypeCondition(authProvider.provider),
             externalId: authProvider.externalId,
           },
         },
@@ -91,7 +92,7 @@ export class PrismaUserRepository
       where: {
         authProviders: {
           some: {
-            providerType: authProvider.provider,
+            providerType: toProviderTypeCondition(authProvider.provider),
             externalId: authProvider.externalId,
           },
         },

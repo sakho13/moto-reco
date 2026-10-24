@@ -2,3 +2,15 @@
   font-size: var(--font-size-xs);
   color: var(--color-inkLight);
 }
+
+.policyNote {
+  margin-top: var(--spacing-4);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-inkLight);
+  text-align: center;
+}
+
+.policyLink {
+  text-decoration: underline;
+}
