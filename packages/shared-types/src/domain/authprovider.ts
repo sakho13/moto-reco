@@ -9,6 +9,14 @@ export const ProviderTypeMap = {
 export type ProviderType =
   (typeof ProviderTypeMap)[keyof typeof ProviderTypeMap]
 
+/**
+ * 同一の Firebase UID で1ユーザーに紐付けられる認証方式
+ */
+export const FIREBASE_LINKABLE_PROVIDER_TYPES: readonly ProviderType[] = [
+  ProviderTypeMap.FIREBASE_EMAIL,
+  ProviderTypeMap.FIREBASE_GOOGLE,
+]
+
 export type AuthProvider = {
   userId: UserId
   externalId: string

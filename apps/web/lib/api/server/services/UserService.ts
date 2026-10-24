@@ -5,12 +5,18 @@ import {
   IUserRepository,
 } from '@repo/shared-domain'
 import { createUserId } from '@repo/shared-types'
+import { AuthProviderLinkService } from './AuthProviderLinkService'
 
 export class UserService {
   private _userRepository: IUserRepository
+  private _authProviderLinkService: AuthProviderLinkService
 
-  constructor(userRepository: IUserRepository) {
+  constructor(
+    userRepository: IUserRepository,
+    authProviderLinkService: AuthProviderLinkService
+  ) {
     this._userRepository = userRepository
+    this._authProviderLinkService = authProviderLinkService
   }
 
   public async createUser(
@@ -40,6 +46,26 @@ export class UserService {
       return {
         status: 'EXISTS',
         user: existingUser,
+      }
+    }
+
+    const linkResult =
+      await this._authProviderLinkService.linkByExternalId(authProvider)
+
+    if (linkResult.status === 'QUIT') {
+      throw new ApiV1Error(
+        'USER_QUIT',
+        '退会済みのアカウントです。ご登録のメールアドレスをご確認ください。'
+      )
+    }
+
+    if (linkResult.status === 'LINKED') {
+      const linkedUser = await this._userRepository.findById(linkResult.userId)
+      if (linkedUser) {
+        return {
+          status: 'EXISTS',
+          user: linkedUser,
+        }
       }
     }
 

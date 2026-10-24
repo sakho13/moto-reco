@@ -62,9 +62,10 @@ export class PurgeUserService {
     // 対象ユーザーのTUserQuitレコードが残り、次回バッチでも再試行対象になる。
     // 既に削除済み（auth/user-not-found）の場合のみ成功扱いとしてスキップする。
     const authClient = getFirebaseAdminAuthClient()
-    for (const provider of authProviders) {
+    const externalIds = [...new Set(authProviders.map((p) => p.externalId))]
+    for (const externalId of externalIds) {
       try {
-        await authClient.deleteUser(provider.externalId)
+        await authClient.deleteUser(externalId)
       } catch (error) {
         if (!isUserNotFoundError(error)) {
           throw error

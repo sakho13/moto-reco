@@ -33,6 +33,7 @@ import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepo
 import { PrismaUserPlanHistoryRepository } from '../repositories/PrismaUserPlanHistoryRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
+import { AuthProviderLinkService } from '../services/AuthProviderLinkService'
 import { UserFollowService } from '../services/UserFollowService'
 import { UserPlanService } from '../services/UserPlanService'
 import { UserQuitService } from '../services/UserQuitService'
@@ -405,7 +406,10 @@ user.post(
 
     const { user, status } = await prisma.$transaction(async (t) => {
       const userRepo = new PrismaUserRepository(t)
-      const service = new UserService(userRepo)
+      const service = new UserService(
+        userRepo,
+        new AuthProviderLinkService(new PrismaAuthProviderRepository(t))
+      )
 
       const user = await service.createUser(authProvider, {
         name: body.name,
@@ -586,7 +590,10 @@ user.post(
 
     const guestUser = await prisma.$transaction(async (t) => {
       const userRepo = new PrismaUserRepository(t)
-      const service = new UserService(userRepo)
+      const service = new UserService(
+        userRepo,
+        new AuthProviderLinkService(new PrismaAuthProviderRepository(t))
+      )
       return service.createGuestUser(authProvider, { name: body.name })
     })
 

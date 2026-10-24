@@ -1,11 +1,13 @@
 import { getApps, initializeApp } from 'firebase/app'
 import {
   EmailAuthProvider,
+  GoogleAuthProvider,
   connectAuthEmulator,
   createUserWithEmailAndPassword,
   getAuth,
   linkWithCredential,
   signInAnonymously,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
@@ -82,4 +84,23 @@ export const handleLinkAnonymousWithEmail = async (
   if (!auth.currentUser) throw new Error('No current user to link')
   const credential = EmailAuthProvider.credential(email, password)
   return await linkWithCredential(auth.currentUser, credential)
+}
+
+/**
+ * Auth Emulator で Google アカウントとしてサインインする
+ *
+ * @remarks
+ * Emulator は署名なしの JSON を Google の ID トークンとして受け付ける。
+ * 同じメールアドレスの既存アカウントがある場合は、そのアカウント（同じUID）にサインインする。
+ */
+export const handleGoogleSignInByFirebase = async (email: string) => {
+  const auth = getFirebaseClientAuth()
+  if (!auth) throw new Error('Firebase auth is not initialized')
+  const idToken = JSON.stringify({
+    sub: `google-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    email,
+    email_verified: true,
+  })
+  const credential = GoogleAuthProvider.credential(idToken)
+  return await signInWithCredential(auth, credential)
 }

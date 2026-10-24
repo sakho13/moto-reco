@@ -24,5 +24,24 @@ Firebase Authenticationを使用して、認証システムを構築する。
 
 対応する認証方法:
 
-- メール/パスワード認証
-- OAuthプロバイダ (Google, Facebook, Twitterなど)
+- メール/パスワード認証（`FIREBASE_EMAIL`）
+- Googleアカウント認証（`FIREBASE_GOOGLE`）
+- 匿名認証（`FIREBASE_ANONYMOUS`、ゲストアカウント）
+
+### ユーザーの識別と認証方式の紐付け
+
+Firebase Authenticationは「1メールアドレス1アカウント」の設定で運用する。この設定では、メール/パスワードで登録済みのユーザーが同じメールアドレスのGoogleアカウントでログインすると、同じFirebase UIDのアカウントにログインする。
+
+APIの認証（`honoAuthMiddleware`）は次の順でユーザーを判定する。
+
+1. IDトークンの認証方式とUIDが一致する、有効な`MAuthProvider`の行を探す。見つかれば認証済みとする
+2. 見つからない場合、同じUIDを持つ`FIREBASE_EMAIL` / `FIREBASE_GOOGLE`の行を探す（`AuthProviderLinkService`）
+   - 有効なユーザー: 今回の認証方式の行を追加して認証済みとする
+   - 退会済みユーザー: 行は追加せず`USER_QUIT`を返す
+3. どれにも当てはまらない場合は`USER_NOT_REGISTERED`を返す
+
+ユーザー登録（`POST /api/v1/user/auth/register`）も同じ紐付けを行う。同じUIDの有効なユーザーがいれば、行を追加して既存ユーザーを返す（`MUser`は作成しない）。
+
+匿名認証（ゲスト）は紐付けの対象外。
+
+Firebaseの挙動として、メールアドレス未確認のユーザーがGoogleでログインすると、Firebase側のパスワード認証が外れる。パスワードを再び使うにはパスワード再設定を行う。

@@ -103,6 +103,24 @@ describe('PurgeUserService.purgeExpiredQuitUsers()', () => {
     expect(deleteUserFromFirebaseAuth).toHaveBeenCalledWith('firebase-uid-1')
   })
 
+  test('同じ外部IDの認証方式が複数ある場合はFirebase Authの削除を1回だけ行う', async () => {
+    const userId = createUserId('user-1')
+    vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([
+      { userId },
+    ])
+    vi.mocked(purgeUserRepository.findAuthProvidersByUserId).mockResolvedValue([
+      { externalId: 'firebase-uid-1', providerType: 'FIREBASE_EMAIL' },
+      { externalId: 'firebase-uid-1', providerType: 'FIREBASE_GOOGLE' },
+    ])
+
+    const result = await service.purgeExpiredQuitUsers(new Date())
+
+    expect(result.succeededUserIds).toEqual(['user-1'])
+    expect(deleteUserFromFirebaseAuth).toHaveBeenCalledTimes(1)
+    expect(deleteUserFromFirebaseAuth).toHaveBeenCalledWith('firebase-uid-1')
+    expect(purgeUserRepository.deleteUser).toHaveBeenCalledWith('user-1')
+  })
+
   test('Firebase Auth削除が失敗した場合はDB削除に進まず、失敗として扱われる（次回バッチで再試行可能にする）', async () => {
     const userId = createUserId('user-fail')
     vi.mocked(purgeTargetRepository.findPurgeTargets).mockResolvedValue([

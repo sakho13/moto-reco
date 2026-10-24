@@ -1,4 +1,13 @@
-import { ProviderType, UserId, UserPlan } from '@repo/shared-types'
+import {
+  ExternalIdUserStatus,
+  IAuthProviderRepository,
+} from '@repo/shared-domain'
+import {
+  ProviderType,
+  UserId,
+  UserPlan,
+  createUserId,
+} from '@repo/shared-types'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export type ActiveUserInfo = {
@@ -12,7 +21,10 @@ export type ActiveUserInfo = {
   createdAt: Date
 }
 
-export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
+export class PrismaAuthProviderRepository
+  extends PrismaRepositoryBase
+  implements IAuthProviderRepository
+{
   /**
    * 外部ID（Firebase UIDなど）からアクティブな内部User IDを取得
    */
@@ -145,6 +157,56 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
     })
 
     return authProvider?.user?.id ?? null
+  }
+
+  /**
+   * 指定した認証方式のいずれかで外部IDに紐付くユーザーを取得する（ステータス不問）
+   */
+  async findUserStatusByExternalId(
+    externalId: string,
+    providerTypes: readonly ProviderType[]
+  ): Promise<ExternalIdUserStatus | null> {
+    const authProvider = await this.connection.mAuthProvider.findFirst({
+      select: {
+        user: {
+          select: {
+            id: true,
+            status: true,
+            userQuit: { select: { status: true } },
+          },
+        },
+      },
+      where: {
+        externalId: externalId,
+        providerType: { in: [...providerTypes] },
+      },
+      orderBy: { createdAt: 'asc' },
+    })
+
+    if (!authProvider?.user) return null
+
+    return {
+      userId: createUserId(authProvider.user.id),
+      status: authProvider.user.status as ExternalIdUserStatus['status'],
+      isQuit: authProvider.user.userQuit?.status === 'QUIT',
+    }
+  }
+
+  /**
+   * ユーザーに認証方式を追加する
+   *
+   * @remarks
+   * 同じ認証方式・外部IDの行が既に存在する場合は何もしない。
+   */
+  async addProvider(
+    userId: UserId,
+    providerType: ProviderType,
+    externalId: string
+  ): Promise<void> {
+    await this.connection.mAuthProvider.createMany({
+      data: [{ userId, providerType, externalId, isActive: true }],
+      skipDuplicates: true,
+    })
   }
 
   /**

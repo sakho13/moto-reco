@@ -175,6 +175,14 @@ erDiagram
     }
 ```
 
+### 認証方式（MAuthProvider）
+
+- `MAuthProvider`は認証方式ごとの行で、1ユーザー（`MUser`）が複数行を持てる。Firebase Authenticationの認証方式（`FIREBASE_EMAIL` / `FIREBASE_GOOGLE`）は、どの行も`externalId`に同じFirebase UIDを保存する。
+- ユニーク制約: `(providerType, externalId)`、`(userId, providerType)`（1ユーザーにつき認証方式ごとに1行）。
+- 認証時に`(providerType, externalId)`の行が無く、同じ`externalId`を持つ`FIREBASE_EMAIL` / `FIREBASE_GOOGLE`の行があれば、そのユーザーに今回の認証方式の行を追加する（詳細は`01_domain/authorization.md`）。
+- `FIREBASE_ANONYMOUS`（ゲスト）は紐付けの対象外。
+- Firebase側で外れた認証方式（例: メール未確認のユーザーがGoogleでログインした後の`FIREBASE_EMAIL`）の行は削除しない。行は「そのユーザーが使ったことのある認証方式」を表し、ログインできるかどうかはFirebaseが判定する。
+
 ### 退会・完全削除フロー（TUserQuit / MSystemApiKey）
 
 - 退会時（`POST /api/v1/user/auth/quit`）: `MUser.status`を`INACTIVE`に、`MAuthProvider.isActive`を`false`にする論理削除を行い、`TUserQuit`を`status=QUIT`で作成する。`purgeAt`には退会日時の30日後を保存する。復帰用トークンは平文をメールにのみ埋め込み、DBには`recoveryTokenHash`（SHA-256）のみ保存する。
@@ -186,7 +194,7 @@ erDiagram
 | テーブル名       | 説明                                                     | 実装状況 |
 | ---------------- | -------------------------------------------------------- | -------- |
 | MUser            | ユーザー情報を格納するマスターテーブル                   | ✅       |
-| MAuthProvider    | 認証情報を格納するマスターテーブル                       | ✅       |
+| MAuthProvider    | 認証情報を格納するマスターテーブル（認証方式ごとに1行）   | ✅       |
 | MCompany         | 会社マスターテーブル（バイクメーカー/グッズメーカーを`categories`で兼用。旧`MManufacturer`は#464で統合済み） | ✅       |
 | MBike            | バイク車種マスターテーブル（同じシリーズでも年式別）     | ✅       |
 | MMaintenanceType | メンテナンス種類情報を格納するマスターテーブル           | ✅       |

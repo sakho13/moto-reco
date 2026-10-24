@@ -6,6 +6,7 @@ import { getCurrentDate } from '@repo/shared-utils'
 import { GUEST_ACCOUNT_LIMITS } from '../../../statics'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
+import { AuthProviderLinkService } from '../services/AuthProviderLinkService'
 import { HonoVariables } from '../types/hono'
 
 /**
@@ -35,10 +36,30 @@ export async function honoAuthMiddleware(
 
     // Step 2: MAuthProviderから内部User情報（ID・ロール・作成日時）を取得
     const authProviderRepo = new PrismaAuthProviderRepository(prisma)
-    const userInfo = await authProviderRepo.findActiveUserInfoByExternalId(
+    let userInfo = await authProviderRepo.findActiveUserInfoByExternalId(
       authProvider.externalId,
       authProvider.provider
     )
+
+    // Step 3: 同一UIDで別の認証方式から登録済みのユーザーへ今回の認証方式を紐付ける
+    if (!userInfo) {
+      const linkService = new AuthProviderLinkService(authProviderRepo)
+      const linkResult = await linkService.linkByExternalId(authProvider)
+
+      if (linkResult.status === 'QUIT') {
+        throw new ApiV1Error(
+          'USER_QUIT',
+          '退会済みのアカウントです。ご登録のメールアドレスをご確認ください。'
+        )
+      }
+
+      if (linkResult.status === 'LINKED') {
+        userInfo = await authProviderRepo.findActiveUserInfoByExternalId(
+          authProvider.externalId,
+          authProvider.provider
+        )
+      }
+    }
 
     if (!userInfo) {
       // アクティブユーザーでなかった場合のみ、退会済みかどうかを追加で判定する
@@ -59,7 +80,7 @@ export async function honoAuthMiddleware(
       )
     }
 
-    // Step 3: ゲストアカウントの有効期限チェック（登録から7日）
+    // Step 4: ゲストアカウントの有効期限チェック（登録から7日）
     if (userInfo.role === 'GUEST') {
       const expiresAt = new Date(
         userInfo.createdAt.getTime() + GUEST_ACCOUNT_LIMITS.TTL_MS
