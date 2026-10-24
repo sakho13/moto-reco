@@ -2,7 +2,9 @@
 
 import type { AuthProvider } from '@refinedev/core'
 import {
+  GoogleAuthProvider,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   onAuthStateChanged,
   type User,
@@ -14,10 +16,13 @@ const getIdToken = async (user: User): Promise<string> => {
 }
 
 export const authProvider: AuthProvider = {
-  login: async ({ email, password }) => {
+  login: async ({ email, password, providerName }) => {
+    const isGoogle = providerName === 'google'
     try {
       const auth = getFirebaseAuth()
-      const { user } = await signInWithEmailAndPassword(auth, email, password)
+      const { user } = isGoogle
+        ? await signInWithPopup(auth, new GoogleAuthProvider())
+        : await signInWithEmailAndPassword(auth, email, password)
 
       // 管理者ロールチェック
       const token = await getIdToken(user)
@@ -39,7 +44,9 @@ export const authProvider: AuthProvider = {
         success: false,
         error: {
           name: 'LoginError',
-          message: 'メールアドレスまたはパスワードが正しくありません',
+          message: isGoogle
+            ? 'Googleでのログインに失敗しました'
+            : 'メールアドレスまたはパスワードが正しくありません',
         },
       }
     }
