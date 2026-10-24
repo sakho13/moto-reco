@@ -43,6 +43,7 @@ export const authenticatedFetch = async (
   options: RequestInit = {}
 ): Promise<Response> => {
   const auth = getFirebaseAuth()
+  await auth.authStateReady()
   const user = auth.currentUser
 
   if (!user) {
