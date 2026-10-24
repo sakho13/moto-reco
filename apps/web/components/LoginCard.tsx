@@ -5,16 +5,22 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FormEvent, useState } from 'react'
 import { ApiV1Error } from '@repo/shared-domain'
+import type { ProviderType } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { toast } from '@repo/ui/sonner'
 import styles from './LoginCard.module.css'
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { trackEvent } from '@/lib/analytics'
-import { apiGet, apiPost } from '@/lib/api/client'
+import { apiGet, apiPost, apiPut } from '@/lib/api/client'
 import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
+import {
+  unlinkProvidersExcept,
+  type SwitchableProviderId,
+} from '@/lib/firebase/auth'
 import { getFirebaseAuth } from '@/lib/firebase/config'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -26,6 +32,48 @@ const GOOGLE_LOGIN_CANCEL_ERROR_CODES: readonly string[] = [
   'auth/popup-closed-by-user',
   'auth/cancelled-popup-request',
 ]
+
+/** ログインに使った認証方式に対応する Firebase の認証方式ID */
+const LOGIN_PROVIDER_ID: Record<
+  Extract<ProviderType, 'FIREBASE_EMAIL' | 'FIREBASE_GOOGLE'>,
+  SwitchableProviderId
+> = {
+  FIREBASE_EMAIL: 'password',
+  FIREBASE_GOOGLE: 'google.com',
+}
+
+/** ログインに使った認証方式の表示名 */
+const LOGIN_PROVIDER_LABEL: Record<
+  Extract<ProviderType, 'FIREBASE_EMAIL' | 'FIREBASE_GOOGLE'>,
+  string
+> = {
+  FIREBASE_EMAIL: 'メール/パスワード',
+  FIREBASE_GOOGLE: 'Google',
+}
+
+/**
+ * ログインに使った認証方式へサーバー側の認証方式を切り替える
+ *
+ * @remarks
+ * 失敗してもログイン処理は継続する。
+ */
+const syncLoginProvider = async (
+  providerType: keyof typeof LOGIN_PROVIDER_LABEL
+): Promise<void> => {
+  try {
+    await unlinkProvidersExcept(LOGIN_PROVIDER_ID[providerType])
+    const response = await apiPut('/api/v1/user/auth/provider', {
+      providerType,
+    })
+    if (response.data.switched) {
+      toast.success(
+        `ログイン方法を${LOGIN_PROVIDER_LABEL[providerType]}に切り替えました`
+      )
+    }
+  } catch (error: unknown) {
+    console.error('Login provider sync error:', error)
+  }
+}
 
 /** 専用の案内メッセージを表示するFirebaseエラーコード */
 const GOOGLE_LOGIN_GUIDED_ERROR_CODES: readonly string[] = [
@@ -67,6 +115,7 @@ export function LoginCard() {
 
       try {
         await apiGet('/api/v1/user/profile')
+        await syncLoginProvider('FIREBASE_EMAIL')
       } catch (profileError: unknown) {
         if (
           profileError instanceof ApiV1Error &&
@@ -160,6 +209,7 @@ export function LoginCard() {
         await apiGet('/api/v1/user/profile')
 
         // 成功 = 既に登録済み
+        await syncLoginProvider('FIREBASE_GOOGLE')
         trackEvent('web_login', { method: 'google' })
         router.push(redirectTo)
         return

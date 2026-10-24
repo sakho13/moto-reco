@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test'
+import { completeEmulatorGoogleSignIn } from '../helpers/googleEmulatorPopup'
 
 /** Googleログインを有効化するクエリパラメータ付きのログインURL */
 const GOOGLE_LOGIN_ENABLED_PATH = '/app/login?feature=google-login'
@@ -68,21 +69,7 @@ export class LoginPage {
   async loginWithGoogle(email: string, displayName: string): Promise<void> {
     const popupPromise = this.page.waitForEvent('popup')
     await this.googleLoginButton.click()
-    const popup = await popupPromise
-    await popup.waitForLoadState()
-
-    const addAccountButton = popup.getByRole('button', {
-      name: 'Add new account',
-    })
-    const emailInput = popup.locator('#email-input')
-    await addAccountButton.or(emailInput).first().waitFor()
-    if (await addAccountButton.isVisible()) {
-      await addAccountButton.click()
-    }
-
-    await emailInput.fill(email)
-    await popup.locator('#display-name-input').fill(displayName)
-    await popup.getByRole('button', { name: 'Sign in with Google.com' }).click()
+    await completeEmulatorGoogleSignIn(await popupPromise, email, displayName)
   }
 
   /** ホームページへのリダイレクトを待つ */

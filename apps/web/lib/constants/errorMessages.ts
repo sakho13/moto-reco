@@ -39,6 +39,12 @@ export const ERROR_MESSAGES = {
       'ポップアップがブロックされました。ブラウザの設定でポップアップを許可してから再度お試しください',
     ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL:
       'このメールアドレスは別のログイン方法で登録済みです。メールアドレスとパスワードでログインしてください',
+    CREDENTIAL_ALREADY_IN_USE:
+      'このGoogleアカウントは別のアカウントで使用されています。別のGoogleアカウントを選択してください',
+    REQUIRES_RECENT_LOGIN:
+      'セキュリティのため、一度ログアウトしてから再度ログインし、もう一度お試しください',
+    PROVIDER_SWITCH_FAILED:
+      'ログイン方法の切り替えに失敗しました。もう一度お試しください',
   },
 
   // API
@@ -92,6 +98,10 @@ export const getFirebaseErrorMessage = (errorCode: string): string => {
       return ERROR_MESSAGES.AUTH.POPUP_BLOCKED
     case 'auth/account-exists-with-different-credential':
       return ERROR_MESSAGES.AUTH.ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL
+    case 'auth/credential-already-in-use':
+      return ERROR_MESSAGES.AUTH.CREDENTIAL_ALREADY_IN_USE
+    case 'auth/requires-recent-login':
+      return ERROR_MESSAGES.AUTH.REQUIRES_RECENT_LOGIN
     default:
       return ERROR_MESSAGES.API.UNKNOWN_ERROR
   }
