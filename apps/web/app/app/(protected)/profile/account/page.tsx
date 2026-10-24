@@ -31,12 +31,11 @@ function AccountPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const providerLabel = isGuest
-    ? 'ゲスト'
-    : user?.providerData[0]?.providerId != null
-      ? (PROVIDER_LABEL[user.providerData[0].providerId] ??
-        user.providerData[0].providerId)
-      : '-'
+  const providerLabels = isGuest
+    ? ['ゲスト']
+    : (user?.providerData ?? []).map(
+        ({ providerId }) => PROVIDER_LABEL[providerId] ?? providerId
+      )
 
   const handleOpenQuitModal = () => {
     setQuitStep('form')
@@ -188,7 +187,9 @@ function AccountPage() {
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex justify-between">
             <span className={styles.itemLabel}>認証方式</span>
-            <span>{providerLabel}</span>
+            <span>
+              {providerLabels.length > 0 ? providerLabels.join(' / ') : '-'}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className={styles.itemLabel}>メールアドレス</span>
