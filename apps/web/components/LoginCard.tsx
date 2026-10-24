@@ -14,12 +14,30 @@ import styles from './LoginCard.module.css'
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
+import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
 import { getFirebaseAuth } from '@/lib/firebase/config'
 import { useAuth } from '@/lib/hooks/useAuth'
+
+/** Googleログインを有効化するクエリパラメータ `feature` の値 */
+const GOOGLE_LOGIN_FEATURE_FLAG = 'google-login'
+
+/** ユーザー操作によるキャンセルを示すFirebaseエラーコード */
+const GOOGLE_LOGIN_CANCEL_ERROR_CODES: readonly string[] = [
+  'auth/popup-closed-by-user',
+  'auth/cancelled-popup-request',
+]
+
+/** 専用の案内メッセージを表示するFirebaseエラーコード */
+const GOOGLE_LOGIN_GUIDED_ERROR_CODES: readonly string[] = [
+  'auth/popup-blocked',
+  'auth/account-exists-with-different-credential',
+]
 
 export function LoginCard() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const isGoogleLoginEnabled =
+    searchParams.get('feature') === GOOGLE_LOGIN_FEATURE_FLAG
   // オープンリダイレクト対策: /app/ 配下の相対パスのみ許可する
   const rawRedirect = searchParams.get('redirect')
   const redirectTo =
@@ -200,24 +218,34 @@ export function LoginCard() {
         throw profileError
       }
     } catch (err) {
+      const errorCode =
+        err instanceof ApiV1Error
+          ? err.errorCode
+          : typeof err === 'object' &&
+              err !== null &&
+              'code' in err &&
+              typeof err.code === 'string'
+            ? err.code
+            : undefined
+
+      if (errorCode && GOOGLE_LOGIN_CANCEL_ERROR_CODES.includes(errorCode)) {
+        return
+      }
+
       console.error('Google login error:', err)
       trackEvent('login_error', {
         method: 'google',
-        error_code:
-          err instanceof ApiV1Error
-            ? err.errorCode
-            : typeof err === 'object' &&
-                err !== null &&
-                'code' in err &&
-                typeof err.code === 'string'
-              ? err.code
-              : undefined,
+        error_code: errorCode,
       })
 
       // エラー時はログアウト
       await signOut()
 
-      setError('Googleログインに失敗しました。もう一度お試しください。')
+      setError(
+        errorCode && GOOGLE_LOGIN_GUIDED_ERROR_CODES.includes(errorCode)
+          ? getFirebaseErrorMessage(errorCode)
+          : 'Googleログインに失敗しました。もう一度お試しください。'
+      )
     } finally {
       setLoading(false)
     }
@@ -290,7 +318,7 @@ export function LoginCard() {
           onClick={handleGoogleLogin}
           variant="social"
           size="icon"
-          disabled={true}
+          disabled={!isGoogleLoginEnabled || loading}
           aria-label="Googleでログイン"
           title="Googleでログイン"
         >
@@ -311,6 +339,22 @@ export function LoginCard() {
           <span className={styles.guestLabel}>ゲスト</span>
         </div>
       </div>
+
+      {isGoogleLoginEnabled && (
+        <p className={styles.policyNote}>
+          Googleでログインすることで
+          <Link
+            className={styles.policyLink}
+            href="/privacy-policy"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="プライバシーポリシーを新しいタブで開く"
+          >
+            プライバシーポリシー
+          </Link>
+          に同意したものとみなします。
+        </p>
+      )}
     </BaseCard>
   )
 }

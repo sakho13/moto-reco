@@ -35,6 +35,10 @@ export const ERROR_MESSAGES = {
     USER_DISABLED: 'このアカウントは無効化されています',
     OPERATION_NOT_ALLOWED: 'この操作は許可されていません',
     INVALID_CREDENTIAL: '認証情報が無効です',
+    POPUP_BLOCKED:
+      'ポップアップがブロックされました。ブラウザの設定でポップアップを許可してから再度お試しください',
+    ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL:
+      'このメールアドレスは別のログイン方法で登録済みです。メールアドレスとパスワードでログインしてください',
   },
 
   // API
@@ -84,6 +88,10 @@ export const getFirebaseErrorMessage = (errorCode: string): string => {
       return ERROR_MESSAGES.AUTH.OPERATION_NOT_ALLOWED
     case 'auth/invalid-credential':
       return ERROR_MESSAGES.AUTH.INVALID_CREDENTIAL
+    case 'auth/popup-blocked':
+      return ERROR_MESSAGES.AUTH.POPUP_BLOCKED
+    case 'auth/account-exists-with-different-credential':
+      return ERROR_MESSAGES.AUTH.ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL
     default:
       return ERROR_MESSAGES.API.UNKNOWN_ERROR
   }

@@ -32,7 +32,7 @@ export default function PrivacyPolicyPage() {
           （以下「本サービス」）は、ユーザーの個人情報を適切に取り扱うことを重要な責務と考え、
           本プライバシーポリシーを定めます。
         </p>
-        <p className={styles.note}>最終更新日: 2026年1月</p>
+        <p className={styles.note}>最終更新日: 2026年10月</p>
       </header>
 
       <div className={styles.content}>
@@ -45,6 +45,9 @@ export default function PrivacyPolicyPage() {
             <ul className={styles.list}>
               <li>
                 氏名、ニックネーム、メールアドレスなど登録時に入力した情報
+              </li>
+              <li>
+                Googleアカウントでログインした場合に、Googleから提供されるメールアドレスおよび表示名
               </li>
               <li>
                 バイクの登録情報、給油記録、メンテナンス履歴などサービス利用に伴う情報
