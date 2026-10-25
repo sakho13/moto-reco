@@ -1,9 +1,6 @@
 import { type Locator, type Page } from '@playwright/test'
 import { completeEmulatorGoogleSignIn } from '../helpers/googleEmulatorPopup'
 
-/** Googleログインを有効化するクエリパラメータ付きのログインURL */
-const GOOGLE_LOGIN_ENABLED_PATH = '/app/login?feature=google-login'
-
 /**
  * ログインページの Page Object Model
  *
@@ -13,7 +10,7 @@ const GOOGLE_LOGIN_ENABLED_PATH = '/app/login?feature=google-login'
  * - `#password`: パスワード入力欄
  * - `button[type="submit"]`: ログインボタン
  * - `[role="alert"]`: ErrorMessage コンポーネント
- * - 「Googleでログイン」ボタン: `?feature=google-login` 指定時のみ有効
+ * - 「Googleでログイン」ボタン
  */
 export class LoginPage {
   readonly page: Page
@@ -41,11 +38,6 @@ export class LoginPage {
   /** ログインページへ遷移する */
   async goto(): Promise<void> {
     await this.page.goto('/app/login')
-  }
-
-  /** Googleログインを有効化した状態でログインページへ遷移する */
-  async gotoWithGoogleLogin(): Promise<void> {
-    await this.page.goto(GOOGLE_LOGIN_ENABLED_PATH)
   }
 
   /**

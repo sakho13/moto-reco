@@ -12,10 +12,12 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { toast } from '@repo/ui/sonner'
 import styles from './RegisterCard.module.css'
+import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
 import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useGoogleLogin } from '@/lib/hooks/useGoogleLogin'
 import {
   validateEmail,
   validateName,
@@ -26,6 +28,7 @@ import {
 export function RegisterCard() {
   const router = useRouter()
   const { registerWithEmail } = useAuth()
+  const { loginWithGoogle } = useGoogleLogin()
   const { mutate } = useSWRConfig()
 
   const [email, setEmail] = useState('')
@@ -137,6 +140,24 @@ export function RegisterCard() {
       }
 
       setGlobalError(`アカウントの作成に失敗しました。もう一度お試しください。`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /**
+   * Googleでの新規登録処理
+   *
+   * @remarks
+   * 登録済みのGoogleアカウントの場合はそのままログインする。
+   */
+  const handleGoogleRegister = async () => {
+    setGlobalError(null)
+    setLoading(true)
+
+    try {
+      const errorMessage = await loginWithGoogle('/app/home')
+      if (errorMessage) setGlobalError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -255,6 +276,36 @@ export function RegisterCard() {
           に同意したものとみなします。
         </p>
       </form>
+
+      <div className="divider-label">
+        <span>または</span>
+      </div>
+
+      <Button
+        onClick={handleGoogleRegister}
+        variant="social"
+        size="lg"
+        fullWidth
+        disabled={loading}
+      >
+        <span className={styles.googleButtonLabel}>
+          <GoogleIcon />
+          Googleで登録
+        </span>
+      </Button>
+      <p className={styles.policyNote}>
+        Googleで登録することで
+        <Link
+          className={styles.policyLink}
+          href="/privacy-policy"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="プライバシーポリシーを新しいタブで開く"
+        >
+          プライバシーポリシー
+        </Link>
+        に同意したものとみなします。
+      </p>
     </BaseCard>
   )
 }

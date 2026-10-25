@@ -40,11 +40,6 @@ const TARGET_LABEL: Record<SwitchTarget, string> = {
   FIREBASE_GOOGLE: 'Google',
 }
 
-type Props = {
-  /** 「Googleに切り替える」を表示するか */
-  isGoogleSwitchEnabled: boolean
-}
-
 const getErrorCode = (err: unknown): string | undefined =>
   typeof err === 'object' &&
   err !== null &&
@@ -56,7 +51,7 @@ const getErrorCode = (err: unknown): string | undefined =>
 /**
  * ログイン方法（メール/パスワード・Google）を切り替える操作群
  */
-export function AuthProviderSwitch({ isGoogleSwitchEnabled }: Props) {
+export function AuthProviderSwitch() {
   const {
     user,
     linkWithGoogle,
@@ -79,7 +74,7 @@ export function AuthProviderSwitch({ isGoogleSwitchEnabled }: Props) {
   const hasPassword = providerIds.includes('password')
   const hasGoogle = providerIds.includes('google.com')
 
-  const showGoogleSwitch = isGoogleSwitchEnabled && hasPassword
+  const showGoogleSwitch = hasPassword
   const showEmailSwitch = hasGoogle
 
   if (!showGoogleSwitch && !showEmailSwitch) return null
