@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createRandomEmail } from '../../helpers/createRandomEmail'
 import { LoginPage } from '../../pages/loginPage'
+import { RegisterPage } from '../../pages/registerPage'
 
 /**
  * Googleログイン E2E テスト
@@ -9,11 +10,11 @@ import { LoginPage } from '../../pages/loginPage'
  * Auth Emulator のダミー Google ログイン画面を popup として操作する。
  */
 test.describe('Googleログイン', () => {
-  test('feature=google-login 指定時、新規Googleアカウントで登録してホームへリダイレクトされる', async ({
+  test('ログイン画面から新規Googleアカウントで登録してホームへリダイレクトされる', async ({
     page,
   }) => {
     const loginPage = new LoginPage(page)
-    await loginPage.gotoWithGoogleLogin()
+    await loginPage.goto()
 
     await expect(loginPage.googleLoginButton).toBeEnabled()
     await expect(loginPage.googlePolicyNote).toBeVisible()
@@ -24,13 +25,21 @@ test.describe('Googleログイン', () => {
     await expect(page).toHaveURL(/\/app\/home/)
   })
 
-  test('パラメータなしではGoogleログインボタンが無効化されている', async ({
+  test('登録画面から新規Googleアカウントで登録してホームへリダイレクトされる', async ({
     page,
   }) => {
-    const loginPage = new LoginPage(page)
-    await loginPage.goto()
+    const registerPage = new RegisterPage(page)
+    await registerPage.goto()
 
-    await expect(loginPage.googleLoginButton).toBeDisabled()
-    await expect(loginPage.googlePolicyNote).toBeHidden()
+    await expect(registerPage.googleRegisterButton).toBeEnabled()
+    await expect(registerPage.googlePolicyNote).toBeVisible()
+
+    await registerPage.registerWithGoogle(
+      createRandomEmail(),
+      'E2E Googleユーザー'
+    )
+    await registerPage.waitForRedirectToHome()
+
+    await expect(page).toHaveURL(/\/app\/home/)
   })
 })

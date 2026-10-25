@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { ApiV1Error } from '@repo/shared-domain'
 import { BaseCard } from '@repo/ui/baseCard'
@@ -22,14 +22,8 @@ const PROVIDER_LABEL: Record<string, string> = {
 
 type QuitStep = 'form' | 'confirm'
 
-/** Googleへの切り替えを有効化するクエリパラメータ `feature` の値 */
-const GOOGLE_LOGIN_FEATURE_FLAG = 'google-login'
-
 function AccountPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const isGoogleSwitchEnabled =
-    searchParams.get('feature') === GOOGLE_LOGIN_FEATURE_FLAG
   const { user, isGuest } = useAuth()
 
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false)
@@ -203,9 +197,7 @@ function AccountPage() {
             <span>{user?.email ?? '-'}</span>
           </div>
         </div>
-        {!isGuest && (
-          <AuthProviderSwitch isGoogleSwitchEnabled={isGoogleSwitchEnabled} />
-        )}
+        {!isGuest && <AuthProviderSwitch />}
       </BaseCard>
 
       {!isGuest && (

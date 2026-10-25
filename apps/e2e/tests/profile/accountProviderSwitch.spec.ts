@@ -12,12 +12,12 @@ const NEW_PASSWORD = 'switchPass123'
  * Auth Emulator のダミー Google ログイン画面を popup として操作する。
  */
 test.describe('認証方式の切り替え', () => {
-  test('feature=google-login 指定時、メール/パスワードからGoogleへ切り替えられる', async ({
+  test('メール/パスワードからGoogleへ切り替えられる', async ({
     authenticatedPage,
     testUserEmail,
   }) => {
     const accountPage = new AccountPage(authenticatedPage)
-    await accountPage.gotoWithGoogleSwitch()
+    await accountPage.goto()
 
     await expect(accountPage.providerRow).toContainText('メール/パスワード')
     await expect(accountPage.switchToEmailButton).toBeHidden()
@@ -32,22 +32,12 @@ test.describe('認証方式の切り替え', () => {
     await expect(accountPage.switchToEmailButton).toBeVisible()
   })
 
-  test('パラメータなしではGoogleへの切り替えボタンが表示されない', async ({
-    authenticatedPage,
-  }) => {
-    const accountPage = new AccountPage(authenticatedPage)
-    await accountPage.goto()
-
-    await expect(accountPage.providerRow).toContainText('メール/パスワード')
-    await expect(accountPage.switchToGoogleButton).toBeHidden()
-  })
-
   test('Googleからメール/パスワードへ切り替え、新しいパスワードでログインできる', async ({
     page,
   }) => {
     const email = createRandomEmail()
     const loginPage = new LoginPage(page)
-    await loginPage.gotoWithGoogleLogin()
+    await loginPage.goto()
     await loginPage.loginWithGoogle(email, 'E2E Googleユーザー')
     await loginPage.waitForRedirectToHome()
 

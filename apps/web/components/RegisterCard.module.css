@@ -8,3 +8,9 @@
 .policyLink {
   text-decoration: underline;
 }
+
+.googleButtonLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}

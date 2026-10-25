@@ -79,11 +79,6 @@ export class AccountPage {
     await this.page.goto('/app/profile/account')
   }
 
-  /** Googleへの切り替えを有効化した状態で認証情報ページへ遷移する */
-  async gotoWithGoogleSwitch(): Promise<void> {
-    await this.page.goto('/app/profile/account?feature=google-login')
-  }
-
   /** アカウント認証カード内のメールアドレスロケータを返す */
   emailText(email: string): Locator {
     return this.page.getByText(email).first()
