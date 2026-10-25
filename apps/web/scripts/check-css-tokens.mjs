@@ -118,7 +118,6 @@ const IGNORED_DIRS = new Set([
   'coverage',
   'dist',
   'build',
-  'storybook-static',
   'playwright-report',
   'test-results',
 ])

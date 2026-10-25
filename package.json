@@ -12,8 +12,7 @@
     "test:e2e": "dotenv -e .env.local -- turbo run test:e2e",
     "lint": "turbo run lint",
     "format": "prettier --write \"apps/**/*.{ts,tsx,md}\" \"packages/**/*.{ts,tsx,md}\" \"*.md\" --ignore-path .prettierignore",
-    "check-types": "turbo run check-types",
-    "storybook": "turbo run storybook"
+    "check-types": "turbo run check-types"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",

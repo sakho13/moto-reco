@@ -19,11 +19,6 @@
 - Webアプリ: `WEB_PORT` (デフォルト: 3000)
 - 管理画面: `ADMIN_PORT` (デフォルト: 3001)
 
-### 開発ツール
-
-- **Storybook**: UIコンポーネント開発環境 (http://localhost:6006)
-  - `packages/ui`のコンポーネントをStorybookで開発・確認できます
-
 ### Packages
 
 - **`@repo/ui`**: React コンポーネントライブラリ
@@ -147,13 +142,6 @@ pnpm dev:web
 
 # 管理画面のみ
 pnpm --filter admin dev
-```
-
-### Storybookの起動
-
-```bash
-# UIコンポーネント開発用
-pnpm storybook
 ```
 
 ## データベース操作
