@@ -1,4 +1,8 @@
 import { type Locator, type Page } from '@playwright/test'
+import { completeEmulatorGoogleSignIn } from '../helpers/googleEmulatorPopup'
+
+/** Googleログインを有効化するクエリパラメータ付きのログインURL */
+const GOOGLE_LOGIN_ENABLED_PATH = '/app/login?feature=google-login'
 
 /**
  * ログインページの Page Object Model
@@ -9,6 +13,7 @@ import { type Locator, type Page } from '@playwright/test'
  * - `#password`: パスワード入力欄
  * - `button[type="submit"]`: ログインボタン
  * - `[role="alert"]`: ErrorMessage コンポーネント
+ * - 「Googleでログイン」ボタン: `?feature=google-login` 指定時のみ有効
  */
 export class LoginPage {
   readonly page: Page
@@ -16,6 +21,8 @@ export class LoginPage {
   readonly passwordInput: Locator
   readonly submitButton: Locator
   readonly errorMessage: Locator
+  readonly googleLoginButton: Locator
+  readonly googlePolicyNote: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -25,11 +32,20 @@ export class LoginPage {
     this.errorMessage = page.locator(
       '[role="alert"]:not(#__next-route-announcer__)'
     )
+    this.googleLoginButton = page.getByRole('button', {
+      name: 'Googleでログイン',
+    })
+    this.googlePolicyNote = page.getByText('Googleでログインすることで')
   }
 
   /** ログインページへ遷移する */
   async goto(): Promise<void> {
     await this.page.goto('/app/login')
+  }
+
+  /** Googleログインを有効化した状態でログインページへ遷移する */
+  async gotoWithGoogleLogin(): Promise<void> {
+    await this.page.goto(GOOGLE_LOGIN_ENABLED_PATH)
   }
 
   /**
@@ -42,6 +58,18 @@ export class LoginPage {
     await this.emailInput.fill(email)
     await this.passwordInput.fill(password)
     await this.submitButton.click()
+  }
+
+  /**
+   * Auth Emulator のダミー画面で新規 Google アカウントを追加してログインする
+   *
+   * @param email - Google アカウントとして使うメールアドレス
+   * @param displayName - Google アカウントの表示名
+   */
+  async loginWithGoogle(email: string, displayName: string): Promise<void> {
+    const popupPromise = this.page.waitForEvent('popup')
+    await this.googleLoginButton.click()
+    await completeEmulatorGoogleSignIn(await popupPromise, email, displayName)
   }
 
   /** ホームページへのリダイレクトを待つ */

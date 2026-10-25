@@ -1,4 +1,6 @@
+import { IAuthProviderRepository } from '@repo/shared-domain'
 import { ProviderType, UserId, UserPlan } from '@repo/shared-types'
+import { toProviderTypeCondition } from './authProviderTypeCondition'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
 export type ActiveUserInfo = {
@@ -12,7 +14,10 @@ export type ActiveUserInfo = {
   createdAt: Date
 }
 
-export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
+export class PrismaAuthProviderRepository
+  extends PrismaRepositoryBase
+  implements IAuthProviderRepository
+{
   /**
    * 外部ID（Firebase UIDなど）からアクティブな内部User IDを取得
    */
@@ -28,7 +33,7 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
       },
       where: {
         externalId: externalId,
-        providerType: providerType,
+        providerType: toProviderTypeCondition(providerType),
         isActive: true,
         user: {
           status: 'ACTIVE',
@@ -67,7 +72,7 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
       },
       where: {
         externalId: externalId,
-        providerType: providerType,
+        providerType: toProviderTypeCondition(providerType),
         isActive: true,
         user: {
           status: 'ACTIVE',
@@ -115,7 +120,7 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
       },
       where: {
         externalId: externalId,
-        providerType: providerType,
+        providerType: toProviderTypeCondition(providerType),
       },
     })
 
@@ -140,11 +145,36 @@ export class PrismaAuthProviderRepository extends PrismaRepositoryBase {
       },
       where: {
         externalId: externalId,
-        providerType: providerType,
+        providerType: toProviderTypeCondition(providerType),
       },
     })
 
     return authProvider?.user?.id ?? null
+  }
+
+  /**
+   * ユーザーの認証方式を取得する
+   */
+  async findProviderTypeByUserId(userId: UserId): Promise<ProviderType | null> {
+    const authProvider = await this.connection.mAuthProvider.findUnique({
+      select: { providerType: true },
+      where: { userId },
+    })
+
+    return (authProvider?.providerType as ProviderType | undefined) ?? null
+  }
+
+  /**
+   * ユーザーの認証方式を更新する
+   */
+  async updateProviderType(
+    userId: UserId,
+    providerType: ProviderType
+  ): Promise<void> {
+    await this.connection.mAuthProvider.update({
+      where: { userId },
+      data: { providerType },
+    })
   }
 
   /**
