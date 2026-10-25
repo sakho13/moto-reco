@@ -1,3 +1,4 @@
+import type { ProviderType } from '../domain/authprovider'
 import type { GoodsCategory } from '../domain/goods'
 import type {
   MaintenanceCategory,
@@ -127,6 +128,12 @@ export type ApiResponseUserQuit = {
 
 /** 復帰処理も完了メッセージのみを返す（非認証の公開エンドポイントのため個人情報は含めない） */
 export type ApiResponseUserRecover = Record<string, never>
+
+/** 認証方式切り替え結果（switched は DB の認証方式が変わったかどうか） */
+export type ApiResponseUserAuthProviderSwitch = {
+  providerType: ProviderType
+  switched: boolean
+}
 
 export type ApiResponseManufacturer = {
   manufacturers: {

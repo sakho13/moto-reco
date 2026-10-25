@@ -4,6 +4,10 @@
  * 実行方法:
  *   cd packages/database
  *   dotenv -e .env.local -- tsx prisma/createAdminUser.ts <email> <password>
+ *   dotenv -e .env.local -- tsx prisma/createAdminUser.ts --google <email>
+ *
+ * `--google` 指定時は Emulator 上に Google 認証のユーザーを作成する。
+ * 作成したユーザーは Emulator のダミー Google ログイン画面で同じメールアドレスを選ぶとログインできる。
  */
 
 import { prisma } from '../src/index'
@@ -32,20 +36,55 @@ async function createFirebaseUser(
   return data.localId
 }
 
-async function main() {
-  const email = process.argv[2]
-  const password = process.argv[3]
+async function createFirebaseGoogleUser(email: string): Promise<string> {
+  const url = `${EMULATOR_URL}/identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=test`
+  const idToken = JSON.stringify({
+    sub: `google-${Date.now()}`,
+    email,
+    email_verified: true,
+  })
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      postBody: `id_token=${idToken}&providerId=google.com`,
+      requestUri: 'http://localhost',
+      returnSecureToken: true,
+    }),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Firebase Google user creation failed: ${body}`)
+  }
+  const data = (await res.json()) as { localId: string }
+  return data.localId
+}
 
-  if (!email || !password) {
-    console.error('Usage: tsx prisma/createAdminUser.ts <email> <password>')
+const USAGE = [
+  'Usage:',
+  '  tsx prisma/createAdminUser.ts <email> <password>',
+  '  tsx prisma/createAdminUser.ts --google <email>',
+].join('\n')
+
+async function main() {
+  const isGoogle = process.argv[2] === '--google'
+  const email = isGoogle ? process.argv[3] : process.argv[2]
+  const password = isGoogle ? undefined : process.argv[3]
+
+  if (!email || (!isGoogle && !password)) {
+    console.error(USAGE)
     process.exit(1)
   }
 
   console.log(`Firebase Emulator: ${EMULATOR_URL}`)
   console.log(`Project: ${PROJECT_ID}`)
-  console.log(`Creating admin user: ${email}`)
+  console.log(
+    `Creating admin user: ${email} (${isGoogle ? 'Google' : 'Email/Password'})`
+  )
 
-  const uid = await createFirebaseUser(email, password)
+  const uid = password
+    ? await createFirebaseUser(email, password)
+    : await createFirebaseGoogleUser(email)
   console.log(`Firebase UID: ${uid}`)
 
   const user = await prisma.mUser.create({
@@ -55,7 +94,7 @@ async function main() {
       status: 'ACTIVE',
       authProviders: {
         create: {
-          providerType: 'FIREBASE_EMAIL',
+          providerType: isGoogle ? 'FIREBASE_GOOGLE' : 'FIREBASE_EMAIL',
           externalId: uid,
           isActive: true,
         },
@@ -67,7 +106,8 @@ async function main() {
   console.log('')
   console.log('✅ Admin user created successfully!')
   console.log(`   Email:    ${email}`)
-  console.log(`   Password: ${password}`)
+  if (password) console.log(`   Password: ${password}`)
+  console.log(`   Provider: ${isGoogle ? 'Google' : 'Email/Password'}`)
   console.log(`   Role:     ADMIN`)
 }
 

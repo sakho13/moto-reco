@@ -4,6 +4,7 @@ import type { UserEntity } from '@repo/shared-domain'
 export type HonoVariables = {
   user?: {
     userEntity: UserEntity
+    externalId: string
     email?: string
     emailVerified?: boolean
     providerType: string

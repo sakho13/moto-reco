@@ -1,5 +1,6 @@
 'use client'
 
+import { GoogleOutlined } from '@ant-design/icons'
 import { AuthPage, useNotificationProvider } from '@refinedev/antd'
 import { Refine } from '@refinedev/core'
 import routerProvider from '@refinedev/nextjs-router'
@@ -22,6 +23,13 @@ export function LoginContent() {
         type="login"
         title="Motoreco 管理画面"
         formProps={{ initialValues: {} }}
+        providers={[
+          {
+            name: 'google',
+            label: 'Googleでログイン',
+            icon: <GoogleOutlined />,
+          },
+        ]}
       />
     </Refine>
   )
