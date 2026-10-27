@@ -112,10 +112,6 @@
         "NEXT_PUBLIC_FIREBASE_APP_ID",
         "FIREBASE_AUTH_EMULATOR_URL"
       ]
-    },
-    "storybook": {
-      "cache": false,
-      "persistent": true
     }
   }
 }
