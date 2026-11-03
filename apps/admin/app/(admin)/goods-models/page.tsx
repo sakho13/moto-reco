@@ -1,6 +1,6 @@
 'use client'
 
-import { SearchOutlined } from '@ant-design/icons'
+import { SearchOutlined, UploadOutlined } from '@ant-design/icons'
 import {
   CreateButton,
   DateField,
@@ -55,7 +55,16 @@ export default function GoodsModelListPage() {
   })
 
   return (
-    <List headerButtons={<CreateButton />}>
+    <List
+      headerButtons={
+        <Space>
+          <Link href="/goods-models/import">
+            <Button icon={<UploadOutlined />}>CSV取り込み</Button>
+          </Link>
+          <CreateButton />
+        </Space>
+      }
+    >
       <Form {...searchFormProps} layout="inline" style={{ marginBottom: 16 }}>
         <Form.Item name="goodsManufacturerId">
           <Select
