@@ -146,8 +146,12 @@ export default function McpSetupPage() {
               ツーリング履歴の詳細（スポット含む）を取得
             </li>
             <li>
-              <strong>get_maintenance_status</strong> —
-              バイクのメンテナンス状況と次回推奨時期を取得
+              <strong>list_maintenance_items</strong> —
+              メンテナンス項目の一覧（推奨交換間隔を含む）を取得
+            </li>
+            <li>
+              <strong>list_maintenance_logs</strong> —
+              整備履歴の一覧を取得（メンテナンス項目での絞り込みに対応）
             </li>
           </ul>
 

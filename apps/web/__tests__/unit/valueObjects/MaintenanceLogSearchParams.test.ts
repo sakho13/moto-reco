@@ -22,6 +22,11 @@ describe('MaintenanceLogSearchParams', () => {
       const params = new MaintenanceLogSearchParams({})
       expect(params.keyword).toBeUndefined()
     })
+
+    test('maintenanceType未指定時はundefinedになる', () => {
+      const params = new MaintenanceLogSearchParams({})
+      expect(params.maintenanceType).toBeUndefined()
+    })
   })
 
   describe('ページネーション', () => {
@@ -51,6 +56,15 @@ describe('MaintenanceLogSearchParams', () => {
     test('指定した値がそのまま保持される', () => {
       const params = new MaintenanceLogSearchParams({ keyword: 'オイル交換' })
       expect(params.keyword).toBe('オイル交換')
+    })
+  })
+
+  describe('maintenanceType', () => {
+    test('指定した値がそのまま保持される', () => {
+      const params = new MaintenanceLogSearchParams({
+        maintenanceType: 'ENGINE_OIL',
+      })
+      expect(params.maintenanceType).toBe('ENGINE_OIL')
     })
   })
 
