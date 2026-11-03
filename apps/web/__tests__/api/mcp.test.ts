@@ -1,8 +1,10 @@
 import { describe, expect, test } from 'vitest'
 import { createGuestUser, createTestUser } from '../helpers/authHelper'
 import { createTestUserBike } from '../helpers/bikeHelper'
+import { createTestMaintenanceLog } from '../helpers/maintenanceLogHelper'
 import { issueTestMcpAccessToken, setTestUserPlan } from '../helpers/mcpHelper'
 import { createTestSpot, createTestTouring } from '../helpers/touringHelper'
+import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 import { mcpApp } from '@/lib/api/server/mcpApp'
 
 async function postMcp(body: unknown, accessToken?: string) {
@@ -106,7 +108,7 @@ describe('POST /api/mcp', () => {
     expect(json.result.serverInfo.name).toBe('motoreco')
   })
 
-  test('tools/list → READ系の6ツールが返る', async () => {
+  test('tools/list → READ系の7ツールが返る', async () => {
     const user = await createTestUser()
     const accessToken = await issueTestMcpAccessToken(user.userId, ['READ'])
 
@@ -125,9 +127,11 @@ describe('POST /api/mcp', () => {
         'get_touring_plan',
         'list_touring_history',
         'get_touring_history',
-        'get_maintenance_status',
+        'list_maintenance_items',
+        'list_maintenance_logs',
       ])
     )
+    expect(toolNames).not.toContain('get_maintenance_status')
   })
 
   test('list_bikesツール呼び出し → 未登録の場合は空配列', async () => {
@@ -192,6 +196,151 @@ describe('POST /api/mcp', () => {
     })
   })
 
+  test('list_maintenance_itemsツール呼び出し → 推奨交換間隔を含むメンテナンス項目マスタが返る', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId)
+    const { myUserBikeId } = await createTestUserBike(user.token, {
+      displacement: 400,
+    })
+
+    const res = await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'list_maintenance_items', arguments: { myUserBikeId } },
+      },
+      accessToken
+    )
+
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.result.isError).toBeUndefined()
+    expect(JSON.parse(json.result.content[0].text)).toEqual([
+      ...MAINTENANCE_ITEMS_MASTER,
+    ])
+  })
+
+  test('list_maintenance_logsツール呼び出し → 登録済みの整備履歴が新しい順に返る', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId)
+    const { myUserBikeId } = await createTestUserBike(user.token, {
+      displacement: 400,
+    })
+    await createTestMaintenanceLog(user.token, myUserBikeId, {
+      performedAt: '2026-01-10T00:00:00.000Z',
+      mileage: 1000,
+      memo: 'オイル交換',
+      items: [{ maintenanceType: 'ENGINE_OIL', value: null }],
+    })
+    await createTestMaintenanceLog(user.token, myUserBikeId, {
+      performedAt: '2026-03-10T00:00:00.000Z',
+      mileage: 3000,
+      items: [{ maintenanceType: 'DRIVE_CHAIN', value: null }],
+    })
+
+    const res = await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'list_maintenance_logs', arguments: { myUserBikeId } },
+      },
+      accessToken
+    )
+
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.result.isError).toBeUndefined()
+    const logs = JSON.parse(json.result.content[0].text)
+    expect(logs).toHaveLength(2)
+    expect(logs[0]).toMatchObject({
+      performedAt: '2026-03-10T00:00:00.000Z',
+      mileage: 3000,
+      items: [{ maintenanceType: 'DRIVE_CHAIN', value: null }],
+    })
+    expect(logs[1]).toMatchObject({
+      performedAt: '2026-01-10T00:00:00.000Z',
+      mileage: 1000,
+      memo: 'オイル交換',
+      items: [{ maintenanceType: 'ENGINE_OIL', value: null }],
+    })
+  })
+
+  test('list_maintenance_logsツール呼び出し（maintenanceType指定）→ 指定項目を含む整備履歴のみ返る', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId)
+    const { myUserBikeId } = await createTestUserBike(user.token, {
+      displacement: 400,
+    })
+    await createTestMaintenanceLog(user.token, myUserBikeId, {
+      performedAt: '2026-01-10T00:00:00.000Z',
+      mileage: 1000,
+      items: [{ maintenanceType: 'ENGINE_OIL', value: null }],
+    })
+    await createTestMaintenanceLog(user.token, myUserBikeId, {
+      performedAt: '2026-02-10T00:00:00.000Z',
+      mileage: 2000,
+      items: [{ maintenanceType: 'FRONT_TIRE', value: null }],
+    })
+    await createTestMaintenanceLog(user.token, myUserBikeId, {
+      performedAt: '2026-03-10T00:00:00.000Z',
+      mileage: 3000,
+      items: [
+        { maintenanceType: 'ENGINE_OIL', value: null },
+        { maintenanceType: 'REAR_TIRE', value: null },
+      ],
+    })
+
+    const res = await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: {
+          name: 'list_maintenance_logs',
+          arguments: { myUserBikeId, maintenanceType: 'ENGINE_OIL' },
+        },
+      },
+      accessToken
+    )
+
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.result.isError).toBeUndefined()
+    const logs = JSON.parse(json.result.content[0].text)
+    expect(logs.map((log: { mileage: number }) => log.mileage)).toEqual([
+      3000, 1000,
+    ])
+    // 絞り込みは履歴単位で行い、該当履歴に含まれる他の項目も返す
+    expect(logs[0].items).toHaveLength(2)
+  })
+
+  test('メンテナンス系ツール呼び出し（他ユーザーのバイク）→ isError: true', async () => {
+    const owner = await createTestUser()
+    const { myUserBikeId } = await createTestUserBike(owner.token, {
+      displacement: 400,
+    })
+    const other = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(other.userId)
+
+    for (const name of ['list_maintenance_items', 'list_maintenance_logs']) {
+      const res = await postMcp(
+        {
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name, arguments: { myUserBikeId } },
+        },
+        accessToken
+      )
+
+      expect(res.status).toBe(200)
+      const json = await res.json()
+      expect(json.result.isError).toBe(true)
+    }
+  })
+
   test('存在しないツール呼び出し → isError: trueのレスポンス', async () => {
     const user = await createTestUser()
     const accessToken = await issueTestMcpAccessToken(user.userId)
@@ -229,7 +378,8 @@ describe('POST /api/mcp', () => {
     'get_touring_plan',
     'list_touring_history',
     'get_touring_history',
-    'get_maintenance_status',
+    'list_maintenance_items',
+    'list_maintenance_logs',
   ]
 
   /** tools/call を呼び出し、isErrorが立たないことを確認してレスポンスのdataを返す */
@@ -392,7 +542,7 @@ describe('POST /api/mcp', () => {
     expect(getJson.result.isError).toBe(true)
   })
 
-  test('tools/list（PREMIUM + READ,WRITE）→ READ6種+WRITE9種の計15ツールが返る', async () => {
+  test('tools/list（PREMIUM + READ,WRITE）→ READ7種+WRITE9種の計16ツールが返る', async () => {
     const user = await createTestUser()
     await setTestUserPlan(user.userId, 'PREMIUM')
     const accessToken = await issueTestMcpAccessToken(user.userId, [
@@ -408,7 +558,7 @@ describe('POST /api/mcp', () => {
     expect(res.status).toBe(200)
     const json = await res.json()
     const toolNames = json.result.tools.map((t: { name: string }) => t.name)
-    expect(toolNames).toHaveLength(15)
+    expect(toolNames).toHaveLength(16)
     expect(toolNames).toEqual(
       expect.arrayContaining([...READ_TOOL_NAMES, ...WRITE_TOOL_NAMES])
     )
