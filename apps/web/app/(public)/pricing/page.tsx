@@ -6,6 +6,8 @@ import {
   APP_NAME,
   FREE_USER_LIMITS,
   GUEST_ACCOUNT_LIMITS,
+  PLAN_LIMITS,
+  PREMIUM_USER_LIMITS,
   SITE_URL,
 } from '@/lib/statics'
 
@@ -76,7 +78,9 @@ export default function PricingPage() {
                 <td>バイク登録</td>
                 <td>{GUEST_ACCOUNT_LIMITS.BIKE}台まで</td>
                 <td>{FREE_USER_LIMITS.BIKE}台まで</td>
-                <td className={styles.comingSoon}>無制限（予定）</td>
+                <td className={styles.comingSoon}>
+                  {PREMIUM_USER_LIMITS.BIKE}台まで（予定）
+                </td>
               </tr>
               <tr>
                 <td>給油履歴</td>
@@ -107,6 +111,14 @@ export default function PricingPage() {
                 <td>{GUEST_ACCOUNT_LIMITS.GOODS}件まで</td>
                 <td>無制限</td>
                 <td className={styles.comingSoon}>無制限（予定）</td>
+              </tr>
+              <tr>
+                <td>AI連携（MCP）</td>
+                <td>-</td>
+                <td>{PLAN_LIMITS.FREE.apiKey}個まで・読み取りのみ</td>
+                <td className={styles.comingSoon}>
+                  無制限・書き込み可（予定）
+                </td>
               </tr>
               <tr>
                 <td>メンテナンス通知</td>
@@ -140,7 +152,10 @@ export default function PricingPage() {
           <div className={styles.faqItem}>
             <h3>無料プランに制限はありますか?</h3>
             <p>
-              はい、無料プランではバイク登録が2台までとなっていますが、その他の基本機能はすべてご利用いただけます。
+              無料プランではバイク登録が{FREE_USER_LIMITS.BIKE}
+              台まで、ツーリングプランが1台あたり
+              {FREE_USER_LIMITS.TOURING_PLAN}
+              件までとなります。給油・メンテナンス・ツーリングの記録は件数の制限なくご利用いただけます。
             </p>
           </div>
           <div className={styles.faqItem}>
@@ -155,6 +170,14 @@ export default function PricingPage() {
             <p>
               プレミアムプランリリース後は、いつでもプラン変更が可能です。
               アカウント設定から簡単に変更できます。
+            </p>
+          </div>
+          <div className={styles.faqItem}>
+            <h3>プランが下がった場合、登録済みのデータはどうなりますか?</h3>
+            <p>
+              プランが下がっても、登録済みのデータは削除されません。閲覧・編集・削除はこれまでどおりご利用いただけます。
+              上限を超えている項目は、上限内に収まるまで新規登録ができなくなります。
+              また、AI連携（MCP）の書き込み機能はプランが下がった時点でご利用いただけなくなります。
             </p>
           </div>
         </div>
