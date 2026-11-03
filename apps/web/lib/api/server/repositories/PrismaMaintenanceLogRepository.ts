@@ -121,6 +121,12 @@ export class PrismaMaintenanceLogRepository
       where.memo = { contains: searchParams.keyword, mode: 'insensitive' }
     }
 
+    if (searchParams.maintenanceType) {
+      where.maintenanceItems = {
+        some: { type: searchParams.maintenanceType },
+      }
+    }
+
     const logs = await this.connection.tUserMyBikeMaintenance.findMany({
       where,
       orderBy: { performedAt: searchParams.sortOrder },
