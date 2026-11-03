@@ -25,7 +25,7 @@
     "@repo/shared-utils": "workspace:*",
     "@tanstack/react-query": "5.105.0",
     "antd": "6.6.7",
-    "axios": "1.20.0",
+    "axios": "1.21.0",
     "csv-parse": "5.6.0",
     "dayjs": "1.11.23",
     "firebase": "catalog:",
