@@ -141,6 +141,7 @@ describe('GoodsModelCsvImportService', () => {
         'SHOEI,M-3,name,HELMET,2026-02-30,,',
         'SHOEI,M-4,name,HELMET,,ftp://example.com,',
         'SHOEI,M-5,name,HELMET,,,yes',
+        'SHOEI,M-6,name,HELMET,,not-a-url,',
       ].join('\n')
 
       const result = await service.validate(toBytes(csv))
@@ -151,6 +152,8 @@ describe('GoodsModelCsvImportService', () => {
         [3, 'releaseDate'],
         [4, 'officialUrl'],
         [5, 'isActive'],
+        // URLとして不正な値でもエラーは1件にまとめる
+        [6, 'officialUrl'],
       ])
       expect(result.items).toEqual([])
     })

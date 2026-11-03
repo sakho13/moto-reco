@@ -66,17 +66,25 @@ const optionalString = z.preprocess(
   z.string().trim().optional()
 )
 
+/**
+ * http(s) のURLかどうかを判定する
+ */
+const isHttpUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 const optionalUrl = (label: string) =>
   z.preprocess(
     emptyToUndefined,
     z
       .string()
       .trim()
-      .url(`${label}はURL形式で入力してください`)
-      .refine(
-        (v) => /^https?:\/\//.test(v),
-        `${label}はhttp(s)のURLで入力してください`
-      )
+      .refine(isHttpUrl, `${label}はhttp(s)のURL形式で入力してください`)
       .optional()
   )
 
