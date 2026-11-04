@@ -23,7 +23,8 @@ export class UserPlanService {
    * role !== 'USER' の場合は null を返す。
    */
   public async getCurrentPlan(userId: UserId): Promise<UserPlan | null> {
-    return this._userPlanHistoryRepository.findCurrentPlanByUserId(userId)
+    const user = await this._userRepository.findById(userId)
+    return user?.role === 'USER' ? user.plan : null
   }
 
   /**

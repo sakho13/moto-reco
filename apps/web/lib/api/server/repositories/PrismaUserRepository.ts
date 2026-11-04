@@ -4,6 +4,7 @@ import {
   IUserRepository,
 } from '@repo/shared-domain'
 import { createUserId, type UserId } from '@repo/shared-types'
+import { resolveLongplayPlan } from '../services/longplayPlan'
 import { toProviderTypeCondition } from './authProviderTypeCondition'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
@@ -22,7 +23,7 @@ const USER_SELECT = {
   },
 } as const
 
-function toUserEntity(user: {
+async function toUserEntity(user: {
   id: string
   name: string
   status: string
@@ -30,9 +31,12 @@ function toUserEntity(user: {
   notificationEmail: string | null
   isProfilePublic: boolean
   planHistories: { plan: string }[]
-}): UserEntity {
-  const plan =
-    (user.planHistories[0]?.plan as 'FREE' | 'PREMIUM' | undefined) ?? null
+}): Promise<UserEntity> {
+  const plan = await resolveLongplayPlan({
+    ...user,
+    plan:
+      (user.planHistories[0]?.plan as 'FREE' | 'PREMIUM' | undefined) ?? null,
+  })
   return new UserEntity(
     {
       id: createUserId(user.id),

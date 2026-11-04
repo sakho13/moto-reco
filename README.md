@@ -270,3 +270,11 @@ pnpm turbo clean
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Hono Documentation](https://hono.dev/)
 - [Prisma Documentation](https://www.prisma.io/docs)
+
+## Longplay による任意の Premium 判定
+
+`LONGPLAY_PREMIUM_FEATURE_ID` 未設定時は既存のプランだけを使用し、課金サービスへ接続しません。有効にする場合は access Feature UUID と `LONGPLAY_BASE_URL`、サーバー専用 `LONGPLAY_SECRET_KEY`、`LONGPLAY_APP_ID`、明示的な `LONGPLAY_ENVIRONMENT` (`sandbox` / `live`) を設定します。公開 SDK は 0.10.15 に固定しています。
+
+DB で取得した ACTIVE / USER の ID を `motoreco:user:<id>` に対応付け、ユーザーエンティティの読込時に権限を確認します。ブラウザーから Customer ID やプランを指定できません。許可時だけ既存 Premium 制限値を利用し、拒否・通信障害時は元の無料プランで既存データを利用できます。管理者が履歴で付与した Premium は維持し、課金結果をプラン履歴へ書き込みません。プロフィールや車両・走行記録は課金サービスへ送信しません。
+
+これは #644 のオンライン権限判定部分です。購入、契約管理、請求書、解約予約、課金履歴および正式な販売開始は未実装です。管理者付与と購入権限の優先順位は採用前に確認してください。access の確認から契約期間や使用量予約を推測しません。SDK 利用許諾の公開条件も確認が必要です。
