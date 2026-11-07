@@ -100,6 +100,20 @@ export class PrismaTouringPlanSpotRepository
     return spots.map(toTouringPlanSpotEntity)
   }
 
+  async findPlanSpotsByPlanIds(
+    planIds: TouringPlanId[]
+  ): Promise<TouringPlanSpotEntity[]> {
+    if (planIds.length === 0) return []
+
+    const spots = await this.connection.tUserMyBikeTouringPlanSpot.findMany({
+      where: { planId: { in: planIds } },
+      select: touringPlanSpotSelect,
+      orderBy: { sortOrder: 'asc' },
+    })
+
+    return spots.map(toTouringPlanSpotEntity)
+  }
+
   async findPlanSpotById(
     spotId: TouringPlanSpotId,
     planId: TouringPlanId

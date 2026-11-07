@@ -72,6 +72,7 @@ describe('TouringPlanSpotService', () => {
     touringPlanSpotRepository = {
       createPlanSpot: vi.fn(),
       findPlanSpotsByPlanId: vi.fn().mockResolvedValue([]),
+      findPlanSpotsByPlanIds: vi.fn().mockResolvedValue([]),
       findPlanSpotById: vi.fn(),
       findPlanSpotByType: vi.fn().mockResolvedValue(null),
       updatePlanSpot: vi.fn(),

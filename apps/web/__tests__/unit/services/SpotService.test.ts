@@ -87,6 +87,7 @@ describe('SpotService', () => {
       deleteTouring: vi.fn(),
       countTourings: vi.fn(),
       findTouringsByPlanId: vi.fn(),
+      countTouringsByPlanIds: vi.fn(),
     }
     myUserBikeRepository = {
       createMyUserBike: vi.fn(),

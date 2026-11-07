@@ -100,6 +100,102 @@ describe('TouringPlans API Endpoints', () => {
       })
       expect(json.data[1].destination).toBeNull()
     })
+
+    test('一覧の行に出す地点の要約と予定の長さを返す', async () => {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            title: '要約確認プラン',
+            startLocation: { latitude: 35, longitude: 139, name: '自宅' },
+            destinationLocation: {
+              latitude: 34,
+              longitude: 138,
+              name: '目的地',
+              travelMinutesFromPrev: 40,
+            },
+          }),
+        }
+      )
+      const { touringPlanId } = (await planRes.json()).data
+
+      for (const spot of [
+        {
+          type: 'SPOT',
+          latitude: 34.8,
+          longitude: 138.8,
+          travelMinutesFromPrev: 30,
+          stayMinutes: 15,
+        },
+        { type: 'BREAK', travelMinutesFromPrev: 20, stayMinutes: 10 },
+      ]) {
+        await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots`,
+          { method: 'POST', headers, body: JSON.stringify(spot) }
+        )
+      }
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        { method: 'GET', headers }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data[0]).toMatchObject({
+        start: { latitude: 35, longitude: 139, name: '自宅' },
+        destination: { name: '目的地' },
+        stops: [
+          { type: 'SPOT', latitude: 34.8, longitude: 138.8 },
+          { type: 'BREAK', latitude: null, longitude: null },
+        ],
+        plannedMinutes: 115,
+        touringCount: 0,
+      })
+    })
+
+    test('プランから開始したツーリングの件数を返す', async () => {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+      const planRes = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ title: '走行済みプラン' }),
+        }
+      )
+      const { touringPlanId } = (await planRes.json()).data
+
+      await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/start-end`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            action: 'start',
+            touringPlanId,
+            startDate: new Date().toISOString(),
+          }),
+        }
+      )
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans`,
+        { method: 'GET', headers }
+      )
+
+      const json = await res.json()
+      expect(json.data[0].touringCount).toBe(1)
+    })
   })
 
   describe('POST /api/v1/user-bike/bike/:myUserBikeId/touring-plans', () => {

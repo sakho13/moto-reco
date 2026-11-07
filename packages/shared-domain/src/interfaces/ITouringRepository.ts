@@ -39,4 +39,13 @@ export interface ITouringRepository {
    * 指定したツーリングプランから開始されたツーリング一覧を取得する
    */
   findTouringsByPlanId(planId: TouringPlanId): Promise<TouringEntity[]>
+
+  /**
+   * 指定したツーリングプランごとに、開始されたツーリングの件数を取得する
+   *
+   * @returns 1件以上あるプランのみを含むMap
+   */
+  countTouringsByPlanIds(
+    planIds: TouringPlanId[]
+  ): Promise<Map<TouringPlanId, number>>
 }

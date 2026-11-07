@@ -488,16 +488,31 @@ export type ApiResponseTouringPlanDetail = {
   touringIds: string[]
 }
 
+export type ApiResponseTouringPlanEndpoint = {
+  latitude: number | null
+  longitude: number | null
+  name: string | null
+}
+
+export type ApiResponseTouringPlanStop = {
+  type: 'SPOT' | 'BREAK'
+  latitude: number | null
+  longitude: number | null
+}
+
 export type ApiResponseTouringPlanListItem = {
   touringPlanId: string
   title: string
   createdAt: string
   updatedAt: string
-  destination: {
-    latitude: number | null
-    longitude: number | null
-    name: string | null
-  } | null
+  start: ApiResponseTouringPlanEndpoint | null
+  destination: ApiResponseTouringPlanEndpoint | null
+  // 経由地と休憩を順番に並べたもの
+  stops: ApiResponseTouringPlanStop[]
+  // 出発から目的地（未設定なら最後の地点の出発）までの予定分数。移動時間が未入力の区間があるとnull
+  plannedMinutes: number | null
+  // このプランから開始されたツーリングの件数
+  touringCount: number
 }
 
 export type ApiResponseTouringPlanList = ApiResponseTouringPlanListItem[]
