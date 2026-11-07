@@ -1,8 +1,10 @@
 import { type ApiKeyScope, type User, type UserPlan } from '@repo/shared-types'
 import {
+  type FeatureKey,
   FREE_USER_LIMITS,
   GUEST_ACCOUNT_LIMITS,
   PLAN_ALLOWED_SCOPES,
+  PLAN_FEATURES,
   PLAN_LIMITS,
   PREMIUM_USER_LIMITS,
 } from '../constants/planLimits'
@@ -34,7 +36,6 @@ const GUEST_MESSAGES: LimitMessages = {
 const FREE_MESSAGES: LimitMessages = {
   bike: `無料ユーザーはバイクを${FREE_USER_LIMITS.BIKE}台まで登録できます`,
   touringPlan: `無料ユーザーはツーリングプランを${FREE_USER_LIMITS.TOURING_PLAN}件まで登録できます`,
-  maintenanceLog: `無料ユーザーはメンテナンス履歴を${FREE_USER_LIMITS.MAINTENANCE_LOG}件まで登録できます`,
   apiKey: `無料プランはAPIキーを${PLAN_LIMITS.FREE.apiKey}個まで発行できます`,
 }
 
@@ -42,9 +43,18 @@ const PREMIUM_MESSAGES: LimitMessages = {
   bike: `プレミアムユーザーはバイクを${PREMIUM_USER_LIMITS.BIKE}台まで登録できます`,
 }
 
+/** 機能が利用できないときのメッセージ */
+const FEATURE_DENIED_MESSAGES: Record<FeatureKey, string> = {
+  hostEvent: 'イベントの開催はプレミアムプランで利用できます',
+}
+
 /**
- * ユーザーロールとプランに対応する登録件数制限を保持するバリューオブジェクト。
- * null は制限なし（無制限）を表す。
+ * ユーザーロールとプランに対応する登録件数制限と、機能の利用可否を保持するバリューオブジェクト。
+ * 件数制限の null は制限なし（無制限）を表す。
+ *
+ * @remarks
+ * プランが下がった場合もデータは削除しない。件数制限は作成時にのみ判定するため、
+ * 上限を超えている既存データの閲覧・編集・削除はでき、新規作成だけが止まる。
  */
 export class AccountLimitsValue {
   private constructor(
@@ -57,7 +67,8 @@ export class AccountLimitsValue {
     readonly maintenanceLog: number | null,
     readonly goods: number | null,
     readonly apiKey: number | null,
-    readonly allowedScopes: ApiKeyScope[]
+    readonly allowedScopes: ApiKeyScope[],
+    private readonly _features: Readonly<Record<FeatureKey, boolean>>
   ) {}
 
   /**
@@ -76,7 +87,8 @@ export class AccountLimitsValue {
         GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG,
         GUEST_ACCOUNT_LIMITS.GOODS,
         0,
-        []
+        [],
+        PLAN_FEATURES.GUEST
       )
     }
     if (role === 'USER' && plan === 'PREMIUM') {
@@ -87,10 +99,11 @@ export class AccountLimitsValue {
         null,
         null,
         PREMIUM_USER_LIMITS.TOURING_PLAN,
-        PREMIUM_USER_LIMITS.MAINTENANCE_LOG,
+        null,
         null,
         PLAN_LIMITS.PREMIUM.apiKey,
-        PLAN_ALLOWED_SCOPES.PREMIUM
+        PLAN_ALLOWED_SCOPES.PREMIUM,
+        PLAN_FEATURES.PREMIUM
       )
     }
     if (role === 'USER') {
@@ -102,10 +115,11 @@ export class AccountLimitsValue {
         null,
         null,
         FREE_USER_LIMITS.TOURING_PLAN,
-        FREE_USER_LIMITS.MAINTENANCE_LOG,
+        null,
         null,
         PLAN_LIMITS.FREE.apiKey,
-        PLAN_ALLOWED_SCOPES.FREE
+        PLAN_ALLOWED_SCOPES.FREE,
+        PLAN_FEATURES.FREE
       )
     }
     // ADMIN: 全て無制限
@@ -119,7 +133,8 @@ export class AccountLimitsValue {
       null,
       null,
       null,
-      ['READ', 'WRITE']
+      ['READ', 'WRITE'],
+      PLAN_FEATURES.ADMIN
     )
   }
 
@@ -129,6 +144,20 @@ export class AccountLimitsValue {
   isOver(type: LimitKey, count: number): boolean {
     const limit = this[type]
     return limit !== null && count >= limit
+  }
+
+  /**
+   * 機能を利用できるか返す
+   */
+  canUse(feature: FeatureKey): boolean {
+    return this._features[feature]
+  }
+
+  /**
+   * 機能を利用できないときのエラーメッセージを返す
+   */
+  featureDeniedMessage(feature: FeatureKey): string {
+    return FEATURE_DENIED_MESSAGES[feature]
   }
 
   /**

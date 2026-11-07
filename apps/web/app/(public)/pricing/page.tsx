@@ -98,13 +98,11 @@ export default function PricingPage() {
             <p>
               はい。無料プランでは、バイク登録は
               {formatLimit(ACCOUNT_LIMITS.free.bike, '台まで')}
-              、メンテナンス記録は1台あたり
-              {formatLimit(ACCOUNT_LIMITS.free.maintenanceLog, '件まで')}
               、ツーリングプランは1台あたり
               {formatLimit(ACCOUNT_LIMITS.free.touringPlan, '件まで')}
               です。MCP連携（AIアシスタント）は
               {formatMcpAccess(ACCOUNT_LIMITS.free.allowedScopes)}
-              となります。給油履歴・ツーリング記録・購入グッズは件数の制限なくご利用いただけます。
+              となります。給油履歴・メンテナンス記録・ツーリング記録・購入グッズは件数の制限なくご利用いただけます。
             </p>
           </div>
           <div className={styles.faqItem}>
@@ -119,6 +117,14 @@ export default function PricingPage() {
             <p>
               プレミアムプランリリース後は、いつでもプラン変更が可能です。
               アカウント設定から簡単に変更できます。
+            </p>
+          </div>
+          <div className={styles.faqItem}>
+            <h3>プランが下がった場合、登録済みのデータはどうなりますか?</h3>
+            <p>
+              プランが下がっても、登録済みのデータは削除されません。閲覧・編集・削除はこれまでどおりご利用いただけます。
+              上限を超えている項目は、上限内に収まるまで新規登録ができなくなります。
+              また、MCP連携（AIアシスタント）の書き込み機能はプランが下がった時点でご利用いただけなくなります。
             </p>
           </div>
         </div>

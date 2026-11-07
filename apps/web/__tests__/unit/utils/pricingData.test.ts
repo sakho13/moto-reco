@@ -73,11 +73,11 @@ describe('COMPARISON_ROWS', () => {
     })
   })
 
-  test('メンテナンス記録は FREE の上限件数を表示し PREMIUM は無制限', () => {
+  test('メンテナンス記録は GUEST の上限件数を表示し FREE・PREMIUM は無制限', () => {
     expect(findRow('メンテナンス記録')).toEqual({
       feature: 'メンテナンス記録',
       guest: `${GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG}件まで / 台`,
-      free: `${FREE_USER_LIMITS.MAINTENANCE_LOG}件まで / 台`,
+      free: '無制限',
       premium: '無制限',
     })
   })
@@ -108,8 +108,9 @@ describe('COMPARISON_ROWS', () => {
 })
 
 describe('FAQで件数の制限なしと案内している項目', () => {
-  test('FREE の給油履歴・ツーリング記録・購入グッズは無制限', () => {
+  test('FREE の給油履歴・メンテナンス記録・ツーリング記録・購入グッズは無制限', () => {
     expect(ACCOUNT_LIMITS.free.fuelLog).toBeNull()
+    expect(ACCOUNT_LIMITS.free.maintenanceLog).toBeNull()
     expect(ACCOUNT_LIMITS.free.touring).toBeNull()
     expect(ACCOUNT_LIMITS.free.goods).toBeNull()
   })

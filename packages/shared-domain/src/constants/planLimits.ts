@@ -28,8 +28,6 @@ export const FREE_USER_LIMITS = {
   BIKE: 2,
   /** ツーリングプラン登録上限 */
   TOURING_PLAN: 10,
-  /** メンテナンス履歴登録上限 */
-  MAINTENANCE_LOG: 5,
 } as const
 
 /**
@@ -41,9 +39,31 @@ export const PREMIUM_USER_LIMITS = {
   BIKE: 10,
   /** ツーリングプラン登録上限（無制限） */
   TOURING_PLAN: null,
-  /** メンテナンス履歴登録上限（無制限） */
-  MAINTENANCE_LOG: null,
 } as const
+
+/**
+ * 利用可否を判定する機能の種別
+ *
+ * - `hostEvent`: イベントの開催（#345）
+ */
+export type FeatureKey = 'hostEvent'
+
+/**
+ * ロール・プラン別に利用できる機能（true = 利用可）
+ *
+ * @remarks
+ * 件数の上限では表せない「機能を使えるか」を表す。
+ * 判定は `AccountLimitsValue.canUse()` を経由して行うこと。
+ */
+export const PLAN_FEATURES: Record<
+  'GUEST' | UserPlan | 'ADMIN',
+  Readonly<Record<FeatureKey, boolean>>
+> = {
+  GUEST: { hostEvent: false },
+  FREE: { hostEvent: false },
+  PREMIUM: { hostEvent: true },
+  ADMIN: { hostEvent: true },
+}
 
 /**
  * プラン別に許可されるAPIキースコープ

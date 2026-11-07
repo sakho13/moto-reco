@@ -20,6 +20,23 @@ describe('AccountLimitsValue', () => {
       expect(limits.fuelLog).toBe(GUEST_ACCOUNT_LIMITS.FUEL_LOG)
     })
 
+    test('maintenanceLog は GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG', () => {
+      const limits = AccountLimitsValue.from('GUEST', null)
+      expect(limits.maintenanceLog).toBe(GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG)
+    })
+
+    test('canUse(hostEvent) は false（イベント開催不可）', () => {
+      const limits = AccountLimitsValue.from('GUEST', null)
+      expect(limits.canUse('hostEvent')).toBe(false)
+    })
+
+    test('featureDeniedMessage(hostEvent) はプレミアムプランへの案内', () => {
+      const limits = AccountLimitsValue.from('GUEST', null)
+      expect(limits.featureDeniedMessage('hostEvent')).toBe(
+        'イベントの開催はプレミアムプランで利用できます'
+      )
+    })
+
     test('apiKey は 0（発行不可）', () => {
       const limits = AccountLimitsValue.from('GUEST', null)
       expect(limits.apiKey).toBe(0)
@@ -47,6 +64,33 @@ describe('AccountLimitsValue', () => {
     test('bike は FREE_USER_LIMITS.BIKE', () => {
       const limits = AccountLimitsValue.from('USER', 'FREE')
       expect(limits.bike).toBe(FREE_USER_LIMITS.BIKE)
+    })
+
+    test('maintenanceLog は null（無制限）', () => {
+      const limits = AccountLimitsValue.from('USER', 'FREE')
+      expect(limits.maintenanceLog).toBeNull()
+    })
+
+    test('isOver(maintenanceLog, 999) は false', () => {
+      const limits = AccountLimitsValue.from('USER', 'FREE')
+      expect(limits.isOver('maintenanceLog', 999)).toBe(false)
+    })
+
+    test('touringPlan は FREE_USER_LIMITS.TOURING_PLAN', () => {
+      const limits = AccountLimitsValue.from('USER', 'FREE')
+      expect(limits.touringPlan).toBe(FREE_USER_LIMITS.TOURING_PLAN)
+    })
+
+    test('canUse(hostEvent) は false（イベント開催不可）', () => {
+      const limits = AccountLimitsValue.from('USER', 'FREE')
+      expect(limits.canUse('hostEvent')).toBe(false)
+    })
+
+    test('plan が null の USER は FREE と同じ扱い', () => {
+      const limits = AccountLimitsValue.from('USER', null)
+      expect(limits.bike).toBe(FREE_USER_LIMITS.BIKE)
+      expect(limits.maintenanceLog).toBeNull()
+      expect(limits.canUse('hostEvent')).toBe(false)
     })
 
     test('apiKey は PLAN_LIMITS.FREE.apiKey (= 1)', () => {
@@ -84,6 +128,16 @@ describe('AccountLimitsValue', () => {
       expect(limits.bike).toBe(PREMIUM_USER_LIMITS.BIKE)
     })
 
+    test('maintenanceLog は null（無制限）', () => {
+      const limits = AccountLimitsValue.from('USER', 'PREMIUM')
+      expect(limits.maintenanceLog).toBeNull()
+    })
+
+    test('canUse(hostEvent) は true（イベント開催可）', () => {
+      const limits = AccountLimitsValue.from('USER', 'PREMIUM')
+      expect(limits.canUse('hostEvent')).toBe(true)
+    })
+
     test('apiKey は null（無制限）', () => {
       const limits = AccountLimitsValue.from('USER', 'PREMIUM')
       expect(limits.apiKey).toBeNull()
@@ -104,6 +158,11 @@ describe('AccountLimitsValue', () => {
     test('bike は null（無制限）', () => {
       const limits = AccountLimitsValue.from('ADMIN', null)
       expect(limits.bike).toBeNull()
+    })
+
+    test('canUse(hostEvent) は true（イベント開催可）', () => {
+      const limits = AccountLimitsValue.from('ADMIN', null)
+      expect(limits.canUse('hostEvent')).toBe(true)
     })
 
     test('apiKey は null（無制限）', () => {
