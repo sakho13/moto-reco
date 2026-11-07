@@ -7,17 +7,19 @@ import { getStoneShape, orderTouringStops } from '@/lib/utils/touringJourney'
 
 type Props = {
   stops: ApiResponseTouringStop[]
-  status: ApiResponseTouringDetail['status']
+  /** `PLANNED` はプランの地点。すべて縁取りの石で出して数える */
+  status: ApiResponseTouringDetail['status'] | 'PLANNED'
 }
 
 const MAX_VISIBLE_PEBBLES = 12
 
 const getPebbleClass = (
   stop: ApiResponseTouringStop,
-  isStarted: boolean
+  status: Props['status']
 ): string => {
   if (stop.isSkipped) return styles.skip!
-  if (isStarted && !stop.hasArrived) return styles.pending!
+  if (status === 'PLANNED') return styles.pending!
+  if (status === 'STARTED' && !stop.hasArrived) return styles.pending!
   return stop.type === 'BREAK' ? styles.rest! : styles.spot!
 }
 
@@ -33,7 +35,8 @@ export function TouringPebbles({ stops, status }: Props) {
   if (stops.length === 0) return null
 
   const isStarted = status === 'STARTED'
-  const ordered = orderTouringStops(stops, status)
+  const ordered =
+    status === 'STARTED' ? orderTouringStops(stops, status) : stops
   const visited = stops.filter(
     (stop) => !stop.isSkipped && (!isStarted || stop.hasArrived)
   )
@@ -72,7 +75,7 @@ export function TouringPebbles({ stops, status }: Props) {
         {ordered.slice(0, MAX_VISIBLE_PEBBLES).map((stop, index) => (
           <span
             key={index}
-            className={`${styles.pebble} ${getPebbleClass(stop, isStarted)}`}
+            className={`${styles.pebble} ${getPebbleClass(stop, status)}`}
             style={{ borderRadius: getStoneShape(String(index)) }}
           />
         ))}

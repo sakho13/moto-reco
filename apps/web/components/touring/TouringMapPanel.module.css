@@ -44,6 +44,14 @@
   text-decoration: none;
 }
 
+.hint {
+  flex: none;
+  margin: 0;
+  padding: 0 var(--spacing-4) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
 .map {
   flex: 1 1 auto;
   min-height: 12rem;

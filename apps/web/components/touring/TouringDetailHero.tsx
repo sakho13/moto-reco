@@ -27,7 +27,13 @@ type Props = {
   children?: ReactNode
 }
 
-function Stat({ label, children }: { label: string; children: ReactNode }) {
+export function Stat({
+  label,
+  children,
+}: {
+  label: string
+  children: ReactNode
+}) {
   return (
     <div className={styles.stat}>
       <p className={styles.statValue}>{children}</p>
@@ -36,7 +42,7 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-function DurationValue({ minutes }: { minutes: number }) {
+export function DurationValue({ minutes }: { minutes: number }) {
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
   return (

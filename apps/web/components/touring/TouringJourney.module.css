@@ -96,6 +96,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  position: relative;
   margin: -14px -6px;
   padding: 14px 6px;
   background: none;
@@ -165,6 +166,7 @@
 
 .leg {
   position: relative;
+  pointer-events: none;
 }
 
 .roadSvg {
@@ -191,6 +193,7 @@
   gap: var(--spacing-1);
   width: max-content;
   max-width: 100%;
+  pointer-events: auto;
 }
 
 /* 文字は小さく保ちつつ、余白で44pxの押下範囲を確保する */

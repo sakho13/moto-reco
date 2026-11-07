@@ -75,6 +75,14 @@
   text-decoration: none;
 }
 
+.planLinkButton {
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .planLink:hover {
   text-decoration: underline;
 }

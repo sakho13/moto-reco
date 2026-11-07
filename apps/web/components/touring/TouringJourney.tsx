@@ -39,10 +39,10 @@ const HERE_EXTRA_HEIGHT = 56
 const EMPTY_LEG_HEIGHT = 150
 const TAIL_HEIGHT = 64
 
-const sideClass = (side: JourneySide): string =>
+export const sideClass = (side: JourneySide): string =>
   side === 'right' ? styles.rowReverse! : ''
 
-const roadX = (side: JourneySide, width: number): number =>
+export const roadX = (side: JourneySide, width: number): number =>
   side === 'left' ? ROAD_INSET : width - ROAD_INSET
 
 function StopLabel({
@@ -223,7 +223,7 @@ function EmptyMessage({ onAddSpot }: { onAddSpot?: () => void }) {
   )
 }
 
-function Road({
+export function Road({
   width,
   height,
   fromX,

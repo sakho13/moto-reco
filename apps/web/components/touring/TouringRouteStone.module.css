@@ -39,3 +39,15 @@
   margin-left: 1px;
   font-size: 0.6875rem;
 }
+
+.planned {
+  background-color: var(--color-background);
+  border: 1.5px dashed var(--color-cloudActive);
+  box-shadow: none;
+}
+
+.planText {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-inkLight);
+}

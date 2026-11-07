@@ -6,7 +6,7 @@ import styles from './TouringMapPanel.module.css'
 import type { MapPoint } from './TouringRouteMap'
 import TouringRouteMap from './TouringRouteMap'
 import { TouringStone } from './TouringStone'
-import type { Journey } from '@/lib/utils/touringJourney'
+import type { Journey, JourneyNode } from '@/lib/utils/touringJourney'
 import {
   formatDuration,
   formatStayTime,
@@ -19,6 +19,12 @@ type Props = {
   focusedId: string | null
   onFocus: (nodeId: string) => void
   onClose: () => void
+  /** 地図の何もないところを押して地点を足すとき */
+  onMapClick?: (lat: number, lng: number) => void
+  /** 地図を押したときの動作の案内 */
+  mapHint?: string
+  /** 選んでいる地点の時刻の表記。未指定なら実際の滞在時刻を出す */
+  getNodeTime?: (node: JourneyNode) => string | null
 }
 
 /**
@@ -33,6 +39,9 @@ export function TouringMapPanel({
   focusedId,
   onFocus,
   onClose,
+  onMapClick,
+  mapHint,
+  getNodeTime = formatStayTime,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
   const backButtonRef = useRef<HTMLButtonElement>(null)
@@ -92,7 +101,7 @@ export function TouringMapPanel({
   }, [focusedNodeId])
 
   const nextLeg = journey.legs.find((leg) => leg.fromId === focused?.id)
-  const time = focused ? formatStayTime(focused) : null
+  const time = focused ? getNodeTime(focused) : null
 
   return (
     <div
@@ -125,12 +134,15 @@ export function TouringMapPanel({
         )}
       </div>
 
+      {mapHint && <p className={styles.hint}>{mapHint}</p>}
+
       <div className={styles.map}>
         <TouringRouteMap
           points={points}
           containerClassName={styles.mapContainer}
           focusedId={focusedNodeId}
           onPointClick={onFocus}
+          onMapClick={onMapClick}
         />
       </div>
 
