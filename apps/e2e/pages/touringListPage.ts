@@ -12,7 +12,7 @@ import { type Locator, type Page } from '@playwright/test'
  * このPOMは既定でPC版の台帳を対象にする。
  *
  * 注意: `display:none` の要素は Playwright の `getByRole` / `getByText` の
- * マッチ対象から自動的には除外されない。モバイル用のカード
+ * マッチ対象から自動的には除外されない。モバイル用の行
  * （`TouringListItem`）とPC用の台帳の行（`TouringLedgerList`）は同じ
  * ツーリングに対して同じ文言（タイトルなど）を含みうるため、ロケーターは
  * 必ず `touring-ledger-section` テストID配下に明示的にスコープしている
@@ -26,6 +26,7 @@ export class TouringListPage {
   readonly searchButton: Locator
   readonly clearButton: Locator
   readonly noResultMessage: Locator
+  readonly sortByDistanceButton: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -43,6 +44,9 @@ export class TouringListPage {
     this.noResultMessage = this.ledgerSection.getByText(
       '該当するツーリングが見つかりませんでした'
     )
+    this.sortByDistanceButton = this.ledgerSection
+      .getByRole('group', { name: '並べ替え' })
+      .getByRole('button', { name: /^距離/ })
   }
 
   /** ツーリング一覧ページへ遷移する */
@@ -65,7 +69,7 @@ export class TouringListPage {
    * タイトル（部分一致可）でツーリングの行（PC版の台帳）を取得する
    *
    * @remarks
-   * `display:none` のモバイル用カード（`TouringListItem`）も同じ文言を含み
+   * `display:none` のモバイル用の行（`TouringListItem`）も同じ文言を含み
    * うるため、台帳（`touring-ledger-section`）配下に明示的にスコープしている。
    */
   touringCard(titlePattern: string | RegExp): Locator {
