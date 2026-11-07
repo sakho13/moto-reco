@@ -104,7 +104,7 @@ export function TouringDetailHero({
           </div>
         </div>
 
-        {onOpenMap && journey.routePoints.length > 0 && (
+        {onOpenMap && (
           <button
             type="button"
             className={styles.mapOpener}
