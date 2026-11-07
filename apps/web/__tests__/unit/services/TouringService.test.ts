@@ -180,6 +180,7 @@ describe('TouringService', () => {
     spotRepository = {
       createSpot: vi.fn().mockImplementation(async (s) => s),
       findSpotsByTouringId: vi.fn().mockResolvedValue([]),
+      findSpotsByTouringIds: vi.fn().mockResolvedValue([]),
       findSpotById: vi.fn(),
       updateSpot: vi.fn(),
       deleteSpot: vi.fn(),

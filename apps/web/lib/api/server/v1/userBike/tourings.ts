@@ -64,6 +64,13 @@ userBikeTourings.get(
       searchParams
     )
 
+    const spotService = new SpotService(
+      new PrismaSpotRepository(prisma),
+      touringRepo,
+      myUserBikeRepo
+    )
+    const spotsByTouring = await spotService.getSpotsGroupedByTouring(tourings)
+
     return c.json<SuccessResponse<ApiResponseTouringList>>(
       {
         status: 'success',
@@ -82,6 +89,13 @@ userBikeTourings.get(
             endLongitude: touring.endLongitude,
             status: touring.status,
             fuelLogIds: [], // 一覧では空配列（詳細APIで取得する）
+            stops: (spotsByTouring.get(touring.id) ?? []).map((spot) => ({
+              type: spot.type,
+              isSkipped: spot.isSkipped,
+              hasArrived: spot.arrivedAt !== null,
+              latitude: spot.latitude,
+              longitude: spot.longitude,
+            })),
           }
         }),
         message: 'ツーリング一覧取得成功',
