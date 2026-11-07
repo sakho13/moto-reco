@@ -3,14 +3,16 @@
 import {
   DndContext,
   closestCenter,
+  KeyboardSensor,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import type { DragEndEvent } from '@dnd-kit/core'
+import type { Announcements, DragEndEvent } from '@dnd-kit/core'
 import {
   SortableContext,
+  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
   arrayMove,
@@ -142,6 +144,9 @@ const formatTimeSlot = (
   return `${slot.label} ${formatTimeValue(slot.value)}`
 }
 
+const getItemName = (item: RouteTimelineItem): string =>
+  item.name ?? (item.type === 'BREAK' ? '休憩' : '無名スポット')
+
 type TimelineRowProps = {
   item: RouteTimelineItem
   badge: React.ReactNode
@@ -165,9 +170,7 @@ function TimelineRow({ item, badge, dragHandle }: TimelineRowProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1 min-w-0">
-            <p className="font-medium text-sm truncate">
-              {item.name ?? (item.type === 'BREAK' ? '休憩' : '無名スポット')}
-            </p>
+            <p className="font-medium text-sm truncate">{getItemName(item)}</p>
             {item.isSkipped && (
               <span className={styles.skippedBadge}>スキップ</span>
             )}
@@ -218,7 +221,10 @@ function SortableTimelineRow({ item, badge }: SortableTimelineRowProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item.id })
+  } = useSortable({
+    id: item.id,
+    attributes: { roleDescription: '並び替えできる地点' },
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -236,7 +242,7 @@ function SortableTimelineRow({ item, badge }: SortableTimelineRowProps) {
             {...attributes}
             {...listeners}
             className={`${styles.dragHandle} cursor-grab active:cursor-grabbing shrink-0`}
-            aria-label="ドラッグして並び替え"
+            aria-label={`${getItemName(item)}をドラッグして並び替え`}
           >
             <DragHandleIcon />
           </button>
@@ -378,7 +384,8 @@ export function RouteTimeline({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, {
       activationConstraint: { delay: 200, tolerance: 5 },
-    })
+    }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
   const startItem = items.find((item) => item.type === 'START') ?? null
@@ -401,6 +408,23 @@ export function RouteTimeline({
 
     const reordered = arrayMove(ids, oldIndex, newIndex)
     void onReorder(reordered)
+  }
+
+  const nameOf = (id: string | number): string =>
+    middleItems.find((item) => item.id === id)?.name ?? '地点'
+  const positionOf = (id: string | number): number =>
+    ids.indexOf(String(id)) + 1
+  const announcements: Announcements = {
+    onDragStart: ({ active }) => `${nameOf(active.id)}を持ち上げました`,
+    onDragOver: ({ active, over }) =>
+      over && over.id !== active.id
+        ? `${nameOf(active.id)}を${positionOf(over.id)}番目へ移動します`
+        : undefined,
+    onDragEnd: ({ active, over }) =>
+      over
+        ? `${nameOf(active.id)}を${positionOf(over.id)}番目に置きました`
+        : `${nameOf(active.id)}を元の位置に戻しました`,
+    onDragCancel: ({ active }) => `${nameOf(active.id)}の移動を取り消しました`,
   }
 
   let spotIndex = 0
@@ -456,6 +480,13 @@ export function RouteTimeline({
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
+            accessibility={{
+              announcements,
+              screenReaderInstructions: {
+                draggable:
+                  'スペースキーで持ち上げ、上下の矢印キーで移動し、スペースキーで置きます。Escapeキーで取り消せます。',
+              },
+            }}
           >
             <SortableContext items={ids} strategy={verticalListSortingStrategy}>
               {middleContent}

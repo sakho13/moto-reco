@@ -124,6 +124,7 @@
 /* dnd-kit のドラッグ用つまみ。押下で操作を起こさないため枠線は持たせない */
 .dragHandle {
   flex-shrink: 0;
+  touch-action: none;
   display: flex;
   align-items: center;
   justify-content: center;
