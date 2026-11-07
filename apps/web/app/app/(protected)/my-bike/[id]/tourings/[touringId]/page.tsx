@@ -26,6 +26,7 @@ import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
+import { useMapPanel } from '@/lib/hooks/useMapPanel'
 import { useMediaQuery } from '@/lib/hooks/useMediaQuery'
 import {
   buildJourney,
@@ -41,8 +42,8 @@ function TouringDetailPage() {
   const bikeId = params.id as string
   const touringId = params.touringId as string
   const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY)
+  const mapPanel = useMapPanel(isDesktop)
   const [isEditing, setIsEditing] = useState(false)
-  const [isMapOpen, setIsMapOpen] = useState(false)
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const [now, setNow] = useState(getCurrentDate)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -106,19 +107,6 @@ function TouringDetailPage() {
     const timer = setInterval(() => setNow(getCurrentDate()), 60_000)
     return () => clearInterval(timer)
   }, [isStarted])
-
-  // ブラウザの「戻る」で全画面の地図だけを閉じる
-  useEffect(() => {
-    if (!isMapOpen) return
-    const handlePopState = () => setIsMapOpen(false)
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [isMapOpen])
-
-  // PC幅では地図を常に並べるので、開いたまま広げられた全画面の地図を閉じる
-  useEffect(() => {
-    if (isDesktop && isMapOpen) window.history.back()
-  }, [isDesktop, isMapOpen])
 
   const journey = useMemo(
     () => (touring ? buildJourney(touring, localSpots) : null),
@@ -306,11 +294,8 @@ function TouringDetailPage() {
   const openMap = (nodeId: string | null) => {
     setFocusedId(nodeId)
     if (isDesktop) return
-    window.history.pushState(null, '')
-    setIsMapOpen(true)
+    mapPanel.open()
   }
-
-  const closeMap = () => window.history.back()
 
   const hasMap = mapPoints.length > 0
   const backHref = `/app/my-bike/${bikeId}/tourings`
@@ -511,13 +496,13 @@ function TouringDetailPage() {
         )}
       </div>
 
-      {!isDesktop && isMapOpen && (
+      {!isDesktop && mapPanel.isOpen && (
         <TouringMapPanel
           journey={journey}
           points={mapPoints}
           focusedId={focusedId}
           onFocus={setFocusedId}
-          onClose={closeMap}
+          onClose={mapPanel.close}
         />
       )}
 
