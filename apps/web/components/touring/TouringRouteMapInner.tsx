@@ -56,6 +56,13 @@ const getSamePointOffset = (points: MapPoint[], index: number): number => {
   return (position - (samePoints.length - 1) / 2) * SAME_POINT_OFFSET
 }
 
+/** Leafletは文字列をHTMLとして描画するので、地点名は要素に入れて渡す */
+const buildTooltipContent = (label: string): HTMLElement => {
+  const element = document.createElement('span')
+  element.textContent = label
+  return element
+}
+
 const buildPinElement = (point: MapPoint): HTMLElement => {
   const element = document.createElement('span')
   element.className = `${styles.pin} ${PIN_TYPE_CLASS[point.type]} ${
@@ -170,7 +177,7 @@ export default function TouringRouteMapInner({
           }).addTo(map)
           addedMarkers.push({ marker, point })
 
-          marker.bindTooltip(point.label, {
+          marker.bindTooltip(buildTooltipContent(point.label), {
             permanent: false,
             direction: 'top',
             offset: [0, -hitSize / 2],
