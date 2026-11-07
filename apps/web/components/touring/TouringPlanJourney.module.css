@@ -1,0 +1,61 @@
+.time {
+  margin: 2px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* 各リンクは余白で44pxの押下範囲を取るので、隣と重ならない間隔を空ける */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--spacing-4);
+  margin-block: var(--spacing-1) 0.625rem;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.decide {
+  margin-top: var(--spacing-1);
+}
+
+.legActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-1) var(--spacing-2);
+}
+
+.enterTravel {
+  min-height: 44px;
+  margin-block: -0.625rem;
+  padding: 0 var(--spacing-2);
+  background-color: var(--color-background);
+  border: none;
+  color: var(--color-product);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.addActions {
+  /* 上の経路リンクと、追加ボタンの押下範囲が重ならない間隔 */
+  margin-top: 1.125rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1);
+  background-color: var(--color-background);
+}
+
+/* 見た目の高さは保ちつつ、余白で44pxの押下範囲を確保する */
+.touchTarget::after {
+  content: '';
+  position: absolute;
+  inset: -7px 0;
+}

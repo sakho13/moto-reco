@@ -1,114 +1,179 @@
-.card {
-  background: var(--color-background);
-  border: 1px solid var(--color-cloud);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-}
-
-.bodyText {
-  color: var(--color-ink);
-  opacity: 0.7;
-}
-
-.mutedText {
-  color: var(--color-ink);
-  opacity: 0.5;
-}
-
-/* lucide の既定は24px角で、Button の iconSm（2rem角・枠線1.5px）の内寸を超える */
-.iconButton svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.mapWrapper {
-  position: relative;
-}
-
-/* 地図タイルの上に載る Google マップへの導線。Google のブランド配色を使うためテーマには追従させない */
-.googleMapsLink {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: white;
-  color: #1a73e8;
-  font-size: 0.7rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-md);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-  z-index: 1000;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.googleMapsLink:hover {
-  opacity: 0.85;
-}
-
-.mapStickyWrapper {
-  /* モバイルは通常フロー */
-}
-
-@media (min-width: 768px) {
-  .mapStickyWrapper {
-    position: sticky;
-    top: 1rem;
-  }
-}
-
-.mapContainerLarge {
-  height: 400px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-@media (min-width: 768px) {
-  .mapContainerLarge {
-    height: calc(100vh - 10rem);
-    min-height: 400px;
-    max-height: 720px;
-  }
-}
-
-.mapClickHint {
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  text-align: center;
-  color: var(--color-ink);
-  opacity: 0.45;
-}
-
-.fixedFooter {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: var(--color-background);
-  border-top: 1px solid var(--color-cloud);
-  padding: 0.75rem 1rem;
-  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-  display: flex;
-  justify-content: center;
-}
-
-.fixedFooterInner {
+.root {
   width: 100%;
-  max-width: 28rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
 }
 
-.fixedFooterSpacer {
-  height: 5rem;
+.loading {
+  margin: 0;
+  padding: var(--spacing-8) 0;
+  text-align: center;
+  font-size: var(--font-size-lg);
+  color: var(--color-ink);
 }
 
-.historyEmpty {
+.muted {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: var(--font-size-sm);
   color: var(--color-ink);
-  opacity: 0.5;
+  text-decoration: none;
+}
+
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-6);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-cloud);
+  border-radius: var(--radius-lg);
 }
 
 .errorTitle {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-danger);
+}
+
+.errorMessage {
+  margin: 0;
+  color: var(--color-inkLight);
+}
+
+.startAction {
+  margin-top: var(--spacing-4);
+}
+
+.startNote {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.layout {
+  width: 100%;
+  max-width: 560px;
+}
+
+.layoutWithMap {
+  display: grid;
+  grid-template-columns: minmax(0, 480px) minmax(280px, 1fr);
+  gap: var(--spacing-8);
+  align-items: start;
+  max-width: none;
+}
+
+.column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  min-height: 44px;
+  margin-bottom: var(--spacing-3);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+/* 見た目の高さは保ちつつ、余白で44pxの押下範囲を確保する */
+.touchTarget::after {
+  content: '';
+  position: absolute;
+  inset: -7px 0;
+}
+
+.reorderNote {
+  margin: 0 0 var(--spacing-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-ink);
+  scroll-margin-top: 5rem;
+}
+
+/* Leafletの操作部品がヘッダーやサイドバーより前に出ないよう、重なりを閉じ込める */
+.mapAside {
+  position: sticky;
+  top: 5rem;
+  min-width: 0;
+}
+
+.mapFrame {
+  isolation: isolate;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.mapContainer {
+  height: calc(100vh - 9rem);
+  min-height: 24rem;
+  max-height: 44rem;
+}
+
+.mapFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--spacing-3);
+  min-height: 44px;
+  margin-top: var(--spacing-1);
+}
+
+.mapHint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.routeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  min-height: 44px;
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-product);
+  text-decoration: none;
+}
+
+@media (min-width: 640px) {
+  .startAction {
+    max-width: 320px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .root {
+    max-width: calc(var(--app-page-w) * 0.8);
+  }
 }
