@@ -1,80 +1,69 @@
 'use client'
 
-import type { ApiResponseTouringDetail } from '@repo/shared-types'
-import { formatDate } from '@repo/shared-utils'
+import type { ApiResponseTouringListItem } from '@repo/shared-types'
 import styles from './TouringListItem.module.css'
+import { TouringPebbles } from './TouringPebbles'
+import { TouringRouteStone } from './TouringRouteStone'
+import { TouringStatusMark } from './TouringStatusMark'
+import { formatMonthDay, getTouringDistance } from '@/lib/utils/touringJourney'
 
 export interface TouringListItemProps {
-  touring: ApiResponseTouringDetail
-  onDetail?: (touringId: string) => void
+  touring: ApiResponseTouringListItem
+  onDetail: (touringId: string) => void
+}
+
+const formatPeriod = (touring: ApiResponseTouringListItem): string => {
+  const start = formatMonthDay(touring.startDate)
+  const isSameDay =
+    new Date(touring.startDate).toDateString() ===
+    new Date(touring.endDate).toDateString()
+  if (touring.status === 'STARTED' || isSameDay) return start
+  return `${start} 〜 ${formatMonthDay(touring.endDate)}`
+}
+
+const formatMeter = (touring: ApiResponseTouringListItem): string | null => {
+  if (touring.startMileage === null) return null
+  const start = `${touring.startMileage.toLocaleString()}km`
+  return touring.endMileage === null
+    ? start
+    : `${start} → ${touring.endMileage.toLocaleString()}km`
 }
 
 export const TouringListItem = ({
   touring,
   onDetail,
 }: TouringListItemProps) => {
-  const calculateDistance = () => {
-    if (touring.startMileage !== null && touring.endMileage !== null) {
-      return touring.endMileage - touring.startMileage
-    }
-    return null
-  }
-
-  const distance = calculateDistance()
+  const distance = getTouringDistance(touring)
+  const meter = formatMeter(touring)
 
   return (
-    <div
-      className={`${styles.item} ${onDetail ? styles.itemClickable : ''}`}
-      onClick={() => onDetail?.(touring.touringId)}
-      role={onDetail ? 'button' : undefined}
-      tabIndex={onDetail ? 0 : undefined}
-      onKeyDown={
-        onDetail
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onDetail(touring.touringId)
-              }
-            }
-          : undefined
-      }
-    >
-      <div className={styles.mainRow}>
-        <div className={styles.titleSection}>
-          <h3 className={styles.title}>{touring.title}</h3>
-          <span
-            className={
-              touring.status === 'STARTED'
-                ? styles.statusBadgeStarted
-                : styles.statusBadgeCompleted
-            }
-          >
-            {touring.status === 'STARTED' ? '進行中' : '完了'}
-          </span>
-        </div>
-        <span className={styles.chevron}>›</span>
-      </div>
-
-      <div className={styles.periodRow}>
-        <span>
-          {formatDate(touring.startDate)} 〜 {formatDate(touring.endDate)}
+    <li className={styles.item}>
+      <button
+        type="button"
+        className={styles.row}
+        onClick={() => onDetail(touring.touringId)}
+      >
+        <span className={styles.stoneSlot}>
+          <TouringRouteStone touring={touring} />
         </span>
-      </div>
 
-      {distance !== null && (
-        <div className={styles.detailsRow}>
-          <span>走行距離: {distance.toLocaleString()}km</span>
-          {touring.startMileage !== null && (
-            <>
-              <span className={styles.separator}>|</span>
-              <span>
-                {touring.startMileage.toLocaleString()}km →{' '}
-                {touring.endMileage?.toLocaleString()}km
-              </span>
-            </>
-          )}
-        </div>
-      )}
-    </div>
+        <span className={styles.body}>
+          <span className={styles.titleRow}>
+            <span className={styles.title}>{touring.title}</span>
+            <TouringStatusMark status={touring.status} size="sm" />
+          </span>
+          <span className={styles.meta}>
+            {formatPeriod(touring)}
+            {distance !== null && ` ・ ${distance.toLocaleString()}km`}
+          </span>
+          <TouringPebbles stops={touring.stops} status={touring.status} />
+          {meter && <span className={styles.meter}>{meter}</span>}
+        </span>
+
+        <span className={styles.chevron} aria-hidden="true">
+          ›
+        </span>
+      </button>
+    </li>
   )
 }

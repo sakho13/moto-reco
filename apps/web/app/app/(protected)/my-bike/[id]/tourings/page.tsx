@@ -5,7 +5,7 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import type {
-  ApiResponseTouringDetail,
+  ApiResponseTouringList,
   SuccessResponse,
 } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
@@ -41,9 +41,8 @@ function TouringsPage() {
           errorData.message || 'エラーが発生しました'
         )
       }
-      const json = (await response.json()) as SuccessResponse<
-        ApiResponseTouringDetail[]
-      >
+      const json =
+        (await response.json()) as SuccessResponse<ApiResponseTouringList>
       return json.data
     },
     { keepPreviousData: true }
@@ -140,7 +139,11 @@ function TouringsPage() {
         </div>
 
         <div className={styles.desktopOnly}>
-          <TouringLedgerSection bikeId={bikeId} onSelect={handleDetail} />
+          <TouringLedgerSection
+            bikeId={bikeId}
+            onSelect={handleDetail}
+            onRegister={handleRegisterHistory}
+          />
         </div>
       </div>
     </>

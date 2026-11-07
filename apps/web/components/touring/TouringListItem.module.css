@@ -1,127 +1,109 @@
 .item {
-  padding: var(--spacing-2) 0;
+  position: relative;
+  border-bottom: 1px solid var(--color-cloudHover);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+/* 石の列の中心を通る点線の道。グループの先頭と末尾は石の中心で止める */
+.item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: -1px;
+  left: 42px;
+  width: 4px;
+  background: radial-gradient(
+      circle at 2px 2px,
+      var(--color-cloudActive) 2px,
+      transparent 2.2px
+    )
+    0 0 / 4px 10.5px repeat-y;
+  pointer-events: none;
+}
+
+.item:first-child::before {
+  top: 50%;
+}
+
+.item:last-child::before {
+  bottom: 50%;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: calc(100% + var(--spacing-2) * 2);
+  margin-inline: calc(var(--spacing-2) * -1);
+  min-height: 44px;
+  padding: var(--spacing-3) var(--spacing-2);
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+/* 石と同じ色にすると形が消えるので、行のホバーは石より薄くする */
+.row:hover {
+  background-color: color-mix(in srgb, var(--color-cloud) 45%, transparent);
+}
+
+.row:active {
+  background-color: color-mix(in srgb, var(--color-cloud) 70%, transparent);
+}
+
+.stoneSlot {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.body {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-1);
+  gap: 2px;
+  min-width: 0;
 }
 
-.item:not(:last-child) {
-  border-bottom: 1px solid var(--color-cloud);
-}
-
-.itemClickable {
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  transition: background-color var(--transition-fast);
-  padding: var(--spacing-2) var(--spacing-2);
-  margin: 0 calc(-1 * var(--spacing-2));
-}
-
-.itemClickable:hover {
-  background-color: var(--color-cloudHover);
-}
-
-.itemClickable:active {
-  background-color: var(--color-cloudActive);
-}
-
-.chevron {
-  font-size: 1.25rem;
-  color: var(--color-inkLight);
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-/* 行1: タイトル・ステータス・編集 */
-.mainRow {
+.titleRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--spacing-3);
-}
-
-.titleSection {
-  display: flex;
-  align-items: center;
   gap: var(--spacing-2);
-  flex: 1;
 }
 
 .title {
-  font-size: var(--font-size-lg);
+  min-width: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
+  line-height: 1.4;
   color: var(--color-ink);
-  margin: 0;
+  overflow-wrap: anywhere;
 }
 
-.statusBadgeStarted,
-.statusBadgeCompleted {
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  white-space: nowrap;
-}
-
-/*
- * success には対になるインク色トークンが無いため塗りにできない。
- * 地色の面 + アクセントの枠線 + アクセントの文字（Button の success と同じ様式）。
- */
-.statusBadgeStarted {
-  background-color: var(--color-background);
-  border: 1.5px solid var(--color-success);
-  color: var(--color-success);
-}
-
-.statusBadgeCompleted {
-  background-color: var(--color-cloud);
-  color: var(--color-ink);
-  opacity: 0.7;
-}
-
-/* 行2: 期間 */
-.periodRow {
-  font-size: var(--font-size-sm);
-  color: var(--color-ink);
-  opacity: 0.7;
-}
-
-/* 行3: 走行距離詳細 */
-.detailsRow {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
+.meta {
   font-size: var(--font-size-xs);
   color: var(--color-ink);
-  opacity: 0.5;
+  font-variant-numeric: tabular-nums;
 }
 
-.separator {
-  opacity: 0.3;
+.meter {
+  font-size: 0.6875rem;
+  color: var(--color-inkLight);
+  font-variant-numeric: tabular-nums;
 }
 
-/* レスポンシブ対応: モバイル */
-@media (max-width: 640px) {
-  .mainRow {
-    gap: var(--spacing-2);
-  }
-
-  .titleSection {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-1);
-  }
-
-  .title {
-    font-size: var(--font-size-md);
-  }
-
-  .periodRow {
-    font-size: var(--font-size-xs);
-  }
-
-  .detailsRow {
-    font-size: 0.625rem;
-    flex-wrap: wrap;
-  }
+.chevron {
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  color: var(--color-inkLight);
 }
