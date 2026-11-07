@@ -1,0 +1,16 @@
+.line {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dot {
+  fill: var(--color-background);
+  stroke: currentColor;
+}
+
+.startDot {
+  fill: currentColor;
+  stroke: currentColor;
+}
