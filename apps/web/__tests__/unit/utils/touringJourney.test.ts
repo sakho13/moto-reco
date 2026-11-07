@@ -22,8 +22,8 @@ const buildTouring = (
   touringId: 'touring-1',
   touringPlanId: null,
   title: '伊豆',
-  startDate: '2026-10-18T06:40:00+09:00',
-  endDate: '2026-10-18T18:20:00+09:00',
+  startDate: '2026-10-18T06:40:00',
+  endDate: '2026-10-18T18:20:00',
   startMileage: 1000,
   endMileage: 1323,
   startLatitude: 35.3,
@@ -46,8 +46,8 @@ const buildSpot = (
   longitude: 139,
   plannedArrivalAt: null,
   plannedDepartureAt: null,
-  arrivedAt: '2026-10-18T08:30:00+09:00',
-  departedAt: '2026-10-18T09:05:00+09:00',
+  arrivedAt: '2026-10-18T08:30:00',
+  departedAt: '2026-10-18T09:05:00',
   isSkipped: false,
   skippedAt: null,
   sortOrder: 0,
@@ -120,13 +120,13 @@ describe('buildJourney', () => {
     const journey = buildJourney(buildTouring(), [
       buildSpot({
         spotId: 'short',
-        arrivedAt: '2026-10-18T08:00:00+09:00',
-        departedAt: '2026-10-18T08:10:00+09:00',
+        arrivedAt: '2026-10-18T08:00:00',
+        departedAt: '2026-10-18T08:10:00',
       }),
       buildSpot({
         spotId: 'long',
-        arrivedAt: '2026-10-18T12:00:00+09:00',
-        departedAt: '2026-10-18T13:00:00+09:00',
+        arrivedAt: '2026-10-18T12:00:00',
+        departedAt: '2026-10-18T13:00:00',
       }),
     ])
 
@@ -158,7 +158,7 @@ describe('buildJourney', () => {
     const journey = buildJourney(
       buildTouring({
         status: 'STARTED',
-        endDate: '2026-10-18T06:40:00+09:00',
+        endDate: '2026-10-18T06:40:00',
         endMileage: null,
       }),
       [
@@ -234,8 +234,8 @@ describe('buildJourney', () => {
     const journey = buildJourney(buildTouring(), [
       buildSpot({
         spotId: 'late',
-        arrivedAt: '2026-11-01T17:00:00+09:00',
-        departedAt: '2026-11-01T17:30:00+09:00',
+        arrivedAt: '2026-11-01T17:00:00',
+        departedAt: '2026-11-01T17:30:00',
       }),
     ])
 
@@ -245,13 +245,13 @@ describe('buildJourney', () => {
 
   test('日付が変わる区間に日数を持たせる', () => {
     const journey = buildJourney(
-      buildTouring({ endDate: '2026-10-19T18:00:00+09:00' }),
+      buildTouring({ endDate: '2026-10-19T18:00:00' }),
       [
         buildSpot({ spotId: 'day1' }),
         buildSpot({
           spotId: 'day2',
-          arrivedAt: '2026-10-19T09:00:00+09:00',
-          departedAt: '2026-10-19T10:00:00+09:00',
+          arrivedAt: '2026-10-19T09:00:00',
+          departedAt: '2026-10-19T10:00:00',
         }),
       ]
     )
@@ -306,7 +306,7 @@ describe('layoutJourney', () => {
 
   test('次の地点があれば現在地は区間の途中に置く', () => {
     const journey = buildJourney(
-      buildTouring({ status: 'STARTED', endDate: '2026-10-18T06:40:00+09:00' }),
+      buildTouring({ status: 'STARTED', endDate: '2026-10-18T06:40:00' }),
       []
     )
 
@@ -423,9 +423,9 @@ describe('groupTouringsByMonth', () => {
 
   test('連続する同じ月をまとめ、距離を合計する', () => {
     const groups = groupTouringsByMonth([
-      touring('2026-10-25T10:00:00+09:00', 'COMPLETED', 100),
-      touring('2026-10-03T10:00:00+09:00', 'COMPLETED', null),
-      touring('2026-09-20T10:00:00+09:00', 'COMPLETED', 50),
+      touring('2026-10-25T10:00:00', 'COMPLETED', 100),
+      touring('2026-10-03T10:00:00', 'COMPLETED', null),
+      touring('2026-09-20T10:00:00', 'COMPLETED', 50),
     ])
 
     expect(
@@ -442,8 +442,8 @@ describe('groupTouringsByMonth', () => {
 
   test('進行中は先頭の走行中にまとめる', () => {
     const groups = groupTouringsByMonth([
-      touring('2026-10-25T10:00:00+09:00', 'COMPLETED', 100),
-      touring('2026-09-01T10:00:00+09:00', 'STARTED', null),
+      touring('2026-10-25T10:00:00', 'COMPLETED', 100),
+      touring('2026-09-01T10:00:00', 'STARTED', null),
     ])
 
     expect(groups.map((group) => group.label)).toEqual(['走行中', '2026年10月'])
@@ -463,7 +463,7 @@ describe('表示の整形', () => {
 
   test('日をまたぐツーリングは範囲で返す', () => {
     expect(
-      formatTouringDate(buildTouring({ endDate: '2026-10-20T18:00:00+09:00' }))
+      formatTouringDate(buildTouring({ endDate: '2026-10-20T18:00:00' }))
     ).toBe('2026年10月18日（日） 〜 10月20日（火）')
   })
 
@@ -472,7 +472,7 @@ describe('表示の整形', () => {
       formatTouringDate(
         buildTouring({
           status: 'STARTED',
-          endDate: '2026-10-20T18:00:00+09:00',
+          endDate: '2026-10-20T18:00:00',
         })
       )
     ).toBe('2026年10月18日（日）')
