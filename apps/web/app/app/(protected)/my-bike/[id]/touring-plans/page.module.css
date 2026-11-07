@@ -66,39 +66,26 @@
   width: 100%;
 }
 
-.mutedText {
+.empty {
+  padding: var(--spacing-6) 0;
+  border-top: 1px solid var(--color-ink);
+}
+
+.emptyTitle {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+.emptyText {
+  margin: var(--spacing-1) 0 0;
+  font-size: var(--font-size-sm);
   color: var(--color-inkLight);
 }
 
-/* モバイル/タブレットのカード（Issue #575以前の見た目を維持） */
-.card {
-  background: var(--color-background);
-  border: 1px solid var(--color-cloud);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-}
-
-/* モバイル/タブレットのみ表示（カードの縦1列。PCでは台帳に差し替える） */
-.mobileOnly {
-}
-
 @media (min-width: 1024px) {
-  .mobileOnly {
-    display: none;
-  }
-}
-
-/* PC（1024px〜）: ツーリングプランの台帳（Issue #575「05 画面案 ─ PC」） */
-.desktopOnly {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .desktopOnly {
-    display: block;
-  }
-
   .listLayout {
     max-width: calc(var(--app-page-w) * 0.8);
   }

@@ -5,8 +5,7 @@ import useSWR from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
 import styles from './page.module.css'
-import { TouringPlanLedgerList } from '@/components/bike/TouringPlanLedgerList'
-import { PlanCard } from '@/components/touring/PlanCard'
+import { TouringPlanList } from '@/components/touring/TouringPlanList'
 import { apiGet } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 
@@ -96,26 +95,16 @@ function TouringPlansPage() {
 
       <div className={`${styles.listLayout} mt-3`}>
         {plans && plans.length > 0 ? (
-          <>
-            <div className={styles.mobileOnly}>
-              <div className={styles.card}>
-                {plans.map((plan) => (
-                  <PlanCard
-                    key={plan.touringPlanId}
-                    plan={plan}
-                    onClick={handleDetail}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className={styles.desktopOnly}>
-              <TouringPlanLedgerList plans={plans} onSelect={handleDetail} />
-            </div>
-          </>
+          <TouringPlanList plans={plans} onSelect={handleDetail} />
         ) : (
-          <p className={`text-sm ${styles.mutedText}`}>
-            ツーリングプランはまだ登録されていません
-          </p>
+          <div className={styles.empty}>
+            <p className={styles.emptyTitle}>
+              ツーリングプランはまだ登録されていません
+            </p>
+            <p className={styles.emptyText}>
+              行きたい場所を順に並べておくと、当日はそのまま走り出せます。
+            </p>
+          </div>
         )}
       </div>
     </>
