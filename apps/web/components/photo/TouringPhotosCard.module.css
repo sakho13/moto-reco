@@ -60,3 +60,11 @@
   cursor: not-allowed;
   opacity: 0.5;
 }
+
+.heading {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}

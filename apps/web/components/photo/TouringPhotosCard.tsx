@@ -129,17 +129,14 @@ export function TouringPhotosCard({
   return (
     <div className={cardClassName}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">写真</h2>
+        <h2 className={styles.heading}>この旅の写真</h2>
         <Button
           type="button"
-          variant="quiet"
-          size="iconSm"
+          variant="cloud"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          aria-label="写真を追加"
-          title="写真を追加"
         >
-          {isUploading ? '...' : '＋'}
+          {isUploading ? '追加中...' : '＋ 写真を追加'}
         </Button>
         <input
           ref={fileInputRef}
