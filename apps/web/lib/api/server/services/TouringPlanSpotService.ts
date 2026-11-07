@@ -77,10 +77,14 @@ export class TouringPlanSpotService {
           params.planId
         )
 
-      // SPOT/BREAKのみを対象にsortOrderを採番（末尾に追加）
-      const waypointCount = existingSpots.filter(
-        (s) => s.type === 'SPOT' || s.type === 'BREAK'
-      ).length
+      // SPOT/BREAKのみを対象に、既存の最大値の次を採番する（削除で番号が飛ぶため件数は使えない）
+      const nextSortOrder =
+        Math.max(
+          -1,
+          ...existingSpots
+            .filter((s) => s.type === 'SPOT' || s.type === 'BREAK')
+            .map((s) => s.sortOrder)
+        ) + 1
 
       const spot = new TouringPlanSpotEntity({
         touringPlanSpotId: createTouringPlanSpotId(''),
@@ -93,7 +97,7 @@ export class TouringPlanSpotService {
         stayMinutes: params.stayMinutes ?? null,
         travelMinutesFromPrev: params.travelMinutesFromPrev ?? null,
         routeTypeFromPrev: params.routeTypeFromPrev ?? null,
-        sortOrder: waypointCount,
+        sortOrder: nextSortOrder,
       })
 
       const created = await this.touringPlanSpotRepository.createPlanSpot(spot)

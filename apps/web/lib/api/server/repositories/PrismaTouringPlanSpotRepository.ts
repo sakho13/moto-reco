@@ -94,7 +94,7 @@ export class PrismaTouringPlanSpotRepository
     const spots = await this.connection.tUserMyBikeTouringPlanSpot.findMany({
       where: { planId },
       select: touringPlanSpotSelect,
-      orderBy: { sortOrder: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     })
 
     return spots.map(toTouringPlanSpotEntity)
@@ -108,7 +108,7 @@ export class PrismaTouringPlanSpotRepository
     const spots = await this.connection.tUserMyBikeTouringPlanSpot.findMany({
       where: { planId: { in: planIds } },
       select: touringPlanSpotSelect,
-      orderBy: { sortOrder: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     })
 
     return spots.map(toTouringPlanSpotEntity)

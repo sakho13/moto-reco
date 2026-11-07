@@ -160,6 +160,42 @@ describe('TouringPlanSpotService', () => {
   })
 
   describe('getPlanSpots', () => {
+    test('削除で番号が飛んでいても既存の最大値の次を採番する', async () => {
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanId
+      ).mockResolvedValue([
+        buildPlanSpot({ type: 'START', sortOrder: 0 }),
+        buildPlanSpot({
+          touringPlanSpotId: createTouringPlanSpotId('b'),
+          type: 'SPOT',
+          sortOrder: 1,
+        }),
+        buildPlanSpot({
+          touringPlanSpotId: createTouringPlanSpotId('c'),
+          type: 'SPOT',
+          sortOrder: 5,
+        }),
+        buildPlanSpot({ type: 'DESTINATION', sortOrder: 9999 }),
+      ])
+      vi.mocked(touringPlanSpotRepository.createPlanSpot).mockImplementation(
+        async (spot) => spot
+      )
+
+      await service
+        .registerPlanSpot({
+          planId,
+          myUserBikeId,
+          userId,
+          type: 'SPOT',
+        })
+        .catch(() => {})
+
+      expect(
+        vi.mocked(touringPlanSpotRepository.createPlanSpot).mock.calls[0]?.[0]
+          .sortOrder
+      ).toBe(6)
+    })
+
     test('START -> 経由地・休憩(sortOrder順) -> DESTINATION の順で返す', async () => {
       const start = buildPlanSpot({ type: 'START', sortOrder: 0 })
       const waypoint2 = buildPlanSpot({
