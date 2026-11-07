@@ -2,6 +2,7 @@ import type {
   ApiResponseSpotDetail,
   ApiResponseTouringDetail,
   ApiResponseTouringStop,
+  TouringPlanRouteType,
 } from '@repo/shared-types'
 import {
   buildGoogleMapsRouteUrl,
@@ -35,6 +36,10 @@ export type JourneyNode = {
   isCurrent: boolean
   isLongestStay: boolean
   spot: ApiResponseSpotDetail | null
+  /** プランの地点で、出発からの予定分数。実際のツーリングではnull */
+  plannedOffset: { arrival: number | null; departure: number | null } | null
+  /** プランの出発地・目的地がまだ決まっていない */
+  isUnset: boolean
 }
 
 /** スキップを除いた、隣り合う2地点の区間 */
@@ -47,6 +52,8 @@ export type JourneyLeg = {
   isLongest: boolean
   /** この区間で日付が変わるときの、到着側の日数（2日目なら2） */
   dayNumber: number | null
+  /** プランの区間の経路種別。実際のツーリングではnull */
+  routeType: TouringPlanRouteType | null
 }
 
 export type Journey = {
@@ -64,12 +71,12 @@ export type Journey = {
   routeUrl: string | null
 }
 
-const STAY_NAME_FALLBACK = {
+export const STAY_NAME_FALLBACK = {
   SPOT: '名もなきスポット',
   BREAK: '休憩',
 } as const
 
-const toPoint = (
+export const toPoint = (
   latitude: number | null | undefined,
   longitude: number | null | undefined
 ): JourneyPoint | null =>
@@ -161,6 +168,8 @@ export function buildJourney(
     isCurrent: false,
     isLongestStay: false,
     spot: null,
+    plannedOffset: null,
+    isUnset: false,
   })
 
   let spotNumber = 0
@@ -209,6 +218,8 @@ export function buildJourney(
       isCurrent: false,
       isLongestStay: false,
       spot,
+      plannedOffset: null,
+      isUnset: false,
     })
   }
 
@@ -230,6 +241,8 @@ export function buildJourney(
       isCurrent: false,
       isLongestStay: false,
       spot: null,
+      plannedOffset: null,
+      isUnset: false,
     })
   }
 
@@ -274,6 +287,7 @@ export function buildJourney(
           : null,
       isLongest: false,
       dayNumber,
+      routeType: null,
     })
   })
 
@@ -397,7 +411,7 @@ export const getStoneShape = (id: string): string => {
   return STONE_SHAPES[hash % STONE_SHAPES.length]!
 }
 
-const clamp = (value: number, min: number, max: number): number =>
+export const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value))
 
 /** 石の幅（px）。スポットは滞在時間が長いほど大きい。高さは幅の95% */
