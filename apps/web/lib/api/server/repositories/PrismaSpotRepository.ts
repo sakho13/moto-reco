@@ -98,6 +98,18 @@ export class PrismaSpotRepository
     return spots.map(toSpotEntity)
   }
 
+  async findSpotsByTouringIds(touringIds: TouringId[]): Promise<SpotEntity[]> {
+    if (touringIds.length === 0) return []
+
+    const spots = await this.connection.tUserMyBikeTouringSpot.findMany({
+      where: { touringId: { in: touringIds } },
+      select: spotSelect,
+      orderBy: { sortOrder: 'asc' },
+    })
+
+    return spots.map(toSpotEntity)
+  }
+
   async findSpotById(
     spotId: SpotId,
     touringId: TouringId

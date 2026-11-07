@@ -69,6 +69,7 @@ describe('SpotService', () => {
     spotRepository = {
       createSpot: vi.fn().mockImplementation(async (s) => s),
       findSpotsByTouringId: vi.fn().mockResolvedValue([]),
+      findSpotsByTouringIds: vi.fn().mockResolvedValue([]),
       findSpotById: vi.fn(),
       updateSpot: vi.fn().mockImplementation(async (s) => s),
       deleteSpot: vi.fn(),
@@ -106,6 +107,31 @@ describe('SpotService', () => {
       touringRepository,
       myUserBikeRepository
     )
+  })
+
+  describe('getSpotsGroupedByTouring', () => {
+    test('スポットをツーリングごとにまとめ、順序を保つ', async () => {
+      const otherTouringId = createTouringId('touring-2')
+      const first = buildSpot({ spotId: createSpotId('spot-a'), sortOrder: 0 })
+      const second = buildSpot({ spotId: createSpotId('spot-b'), sortOrder: 1 })
+      const other = buildSpot({
+        spotId: createSpotId('spot-c'),
+        touringId: otherTouringId,
+      })
+      vi.mocked(spotRepository.findSpotsByTouringIds).mockResolvedValue([
+        first,
+        other,
+        second,
+      ])
+
+      const result = await service.getSpotsGroupedByTouring([buildTouring()])
+
+      expect(spotRepository.findSpotsByTouringIds).toHaveBeenCalledWith([
+        touringId,
+      ])
+      expect(result.get(touringId)).toEqual([first, second])
+      expect(result.get(otherTouringId)).toEqual([other])
+    })
   })
 
   describe('registerSpot', () => {

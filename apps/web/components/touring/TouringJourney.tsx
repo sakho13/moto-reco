@@ -1,0 +1,359 @@
+'use client'
+
+import { Bike, ExternalLink, MapPin } from 'lucide-react'
+import { useEffect } from 'react'
+import { Button } from '@repo/ui/button'
+import styles from './TouringJourney.module.css'
+import { TouringStone } from './TouringStone'
+import { useElementWidth } from '@/lib/hooks/useElementWidth'
+import { calcTravelMinutes } from '@/lib/utils/googleMaps'
+import type {
+  Journey,
+  JourneyLeg,
+  JourneyNode,
+  JourneyRow,
+  JourneySide,
+} from '@/lib/utils/touringJourney'
+import {
+  formatClock,
+  formatDuration,
+  formatStayTime,
+  getLegHeight,
+  layoutJourney,
+} from '@/lib/utils/touringJourney'
+
+type Props = {
+  journey: Journey
+  now: Date
+  /** 地図で強調している地点のID */
+  focusedId: string | null
+  /** 座標のある地点の「地図」を押したとき */
+  onShowOnMap: (nodeId: string) => void
+  /** スポットが1件もないときの追加ボタン。未指定なら出さない */
+  onAddSpot?: () => void
+}
+
+/** 石を置く列の幅の半分。道はこの位置を通る */
+const ROAD_INSET = 44
+const HERE_EXTRA_HEIGHT = 56
+const EMPTY_LEG_HEIGHT = 150
+const TAIL_HEIGHT = 64
+
+const sideClass = (side: JourneySide): string =>
+  side === 'right' ? styles.rowReverse! : ''
+
+const roadX = (side: JourneySide, width: number): number =>
+  side === 'left' ? ROAD_INSET : width - ROAD_INSET
+
+function StopLabel({
+  node,
+  onShowOnMap,
+}: {
+  node: JourneyNode
+  onShowOnMap: (nodeId: string) => void
+}) {
+  const time = formatStayTime(node)
+  const planned =
+    node.plannedArrivalAt && !node.arrivedAt
+      ? `予定 ${formatClock(node.plannedArrivalAt)}`
+      : null
+  const details = [
+    time,
+    planned,
+    node.mileage !== null ? `${node.mileage.toLocaleString()}km` : null,
+  ].filter((text): text is string => text !== null)
+
+  return (
+    <div className={styles.label}>
+      {node.isLongestStay && <span className={styles.tag}>いちばん長居</span>}
+      {node.isCurrent && <span className={styles.tag}>今ここ</span>}
+      <h3
+        className={`${styles.name} ${node.isPending && node.kind !== 'end' ? styles.nameMuted : ''}`}
+      >
+        {node.name}
+      </h3>
+      <div className={styles.meta}>
+        {details.length > 0 && <span>{details.join(' ・ ')}</span>}
+        {node.point && (
+          <button
+            type="button"
+            className={styles.mapLink}
+            onClick={() => onShowOnMap(node.id)}
+          >
+            <MapPin size={13} aria-hidden="true" />
+            地図
+          </button>
+        )}
+      </div>
+      {node.memo && <p className={styles.memo}>{node.memo}</p>}
+    </div>
+  )
+}
+
+function StopRow({
+  row,
+  isFocused,
+  onShowOnMap,
+}: {
+  row: Extract<JourneyRow, { type: 'stop' }>
+  isFocused: boolean
+  onShowOnMap: (nodeId: string) => void
+}) {
+  return (
+    <div
+      data-node-id={row.node.id}
+      className={`${styles.row} ${sideClass(row.side)} ${isFocused ? styles.focused : ''}`}
+    >
+      <div className={styles.slot}>
+        <TouringStone node={row.node} />
+        {row.hasTrail && <div className={styles.trail} />}
+      </div>
+      <StopLabel node={row.node} onShowOnMap={onShowOnMap} />
+    </div>
+  )
+}
+
+function SkipRow({
+  row,
+  isFocused,
+}: {
+  row: Extract<JourneyRow, { type: 'skip' }>
+  isFocused: boolean
+}) {
+  const stoneSide: JourneySide = row.roadSide === 'left' ? 'right' : 'left'
+
+  return (
+    <div
+      data-node-id={row.node.id}
+      className={`${styles.row} ${styles.skipRow} ${sideClass(stoneSide)} ${
+        row.roadSide === 'left' ? styles.skipRoadLeft : styles.skipRoadRight
+      } ${isFocused ? styles.focused : ''}`}
+    >
+      <div className={styles.skipTrail} aria-hidden="true" />
+      <div className={styles.slot}>
+        <TouringStone node={row.node} />
+      </div>
+      <div className={styles.label}>
+        <h3 className={`${styles.name} ${styles.nameMuted}`}>
+          {row.node.name}
+          <span className={styles.skipBadge}>スキップ</span>
+        </h3>
+        {row.node.skippedAt && (
+          <div className={styles.meta}>
+            <span>スキップ {formatClock(row.node.skippedAt)}</span>
+          </div>
+        )}
+        {row.node.memo && <p className={styles.memo}>{row.node.memo}</p>}
+      </div>
+    </div>
+  )
+}
+
+function LegChip({ leg }: { leg: JourneyLeg }) {
+  const travel =
+    leg.minutes !== null ? `移動 ${formatDuration(leg.minutes)}` : ''
+  const content = (
+    <>
+      {leg.dayNumber !== null && (
+        <b className={styles.chipDay}>{leg.dayNumber}日目</b>
+      )}
+      {leg.isLongest && <b className={styles.chipLongest}>最長</b>}
+      {travel}
+    </>
+  )
+
+  if (leg.href) {
+    return (
+      <a
+        className={styles.chipLink}
+        href={leg.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Googleマップで経路を開く${travel ? `（${travel}）` : ''}`}
+      >
+        <span className={styles.chip}>
+          {content}
+          {!travel && '経路'}
+          <ExternalLink size={12} aria-hidden="true" />
+        </span>
+      </a>
+    )
+  }
+
+  if (!travel && leg.dayNumber === null) return null
+  return <span className={styles.chip}>{content}</span>
+}
+
+function HereMarker({
+  from,
+  now,
+}: {
+  from: JourneyNode | undefined
+  now: Date
+}) {
+  const ridingMinutes = calcTravelMinutes(from?.departedAt, now.toISOString())
+
+  return (
+    <span className={styles.here}>
+      <span className={styles.hereStone}>
+        <Bike size={24} aria-hidden="true" />
+      </span>
+      <span>
+        <b className={styles.hereTitle}>今ここ</b>
+        <span className={styles.hereDetail}>
+          {formatClock(now.toISOString())}
+          {ridingMinutes !== null &&
+            ` ・ 走行 ${formatDuration(ridingMinutes)}`}
+        </span>
+      </span>
+    </span>
+  )
+}
+
+function EmptyMessage({ onAddSpot }: { onAddSpot?: () => void }) {
+  return (
+    <>
+      <p className={styles.emptyText}>スポットはまだ記録されていません</p>
+      {onAddSpot && (
+        <Button type="button" variant="cloud" onClick={onAddSpot}>
+          ＋ 寄った場所を追加
+        </Button>
+      )}
+    </>
+  )
+}
+
+function Road({
+  width,
+  height,
+  fromX,
+  toX,
+}: {
+  width: number
+  height: number
+  fromX: number
+  toX: number
+}) {
+  if (width === 0) return null
+  return (
+    <svg
+      className={styles.roadSvg}
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      aria-hidden="true"
+    >
+      <path
+        className={styles.road}
+        d={`M${fromX} 0C${fromX} ${height * 0.55} ${toX} ${height * 0.45} ${toX} ${height}`}
+      />
+    </svg>
+  )
+}
+
+/**
+ * ツーリングの道のりを飛び石で表示する
+ *
+ * @remarks
+ * 石は訪れた順に左右交互に置き、点線の道でつなぐ。移動時間が長いほど石の間隔が開く。
+ * スキップした地点は道の向かいに破線の石で置き、道はそこを通らない。
+ * 石そのものは操作対象にせず、地図と経路のリンクだけを押せるようにする。
+ */
+export function TouringJourney({
+  journey,
+  now,
+  focusedId,
+  onShowOnMap,
+  onAddSpot,
+}: Props) {
+  const [roadRef, width] = useElementWidth<HTMLDivElement>()
+  const rows = layoutJourney(journey)
+  const nodeById = new Map(journey.nodes.map((node) => [node.id, node]))
+  const isEmpty = journey.nodes.every(
+    (node) => node.kind === 'start' || node.kind === 'end'
+  )
+
+  useEffect(() => {
+    if (!focusedId) return
+    roadRef.current
+      ?.querySelector(`[data-node-id="${CSS.escape(focusedId)}"]`)
+      ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [focusedId, roadRef])
+
+  return (
+    <div ref={roadRef} className={styles.journey}>
+      {rows.map((row) => {
+        switch (row.type) {
+          case 'stop':
+            return (
+              <StopRow
+                key={row.node.id}
+                row={row}
+                isFocused={focusedId === row.node.id}
+                onShowOnMap={onShowOnMap}
+              />
+            )
+          case 'skip':
+            return (
+              <SkipRow
+                key={row.node.id}
+                row={row}
+                isFocused={focusedId === row.node.id}
+              />
+            )
+          case 'leg': {
+            const baseHeight = isEmpty
+              ? EMPTY_LEG_HEIGHT
+              : getLegHeight(row.leg.minutes)
+            const height = baseHeight + (row.showsHere ? HERE_EXTRA_HEIGHT : 0)
+            return (
+              <div
+                key={`leg-${row.leg.fromId}`}
+                className={styles.leg}
+                style={{ height }}
+              >
+                <Road
+                  width={width}
+                  height={height}
+                  fromX={roadX(row.fromSide, width)}
+                  toX={roadX(row.toSide, width)}
+                />
+                <div
+                  className={`${styles.legCenter} ${isEmpty ? styles.legCenterEmpty : ''}`}
+                >
+                  {row.showsHere && (
+                    <HereMarker from={nodeById.get(row.leg.fromId)} now={now} />
+                  )}
+                  <LegChip leg={row.leg} />
+                  {isEmpty && (
+                    <EmptyMessage
+                      onAddSpot={row.showsHere ? undefined : onAddSpot}
+                    />
+                  )}
+                </div>
+              </div>
+            )
+          }
+          case 'tail':
+            return (
+              <div key="tail" className={styles.tail}>
+                <div className={styles.leg} style={{ height: TAIL_HEIGHT }}>
+                  <Road
+                    width={width}
+                    height={TAIL_HEIGHT}
+                    fromX={roadX(row.fromSide, width)}
+                    toX={width / 2}
+                  />
+                </div>
+                <HereMarker
+                  from={nodeById.get(journey.hereAfterId ?? '')}
+                  now={now}
+                />
+                {isEmpty && <EmptyMessage />}
+              </div>
+            )
+        }
+      })}
+    </div>
+  )
+}

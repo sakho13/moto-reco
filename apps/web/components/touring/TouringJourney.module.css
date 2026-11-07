@@ -1,0 +1,282 @@
+.journey {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-3);
+  border-radius: var(--radius-md);
+  scroll-margin-block: 5rem;
+}
+
+.rowReverse {
+  flex-direction: row-reverse;
+}
+
+/* 列が広いときに、ラベルが右の石から離れないようにする */
+.rowReverse .label {
+  flex: 0 1 auto;
+}
+
+.focused {
+  outline: 2px solid var(--color-product);
+  outline-offset: 6px;
+}
+
+.slot {
+  flex: none;
+  width: 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.trail {
+  flex: 1;
+  width: 4px;
+  min-height: 0;
+  background: radial-gradient(
+      circle at 2px 2px,
+      var(--color-cloudActive) 2px,
+      transparent 2.2px
+    )
+    0 0 / 4px 10.5px repeat-y;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: var(--spacing-1);
+}
+
+.tag {
+  display: inline-block;
+  margin-bottom: var(--spacing-1);
+  padding: 0 0.375rem;
+  border: 1px solid var(--color-product);
+  border-radius: var(--radius-sm);
+  color: var(--color-product);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.6;
+}
+
+.tag + .tag {
+  margin-left: var(--spacing-1);
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+
+.nameMuted {
+  color: var(--color-inkLight);
+}
+
+.meta {
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.625rem;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 文字は小さく保ちつつ、余白で44pxの押下範囲を確保する */
+.mapLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin: -14px -6px;
+  padding: 14px 6px;
+  background: none;
+  border: none;
+  color: var(--color-product);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.memo {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--color-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.skipRow {
+  position: relative;
+  padding-block: 0.625rem;
+}
+
+/* 石の反対側に道が通るので、ラベルが道に重ならない余白を取る */
+.skipRoadRight .label {
+  padding-right: 3.25rem;
+}
+
+.skipRoadLeft .label {
+  padding-left: 3.25rem;
+}
+
+.skipTrail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: radial-gradient(
+      circle at 2px 2px,
+      var(--color-cloudActive) 2px,
+      transparent 2.2px
+    )
+    0 0 / 4px 10.5px repeat-y;
+}
+
+.skipRoadRight .skipTrail {
+  right: 42px;
+}
+
+.skipRoadLeft .skipTrail {
+  left: 42px;
+}
+
+.skipBadge {
+  display: inline-block;
+  margin-left: var(--spacing-1);
+  padding: 0 0.375rem;
+  background-color: var(--color-cloud);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  font-family: var(--font-family-body);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-medium);
+  vertical-align: 2px;
+}
+
+.leg {
+  position: relative;
+}
+
+.roadSvg {
+  position: absolute;
+  inset: 0;
+}
+
+.road {
+  fill: none;
+  stroke: var(--color-cloudActive);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 0.5 10;
+}
+
+.legCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+  width: max-content;
+  max-width: 100%;
+}
+
+/* 文字は小さく保ちつつ、余白で44pxの押下範囲を確保する */
+.chipLink {
+  display: block;
+  padding-block: 0.75rem;
+  margin-block: -0.75rem;
+  text-decoration: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 2px var(--spacing-2);
+  background-color: var(--color-background);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  white-space: nowrap;
+}
+
+.chipLongest {
+  color: var(--color-product);
+  font-weight: var(--font-weight-bold);
+}
+
+.chipDay {
+  color: var(--color-ink);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+}
+
+.here {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: 0 var(--spacing-2);
+  background-color: var(--color-background);
+}
+
+.hereStone {
+  flex: none;
+  width: 44px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% 50% 46% 54% / 54% 48% 52% 46%;
+  background-color: var(--color-product);
+  color: var(--color-productInk);
+  box-shadow: var(--shadow-md);
+}
+
+.hereTitle {
+  display: block;
+  font-family: var(--font-family-display);
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-ink);
+}
+
+.hereDetail {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.tail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.tail .leg {
+  width: 100%;
+}
+
+.legCenterEmpty {
+  padding: var(--spacing-2);
+  background-color: var(--color-background);
+}
+
+.emptyText {
+  margin: 0;
+  padding: 2px var(--spacing-2);
+  background-color: var(--color-background);
+  font-size: 0.8125rem;
+  color: var(--color-inkLight);
+}

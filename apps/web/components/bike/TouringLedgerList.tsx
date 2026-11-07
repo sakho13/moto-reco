@@ -1,7 +1,20 @@
 'use client'
 
-import type { ApiResponseTouringDetail } from '@repo/shared-types'
+import type { ReactNode } from 'react'
+import type { ApiResponseTouringListItem } from '@repo/shared-types'
 import styles from './TouringLedgerList.module.css'
+import {
+  formatTouringSummary,
+  sumTouringDistance,
+  TouringMonthHeading,
+} from '@/components/touring/TouringMonthHeading'
+import { TouringPebbles } from '@/components/touring/TouringPebbles'
+import { TouringRouteStone } from '@/components/touring/TouringRouteStone'
+import { TouringStatusMark } from '@/components/touring/TouringStatusMark'
+import {
+  getTouringDistance,
+  groupTouringsByMonth,
+} from '@/lib/utils/touringJourney'
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土']
 
@@ -22,15 +35,23 @@ function formatTime(dateString: string): string {
 }
 
 type TouringLedgerRowProps = {
-  touring: ApiResponseTouringDetail
+  touring: ApiResponseTouringListItem
   onSelect: (touringId: string) => void
 }
 
+function formatEndTime(touring: ApiResponseTouringListItem): string {
+  if (touring.status === 'STARTED') return '走行中'
+  const isSameDay =
+    new Date(touring.startDate).toDateString() ===
+    new Date(touring.endDate).toDateString()
+  return isSameDay
+    ? formatTime(touring.endDate)
+    : `${formatMonthDay(touring.endDate)} ${formatTime(touring.endDate)}`
+}
+
 function TouringLedgerRow({ touring, onSelect }: TouringLedgerRowProps) {
-  const distance =
-    touring.startMileage !== null && touring.endMileage !== null
-      ? touring.endMileage - touring.startMileage
-      : null
+  const distance = getTouringDistance(touring)
+  const isStarted = touring.status === 'STARTED'
 
   return (
     <li className={styles.item}>
@@ -48,31 +69,27 @@ function TouringLedgerRow({ touring, onSelect }: TouringLedgerRowProps) {
           </span>
         </span>
 
+        <span className={styles.stoneSlot}>
+          <TouringRouteStone touring={touring} />
+        </span>
+
         <span className={styles.body}>
-          <span className={styles.typeLine}>
-            <span
-              className={
-                touring.status === 'STARTED'
-                  ? styles.tagStarted
-                  : styles.tagCompleted
-              }
-            >
-              {touring.status === 'STARTED' ? '進行中' : '完了'}
-            </span>
+          <span className={styles.titleLine}>
             <span className={styles.title}>{touring.title}</span>
+            <TouringStatusMark status={touring.status} size="sm" />
           </span>
           <span className={styles.detailLine}>
-            {formatTime(touring.startDate)} → {formatTime(touring.endDate)}
+            {formatTime(touring.startDate)} → {formatEndTime(touring)}
             {touring.startMileage !== null && (
               <>
                 {' '}
-                ／ {touring.startMileage.toLocaleString()}km →{' '}
-                {touring.endMileage !== null
-                  ? `${touring.endMileage.toLocaleString()}km`
-                  : '走行中'}
+                ／ {touring.startMileage.toLocaleString()}km
+                {touring.endMileage !== null &&
+                  ` → ${touring.endMileage.toLocaleString()}km`}
               </>
             )}
           </span>
+          <TouringPebbles stops={touring.stops} status={touring.status} />
         </span>
 
         <span className={styles.value}>
@@ -84,7 +101,9 @@ function TouringLedgerRow({ touring, onSelect }: TouringLedgerRowProps) {
               <span className={styles.valueUnit}>km</span>
             </>
           ) : (
-            <span className={styles.valueNoteMuted}>走行距離未記録</span>
+            <span className={styles.valueNoteMuted}>
+              {isStarted ? '走行中' : '走行距離未記録'}
+            </span>
           )}
         </span>
       </button>
@@ -93,37 +112,73 @@ function TouringLedgerRow({ touring, onSelect }: TouringLedgerRowProps) {
 }
 
 type Props = {
-  tourings: ApiResponseTouringDetail[]
+  tourings: ApiResponseTouringListItem[]
+  /** 月ごとの見出しを出すか。日付順に並んでいるときだけ指定する */
+  groupByMonth: boolean
   onSelect: (touringId: string) => void
-  emptyMessage: string
+  /** 0件のときに出す内容 */
+  emptyContent: ReactNode
 }
 
 /**
- * ツーリングの台帳（行リスト）の表示部品（Issue #575「05 画面案 ─ PC」）
+ * ツーリングの台帳（行リスト）の表示部品
  *
  * @remarks
  * `/app/my-bike/{id}/tourings` のPC版一覧（`TouringLedgerSection`）から使う。
- * `FuelLedgerList` と同じ罫線区切り・枠なしの行構成にする。
+ * `FuelLedgerList` と同じ罫線区切り・枠なしの行構成に、経路の形を入れた石の列を足す。
  */
-export function TouringLedgerList({ tourings, onSelect, emptyMessage }: Props) {
+export function TouringLedgerList({
+  tourings,
+  groupByMonth,
+  onSelect,
+  emptyContent,
+}: Props) {
   if (tourings.length === 0) {
-    return <p className={styles.emptyMessage}>{emptyMessage}</p>
+    return <div className={styles.empty}>{emptyContent}</div>
   }
+
+  const renderRows = (items: ApiResponseTouringListItem[]) => (
+    <ul className={styles.list}>
+      {items.map((touring) => (
+        <TouringLedgerRow
+          key={touring.touringId}
+          touring={touring}
+          onSelect={onSelect}
+        />
+      ))}
+    </ul>
+  )
 
   return (
     <div className={styles.table}>
-      <div className={styles.countRow} aria-hidden="true">
-        <span>{tourings.length}件</span>
+      <div
+        className={`${styles.countRow} ${groupByMonth ? '' : styles.countRowRuled}`}
+        aria-hidden="true"
+      >
+        <span>
+          {formatTouringSummary(
+            tourings.length,
+            '件',
+            sumTouringDistance(tourings)
+          )}
+        </span>
       </div>
-      <ul className={styles.list}>
-        {tourings.map((touring) => (
-          <TouringLedgerRow
-            key={touring.touringId}
-            touring={touring}
-            onSelect={onSelect}
-          />
-        ))}
-      </ul>
+      {groupByMonth ? (
+        <div className={styles.groups}>
+          {groupTouringsByMonth(tourings).map((group) => (
+            <div key={group.key}>
+              <TouringMonthHeading
+                label={group.label}
+                count={group.items.length}
+                totalDistance={group.totalDistance}
+              />
+              {renderRows(group.items)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        renderRows(tourings)
+      )}
     </div>
   )
 }

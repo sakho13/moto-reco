@@ -65,6 +65,8 @@ export type RouteTimelineItem = {
   id: string
   /** 項目の種別 */
   type: RouteTimelineItemType
+  /** バッジに出す印。未指定のSPOTは先頭からの連番になる */
+  mark?: string
   /** 表示名 */
   name: string | null
   /** メモ */
@@ -106,6 +108,8 @@ export type RouteTimelineProps = {
   onDestinationClick?: () => void
   /** SPOT/BREAKが0件の場合に表示するメッセージ */
   emptyMessage?: string
+  /** PC幅で一覧の内側をスクロールさせるか。地図と並べないときはfalseにする */
+  isScrollable?: boolean
 }
 
 const formatTimeValue = (value: string): string => {
@@ -368,6 +372,7 @@ export function RouteTimeline({
   onStartClick,
   onDestinationClick,
   emptyMessage = '経由地はまだ登録されていません',
+  isScrollable = true,
 }: RouteTimelineProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -410,7 +415,7 @@ export function RouteTimeline({
         const badge = isBreak ? (
           <div className={styles.breakBadge}>休</div>
         ) : (
-          <div className={styles.spotBadge}>{++spotIndex}</div>
+          <div className={styles.spotBadge}>{item.mark ?? ++spotIndex}</div>
         )
 
         return (
@@ -428,7 +433,7 @@ export function RouteTimeline({
   )
 
   return (
-    <div className={styles.spotsListScroll}>
+    <div className={isScrollable ? styles.spotsListScroll : undefined}>
       <div className="space-y-3">
         {startItem ? (
           <FixedRow

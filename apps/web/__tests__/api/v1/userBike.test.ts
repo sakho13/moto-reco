@@ -3465,6 +3465,65 @@ describe('UserBike API Endpoints', () => {
       expect(json.data[2].startDate).toBe('2024-03-01T00:00:00.000Z')
     })
 
+    test('各ツーリングの地点の要約を走行順で返す', async () => {
+      const touringId = await createTestTouring(token, myUserBikeId, {
+        title: '要約テスト',
+        startDate: '2024-06-01T00:00:00.000Z',
+        endDate: '2024-06-01T10:00:00.000Z',
+      })
+      await createTestSpot(token, myUserBikeId, touringId, {
+        type: 'SPOT',
+        name: '1か所目',
+        latitude: 35,
+        longitude: 139,
+        arrivedAt: '2024-06-01T02:00:00.000Z',
+      })
+      await createTestSpot(token, myUserBikeId, touringId, {
+        type: 'BREAK',
+        name: '休憩',
+      })
+
+      const res = await app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+
+      const touring = json.data.find(
+        (item: { touringId: string }) => item.touringId === touringId
+      )
+      expect(touring.stops).toEqual([
+        {
+          type: 'SPOT',
+          isSkipped: false,
+          hasArrived: true,
+          latitude: 35,
+          longitude: 139,
+        },
+        {
+          type: 'BREAK',
+          isSkipped: false,
+          hasArrived: expect.any(Boolean),
+          latitude: null,
+          longitude: null,
+        },
+      ])
+
+      const others = json.data.filter(
+        (item: { touringId: string }) => item.touringId !== touringId
+      )
+      for (const other of others) {
+        expect(other.stops).toEqual([])
+      }
+    })
+
     test('ソート機能が動作する（end-date昇順）', async () => {
       const res = await app.request(
         `/api/v1/user-bike/bike/${myUserBikeId}/tourings?sort-by=end-date&sort-order=asc`,

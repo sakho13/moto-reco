@@ -23,23 +23,23 @@ const SORT_ITEMS: { key: SortKey; label: string }[] = [
 type Props = {
   bikeId: string
   onSelect: (touringId: string) => void
+  onRegister: () => void
 }
 
 /**
- * ツーリングの台帳（PC版・全件、Issue #575「05 画面案 ─ PC」）
+ * ツーリングの台帳（PC版・全件）
  *
  * @remarks
  * `/app/my-bike/{id}/tourings` のPC幅（1024px以上）専用の一覧。
- * カードの縦1列（`TouringListSection`。`components/touring/` 配下のため
- * 変更していない）をやめ、罫線区切りの台帳（行）にする。モバイル/タブレット幅は
- * 従来どおり `TouringListSection` を表示し、本コンポーネントはCSSで
- * 非表示にする（`tourings/page.module.css` の `.desktopOnly`）。
+ * モバイル/タブレット幅は `TouringListSection` を表示し、本コンポーネントは
+ * CSSで非表示にする（`tourings/page.module.css` の `.desktopOnly`）。
  *
  * ツーリング一覧APIはページネーションを持たない（全件返却）ため、
  * `FuelLedgerSection` と異なり件数指定なしで取得する。並べ替え（日付・距離）は
- * `FuelLedgerSection` と同じくクライアント側で行う。
+ * `FuelLedgerSection` と同じくクライアント側で行う。日付で並べ替えているときは
+ * 月ごとの見出しを出す。
  */
-export function TouringLedgerSection({ bikeId, onSelect }: Props) {
+export function TouringLedgerSection({ bikeId, onSelect, onRegister }: Props) {
   const [sortBy, setSortBy] = useState<SortKey>('startDate')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [keyword, setKeyword] = useState('')
@@ -137,8 +137,20 @@ export function TouringLedgerSection({ bikeId, onSelect }: Props) {
       ) : (
         <TouringLedgerList
           tourings={sorted}
+          groupByMonth={sortBy === 'startDate'}
           onSelect={onSelect}
-          emptyMessage="該当するツーリングが見つかりませんでした"
+          emptyContent={
+            keyword ? (
+              <p>該当するツーリングが見つかりませんでした</p>
+            ) : (
+              <>
+                <p>ツーリングの記録がまだありません</p>
+                <Button type="button" variant="primary" onClick={onRegister}>
+                  最初のツーリングを登録
+                </Button>
+              </>
+            )
+          }
         />
       )}
     </section>

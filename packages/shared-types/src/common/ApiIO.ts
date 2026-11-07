@@ -383,7 +383,20 @@ export type ApiResponseTouringDetail = {
   fuelLogIds: string[]
 }
 
-export type ApiResponseTouringList = ApiResponseTouringDetail[]
+/** ツーリング一覧の各行に道のりを描くための、地点ごとの要約（走行順） */
+export type ApiResponseTouringStop = {
+  type: 'SPOT' | 'BREAK'
+  isSkipped: boolean
+  hasArrived: boolean
+  latitude: number | null
+  longitude: number | null
+}
+
+export type ApiResponseTouringListItem = ApiResponseTouringDetail & {
+  stops: ApiResponseTouringStop[]
+}
+
+export type ApiResponseTouringList = ApiResponseTouringListItem[]
 
 export type ApiResponsePublicTouringList = {
   tourings: {
