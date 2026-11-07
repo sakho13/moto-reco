@@ -1,0 +1,64 @@
+.routeLine {
+  stroke: var(--color-product);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pinHit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+}
+
+.pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 50%;
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+  transition:
+    width var(--transition-fast),
+    height var(--transition-fast);
+}
+
+.pinMarked {
+  width: 28px;
+  height: 28px;
+  font-size: var(--font-size-sm);
+}
+
+.pinDot {
+  width: 16px;
+  height: 16px;
+}
+
+.pinFlag {
+  background-color: var(--color-product);
+  color: var(--color-productInk);
+}
+
+.pinStay {
+  background-color: var(--color-cloud);
+  color: var(--color-ink);
+}
+
+.pinSkip {
+  background-color: var(--color-background);
+  color: var(--color-inkLight);
+  border: 1.5px dashed var(--color-cloudActive);
+}
+
+.pinHitActive .pin {
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--color-ink);
+  font-size: var(--font-size-lg);
+  background-color: var(--color-product);
+  color: var(--color-productInk);
+}

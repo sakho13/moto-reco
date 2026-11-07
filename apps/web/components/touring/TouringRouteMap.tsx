@@ -7,6 +7,8 @@ type Props = {
   points: MapPoint[]
   containerClassName: string | undefined
   onMapClick?: (lat: number, lng: number) => void
+  focusedId?: string | null
+  onPointClick?: (id: string) => void
 }
 
 const TouringRouteMapInner = dynamic(() => import('./TouringRouteMapInner'), {
@@ -32,12 +34,16 @@ export default function TouringRouteMap({
   points,
   containerClassName,
   onMapClick,
+  focusedId,
+  onPointClick,
 }: Props) {
   return (
     <TouringRouteMapInner
       points={points}
       containerClassName={containerClassName}
       onMapClick={onMapClick}
+      focusedId={focusedId}
+      onPointClick={onPointClick}
     />
   )
 }
