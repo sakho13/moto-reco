@@ -2,6 +2,7 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  container-type: inline-size;
 }
 
 .list {
@@ -56,4 +57,11 @@
 .separator {
   opacity: 0.6;
   flex-shrink: 0;
+}
+
+/* 幅が足りないときは中間の階層を省き、先頭と現在地だけを出す */
+@container (max-width: 200px) {
+  .item:not(:first-child, :last-child) {
+    display: none;
+  }
 }

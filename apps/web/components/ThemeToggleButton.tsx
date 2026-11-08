@@ -3,7 +3,12 @@
 import { Button } from '@repo/ui/button'
 import { useTheme } from '@repo/ui/context/ThemeContext'
 
-export function ThemeToggleButton() {
+type Props = {
+  /** true のときは文言を出さず、アイコンだけを表示する */
+  iconOnly?: boolean
+}
+
+export function ThemeToggleButton({ iconOnly = false }: Props) {
   const { themeMode, setThemeMode } = useTheme()
   const isDark = themeMode === 'dark'
 
@@ -26,7 +31,7 @@ export function ThemeToggleButton() {
       }}
     >
       <span aria-hidden="true">{isDark ? '🌙' : '☀️'}</span>
-      <span>{isDark ? 'ダーク' : 'ライト'}</span>
+      {!iconOnly && <span>{isDark ? 'ダーク' : 'ライト'}</span>}
     </Button>
   )
 }
