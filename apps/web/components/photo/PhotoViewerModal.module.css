@@ -1,0 +1,39 @@
+.figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  /* 見出しと操作ボタンの分を除いた高さに収める */
+  height: clamp(8rem, calc(90dvh - 11rem), 40rem);
+  object-fit: contain;
+}
+
+.caption {
+  align-self: stretch;
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--color-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.counter {
+  min-width: 4rem;
+  text-align: center;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}

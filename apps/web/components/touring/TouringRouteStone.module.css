@@ -1,0 +1,53 @@
+.stone {
+  --stone-width: 60px;
+  --stone-height: 57px;
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--stone-width);
+  height: var(--stone-height);
+  background-color: var(--color-cloud);
+  color: var(--color-product);
+  box-shadow: var(--shadow-md);
+}
+
+.started {
+  background-color: var(--color-product);
+  color: var(--color-productInk);
+}
+
+.shape {
+  display: block;
+}
+
+.day {
+  font-family: var(--font-family-display);
+  font-size: calc(var(--stone-width) * 0.32);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--color-ink);
+}
+
+.started .day {
+  color: inherit;
+}
+
+.dayUnit {
+  margin-left: 1px;
+  font-size: 0.6875rem;
+}
+
+.planned {
+  background-color: var(--color-background);
+  border: 1.5px dashed var(--color-cloudActive);
+  box-shadow: none;
+}
+
+.planText {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-inkLight);
+}

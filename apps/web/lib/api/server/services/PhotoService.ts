@@ -6,6 +6,7 @@ import {
   IPhotoRepository,
   ISpotRepository,
   ITouringRepository,
+  SpotPhotos,
 } from '@repo/shared-domain'
 import {
   MyUserBikeId,
@@ -186,6 +187,15 @@ export class PhotoService {
   ): Promise<PhotoEntity[]> {
     await this.requireSpotOwnership(spotId, touringId, userId)
     return this.photoRepository.findPhotosBySpotId(spotId)
+  }
+
+  /** ツーリング内の写真のあるスポットごとに写真を返す */
+  public async getSpotPhotosByTouringId(
+    touringId: TouringId,
+    userId: UserId
+  ): Promise<SpotPhotos[]> {
+    await this.requireTouringOwnership(touringId, userId)
+    return this.photoRepository.findSpotPhotosByTouringId(touringId)
   }
 
   public async getPhotosByMyBikeId(

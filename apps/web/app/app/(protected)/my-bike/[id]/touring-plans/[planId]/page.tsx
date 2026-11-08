@@ -1,35 +1,64 @@
 'use client'
 
+import { ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
-import type { TouringPlanRouteType } from '@repo/shared-types'
-import { formatPlanSpotOffsetMinutes, getCurrentDate } from '@repo/shared-utils'
+import { getCurrentDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
-import { EditIcon } from '@/components/icons/EditIcon'
 import { HistorySummaryCard } from '@/components/touring/HistorySummaryCard'
 import { PlanEditModal } from '@/components/touring/PlanEditModal'
 import { PlanLocationEditModal } from '@/components/touring/PlanLocationEditModal'
 import { PlanSpotAddModal } from '@/components/touring/PlanSpotAddModal'
 import { PlanSpotEditModal } from '@/components/touring/PlanSpotEditModal'
-import {
-  RouteTimeline,
-  type RouteTimelineItem,
-} from '@/components/touring/RouteTimeline'
+import type { RouteTimelineItem } from '@/components/touring/RouteTimeline'
+import { RouteTimeline } from '@/components/touring/RouteTimeline'
+import { TouringMapPanel } from '@/components/touring/TouringMapPanel'
+import { TouringPlanHero } from '@/components/touring/TouringPlanHero'
+import { TouringPlanJourney } from '@/components/touring/TouringPlanJourney'
 import TouringRouteMap from '@/components/touring/TouringRouteMap'
 import type { MapPoint } from '@/components/touring/TouringRouteMap'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useGeolocation } from '@/lib/hooks/useGeolocation'
+import { useMapPanel } from '@/lib/hooks/useMapPanel'
+import { useMediaQuery } from '@/lib/hooks/useMediaQuery'
+import type { JourneyNode } from '@/lib/utils/touringJourney'
 import {
-  buildGoogleMapsRouteUrl,
-  buildGoogleMapsTwoPointUrl,
-} from '@/lib/utils/googleMaps'
+  buildPlanJourney,
+  formatPlanStayTime,
+} from '@/lib/utils/touringPlanJourney'
+
+const DESKTOP_MEDIA_QUERY = '(min-width: 1024px)'
+const HISTORY_SECTION_ID = 'plan-history'
+const MIN_STOPS_TO_REORDER = 2
+
+const toLatLng = (
+  location: { latitude: number | null; longitude: number | null } | null
+): { lat: number; lng: number } | null =>
+  location?.latitude != null && location.longitude != null
+    ? { lat: location.latitude, lng: location.longitude }
+    : null
+
+const toTimelineItem = (node: JourneyNode): RouteTimelineItem => {
+  const base = { id: node.id, name: node.name, mark: node.mark }
+  switch (node.kind) {
+    case 'start':
+      return { ...base, type: 'START' }
+    case 'end':
+      return { ...base, type: 'DESTINATION' }
+    case 'break':
+      return { ...base, type: 'BREAK' }
+    default:
+      return { ...base, type: 'SPOT' }
+  }
+}
 
 function TouringPlanDetailPage() {
   const params = useParams()
@@ -37,7 +66,11 @@ function TouringPlanDetailPage() {
   const bikeId = params.id as string
   const planId = params.planId as string
   const { getCurrentPosition } = useGeolocation()
+  const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY)
+  const mapPanel = useMapPanel(isDesktop)
 
+  const [focusedId, setFocusedId] = useState<string | null>(null)
+  const [isReordering, setIsReordering] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingLocationTarget, setEditingLocationTarget] = useState<
     'start' | 'destination' | null
@@ -53,8 +86,9 @@ function TouringPlanDetailPage() {
     lng: number
   } | null>(null)
 
-  const detailUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}`
-  const spotsUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`
+  const listUrl = `/api/v1/user-bike/bike/${bikeId}/touring-plans`
+  const detailUrl = `${listUrl}/${planId}`
+  const spotsUrl = `${detailUrl}/spots`
 
   const {
     data: plan,
@@ -67,15 +101,16 @@ function TouringPlanDetailPage() {
     return response.data
   })
 
-  const { data: spots, isLoading: spotsLoading } = useSWR(
-    bikeId && planId ? spotsUrl : null,
-    async (url) => {
-      const response = await apiGet(
-        url as `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots`
-      )
-      return response.data
-    }
-  )
+  const {
+    data: spots,
+    error: spotsError,
+    isLoading: spotsLoading,
+  } = useSWR(bikeId && planId ? spotsUrl : null, async (url) => {
+    const response = await apiGet(
+      url as `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots`
+    )
+    return response.data
+  })
 
   const touringIds = plan?.touringIds ?? []
 
@@ -96,298 +131,130 @@ function TouringPlanDetailPage() {
     }
   )
 
+  const journey = useMemo(
+    () => (plan ? buildPlanJourney(plan, spots ?? []) : null),
+    [plan, spots]
+  )
+
+  const mapPoints = useMemo<MapPoint[]>(
+    () =>
+      (journey?.nodes ?? []).flatMap((node) =>
+        node.point
+          ? [
+              {
+                lat: node.point.lat,
+                lng: node.point.lng,
+                label: node.name,
+                type: node.kind,
+                id: node.id,
+                mark: node.mark,
+              },
+            ]
+          : []
+      ),
+    [journey]
+  )
+
+  const backHref = `/app/my-bike/${bikeId}/touring-plans`
+
   if (planLoading) {
     return (
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-center min-h-100">
-          <p className="text-lg">読み込み中...</p>
-        </div>
+      <div className={styles.root}>
+        <p className={styles.loading}>読み込み中...</p>
       </div>
     )
   }
 
-  if (planError || !plan) {
+  if (planError || !plan || !journey) {
     return (
-      <>
-        <div className="mb-4">
-          <Button
-            onClick={() => router.push(`/app/my-bike/${bikeId}/touring-plans`)}
-            variant="cloud"
-          >
-            ← 戻る
-          </Button>
-        </div>
-        <div className={styles.card}>
-          <h1 className={`text-2xl font-bold mb-4 ${styles.errorTitle}`}>
-            エラー
-          </h1>
-          <p className={`mb-4 ${styles.bodyText}`}>
+      <div className={styles.root}>
+        <Link href={backHref} className={styles.backLink}>
+          ‹ 一覧へ
+        </Link>
+        <div className={styles.errorBox}>
+          <h1 className={styles.errorTitle}>エラー</h1>
+          <p className={styles.errorMessage}>
             {planError instanceof ApiV1Error
               ? planError.message
               : 'ツーリングプランの取得に失敗しました'}
           </p>
         </div>
-      </>
+      </div>
     )
   }
 
-  // SPOT/BREAKのみに絞った経由地一覧
   const middleSpots = (spots ?? []).filter(
     (spot) => spot.type === 'SPOT' || spot.type === 'BREAK'
   )
-
-  // 地図表示用の地点一覧
-  const mapPoints: MapPoint[] = []
-
-  if (
-    plan.startLocation?.latitude != null &&
-    plan.startLocation.longitude != null
-  ) {
-    mapPoints.push({
-      lat: plan.startLocation.latitude,
-      lng: plan.startLocation.longitude,
-      label: plan.startLocation.name ?? '出発地',
-      type: 'start',
-    })
-  }
-
-  middleSpots
-    .filter((spot) => spot.latitude != null && spot.longitude != null)
-    .forEach((spot, i) => {
-      mapPoints.push({
-        lat: spot.latitude!,
-        lng: spot.longitude!,
-        label:
-          spot.name ??
-          (spot.type === 'BREAK' ? `休憩 ${i + 1}` : `スポット ${i + 1}`),
-        type: spot.type === 'BREAK' ? 'break' : 'spot',
-      })
-    })
-
-  if (
-    plan.destinationLocation?.latitude != null &&
-    plan.destinationLocation.longitude != null
-  ) {
-    mapPoints.push({
-      lat: plan.destinationLocation.latitude,
-      lng: plan.destinationLocation.longitude,
-      label: plan.destinationLocation.name ?? '目的地',
-      type: 'end',
-    })
-  }
-
-  const googleMapsUrl = buildGoogleMapsRouteUrl(mapPoints)
-
-  // 緯度経度の両方が設定されているか判定する型ガード
-  const hasLatLng = (
-    loc:
-      | { latitude: number | null; longitude: number | null }
-      | null
-      | undefined
-  ): loc is { latitude: number; longitude: number } =>
-    loc != null && loc.latitude != null && loc.longitude != null
-
-  /**
-   * 地点情報を「前の地点」として各モーダルに渡す`{ lat, lng }`形式に変換する。
-   *
-   * @remarks
-   * 緯度経度が無い場合は `null` を返す。
-   */
-  const toPrevLocation = (
-    loc:
-      | { latitude: number | null; longitude: number | null }
-      | null
-      | undefined
-  ): { lat: number; lng: number } | null =>
-    hasLatLng(loc) ? { lat: loc.latitude, lng: loc.longitude } : null
-
-  /**
-   * 2地点間のGoogleマップ経路リンクと移動時間・経路種別を算出する。
-   *
-   * @remarks
-   * いずれかの地点に緯度経度が無い場合は `null` を返す。
-   * 移動時間・経路種別は対象地点（次の地点）の`travelMinutesFromPrev`/`routeTypeFromPrev`をそのまま使う。
-   */
-  const buildTravelLink = (
-    from:
-      | { latitude: number | null; longitude: number | null }
-      | null
-      | undefined,
-    to:
-      | { latitude: number | null; longitude: number | null }
-      | null
-      | undefined,
-    minutes: number | null,
-    routeType: TouringPlanRouteType | null
-  ): {
-    href: string
-    minutes: number | null
-    routeType: TouringPlanRouteType | null
-  } | null => {
-    if (!hasLatLng(from) || !hasLatLng(to)) return null
-    return {
-      href: buildGoogleMapsTwoPointUrl(
-        { lat: from.latitude, lng: from.longitude },
-        { lat: to.latitude, lng: to.longitude },
-        routeType
-      ),
-      minutes,
-      routeType,
-    }
-  }
-
-  // RouteTimelineItem に変換
-  const timelineItems: RouteTimelineItem[] = []
-
-  const firstMiddleSpot = middleSpots[0]
-  const startTravelTarget = firstMiddleSpot ?? plan.destinationLocation
-
-  timelineItems.push({
-    id: 'START',
-    type: 'START',
-    name: plan.startLocation?.name ?? '出発地',
-    memo: plan.startLocation?.memo ?? null,
-    latitude: plan.startLocation?.latitude ?? null,
-    longitude: plan.startLocation?.longitude ?? null,
-    primaryTime: {
-      label: '出発予定',
-      value: null,
-      displayValue: formatPlanSpotOffsetMinutes(
-        plan.startLocation?.plannedDepartureOffsetMinutes ?? null
-      ),
-    },
-    travelLink: buildTravelLink(
-      plan.startLocation,
-      startTravelTarget,
-      startTravelTarget?.travelMinutesFromPrev ?? null,
-      startTravelTarget?.routeTypeFromPrev ?? null
-    ),
-    onEdit: () => setEditingLocationTarget('start'),
-  })
-
-  middleSpots.forEach((spot, index) => {
-    const nextSpot = middleSpots[index + 1]
-    const travelTarget = nextSpot ?? plan.destinationLocation
-
-    timelineItems.push({
-      id: spot.touringPlanSpotId,
-      type: spot.type,
-      name: spot.name,
-      memo: spot.memo,
-      latitude: spot.latitude,
-      longitude: spot.longitude,
-      primaryTime: {
-        label: '到着予定',
-        value: null,
-        displayValue: formatPlanSpotOffsetMinutes(
-          spot.plannedArrivalOffsetMinutes
-        ),
-      },
-      secondaryTime: {
-        label: '出発予定',
-        value: null,
-        displayValue: formatPlanSpotOffsetMinutes(
-          spot.plannedDepartureOffsetMinutes
-        ),
-      },
-      travelLink: buildTravelLink(
-        spot,
-        travelTarget,
-        travelTarget?.travelMinutesFromPrev ?? null,
-        travelTarget?.routeTypeFromPrev ?? null
-      ),
-      onEdit: () => setEditingSpotId(spot.touringPlanSpotId),
-    })
-  })
-
-  timelineItems.push({
-    id: 'DESTINATION',
-    type: 'DESTINATION',
-    name: plan.destinationLocation?.name ?? '目的地',
-    memo: plan.destinationLocation?.memo ?? null,
-    latitude: plan.destinationLocation?.latitude ?? null,
-    longitude: plan.destinationLocation?.longitude ?? null,
-    primaryTime: {
-      label: '到着予定',
-      value: null,
-      displayValue: formatPlanSpotOffsetMinutes(
-        plan.destinationLocation?.plannedArrivalOffsetMinutes ?? null
-      ),
-    },
-    onEdit: () => setEditingLocationTarget('destination'),
-  })
-
   const sortableIds = middleSpots.map((spot) => spot.touringPlanSpotId)
-
   const editingSpot = spots?.find(
     (spot) => spot.touringPlanSpotId === editingSpotId
   )
-
-  // PlanSpotAddModal用「前の地点」: 既存の経由地一覧の最後、無ければ出発地
-  const lastMiddleSpot = middleSpots[middleSpots.length - 1]
-  const addSpotPrevLocation = toPrevLocation(
-    lastMiddleSpot ?? plan.startLocation
+  const editingSpotIndex = middleSpots.findIndex(
+    (spot) => spot.touringPlanSpotId === editingSpotId
   )
-
-  // PlanSpotEditModal用「前の地点」: 編集対象スポットの直前のスポット、無ければ出発地
-  const editingSpotIndex = editingSpot
-    ? middleSpots.findIndex(
-        (spot) => spot.touringPlanSpotId === editingSpot.touringPlanSpotId
-      )
-    : -1
-  const editSpotPrevLocation = toPrevLocation(
+  const startLatLng = toLatLng(plan.startLocation)
+  const lastStopLatLng = toLatLng(middleSpots.at(-1) ?? plan.startLocation)
+  const editSpotPrevLocation =
     editingSpotIndex > 0
-      ? middleSpots[editingSpotIndex - 1]
-      : plan.startLocation
-  )
-
-  // PlanLocationEditModal（destination）用「前の地点」: 経由地一覧の最後、無ければ出発地
-  const destinationPrevLocation = toPrevLocation(
-    lastMiddleSpot ?? plan.startLocation
-  )
+      ? toLatLng(middleSpots[editingSpotIndex - 1] ?? null)
+      : startLatLng
 
   const handleReorder = async (newOrderIds: string[]) => {
+    const previous = spots
+    const reordered = previous && [
+      ...previous.filter((spot) => spot.type === 'START'),
+      ...newOrderIds.flatMap((id) =>
+        previous.filter((spot) => spot.touringPlanSpotId === id)
+      ),
+      ...previous.filter((spot) => spot.type === 'DESTINATION'),
+    ]
+    await mutate(spotsUrl, reordered, { revalidate: false })
+
     try {
       await apiPatch(
         `${spotsUrl}/reorder` as `/api/v1/user-bike/bike/${string}/touring-plans/${string}/spots/reorder`,
         { spotIds: newOrderIds }
       )
-      await mutate(spotsUrl)
     } catch (err) {
+      await mutate(spotsUrl, previous, { revalidate: false })
       toast.error(
         err instanceof ApiV1Error ? err.message : '並び替えに失敗しました'
       )
+      return
     }
+    await Promise.all([
+      mutate(spotsUrl),
+      mutate(detailUrl),
+      mutate(listUrl),
+    ]).catch(() => {})
   }
 
   const handleEditSuccess = async (action: 'update' | 'delete') => {
     if (action === 'delete') {
-      router.push(`/app/my-bike/${bikeId}/touring-plans`)
+      router.push(backHref)
     } else {
       setIsEditModalOpen(false)
     }
   }
 
-  const handleLocationEditSuccess = () => {
-    setEditingLocationTarget(null)
+  const handleEditNode = (nodeId: string) => {
+    if (nodeId === 'start' || nodeId === 'destination') {
+      setEditingLocationTarget(nodeId)
+    } else {
+      setEditingSpotId(nodeId)
+    }
   }
 
-  const handleSpotAddSuccess = () => {
-    setAddModalType(null)
-    setMapClickLocation(null)
+  const handleShowOnMap = (nodeId: string) => {
+    setFocusedId(nodeId)
+    if (!isDesktop) mapPanel.open()
   }
 
   const handleMapClick = (lat: number, lng: number) => {
     setMapClickLocation({ lat, lng })
     setAddModalType('SPOT')
-  }
-
-  const handleSpotEditSuccess = () => {
-    setEditingSpotId(null)
-  }
-
-  const handleSpotDeleteSuccess = () => {
-    setEditingSpotId(null)
+    if (mapPanel.isOpen) mapPanel.close()
   }
 
   const handleStart = async () => {
@@ -426,134 +293,153 @@ function TouringPlanDetailPage() {
     }
   }
 
-  const routeAndHistoryCards = (
-    <>
-      <div className={styles.card}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">ルート</h2>
-          <Button
-            type="button"
-            variant="quiet"
-            size="iconSm"
-            onClick={() => setAddModalType('SPOT')}
-            aria-label="経由地・休憩を追加"
-            title="経由地・休憩を追加"
-          >
-            ＋
-          </Button>
-        </div>
-
-        {spotsLoading ? (
-          <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-        ) : (
+  const renderRoute = () => {
+    if (spotsLoading) return <p className={styles.muted}>読み込み中...</p>
+    if (spotsError) {
+      return <p className={styles.muted}>地点の取得に失敗しました</p>
+    }
+    if (isReordering) {
+      return (
+        <>
+          <p className={styles.reorderNote}>
+            つまみをドラッグして順番を変えられます。移動時間は変わらないので、順番を変えたら区間ごとに見直してください。
+          </p>
           <RouteTimeline
-            items={timelineItems}
+            items={journey.nodes.map(toTimelineItem)}
             sortableIds={sortableIds}
             onReorder={handleReorder}
-            onStartClick={() => setEditingLocationTarget('start')}
-            onDestinationClick={() => setEditingLocationTarget('destination')}
+            isScrollable={false}
           />
-        )}
-      </div>
-
-      <div className={styles.card}>
-        <h2 className="text-lg font-semibold mb-4">ツーリング実績</h2>
-        {touringIds.length === 0 ? (
-          <p className={styles.historyEmpty}>
-            このプランからのツーリング実績はまだありません
-          </p>
-        ) : touringsLoading ? (
-          <p className={`text-sm ${styles.mutedText}`}>読み込み中...</p>
-        ) : (
-          <div>
-            {tourings?.map((touring) => (
-              <HistorySummaryCard
-                key={touring.touringId}
-                touring={touring}
-                onClick={(touringId) =>
-                  router.push(`/app/my-bike/${bikeId}/tourings/${touringId}`)
-                }
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </>
-  )
+        </>
+      )
+    }
+    return (
+      <TouringPlanJourney
+        journey={journey}
+        focusedId={isDesktop ? focusedId : null}
+        onShowOnMap={handleShowOnMap}
+        onEditNode={handleEditNode}
+        onAddStop={setAddModalType}
+      />
+    )
+  }
 
   return (
-    <>
-      <div className="w-full flex flex-row items-start gap-3 mb-4 max-w-5xl">
-        <div className="shrink-0 pt-0.5">
+    <div className={styles.root}>
+      <TouringPlanHero
+        plan={plan}
+        journey={journey}
+        backHref={backHref}
+        hasLoadedStops={spots !== undefined}
+        onShowHistory={() =>
+          document
+            .getElementById(HISTORY_SECTION_ID)
+            ?.scrollIntoView({ behavior: 'smooth' })
+        }
+        onEdit={() => setIsEditModalOpen(true)}
+        onOpenMap={!isDesktop ? mapPanel.open : undefined}
+      >
+        <div className={styles.startAction}>
           <Button
-            onClick={() => router.push(`/app/my-bike/${bikeId}/touring-plans`)}
-            variant="cloud"
-          >
-            ← 戻る
-          </Button>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-bold truncate">{plan.title}</h1>
-            <Button
-              type="button"
-              variant="quiet"
-              size="iconSm"
-              className={styles.iconButton}
-              onClick={() => setIsEditModalOpen(true)}
-              aria-label="編集"
-            >
-              <EditIcon />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full max-w-5xl flex flex-col md:flex-row md:gap-6 md:items-start gap-4">
-        <div className="md:flex-1 min-w-0">
-          <div className={styles.mapStickyWrapper}>
-            <div className={styles.card}>
-              <div className={styles.mapWrapper}>
-                <TouringRouteMap
-                  points={mapPoints}
-                  containerClassName={styles.mapContainerLarge}
-                  onMapClick={handleMapClick}
-                />
-                {googleMapsUrl && (
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.googleMapsLink}
-                  >
-                    Googleマップで経路を表示
-                  </a>
-                )}
-                <p className={styles.mapClickHint}>
-                  地図をタップしてスポットを追加
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="md:w-80 lg:w-96 shrink-0 space-y-4">
-          {routeAndHistoryCards}
-          <div className={styles.fixedFooterSpacer} />
-        </div>
-      </div>
-
-      <div className={styles.fixedFooter}>
-        <div className={styles.fixedFooterInner}>
-          <Button
-            onClick={() => setIsStartConfirmOpen(true)}
+            type="button"
             variant="primary"
             fullWidth
             disabled={isStarting}
+            onClick={() => setIsStartConfirmOpen(true)}
           >
             {isStarting ? '開始中...' : 'このプランで開始する'}
           </Button>
         </div>
+      </TouringPlanHero>
+
+      <div
+        className={`${styles.layout} ${isDesktop ? styles.layoutWithMap : ''}`}
+      >
+        <div className={styles.column}>
+          <section>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>道のり</h2>
+              {sortableIds.length >= MIN_STOPS_TO_REORDER && (
+                <Button
+                  type="button"
+                  variant={isReordering ? 'primary' : 'cloud'}
+                  size="sm"
+                  className={styles.touchTarget}
+                  aria-pressed={isReordering}
+                  onClick={() => setIsReordering((current) => !current)}
+                >
+                  {isReordering ? '並び替えを終える' : '順番を変える'}
+                </Button>
+              )}
+            </div>
+            {renderRoute()}
+          </section>
+
+          {touringIds.length > 0 && (
+            <section id={HISTORY_SECTION_ID} className={styles.history}>
+              <h2 className={styles.sectionTitle}>このプランの走行記録</h2>
+              {touringsLoading ? (
+                <p className={styles.muted}>読み込み中...</p>
+              ) : (
+                tourings?.map((touring) => (
+                  <HistorySummaryCard
+                    key={touring.touringId}
+                    touring={touring}
+                    onClick={(touringId) =>
+                      router.push(
+                        `/app/my-bike/${bikeId}/tourings/${touringId}`
+                      )
+                    }
+                  />
+                ))
+              )}
+            </section>
+          )}
+        </div>
+
+        {isDesktop && (
+          <aside className={styles.mapAside}>
+            <div className={styles.mapFrame}>
+              <TouringRouteMap
+                points={mapPoints}
+                containerClassName={styles.mapContainer}
+                focusedId={focusedId}
+                onPointClick={setFocusedId}
+                onMapClick={handleMapClick}
+              />
+            </div>
+            <div className={styles.mapFooter}>
+              <p className={styles.mapHint}>
+                地図をクリックするとスポットを追加できます
+              </p>
+              {journey.routeUrl && (
+                <a
+                  className={styles.routeLink}
+                  href={journey.routeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Googleマップで経路を表示
+                  <ExternalLink size={13} aria-hidden="true" />
+                </a>
+              )}
+            </div>
+          </aside>
+        )}
       </div>
+
+      {!isDesktop && mapPanel.isOpen && (
+        <TouringMapPanel
+          journey={journey}
+          points={mapPoints}
+          focusedId={focusedId}
+          onFocus={setFocusedId}
+          onClose={mapPanel.close}
+          onMapClick={handleMapClick}
+          mapHint="地図をタップするとスポットを追加できます"
+          getNodeTime={formatPlanStayTime}
+        />
+      )}
 
       {isEditModalOpen && (
         <PlanEditModal
@@ -576,12 +462,10 @@ function TouringPlanDetailPage() {
               : plan.destinationLocation
           }
           prevLocation={
-            editingLocationTarget === 'destination'
-              ? destinationPrevLocation
-              : null
+            editingLocationTarget === 'destination' ? lastStopLatLng : null
           }
           onClose={() => setEditingLocationTarget(null)}
-          onSuccess={handleLocationEditSuccess}
+          onSuccess={() => setEditingLocationTarget(null)}
         />
       )}
 
@@ -591,12 +475,15 @@ function TouringPlanDetailPage() {
           planId={planId}
           initialType={addModalType}
           initialLocation={mapClickLocation}
-          prevLocation={addSpotPrevLocation}
+          prevLocation={lastStopLatLng}
           onClose={() => {
             setAddModalType(null)
             setMapClickLocation(null)
           }}
-          onSuccess={handleSpotAddSuccess}
+          onSuccess={() => {
+            setAddModalType(null)
+            setMapClickLocation(null)
+          }}
         />
       )}
 
@@ -607,8 +494,8 @@ function TouringPlanDetailPage() {
           spot={editingSpot}
           prevLocation={editSpotPrevLocation}
           onClose={() => setEditingSpotId(null)}
-          onSuccess={handleSpotEditSuccess}
-          onDelete={handleSpotDeleteSuccess}
+          onSuccess={() => setEditingSpotId(null)}
+          onDelete={() => setEditingSpotId(null)}
         />
       )}
 
@@ -619,7 +506,7 @@ function TouringPlanDetailPage() {
           size="sm"
         >
           <div className="space-y-4">
-            <p className="text-sm opacity-60">
+            <p className={styles.startNote}>
               今すぐ開始すると、現在地と現在時刻でツーリングが記録されます。
             </p>
             <div className="flex gap-3">
@@ -644,7 +531,7 @@ function TouringPlanDetailPage() {
           </div>
         </ModalBase>
       )}
-    </>
+    </div>
   )
 }
 

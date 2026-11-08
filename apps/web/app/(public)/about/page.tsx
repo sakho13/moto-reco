@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { FeatureVideo } from '@/components/lp/FeatureVideo'
 import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
@@ -26,7 +27,45 @@ export const metadata: Metadata = {
   },
 }
 
-const featureDetails = [
+type FeatureDetail = {
+  id: string
+  title: string
+  items: string[]
+  /** 操作動画。ある機能は動画と並べて大きく紹介する */
+  video?: { src: string; poster: string }
+}
+
+type FeatureShowcase = FeatureDetail & Required<Pick<FeatureDetail, 'video'>>
+
+const featureDetails: readonly FeatureDetail[] = [
+  {
+    id: 'feature-fuel',
+    title: '給油・燃費の記録',
+    items: [
+      'ODO・給油量・支払金額の3項目を入れるだけで記録',
+      'スマホでは専用のテンキーで続けて入力でき、区間距離・燃費・単価もその場で確認',
+      '燃費の推移をグラフで確認',
+      'オフライン時も記録して後で同期',
+    ],
+    video: {
+      src: '/videos/lp/fuel-log.webm',
+      poster: '/videos/lp/fuel-log.jpg',
+    },
+  },
+  {
+    id: 'feature-touring',
+    title: 'ツーリング記録',
+    items: [
+      '出発から到着まで、寄った場所と休憩を走った順に記録',
+      '道のりを飛び石で表示し、移動時間や長居した場所がひと目でわかる',
+      '立ち寄った地点を地図で確認し、Googleマップで経路を開ける',
+      'ツーリングプランを作っておき、当日はプランから記録を始められる',
+    ],
+    video: {
+      src: '/videos/lp/touring-journey.webm',
+      poster: '/videos/lp/touring-journey.jpg',
+    },
+  },
   {
     id: 'feature-garage',
     title: 'バイク登録とガレージ管理',
@@ -34,15 +73,6 @@ const featureDetails = [
       'メーカー・モデル・年式・走行距離などの基本情報を保存',
       '複数台のバイクを切り替えて管理',
       '共有用のメンテナンス履歴としても活用',
-    ],
-  },
-  {
-    id: 'feature-fuel',
-    title: '給油・燃費の記録',
-    items: [
-      '給油日、走行距離、給油量、燃費をまとめて記録',
-      '燃費の推移をグラフで確認',
-      'オフライン時も記録して後で同期',
     ],
   },
   {
@@ -64,6 +94,23 @@ const featureDetails = [
     ],
   },
 ]
+
+const featureShowcases = featureDetails.filter(
+  (feature): feature is FeatureShowcase => feature.video !== undefined
+)
+const featureCards = featureDetails.filter(
+  (feature) => feature.video === undefined
+)
+
+function FeatureItems({ items }: { items: string[] }) {
+  return (
+    <ul className={styles.featureDetailItems}>
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  )
+}
 
 export default function AboutPage() {
   return (
@@ -90,19 +137,35 @@ export default function AboutPage() {
             各機能の操作の流れと記録できる情報を紹介します。
           </p>
         </div>
+        <div className={styles.showcaseList}>
+          {featureShowcases.map((feature, index) => (
+            <div
+              key={feature.id}
+              id={feature.id}
+              className={`${styles.featureDetail} ${styles.showcase} ${index % 2 === 1 ? styles.showcaseReverse : ''}`}
+            >
+              <div className={styles.showcaseText}>
+                <h3 className={styles.featureDetailTitle}>{feature.title}</h3>
+                <FeatureItems items={feature.items} />
+              </div>
+              <div className={styles.showcasePhone}>
+                <FeatureVideo
+                  src={feature.video.src}
+                  poster={feature.video.poster}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
         <div className={styles.featureDetailGrid}>
-          {featureDetails.map((feature) => (
+          {featureCards.map((feature) => (
             <div
               key={feature.id}
               id={feature.id}
               className={styles.featureDetail}
             >
               <h3 className={styles.featureDetailTitle}>{feature.title}</h3>
-              <ul className={styles.featureDetailItems}>
-                {feature.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+              <FeatureItems items={feature.items} />
             </div>
           ))}
         </div>

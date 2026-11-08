@@ -9,6 +9,7 @@ import { ProfileCard } from '@/components/ProfileCard'
 import { apiGet } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { canUsePhotos } from '@/lib/utils/photoAccess'
 
 function ProfileEditPage() {
   const { isGuest } = useAuth()
@@ -17,7 +18,7 @@ function ProfileEditPage() {
     const response = await apiGet(url)
     return response.data
   })
-  const isAdmin = data?.role === 'ADMIN'
+  const showsPhotos = canUsePhotos(data?.role)
 
   return (
     <div className="w-full max-w-md flex flex-col gap-4">
@@ -32,7 +33,7 @@ function ProfileEditPage() {
             <span>認証情報</span>
             <span style={{ color: 'var(--color-inkLight)' }}>›</span>
           </Link>
-          {isAdmin && (
+          {showsPhotos && (
             <Link
               href="/app/photos"
               className="flex justify-between items-center text-sm py-2 border-b last:border-b-0"

@@ -1,17 +1,19 @@
 import type { Metadata } from 'next'
 import styles from './page.module.css'
-import { PRICING_PLANS } from './pricingData'
-import { PricingCard } from '@/components/docs/pricing/PricingCard'
 import {
-  APP_NAME,
-  FREE_USER_LIMITS,
-  GUEST_ACCOUNT_LIMITS,
-  SITE_URL,
-} from '@/lib/statics'
+  ACCOUNT_LIMITS,
+  COMPARISON_ROWS,
+  GUEST_ACCOUNT_TTL_DAYS,
+  PRICING_PLANS,
+  formatLimit,
+  formatMcpAccess,
+} from './pricingData'
+import { PricingCard } from '@/components/docs/pricing/PricingCard'
+import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
   title: `料金プラン`,
-  description: `${APP_NAME}の料金プランをご確認いただけます。無料プランですべての基本機能(バイク登録2台まで、メンテナンス記録、給油記録)をご利用いただけます。`,
+  description: `${APP_NAME}の料金プランをご確認いただけます。無料プランですべての基本機能(バイク登録${formatLimit(ACCOUNT_LIMITS.free.bike, '台まで')}、メンテナンス記録、給油記録)をご利用いただけます。`,
   openGraph: {
     url: `${SITE_URL}/pricing`,
     title: `料金プラン | ${APP_NAME}`,
@@ -72,65 +74,19 @@ export default function PricingPage() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>バイク登録</td>
-                <td>{GUEST_ACCOUNT_LIMITS.BIKE}台まで</td>
-                <td>{FREE_USER_LIMITS.BIKE}台まで</td>
-                <td className={styles.comingSoon}>無制限（予定）</td>
-              </tr>
-              <tr>
-                <td>給油履歴</td>
-                <td>{GUEST_ACCOUNT_LIMITS.FUEL_LOG}件まで / 台</td>
-                <td>無制限</td>
-                <td className={styles.comingSoon}>無制限（予定）</td>
-              </tr>
-              <tr>
-                <td>ツーリング記録</td>
-                <td>{GUEST_ACCOUNT_LIMITS.TOURING}件まで / 台</td>
-                <td>無制限</td>
-                <td className={styles.comingSoon}>無制限（予定）</td>
-              </tr>
-              <tr>
-                <td>ツーリングプラン</td>
-                <td>{GUEST_ACCOUNT_LIMITS.TOURING_PLAN}件まで / 台</td>
-                <td>{FREE_USER_LIMITS.TOURING_PLAN}件まで / 台</td>
-                <td className={styles.comingSoon}>無制限（予定）</td>
-              </tr>
-              <tr>
-                <td>メンテナンス記録</td>
-                <td>{GUEST_ACCOUNT_LIMITS.MAINTENANCE_LOG}件まで / 台</td>
-                <td>無制限</td>
-                <td className={styles.comingSoon}>無制限（予定）</td>
-              </tr>
-              <tr>
-                <td>購入グッズ登録</td>
-                <td>{GUEST_ACCOUNT_LIMITS.GOODS}件まで</td>
-                <td>無制限</td>
-                <td className={styles.comingSoon}>無制限（予定）</td>
-              </tr>
-              <tr>
-                <td>メンテナンス通知</td>
-                <td>-</td>
-                <td>○</td>
-                <td className={styles.comingSoon}>○（予定）</td>
-              </tr>
-              <tr>
-                <td>データ自動バックアップ</td>
-                <td>○</td>
-                <td>○</td>
-                <td className={styles.comingSoon}>○（予定）</td>
-              </tr>
-              <tr>
-                <td>マルチデバイス同期</td>
-                <td>○</td>
-                <td>○</td>
-                <td className={styles.comingSoon}>○（予定）</td>
-              </tr>
+              {COMPARISON_ROWS.map((row) => (
+                <tr key={row.feature}>
+                  <td>{row.feature}</td>
+                  <td>{row.guest}</td>
+                  <td>{row.free}</td>
+                  <td className={styles.comingSoon}>{row.premium}（予定）</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
         <p className={styles.comparisonNote}>
-          ※ゲストアカウントは登録から7日間有効です。
+          ※ゲストアカウントは登録から{GUEST_ACCOUNT_TTL_DAYS}日間有効です。
         </p>
       </section>
 
@@ -140,7 +96,13 @@ export default function PricingPage() {
           <div className={styles.faqItem}>
             <h3>無料プランに制限はありますか?</h3>
             <p>
-              はい、無料プランではバイク登録が2台までとなっていますが、その他の基本機能はすべてご利用いただけます。
+              はい。無料プランでは、バイク登録は
+              {formatLimit(ACCOUNT_LIMITS.free.bike, '台まで')}
+              、ツーリングプランは1台あたり
+              {formatLimit(ACCOUNT_LIMITS.free.touringPlan, '件まで')}
+              です。MCP連携（AIアシスタント）は
+              {formatMcpAccess(ACCOUNT_LIMITS.free.allowedScopes)}
+              となります。給油履歴・メンテナンス記録・ツーリング記録・購入グッズは件数の制限なくご利用いただけます。
             </p>
           </div>
           <div className={styles.faqItem}>
@@ -155,6 +117,14 @@ export default function PricingPage() {
             <p>
               プレミアムプランリリース後は、いつでもプラン変更が可能です。
               アカウント設定から簡単に変更できます。
+            </p>
+          </div>
+          <div className={styles.faqItem}>
+            <h3>プランが下がった場合、登録済みのデータはどうなりますか?</h3>
+            <p>
+              プランが下がっても、登録済みのデータは削除されません。閲覧・編集・削除はこれまでどおりご利用いただけます。
+              上限を超えている項目は、上限内に収まるまで新規登録ができなくなります。
+              また、MCP連携（AIアシスタント）の書き込み機能はプランが下がった時点でご利用いただけなくなります。
             </p>
           </div>
         </div>

@@ -53,6 +53,7 @@ const buildPlan = (overrides: Partial<TouringPlan> = {}) => {
 const buildPlanSpot = (
   overrides: Partial<{
     touringPlanSpotId: ReturnType<typeof createTouringPlanSpotId>
+    touringPlanId: ReturnType<typeof createTouringPlanId>
     type: 'START' | 'SPOT' | 'BREAK' | 'DESTINATION'
     name: string | null
     memo: string | null
@@ -99,6 +100,7 @@ describe('TouringPlanService', () => {
     touringPlanSpotRepository = {
       createPlanSpot: vi.fn(),
       findPlanSpotsByPlanId: vi.fn().mockResolvedValue([]),
+      findPlanSpotsByPlanIds: vi.fn().mockResolvedValue([]),
       findPlanSpotById: vi.fn(),
       findPlanSpotByType: vi.fn().mockResolvedValue(null),
       updatePlanSpot: vi.fn(),
@@ -118,6 +120,7 @@ describe('TouringPlanService', () => {
       deleteTouring: vi.fn(),
       countTourings: vi.fn(),
       findTouringsByPlanId: vi.fn().mockResolvedValue([]),
+      countTouringsByPlanIds: vi.fn().mockResolvedValue(new Map()),
     }
     myUserBikeRepository = {
       createMyUserBike: vi.fn(),
@@ -239,19 +242,94 @@ describe('TouringPlanService', () => {
       )
     })
 
-    test('プラン一覧と目的地情報を取得できる', async () => {
+    test('プラン一覧と地点の要約を取得できる', async () => {
       const plan = buildPlan()
-      const destinationSpot = buildPlanSpot({ type: 'DESTINATION' })
+      const startSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('start'),
+        type: 'START',
+      })
+      const later = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('later'),
+        type: 'BREAK',
+        sortOrder: 2,
+        travelMinutesFromPrev: 20,
+        stayMinutes: 10,
+      })
+      const earlier = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('earlier'),
+        type: 'SPOT',
+        sortOrder: 1,
+        travelMinutesFromPrev: 30,
+        stayMinutes: 15,
+      })
+      const destinationSpot = buildPlanSpot({
+        touringPlanSpotId: createTouringPlanSpotId('destination'),
+        type: 'DESTINATION',
+        travelMinutesFromPrev: 40,
+      })
       vi.mocked(touringPlanRepository.findPlans).mockResolvedValue([plan])
-      vi.mocked(touringPlanSpotRepository.findPlanSpotByType).mockResolvedValue(
-        destinationSpot
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanIds
+      ).mockResolvedValue([destinationSpot, later, startSpot, earlier])
+      vi.mocked(touringRepository.countTouringsByPlanIds).mockResolvedValue(
+        new Map([[plan.id, 2]])
       )
 
-      const result = await service.getPlans(myUserBikeId, userId)
+      const [result] = await service.getPlans(myUserBikeId, userId)
 
-      expect(result).toHaveLength(1)
-      expect(result[0]?.plan).toBe(plan)
-      expect(result[0]?.destinationSpot).toBe(destinationSpot)
+      expect(result?.plan).toBe(plan)
+      expect(result?.startSpot).toBe(startSpot)
+      expect(result?.destinationSpot).toBe(destinationSpot)
+      expect(result?.stops).toEqual([earlier, later])
+      expect(result?.plannedMinutes).toBe(115)
+      expect(result?.touringCount).toBe(2)
+    })
+
+    test('他のプランの地点を混ぜない', async () => {
+      const plan = buildPlan()
+      vi.mocked(touringPlanRepository.findPlans).mockResolvedValue([plan])
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanIds
+      ).mockResolvedValue([
+        buildPlanSpot({
+          touringPlanId: createTouringPlanId('other-plan'),
+          type: 'SPOT',
+        }),
+      ])
+
+      const [result] = await service.getPlans(myUserBikeId, userId)
+
+      expect(result?.stops).toEqual([])
+      expect(result?.touringCount).toBe(0)
+    })
+
+    test('移動時間が未入力の区間があると予定の長さはnullになる', async () => {
+      const plan = buildPlan()
+      vi.mocked(touringPlanRepository.findPlans).mockResolvedValue([plan])
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanIds
+      ).mockResolvedValue([
+        buildPlanSpot({ type: 'START' }),
+        buildPlanSpot({ type: 'SPOT', travelMinutesFromPrev: null }),
+      ])
+
+      const [result] = await service.getPlans(myUserBikeId, userId)
+
+      expect(result?.plannedMinutes).toBeNull()
+    })
+
+    test('出発地が未設定なら予定の長さはnullになる', async () => {
+      const plan = buildPlan()
+      vi.mocked(touringPlanRepository.findPlans).mockResolvedValue([plan])
+      vi.mocked(
+        touringPlanSpotRepository.findPlanSpotsByPlanIds
+      ).mockResolvedValue([
+        buildPlanSpot({ type: 'DESTINATION', travelMinutesFromPrev: 60 }),
+      ])
+
+      const [result] = await service.getPlans(myUserBikeId, userId)
+
+      expect(result?.plannedMinutes).toBeNull()
     })
   })
 

@@ -106,19 +106,43 @@ userBikeTouringPlans.get('/', honoAuthMiddleware, async (c) => {
   return c.json<SuccessResponse<ApiResponseTouringPlanList>>(
     {
       status: 'success',
-      data: plans.map(({ plan, destinationSpot }) => ({
-        touringPlanId: plan.id,
-        title: plan.title,
-        createdAt: plan.createdAt.toISOString(),
-        updatedAt: plan.updatedAt.toISOString(),
-        destination: destinationSpot
-          ? {
-              latitude: destinationSpot.latitude,
-              longitude: destinationSpot.longitude,
-              name: destinationSpot.name,
-            }
-          : null,
-      })),
+      data: plans.map(
+        ({
+          plan,
+          startSpot,
+          destinationSpot,
+          stops,
+          plannedMinutes,
+          touringCount,
+        }) => ({
+          touringPlanId: plan.id,
+          title: plan.title,
+          createdAt: plan.createdAt.toISOString(),
+          updatedAt: plan.updatedAt.toISOString(),
+          start: startSpot
+            ? {
+                latitude: startSpot.latitude,
+                longitude: startSpot.longitude,
+                name: startSpot.name,
+              }
+            : null,
+          destination: destinationSpot
+            ? {
+                latitude: destinationSpot.latitude,
+                longitude: destinationSpot.longitude,
+                name: destinationSpot.name,
+              }
+            : null,
+          stops: stops.map((stop) => ({
+            type:
+              stop.type === 'BREAK' ? ('BREAK' as const) : ('SPOT' as const),
+            latitude: stop.latitude,
+            longitude: stop.longitude,
+          })),
+          plannedMinutes,
+          touringCount,
+        })
+      ),
       message: 'ツーリングプラン一覧取得成功',
     },
     200

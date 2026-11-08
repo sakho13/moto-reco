@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { mutate } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
 import type {
@@ -64,13 +64,20 @@ export function PlanSpotEditForm({
   const [currentLocation, setCurrentLocation] = useState<{
     lat: number
     lng: number
-  } | null>(null)
+  } | null>(
+    spot.latitude != null && spot.longitude != null
+      ? { lat: spot.latitude, lng: spot.longitude }
+      : null
+  )
   const [formState, setFormState] = useState<PlanSpotFormState>({
-    name: '',
-    memo: '',
-    stayMinutes: '',
-    travelMinutesFromPrev: '',
-    routeTypeFromPrev: 'MIXED',
+    name: spot.name ?? '',
+    memo: spot.memo ?? '',
+    stayMinutes: spot.stayMinutes != null ? String(spot.stayMinutes) : '',
+    travelMinutesFromPrev:
+      spot.travelMinutesFromPrev != null
+        ? String(spot.travelMinutesFromPrev)
+        : '',
+    routeTypeFromPrev: spot.routeTypeFromPrev ?? 'MIXED',
   })
 
   const isBreak = spot.type === 'BREAK'
@@ -87,23 +94,6 @@ export function PlanSpotEditForm({
         )
       : null
 
-  useEffect(() => {
-    setFormState({
-      name: spot.name ?? '',
-      memo: spot.memo ?? '',
-      stayMinutes: spot.stayMinutes != null ? String(spot.stayMinutes) : '',
-      travelMinutesFromPrev:
-        spot.travelMinutesFromPrev != null
-          ? String(spot.travelMinutesFromPrev)
-          : '',
-      routeTypeFromPrev: spot.routeTypeFromPrev ?? 'MIXED',
-    })
-
-    if (spot.latitude != null && spot.longitude != null) {
-      setCurrentLocation({ lat: spot.latitude, lng: spot.longitude })
-    }
-  }, [spot])
-
   const handleLocationSaved = async (lat: number, lng: number) => {
     if (isSavingLocation) return
     setIsSavingLocation(true)
@@ -114,6 +104,7 @@ export function PlanSpotEditForm({
         { latitude: lat, longitude: lng }
       )
       setCurrentLocation({ lat, lng })
+      setIsLocationModalOpen(false)
       trackEvent('touring_plan_spot_update', {
         spot_type: spot.type,
         field: 'location',
@@ -170,7 +161,7 @@ export function PlanSpotEditForm({
       await apiPatch(
         `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots/${spot.touringPlanSpotId}`,
         {
-          name: formState.name !== '' ? formState.name : null,
+          name: formState.name.trim() !== '' ? formState.name.trim() : null,
           memo: formState.memo !== '' ? formState.memo : null,
           stayMinutes:
             formState.stayMinutes !== '' ? Number(formState.stayMinutes) : null,
@@ -183,7 +174,7 @@ export function PlanSpotEditForm({
       )
       trackEvent('touring_plan_spot_update', {
         spot_type: spot.type,
-        has_name: formState.name !== '',
+        has_name: formState.name.trim() !== '',
         has_memo: formState.memo !== '',
         has_stay_minutes: formState.stayMinutes !== '',
         has_travel_minutes: formState.travelMinutesFromPrev !== '',

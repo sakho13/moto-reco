@@ -14,7 +14,7 @@ export function MobileHeader() {
       <div className={styles.actions}>
         <BikeSwitcher />
         <BellButton />
-        <ThemeToggleButton />
+        <ThemeToggleButton iconOnly />
         <SettingsButton />
       </div>
     </header>

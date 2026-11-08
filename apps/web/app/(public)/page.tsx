@@ -2,6 +2,7 @@ import {
   Activity,
   ArrowRight,
   Check,
+  type LucideIcon,
   Navigation,
   Users,
   Wrench,
@@ -10,6 +11,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { FeatureVideo } from '@/components/lp/FeatureVideo'
 import { APP_NAME, APP_VERSION, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
@@ -46,7 +48,44 @@ export const metadata: Metadata = {
   },
 }
 
-const features = [
+type Feature = {
+  icon: LucideIcon
+  title: string
+  description: string
+  image: string
+  link: string
+  color: 'orange' | 'blue' | 'green' | 'purple'
+  /** 操作動画。あるカードは動画を並べて表示する */
+  video?: { src: string; poster: string }
+}
+
+const features: readonly Feature[] = [
+  {
+    icon: Activity,
+    title: '給油・燃費の記録',
+    description:
+      '給油日・走行距離・給油量をワンステップで保存。燃費の推移グラフで愛車の状態を把握できます。',
+    image: '/images/featureFuel.svg',
+    link: '/about#feature-fuel',
+    color: 'blue',
+    video: {
+      src: '/videos/lp/fuel-log.webm',
+      poster: '/videos/lp/fuel-log.jpg',
+    },
+  },
+  {
+    icon: Navigation,
+    title: 'ツーリング記録',
+    description:
+      '走った場所・距離・思い出をログとして保存。ルート記録で過去のツーリングをいつでも振り返れます。',
+    image: '/images/featureGarage.svg',
+    link: '/about#feature-touring',
+    color: 'green',
+    video: {
+      src: '/videos/lp/touring-journey.webm',
+      poster: '/videos/lp/touring-journey.jpg',
+    },
+  },
   {
     icon: Wrench,
     title: 'メンテナンス管理',
@@ -57,24 +96,6 @@ const features = [
     color: 'orange',
   },
   {
-    icon: Activity,
-    title: '給油・燃費の記録',
-    description:
-      '給油日・走行距離・給油量をワンステップで保存。燃費の推移グラフで愛車の状態を把握できます。',
-    image: '/images/featureFuel.svg',
-    link: '/about#feature-fuel',
-    color: 'blue',
-  },
-  {
-    icon: Navigation,
-    title: 'ツーリング記録',
-    description:
-      '走った場所・距離・思い出をログとして保存。ルート記録で過去のツーリングをいつでも振り返れます。',
-    image: '/images/featureGarage.svg',
-    link: '/about#feature-garage',
-    color: 'green',
-  },
-  {
     icon: Users,
     title: 'ライダーコミュニティ',
     description:
@@ -83,13 +104,20 @@ const features = [
     link: '/about#feature-friend',
     color: 'purple',
   },
-] as const
+]
 
-const iconColorClass: Record<string, string> = {
+const iconColorClass: Record<Feature['color'], string | undefined> = {
   orange: styles.featureIconOrange,
   blue: styles.featureIconBlue,
   green: styles.featureIconGreen,
   purple: styles.featureIconPurple,
+}
+
+const mediaColorClass: Record<Feature['color'], string | undefined> = {
+  orange: styles.showcaseMediaOrange,
+  blue: styles.showcaseMediaBlue,
+  green: styles.showcaseMediaGreen,
+  purple: styles.showcaseMediaPurple,
 }
 
 const steps = [
@@ -194,12 +222,8 @@ export default function Home() {
           <div className={styles.featuresGrid}>
             {features.map((feature) => {
               const Icon = feature.icon
-              return (
-                <Link
-                  key={feature.title}
-                  href={feature.link}
-                  className={styles.featureCard}
-                >
+              const text = (
+                <>
                   <div
                     className={`${styles.featureIcon} ${iconColorClass[feature.color] ?? ''}`}
                   >
@@ -210,6 +234,40 @@ export default function Home() {
                   <span className={styles.featureMore} aria-hidden="true">
                     詳しく見る <ArrowRight size={14} />
                   </span>
+                </>
+              )
+
+              if (!feature.video) {
+                return (
+                  <Link
+                    key={feature.title}
+                    href={feature.link}
+                    className={styles.featureCard}
+                  >
+                    {text}
+                  </Link>
+                )
+              }
+
+              return (
+                <Link
+                  key={feature.title}
+                  href={feature.link}
+                  className={`${styles.featureCard} ${styles.featureCardShowcase}`}
+                >
+                  <div className={styles.showcase}>
+                    <div
+                      className={`${styles.showcaseMedia} ${mediaColorClass[feature.color] ?? ''}`}
+                    >
+                      <div className={styles.showcasePhone}>
+                        <FeatureVideo
+                          src={feature.video.src}
+                          poster={feature.video.poster}
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.showcaseText}>{text}</div>
+                  </div>
                 </Link>
               )
             })}

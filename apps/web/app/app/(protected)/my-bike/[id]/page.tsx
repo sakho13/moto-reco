@@ -27,6 +27,7 @@ import { withAuth } from '@/lib/hoc/withAuth'
 import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { BIKE_CARTE_PERIOD_FETCH_SIZE } from '@/lib/statics'
+import { canUsePhotos } from '@/lib/utils/photoAccess'
 
 async function fetchFuelLogList(url: string): Promise<ApiResponseFuelLogList> {
   const response = await authenticatedFetch(url, { method: 'GET' })
@@ -216,7 +217,7 @@ function BikeDetailPage() {
         isAdmin={isAdmin}
       />
 
-      {isAdmin && <BikePhotosCard myUserBikeId={id} />}
+      {canUsePhotos(profile?.role) && <BikePhotosCard myUserBikeId={id} />}
     </div>
   )
 }

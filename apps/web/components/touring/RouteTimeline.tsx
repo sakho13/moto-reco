@@ -3,21 +3,21 @@
 import {
   DndContext,
   closestCenter,
+  KeyboardSensor,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import type { DragEndEvent } from '@dnd-kit/core'
+import type { Announcements, DragEndEvent } from '@dnd-kit/core'
 import {
   SortableContext,
+  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Fragment } from 'react'
-import type { TouringPlanRouteType } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './RouteTimeline.module.css'
 import { DragHandleIcon } from '@/components/icons/DragHandleIcon'
@@ -65,6 +65,8 @@ export type RouteTimelineItem = {
   id: string
   /** 項目の種別 */
   type: RouteTimelineItemType
+  /** バッジに出す印。未指定のSPOTは先頭からの連番になる */
+  mark?: string
   /** 表示名 */
   name: string | null
   /** メモ */
@@ -79,12 +81,6 @@ export type RouteTimelineItem = {
   secondaryTime?: RouteTimelineTimeSlot | null
   /** スキップ済みかどうか */
   isSkipped?: boolean
-  /** この地点から次の地点（経由地が無ければ目的地）へのGoogleマップ経路リンク。未設定/算出不可ならnullまたは省略 */
-  travelLink?: {
-    href: string
-    minutes: number | null
-    routeType?: TouringPlanRouteType | null
-  } | null
   /** クリック/編集ボタン押下時のハンドラ。未指定なら編集ボタン非表示 */
   onEdit?: () => void
 }
@@ -96,16 +92,10 @@ export type RouteTimelineProps = {
   sortableIds?: string[]
   /** 並び替え確定時のコールバック */
   onReorder?: (newOrderIds: string[]) => void | Promise<void>
-  /** 出発地未設定時のプレースホルダラベル */
-  startPlaceholderLabel?: string
-  /** 目的地未設定時のプレースホルダラベル */
-  destinationPlaceholderLabel?: string
-  /** 出発地行クリック時（未設定時のプレースホルダ含む） */
-  onStartClick?: () => void
-  /** 目的地行クリック時（未設定時のプレースホルダ含む） */
-  onDestinationClick?: () => void
   /** SPOT/BREAKが0件の場合に表示するメッセージ */
   emptyMessage?: string
+  /** PC幅で一覧の内側をスクロールさせるか。地図と並べないときはfalseにする */
+  isScrollable?: boolean
 }
 
 const formatTimeValue = (value: string): string => {
@@ -138,6 +128,9 @@ const formatTimeSlot = (
   return `${slot.label} ${formatTimeValue(slot.value)}`
 }
 
+const getItemName = (item: RouteTimelineItem): string =>
+  item.name ?? (item.type === 'BREAK' ? '休憩' : '無名スポット')
+
 type TimelineRowProps = {
   item: RouteTimelineItem
   badge: React.ReactNode
@@ -161,9 +154,7 @@ function TimelineRow({ item, badge, dragHandle }: TimelineRowProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1 min-w-0">
-            <p className="font-medium text-sm truncate">
-              {item.name ?? (item.type === 'BREAK' ? '休憩' : '無名スポット')}
-            </p>
+            <p className="font-medium text-sm truncate">{getItemName(item)}</p>
             {item.isSkipped && (
               <span className={styles.skippedBadge}>スキップ</span>
             )}
@@ -214,7 +205,10 @@ function SortableTimelineRow({ item, badge }: SortableTimelineRowProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item.id })
+  } = useSortable({
+    id: item.id,
+    attributes: { roleDescription: '並び替えできる地点' },
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -232,53 +226,12 @@ function SortableTimelineRow({ item, badge }: SortableTimelineRowProps) {
             {...attributes}
             {...listeners}
             className={`${styles.dragHandle} cursor-grab active:cursor-grabbing shrink-0`}
-            aria-label="ドラッグして並び替え"
+            aria-label={`${getItemName(item)}をドラッグして並び替え`}
           >
             <DragHandleIcon />
           </button>
         }
       />
-    </div>
-  )
-}
-
-type PlaceholderRowProps = {
-  label: string
-  badgeClassName: string
-  badgeLabel: string
-  onClick?: () => void
-}
-
-/**
- * 出発地・目的地が未設定の場合に表示するプレースホルダ行
- */
-function PlaceholderRow({
-  label,
-  badgeClassName,
-  badgeLabel,
-  onClick,
-}: PlaceholderRowProps) {
-  return (
-    <div
-      className={styles.placeholderItem}
-      onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={
-        onClick
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onClick()
-              }
-            }
-          : undefined
-      }
-    >
-      <div className={badgeClassName}>{badgeLabel}</div>
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm ${styles.mutedText}`}>{label}</p>
-      </div>
     </div>
   )
 }
@@ -297,83 +250,25 @@ function FixedRow({ item, badgeClassName, badgeLabel }: FixedRowProps) {
   return <TimelineRow item={item} badge={badge} />
 }
 
-type TravelLinkRowProps = {
-  travelLink:
-    | {
-        href: string
-        minutes: number | null
-        routeType?: TouringPlanRouteType | null
-      }
-    | null
-    | undefined
-}
-
-/**
- * 経路種別ごとの表示ラベル
- */
-const ROUTE_TYPE_LABELS: Record<TouringPlanRouteType, string> = {
-  GENERAL: '下道',
-  HIGHWAY: '高速',
-  MIXED: '混在',
-}
-
-/**
- * 移動時間・経路種別から括弧内に表示する補足テキストを組み立てる
- *
- * @remarks
- * `minutes`/`routeType`のいずれも無い場合は空文字を返す（括弧自体を表示しない）。
- */
-const buildTravelDetailText = (
-  minutes: number | null,
-  routeType: TouringPlanRouteType | null | undefined
-): string => {
-  const parts: string[] = []
-  if (minutes !== null) parts.push(`移動 ${minutes}分`)
-  if (routeType) parts.push(ROUTE_TYPE_LABELS[routeType])
-  return parts.length > 0 ? `（${parts.join('・')}）` : ''
-}
-
-/**
- * 地点間のGoogleマップ経路リンクを表示する行
- */
-function TravelLinkRow({ travelLink }: TravelLinkRowProps) {
-  if (!travelLink) return null
-  return (
-    <a
-      href={travelLink.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={styles.travelLink}
-    >
-      ↓ Googleマップで経路を表示
-      {buildTravelDetailText(travelLink.minutes, travelLink.routeType)}
-    </a>
-  )
-}
-
 /**
  * 出発地🏁→経由地📍/休憩☕→目的地🏁を縦の時系列ラインで表示する汎用UIコンポーネント
  *
  * @remarks
- * プラン管理画面・ツーリング詳細画面の両方で使用する基盤コンポーネント。
- * 各項目の `travelLink` を設定すると、出発地・各経由地/休憩行の直後に
- * Googleマップ経路リンクが表示される。
+ * プラン画面の並び替えとツーリング詳細の編集モードで使用する基盤コンポーネント。
  */
 export function RouteTimeline({
   items,
   sortableIds,
   onReorder,
-  startPlaceholderLabel = '出発地を設定',
-  destinationPlaceholderLabel = '目的地を設定',
-  onStartClick,
-  onDestinationClick,
   emptyMessage = '経由地はまだ登録されていません',
+  isScrollable = true,
 }: RouteTimelineProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, {
       activationConstraint: { delay: 200, tolerance: 5 },
-    })
+    }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
   const startItem = items.find((item) => item.type === 'START') ?? null
@@ -398,6 +293,23 @@ export function RouteTimeline({
     void onReorder(reordered)
   }
 
+  const nameOf = (id: string | number): string =>
+    middleItems.find((item) => item.id === id)?.name ?? '地点'
+  const positionOf = (id: string | number): number =>
+    ids.indexOf(String(id)) + 1
+  const announcements: Announcements = {
+    onDragStart: ({ active }) => `${nameOf(active.id)}を持ち上げました`,
+    onDragOver: ({ active, over }) =>
+      over && over.id !== active.id
+        ? `${nameOf(active.id)}を${positionOf(over.id)}番目へ移動します`
+        : undefined,
+    onDragEnd: ({ active, over }) =>
+      over
+        ? `${nameOf(active.id)}を${positionOf(over.id)}番目に置きました`
+        : `${nameOf(active.id)}を元の位置に戻しました`,
+    onDragCancel: ({ active }) => `${nameOf(active.id)}の移動を取り消しました`,
+  }
+
   let spotIndex = 0
 
   const middleContent = (
@@ -410,47 +322,41 @@ export function RouteTimeline({
         const badge = isBreak ? (
           <div className={styles.breakBadge}>休</div>
         ) : (
-          <div className={styles.spotBadge}>{++spotIndex}</div>
+          <div className={styles.spotBadge}>{item.mark ?? ++spotIndex}</div>
         )
 
-        return (
-          <Fragment key={item.id}>
-            {draggable ? (
-              <SortableTimelineRow item={item} badge={badge} />
-            ) : (
-              <TimelineRow item={item} badge={badge} />
-            )}
-            <TravelLinkRow travelLink={item.travelLink} />
-          </Fragment>
+        return draggable ? (
+          <SortableTimelineRow key={item.id} item={item} badge={badge} />
+        ) : (
+          <TimelineRow key={item.id} item={item} badge={badge} />
         )
       })}
     </div>
   )
 
   return (
-    <div className={styles.spotsListScroll}>
+    <div className={isScrollable ? styles.spotsListScroll : undefined}>
       <div className="space-y-3">
-        {startItem ? (
+        {startItem && (
           <FixedRow
             item={startItem}
             badgeClassName={styles.startBadge}
             badgeLabel="出"
           />
-        ) : onStartClick ? (
-          <PlaceholderRow
-            label={startPlaceholderLabel}
-            badgeClassName={styles.startBadge}
-            badgeLabel="出"
-            onClick={onStartClick}
-          />
-        ) : null}
-        <TravelLinkRow travelLink={startItem?.travelLink} />
+        )}
 
         {draggable ? (
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
+            accessibility={{
+              announcements,
+              screenReaderInstructions: {
+                draggable:
+                  'スペースキーで持ち上げ、上下の矢印キーで移動し、スペースキーで置きます。Escapeキーで取り消せます。',
+              },
+            }}
           >
             <SortableContext items={ids} strategy={verticalListSortingStrategy}>
               {middleContent}
@@ -460,20 +366,13 @@ export function RouteTimeline({
           middleContent
         )}
 
-        {destinationItem ? (
+        {destinationItem && (
           <FixedRow
             item={destinationItem}
             badgeClassName={styles.endBadge}
             badgeLabel="着"
           />
-        ) : onDestinationClick ? (
-          <PlaceholderRow
-            label={destinationPlaceholderLabel}
-            badgeClassName={styles.endBadge}
-            badgeLabel="着"
-            onClick={onDestinationClick}
-          />
-        ) : null}
+        )}
       </div>
     </div>
   )

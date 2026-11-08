@@ -11,6 +11,7 @@ import {
   ApiResponsePhotoUploadUrl,
   ApiResponseSpotPhotoList,
   ApiResponseTouringPhotoList,
+  ApiResponseTouringSpotPhotoList,
   ApiResponseUserPhotoList,
   createMyUserBikeId,
   createPhotoId,
@@ -366,6 +367,48 @@ photo.get(
       status: 'success',
       data,
       message: 'ツーリング写真一覧取得成功',
+    })
+  }
+)
+
+/**
+ * GET /api/v1/photo/touring/:touringId/spots
+ * ツーリング内のスポット写真を、写真のあるスポットごとにまとめて取得する
+ */
+photo.get(
+  '/touring/:touringId/spots',
+  honoAuthMiddleware,
+  honoAdminMiddleware,
+  async (c) => {
+    const { userEntity } = c.var.user!
+    const touringId = c.req.param('touringId')
+
+    const service = createPhotoService()
+    const spotPhotos = await service.getSpotPhotosByTouringId(
+      createTouringId(touringId),
+      createUserId(userEntity.id)
+    )
+
+    const bucket = getBucket()
+    const data = await Promise.all(
+      spotPhotos.map(async ({ spotId, photos }) => ({
+        spotId,
+        photos: await Promise.all(
+          photos.map(async (entity) => {
+            const photoUrl = await generateReadSignedUrl(
+              bucket,
+              entity.storagePath
+            )
+            return toApiResponsePhotoDetail(entity, photoUrl)
+          })
+        ),
+      }))
+    )
+
+    return c.json<SuccessResponse<ApiResponseTouringSpotPhotoList>>({
+      status: 'success',
+      data,
+      message: 'スポット写真一覧取得成功',
     })
   }
 )

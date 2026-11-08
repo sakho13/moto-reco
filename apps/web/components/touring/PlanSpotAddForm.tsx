@@ -95,7 +95,8 @@ export function PlanSpotAddForm({
         `/api/v1/user-bike/bike/${bikeId}/touring-plans/${planId}/spots`,
         {
           type: formState.type,
-          name: formState.name !== '' ? formState.name : undefined,
+          name:
+            formState.name.trim() !== '' ? formState.name.trim() : undefined,
           memo: formState.memo !== '' ? formState.memo : undefined,
           latitude: location?.lat,
           longitude: location?.lng,
@@ -112,7 +113,7 @@ export function PlanSpotAddForm({
       )
       trackEvent('touring_plan_spot_create', {
         spot_type: formState.type,
-        has_name: formState.name !== '',
+        has_name: formState.name.trim() !== '',
         has_memo: formState.memo !== '',
         has_location: location != null,
         has_stay_minutes: formState.stayMinutes !== '',

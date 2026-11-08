@@ -1,5 +1,5 @@
 /*
- * ツーリングの台帳（PC）。Issue #575「05 画面案 ─ PC」の記帳と同じ語彙。
+ * ツーリングの台帳（PC）。給油・メンテナンスの台帳と同じ語彙。
  * 枠線ヘッダーのデータテーブルにはせず、行の区切りは下罫線のみ。
  * 行を枠で囲わない。数字（距離）は明朝で組む。
  */
@@ -12,11 +12,20 @@
   display: flex;
   justify-content: flex-end;
   padding-bottom: var(--spacing-2);
-  border-bottom: 1px solid var(--color-ink);
   font-family: var(--font-family-body);
   font-size: var(--font-size-xs);
   letter-spacing: 0.08em;
   color: var(--color-inkLight);
+}
+
+.countRowRuled {
+  border-bottom: 1px solid var(--color-ink);
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
 }
 
 .list {
@@ -26,6 +35,7 @@
 }
 
 .item {
+  position: relative;
   border-bottom: 1px solid var(--color-cloudHover);
 }
 
@@ -33,13 +43,39 @@
   border-bottom: none;
 }
 
+/* 石の列の中心を通る点線の道。グループの先頭と末尾は石の中心で止める */
+.item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: -1px;
+  left: calc(64px + var(--spacing-3) + 42px);
+  width: 4px;
+  background: radial-gradient(
+      circle at 2px 2px,
+      var(--color-cloudActive) 2px,
+      transparent 2.2px
+    )
+    0 0 / 4px 10.5px repeat-y;
+  pointer-events: none;
+}
+
+.item:first-child::before {
+  top: 50%;
+}
+
+.item:last-child::before {
+  bottom: 50%;
+}
+
 .row {
   display: grid;
-  grid-template-columns: 64px 1fr auto;
+  grid-template-columns: 64px 88px minmax(0, 1fr) auto;
   align-items: start;
   gap: var(--spacing-3);
-  width: 100%;
-  padding-block: var(--spacing-3);
+  width: calc(100% + var(--spacing-2) * 2);
+  margin-inline: calc(var(--spacing-2) * -1);
+  padding: var(--spacing-3) var(--spacing-2);
   background: none;
   border: none;
   text-align: left;
@@ -48,8 +84,9 @@
   font: inherit;
 }
 
+/* 石と同じ色にすると形が消えるので、行のホバーは石より薄くする */
 .row:hover {
-  background-color: var(--color-cloud);
+  background-color: color-mix(in srgb, var(--color-cloud) 45%, transparent);
 }
 
 .date {
@@ -71,6 +108,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+.stoneSlot {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .body {
   display: flex;
   flex-direction: column;
@@ -78,32 +122,17 @@
   min-width: 0;
 }
 
-.typeLine {
+.titleLine {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
 }
 
-.tagStarted,
-.tagCompleted {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  font-size: var(--font-size-xs);
-  padding: 0 var(--spacing-2);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-cloudHover);
-  color: var(--color-inkLight);
-  white-space: nowrap;
-}
-
-.tagStarted {
-  border-color: var(--color-success);
-  color: var(--color-success);
-}
-
 .title {
-  font-size: var(--font-size-sm);
+  min-width: 0;
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   color: var(--color-ink);
   overflow-wrap: anywhere;
 }
@@ -137,11 +166,18 @@
 .valueNoteMuted {
   font-size: var(--font-size-xs);
   color: var(--color-inkLight);
-  font-style: italic;
 }
 
-.emptyMessage {
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
   padding: var(--spacing-6) 0;
   text-align: center;
   color: var(--color-inkLight);
+}
+
+.empty p {
+  margin: 0;
 }

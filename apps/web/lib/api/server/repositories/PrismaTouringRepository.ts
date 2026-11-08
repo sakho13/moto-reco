@@ -252,4 +252,24 @@ export class PrismaTouringRepository
 
     return tourings.map(toTouringEntity)
   }
+
+  async countTouringsByPlanIds(
+    planIds: TouringPlanId[]
+  ): Promise<Map<TouringPlanId, number>> {
+    if (planIds.length === 0) return new Map()
+
+    const groups = await this.connection.tUserMyBikeTouring.groupBy({
+      by: ['planId'],
+      where: { planId: { in: planIds } },
+      _count: { _all: true },
+    })
+
+    return new Map(
+      groups.flatMap((group) =>
+        group.planId
+          ? [[createTouringPlanId(group.planId), group._count._all] as const]
+          : []
+      )
+    )
+  }
 }

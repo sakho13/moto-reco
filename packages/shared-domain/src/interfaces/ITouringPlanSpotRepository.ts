@@ -26,6 +26,9 @@ export type SingletonTouringPlanSpotData = {
 export interface ITouringPlanSpotRepository {
   createPlanSpot(spot: TouringPlanSpotEntity): Promise<TouringPlanSpotEntity>
   findPlanSpotsByPlanId(planId: TouringPlanId): Promise<TouringPlanSpotEntity[]>
+  findPlanSpotsByPlanIds(
+    planIds: TouringPlanId[]
+  ): Promise<TouringPlanSpotEntity[]>
   findPlanSpotById(
     spotId: TouringPlanSpotId,
     planId: TouringPlanId
