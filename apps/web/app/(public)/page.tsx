@@ -79,7 +79,7 @@ const features: readonly Feature[] = [
     description:
       '走った場所・距離・思い出をログとして保存。ルート記録で過去のツーリングをいつでも振り返れます。',
     image: '/images/featureGarage.svg',
-    link: '/about#feature-garage',
+    link: '/about#feature-touring',
     color: 'green',
     video: {
       src: '/videos/lp/touring-journey.webm',
