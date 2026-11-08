@@ -6,6 +6,7 @@
 
 ```
 apps/e2e/
+├── demo/              # LP に載せる操作動画の録画（テストではない）
 ├── fixtures/          # カスタムフィクスチャ
 ├── helpers/           # API操作・データ生成などのユーティリティ
 ├── pages/             # Page Object Model (POM)
@@ -198,6 +199,23 @@ pnpm exec playwright test --ui
 # 失敗時にHTMLレポートを確認
 pnpm exec playwright show-report
 ```
+
+## LP の操作動画（demo/）
+
+LP の「主要機能」に載せる操作動画は、`demo/*.demo.ts` で録画する。
+設定は `playwright.demo.config.ts` で、`tests/` とは分けているため通常のテストや CI では動かない。
+
+```bash
+# apps/e2e で実行。dev サーバーが別ポートなら PLAYWRIGHT_BASE_URL を指定する
+pnpm demo:record
+```
+
+- 書き出し先は `apps/web/public/videos/lp/{名前}.webm` と `{名前}.jpg`（再生前の静止画）
+- 画面は 390×844 のモバイル幅で録画する
+- 動画の圧縮には Playwright が入れる ffmpeg（`pnpm exec playwright install ffmpeg`）を使う。別の ffmpeg を使うときは `FFMPEG_PATH` を指定する
+- データは `helpers/` の API で作り、`demo/demoFixtures.ts` の `demoPage`（LP 向けのユーザー名でログイン済み）を使う
+- 場面は `recordScene()` に渡す関数に書く。データの準備や画面の読み込みは録画を始める前に済ませる
+- 画面の文言や構成を変えて動画が古くなったら、録画し直してコミットする
 
 ## 新規テスト追加チェックリスト
 
