@@ -1,15 +1,20 @@
 'use client'
 
-import type { ApiResponseTouringDetail } from '@repo/shared-types'
-import { BaseCard } from '@repo/ui/baseCard'
+import type { ApiResponseTouringListItem } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { TouringListItem } from './TouringListItem'
 import styles from './TouringListSection.module.css'
+import {
+  formatTouringSummary,
+  sumTouringDistance,
+  TouringMonthHeading,
+} from './TouringMonthHeading'
 import { KeywordSearchBar } from '@/components/common/KeywordSearchBar'
+import { groupTouringsByMonth } from '@/lib/utils/touringJourney'
 
 export interface TouringListSectionProps {
-  tourings: ApiResponseTouringDetail[]
-  onDetail?: (touringId: string) => void
+  tourings: ApiResponseTouringListItem[]
+  onDetail: (touringId: string) => void
   onRegister: () => void
   onSearch: (keyword: string) => void
   isSearchActive: boolean
@@ -22,13 +27,29 @@ export const TouringListSection = ({
   onSearch,
   isSearchActive,
 }: TouringListSectionProps) => {
+  const groups = groupTouringsByMonth(tourings)
+
   return (
-    <BaseCard title="ツーリング">
+    <section className={styles.section}>
+      <div className={styles.heading}>
+        <h2 className={styles.title}>ツーリング</h2>
+        {tourings.length > 0 && (
+          <p className={styles.summary}>
+            {formatTouringSummary(
+              tourings.length,
+              '件',
+              sumTouringDistance(tourings)
+            )}
+          </p>
+        )}
+      </div>
+
       <KeywordSearchBar
         placeholder="タイトルで検索"
         onSearch={onSearch}
         testId="touring-search"
       />
+
       {tourings.length === 0 ? (
         <div className={styles.emptyState}>
           {isSearchActive ? (
@@ -43,16 +64,27 @@ export const TouringListSection = ({
           )}
         </div>
       ) : (
-        <div className={styles.listContainer}>
-          {tourings.map((touring) => (
-            <TouringListItem
-              key={touring.touringId}
-              touring={touring}
-              onDetail={onDetail}
-            />
+        <div className={styles.groups}>
+          {groups.map((group) => (
+            <div key={group.key}>
+              <TouringMonthHeading
+                label={group.label}
+                count={group.items.length}
+                totalDistance={group.totalDistance}
+              />
+              <ul className={styles.list}>
+                {group.items.map((touring) => (
+                  <TouringListItem
+                    key={touring.touringId}
+                    touring={touring}
+                    onDetail={onDetail}
+                  />
+                ))}
+              </ul>
+            </div>
           ))}
         </div>
       )}
-    </BaseCard>
+    </section>
   )
 }

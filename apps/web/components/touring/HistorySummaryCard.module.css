@@ -78,14 +78,12 @@
 .statusBadgeCompleted {
   background-color: var(--color-cloud);
   color: var(--color-ink);
-  opacity: 0.7;
 }
 
 /* 行2: 実施日 */
 .periodRow {
   font-size: var(--font-size-sm);
-  color: var(--color-ink);
-  opacity: 0.7;
+  color: var(--color-inkLight);
 }
 
 /* 行3: 走行距離 */
@@ -94,8 +92,7 @@
   align-items: center;
   gap: var(--spacing-2);
   font-size: var(--font-size-xs);
-  color: var(--color-ink);
-  opacity: 0.5;
+  color: var(--color-inkLight);
 }
 
 /* レスポンシブ対応: モバイル */
@@ -115,7 +112,6 @@
   }
 
   .detailsRow {
-    font-size: 0.625rem;
     flex-wrap: wrap;
   }
 }

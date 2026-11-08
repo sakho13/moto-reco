@@ -1,0 +1,17 @@
+.phone {
+  width: 100%;
+  aspect-ratio: 390 / 844;
+  padding: 5px;
+  border-radius: 26px;
+  background: var(--color-ink);
+  box-shadow: var(--shadow-md);
+}
+
+.video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 21px;
+  object-fit: cover;
+  background: var(--color-background);
+}

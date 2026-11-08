@@ -1,0 +1,50 @@
+.pebbles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.125rem var(--spacing-2);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}
+
+.stones {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+.pebble {
+  display: inline-block;
+  box-sizing: border-box;
+  flex: none;
+}
+
+.spot {
+  width: 10px;
+  height: 9px;
+  background-color: var(--color-inkLight);
+}
+
+.rest {
+  width: 7px;
+  height: 6px;
+  background-color: var(--color-inkLight);
+}
+
+.skip {
+  width: 9px;
+  height: 8px;
+  border: 1.5px dashed var(--color-inkLight);
+}
+
+.pending {
+  width: 10px;
+  height: 9px;
+  border: 1px solid var(--color-inkLight);
+}
+
+.more {
+  margin-left: 2px;
+  font-size: 0.6875rem;
+}

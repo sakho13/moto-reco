@@ -1,0 +1,114 @@
+.stone {
+  /* 実際の幅は TouringStone がインラインで上書きする */
+  --stone-width: 68px;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--stone-width);
+  height: calc(var(--stone-width) * 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.15;
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-bold);
+}
+
+.mark {
+  font-size: calc(var(--stone-width) * 0.32);
+}
+
+.caption {
+  font-family: var(--font-family-body);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.stay {
+  background-color: var(--color-cloud);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-md);
+}
+
+.flag {
+  background-color: var(--color-product);
+  color: var(--color-productInk);
+  box-shadow: var(--shadow-md);
+}
+
+.pending,
+.skip {
+  background-color: var(--color-background);
+  color: var(--color-inkLight);
+  border: 1.5px dashed var(--color-cloudActive);
+}
+
+.skip .mark {
+  font-size: var(--font-size-sm);
+}
+
+.photoStone {
+  /* 実際の幅は TouringPhotoStone がインラインで上書きする */
+  --stone-width: 72px;
+  position: relative;
+  flex: none;
+  width: var(--stone-width);
+  height: calc(var(--stone-width) * 0.95);
+}
+
+.photoButton {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  border-radius: inherit;
+  overflow: hidden;
+  background-color: var(--color-cloud);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* スキップした地点の破線の縁 */
+.photoStoneSkip::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 1.5px dashed var(--color-cloudActive);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.pin {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  box-sizing: border-box;
+  min-width: 26px;
+  height: 26px;
+  padding-inline: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 52% 48% 46% 54% / 50% 54% 46% 50%;
+  background-color: var(--color-background);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-family-display);
+  font-size: 0.8125rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.photoStoneSkip .pin {
+  color: var(--color-inkLight);
+  font-size: 0.6875rem;
+}

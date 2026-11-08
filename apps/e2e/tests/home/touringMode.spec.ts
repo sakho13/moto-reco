@@ -1,6 +1,11 @@
 import { expect, test } from '../../fixtures/authenticatedPage'
 import { registerTestBike } from '../../helpers/bikeHelper'
 import { endTestTouring, startTestTouring } from '../../helpers/touringHelper'
+import {
+  addTouringPlanSpot,
+  registerTestTouringPlan,
+  startTouringFromPlan,
+} from '../../helpers/touringPlanHelper'
 
 test.describe('ツーリング中TOPページ（全画面モード）', () => {
   test('ツーリング開始後、ホームページが全画面ツーリングモードに切り替わる', async ({
@@ -100,5 +105,54 @@ test.describe('ツーリング中TOPページ（全画面モード）', () => {
 
     // 通常のホームページに戻る（home-actions が表示される）
     await expect(page.locator('[data-testid="home-actions"]')).toBeVisible()
+  })
+
+  test('スポットをスキップすると次のスポットへ進み、すべてスキップすると到達の案内を出さない', async ({
+    authenticatedPage: page,
+    authToken,
+  }) => {
+    const myUserBikeId = await registerTestBike(authToken, {
+      nickname: 'スキップ進行テストバイク',
+    })
+    const touringPlanId = await registerTestTouringPlan(
+      authToken,
+      myUserBikeId,
+      'スキップ進行テストプラン'
+    )
+    for (const [index, name] of ['1つ目の寄り道', '2つ目の寄り道'].entries()) {
+      await addTouringPlanSpot(authToken, myUserBikeId, touringPlanId, {
+        type: 'SPOT',
+        name,
+        latitude: 35.5 - index * 0.1,
+        longitude: 138.5,
+      })
+    }
+    await startTouringFromPlan(authToken, myUserBikeId, touringPlanId)
+
+    await page.goto('/app/home')
+
+    const touringMode = page.getByTestId('touring-mode-view')
+    const skipButton = touringMode.getByRole('button', {
+      name: 'スキップ',
+      exact: true,
+    })
+    await expect(touringMode.getByText('1つ目の寄り道')).toBeVisible({
+      timeout: 15_000,
+    })
+
+    await skipButton.click()
+    await expect(touringMode.getByText('2つ目の寄り道')).toBeVisible({
+      timeout: 10_000,
+    })
+    await expect(touringMode.getByText('1つ目の寄り道')).toHaveCount(0)
+
+    await skipButton.click()
+    await expect(touringMode.getByText('2つ目の寄り道')).toHaveCount(0, {
+      timeout: 10_000,
+    })
+    await expect(skipButton).toHaveCount(0)
+    await expect(touringMode.getByText('全スポットに到達しました')).toHaveCount(
+      0
+    )
   })
 })

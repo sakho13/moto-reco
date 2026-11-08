@@ -84,7 +84,7 @@
 
 .featureDetailGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
 
@@ -112,6 +112,37 @@
   color: var(--color-inkLight);
   line-height: 1.7;
   font-size: 15px;
+}
+
+/* 操作動画のある機能。説明と動画を横に並べ、機能ごとに左右を入れ替える */
+.showcaseList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.showcase {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 40px 56px;
+}
+
+.showcaseReverse {
+  flex-direction: row-reverse;
+}
+
+.showcaseText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.showcasePhone {
+  flex: 0 0 240px;
 }
 
 /* CTA */
@@ -177,6 +208,12 @@
   }
 }
 
+@media (max-width: 1100px) {
+  .featureDetailGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .page {
     padding: 64px 24px 48px;
@@ -185,6 +222,20 @@
 
   .featureDetailGrid {
     grid-template-columns: 1fr;
+  }
+
+  .showcase,
+  .showcaseReverse {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+    padding: 32px 24px;
+  }
+
+  .showcasePhone {
+    flex: none;
+    align-self: center;
+    width: 220px;
   }
 
   .ctaSection {

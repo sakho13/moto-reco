@@ -326,6 +326,11 @@ export type ApiResponsePhotoDetail = {
 
 export type ApiResponseTouringPhotoList = ApiResponsePhotoDetail[]
 export type ApiResponseSpotPhotoList = ApiResponsePhotoDetail[]
+/** ツーリング内の写真のあるスポットごとの写真。写真のないスポットは含まない */
+export type ApiResponseTouringSpotPhotoList = {
+  spotId: string
+  photos: ApiResponsePhotoDetail[]
+}[]
 export type ApiResponseBikePhotoList = ApiResponsePhotoDetail[]
 
 export type ApiResponsePhotoUploadUrl = {
@@ -383,7 +388,20 @@ export type ApiResponseTouringDetail = {
   fuelLogIds: string[]
 }
 
-export type ApiResponseTouringList = ApiResponseTouringDetail[]
+/** ツーリング一覧の各行に道のりを描くための、地点ごとの要約（走行順） */
+export type ApiResponseTouringStop = {
+  type: 'SPOT' | 'BREAK'
+  isSkipped: boolean
+  hasArrived: boolean
+  latitude: number | null
+  longitude: number | null
+}
+
+export type ApiResponseTouringListItem = ApiResponseTouringDetail & {
+  stops: ApiResponseTouringStop[]
+}
+
+export type ApiResponseTouringList = ApiResponseTouringListItem[]
 
 export type ApiResponsePublicTouringList = {
   tourings: {
@@ -475,16 +493,31 @@ export type ApiResponseTouringPlanDetail = {
   touringIds: string[]
 }
 
+export type ApiResponseTouringPlanEndpoint = {
+  latitude: number | null
+  longitude: number | null
+  name: string | null
+}
+
+export type ApiResponseTouringPlanStop = {
+  type: 'SPOT' | 'BREAK'
+  latitude: number | null
+  longitude: number | null
+}
+
 export type ApiResponseTouringPlanListItem = {
   touringPlanId: string
   title: string
   createdAt: string
   updatedAt: string
-  destination: {
-    latitude: number | null
-    longitude: number | null
-    name: string | null
-  } | null
+  start: ApiResponseTouringPlanEndpoint | null
+  destination: ApiResponseTouringPlanEndpoint | null
+  // 経由地と休憩を順番に並べたもの
+  stops: ApiResponseTouringPlanStop[]
+  // 出発から目的地（未設定なら最後の地点の出発）までの予定分数。移動時間が未入力の区間があるとnull
+  plannedMinutes: number | null
+  // このプランから開始されたツーリングの件数
+  touringCount: number
 }
 
 export type ApiResponseTouringPlanList = ApiResponseTouringPlanListItem[]

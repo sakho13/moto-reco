@@ -12,6 +12,7 @@ import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { Select } from '@repo/ui/select'
 import { toast } from '@repo/ui/sonner'
+import { Textarea } from '@repo/ui/textarea'
 import styles from './PlanLocationEditModal.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
@@ -26,6 +27,11 @@ const ROUTE_TYPE_OPTIONS = [
   { value: 'HIGHWAY', label: '高速' },
   { value: 'MIXED', label: '混在' },
 ]
+
+const MAX_TRAVEL_MINUTES = 1440
+
+const isValidTravelMinutes = (minutes: number): boolean =>
+  Number.isInteger(minutes) && minutes >= 0 && minutes <= MAX_TRAVEL_MINUTES
 
 interface PlanLocationEditModalProps {
   bikeId: string
@@ -60,6 +66,8 @@ export function PlanLocationEditModal({
       ? { lat: initialLocation.latitude, lng: initialLocation.longitude }
       : null
   )
+  const [name, setName] = useState(initialLocation?.name ?? '')
+  const [memo, setMemo] = useState(initialLocation?.memo ?? '')
   const [travelMinutesFromPrev, setTravelMinutesFromPrev] = useState(
     initialLocation?.travelMinutesFromPrev != null
       ? String(initialLocation.travelMinutesFromPrev)
@@ -97,12 +105,23 @@ export function PlanLocationEditModal({
       return
     }
 
+    if (
+      !isStart &&
+      travelMinutesFromPrev !== '' &&
+      !isValidTravelMinutes(Number(travelMinutesFromPrev))
+    ) {
+      setError(`移動時間は0〜${MAX_TRAVEL_MINUTES}分の整数で入力してください`)
+      return
+    }
+
     setError('')
     setIsSaving(true)
     try {
       await apiPatch(endpoint, {
         latitude: location.lat,
         longitude: location.lng,
+        name: name.trim() !== '' ? name.trim() : undefined,
+        memo: memo.trim() !== '' ? memo.trim() : undefined,
         ...(isStart
           ? {}
           : {
@@ -182,6 +201,29 @@ export function PlanLocationEditModal({
             </div>
           </FormField>
 
+          <FormField label="名前（任意）" htmlFor="planLocationName">
+            <Input
+              id="planLocationName"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={100}
+              placeholder={isStart ? '例: 自宅' : '例: 沼津港'}
+              disabled={isSaving}
+            />
+          </FormField>
+
+          <FormField label="メモ（任意）" htmlFor="planLocationMemo">
+            <Textarea
+              id="planLocationMemo"
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              rows={2}
+              maxLength={500}
+              disabled={isSaving}
+            />
+          </FormField>
+
           {!isStart && (
             <>
               {routeLink && (
@@ -204,7 +246,7 @@ export function PlanLocationEditModal({
                     id="planLocationTravelMinutesFromPrev"
                     type="number"
                     min="0"
-                    max="1440"
+                    max={MAX_TRAVEL_MINUTES}
                     value={travelMinutesFromPrev}
                     onChange={(e) => setTravelMinutesFromPrev(e.target.value)}
                     placeholder="例: 30"

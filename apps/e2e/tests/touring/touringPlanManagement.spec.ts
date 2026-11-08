@@ -1,6 +1,12 @@
 import { expect, test } from '../../fixtures/authenticatedPage'
 import { registerTestBike } from '../../helpers/bikeHelper'
-import { registerTestTouringPlan } from '../../helpers/touringPlanHelper'
+import {
+  addTouringPlanSpot,
+  registerTestTouringPlan,
+  setTouringPlanDestinationLocation,
+  setTouringPlanStartLocation,
+  startTouringFromPlan,
+} from '../../helpers/touringPlanHelper'
 import { TouringPlanListPage } from '../../pages/touringPlanListPage'
 
 test.describe('ツーリングプラン管理', () => {
@@ -53,6 +59,55 @@ test.describe('ツーリングプラン管理', () => {
     )
   })
 
+  test('一覧の行に所要時間・経路・地点の数・走行回数が表示される', async ({
+    authenticatedPage: page,
+    authToken,
+  }) => {
+    const myUserBikeId = await registerTestBike(authToken, {
+      nickname: '一覧要約テストバイク',
+    })
+    const touringPlanId = await registerTestTouringPlan(
+      authToken,
+      myUserBikeId,
+      '要約確認プラン'
+    )
+    await setTouringPlanStartLocation(authToken, myUserBikeId, touringPlanId, {
+      latitude: 35.681236,
+      longitude: 139.767125,
+      name: '出発地点',
+    })
+    await addTouringPlanSpot(authToken, myUserBikeId, touringPlanId, {
+      type: 'SPOT',
+      name: '経由スポット',
+      latitude: 35.5,
+      longitude: 138.5,
+      travelMinutesFromPrev: 60,
+      stayMinutes: 30,
+    })
+    await setTouringPlanDestinationLocation(
+      authToken,
+      myUserBikeId,
+      touringPlanId,
+      {
+        latitude: 35.170915,
+        longitude: 136.881537,
+        name: '目的地点',
+        travelMinutesFromPrev: 60,
+      }
+    )
+    await startTouringFromPlan(authToken, myUserBikeId, touringPlanId)
+
+    const touringPlanListPage = new TouringPlanListPage(page)
+    await touringPlanListPage.goto(myUserBikeId)
+
+    const row = touringPlanListPage.planRow('要約確認プラン')
+    await expect(row).toBeVisible({ timeout: 10_000 })
+    await expect(row.getByText('出発地点 → 目的地点')).toBeVisible()
+    await expect(row.getByRole('img', { name: '寄り道1か所' })).toBeVisible()
+    await expect(row.getByText('走行記録 1件')).toBeVisible()
+    await expect(row).toContainText('2時間30分')
+  })
+
   test('プラン詳細ページでタイトルを編集できる', async ({
     authenticatedPage: page,
     authToken,
@@ -70,14 +125,7 @@ test.describe('ツーリングプラン管理', () => {
       `/app/my-bike/${myUserBikeId}/touring-plans/${touringPlanId}`
     )
 
-    // 編集ボタン（最初のものがプラン情報の編集）をクリックして編集モーダルを開く
-    // exact指定必須: このテストのバイクニックネーム「編集テストバイク」自体が
-    // 「編集」を含むため、部分一致だとヘッダーの車両セレクタ（aria-label
-    // 「アクティブ車両: 編集テストバイク。...」）を誤って拾ってしまう
-    await page
-      .getByRole('button', { name: '編集', exact: true })
-      .first()
-      .click()
+    await page.getByRole('button', { name: 'プランを編集' }).click()
     await expect(
       page.getByRole('heading', { name: 'プランを編集' })
     ).toBeVisible({ timeout: 5_000 })
@@ -107,7 +155,7 @@ test.describe('ツーリングプラン管理', () => {
       `/app/my-bike/${myUserBikeId}/touring-plans/${touringPlanId}`
     )
 
-    await page.getByRole('button', { name: '編集' }).first().click()
+    await page.getByRole('button', { name: 'プランを編集' }).click()
     await expect(
       page.getByRole('button', { name: '削除', exact: true })
     ).toBeVisible({ timeout: 5_000 })

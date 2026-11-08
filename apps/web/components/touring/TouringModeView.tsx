@@ -84,16 +84,16 @@ export const TouringModeView = ({
       (s) => s.type === 'BREAK' && s.arrivedAt !== null && s.departedAt === null
     ) ?? null
 
-  // SPOT タイプのスポットを sortOrder 順に並べ、最初の未到着（arrivedAt === null）を次の目的地とする
+  // SPOT タイプのスポットを sortOrder 順に並べ、スキップしていない最初の未到着を次の目的地とする
   const nextDestinationSpot =
     spots
       ?.filter((s) => s.type === 'SPOT')
       .sort((a, b) => a.sortOrder - b.sortOrder)
-      .find((s) => s.arrivedAt === null) ?? null
+      .find((s) => s.arrivedAt === null && !s.isSkipped) ?? null
 
   const hasReachedNextDestination =
     nextDestinationSpot === null &&
-    (spots?.filter((s) => s.type === 'SPOT').length ?? 0) > 0
+    (spots?.some((s) => s.type === 'SPOT' && !s.isSkipped) ?? false)
 
   useEffect(() => {
     const updateElapsedTime = () => {

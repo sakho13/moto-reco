@@ -4,6 +4,7 @@ import {
   IMyUserBikeRepository,
   ISpotRepository,
   ITouringRepository,
+  TouringEntity,
 } from '@repo/shared-domain'
 import type { SpotReorderRequest } from '@repo/shared-types'
 import {
@@ -148,6 +149,32 @@ export class SpotService {
     }
 
     return await this.spotRepository.findSpotsByTouringId(touringId)
+  }
+
+  /**
+   * 複数ツーリングのスポットをツーリングごとにまとめて取得する
+   *
+   * @remarks
+   * 所有者の確認は行わない。`TouringService.getTourings` などで所有者を確認して
+   * 取得したツーリングだけを渡すこと。
+   */
+  public async getSpotsGroupedByTouring(
+    tourings: TouringEntity[]
+  ): Promise<Map<TouringId, SpotEntity[]>> {
+    const spots = await this.spotRepository.findSpotsByTouringIds(
+      tourings.map((touring) => touring.id)
+    )
+
+    const grouped = new Map<TouringId, SpotEntity[]>()
+    for (const spot of spots) {
+      const group = grouped.get(spot.touringId)
+      if (group) {
+        group.push(spot)
+      } else {
+        grouped.set(spot.touringId, [spot])
+      }
+    }
+    return grouped
   }
 
   public async updateSpot(params: UpdateSpotParams): Promise<SpotEntity> {

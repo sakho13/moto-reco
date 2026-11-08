@@ -14,6 +14,7 @@ import { Textarea } from '@repo/ui/textarea'
 import styles from './SpotEditForm.module.css'
 import { LocationPickerModal } from '@/components/map/LocationPickerModal'
 import { SpotDeleteConfirmModal } from '@/components/spot/SpotDeleteConfirmModal'
+import { SpotPhotosField } from '@/components/spot/SpotPhotosField'
 import { trackEvent } from '@/lib/analytics'
 import { apiDelete, apiPatch } from '@/lib/api/client'
 
@@ -21,6 +22,8 @@ interface SpotEditFormProps {
   bikeId: string
   touringId: string
   spot: ApiResponseSpotDetail
+  /** 写真欄を出すか */
+  showsPhotos?: boolean
   onSuccess: () => void
   onDelete?: () => void
 }
@@ -42,6 +45,7 @@ export function SpotEditForm({
   bikeId,
   touringId,
   spot,
+  showsPhotos = false,
   onSuccess,
   onDelete,
 }: SpotEditFormProps) {
@@ -276,6 +280,10 @@ export function SpotEditForm({
             </Button>
           </div>
         </FormField>
+
+        {showsPhotos && (
+          <SpotPhotosField touringId={touringId} spotId={spot.spotId} />
+        )}
 
         {error && <p className={`text-sm ${styles.errorText}`}>{error}</p>}
 

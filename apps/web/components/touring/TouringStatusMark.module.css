@@ -1,0 +1,38 @@
+.started,
+.stamp {
+  display: inline-block;
+  flex: none;
+  white-space: nowrap;
+  font-weight: var(--font-weight-bold);
+}
+
+.started {
+  padding: 0.0625rem 0.625rem;
+  background-color: var(--color-background);
+  border: 1.5px solid var(--color-success);
+  border-radius: var(--radius-full);
+  color: var(--color-success);
+  font-size: var(--font-size-xs);
+}
+
+.stamp {
+  padding: 0.125rem 0.625rem;
+  transform: rotate(-7deg);
+  border: 2px solid var(--color-product);
+  border-radius: var(--radius-sm);
+  color: var(--color-product);
+  box-shadow: 2px 2px 0 var(--color-cloud);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-sm);
+}
+
+.small.started,
+.small.stamp {
+  padding: 0 0.375rem;
+  font-size: 0.6875rem;
+  box-shadow: none;
+}
+
+.small.stamp {
+  border-width: 1.5px;
+}

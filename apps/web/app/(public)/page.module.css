@@ -323,6 +323,68 @@
   color: var(--color-warning);
 }
 
+/* 操作動画を並べるカード。カードの幅で、動画と説明を縦に積むか横に並べるかを切り替える */
+.featureCardShowcase {
+  container-type: inline-size;
+}
+
+.showcase {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100%;
+}
+
+.showcaseMedia {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  border-radius: var(--radius-md);
+}
+
+.showcaseMediaOrange {
+  background: color-mix(in srgb, var(--color-product) 10%, transparent);
+}
+
+.showcaseMediaBlue {
+  background: color-mix(in srgb, var(--color-social) 10%, transparent);
+}
+
+.showcaseMediaGreen {
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
+}
+
+.showcaseMediaPurple {
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+}
+
+.showcasePhone {
+  width: 200px;
+}
+
+.showcaseText {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+@container (min-width: 420px) {
+  .showcase {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .showcaseMedia {
+    flex: 0 0 196px;
+    padding: 20px;
+  }
+
+  .showcasePhone {
+    width: 100%;
+  }
+}
+
 .featureTitle {
   font-size: 19px;
   font-weight: 700;

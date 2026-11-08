@@ -20,6 +20,8 @@ import {
 } from '@repo/shared-types'
 import {
   computeTouringPlanSpotTimes,
+  getPlannedTotalMinutes,
+  withTouringPlanSpotTimes,
   TouringPlanSpotWithTimes,
 } from './computeTouringPlanSpotTimes'
 
@@ -178,6 +180,9 @@ export class TouringPlanService {
 
   /**
    * プラン一覧を取得する
+   *
+   * @remarks
+   * 一覧の行に必要な地点の要約、予定の長さ、開始されたツーリングの件数も合わせて返す。
    */
   public async getPlans(
     myUserBikeId: MyUserBikeId,
@@ -185,7 +190,11 @@ export class TouringPlanService {
   ): Promise<
     {
       plan: TouringPlanEntity
+      startSpot: TouringPlanSpotEntity | null
       destinationSpot: TouringPlanSpotEntity | null
+      stops: TouringPlanSpotEntity[]
+      plannedMinutes: number | null
+      touringCount: number
     }[]
   > {
     const myUserBike = await this.myUserBikeRepository.findMyUserBikeById(
@@ -198,17 +207,30 @@ export class TouringPlanService {
     }
 
     const plans = await this.touringPlanRepository.findPlans(myUserBikeId)
+    const planIds = plans.map((plan) => plan.id)
+    const [spots, touringCounts] = await Promise.all([
+      this.touringPlanSpotRepository.findPlanSpotsByPlanIds(planIds),
+      this.touringRepository.countTouringsByPlanIds(planIds),
+    ])
 
-    return await Promise.all(
-      plans.map(async (plan) => {
-        const destinationSpot =
-          await this.touringPlanSpotRepository.findPlanSpotByType(
-            plan.id,
-            'DESTINATION'
-          )
-        return { plan, destinationSpot }
-      })
-    )
+    return plans.map((plan) => {
+      const spotsWithTimes = withTouringPlanSpotTimes(
+        spots.filter((spot) => spot.touringPlanId === plan.id)
+      )
+      const ordered = spotsWithTimes.map(({ spot }) => spot)
+
+      return {
+        plan,
+        startSpot: ordered.find((spot) => spot.type === 'START') ?? null,
+        destinationSpot:
+          ordered.find((spot) => spot.type === 'DESTINATION') ?? null,
+        stops: ordered.filter(
+          (spot) => spot.type === 'SPOT' || spot.type === 'BREAK'
+        ),
+        plannedMinutes: getPlannedTotalMinutes(spotsWithTimes),
+        touringCount: touringCounts.get(plan.id) ?? 0,
+      }
+    })
   }
 
   /**

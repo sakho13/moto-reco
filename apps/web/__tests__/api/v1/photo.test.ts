@@ -1000,6 +1000,172 @@ describe('Photo API Endpoints', () => {
   })
 
   // -----------------------------------------------------------------------
+  // GET /api/v1/photo/touring/:touringId/spots
+  // -----------------------------------------------------------------------
+  describe('GET /api/v1/photo/touring/:touringId/spots', () => {
+    let token: string
+    let userId: string
+    let myUserBikeId: string
+    let touringId: string
+    let firstSpotId: string
+    let secondSpotId: string
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      await createAdminUser(user.token, user.userId)
+      token = user.token
+      userId = user.userId
+      const bikeId = await getTestBikeId()
+      const bike = await createTestUserBike(token, { bikeId })
+      myUserBikeId = bike.myUserBikeId
+      touringId = await createTestTouring(token, myUserBikeId, {
+        title: 'テストツーリング',
+        startDate: '2024-06-01T09:00:00.000Z',
+        endDate: '2024-06-01T18:00:00.000Z',
+      })
+      firstSpotId = await createTestSpot(token, myUserBikeId, touringId, {
+        arrivedAt: '2024-06-01T11:00:00.000Z',
+        type: 'SPOT',
+        name: '1件目のスポット',
+      })
+      secondSpotId = await createTestSpot(token, myUserBikeId, touringId, {
+        arrivedAt: '2024-06-01T13:00:00.000Z',
+        type: 'BREAK',
+        name: '2件目の休憩',
+      })
+    })
+
+    const requestSpotPhotos = (id: string, authToken: string) =>
+      app.request(`/api/v1/photo/touring/${id}/spots`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${authToken}` },
+      })
+
+    test('Authorizationヘッダーが未指定の場合にエラーとなる', async () => {
+      await testAuthRequired(`/api/v1/photo/touring/${touringId}/spots`, 'GET')
+    })
+
+    test('ADMIN以外のユーザーは403になる', async () => {
+      const generalUser = await createTestUser()
+
+      const res = await requestSpotPhotos(touringId, generalUser.token)
+
+      expect(res.status).toBe(403)
+    })
+
+    test('スポット写真がない場合は空配列を返す', async () => {
+      await createTestTouringPhoto({ userId, touringId })
+
+      const res = await requestSpotPhotos(touringId, token)
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.status).toBe('success')
+      expect(json.data).toEqual([])
+    })
+
+    test('写真のあるスポットだけを、スポットの順・撮影日時の昇順でまとめて返す', async () => {
+      const secondSpotPhotoId = await createTestSpotPhoto({
+        userId,
+        spotId: secondSpotId,
+        takenAt: new Date('2024-06-01T10:00:00.000Z'),
+      })
+      const firstSpotLaterPhotoId = await createTestSpotPhoto({
+        userId,
+        spotId: firstSpotId,
+        takenAt: new Date('2024-06-01T12:00:00.000Z'),
+      })
+      const firstSpotEarlierPhotoId = await createTestSpotPhoto({
+        userId,
+        spotId: firstSpotId,
+        takenAt: new Date('2024-06-01T11:30:00.000Z'),
+      })
+      await createTestSpot(token, myUserBikeId, touringId, {
+        arrivedAt: '2024-06-01T15:00:00.000Z',
+        type: 'SPOT',
+        name: '写真のないスポット',
+      })
+
+      const res = await requestSpotPhotos(touringId, token)
+
+      const json = (await res.json()) as {
+        data: { spotId: string; photos: { photoId: string }[] }[]
+      }
+      expect(res.status).toBe(200)
+      expect(
+        json.data.map((item) => ({
+          spotId: item.spotId,
+          photoIds: item.photos.map((p) => p.photoId),
+        }))
+      ).toEqual([
+        {
+          spotId: firstSpotId,
+          photoIds: [firstSpotEarlierPhotoId, firstSpotLaterPhotoId],
+        },
+        { spotId: secondSpotId, photoIds: [secondSpotPhotoId] },
+      ])
+    })
+
+    test('都度発行した署名付きURLを返す', async () => {
+      await createTestSpotPhoto({ userId, spotId: firstSpotId })
+
+      const res = await requestSpotPhotos(touringId, token)
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data[0].photos[0].photoUrl).toBe(
+        'https://storage.example.com/signed-test.jpg'
+      )
+    })
+
+    test('別のツーリングのスポット写真は含まない', async () => {
+      const otherTouringId = await createTestTouring(token, myUserBikeId, {
+        title: '別のテストツーリング',
+        startDate: '2024-06-02T09:00:00.000Z',
+        endDate: '2024-06-02T18:00:00.000Z',
+      })
+      const otherSpotId = await createTestSpot(
+        token,
+        myUserBikeId,
+        otherTouringId,
+        {
+          arrivedAt: '2024-06-02T11:00:00.000Z',
+          type: 'SPOT',
+          name: '別のツーリングのスポット',
+        }
+      )
+      await createTestSpotPhoto({ userId, spotId: otherSpotId })
+
+      const res = await requestSpotPhotos(touringId, token)
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data).toEqual([])
+    })
+
+    test('他ユーザーのツーリングは404になる', async () => {
+      const otherUser = await createTestUser()
+      const otherBikeId = await getTestBikeId()
+      const otherBike = await createTestUserBike(otherUser.token, {
+        bikeId: otherBikeId,
+      })
+      const otherTouringId = await createTestTouring(
+        otherUser.token,
+        otherBike.myUserBikeId,
+        {
+          title: '他ユーザーのツーリング',
+          startDate: '2024-06-01T09:00:00.000Z',
+          endDate: '2024-06-01T18:00:00.000Z',
+        }
+      )
+
+      const res = await requestSpotPhotos(otherTouringId, token)
+
+      expect(res.status).toBe(404)
+    })
+  })
+
+  // -----------------------------------------------------------------------
   // POST /api/v1/photo/bike/:myUserBikeId
   // -----------------------------------------------------------------------
   describe('POST /api/v1/photo/bike/:myUserBikeId', () => {
