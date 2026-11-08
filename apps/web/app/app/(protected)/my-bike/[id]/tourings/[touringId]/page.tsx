@@ -28,6 +28,7 @@ import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useMapPanel } from '@/lib/hooks/useMapPanel'
 import { useMediaQuery } from '@/lib/hooks/useMediaQuery'
+import { canUsePhotos } from '@/lib/utils/photoAccess'
 import {
   buildJourney,
   formatClock,
@@ -64,7 +65,7 @@ function TouringDetailPage() {
     const response = await apiGet(url)
     return response.data
   })
-  const isAdmin = profile?.role === 'ADMIN'
+  const showsPhotos = canUsePhotos(profile?.role)
 
   const {
     data: touring,
@@ -434,7 +435,7 @@ function TouringDetailPage() {
                 )}
               </section>
 
-              {isAdmin && (
+              {showsPhotos && (
                 <TouringPhotosCard
                   touringId={touringId}
                   cardClassName={styles.photos}
