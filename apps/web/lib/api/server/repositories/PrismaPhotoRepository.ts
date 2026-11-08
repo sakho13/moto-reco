@@ -1,4 +1,4 @@
-import { PhotoEntity, IPhotoRepository } from '@repo/shared-domain'
+import { PhotoEntity, IPhotoRepository, SpotPhotos } from '@repo/shared-domain'
 import {
   createMyUserBikeId,
   createPhotoId,
@@ -149,6 +149,34 @@ export class PrismaPhotoRepository
     })
 
     return links.map((l) => this.toEntity(l.photo))
+  }
+
+  public async findSpotPhotosByTouringId(
+    touringId: TouringId
+  ): Promise<SpotPhotos[]> {
+    const links = await this.connection.tUserMyBikeTouringSpotPhoto.findMany({
+      where: { spot: { touringId } },
+      include: { photo: { include: PHOTO_ATTACHMENTS_INCLUDE } },
+      orderBy: [
+        { spot: { sortOrder: 'asc' } },
+        { spot: { createdAt: 'asc' } },
+        { spotId: 'asc' },
+        { photo: { takenAt: 'asc' } },
+        { photo: { createdAt: 'asc' } },
+      ],
+    })
+
+    const grouped: SpotPhotos[] = []
+    for (const link of links) {
+      const last = grouped.at(-1)
+      const photo = this.toEntity(link.photo)
+      if (last && last.spotId === link.spotId) {
+        last.photos.push(photo)
+      } else {
+        grouped.push({ spotId: createSpotId(link.spotId), photos: [photo] })
+      }
+    }
+    return grouped
   }
 
   public async findPhotosByMyBikeId(
