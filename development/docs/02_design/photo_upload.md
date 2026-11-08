@@ -96,8 +96,8 @@ sequenceDiagram
 すべて `honoAuthMiddleware` + `honoAdminMiddleware` による認証必須・**ADMINロール限定**。
 
 > Storage設定を含め新規追加の機能のため、現時点では一般ユーザーには公開しない。
-> クライアント側もプロフィール画面の「マイフォト」リンク・バイク詳細/ツーリング詳細の写真カードを
-> `role === 'ADMIN'` の場合のみ表示する。
+> クライアント側もプロフィール画面の「マイフォト」リンク・バイク詳細/ツーリング詳細の写真カード・
+> ツーリング詳細のスポット写真（道のりの石・スポット編集の写真欄）を `role === 'ADMIN'` の場合のみ表示する。
 > 判定は `apps/web/lib/utils/photoAccess.ts` の `canUsePhotos` に集約している。
 
 | メソッド | パス                                            | 説明                                                                                    |

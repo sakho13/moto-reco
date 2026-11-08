@@ -559,6 +559,7 @@ function TouringDetailPage() {
           bikeId={bikeId}
           touringId={touringId}
           spot={editingSpot}
+          showsPhotos={showsPhotos}
           onClose={() => setEditingSpot(null)}
           onSuccess={handleSpotEditSuccess}
           onDelete={handleSpotDeleteSuccess}
