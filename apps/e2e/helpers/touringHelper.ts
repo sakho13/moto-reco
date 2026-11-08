@@ -75,6 +75,10 @@ export async function registerTestTouring(
     endDate: string
     startMileage?: number
     endMileage?: number
+    /** 出発地の座標 */
+    start?: { latitude: number; longitude: number }
+    /** 終着地の座標 */
+    end?: { latitude: number; longitude: number }
   }
 ): Promise<string> {
   const res = await fetch(
@@ -91,6 +95,10 @@ export async function registerTestTouring(
         endDate: params.endDate,
         startMileage: params.startMileage,
         endMileage: params.endMileage,
+        startLatitude: params.start?.latitude,
+        startLongitude: params.start?.longitude,
+        endLatitude: params.end?.latitude,
+        endLongitude: params.end?.longitude,
         status: 'COMPLETED',
       }),
       signal: AbortSignal.timeout(30_000),
