@@ -2,10 +2,12 @@
 
 import { Bike, ExternalLink, MapPin } from 'lucide-react'
 import { useEffect } from 'react'
+import type { ApiResponsePhotoDetail } from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import styles from './TouringJourney.module.css'
-import { TouringStone } from './TouringStone'
+import { TouringPhotoStone, TouringStone } from './TouringStone'
 import { useElementWidth } from '@/lib/hooks/useElementWidth'
+import type { SpotPhotoMap } from '@/lib/hooks/useTouringSpotPhotos'
 import { calcTravelMinutes } from '@/lib/utils/googleMaps'
 import type {
   Journey,
@@ -31,6 +33,15 @@ type Props = {
   onShowOnMap: (nodeId: string) => void
   /** スポットが1件もないときの追加ボタン。未指定なら出さない */
   onAddSpot?: () => void
+  /** 地点IDごとの写真。未指定なら写真を出さない */
+  photosBySpotId?: SpotPhotoMap
+  /** 写真を押したとき。`index` はその地点の写真の何枚目か（0始まり） */
+  onOpenPhoto?: (nodeId: string, index: number) => void
+}
+
+type PhotoProps = {
+  photos: ApiResponsePhotoDetail[]
+  onOpenPhoto: (nodeId: string, index: number) => void
 }
 
 /** 石を置く列の幅の半分。道はこの位置を通る */
@@ -64,11 +75,65 @@ function MapLinkButton({
   )
 }
 
+function NodeStone({
+  node,
+  photo,
+}: {
+  node: JourneyNode
+  photo: PhotoProps | null
+}) {
+  const first = photo?.photos[0]
+  if (!photo || !first) return <TouringStone node={node} />
+  return (
+    <TouringPhotoStone
+      node={node}
+      photo={first}
+      onOpen={() => photo.onOpenPhoto(node.id, 0)}
+    />
+  )
+}
+
+/** 2枚目以降の写真 */
+function PhotoThumbnails({
+  node,
+  photo,
+}: {
+  node: JourneyNode
+  photo: PhotoProps | null
+}) {
+  const rest = photo?.photos.slice(1) ?? []
+  if (!photo || rest.length === 0) return null
+  return (
+    <div className={styles.thumbnails}>
+      {rest.map((item, i) => (
+        <button
+          key={item.photoId}
+          type="button"
+          className={styles.thumbnail}
+          aria-label={`${node.name}の写真 ${i + 2}枚目を開く`}
+          onClick={() => photo.onOpenPhoto(node.id, i + 1)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={item.photoUrl}
+            alt=""
+            className={styles.thumbnailImage}
+            loading="lazy"
+            decoding="async"
+          />
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function StopLabel({
   node,
+  photo,
   onShowOnMap,
 }: {
   node: JourneyNode
+  photo: PhotoProps | null
   onShowOnMap: (nodeId: string) => void
 }) {
   const time = formatStayTime(node)
@@ -98,6 +163,7 @@ function StopLabel({
         )}
       </div>
       {node.memo && <p className={styles.memo}>{node.memo}</p>}
+      <PhotoThumbnails node={node} photo={photo} />
     </div>
   )
 }
@@ -105,10 +171,12 @@ function StopLabel({
 function StopRow({
   row,
   isFocused,
+  photo,
   onShowOnMap,
 }: {
   row: Extract<JourneyRow, { type: 'stop' }>
   isFocused: boolean
+  photo: PhotoProps | null
   onShowOnMap: (nodeId: string) => void
 }) {
   return (
@@ -117,10 +185,10 @@ function StopRow({
       className={`${styles.row} ${sideClass(row.side)} ${isFocused ? styles.focused : ''}`}
     >
       <div className={styles.slot}>
-        <TouringStone node={row.node} />
+        <NodeStone node={row.node} photo={photo} />
         {row.hasTrail && <div className={styles.trail} />}
       </div>
-      <StopLabel node={row.node} onShowOnMap={onShowOnMap} />
+      <StopLabel node={row.node} photo={photo} onShowOnMap={onShowOnMap} />
     </div>
   )
 }
@@ -128,10 +196,12 @@ function StopRow({
 function SkipRow({
   row,
   isFocused,
+  photo,
   onShowOnMap,
 }: {
   row: Extract<JourneyRow, { type: 'skip' }>
   isFocused: boolean
+  photo: PhotoProps | null
   onShowOnMap: (nodeId: string) => void
 }) {
   const stoneSide: JourneySide = row.roadSide === 'left' ? 'right' : 'left'
@@ -145,7 +215,7 @@ function SkipRow({
     >
       <div className={styles.skipTrail} aria-hidden="true" />
       <div className={styles.slot}>
-        <TouringStone node={row.node} />
+        <NodeStone node={row.node} photo={photo} />
       </div>
       <div className={styles.label}>
         <h3 className={`${styles.name} ${styles.nameMuted}`}>
@@ -163,6 +233,7 @@ function SkipRow({
           </div>
         )}
         {row.node.memo && <p className={styles.memo}>{row.node.memo}</p>}
+        <PhotoThumbnails node={row.node} photo={photo} />
       </div>
     </div>
   )
@@ -284,8 +355,16 @@ export function TouringJourney({
   focusedId,
   onShowOnMap,
   onAddSpot,
+  photosBySpotId,
+  onOpenPhoto,
 }: Props) {
   const [roadRef, width] = useElementWidth<HTMLDivElement>()
+  const getPhoto = (nodeId: string): PhotoProps | null => {
+    const photos = photosBySpotId?.get(nodeId)
+    return photos && photos.length > 0 && onOpenPhoto
+      ? { photos, onOpenPhoto }
+      : null
+  }
   const rows = layoutJourney(journey)
   const nodeById = new Map(journey.nodes.map((node) => [node.id, node]))
   const isEmpty = journey.nodes.every(
@@ -309,6 +388,7 @@ export function TouringJourney({
                 key={row.node.id}
                 row={row}
                 isFocused={focusedId === row.node.id}
+                photo={getPhoto(row.node.id)}
                 onShowOnMap={onShowOnMap}
               />
             )
@@ -318,6 +398,7 @@ export function TouringJourney({
                 key={row.node.id}
                 row={row}
                 isFocused={focusedId === row.node.id}
+                photo={getPhoto(row.node.id)}
                 onShowOnMap={onShowOnMap}
               />
             )
