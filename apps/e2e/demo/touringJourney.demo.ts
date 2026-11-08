@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test'
 import { registerTestBike } from '../helpers/bikeHelper'
 import { registerTestSpot, updateTestSpot } from '../helpers/spotHelper'
 import { registerTestTouring } from '../helpers/touringHelper'
@@ -11,7 +12,7 @@ const at = (time: string): string => `2026-10-18T${time}:00+09:00`
 /** 伊豆半島を一周した日のツーリングを作る */
 async function registerIzuTouring(authToken: string) {
   const bikeId = await registerTestBike(authToken, {
-    nickname: 'わたしのカブ',
+    nickname: '相棒',
     displacement: 125,
     totalMileage: 12323,
   })
@@ -81,19 +82,44 @@ async function registerIzuTouring(authToken: string) {
     departedAt: at('16:15'),
   })
 
-  return { bikeId, touringId }
+  return { bikeId, touringId, skippedId }
+}
+
+/**
+ * スポット一覧の応答で、スキップした地点の時刻を `skippedAt` に差し替える
+ *
+ * @remarks
+ * スキップの時刻はサーバーが更新した時点の現在時刻で入れるため、録画した時刻が映ってしまう。
+ */
+async function overrideSkippedAt(
+  page: Page,
+  touringId: string,
+  spotId: string,
+  skippedAt: string
+): Promise<void> {
+  await page.route(`**/tourings/${touringId}/spots`, async (route) => {
+    const response = await route.fetch()
+    const json = (await response.json()) as {
+      data: { spotId: string; skippedAt: string | null }[]
+    }
+    const data = json.data.map((spot) =>
+      spot.spotId === spotId ? { ...spot, skippedAt } : spot
+    )
+    await route.fulfill({ response, json: { ...json, data } })
+  })
 }
 
 test('ツーリング詳細の飛び石', async ({
   demoPage: page,
   authToken,
 }, testInfo) => {
-  const { bikeId, touringId } = await registerIzuTouring(authToken)
+  const { bikeId, touringId, skippedId } = await registerIzuTouring(authToken)
   const detailPage = new TouringDetailPage(page)
   const row = (name: string) =>
     page.locator('[data-node-id]').filter({ hasText: name })
 
   await prepareStage(page)
+  await overrideSkippedAt(page, touringId, skippedId, at('13:20'))
   await detailPage.goto(bikeId, touringId)
   await expect(row('石廊崎')).toBeVisible({ timeout: 30_000 })
 

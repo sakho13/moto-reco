@@ -16,7 +16,7 @@ const daysAgo = (days: number, hour: number): string => {
 /** 125cc のバイクと、これまでの給油3回分を作る */
 async function registerFuelHistory(authToken: string): Promise<void> {
   const bikeId = await registerTestBike(authToken, {
-    nickname: 'わたしのカブ',
+    nickname: '相棒',
     displacement: 125,
     totalMileage: 12750,
   })
@@ -69,7 +69,7 @@ test('給油の記録', async ({ demoPage: page, authToken }, testInfo) => {
 
   await prepareStage(page)
   await page.goto('/app/home')
-  await expect(page.getByText('わたしのカブ').first()).toBeVisible({
+  await expect(page.getByText('相棒').first()).toBeVisible({
     timeout: 30_000,
   })
   await pause(page, 1500)
