@@ -25,18 +25,27 @@ const fetchTouringSpotPhotos = async (
   return json.data
 }
 
+type Options = {
+  /** true ならマウントのたびに取り直す。未指定なら、キャッシュがあるあいだは取り直さない */
+  revalidateOnMount?: boolean
+}
+
 /**
  * ツーリング内のスポット写真を1回のリクエストでまとめて取得し、スポットIDで引けるようにする
  *
  * @param enabled - false のあいだは取得しない
  */
-export function useTouringSpotPhotos(touringId: string, enabled: boolean) {
+export function useTouringSpotPhotos(
+  touringId: string,
+  enabled: boolean,
+  { revalidateOnMount }: Options = {}
+) {
   const key = getTouringSpotPhotosKey(touringId)
   // 署名付きURLは取得のたびに変わり、変わると同じ画像を読み込み直す
   const { data, mutate } = useSWR(
     enabled ? key : null,
     fetchTouringSpotPhotos,
-    { revalidateIfStale: false, revalidateOnFocus: false }
+    { revalidateIfStale: false, revalidateOnFocus: false, revalidateOnMount }
   )
 
   const photosBySpotId = useMemo<SpotPhotoMap>(

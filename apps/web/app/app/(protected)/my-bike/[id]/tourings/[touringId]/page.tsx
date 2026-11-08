@@ -72,7 +72,9 @@ function TouringDetailPage() {
     return response.data
   })
   const showsPhotos = canUsePhotos(profile?.role)
-  const { photosBySpotId } = useTouringSpotPhotos(touringId, showsPhotos)
+  const { photosBySpotId } = useTouringSpotPhotos(touringId, showsPhotos, {
+    revalidateOnMount: true,
+  })
 
   const {
     data: touring,
