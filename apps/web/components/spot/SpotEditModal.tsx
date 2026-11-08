@@ -8,6 +8,8 @@ interface SpotEditModalProps {
   bikeId: string
   touringId: string
   spot: ApiResponseSpotDetail
+  /** 写真欄を出すか */
+  showsPhotos?: boolean
   onClose: () => void
   onSuccess: () => void
   onDelete?: () => void
@@ -20,6 +22,7 @@ export function SpotEditModal({
   bikeId,
   touringId,
   spot,
+  showsPhotos = false,
   onClose,
   onSuccess,
   onDelete,
@@ -32,6 +35,7 @@ export function SpotEditModal({
         bikeId={bikeId}
         touringId={touringId}
         spot={spot}
+        showsPhotos={showsPhotos}
         onSuccess={onSuccess}
         onDelete={onDelete}
       />

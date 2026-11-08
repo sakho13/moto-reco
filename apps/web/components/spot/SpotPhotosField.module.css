@@ -1,0 +1,71 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-cloud);
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 見た目は写真の右上の小さな丸、押せる範囲は44px角 */
+.deleteButton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  background: none;
+  border: none;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.deleteButton svg {
+  box-sizing: content-box;
+  margin: 4px;
+  padding: 3px;
+  border-radius: 50%;
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-sm);
+}
+
+.deleteButton:disabled {
+  cursor: not-allowed;
+}
+
+.empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-inkLight);
+}
+
+.error {
+  font-size: var(--font-size-sm);
+  color: var(--color-danger);
+}

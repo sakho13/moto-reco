@@ -326,6 +326,11 @@ export type ApiResponsePhotoDetail = {
 
 export type ApiResponseTouringPhotoList = ApiResponsePhotoDetail[]
 export type ApiResponseSpotPhotoList = ApiResponsePhotoDetail[]
+/** ツーリング内の写真のあるスポットごとの写真。写真のないスポットは含まない */
+export type ApiResponseTouringSpotPhotoList = {
+  spotId: string
+  photos: ApiResponsePhotoDetail[]
+}[]
 export type ApiResponseBikePhotoList = ApiResponsePhotoDetail[]
 
 export type ApiResponsePhotoUploadUrl = {

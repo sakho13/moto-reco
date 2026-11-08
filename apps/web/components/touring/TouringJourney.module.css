@@ -116,6 +116,31 @@
   overflow-wrap: anywhere;
 }
 
+.thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-block: var(--spacing-2);
+}
+
+.thumbnail {
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-cloud);
+  cursor: pointer;
+}
+
+.thumbnailImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .skipRow {
   position: relative;
   padding-block: 0.625rem;

@@ -96,20 +96,22 @@ sequenceDiagram
 すべて `honoAuthMiddleware` + `honoAdminMiddleware` による認証必須・**ADMINロール限定**。
 
 > Storage設定を含め新規追加の機能のため、現時点では一般ユーザーには公開しない。
-> クライアント側もプロフィール画面の「マイフォト」リンク・バイク詳細/ツーリング詳細の写真カードを
-> `role === 'ADMIN'` の場合のみ表示する。
+> クライアント側もプロフィール画面の「マイフォト」リンク・バイク詳細/ツーリング詳細の写真カード・
+> ツーリング詳細のスポット写真（道のりの石・スポット編集の写真欄）を `role === 'ADMIN'` の場合のみ表示する。
+> 判定は `apps/web/lib/utils/photoAccess.ts` の `canUsePhotos` に集約している。
 
-| メソッド | パス                               | 説明                                                                |
-| -------- | ---------------------------------- | ------------------------------------------------------------------- |
-| POST     | `/api/v1/photo/upload-url`         | 署名付きアップロードURL生成                                         |
-| POST     | `/api/v1/photo/touring/:touringId` | ツーリングへの写真登録                                              |
-| GET      | `/api/v1/photo/touring/:touringId` | ツーリングの写真一覧（takenAt昇順）                                 |
-| POST     | `/api/v1/photo/spot/:spotId`       | スポットへの写真登録                                                |
-| GET      | `/api/v1/photo/spot/:spotId`       | スポットの写真一覧（takenAt昇順）                                   |
-| POST     | `/api/v1/photo/bike/:myUserBikeId` | バイク本体への写真登録（ツーリング/スポットを介さない日常の1枚）    |
-| GET      | `/api/v1/photo/bike/:myUserBikeId` | バイク本体に直接紐づく写真一覧（takenAt昇順）                       |
-| GET      | `/api/v1/photo`                    | マイフォト・ギャラリー（全写真横断、ページネーション、takenAt降順） |
-| DELETE   | `/api/v1/photo/:photoId`           | 写真削除（Storage上のファイルも削除）                               |
+| メソッド | パス                                            | 説明                                                                                    |
+| -------- | ----------------------------------------------- | --------------------------------------------------------------------------------------- |
+| POST     | `/api/v1/photo/upload-url`                      | 署名付きアップロードURL生成                                                             |
+| POST     | `/api/v1/photo/touring/:touringId`              | ツーリングへの写真登録                                                                  |
+| GET      | `/api/v1/photo/touring/:touringId`              | ツーリングの写真一覧（takenAt昇順）                                                     |
+| GET      | `/api/v1/photo/touring/:touringId/spots`        | ツーリング内のスポット写真の一括取得（写真のあるスポットのみ、スポット順・takenAt昇順） |
+| POST     | `/api/v1/photo/touring/:touringId/spot/:spotId` | スポットへの写真登録                                                                    |
+| GET      | `/api/v1/photo/touring/:touringId/spot/:spotId` | スポットの写真一覧（takenAt昇順）                                                       |
+| POST     | `/api/v1/photo/bike/:myUserBikeId`              | バイク本体への写真登録（ツーリング/スポットを介さない日常の1枚）                        |
+| GET      | `/api/v1/photo/bike/:myUserBikeId`              | バイク本体に直接紐づく写真一覧（takenAt昇順）                                           |
+| GET      | `/api/v1/photo`                                 | マイフォト・ギャラリー（全写真横断、ページネーション、takenAt降順）                     |
+| DELETE   | `/api/v1/photo/:photoId`                        | 写真削除（Storage上のファイルも削除）                                                   |
 
 ### POST `/api/v1/photo/upload-url`
 

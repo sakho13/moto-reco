@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useId } from 'react'
 import { Button } from '@repo/ui/button'
 import styles from './ModalBase.module.css'
 import { XIcon } from '@/components/icons/XIcon'
@@ -63,6 +63,8 @@ export function ModalBase({
     }
   }, [])
 
+  const titleId = useId()
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div
@@ -71,9 +73,11 @@ export function ModalBase({
         role="dialog"
         aria-modal="true"
         aria-label={hideTitleOnDesktop ? title : undefined}
+        aria-labelledby={hideTitleOnDesktop ? undefined : titleId}
       >
         <div className={styles.header}>
           <h2
+            id={titleId}
             className={`text-lg font-semibold ${hideTitleOnDesktop ? styles.titleHiddenOnDesktop : ''}`}
           >
             {title}

@@ -11,6 +11,7 @@ import { Button } from '@repo/ui/button'
 import { toast } from '@repo/ui/sonner'
 import styles from './page.module.css'
 import { FuelIcon } from '@/components/icons/FuelIcon'
+import { PhotoViewerModal } from '@/components/photo/PhotoViewerModal'
 import { TouringPhotosCard } from '@/components/photo/TouringPhotosCard'
 import { SpotAddModal } from '@/components/spot/SpotAddModal'
 import { SpotEditModal } from '@/components/spot/SpotEditModal'
@@ -28,6 +29,8 @@ import { apiGet, apiPatch, apiPost } from '@/lib/api/client'
 import { withAuth } from '@/lib/hoc/withAuth'
 import { useMapPanel } from '@/lib/hooks/useMapPanel'
 import { useMediaQuery } from '@/lib/hooks/useMediaQuery'
+import { useTouringSpotPhotos } from '@/lib/hooks/useTouringSpotPhotos'
+import { canUsePhotos } from '@/lib/utils/photoAccess'
 import {
   buildJourney,
   formatClock,
@@ -59,12 +62,19 @@ function TouringDetailPage() {
   )
   const [localSpots, setLocalSpots] = useState<ApiResponseSpotDetail[]>([])
   const [isBreakLoading, setIsBreakLoading] = useState(false)
+  const [viewingPhoto, setViewingPhoto] = useState<{
+    nodeId: string
+    index: number
+  } | null>(null)
 
   const { data: profile } = useSWR('/api/v1/user/profile', async (url) => {
     const response = await apiGet(url)
     return response.data
   })
-  const isAdmin = profile?.role === 'ADMIN'
+  const showsPhotos = canUsePhotos(profile?.role)
+  const { photosBySpotId } = useTouringSpotPhotos(touringId, showsPhotos, {
+    revalidateOnMount: true,
+  })
 
   const {
     data: touring,
@@ -298,6 +308,11 @@ function TouringDetailPage() {
   }
 
   const hasMap = mapPoints.length > 0
+  const viewingPhotos = viewingPhoto
+    ? photosBySpotId.get(viewingPhoto.nodeId)
+    : undefined
+  const viewingNodeName =
+    journey.nodes.find((node) => node.id === viewingPhoto?.nodeId)?.name ?? ''
   const backHref = `/app/my-bike/${bikeId}/tourings`
   const planHref =
     touring.touringPlanId !== null
@@ -430,11 +445,15 @@ function TouringDetailPage() {
                     focusedId={isDesktop ? focusedId : null}
                     onShowOnMap={openMap}
                     onAddSpot={() => setAddModalType('SPOT')}
+                    photosBySpotId={showsPhotos ? photosBySpotId : undefined}
+                    onOpenPhoto={(nodeId, index) =>
+                      setViewingPhoto({ nodeId, index })
+                    }
                   />
                 )}
               </section>
 
-              {isAdmin && (
+              {showsPhotos && (
                 <TouringPhotosCard
                   touringId={touringId}
                   cardClassName={styles.photos}
@@ -542,9 +561,19 @@ function TouringDetailPage() {
           bikeId={bikeId}
           touringId={touringId}
           spot={editingSpot}
+          showsPhotos={showsPhotos}
           onClose={() => setEditingSpot(null)}
           onSuccess={handleSpotEditSuccess}
           onDelete={handleSpotDeleteSuccess}
+        />
+      )}
+
+      {viewingPhoto && viewingPhotos && (
+        <PhotoViewerModal
+          title={`${viewingNodeName}の写真`}
+          photos={viewingPhotos}
+          initialIndex={viewingPhoto.index}
+          onClose={() => setViewingPhoto(null)}
         />
       )}
 
