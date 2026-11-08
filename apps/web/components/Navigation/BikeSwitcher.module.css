@@ -6,11 +6,21 @@
   max-width: 11rem;
 }
 
+/* @repo/ui の Button は children を span で包むため、その span もボタンの幅まで縮める */
+.trigger > span {
+  min-width: 0;
+}
+
 .triggerContent {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
   min-width: 0;
+  max-width: 100%;
+}
+
+.triggerContent > svg {
+  flex-shrink: 0;
 }
 
 .name {
