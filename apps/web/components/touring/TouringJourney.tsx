@@ -45,6 +45,25 @@ export const sideClass = (side: JourneySide): string =>
 export const roadX = (side: JourneySide, width: number): number =>
   side === 'left' ? ROAD_INSET : width - ROAD_INSET
 
+function MapLinkButton({
+  nodeId,
+  onShowOnMap,
+}: {
+  nodeId: string
+  onShowOnMap: (nodeId: string) => void
+}) {
+  return (
+    <button
+      type="button"
+      className={styles.mapLink}
+      onClick={() => onShowOnMap(nodeId)}
+    >
+      <MapPin size={13} aria-hidden="true" />
+      地図
+    </button>
+  )
+}
+
 function StopLabel({
   node,
   onShowOnMap,
@@ -75,14 +94,7 @@ function StopLabel({
       <div className={styles.meta}>
         {details.length > 0 && <span>{details.join(' ・ ')}</span>}
         {node.point && (
-          <button
-            type="button"
-            className={styles.mapLink}
-            onClick={() => onShowOnMap(node.id)}
-          >
-            <MapPin size={13} aria-hidden="true" />
-            地図
-          </button>
+          <MapLinkButton nodeId={node.id} onShowOnMap={onShowOnMap} />
         )}
       </div>
       {node.memo && <p className={styles.memo}>{node.memo}</p>}
@@ -116,9 +128,11 @@ function StopRow({
 function SkipRow({
   row,
   isFocused,
+  onShowOnMap,
 }: {
   row: Extract<JourneyRow, { type: 'skip' }>
   isFocused: boolean
+  onShowOnMap: (nodeId: string) => void
 }) {
   const stoneSide: JourneySide = row.roadSide === 'left' ? 'right' : 'left'
 
@@ -138,9 +152,14 @@ function SkipRow({
           {row.node.name}
           <span className={styles.skipBadge}>スキップ</span>
         </h3>
-        {row.node.skippedAt && (
+        {(row.node.skippedAt || row.node.point) && (
           <div className={styles.meta}>
-            <span>スキップ {formatClock(row.node.skippedAt)}</span>
+            {row.node.skippedAt && (
+              <span>スキップ {formatClock(row.node.skippedAt)}</span>
+            )}
+            {row.node.point && (
+              <MapLinkButton nodeId={row.node.id} onShowOnMap={onShowOnMap} />
+            )}
           </div>
         )}
         {row.node.memo && <p className={styles.memo}>{row.node.memo}</p>}
@@ -299,6 +318,7 @@ export function TouringJourney({
                 key={row.node.id}
                 row={row}
                 isFocused={focusedId === row.node.id}
+                onShowOnMap={onShowOnMap}
               />
             )
           case 'leg': {

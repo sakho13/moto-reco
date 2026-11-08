@@ -116,6 +116,50 @@ test.describe('ツーリング詳細 - 地図', () => {
     await expect(page).toHaveURL(new RegExp(`/tourings/${touringId}$`))
   })
 
+  test('モバイル幅ではスキップした地点にしか座標がなくても地図を開ける', async ({
+    authenticatedPage: page,
+    authToken,
+  }) => {
+    const myUserBikeId = await registerTestBike(authToken, {
+      nickname: 'スキップ地図テスト',
+    })
+    const touringId = await registerTestTouring(authToken, myUserBikeId, {
+      title: 'スキップ地図ツーリング',
+      startDate: new Date().toISOString(),
+      endDate: new Date().toISOString(),
+    })
+    await registerTestSpot(authToken, myUserBikeId, touringId, {
+      name: '座標なしの地点',
+    })
+    const skippedSpotId = await registerTestSpot(
+      authToken,
+      myUserBikeId,
+      touringId,
+      { name: '座標ありの寄らなかった地点', latitude: 35.2, longitude: 139.2 }
+    )
+    await updateTestSpot(authToken, myUserBikeId, touringId, skippedSpotId, {
+      isSkipped: true,
+      arrivedAt: null,
+    })
+    await page.setViewportSize(MOBILE_VIEWPORT)
+    const detailPage = new TouringDetailPage(page)
+    await detailPage.goto(myUserBikeId, touringId)
+
+    await expect(page.getByText('座標ありの寄らなかった地点')).toBeVisible({
+      timeout: 10_000,
+    })
+    await expect(detailPage.openMapButton).toBeVisible()
+
+    const skipMapButton = page.getByRole('button', {
+      name: '地図',
+      exact: true,
+    })
+    await expect(skipMapButton).toHaveCount(1)
+    await skipMapButton.click()
+    await expect(detailPage.mapPanel).toBeVisible()
+    await expect(detailPage.mapPins).toHaveCount(1, { timeout: 15_000 })
+  })
+
   test('座標が1件もないツーリングは地図を出さない', async ({
     authenticatedPage: page,
     authToken,
