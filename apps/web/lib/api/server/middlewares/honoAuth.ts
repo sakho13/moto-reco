@@ -1,4 +1,4 @@
-import { Context, Next } from 'hono'
+import { createMiddleware } from 'hono/factory'
 import { prisma } from '@repo/database'
 import { UserEntity, ApiV1Error } from '@repo/shared-domain'
 import { createUserId } from '@repo/shared-types'
@@ -12,10 +12,9 @@ import { HonoVariables } from '../types/hono'
  * Hono用認証ミドルウェア
  * Authorizationヘッダーから Bearer token を検証し、内部User情報を取得
  */
-export async function honoAuthMiddleware(
-  c: Context<{ Variables: HonoVariables }>,
-  next: Next
-) {
+export const honoAuthMiddleware = createMiddleware<{
+  Variables: HonoVariables
+}>(async (c, next) => {
   try {
     const authHeader = c.req.header('Authorization')
 
@@ -104,16 +103,15 @@ export async function honoAuthMiddleware(
     console.error('認証処理中にエラーが発生しました:', error)
     throw new ApiV1Error('SERVER_ERROR', '認証処理中にエラーが発生しました')
   }
-}
+})
 
 /**
  * Hono用オプション認証ミドルウェア
  * トークンがあれば検証、なければスキップ
  */
-export async function honoOptionalAuthMiddleware(
-  c: Context<{ Variables: HonoVariables }>,
-  next: Next
-) {
+export const honoOptionalAuthMiddleware = createMiddleware<{
+  Variables: HonoVariables
+}>(async (c, next) => {
   const authHeader = c.req.header('Authorization')
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -124,4 +122,4 @@ export async function honoOptionalAuthMiddleware(
 
   // 認証がある場合は検証
   return honoAuthMiddleware(c, next)
-}
+})

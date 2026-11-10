@@ -10,8 +10,8 @@ catalogs:
       specifier: 10.0.1
       version: 10.0.1
     '@hono/zod-validator':
-      specifier: 0.8.0
-      version: 0.8.0
+      specifier: 0.9.1
+      version: 0.9.1
     '@next/third-parties':
       specifier: 16.4.2
       version: 16.4.2
@@ -46,8 +46,8 @@ catalogs:
       specifier: 13.6.0
       version: 13.6.0
     hono:
-      specifier: 4.10.3
-      version: 4.10.3
+      specifier: 4.13.17
+      version: 4.13.17
     lucide-react:
       specifier: 0.561.0
       version: 0.561.0
@@ -236,7 +236,7 @@ importers:
         version: 3.2.2(react@19.2.9)
       '@hono/zod-validator':
         specifier: 'catalog:'
-        version: 0.8.0(hono@4.10.3)(zod@3.25.76)
+        version: 0.9.1(hono@4.13.17)(zod@3.25.76)
       '@modelcontextprotocol/sdk':
         specifier: 1.32.1
         version: 1.32.1(zod@3.25.76)
@@ -296,7 +296,7 @@ importers:
         version: 13.6.0
       hono:
         specifier: 'catalog:'
-        version: 4.10.3
+        version: 4.13.17
       leaflet:
         specifier: 1.9.4
         version: 1.9.4
@@ -1350,10 +1350,10 @@ packages:
     peerDependencies:
       hono: ^4 || ^5.0.0-0
 
-  '@hono/zod-validator@0.8.0':
-    resolution: {integrity: sha512-5uS4S1/LKtZQYvD4BtpPUFkOv8d1wNxHHrChm26buMiEYc1FrHWvDUaKVBwkiVtvSExHSpLGDvcnpI2Copyj9w==}
+  '@hono/zod-validator@0.9.1':
+    resolution: {integrity: sha512-iiv6w0qrIc0arfvCtUqBWsvl4fXjzaTcQcCJTTtCnkawF9HHGE+KjEl0ox3gQJ6rKZEgE3mLExlQCF72M+mNuw==}
     peerDependencies:
-      hono: '>=4.10.0'
+      hono: '>=4.11.2'
       zod: ^3.25.0 || ^4.0.0
 
   '@humanfs/core@0.19.1':
@@ -4001,12 +4001,12 @@ packages:
   hast-util-whitespace@3.0.0:
     resolution: {integrity: sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw==}
 
-  hono@4.10.3:
-    resolution: {integrity: sha512-2LOYWUbnhdxdL8MNbNg9XZig6k+cZXm5IjHn2Aviv7honhBMOHb+jxrKIeJRZJRmn+htUCKhaicxwXuUDlchRA==}
-    engines: {node: '>=16.9.0'}
-
   hono@4.13.13:
     resolution: {integrity: sha512-CQ46U0ZkAGmbT/4UxdzzGJpacP2IeKgY4a5/tOI9AABbpOMfK739wfDXmv1usCk+3RkKj1hQy4/fjhiwa2xlrA==}
+    engines: {node: '>=16.9.0'}
+
+  hono@4.13.17:
+    resolution: {integrity: sha512-vZIcbkvjOR5hHRWERbGkr8fGfF0GGM1ooYkuH448iO3b2AdVEr3AXZSw4Z3Kn+1L5z0CVoVeyV29VGYmFh05kQ==}
     engines: {node: '>=16.9.0'}
 
   html-entities@2.6.0:
@@ -6761,9 +6761,9 @@ snapshots:
     dependencies:
       hono: 4.13.13
 
-  '@hono/zod-validator@0.8.0(hono@4.10.3)(zod@3.25.76)':
+  '@hono/zod-validator@0.9.1(hono@4.13.17)(zod@3.25.76)':
     dependencies:
-      hono: 4.10.3
+      hono: 4.13.17
       zod: 3.25.76
 
   '@humanfs/core@0.19.1': {}
@@ -9713,9 +9713,9 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.5
 
-  hono@4.10.3: {}
-
   hono@4.13.13: {}
+
+  hono@4.13.17: {}
 
   html-entities@2.6.0:
     optional: true
