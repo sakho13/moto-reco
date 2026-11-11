@@ -16,8 +16,8 @@ catalog:
 
   hono: 4.13.17
   '@hono/node-server': 1.19.18
-  firebase: 12.6.0
-  'firebase-admin': 13.6.0
+  firebase: 12.19.0
+  'firebase-admin': 13.10.0
   next: 16.4.2
   '@next/third-parties': 16.4.2
   react: 19.2.9
@@ -45,3 +45,8 @@ allowBuilds:
   protobufjs: true
   sharp: true
   unrs-resolver: true
+
+# firebase / firebase-admin が推移的に引き込む脆弱な版を修正版に固定する (#666)
+overrides:
+  '@firebase/firestore>@grpc/grpc-js': ^1.14.7
+  'uuid@<11.1.1': ^11.1.1
