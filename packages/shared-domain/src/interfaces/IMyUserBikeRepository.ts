@@ -1,4 +1,10 @@
-import { BikeId, MyUserBikeId, UserBikeId, UserId } from '@repo/shared-types'
+import {
+  BikeId,
+  EtcDeviceType,
+  MyUserBikeId,
+  UserBikeId,
+  UserId,
+} from '@repo/shared-types'
 import { MyUserBikeEntity } from '../entities/MyUserBikeEntity'
 import { UserBikeSearchParams } from '../valueObjects/UserBikeSearchParams'
 
@@ -12,6 +18,7 @@ export type MyUserBikeDetail = {
   purchaseDate: Date | null
   purchasePrice: number | null
   purchaseMileage: number | null
+  etcType: EtcDeviceType | null
   totalMileage: number
   displacement: number
   modelYear: number | null

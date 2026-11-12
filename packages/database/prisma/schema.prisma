@@ -263,12 +263,15 @@ model TUserMyBike {
   userBikeId String @map("user_bike_id")
 
   // ユーザー独自の設定
-  nickname        String?   @map("nickname") // 愛称
-  purchaseDate    DateTime? @map("purchase_date") @db.Timestamptz
-  purchasePrice   Int?      @map("purchase_price")
-  purchaseMileage Int?      @map("purchase_mileage")
+  nickname        String?        @map("nickname") // 愛称
+  purchaseDate    DateTime?      @map("purchase_date") @db.Timestamptz
+  purchasePrice   Int?           @map("purchase_price")
+  purchaseMileage Int?           @map("purchase_mileage")
+  // ETC車載器の搭載状況（null: 未設定）。車載器は車両番号・所有者に紐付けてセットアップするため、
+  // 物理的な個体（TUserBike）ではなく所有者ごとのマイバイクで保持する
+  etcType         EtcDeviceType? @map("etc_type")
   // 未使用: バイクの公開設定はフレンド機能追加（isProfilePublic）に伴い廃止
-  isPublic        Boolean   @default(false) @map("is_public")
+  isPublic        Boolean        @default(false) @map("is_public")
 
   // 所有状態
   ownedAt   DateTime          @map("owned_at") @db.Timestamptz
@@ -717,6 +720,12 @@ enum UserBikeOwnStatus {
   SOLD // 売却済み
   TRANSFERRED // 譲渡済み
   SCRAPPED // 廃車
+}
+
+enum EtcDeviceType {
+  NONE // 未搭載
+  ETC // ETC（従来型）
+  ETC2 // ETC2.0
 }
 
 enum GoodsCategory {
