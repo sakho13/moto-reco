@@ -1,4 +1,5 @@
 import {
+  EtcDeviceType,
   MyUserBike,
   MyUserBikeId,
   UserBike,
@@ -37,6 +38,7 @@ export class MyUserBikeEntity extends UserBikeEntity {
       purchaseDate: myUserBike.purchaseDate,
       purchasePrice: myUserBike.purchasePrice,
       purchaseMileage: myUserBike.purchaseMileage,
+      etcType: myUserBike.etcType,
       ownedAt: myUserBike.ownedAt,
       soldAt: myUserBike.soldAt,
       ownStatus: myUserBike.ownStatus,
@@ -72,6 +74,10 @@ export class MyUserBikeEntity extends UserBikeEntity {
 
   public get purchaseMileage(): number | null {
     return this._myValue.purchaseMileage
+  }
+
+  public get etcType(): EtcDeviceType | null {
+    return this._myValue.etcType
   }
 
   public get ownedAt(): Date {

@@ -191,6 +191,32 @@ describe('UserBike API Endpoints', () => {
       expect(json.data.purchaseDate).toBeNull()
     })
 
+    test('etcTypeを指定して登録でき、未指定の場合は未設定（null）になる', async () => {
+      const withEtc = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bikeId, etcType: 'ETC2' }),
+      })
+      const withEtcJson = await withEtc.json()
+      expect(withEtc.status).toBe(201)
+      expect(withEtcJson.data.etcType).toBe('ETC2')
+
+      const withoutEtc = await app.request('/api/v1/user-bike/register', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bikeId }),
+      })
+      const withoutEtcJson = await withoutEtc.json()
+      expect(withoutEtc.status).toBe(201)
+      expect(withoutEtcJson.data.etcType).toBeNull()
+    })
+
     test('車台番号を指定しなくても登録できる', async () => {
       const res = await app.request('/api/v1/user-bike/register', {
         method: 'POST',
@@ -658,6 +684,74 @@ describe('UserBike API Endpoints', () => {
         where: { id: myUserBikeId },
       })
       expect(myUserBikeRecord?.purchaseDate).toBeNull()
+    })
+
+    test('etcTypeを更新でき、nullを指定すると未設定に戻せる', async () => {
+      const patchEtcType = (etcType: string | null) =>
+        app.request(`/api/v1/user-bike/bike/${myUserBikeId}`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ etcType }),
+        })
+
+      const updated = await patchEtcType('NONE')
+      const updatedJson = await updated.json()
+      expect(updated.status).toBe(200)
+      expect(updatedJson.data.etcType).toBe('NONE')
+      const updatedRecord = await prisma.tUserMyBike.findUnique({
+        where: { id: myUserBikeId },
+      })
+      expect(updatedRecord?.etcType).toBe('NONE')
+
+      const cleared = await patchEtcType(null)
+      const clearedJson = await cleared.json()
+      expect(cleared.status).toBe(200)
+      expect(clearedJson.data.etcType).toBeNull()
+      const clearedRecord = await prisma.tUserMyBike.findUnique({
+        where: { id: myUserBikeId },
+      })
+      expect(clearedRecord?.etcType).toBeNull()
+    })
+
+    test('etcTypeを指定しない更新ではETC車載器の搭載状況が維持される', async () => {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+      await app.request(`/api/v1/user-bike/bike/${myUserBikeId}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ etcType: 'ETC' }),
+      })
+
+      const res = await app.request(`/api/v1/user-bike/bike/${myUserBikeId}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ nickname: updatedNickname }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.nickname).toBe(updatedNickname)
+      expect(json.data.etcType).toBe('ETC')
+    })
+
+    test('etcTypeに不正な値を指定するとバリデーションエラーとなる', async () => {
+      const res = await app.request(`/api/v1/user-bike/bike/${myUserBikeId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ etcType: 'ETC3' }),
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expectValidationError(json)
     })
 
     test('排気量のみで登録したバイクの排気量を更新できる', async () => {

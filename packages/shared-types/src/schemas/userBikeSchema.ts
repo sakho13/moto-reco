@@ -1,4 +1,18 @@
 import { z } from 'zod'
+import { ETC_DEVICE_TYPES } from '../domain/bike'
+
+/**
+ * ETC車載器の搭載状況のバリデーションスキーマ（null: 未設定）
+ */
+const EtcTypeSchema = z
+  .enum(ETC_DEVICE_TYPES, {
+    errorMap: () => ({
+      message:
+        'ETC車載器の搭載状況はNONE・ETC・ETC2のいずれかで指定してください',
+    }),
+  })
+  .nullable()
+  .optional()
 
 /**
  * ユーザーバイク登録リクエストのバリデーションスキーマ
@@ -49,6 +63,7 @@ export const UserBikeRegisterRequestSchema = z
       .nonnegative('購入時走行距離は0以上で指定してください')
       .nullable()
       .optional(),
+    etcType: EtcTypeSchema,
     totalMileage: z
       .number({ invalid_type_error: '総走行距離は数値で指定してください' })
       .int('総走行距離は整数で指定してください')
@@ -97,6 +112,7 @@ export const UserBikeUpdateRequestSchema = z
       .nonnegative('購入時走行距離は0以上で指定してください')
       .nullable()
       .optional(),
+    etcType: EtcTypeSchema,
     displacement: z
       .number({ invalid_type_error: '排気量は数値で指定してください' })
       .positive('排気量は0より大きい値で指定してください')
@@ -114,6 +130,7 @@ export const UserBikeUpdateRequestSchema = z
       data.purchaseDate !== undefined ||
       data.purchasePrice !== undefined ||
       data.purchaseMileage !== undefined ||
+      data.etcType !== undefined ||
       data.totalMileage !== undefined ||
       data.displacement !== undefined,
     {

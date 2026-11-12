@@ -103,6 +103,7 @@ erDiagram
         string userBikeId FK
         string nickname
         datetime purchaseDate
+        EtcDeviceType etcType "NONE / ETC / ETC2。nullは未設定"
         UserBikeOwnStatus ownStatus
     }
 
@@ -174,6 +175,12 @@ erDiagram
         datetime lastUsedAt
     }
 ```
+
+### ETC車載器の搭載状況（TMyBike.etcType）
+
+- `NONE`（未搭載）/ `ETC` / `ETC2`（ETC2.0）の3値。`null`は「未設定（情報なし）」を表し、`NONE`と区別する。
+- ETC車載器は車両番号・所有者に紐付けてセットアップするもので、売買・譲渡時には再セットアップが必要。そのため物理的な個体（`TUserBike`）ではなく、所有者ごとの`TMyBike`で保持し、次のオーナーへ引き継がない。
+- MCPの`list_bikes` / `get_touring_plan`でも返し、LLMがルートを検討するとき（スマートICの利用可否など）に使う。
 
 ### 認証方式（MAuthProvider）
 

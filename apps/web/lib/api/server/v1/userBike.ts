@@ -57,6 +57,7 @@ const toApiResponseUserBikeDetail = (
   purchaseDate: detail.purchaseDate?.toISOString() ?? null,
   purchasePrice: detail.purchasePrice,
   purchaseMileage: detail.purchaseMileage,
+  etcType: detail.etcType,
   totalMileage: detail.totalMileage,
   displacement: detail.displacement,
   modelYear: detail.modelYear,
@@ -93,6 +94,7 @@ userBike.post(
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,
         purchaseMileage: body.purchaseMileage,
+        etcType: body.etcType,
         totalMileage: body.totalMileage,
       })
 
@@ -268,6 +270,7 @@ userBike.patch(
         purchaseDate: body.purchaseDate,
         purchasePrice: body.purchasePrice,
         purchaseMileage: body.purchaseMileage,
+        etcType: body.etcType,
         displacement: body.displacement,
         totalMileage: body.totalMileage,
       })

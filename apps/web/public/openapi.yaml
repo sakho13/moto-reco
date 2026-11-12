@@ -2273,6 +2273,14 @@ components:
           type: integer
           description: 購入時走行距離（km）
           nullable: true
+        etcType:
+          type: string
+          enum:
+            - NONE
+            - ETC
+            - ETC2
+          description: ETC車載器の搭載状況（NONE=未搭載, ETC=ETC, ETC2=ETC2.0, null=未設定）
+          nullable: true
         totalMileage:
           type: integer
           description: 総走行距離（km）
@@ -2330,6 +2338,14 @@ components:
           type: integer
           description: 購入時走行距離（km）
           nullable: true
+        etcType:
+          type: string
+          enum:
+            - NONE
+            - ETC
+            - ETC2
+          description: ETC車載器の搭載状況（NONE=未搭載, ETC=ETC, ETC2=ETC2.0, null=未設定）
+          nullable: true
         totalMileage:
           type: integer
           description: 総走行距離（km）
@@ -2350,6 +2366,14 @@ components:
         purchaseMileage:
           type: integer
           description: 購入時走行距離（km）
+          nullable: true
+        etcType:
+          type: string
+          enum:
+            - NONE
+            - ETC
+            - ETC2
+          description: ETC車載器の搭載状況（NONE=未搭載, ETC=ETC, ETC2=ETC2.0, null=未設定）
           nullable: true
         purchasePrice:
           type: integer

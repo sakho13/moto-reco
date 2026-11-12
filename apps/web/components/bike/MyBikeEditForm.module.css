@@ -1,0 +1,10 @@
+/*
+ * ETC車載器の解説記事へのリンク（Issue #656）。
+ * セレクトの直下に控えめに添え、入力の流れを邪魔しない。
+ */
+.etcLink {
+  display: inline-block;
+  margin-top: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+}

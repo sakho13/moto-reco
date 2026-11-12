@@ -1,13 +1,19 @@
 'use client'
 
+import { ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
-import type { ApiResponseUserBikeDetail } from '@repo/shared-types'
+import {
+  ETC_DEVICE_TYPE_LABELS,
+  type ApiResponseUserBikeDetail,
+} from '@repo/shared-types'
 import { formatDate, getCurrentDate, isUnsetDate } from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import styles from './BikeHeroSection.module.css'
 import { MyBikeEditModal } from './MyBikeEditModal'
 import { EditIcon } from '@/components/icons/EditIcon'
 import { getBikeDisplayName } from '@/lib/bike'
+import { ETC_ARTICLE_PATH } from '@/lib/statics'
 
 const UNSET = '未設定'
 
@@ -92,7 +98,14 @@ export function BikeHeroSection({ bike }: Props) {
       label: '所有期間',
       value: formatOwnershipDuration(bike.purchaseDate),
     },
+    {
+      label: 'ETC',
+      value: bike.etcType ? ETC_DEVICE_TYPE_LABELS[bike.etcType] : UNSET,
+    },
   ]
+
+  // 未設定・未搭載のときだけ、ETCの解説記事へ誘導する（Issue #656）
+  const shouldPromoteEtc = bike.etcType === null || bike.etcType === 'NONE'
 
   return (
     <section className={styles.section} data-testid="bike-hero-section">
@@ -130,6 +143,13 @@ export function BikeHeroSection({ bike }: Props) {
           </div>
         ))}
       </dl>
+
+      {shouldPromoteEtc && (
+        <Link href={ETC_ARTICLE_PATH} className={styles.etcLink}>
+          ETCのメリットを見る
+          <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
+        </Link>
+      )}
     </section>
   )
 }
