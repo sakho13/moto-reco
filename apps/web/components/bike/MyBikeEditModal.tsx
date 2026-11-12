@@ -60,6 +60,7 @@ export function MyBikeEditModal({
       purchaseDate: toDateInputValue(data.purchaseDate),
       totalMileage: data.totalMileage.toString(),
       displacement: data.displacement.toString(),
+      etcType: data.etcType ?? '',
     })
     setIsDisplacementEditable(data.bikeId === null)
   }, [data])
@@ -75,6 +76,7 @@ export function MyBikeEditModal({
           ? new Date(formData.purchaseDate)
           : null,
         totalMileage: Number(formData.totalMileage),
+        etcType: formData.etcType === '' ? null : formData.etcType,
         ...(isDisplacementEditable
           ? { displacement: Number(formData.displacement) }
           : {}),
@@ -82,6 +84,7 @@ export function MyBikeEditModal({
       trackEvent('bike_update', {
         has_nickname: !!formData.nickname.trim(),
         has_purchase_date: !!formData.purchaseDate,
+        etc_type: formData.etcType || 'UNSET',
         is_displacement_editable: isDisplacementEditable,
         displacement_changed:
           isDisplacementEditable &&

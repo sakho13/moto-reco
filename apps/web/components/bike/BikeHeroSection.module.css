@@ -53,10 +53,10 @@
 }
 
 /*
- * 車両情報は5項目固定（2列 × 2行 + 最終行1項目）のため、
- * 最終行は常に最後の1項目だけになる。:last-childのみで罫線を消せる。
+ * 車両情報は6項目固定（2列 × 3行）のため、
+ * 2列表示では最終行の2項目の罫線を消す。
  */
-.specRow:last-child {
+.specRow:nth-last-child(-n + 2) {
   border-bottom: none;
 }
 
@@ -76,8 +76,28 @@
   text-align: right;
 }
 
+/* ETCの解説記事への導線（未設定・未搭載のときのみ表示） */
+.etcLink {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  text-decoration: none;
+}
+
+.etcLink:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 420px) {
   .spec {
     grid-template-columns: 1fr;
+  }
+
+  /* 1列表示では最後の1項目だけが最終行になるため、その直前の罫線は戻す */
+  .specRow:nth-last-child(2) {
+    border-bottom: 1px dotted var(--color-cloud);
   }
 }
