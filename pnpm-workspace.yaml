@@ -14,10 +14,10 @@ catalog:
   dotenv-cli: 11.0.0
   prettier: 3.8.3
 
-  hono: 4.10.3
-  '@hono/node-server': 1.19.5
-  firebase: 12.6.0
-  'firebase-admin': 13.6.0
+  hono: 4.13.17
+  '@hono/node-server': 1.19.18
+  firebase: 12.19.0
+  'firebase-admin': 13.10.0
   next: 16.4.2
   '@next/third-parties': 16.4.2
   react: 19.2.9
@@ -30,7 +30,7 @@ catalog:
   '@types/react-dom': 19.2.2
 
   zod: 3.25.76
-  '@hono/zod-validator': 0.8.0
+  '@hono/zod-validator': 0.9.1
 
   vitest: 2.1.8
   '@vitest/ui': 2.1.8
@@ -45,3 +45,8 @@ allowBuilds:
   protobufjs: true
   sharp: true
   unrs-resolver: true
+
+# firebase / firebase-admin が推移的に引き込む脆弱な版を修正版に固定する (#666)
+overrides:
+  '@firebase/firestore>@grpc/grpc-js': ^1.14.7
+  'uuid@<11.1.1': ^11.1.1

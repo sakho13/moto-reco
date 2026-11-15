@@ -3,16 +3,15 @@ import { prisma } from '@repo/database'
 import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import { ApiV1Error } from '@repo/shared-domain'
 import {
-  ApiResponseUserFollowList,
+  ApiResponseNotificationEmailVerify,
   ApiResponseUserProfile,
   ApiResponseUserPlanHistory,
-  ApiResponsePublicUserPage,
   ApiResponseUserAuthProviderSwitch,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
-  ApiResponseUserSearch,
   ChangePlanRequestSchema,
   GuestRegisterRequestSchema,
+  NotificationEmailVerifyRequestSchema,
   SuccessResponse,
   UserAuthProviderSwitchRequestSchema,
   UserAuthRecoverRequestSchema,
@@ -21,22 +20,16 @@ import {
   UserProfilePatchRequestSchema,
   createUserId,
 } from '@repo/shared-types'
-import {
-  honoAuthMiddleware,
-  honoOptionalAuthMiddleware,
-} from '../middlewares/honoAuth'
+import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
-import { PrismaHistoryRepository } from '../repositories/PrismaHistoryRepository'
-import { PrismaMyUserBikeRepository } from '../repositories/PrismaMyUserBikeRepository'
-import { PrismaNotificationRepository } from '../repositories/PrismaNotificationRepository'
-import { PrismaUserFollowRepository } from '../repositories/PrismaUserFollowRepository'
+import { PrismaNotificationEmailVerificationRepository } from '../repositories/PrismaNotificationEmailVerificationRepository'
 import { PrismaUserPlanHistoryRepository } from '../repositories/PrismaUserPlanHistoryRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
 import { AuthProviderSwitchService } from '../services/AuthProviderSwitchService'
-import { UserFollowService } from '../services/UserFollowService'
+import { NotificationEmailVerificationService } from '../services/NotificationEmailVerificationService'
 import { UserPlanService } from '../services/UserPlanService'
 import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
@@ -53,13 +46,21 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
     throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
   }
 
+  const verificationService = new NotificationEmailVerificationService(
+    new PrismaNotificationEmailVerificationRepository(prisma),
+    userRepo
+  )
+  const pendingNotificationEmail = await verificationService.getPendingEmail(
+    user.id
+  )
+
   return c.json<SuccessResponse<ApiResponseUserProfile>>({
     status: 'success',
     data: {
       userId: user.id,
       name: user.name,
       notificationEmail: user.notificationEmail,
-      isProfilePublic: user.isProfilePublic,
+      pendingNotificationEmail,
       role: user.role as import('@repo/shared-types').UserRole,
       plan: user.plan,
     },
@@ -74,6 +75,8 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
  * - 認証必須（honoAuthMiddleware）
  * - リクエストボディのバリデーション（zodValidateJson）
  * - nameフィールド: 指定時は1文字以上50文字以下
+ * - notificationEmailフィールド: 新しいアドレスは即時反映せず、確認メールを送って所有確認後に反映する。
+ *   `null` の指定（解除）は即時反映する
  * - 少なくとも1フィールドの指定が必須
  */
 user.patch(
@@ -85,6 +88,10 @@ user.patch(
     const body = c.req.valid('json')
 
     const userRepo = new PrismaUserRepository(prisma)
+    const verificationService = new NotificationEmailVerificationService(
+      new PrismaNotificationEmailVerificationRepository(prisma),
+      userRepo
+    )
 
     // ユーザーの存在確認
     const user = await userRepo.findById(userEntity.id)
@@ -92,46 +99,62 @@ user.patch(
       throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
     }
 
-    const prevNotificationEmail = user.notificationEmail
+    // 通知メールアドレスの変更依頼（所有確認が必要なもの）
+    let verificationRequest: { token: string; email: string } | null = null
+    if (body.notificationEmail !== undefined) {
+      const requestedEmail = body.notificationEmail ?? null
+
+      if (requestedEmail === null) {
+        // 解除は所有確認不要のため即時反映する
+        user.notificationEmail = null
+        await verificationService.cancelPending(user.id)
+      } else if (requestedEmail === user.notificationEmail) {
+        // 現在のアドレスのままなら確認待ちの依頼だけ取り消す
+        await verificationService.cancelPending(user.id)
+      } else {
+        if (userEntity.role === 'GUEST') {
+          throw new ApiV1Error(
+            'FORBIDDEN',
+            'ゲストアカウントは通知メールアドレスを設定できません'
+          )
+        }
+        // 送信レート制限を超えた場合はここで例外となり、名前の更新も行わない。
+        // 並列リクエストで上限をすり抜けないよう、ユーザー単位のロックを取るトランザクション内で発行する
+        verificationRequest = await prisma.$transaction(async (t) =>
+          new NotificationEmailVerificationService(
+            new PrismaNotificationEmailVerificationRepository(t),
+            new PrismaUserRepository(t)
+          ).requestChange(user.id, requestedEmail)
+        )
+      }
+    }
 
     if (body.name !== undefined) {
       user.name = body.name
     }
-    if (body.notificationEmail !== undefined) {
-      user.notificationEmail = body.notificationEmail ?? null
-    }
-    if (body.isProfilePublic !== undefined) {
-      if (userEntity.role === 'GUEST' && body.isProfilePublic === true) {
-        throw new ApiV1Error(
-          'INVALID_REQUEST',
-          'ゲストアカウントはプロフィールを公開できません'
-        )
-      }
-      user.isProfilePublic = body.isProfilePublic
-    }
     // プロフィール更新
     const updatedUser = await userRepo.updateUser(user)
 
-    // 通知メールアドレスが新規設定または変更された場合に通知メールを送信
-    const newNotificationEmail = updatedUser.notificationEmail
-    if (
-      newNotificationEmail &&
-      newNotificationEmail !== prevNotificationEmail
-    ) {
+    // 新しいアドレスへ確認メールを送信する（表示名は含めない）
+    if (verificationRequest) {
       const emailRepository = new ResendEmailRepository(
         process.env.RESEND_API_KEY,
         process.env.RESEND_FROM_EMAIL
       )
       const emailService = new EmailService(emailRepository)
       emailService
-        .sendByType(EmailType.NOTIFICATION_EMAIL_CHANGED, {
-          to: newNotificationEmail,
-          userName: updatedUser.name,
+        .sendByType(EmailType.NOTIFICATION_EMAIL_VERIFICATION, {
+          to: verificationRequest.email,
+          token: verificationRequest.token,
         })
         .catch((error: unknown) => {
-          console.error('通知メールアドレス変更メール送信に失敗しました', error)
+          console.error('通知メールアドレス確認メール送信に失敗しました', error)
         })
     }
+
+    const pendingNotificationEmail = await verificationService.getPendingEmail(
+      updatedUser.id
+    )
 
     return c.json<SuccessResponse<ApiResponseUserProfile>>({
       status: 'success',
@@ -139,233 +162,46 @@ user.patch(
         userId: updatedUser.id,
         name: updatedUser.name,
         notificationEmail: updatedUser.notificationEmail,
-        isProfilePublic: updatedUser.isProfilePublic,
+        pendingNotificationEmail,
         role: updatedUser.role as import('@repo/shared-types').UserRole,
         plan: updatedUser.plan,
       },
-      message: 'プロフィール更新成功',
+      message: verificationRequest
+        ? '確認メールを送信しました。メール内のリンクから確認すると通知メールアドレスが変更されます'
+        : 'プロフィール更新成功',
     })
   }
 )
 
-user.get('/:userId/page', honoOptionalAuthMiddleware, async (c) => {
-  const userId = c.req.param('userId')
-  const requesterId = c.var.user?.userEntity.id
-  const targetUserId = createUserId(userId)
+/**
+ * 通知メールアドレス所有確認エンドポイント
+ *
+ * @remarks
+ * - 認証不要（完全公開エンドポイント）。確認メールに記載されたトークンのみで完結する
+ * - トークンをSHA-256ハッシュ化して照合し、未確認・未無効化・有効期限内であれば通知メールアドレスを確定する
+ * - 成功時はワンタイム化する
+ */
+user.post(
+  '/notification-email/verify',
+  zodValidateJson(NotificationEmailVerifyRequestSchema),
+  async (c) => {
+    const body = c.req.valid('json')
 
-  const userRepo = new PrismaUserRepository(prisma)
-  const followRepo = new PrismaUserFollowRepository(prisma)
-  const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
-  const historyRepo = new PrismaHistoryRepository(prisma)
-  const targetUser = await userRepo.findById(targetUserId)
+    const result = await prisma.$transaction(async (t) => {
+      const service = new NotificationEmailVerificationService(
+        new PrismaNotificationEmailVerificationRepository(t),
+        new PrismaUserRepository(t)
+      )
+      return service.verify(body.token)
+    })
 
-  if (!targetUser || !targetUser.isProfilePublic) {
-    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
-  }
-
-  const [bikes, histories, followerCount, followingCount, isFollowing] =
-    await Promise.all([
-      myUserBikeRepo.findPublicBikesByUserId(targetUserId, 8),
-      historyRepo.findPublicHistoriesByUserId(targetUserId, 30),
-      followRepo.countFollowers(targetUserId),
-      followRepo.countFollowing(targetUserId),
-      requesterId
-        ? followRepo.isFollowing(requesterId, targetUserId)
-        : Promise.resolve(false),
-    ])
-
-  return c.json<SuccessResponse<ApiResponsePublicUserPage>>({
-    status: 'success',
-    data: {
-      userId: targetUser.id,
-      name: targetUser.name,
-      followerCount,
-      followingCount,
-      isFollowing,
-      bikes: bikes.map((bike) => ({
-        myUserBikeId: bike.myUserBikeId,
-        manufacturerName: bike.manufacturerName,
-        modelName: bike.modelName,
-        nickname: bike.nickname,
-        displacement: bike.displacement,
-        totalMileage: bike.totalMileage,
-        ownedAt: bike.ownedAt.toISOString(),
-        updatedAt: bike.updatedAt.toISOString(),
-      })),
-      histories: histories
-        .map((item) => {
-          const bikeName =
-            item.userMyBike?.nickname ??
-            item.userMyBike?.userBike.bike?.modelName ??
-            'バイク'
-          if (item.type === 'FUEL_LOG' && item.fuelLog) {
-            return {
-              bikeId: item.userMyBikeId ?? '',
-              bikeName,
-              type: 'FUEL_LOG' as const,
-              occurredAt: item.occurredAt.toISOString(),
-              fuelLog: {
-                fuelLogId: item.fuelLog.id,
-                refueledAt: item.fuelLog.refueledAt.toISOString(),
-                mileage: item.fuelLog.mileage,
-                previousMileage: item.fuelLog.previousMileage,
-                amount: item.fuelLog.amount,
-                totalPrice: item.fuelLog.price,
-                memo: item.fuelLog.memo,
-                isFullTank: item.fuelLog.isFullTank,
-                fuelEfficiency: null,
-                pricePerLiter: null,
-                touringId: item.fuelLog.touringId,
-                touringTitle: null,
-              },
-            }
-          }
-          if (item.type === 'TOURING' && item.touring) {
-            return {
-              bikeId: item.userMyBikeId ?? '',
-              bikeName,
-              type: 'TOURING' as const,
-              occurredAt: item.occurredAt.toISOString(),
-              touring: {
-                touringId: item.touring.id,
-                touringPlanId: item.touring.planId,
-                title: item.touring.title,
-                startDate: item.touring.startDate.toISOString(),
-                endDate: item.touring.endDate.toISOString(),
-                startMileage: item.touring.startMileage,
-                endMileage: item.touring.endMileage,
-                startLatitude: null,
-                startLongitude: null,
-                endLatitude: null,
-                endLongitude: null,
-                status: item.touring.status,
-                fuelLogIds: [],
-              },
-            }
-          }
-          return null
-        })
-        .filter((v): v is NonNullable<typeof v> => v !== null),
-    },
-    message: '公開プロフィール取得成功',
-  })
-})
-
-user.post('/:userId/follow', honoAuthMiddleware, async (c) => {
-  const { userEntity } = c.var.user!
-  const followingId = createUserId(c.req.param('userId'))
-
-  const userRepo = new PrismaUserRepository(prisma)
-  const followRepo = new PrismaUserFollowRepository(prisma)
-  const notifRepo = new PrismaNotificationRepository(prisma)
-  const service = new UserFollowService(userRepo, followRepo, notifRepo)
-  await service.followUser(userEntity.id, followingId, userEntity.role)
-
-  return c.json<SuccessResponse<Record<string, never>>>({
-    status: 'success',
-    data: {},
-    message: 'フォローしました',
-  })
-})
-
-user.delete('/:userId/follow', honoAuthMiddleware, async (c) => {
-  const { userEntity } = c.var.user!
-  const followingId = createUserId(c.req.param('userId'))
-
-  const userRepo = new PrismaUserRepository(prisma)
-  const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(
-    userRepo,
-    followRepo,
-    new PrismaNotificationRepository(prisma)
-  )
-  await service.unfollowUser(userEntity.id, followingId)
-
-  return c.json<SuccessResponse<Record<string, never>>>({
-    status: 'success',
-    data: {},
-    message: 'フォロー解除しました',
-  })
-})
-
-user.get('/:userId/followers', honoAuthMiddleware, async (c) => {
-  const userId = createUserId(c.req.param('userId'))
-  const page = Number(c.req.query('page') ?? '1')
-
-  const userRepo = new PrismaUserRepository(prisma)
-  const targetUser = await userRepo.findById(userId)
-  if (!targetUser || !targetUser.isProfilePublic) {
-    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
-  }
-
-  const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(
-    userRepo,
-    followRepo,
-    new PrismaNotificationRepository(prisma)
-  )
-  const result = await service.getFollowers(userId, page)
-
-  return c.json<SuccessResponse<ApiResponseUserFollowList>>({
-    status: 'success',
-    data: result,
-    message: 'フォロワー一覧取得成功',
-  })
-})
-
-user.get('/:userId/following', honoAuthMiddleware, async (c) => {
-  const userId = createUserId(c.req.param('userId'))
-  const page = Number(c.req.query('page') ?? '1')
-
-  const userRepo = new PrismaUserRepository(prisma)
-  const targetUser = await userRepo.findById(userId)
-  if (!targetUser || !targetUser.isProfilePublic) {
-    throw new ApiV1Error('NOT_FOUND', '公開プロフィールが見つかりません')
-  }
-
-  const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(
-    userRepo,
-    followRepo,
-    new PrismaNotificationRepository(prisma)
-  )
-  const result = await service.getFollowing(userId, page)
-
-  return c.json<SuccessResponse<ApiResponseUserFollowList>>({
-    status: 'success',
-    data: result,
-    message: 'フォロー中一覧取得成功',
-  })
-})
-
-user.get('/search', honoAuthMiddleware, async (c) => {
-  const { userEntity } = c.var.user!
-  const query = c.req.query('q') ?? ''
-  const page = Number(c.req.query('page') ?? '1')
-
-  if (query.trim().length === 0) {
-    return c.json<SuccessResponse<ApiResponseUserSearch>>({
+    return c.json<SuccessResponse<ApiResponseNotificationEmailVerify>>({
       status: 'success',
-      data: { users: [], total: 0, page },
-      message: 'ユーザー検索成功',
+      data: { notificationEmail: result.notificationEmail },
+      message: '通知メールアドレスを確認しました',
     })
   }
-
-  const userRepo = new PrismaUserRepository(prisma)
-  const followRepo = new PrismaUserFollowRepository(prisma)
-  const service = new UserFollowService(
-    userRepo,
-    followRepo,
-    new PrismaNotificationRepository(prisma)
-  )
-  const result = await service.searchUsers(query.trim(), userEntity.id, page)
-
-  return c.json<SuccessResponse<ApiResponseUserSearch>>({
-    status: 'success',
-    data: result,
-    message: 'ユーザー検索成功',
-  })
-})
+)
 
 /**
  * ユーザー認証登録エンドポイント
@@ -440,7 +276,7 @@ user.post(
           userId: user.id,
           name: user.name,
           notificationEmail: user.notificationEmail,
-          isProfilePublic: user.isProfilePublic,
+          pendingNotificationEmail: null,
           role: user.role as import('@repo/shared-types').UserRole,
           plan: user.plan,
         },
@@ -639,7 +475,7 @@ user.post(
           userId: guestUser.id,
           name: guestUser.name,
           notificationEmail: guestUser.notificationEmail,
-          isProfilePublic: guestUser.isProfilePublic,
+          pendingNotificationEmail: null,
           role: guestUser.role as import('@repo/shared-types').UserRole,
           plan: guestUser.plan,
         },

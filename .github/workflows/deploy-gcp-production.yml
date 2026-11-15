@@ -138,6 +138,22 @@ jobs:
           echo "revision_name=${LATEST_REVISION}" >> $GITHUB_OUTPUT
           echo "app_version=${APP_VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Assign latest tag
+        id: latest_tag
+        run: |
+          # latest タグは最新のreadyリビジョンを常に指す。このURLはFirebase Authの承認済みドメインに登録している
+          gcloud run services update-traffic ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --update-tags=latest=LATEST \
+            --quiet
+
+          LATEST_URL=$(gcloud run services describe ${{ env.CLOUD_RUN_SERVICE }} \
+            --region=${{ env.GCP_REGION }} \
+            --format=json | jq -r '.status.traffic[] | select(.tag == "latest") | .url')
+
+          echo "Latest tag URL: ${LATEST_URL}"
+          echo "latest_url=${LATEST_URL}" >> $GITHUB_OUTPUT
+
       - name: Wait for deployment
         run: |
           echo "Waiting for deployment to complete..."
@@ -178,7 +194,10 @@ jobs:
           echo "   https://github.com/${{ github.repository }}/actions/workflows/run-migration.yml"
           echo "   👉 Click 'Run workflow' button"
           echo ""
-          echo "2️⃣  After migration succeeds, switch traffic to new revision:"
+          echo "2️⃣  After migration succeeds, verify the new revision (production data):"
+          echo "   ${{ steps.latest_tag.outputs.latest_url }}"
+          echo ""
+          echo "3️⃣  Switch traffic to new revision:"
           echo "   https://github.com/${{ github.repository }}/actions/workflows/switch-traffic.yml"
           echo "   👉 Specify revision: ${{ steps.deploy.outputs.revision_name }}"
           echo ""

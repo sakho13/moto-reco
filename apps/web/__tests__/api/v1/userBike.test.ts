@@ -5540,6 +5540,120 @@ describe('UserBike API Endpoints', () => {
     })
   })
 
+  describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/tourings/:touringId/spots/reorder', () => {
+    let token: string
+    let myUserBikeId: string
+    let touringId: string
+    let spotIdA: string
+    let spotIdB: string
+
+    const reorder = (spotIds: string[], authToken = token) =>
+      app.request(
+        `/api/v1/user-bike/bike/${myUserBikeId}/tourings/${touringId}/spots/reorder`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ spotIds }),
+        }
+      )
+
+    beforeEach(async () => {
+      const user = await createTestUser()
+      token = user.token
+
+      const bike = await createTestUserBike(token, {
+        displacement: 400,
+        nickname: 'スポット並び替えテスト用バイク',
+      })
+      myUserBikeId = bike.myUserBikeId
+
+      touringId = await createTestTouring(token, myUserBikeId, {
+        title: 'スポット並び替えテスト用ツーリング',
+        startDate: '2024-11-01T00:00:00.000Z',
+        endDate: '2024-11-02T00:00:00.000Z',
+      })
+      spotIdA = await createTestSpot(token, myUserBikeId, touringId, {
+        name: 'スポットA',
+      })
+      spotIdB = await createTestSpot(token, myUserBikeId, touringId, {
+        name: 'スポットB',
+      })
+    })
+
+    test('自分のスポットを並び替えできる', async () => {
+      const res = await reorder([spotIdB, spotIdA])
+      expect(res.status).toBe(200)
+
+      const spots = await prisma.tUserMyBikeTouringSpot.findMany({
+        where: { touringId },
+        orderBy: { sortOrder: 'asc' },
+      })
+      expect(spots.map((s) => s.id)).toEqual([spotIdB, spotIdA])
+    })
+
+    test('他ユーザーのスポットIDを指定した場合は400となり、他ユーザーのスポットは変更されない', async () => {
+      const victim = await createTestUser()
+      const victimBike = await createTestUserBike(victim.token, {
+        displacement: 250,
+        nickname: '被害者バイク',
+      })
+      const victimTouringId = await createTestTouring(
+        victim.token,
+        victimBike.myUserBikeId,
+        {
+          title: '被害者ツーリング',
+          startDate: '2024-11-01T00:00:00.000Z',
+          endDate: '2024-11-02T00:00:00.000Z',
+        }
+      )
+      const victimSpotId1 = await createTestSpot(
+        victim.token,
+        victimBike.myUserBikeId,
+        victimTouringId,
+        { name: '被害者スポット1' }
+      )
+      const victimSpotId2 = await createTestSpot(
+        victim.token,
+        victimBike.myUserBikeId,
+        victimTouringId,
+        { name: '被害者スポット2' }
+      )
+      const before = await prisma.tUserMyBikeTouringSpot.findMany({
+        where: { touringId: victimTouringId },
+        orderBy: { sortOrder: 'asc' },
+      })
+
+      const res = await reorder([victimSpotId2, victimSpotId1])
+      expect(res.status).toBe(400)
+
+      const mixedRes = await reorder([spotIdB, spotIdA, victimSpotId1])
+      expect(mixedRes.status).toBe(400)
+
+      const after = await prisma.tUserMyBikeTouringSpot.findMany({
+        where: { touringId: victimTouringId },
+        orderBy: { sortOrder: 'asc' },
+      })
+      expect(after.map((s) => [s.id, s.sortOrder])).toEqual(
+        before.map((s) => [s.id, s.sortOrder])
+      )
+    })
+
+    test('スポットIDに過不足や重複がある場合は400となる', async () => {
+      expect((await reorder([spotIdA])).status).toBe(400)
+      expect((await reorder([spotIdA, spotIdA])).status).toBe(400)
+      expect((await reorder([spotIdA, spotIdB, randomUUID()])).status).toBe(400)
+    })
+
+    test('他ユーザーのツーリングに対する並び替えは404となる', async () => {
+      const other = await createTestUser()
+      const res = await reorder([spotIdB, spotIdA], other.token)
+      expect(res.status).toBe(404)
+    })
+  })
+
   describe('ゲストアカウント制限', () => {
     describe('バイク登録制限（1台まで）', () => {
       test('ゲストは1台目のバイクを登録できる', async () => {

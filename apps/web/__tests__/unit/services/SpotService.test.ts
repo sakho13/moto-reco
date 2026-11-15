@@ -92,7 +92,6 @@ describe('SpotService', () => {
     myUserBikeRepository = {
       createMyUserBike: vi.fn(),
       findMyUserBikes: vi.fn(),
-      findPublicBikesByUserId: vi.fn(),
       findMyUserBikeById: vi
         .fn()
         .mockResolvedValue({} as unknown as MyUserBikeEntity),
@@ -413,6 +412,11 @@ describe('SpotService', () => {
     })
 
     test('スポットを並び替えできる', async () => {
+      vi.mocked(spotRepository.findSpotsByTouringId).mockResolvedValue([
+        buildSpot({ spotId: createSpotId('spot-1') }),
+        buildSpot({ spotId: createSpotId('spot-2'), sortOrder: 1 }),
+      ])
+
       await service.reorderSpots(
         ['spot-2', 'spot-1'],
         touringId,
@@ -424,6 +428,29 @@ describe('SpotService', () => {
         ['spot-2', 'spot-1'],
         touringId
       )
+    })
+
+    test.each([
+      [
+        '他ツーリングのスポットIDが含まれる',
+        ['spot-2', 'spot-1', 'other-spot'],
+      ],
+      ['スポットIDが不足している', ['spot-1']],
+      ['スポットIDが重複している', ['spot-1', 'spot-1']],
+    ])('%s場合はINVALID_REQUESTエラーになる', async (_, spotIds) => {
+      vi.mocked(spotRepository.findSpotsByTouringId).mockResolvedValue([
+        buildSpot({ spotId: createSpotId('spot-1') }),
+        buildSpot({ spotId: createSpotId('spot-2'), sortOrder: 1 }),
+      ])
+
+      const error = await service
+        .reorderSpots(spotIds, touringId, myUserBikeId, userId)
+        .catch((e: unknown) => e)
+      expect(error).toBeInstanceOf(ApiV1Error)
+      expect((error as ApiV1Error).toErrorResponse().errorCode).toBe(
+        'INVALID_REQUEST'
+      )
+      expect(spotRepository.reorderSpots).not.toHaveBeenCalled()
     })
   })
 })

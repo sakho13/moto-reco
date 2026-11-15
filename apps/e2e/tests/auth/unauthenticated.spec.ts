@@ -43,13 +43,6 @@ test.describe('未認証アクセスのリダイレクト', () => {
     await expect(page).toHaveURL(/\/app\/login/, { timeout: 10_000 })
   })
 
-  test('検索ページへ未認証でアクセスするとログインへリダイレクトされる', async ({
-    page,
-  }) => {
-    await page.goto('/app/search')
-    await expect(page).toHaveURL(/\/app\/login/, { timeout: 10_000 })
-  })
-
   test('グッズ一覧ページへ未認証でアクセスするとログインへリダイレクトされる', async ({
     page,
   }) => {

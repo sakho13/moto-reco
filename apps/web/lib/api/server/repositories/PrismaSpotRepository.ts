@@ -151,11 +151,12 @@ export class PrismaSpotRepository
     })
   }
 
-  async reorderSpots(spotIds: SpotId[]): Promise<void> {
+  async reorderSpots(spotIds: SpotId[], touringId: TouringId): Promise<void> {
+    // touringId でスコープし、他ツーリングのスポットを更新しないようにする
     await (this.connection as PrismaClient).$transaction(
       spotIds.map((spotId, index) =>
-        this.connection.tUserMyBikeTouringSpot.update({
-          where: { id: spotId },
+        this.connection.tUserMyBikeTouringSpot.updateMany({
+          where: { id: spotId, touringId },
           data: { sortOrder: index },
         })
       )

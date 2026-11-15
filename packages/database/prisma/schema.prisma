@@ -46,6 +46,7 @@ model MUser {
   histories               TUserMyBikeHistory[]
   photos                  TUserPhoto[]
   userQuit                TUserQuit?
+  notificationEmailVerifications TUserNotificationEmailVerification[]
   followers               TUserFollow[]             @relation("UserFollowing")
   following               TUserFollow[]             @relation("UserFollowers")
   notifications           TNotification[]
@@ -548,6 +549,25 @@ model TUserQuit {
 
   @@unique([userId])
   @@index([status, purgeAt])
+}
+
+// 通知メールアドレス変更時の所有確認トークン。確認が完了するまで MUser.notificationEmail は更新しない。
+// トークンは平文を確認メールにのみ埋め込み、DBにはSHA-256ハッシュのみ保存する。
+// 発行履歴は送信レート制限の判定にも使う。
+model TUserNotificationEmailVerification {
+  id         String    @id @default(cuid(2))
+  userId     String    @map("user_id")
+  email      String
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz
+  verifiedAt DateTime? @map("verified_at") @db.Timestamptz
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 // 内部API（削除バッチ等）を保護するためのシステム共通APIキー。特定ユーザーに紐づかない。

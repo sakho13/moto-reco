@@ -84,15 +84,6 @@ const featureDetails: readonly FeatureDetail[] = [
       '部品・工具情報へのリンクで準備を効率化',
     ],
   },
-  {
-    id: 'feature-friend',
-    title: '公開プロフィール・フレンド機能',
-    items: [
-      'プロフィールを公開してユーザー検索で見つけてもらう',
-      '気になるライダーをフォローしてバイク・履歴を確認',
-      'フォロワー・フォロー中の一覧をプロフィールページで管理',
-    ],
-  },
 ]
 
 const featureShowcases = featureDetails.filter(

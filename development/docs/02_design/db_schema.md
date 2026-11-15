@@ -7,6 +7,7 @@ erDiagram
     MUser ||--|| MAuthProvider : "認証"
     MUser ||--o{ TMyBike : "所有"
     MUser ||--o| TUserQuit : "退会"
+    MUser ||--o{ TUserNotificationEmailVerification : "通知メール確認"
     MUser ||--o{ TUserGoods : "購入グッズ"
 
     MCompany ||--o{ MBike : "製造"
@@ -165,6 +166,17 @@ erDiagram
         UserQuitStatus status "QUIT / RECOVERED"
     }
 
+    TUserNotificationEmailVerification {
+        string id PK
+        string userId FK
+        string email "確認待ちの通知メールアドレス"
+        string tokenHash UK "確認トークンのSHA-256ハッシュ"
+        datetime expiresAt "発行から24時間"
+        datetime verifiedAt "確認完了日時"
+        datetime revokedAt "新しい変更依頼・解除で無効化した日時"
+        datetime createdAt "レート制限の判定に使用"
+    }
+
     MSystemApiKey {
         string id PK
         string name
@@ -188,6 +200,13 @@ erDiagram
 - 復帰時（`POST /api/v1/user/auth/recover`、非認証の公開エンドポイント）: 受け取ったトークンをハッシュ化して`recoveryTokenHash`と照合し、`purgeAt`を超過していなければ`MUser`/`MAuthProvider`を有効化し`TUserQuit.status`を`RECOVERED`にしてワンタイム化する。
 - 完全削除バッチ（`POST /api/v1/internal/purge-quit-users`、週次でGitHub Actionsから呼び出し）: `status=QUIT AND purgeAt <= now()`の`TUserQuit`を対象に、Storage実ファイル・DB（Cascade）・Firebase Authアカウントを完全に物理削除する。このAPIは`MSystemApiKey`のハッシュ照合による専用ミドルウェアで保護する（管理者専用API/UIで発行・失効を行う）。
 
+### 通知メールアドレスの所有確認（TUserNotificationEmailVerification）
+
+- 変更依頼時（`PATCH /api/v1/user/profile` で `notificationEmail` を新しいアドレスに変更）: `MUser.notificationEmail`は更新せず、確認トークンを発行して新アドレスへ確認メール（確認リンクのみ、表示名は含めない）を送る。同じユーザーの未確認トークンは`revokedAt`を設定して無効化する。
+- 確認時（`POST /api/v1/user/notification-email/verify`、非認証の公開エンドポイント）: トークンをハッシュ化して照合し、未確認・未無効化・有効期限内であれば`MUser.notificationEmail`を確定し`verifiedAt`を設定してワンタイム化する。
+- レート制限: 1ユーザーあたりの発行件数を`createdAt`で数え、直近1時間3件・直近24時間10件を超える依頼は拒否する。
+- `notificationEmail`に`null`を指定した解除は確認なしで即時反映し、未確認トークンも無効化する。
+
 ### 定義済みテーブル
 
 | テーブル名       | 説明                                                     | 実装状況 |
@@ -205,6 +224,7 @@ erDiagram
 | TUserMyBikeMaintenanceItem | メンテナンス項目ごとの入力値を格納するテーブル | ✅       |
 | TUserGoods       | ユーザーが購入したグッズ（マイバイクへの取り付けは任意）を格納するテーブル | ✅       |
 | TUserQuit        | ユーザーの退会・復帰・完全削除予定日時を管理するテーブル | ✅       |
+| TUserNotificationEmailVerification | 通知メールアドレス変更時の所有確認トークン・送信レート制限の履歴 | ✅       |
 | MSystemApiKey    | 内部バッチAPI保護用のシステム共通APIキーを管理するマスターテーブル | ✅       |
 
 ### 未定義テーブル（実装予定）
