@@ -6,20 +6,6 @@ export class NotificationService {
     private readonly _notificationRepository: INotificationRepository
   ) {}
 
-  async createFollowedNotification(
-    followingId: UserId,
-    followerId: UserId,
-    followerName: string
-  ): Promise<void> {
-    await this._notificationRepository.create({
-      userId: followingId,
-      type: 'FOLLOWED',
-      title: 'フォローされました',
-      body: `${followerName}さんにフォローされました`,
-      metadata: { followerId, followerName },
-    })
-  }
-
   async getNotifications(
     userId: UserId,
     page: number

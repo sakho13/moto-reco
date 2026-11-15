@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
-import { Checkbox } from '@repo/ui/checkbox'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { ModalBase } from '@/components/common/ModalBase'
@@ -13,20 +12,17 @@ import { apiPatch } from '@/lib/api/client'
 interface ProfileEditModalProps {
   initialName: string
   initialNotificationEmail: string | null
-  initialIsProfilePublic: boolean
   isGuest?: boolean
   onClose: () => void
   onSuccess: (updated: {
     name: string
     notificationEmail: string | null
-    isProfilePublic: boolean
   }) => void
 }
 
 export function ProfileEditModal({
   initialName,
   initialNotificationEmail,
-  initialIsProfilePublic,
   isGuest = false,
   onClose,
   onSuccess,
@@ -36,7 +32,6 @@ export function ProfileEditModal({
     initialNotificationEmail ?? ''
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isProfilePublic, setIsProfilePublic] = useState(initialIsProfilePublic)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,20 +49,16 @@ export function ProfileEditModal({
       const response = await apiPatch('/api/v1/user/profile', {
         name: trimmedName,
         notificationEmail: notificationEmail.trim() || null,
-        isProfilePublic,
       })
       trackEvent('profile_update', {
         changed_name: trimmedName !== initialName,
         changed_notification_email:
           (notificationEmail.trim() || null) !== initialNotificationEmail,
-        changed_is_profile_public: isProfilePublic !== initialIsProfilePublic,
-        is_profile_public: isProfilePublic,
         is_guest: isGuest,
       })
       onSuccess({
         name: response.data.name,
         notificationEmail: response.data.notificationEmail,
-        isProfilePublic: response.data.isProfilePublic,
       })
     } catch (err) {
       trackEvent('profile_error', {
@@ -110,16 +101,6 @@ export function ProfileEditModal({
             autoFocus
           />
         </FormField>
-        <FormField label="公開設定" htmlFor="modal-profile-public">
-          <Checkbox
-            id="modal-profile-public"
-            label="プロフィールを公開する"
-            checked={isProfilePublic}
-            onChange={(e) => setIsProfilePublic(e.target.checked)}
-            disabled={isSubmitting || isGuest}
-          />
-        </FormField>
-
         <FormField
           label="通知メールアドレス"
           htmlFor="modal-profile-notification-email"

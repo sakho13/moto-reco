@@ -72,13 +72,9 @@ export const UserProfilePatchRequestSchema = z
       .email('有効なメールアドレスを入力してください')
       .nullable()
       .optional(),
-    isProfilePublic: z.boolean().optional(),
   })
   .refine(
-    (data) =>
-      data.name !== undefined ||
-      data.notificationEmail !== undefined ||
-      data.isProfilePublic !== undefined,
+    (data) => data.name !== undefined || data.notificationEmail !== undefined,
     { message: '少なくとも1つのフィールドを指定してください' }
   )
 

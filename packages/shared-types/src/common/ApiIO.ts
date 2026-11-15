@@ -69,7 +69,6 @@ export type ApiResponseUserProfile = {
   userId: string
   name: string
   notificationEmail: string | null
-  isProfilePublic: boolean
   role: UserRole
   /** 料金プラン。GUEST / ADMIN は null */
   plan: UserPlan | null
@@ -82,44 +81,6 @@ export type ApiResponseUserPlanHistory = {
   changedByName: string
   reason: string | null
 }[]
-
-export type ApiResponsePublicUserPage = {
-  userId: string
-  name: string
-  followerCount: number
-  followingCount: number
-  isFollowing: boolean
-  bikes: {
-    myUserBikeId: string
-    manufacturerName: string | null
-    modelName: string | null
-    nickname: string | null
-    displacement: number
-    totalMileage: number
-    ownedAt: string
-    updatedAt: string
-  }[]
-  histories: ApiResponseAllBikesHistoryList
-}
-
-export type ApiResponseUserFollowList = {
-  users: {
-    userId: string
-    name: string
-  }[]
-  total: number
-  page: number
-}
-
-export type ApiResponseUserSearch = {
-  users: {
-    userId: string
-    name: string
-    isFollowing: boolean
-  }[]
-  total: number
-  page: number
-}
 
 /** 退会処理完了時に復帰用トークンを返す（サインアウト後の復帰用URL表示ページに引き継ぐため） */
 export type ApiResponseUserQuit = {

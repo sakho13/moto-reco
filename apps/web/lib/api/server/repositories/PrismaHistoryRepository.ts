@@ -1,15 +1,10 @@
-import {
-  HistoryEntity,
-  IHistoryRepository,
-  PublicHistoryDetail,
-} from '@repo/shared-domain'
+import { HistoryEntity, IHistoryRepository } from '@repo/shared-domain'
 import {
   createFuelLogId,
   createHistoryId,
   createMyUserBikeId,
   createTouringId,
   createUserId,
-  UserId,
 } from '@repo/shared-types'
 import { PrismaRepositoryBase } from './PrismaRepositoryBase'
 
@@ -61,54 +56,6 @@ export class PrismaHistoryRepository
     await this.connection.tUserMyBikeHistory.updateMany({
       where: { touringId },
       data: { occurredAt },
-    })
-  }
-
-  public async findPublicHistoriesByUserId(
-    userId: UserId,
-    limit: number
-  ): Promise<PublicHistoryDetail[]> {
-    return this.connection.tUserMyBikeHistory.findMany({
-      where: { userId },
-      orderBy: { occurredAt: 'desc' },
-      take: limit,
-      select: {
-        id: true,
-        userMyBikeId: true,
-        type: true,
-        occurredAt: true,
-        userMyBike: {
-          select: {
-            nickname: true,
-            userBike: { select: { bike: { select: { modelName: true } } } },
-          },
-        },
-        fuelLog: {
-          select: {
-            id: true,
-            refueledAt: true,
-            mileage: true,
-            previousMileage: true,
-            amount: true,
-            price: true,
-            isFullTank: true,
-            memo: true,
-            touringId: true,
-          },
-        },
-        touring: {
-          select: {
-            id: true,
-            planId: true,
-            title: true,
-            startDate: true,
-            endDate: true,
-            startMileage: true,
-            endMileage: true,
-            status: true,
-          },
-        },
-      },
     })
   }
 
