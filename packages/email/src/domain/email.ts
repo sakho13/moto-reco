@@ -1,6 +1,6 @@
 export const EmailType = {
   WELCOME: 'WELCOME',
-  NOTIFICATION_EMAIL_CHANGED: 'NOTIFICATION_EMAIL_CHANGED',
+  NOTIFICATION_EMAIL_VERIFICATION: 'NOTIFICATION_EMAIL_VERIFICATION',
   USER_QUIT: 'USER_QUIT',
 } as const
 
@@ -11,9 +11,11 @@ export type WelcomeEmailPayload = {
   userName: string
 }
 
-export type NotificationEmailChangedEmailPayload = {
+export type NotificationEmailVerificationEmailPayload = {
+  /** 所有確認を行う（確認待ちの）メールアドレス */
   to: string
-  userName: string
+  /** 確認用の平文トークン（メール本文のURLにのみ埋め込む） */
+  token: string
 }
 
 export type UserQuitEmailPayload = {
@@ -25,7 +27,7 @@ export type UserQuitEmailPayload = {
 
 export type EmailPayloadByType = {
   [EmailType.WELCOME]: WelcomeEmailPayload
-  [EmailType.NOTIFICATION_EMAIL_CHANGED]: NotificationEmailChangedEmailPayload
+  [EmailType.NOTIFICATION_EMAIL_VERIFICATION]: NotificationEmailVerificationEmailPayload
   [EmailType.USER_QUIT]: UserQuitEmailPayload
 }
 

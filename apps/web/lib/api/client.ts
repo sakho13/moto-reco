@@ -13,6 +13,7 @@ import {
   ApiResponseUserAuthProviderSwitch,
   ApiResponseUserQuit,
   ApiResponseUserRecover,
+  ApiResponseNotificationEmailVerify,
   ApiResponseFuelInsight,
   ApiResponseTouringDetail,
   ApiResponseTouringList,
@@ -226,6 +227,9 @@ type API_EP = {
   }
   '/api/v1/user/auth/recover': {
     POST: SuccessResponse<ApiResponseUserRecover>
+  }
+  '/api/v1/user/notification-email/verify': {
+    POST: SuccessResponse<ApiResponseNotificationEmailVerify>
   }
   '/api/v1/user/auth/guest/register': {
     POST: SuccessResponse<ApiResponseUserProfile>

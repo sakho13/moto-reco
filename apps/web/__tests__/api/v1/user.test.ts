@@ -192,6 +192,7 @@ describe('User API Endpoints', () => {
           userId: expect.any(String),
           name: '更新後の名前',
           notificationEmail: expect.any(String),
+          pendingNotificationEmail: null,
           role: expect.any(String),
           plan: expect.any(String),
         },
@@ -199,47 +200,157 @@ describe('User API Endpoints', () => {
       })
       expect(res.status).toBe(200)
     })
+  })
 
-    test('通知メールアドレスのみ更新できる', async () => {
-      const email = createRandomEmail()
-      const credential = await handleRegisterByFirebase(email, 'password')
-      const token = await credential.user.getIdToken()
-      await app.request('/api/v1/user/auth/register', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: 'test_通知メールアドレスのみ更新できる',
-        }),
-      })
-
-      const notificationEmail = createRandomEmail()
-      const res = await app.request('/api/v1/user/profile', {
+  describe('通知メールアドレスの変更（所有確認）', () => {
+    const patchProfile = (token: string, body: Record<string, unknown>) =>
+      app.request('/api/v1/user/profile', {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          notificationEmail,
-        }),
+        body: JSON.stringify(body),
       })
 
-      const json = await res.json()
-      expect(json).toEqual({
-        status: 'success',
-        data: {
-          userId: expect.any(String),
-          name: 'test_通知メールアドレスのみ更新できる',
-          notificationEmail,
-          role: expect.any(String),
-          plan: expect.any(String),
-        },
-        message: expect.any(String),
+    const verify = (token: string) =>
+      app.request('/api/v1/user/notification-email/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
       })
+
+    const getProfile = async (token: string) => {
+      const res = await app.request('/api/v1/user/profile', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      return (await res.json()).data as {
+        notificationEmail: string | null
+        pendingNotificationEmail: string | null
+      }
+    }
+
+    /** 送信された確認メール本文から確認トークンを取り出す */
+    const extractToken = (html: string): string => {
+      const match = html.match(/verify-notification-email\?token=([^"&]+)/)
+      if (!match?.[1]) throw new Error('確認トークンが見つかりません')
+      return decodeURIComponent(match[1])
+    }
+
+    test('新しいアドレスは即時反映されず、表示名を含まない確認メールが送信される', async () => {
+      const { token } = await createTestUser()
+      const before = await getProfile(token)
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+      const newEmail = createRandomEmail()
+
+      const res = await patchProfile(token, {
+        name: '<a href="https://evil.example">悪意ある名前</a>',
+        notificationEmail: newEmail,
+      })
+      const json = await res.json()
+
       expect(res.status).toBe(200)
+      expect(json.data.notificationEmail).toBe(before.notificationEmail)
+      expect(json.data.pendingNotificationEmail).toBe(newEmail)
+      expect(sendSpy).toHaveBeenCalledTimes(1)
+      const sent = sendSpy.mock.calls[0]![0]
+      expect(sent.to).toBe(newEmail)
+      expect(sent.html).not.toContain('悪意ある名前')
+      expect(sent.html).not.toContain('evil.example')
+    })
+
+    test('確認リンクのトークンで通知メールアドレスが確定し、トークンは再利用できない', async () => {
+      const { token } = await createTestUser()
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+      const newEmail = createRandomEmail()
+      await patchProfile(token, { notificationEmail: newEmail })
+      const verifyToken = extractToken(sendSpy.mock.calls[0]![0].html)
+
+      const res = await verify(verifyToken)
+      const json = await res.json()
+      expect(res.status).toBe(200)
+      expect(json.data.notificationEmail).toBe(newEmail)
+
+      const profile = await getProfile(token)
+      expect(profile.notificationEmail).toBe(newEmail)
+      expect(profile.pendingNotificationEmail).toBeNull()
+
+      const reuse = await verify(verifyToken)
+      expect(reuse.status).toBe(400)
+    })
+
+    test('後から別のアドレスへ変更を依頼すると、前の確認トークンは無効になる', async () => {
+      const { token } = await createTestUser()
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+      await patchProfile(token, { notificationEmail: createRandomEmail() })
+      const firstToken = extractToken(sendSpy.mock.calls[0]![0].html)
+      const secondEmail = createRandomEmail()
+      await patchProfile(token, { notificationEmail: secondEmail })
+
+      expect((await verify(firstToken)).status).toBe(400)
+      expect((await getProfile(token)).pendingNotificationEmail).toBe(
+        secondEmail
+      )
+    })
+
+    test('不正なトークンでは確認できない', async () => {
+      const res = await verify('invalid-token')
+      expect(res.status).toBe(400)
+    })
+
+    test('nullを指定すると確認なしで即時に解除される', async () => {
+      const { token } = await createTestUser()
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+
+      const res = await patchProfile(token, { notificationEmail: null })
+      const json = await res.json()
+
+      expect(res.status).toBe(200)
+      expect(json.data.notificationEmail).toBeNull()
+      expect(sendSpy).not.toHaveBeenCalled()
+    })
+
+    test('確認メールの送信回数が上限を超えると429となる', async () => {
+      const { token } = await createTestUser()
+      vi.spyOn(ResendEmailRepository.prototype, 'send').mockResolvedValue()
+
+      for (let i = 0; i < 3; i++) {
+        const res = await patchProfile(token, {
+          notificationEmail: createRandomEmail(),
+        })
+        expect(res.status).toBe(200)
+      }
+
+      const res = await patchProfile(token, {
+        name: 'レート制限後の名前',
+        notificationEmail: createRandomEmail(),
+      })
+      const json = await res.json()
+      expect(res.status).toBe(429)
+      expect(json.errorCode).toBe('TOO_MANY_REQUESTS')
+      // 上限超過時は名前も更新されない
+      const profileRes = await app.request('/api/v1/user/profile', {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      expect((await profileRes.json()).data.name).not.toBe('レート制限後の名前')
+    })
+
+    test('ゲストアカウントは通知メールアドレスを設定できない', async () => {
+      const { token } = await createGuestUser()
+      const res = await patchProfile(token, {
+        notificationEmail: createRandomEmail(),
+      })
+      expect(res.status).toBe(403)
     })
   })
 
@@ -310,6 +421,7 @@ describe('User API Endpoints', () => {
           userId: expect.any(String),
           name: 'テストユーザー',
           notificationEmail: expect.any(String),
+          pendingNotificationEmail: null,
           role: expect.any(String),
           plan: 'FREE',
         },

@@ -41,4 +41,19 @@ describe('メールテンプレートのHTMLエスケープ', () => {
     expect(html).not.toContain('<script>')
     expect(html).toContain('token=abc%22%3E%3Cscript%3E')
   })
+
+  test('通知メールアドレス確認メールは確認リンクのみを含み、トークンはURLエンコードされる', async () => {
+    const { service, send } = buildService()
+
+    await service.sendByType(EmailType.NOTIFICATION_EMAIL_VERIFICATION, {
+      to: 'new@example.com',
+      token: 'abc"><script>',
+    })
+
+    const html = sentHtml(send)
+    expect(html).not.toContain('<script>')
+    expect(html).toContain(
+      'https://moto-reco.com/app/verify-notification-email?token=abc%22%3E%3Cscript%3E'
+    )
+  })
 })

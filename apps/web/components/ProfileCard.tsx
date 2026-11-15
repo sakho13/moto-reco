@@ -88,6 +88,12 @@ export function ProfileCard() {
             <span className={styles.itemLabel}>通知メールアドレス</span>
             <span>{data?.notificationEmail || '未設定'}</span>
           </div>
+          {data?.pendingNotificationEmail && (
+            <p className={styles.pendingNote} role="status">
+              {data.pendingNotificationEmail}{' '}
+              に確認メールを送信しました。メール内のリンクから確認すると変更が反映されます。
+            </p>
+          )}
         </div>
       </BaseCard>
 

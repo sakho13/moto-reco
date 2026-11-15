@@ -17,6 +17,7 @@ interface ProfileEditModalProps {
   onSuccess: (updated: {
     name: string
     notificationEmail: string | null
+    pendingNotificationEmail: string | null
   }) => void
 }
 
@@ -59,6 +60,7 @@ export function ProfileEditModal({
       onSuccess({
         name: response.data.name,
         notificationEmail: response.data.notificationEmail,
+        pendingNotificationEmail: response.data.pendingNotificationEmail,
       })
     } catch (err) {
       trackEvent('profile_error', {
@@ -104,6 +106,7 @@ export function ProfileEditModal({
         <FormField
           label="通知メールアドレス"
           htmlFor="modal-profile-notification-email"
+          helperText="新しいアドレスに確認メールを送信し、メール内のリンクで確認できたら変更されます"
         >
           <Input
             id="modal-profile-notification-email"

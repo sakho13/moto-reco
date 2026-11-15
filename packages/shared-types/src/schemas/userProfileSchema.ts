@@ -101,3 +101,25 @@ export const GuestRegisterRequestSchema = z.object({
 })
 
 export type GuestRegisterRequest = z.infer<typeof GuestRegisterRequestSchema>
+
+/**
+ * 通知メールアドレス所有確認リクエストのバリデーションスキーマ
+ *
+ * @remarks
+ * - token: 確認メールのURLに埋め込まれた確認トークン（平文）
+ * - 認証は不要（トークンのみで完結する公開エンドポイント）
+ */
+export const NotificationEmailVerifyRequestSchema = z.object({
+  token: z
+    .string({
+      required_error: '確認トークンは必須です',
+      invalid_type_error: '確認トークンは文字列である必要があります',
+    })
+    .trim()
+    .min(1, '確認トークンは必須です')
+    .max(256, '確認トークンが正しくありません'),
+})
+
+export type NotificationEmailVerifyRequest = z.infer<
+  typeof NotificationEmailVerifyRequestSchema
+>

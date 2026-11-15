@@ -6,3 +6,10 @@
 .itemLabel {
   color: var(--color-inkLight);
 }
+
+/* 通知メールアドレスの確認待ち案内 */
+.pendingNote {
+  font-size: var(--font-size-xs);
+  color: var(--color-inkLight);
+  overflow-wrap: anywhere;
+}

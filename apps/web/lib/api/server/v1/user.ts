@@ -3,6 +3,7 @@ import { prisma } from '@repo/database'
 import { EmailService, EmailType, ResendEmailRepository } from '@repo/email'
 import { ApiV1Error } from '@repo/shared-domain'
 import {
+  ApiResponseNotificationEmailVerify,
   ApiResponseUserProfile,
   ApiResponseUserPlanHistory,
   ApiResponseUserAuthProviderSwitch,
@@ -10,6 +11,7 @@ import {
   ApiResponseUserRecover,
   ChangePlanRequestSchema,
   GuestRegisterRequestSchema,
+  NotificationEmailVerifyRequestSchema,
   SuccessResponse,
   UserAuthProviderSwitchRequestSchema,
   UserAuthRecoverRequestSchema,
@@ -22,10 +24,12 @@ import { honoAuthMiddleware } from '../middlewares/honoAuth'
 import { zodValidateJson } from '../middlewares/zodValidation'
 import { FirebaseAuthRepository } from '../repositories/FirebaseAuthRepository'
 import { PrismaAuthProviderRepository } from '../repositories/PrismaAuthProviderRepository'
+import { PrismaNotificationEmailVerificationRepository } from '../repositories/PrismaNotificationEmailVerificationRepository'
 import { PrismaUserPlanHistoryRepository } from '../repositories/PrismaUserPlanHistoryRepository'
 import { PrismaUserQuitRepository } from '../repositories/PrismaUserQuitRepository'
 import { PrismaUserRepository } from '../repositories/PrismaUserRepository'
 import { AuthProviderSwitchService } from '../services/AuthProviderSwitchService'
+import { NotificationEmailVerificationService } from '../services/NotificationEmailVerificationService'
 import { UserPlanService } from '../services/UserPlanService'
 import { UserQuitService } from '../services/UserQuitService'
 import { UserService } from '../services/UserService'
@@ -42,12 +46,21 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
     throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
   }
 
+  const verificationService = new NotificationEmailVerificationService(
+    new PrismaNotificationEmailVerificationRepository(prisma),
+    userRepo
+  )
+  const pendingNotificationEmail = await verificationService.getPendingEmail(
+    user.id
+  )
+
   return c.json<SuccessResponse<ApiResponseUserProfile>>({
     status: 'success',
     data: {
       userId: user.id,
       name: user.name,
       notificationEmail: user.notificationEmail,
+      pendingNotificationEmail,
       role: user.role as import('@repo/shared-types').UserRole,
       plan: user.plan,
     },
@@ -62,6 +75,8 @@ user.get('/profile', honoAuthMiddleware, async (c) => {
  * - 認証必須（honoAuthMiddleware）
  * - リクエストボディのバリデーション（zodValidateJson）
  * - nameフィールド: 指定時は1文字以上50文字以下
+ * - notificationEmailフィールド: 新しいアドレスは即時反映せず、確認メールを送って所有確認後に反映する。
+ *   `null` の指定（解除）は即時反映する
  * - 少なくとも1フィールドの指定が必須
  */
 user.patch(
@@ -73,6 +88,10 @@ user.patch(
     const body = c.req.valid('json')
 
     const userRepo = new PrismaUserRepository(prisma)
+    const verificationService = new NotificationEmailVerificationService(
+      new PrismaNotificationEmailVerificationRepository(prisma),
+      userRepo
+    )
 
     // ユーザーの存在確認
     const user = await userRepo.findById(userEntity.id)
@@ -80,37 +99,59 @@ user.patch(
       throw new ApiV1Error('USER_NOT_REGISTERED', 'ユーザーが見つかりません')
     }
 
-    const prevNotificationEmail = user.notificationEmail
+    // 通知メールアドレスの変更依頼（所有確認が必要なもの）
+    let verificationRequest: { token: string; email: string } | null = null
+    if (body.notificationEmail !== undefined) {
+      const requestedEmail = body.notificationEmail ?? null
+
+      if (requestedEmail === null) {
+        // 解除は所有確認不要のため即時反映する
+        user.notificationEmail = null
+        await verificationService.cancelPending(user.id)
+      } else if (requestedEmail === user.notificationEmail) {
+        // 現在のアドレスのままなら確認待ちの依頼だけ取り消す
+        await verificationService.cancelPending(user.id)
+      } else {
+        if (userEntity.role === 'GUEST') {
+          throw new ApiV1Error(
+            'FORBIDDEN',
+            'ゲストアカウントは通知メールアドレスを設定できません'
+          )
+        }
+        // 送信レート制限を超えた場合はここで例外となり、名前の更新も行わない
+        verificationRequest = await verificationService.requestChange(
+          user.id,
+          requestedEmail
+        )
+      }
+    }
 
     if (body.name !== undefined) {
       user.name = body.name
     }
-    if (body.notificationEmail !== undefined) {
-      user.notificationEmail = body.notificationEmail ?? null
-    }
     // プロフィール更新
     const updatedUser = await userRepo.updateUser(user)
 
-    // 通知メールアドレスが新規設定または変更された場合に通知メールを送信
-    const newNotificationEmail = updatedUser.notificationEmail
-    if (
-      newNotificationEmail &&
-      newNotificationEmail !== prevNotificationEmail
-    ) {
+    // 新しいアドレスへ確認メールを送信する（表示名は含めない）
+    if (verificationRequest) {
       const emailRepository = new ResendEmailRepository(
         process.env.RESEND_API_KEY,
         process.env.RESEND_FROM_EMAIL
       )
       const emailService = new EmailService(emailRepository)
       emailService
-        .sendByType(EmailType.NOTIFICATION_EMAIL_CHANGED, {
-          to: newNotificationEmail,
-          userName: updatedUser.name,
+        .sendByType(EmailType.NOTIFICATION_EMAIL_VERIFICATION, {
+          to: verificationRequest.email,
+          token: verificationRequest.token,
         })
         .catch((error: unknown) => {
-          console.error('通知メールアドレス変更メール送信に失敗しました', error)
+          console.error('通知メールアドレス確認メール送信に失敗しました', error)
         })
     }
+
+    const pendingNotificationEmail = await verificationService.getPendingEmail(
+      updatedUser.id
+    )
 
     return c.json<SuccessResponse<ApiResponseUserProfile>>({
       status: 'success',
@@ -118,10 +159,43 @@ user.patch(
         userId: updatedUser.id,
         name: updatedUser.name,
         notificationEmail: updatedUser.notificationEmail,
+        pendingNotificationEmail,
         role: updatedUser.role as import('@repo/shared-types').UserRole,
         plan: updatedUser.plan,
       },
-      message: 'プロフィール更新成功',
+      message: verificationRequest
+        ? '確認メールを送信しました。メール内のリンクから確認すると通知メールアドレスが変更されます'
+        : 'プロフィール更新成功',
+    })
+  }
+)
+
+/**
+ * 通知メールアドレス所有確認エンドポイント
+ *
+ * @remarks
+ * - 認証不要（完全公開エンドポイント）。確認メールに記載されたトークンのみで完結する
+ * - トークンをSHA-256ハッシュ化して照合し、未確認・未無効化・有効期限内であれば通知メールアドレスを確定する
+ * - 成功時はワンタイム化する
+ */
+user.post(
+  '/notification-email/verify',
+  zodValidateJson(NotificationEmailVerifyRequestSchema),
+  async (c) => {
+    const body = c.req.valid('json')
+
+    const result = await prisma.$transaction(async (t) => {
+      const service = new NotificationEmailVerificationService(
+        new PrismaNotificationEmailVerificationRepository(t),
+        new PrismaUserRepository(t)
+      )
+      return service.verify(body.token)
+    })
+
+    return c.json<SuccessResponse<ApiResponseNotificationEmailVerify>>({
+      status: 'success',
+      data: { notificationEmail: result.notificationEmail },
+      message: '通知メールアドレスを確認しました',
     })
   }
 )
@@ -199,6 +273,7 @@ user.post(
           userId: user.id,
           name: user.name,
           notificationEmail: user.notificationEmail,
+          pendingNotificationEmail: null,
           role: user.role as import('@repo/shared-types').UserRole,
           plan: user.plan,
         },
@@ -397,6 +472,7 @@ user.post(
           userId: guestUser.id,
           name: guestUser.name,
           notificationEmail: guestUser.notificationEmail,
+          pendingNotificationEmail: null,
           role: guestUser.role as import('@repo/shared-types').UserRole,
           plan: guestUser.plan,
         },
