@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { REORDER_SPOT_IDS_MAX } from './spotSchema'
 
 /**
  * ツーリングプランスポット（経由地・休憩）登録リクエストのバリデーションスキーマ
@@ -152,7 +153,13 @@ export type TouringPlanSpotUpdateRequest = z.infer<
  * 並び替え対象は経由地・休憩（SPOT/BREAK）のIDのみ。
  */
 export const TouringPlanSpotReorderRequestSchema = z.object({
-  spotIds: z.array(z.string()).min(1, 'スポットIDを1件以上指定してください'),
+  spotIds: z
+    .array(z.string())
+    .min(1, 'スポットIDを1件以上指定してください')
+    .max(
+      REORDER_SPOT_IDS_MAX,
+      `スポットIDは${REORDER_SPOT_IDS_MAX}件以下で指定してください`
+    ),
 })
 
 export type TouringPlanSpotReorderRequest = z.infer<

@@ -178,7 +178,7 @@ export class PrismaTouringPlanSpotRepository
   ): Promise<void> {
     await (this.connection as PrismaClient).$transaction(
       spotIds.map((spotId, index) =>
-        this.connection.tUserMyBikeTouringPlanSpot.update({
+        this.connection.tUserMyBikeTouringPlanSpot.updateMany({
           where: { id: spotId, planId },
           data: { sortOrder: index },
         })

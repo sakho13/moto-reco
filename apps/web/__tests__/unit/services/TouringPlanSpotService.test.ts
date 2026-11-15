@@ -379,6 +379,61 @@ describe('TouringPlanSpotService', () => {
     })
   })
 
+  describe('reorderPlanSpots', () => {
+    const setupSpots = () =>
+      vi
+        .mocked(touringPlanSpotRepository.findPlanSpotsByPlanId)
+        .mockResolvedValue([
+          buildPlanSpot({
+            touringPlanSpotId: createTouringPlanSpotId('start'),
+            type: 'START',
+          }),
+          buildPlanSpot({
+            touringPlanSpotId: createTouringPlanSpotId('spot-1'),
+            sortOrder: 1,
+          }),
+          buildPlanSpot({
+            touringPlanSpotId: createTouringPlanSpotId('spot-2'),
+            type: 'BREAK',
+            sortOrder: 2,
+          }),
+        ])
+
+    test('経由地・休憩を並び替えできる', async () => {
+      setupSpots()
+
+      await service.reorderPlanSpots(
+        ['spot-2', 'spot-1'],
+        planId,
+        myUserBikeId,
+        userId
+      )
+
+      expect(touringPlanSpotRepository.reorderPlanSpots).toHaveBeenCalledWith(
+        ['spot-2', 'spot-1'],
+        planId
+      )
+    })
+
+    test.each([
+      ['他プランのスポットIDが含まれる', ['spot-2', 'spot-1', 'other-spot']],
+      ['出発地のIDが含まれる', ['start', 'spot-2', 'spot-1']],
+      ['スポットIDが不足している', ['spot-1']],
+      ['スポットIDが重複している', ['spot-1', 'spot-1']],
+    ])('%s場合はINVALID_REQUESTエラーになる', async (_, spotIds) => {
+      setupSpots()
+
+      const error = await service
+        .reorderPlanSpots(spotIds, planId, myUserBikeId, userId)
+        .catch((e: unknown) => e)
+      expect(error).toBeInstanceOf(ApiV1Error)
+      expect((error as ApiV1Error).toErrorResponse().errorCode).toBe(
+        'INVALID_REQUEST'
+      )
+      expect(touringPlanSpotRepository.reorderPlanSpots).not.toHaveBeenCalled()
+    })
+  })
+
   describe('setStartSpot', () => {
     test('出発地を新規設定できる', async () => {
       const startSpot = buildPlanSpot({

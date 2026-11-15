@@ -16,6 +16,7 @@ import {
   UserId,
 } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
+import { isSameIdSet } from '../utils/isSameIdSet'
 
 type RegisterSpotParams = {
   touringId: TouringId
@@ -312,6 +313,21 @@ export class SpotService {
 
     if (!touring) {
       throw new ApiV1Error('NOT_FOUND', '指定されたツーリングが見つかりません')
+    }
+
+    // 他ツーリング（他ユーザー含む）のスポットIDが混入していないか、過不足なく一致するかを検証する
+    const currentSpots =
+      await this.spotRepository.findSpotsByTouringId(touringId)
+    if (
+      !isSameIdSet(
+        spotIds,
+        currentSpots.map((spot) => spot.id)
+      )
+    ) {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        '並び替え対象のスポットが最新の状態と一致しません。画面を再読み込みしてください'
+      )
     }
 
     await this.spotRepository.reorderSpots(
