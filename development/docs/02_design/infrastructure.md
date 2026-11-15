@@ -202,16 +202,37 @@ GitHubリポジトリの Settings > Secrets and variables > Actions で設定。
    - Artifact Registryにプッシュ
    - Cloud Run Jobイメージを更新
    - Cloud Runに新リビジョンをデプロイ（トラフィック0%）
+   - latest タグを最新のreadyリビジョンに付与
          │
          ▼
 3. [手動] run-migration.yml 実行
    - Cloud Run JobsでPrismaマイグレーション実行
          │
          ▼
-4. [手動] switch-traffic.yml 実行
+4. [手動] latest タグのURLで動作確認
+   - Googleログインを含めて新リビジョンを確認
+         │
+         ▼
+5. [手動] switch-traffic.yml 実行
    - リビジョン名を指定してトラフィック100%切り替え
    - CONFIRM確認あり（誤操作防止）
 ```
+
+### タグ付きURL
+
+新リビジョンにはトラフィック0%のまま2つのタグが付き、タグごとのURLで直接アクセスできる。
+
+| タグ | URL | 指す先 |
+|------|-----|--------|
+| `v{バージョン}`（例: `v0-1-5`） | `https://v0-1-5---${SERVICE_HOST}` | そのバージョンのリビジョン（リリースごとに増える） |
+| `latest` | `https://latest---${SERVICE_HOST}` | 最新のreadyリビジョン（デプロイのたびに自動で移る） |
+
+`${SERVICE_HOST}` は `gcloud run services describe motoreco-web --region=asia-northeast1 --format='value(status.url)'` のホスト部分（`motoreco-web-xxxxxxxxxx-an.a.run.app`）。`latest` タグのURLは deploy-gcp-production.yml の「Display next steps」にも表示される。
+
+- Googleログイン（`signInWithPopup`）は Firebase Authentication の承認済みドメインにあるホストでしか動かない。承認済みドメインには `latest` タグのURLだけを登録しているため、デプロイ後の動作確認は `latest` タグのURLで行う。
+- 承認済みドメイン `X` は `X` と `*.X` に一致する。タグ付きURLは `{タグ}---{サービスURL}` 形式で、サービスURLのサブドメインではないため、タグごとの登録が必要になる。`a.run.app` などを登録すると他者のCloud Runも許可してしまうため登録しない。
+- タグ付きURLの接続先は本番のCloud SQLと本番のFirebaseである。動作確認で作ったデータは本番データとして残る。
+- `--set-tags` や `--clear-tags` でタグを整理すると `latest` タグも消える。次のデプロイで付け直される。
 
 ---
 
@@ -219,7 +240,7 @@ GitHubリポジトリの Settings > Secrets and variables > Actions で設定。
 
 | ファイル | トリガー | 内容 |
 |---------|---------|------|
-| `deploy-gcp-production.yml` | `release/*` タグ作成 | イメージビルド＆新リビジョンデプロイ（no-traffic） |
+| `deploy-gcp-production.yml` | `release/*` タグ作成 | イメージビルド＆新リビジョンデプロイ（no-traffic）＆ `latest` タグ付与 |
 | `run-migration.yml` | 手動（workflow_dispatch） | Cloud Run JobsでPrismaマイグレーション実行 |
 | `switch-traffic.yml` | 手動（workflow_dispatch） | 指定リビジョンへトラフィック100%切り替え |
 | `every-pr-check.yml` | PRオープン/更新 | lint・build・test（PostgreSQL / LocalStack / Firebase Emulator使用） |
