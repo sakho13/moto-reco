@@ -1,0 +1,44 @@
+import { describe, expect, test, vi } from 'vitest'
+import { EmailService, EmailType } from '@repo/email'
+
+const MALICIOUS_NAME = '<a href="https://evil.example">ログイン</a>&\'"'
+const ESCAPED_NAME =
+  '&lt;a href=&quot;https://evil.example&quot;&gt;ログイン&lt;/a&gt;&amp;&#39;&quot;'
+
+const buildService = () => {
+  const send = vi.fn().mockResolvedValue(undefined)
+  return { service: new EmailService({ send }), send }
+}
+
+const sentHtml = (send: ReturnType<typeof vi.fn>): string =>
+  (send.mock.calls[0]?.[0] as { html: string }).html
+
+describe('メールテンプレートのHTMLエスケープ', () => {
+  test('ウェルカムメールでユーザー名がエスケープされる', async () => {
+    const { service, send } = buildService()
+
+    await service.sendByType(EmailType.WELCOME, {
+      to: 'user@example.com',
+      userName: MALICIOUS_NAME,
+    })
+
+    const html = sentHtml(send)
+    expect(html).toContain(ESCAPED_NAME)
+    expect(html).not.toContain('<a href="https://evil.example">')
+  })
+
+  test('退会完了メールでユーザー名がエスケープされ、トークンはURLエンコードされる', async () => {
+    const { service, send } = buildService()
+
+    await service.sendByType(EmailType.USER_QUIT, {
+      to: 'user@example.com',
+      userName: MALICIOUS_NAME,
+      recoveryToken: 'abc"><script>',
+    })
+
+    const html = sentHtml(send)
+    expect(html).toContain(ESCAPED_NAME)
+    expect(html).not.toContain('<script>')
+    expect(html).toContain('token=abc%22%3E%3Cscript%3E')
+  })
+})

@@ -1,4 +1,5 @@
 import type { EmailMessage, WelcomeEmailPayload } from '../domain/email'
+import { escapeHtml } from '../utils/escapeHtml'
 
 export class WelcomeEmail {
   constructor(private readonly payload: WelcomeEmailPayload) {}
@@ -9,7 +10,7 @@ export class WelcomeEmail {
       subject: 'MotoRecoへようこそ',
       html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
-        <h2 style="margin: 0 0 16px; color: #1f2937;">${this.payload.userName}さん、MotoRecoへようこそ！</h2>
+        <h2 style="margin: 0 0 16px; color: #1f2937;">${escapeHtml(this.payload.userName)}さん、MotoRecoへようこそ！</h2>
         <p>MotoRecoにご登録いただきありがとうございます。</p>
         <p>このアプリでは、次のことができます。</p>
         <ul>
