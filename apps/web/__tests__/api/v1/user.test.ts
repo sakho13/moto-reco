@@ -300,6 +300,19 @@ describe('User API Endpoints', () => {
       )
     })
 
+    test('通知メールアドレスを指定せずに名前だけ更新しても、確認待ちは取り消されない', async () => {
+      const { token } = await createTestUser()
+      vi.spyOn(ResendEmailRepository.prototype, 'send').mockResolvedValue()
+      const newEmail = createRandomEmail()
+      await patchProfile(token, { notificationEmail: newEmail })
+
+      const res = await patchProfile(token, { name: '名前だけ変更' })
+      const json = await res.json()
+
+      expect(res.status).toBe(200)
+      expect(json.data.pendingNotificationEmail).toBe(newEmail)
+    })
+
     test('不正なトークンでは確認できない', async () => {
       const res = await verify('invalid-token')
       expect(res.status).toBe(400)

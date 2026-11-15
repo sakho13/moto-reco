@@ -12,6 +12,8 @@ import { apiPatch } from '@/lib/api/client'
 interface ProfileEditModalProps {
   initialName: string
   initialNotificationEmail: string | null
+  /** 所有確認待ちの通知メールアドレス（ある場合はメール欄の初期値にする） */
+  pendingNotificationEmail?: string | null
   isGuest?: boolean
   onClose: () => void
   onSuccess: (updated: {
@@ -24,13 +26,16 @@ interface ProfileEditModalProps {
 export function ProfileEditModal({
   initialName,
   initialNotificationEmail,
+  pendingNotificationEmail = null,
   isGuest = false,
   onClose,
   onSuccess,
 }: ProfileEditModalProps) {
   const [name, setName] = useState(initialName)
+  // 確認待ちがあればそれを、なければ確定済みのアドレスをメール欄の初期値にする
+  const initialEmailInput = pendingNotificationEmail ?? initialNotificationEmail
   const [notificationEmail, setNotificationEmail] = useState(
-    initialNotificationEmail ?? ''
+    initialEmailInput ?? ''
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -44,17 +49,20 @@ export function ProfileEditModal({
       return
     }
 
+    // メール欄を変更していなければ送らない（名前だけの保存で確認待ちの依頼を取り消さないため）
+    const requestedEmail = notificationEmail.trim() || null
+    const isEmailChanged = requestedEmail !== initialEmailInput
+
     setIsSubmitting(true)
     setError(null)
     try {
       const response = await apiPatch('/api/v1/user/profile', {
         name: trimmedName,
-        notificationEmail: notificationEmail.trim() || null,
+        ...(isEmailChanged ? { notificationEmail: requestedEmail } : {}),
       })
       trackEvent('profile_update', {
         changed_name: trimmedName !== initialName,
-        changed_notification_email:
-          (notificationEmail.trim() || null) !== initialNotificationEmail,
+        changed_notification_email: isEmailChanged,
         is_guest: isGuest,
       })
       onSuccess({
@@ -106,7 +114,11 @@ export function ProfileEditModal({
         <FormField
           label="通知メールアドレス"
           htmlFor="modal-profile-notification-email"
-          helperText="新しいアドレスに確認メールを送信し、メール内のリンクで確認できたら変更されます"
+          helperText={
+            pendingNotificationEmail
+              ? '確認待ちのアドレスです。元のアドレスに戻して保存すると変更を取り消せます'
+              : '新しいアドレスに確認メールを送信し、メール内のリンクで確認できたら変更されます'
+          }
         >
           <Input
             id="modal-profile-notification-email"

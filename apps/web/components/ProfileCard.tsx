@@ -101,6 +101,7 @@ export function ProfileCard() {
         <ProfileEditModal
           initialName={data.name}
           initialNotificationEmail={data.notificationEmail}
+          pendingNotificationEmail={data.pendingNotificationEmail}
           isGuest={isGuest}
           onClose={() => setIsModalOpen(false)}
           onSuccess={(updated) => {
