@@ -1636,6 +1636,62 @@ describe('TouringPlans API Endpoints', () => {
         )
       ).toEqual([spotIdB, spotIdA])
     })
+
+    test('他プランのスポットIDや過不足がある場合は400となる', async () => {
+      const other = await createTestUser()
+      const otherBike = await createTestUserBike(other.token, {
+        displacement: 250,
+        nickname: '他ユーザーバイク',
+      })
+      const otherPlanRes = await app.request(
+        `/api/v1/user-bike/bike/${otherBike.myUserBikeId}/touring-plans`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${other.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: '他ユーザープラン' }),
+        }
+      )
+      const otherPlanId = (await otherPlanRes.json()).data.touringPlanId
+      const otherSpotRes = await app.request(
+        `/api/v1/user-bike/bike/${otherBike.myUserBikeId}/touring-plans/${otherPlanId}/spots`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${other.token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ type: 'SPOT', name: '他ユーザー経由地' }),
+        }
+      )
+      const otherSpotId = (await otherSpotRes.json()).data.touringPlanSpotId
+
+      for (const spotIds of [
+        [spotIdB, spotIdA, otherSpotId],
+        [spotIdA],
+        [spotIdA, spotIdA],
+      ]) {
+        const res = await app.request(
+          `/api/v1/user-bike/bike/${myUserBikeId}/touring-plans/${touringPlanId}/spots/reorder`,
+          {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ spotIds }),
+          }
+        )
+        expect(res.status).toBe(400)
+      }
+
+      const otherSpot = await prisma.tUserMyBikeTouringPlanSpot.findUnique({
+        where: { id: otherSpotId },
+      })
+      expect(otherSpot?.sortOrder).toBe(0)
+    })
   })
 
   describe('PATCH /api/v1/user-bike/bike/:myUserBikeId/touring-plans/:planId/spots/:spotId', () => {

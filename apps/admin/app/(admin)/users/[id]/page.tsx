@@ -203,9 +203,6 @@ export default function UserShowPage() {
               </Button>
             </Descriptions.Item>
           )}
-          <Descriptions.Item label="プロフィール公開">
-            {record?.isProfilePublic ? '公開' : '非公開'}
-          </Descriptions.Item>
           <Descriptions.Item label="登録日">
             {record?.createdAt ? (
               <DateField

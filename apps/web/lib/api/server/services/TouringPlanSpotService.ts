@@ -15,6 +15,7 @@ import {
   TouringPlanSpotId,
   UserId,
 } from '@repo/shared-types'
+import { isSameIdSet } from '../utils/isSameIdSet'
 import {
   computeTouringPlanSpotTimes,
   TouringPlanSpotWithTimes,
@@ -253,6 +254,19 @@ export class TouringPlanSpotService {
     userId: UserId
   ): Promise<void> {
     await this._findPlanOrThrow(planId, myUserBikeId, userId)
+
+    // 並び替え対象は経由地・休憩のみ。他プランのIDの混入や過不足があれば拒否する
+    const currentSpots =
+      await this.touringPlanSpotRepository.findPlanSpotsByPlanId(planId)
+    const middleSpotIds = currentSpots
+      .filter((spot) => spot.type === 'SPOT' || spot.type === 'BREAK')
+      .map((spot) => spot.id)
+    if (!isSameIdSet(spotIds, middleSpotIds)) {
+      throw new ApiV1Error(
+        'INVALID_REQUEST',
+        '並び替え対象のスポットが最新の状態と一致しません。画面を再読み込みしてください'
+      )
+    }
 
     await this.touringPlanSpotRepository.reorderPlanSpots(
       spotIds.map((id) => createTouringPlanSpotId(id)),

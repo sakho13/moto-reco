@@ -51,7 +51,8 @@ export class UserService {
           role: 'USER',
           status: 'ACTIVE',
           notificationEmail: (authProvider.metadata?.email as string) ?? null,
-          isProfilePublic: true,
+          // ユーザー公開機能は廃止済み。DBカラムが残るため常に非公開で作成する
+          isProfilePublic: false,
         },
         null
       ),

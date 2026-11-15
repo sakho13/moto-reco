@@ -1,6 +1,6 @@
 import { EmailType, type EmailPayloadByType } from '../domain/email'
 import type { EmailRepository } from '../interfaces/EmailRepository'
-import { NotificationEmailChangedEmail } from '../templates/NotificationEmailChangedEmail'
+import { NotificationEmailVerificationEmail } from '../templates/NotificationEmailVerificationEmail'
 import { UserQuitEmail } from '../templates/UserQuitEmail'
 import { WelcomeEmail } from '../templates/WelcomeEmail'
 
@@ -19,9 +19,9 @@ export class EmailService {
       return
     }
 
-    if (type === EmailType.NOTIFICATION_EMAIL_CHANGED) {
-      const message = new NotificationEmailChangedEmail(
-        payload as EmailPayloadByType['NOTIFICATION_EMAIL_CHANGED']
+    if (type === EmailType.NOTIFICATION_EMAIL_VERIFICATION) {
+      const message = new NotificationEmailVerificationEmail(
+        payload as EmailPayloadByType['NOTIFICATION_EMAIL_VERIFICATION']
       ).build()
       await this.emailRepository.send(message)
       return

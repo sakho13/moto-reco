@@ -7,6 +7,7 @@ import { completeEmulatorGoogleSignIn } from '../helpers/googleEmulatorPopup'
  * @remarks
  * /app/profile に対応。
  * - プロフィールカード (BaseCard title="プロフィール")
+ * - プロフィール編集モーダル (ProfileEditModal)
  * - オプションカード (認証情報リンク、プランリンク、MCP接続方法リンク)
  * - ログアウトボタン (LogoutButton)
  */
@@ -16,6 +17,12 @@ export class ProfilePage {
   readonly authInfoLink: Locator
   readonly planLink: Locator
   readonly logoutButton: Locator
+  readonly editButton: Locator
+  readonly editModal: Locator
+  readonly nameInput: Locator
+  readonly notificationEmailInput: Locator
+  readonly saveButton: Locator
+  readonly pendingEmailNote: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -25,6 +32,34 @@ export class ProfilePage {
     this.authInfoLink = page.getByRole('link', { name: '認証情報' })
     this.planLink = page.getByRole('link', { name: 'プラン' })
     this.logoutButton = page.getByRole('button', { name: /ログアウト/ })
+    this.editButton = page.getByRole('button', { name: 'プロフィールを編集' })
+    this.editModal = page.getByRole('dialog')
+    this.nameInput = page.locator('#modal-profile-name')
+    this.notificationEmailInput = page.locator(
+      '#modal-profile-notification-email'
+    )
+    this.saveButton = this.editModal.getByRole('button', { name: '保存' })
+    this.pendingEmailNote = page.getByRole('status').filter({
+      hasText: 'に確認メールを送信しました',
+    })
+  }
+
+  /**
+   * プロフィール編集モーダルを開いて入力し、保存する
+   *
+   * @param values - 指定した項目だけ入力し直す
+   */
+  async editProfile(values: {
+    name?: string
+    notificationEmail?: string
+  }): Promise<void> {
+    await this.editButton.click()
+    if (values.name !== undefined) await this.nameInput.fill(values.name)
+    if (values.notificationEmail !== undefined) {
+      await this.notificationEmailInput.fill(values.notificationEmail)
+    }
+    await this.saveButton.click()
+    await this.editModal.waitFor({ state: 'hidden', timeout: 15_000 })
   }
 
   /** プロフィールページへ遷移する */

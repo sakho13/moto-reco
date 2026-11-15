@@ -4,7 +4,6 @@ import {
   Check,
   type LucideIcon,
   Navigation,
-  Users,
   Wrench,
 } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -94,15 +93,6 @@ const features: readonly Feature[] = [
     image: '/images/featureMaintenance.svg',
     link: '/about#feature-maintenance',
     color: 'orange',
-  },
-  {
-    icon: Users,
-    title: 'ライダーコミュニティ',
-    description:
-      'プロフィールを公開してバイク仲間と繋がれます。フォローしたライダーの愛車や記録を確認しましょう。',
-    image: '/images/featureFriend.svg',
-    link: '/about#feature-friend',
-    color: 'purple',
   },
 ]
 

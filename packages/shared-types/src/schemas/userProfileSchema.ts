@@ -72,13 +72,9 @@ export const UserProfilePatchRequestSchema = z
       .email('有効なメールアドレスを入力してください')
       .nullable()
       .optional(),
-    isProfilePublic: z.boolean().optional(),
   })
   .refine(
-    (data) =>
-      data.name !== undefined ||
-      data.notificationEmail !== undefined ||
-      data.isProfilePublic !== undefined,
+    (data) => data.name !== undefined || data.notificationEmail !== undefined,
     { message: '少なくとも1つのフィールドを指定してください' }
   )
 
@@ -105,3 +101,25 @@ export const GuestRegisterRequestSchema = z.object({
 })
 
 export type GuestRegisterRequest = z.infer<typeof GuestRegisterRequestSchema>
+
+/**
+ * 通知メールアドレス所有確認リクエストのバリデーションスキーマ
+ *
+ * @remarks
+ * - token: 確認メールのURLに埋め込まれた確認トークン（平文）
+ * - 認証は不要（トークンのみで完結する公開エンドポイント）
+ */
+export const NotificationEmailVerifyRequestSchema = z.object({
+  token: z
+    .string({
+      required_error: '確認トークンは必須です',
+      invalid_type_error: '確認トークンは文字列である必要があります',
+    })
+    .trim()
+    .min(1, '確認トークンは必須です')
+    .max(256, '確認トークンが正しくありません'),
+})
+
+export type NotificationEmailVerifyRequest = z.infer<
+  typeof NotificationEmailVerifyRequestSchema
+>

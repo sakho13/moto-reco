@@ -137,7 +137,6 @@ describe('TouringService', () => {
     myUserBikeRepository = {
       createMyUserBike: vi.fn(),
       findMyUserBikes: vi.fn(),
-      findPublicBikesByUserId: vi.fn(),
       findMyUserBikeById: vi
         .fn()
         .mockResolvedValue({} as unknown as MyUserBikeEntity),
