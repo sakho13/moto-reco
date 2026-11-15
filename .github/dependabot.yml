@@ -18,17 +18,3 @@ updates:
         patterns:
           - '*'
         group-by: dependency-name
-
-  - package-ecosystem: github-actions
-    directory: '/'
-    schedule:
-      interval: weekly
-      timezone: 'Asia/Tokyo'
-    open-pull-requests-limit: 5
-    commit-message:
-      prefix: '⬆️'
-    target-branch: 'develop'
-    groups:
-      github-actions:
-        patterns:
-          - '*'
