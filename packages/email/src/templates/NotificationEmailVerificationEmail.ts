@@ -2,7 +2,12 @@ import type {
   EmailMessage,
   NotificationEmailVerificationEmailPayload,
 } from '../domain/email'
-import { escapeHtml } from '../utils/escapeHtml'
+import {
+  APP_BASE_URL,
+  emailCallout,
+  emailParagraph,
+  renderEmailLayout,
+} from './layout/emailLayout'
 
 /** 確認トークンの有効期限（時間）。本文の案内文と揃える */
 const EXPIRES_IN_HOURS = 24
@@ -22,27 +27,30 @@ export class NotificationEmailVerificationEmail {
   ) {}
 
   build(): EmailMessage {
-    const verifyUrl = `https://moto-reco.com/app/verify-notification-email?token=${encodeURIComponent(this._payload.token)}`
+    const verifyUrl = `${APP_BASE_URL}/app/verify-notification-email?token=${encodeURIComponent(this._payload.token)}`
 
     return {
       to: this._payload.to,
       subject: 'MotoReco 通知メールアドレスの確認',
-      html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
-        <h2 style="margin: 0 0 16px; color: #1f2937;">通知メールアドレスの確認</h2>
-        <p>MotoRecoで、このメールアドレスを通知メールアドレスに設定する手続きが行われました。</p>
-        <p>お手続きを完了するには、${EXPIRES_IN_HOURS}時間以内に下のボタンを押してください。</p>
-        <div style="margin-top: 24px;">
-          <a href="${escapeHtml(verifyUrl)}"
-             style="display: inline-block; padding: 12px 24px; background-color: #111827; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
-            メールアドレスを確認する
-          </a>
-        </div>
-        <p style="margin-top: 24px; font-size: 12px; color: #6b7280;">
-          このメールに心当たりがない場合は、破棄してください。確認しない限りこのアドレスは設定されません。
-        </p>
-      </div>
-      `.trim(),
+      html: renderEmailLayout({
+        preheader: `${EXPIRES_IN_HOURS}時間以内にリンクから確認すると設定が完了します。`,
+        heading: '通知メールアドレスの確認',
+        bodyHtml: [
+          emailParagraph(
+            'MotoRecoで、このメールアドレスを通知の送り先に設定する手続きが行われました。'
+          ),
+          emailParagraph(
+            '下のボタンから確認すると設定が完了し、今後のお知らせがこのアドレスに届くようになります。'
+          ),
+          emailCallout(
+            `確認の期限は${EXPIRES_IN_HOURS}時間です`,
+            '期限を過ぎた場合は、アプリのプロフィールからもう一度メールアドレスを設定してください。'
+          ),
+        ].join(''),
+        action: { label: 'メールアドレスを確認する', url: verifyUrl },
+        footnote:
+          'このメールに心当たりがない場合は、破棄してください。確認しない限り、このアドレスが設定されることはありません。',
+      }),
     }
   }
 }

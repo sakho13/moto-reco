@@ -56,4 +56,32 @@ describe('メールテンプレートのHTMLエスケープ', () => {
       'https://moto-reco.com/app/verify-notification-email?token=abc%22%3E%3Cscript%3E'
     )
   })
+
+  test('全メールが共通レイアウト（プレヘッダー・送信専用の案内）で組み立てられる', async () => {
+    const { service, send } = buildService()
+
+    await service.sendByType(EmailType.WELCOME, {
+      to: 'user@example.com',
+      userName: 'テスト',
+    })
+    await service.sendByType(EmailType.NOTIFICATION_EMAIL_VERIFICATION, {
+      to: 'user@example.com',
+      token: 'token',
+    })
+    await service.sendByType(EmailType.USER_QUIT, {
+      to: 'user@example.com',
+      userName: 'テスト',
+      recoveryToken: 'token',
+    })
+
+    for (const [message] of send.mock.calls as [{ html: string }][]) {
+      expect(message.html).toMatch(/^<!doctype html>/)
+      expect(message.html).toContain(
+        '<meta name="color-scheme" content="light only">'
+      )
+      expect(message.html).toContain(
+        'このメールは送信専用アドレスからお送りしています'
+      )
+    }
+  })
 })

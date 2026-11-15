@@ -1,6 +1,15 @@
 import type { EmailMessage, WelcomeEmailPayload } from '../domain/email'
 import { escapeHtml } from '../utils/escapeHtml'
+import {
+  APP_BASE_URL,
+  emailNumberedList,
+  emailParagraph,
+  renderEmailLayout,
+} from './layout/emailLayout'
 
+/**
+ * 新規登録時のウェルカムメール
+ */
 export class WelcomeEmail {
   constructor(private readonly payload: WelcomeEmailPayload) {}
 
@@ -8,26 +17,41 @@ export class WelcomeEmail {
     return {
       to: this.payload.to,
       subject: 'MotoRecoへようこそ',
-      html: `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6; color: #111827;">
-        <h2 style="margin: 0 0 16px; color: #1f2937;">${escapeHtml(this.payload.userName)}さん、MotoRecoへようこそ！</h2>
-        <p>MotoRecoにご登録いただきありがとうございます。</p>
-        <p>このアプリでは、次のことができます。</p>
-        <ul>
-          <li>愛車の登録と管理</li>
-          <li>給油ログの記録と燃費の可視化</li>
-          <li>ツーリング履歴の管理</li>
-          <li>メンテナンス履歴の蓄積</li>
-        </ul>
-        <p>ぜひ日々のバイクライフの記録にご活用ください！</p>
-        <div style="margin-top: 24px;">
-          <a href="https://moto-reco.com/app/login"
-             style="display: inline-block; padding: 12px 24px; background-color: #111827; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600;">
-            MotoRecoにログイン
-          </a>
-        </div>
-      </div>
-      `.trim(),
+      html: renderEmailLayout({
+        preheader: 'ご登録ありがとうございます。愛車の記録をはじめましょう。',
+        heading: 'MotoRecoへようこそ',
+        bodyHtml: [
+          emailParagraph(
+            `${escapeHtml(this.payload.userName)} さん、ご登録ありがとうございます。`
+          ),
+          emailParagraph(
+            '給油・ツーリング・メンテナンスの記録を一冊の整備手帳のようにまとめられます。まずは愛車の登録からはじめてみてください。'
+          ),
+          emailNumberedList([
+            {
+              title: '愛車を登録する',
+              description:
+                '車種と走行距離を入れるだけ。複数台の管理もできます。',
+            },
+            {
+              title: '給油を記録する',
+              description: '給油量と走行距離から燃費を自動で計算します。',
+            },
+            {
+              title: 'ツーリングを残す',
+              description: '立ち寄った地点や道のりを地図とともに振り返れます。',
+            },
+            {
+              title: 'メンテナンスを積み重ねる',
+              description: '作業内容と費用を残し、次の整備時期を把握できます。',
+            },
+          ]),
+        ].join(''),
+        action: {
+          label: 'MotoRecoをはじめる',
+          url: `${APP_BASE_URL}/app/login`,
+        },
+      }),
     }
   }
 }
