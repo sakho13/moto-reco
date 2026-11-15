@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+import path from 'node:path'
 import { describe, expect, test, vi } from 'vitest'
 import { EmailService, EmailType } from '@repo/email'
 
@@ -83,5 +85,22 @@ describe('メールテンプレートのHTMLエスケープ', () => {
         'このメールは送信専用アドレスからお送りしています'
       )
     }
+  })
+
+  test('ヘッダーのロゴ画像はWebアプリのpublic配下に実在するファイルを参照する', async () => {
+    const { service, send } = buildService()
+
+    await service.sendByType(EmailType.WELCOME, {
+      to: 'user@example.com',
+      userName: 'テスト',
+    })
+
+    const html = sentHtml(send)
+    const src = html.match(/<img src="https:\/\/moto-reco\.com(\/[^"]+)"/)?.[1]
+    expect(src).toBeDefined()
+    // public/ 配下以外（app/ のアイコン等）は命名規約次第で配信されないため、実ファイルの存在で確認する
+    expect(
+      existsSync(path.resolve(__dirname, '../../../public', `.${src}`))
+    ).toBe(true)
   })
 })

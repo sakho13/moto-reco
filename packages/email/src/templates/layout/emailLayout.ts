@@ -4,6 +4,15 @@ import { escapeHtml } from '../../utils/escapeHtml'
 export const APP_BASE_URL = 'https://moto-reco.com'
 
 /**
+ * ヘッダーに表示するロゴ画像のURL
+ *
+ * @remarks
+ * apps/web/public/images/email/logo.png を静的配信したもの（96×96、表示は32px）。
+ * app/ 直下のアイコン類は Next.js の命名規約に沿わないと配信されないため、public/ に置いた画像を使う。
+ */
+export const EMAIL_LOGO_URL = `${APP_BASE_URL}/images/email/logo.png`
+
+/**
  * メールの配色・書体
  *
  * @remarks
@@ -147,7 +156,7 @@ export const renderEmailLayout = (params: EmailLayoutParams): string => {
           <td style="padding:0 4px 16px;">
             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
               <tr>
-                <td valign="middle" style="padding-right:10px;"><img src="${APP_BASE_URL}/apple-touch-icon.png" width="32" height="32" alt="" style="display:block;border:0;border-radius:8px;"></td>
+                <td valign="middle" style="padding-right:10px;"><img src="${EMAIL_LOGO_URL}" width="32" height="32" alt="" style="display:block;border:0;border-radius:8px;"></td>
                 <td valign="middle" style="font-family:${t.display};font-size:22px;font-weight:700;letter-spacing:0.02em;color:${t.ink};">MotoReco</td>
               </tr>
             </table>
