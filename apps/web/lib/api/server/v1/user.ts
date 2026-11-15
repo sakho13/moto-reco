@@ -118,10 +118,13 @@ user.patch(
             'ゲストアカウントは通知メールアドレスを設定できません'
           )
         }
-        // 送信レート制限を超えた場合はここで例外となり、名前の更新も行わない
-        verificationRequest = await verificationService.requestChange(
-          user.id,
-          requestedEmail
+        // 送信レート制限を超えた場合はここで例外となり、名前の更新も行わない。
+        // 並列リクエストで上限をすり抜けないよう、ユーザー単位のロックを取るトランザクション内で発行する
+        verificationRequest = await prisma.$transaction(async (t) =>
+          new NotificationEmailVerificationService(
+            new PrismaNotificationEmailVerificationRepository(t),
+            new PrismaUserRepository(t)
+          ).requestChange(user.id, requestedEmail)
         )
       }
     }

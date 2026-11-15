@@ -69,6 +69,7 @@ describe('NotificationEmailVerificationService', () => {
       countCreatedSince: vi.fn().mockResolvedValue(0),
       revokePendingByUserId: vi.fn(),
       markVerified: vi.fn().mockResolvedValue(true),
+      lockByUserId: vi.fn(),
     }
     userRepository = {
       findById: vi.fn().mockResolvedValue(user),
@@ -92,6 +93,24 @@ describe('NotificationEmailVerificationService', () => {
       )
       expect(saved.tokenHash).not.toBe(result.token)
       expect(saved.expiresAt.getTime()).toBe(NOW.getTime() + 86_400_000)
+    })
+
+    test('件数を数える前にユーザー単位のロックを取得する', async () => {
+      const calls: string[] = []
+      vi.mocked(verificationRepository.lockByUserId).mockImplementation(
+        async () => void calls.push('lock')
+      )
+      vi.mocked(verificationRepository.countCreatedSince).mockImplementation(
+        async () => {
+          calls.push('count')
+          return 0
+        }
+      )
+
+      await service.requestChange(userId, 'new@example.com')
+
+      expect(calls[0]).toBe('lock')
+      expect(verificationRepository.lockByUserId).toHaveBeenCalledWith(userId)
     })
 
     test.each(NOTIFICATION_EMAIL_VERIFICATION_RATE_LIMITS)(

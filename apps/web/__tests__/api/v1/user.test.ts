@@ -345,6 +345,24 @@ describe('User API Endpoints', () => {
       expect((await profileRes.json()).data.name).not.toBe('レート制限後の名前')
     })
 
+    test('同時に変更を依頼しても送信回数の上限を超えない', async () => {
+      const { token } = await createTestUser()
+      const sendSpy = vi
+        .spyOn(ResendEmailRepository.prototype, 'send')
+        .mockResolvedValue()
+
+      const results = await Promise.all(
+        Array.from({ length: 10 }, () =>
+          patchProfile(token, { notificationEmail: createRandomEmail() })
+        )
+      )
+      const statuses = results.map((res) => res.status)
+
+      expect(statuses.filter((status) => status === 200)).toHaveLength(3)
+      expect(statuses.filter((status) => status === 429)).toHaveLength(7)
+      expect(sendSpy).toHaveBeenCalledTimes(3)
+    })
+
     test('ゲストアカウントは通知メールアドレスを設定できない', async () => {
       const { token } = await createGuestUser()
       const res = await patchProfile(token, {

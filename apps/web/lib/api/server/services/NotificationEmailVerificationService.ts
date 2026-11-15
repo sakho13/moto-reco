@@ -51,6 +51,7 @@ export class NotificationEmailVerificationService {
    * @remarks
    * 同じユーザーの確認待ちトークンは無効化する（最新の依頼のみ有効）。
    * 平文トークンは戻り値として確認メールに埋め込むためだけに返し、DBにはハッシュのみ保存する。
+   * 件数確認から発行までをユーザー単位のロックで直列化するため、トランザクション内で呼ぶこと。
    *
    * @throws {ApiV1Error} TOO_MANY_REQUESTS 送信レート制限を超えた場合
    */
@@ -58,6 +59,7 @@ export class NotificationEmailVerificationService {
     userId: UserId,
     email: string
   ): Promise<{ token: string; email: string }> {
+    await this._verificationRepository.lockByUserId(userId)
     const now = getCurrentDate()
 
     for (const limit of NOTIFICATION_EMAIL_VERIFICATION_RATE_LIMITS) {

@@ -3,6 +3,15 @@ import { NotificationEmailVerificationEntity } from '../entities/NotificationEma
 
 export interface INotificationEmailVerificationRepository {
   /**
+   * ユーザー単位で確認トークンの発行処理を直列化するためのロックを取得する
+   *
+   * @remarks
+   * トランザクション内で呼ぶこと。ロックはトランザクション終了時に解放される。
+   * 同じユーザーの並列リクエストが送信件数を同時に読み取り、レート制限を超えて発行することを防ぐ。
+   */
+  lockByUserId(userId: UserId): Promise<void>
+
+  /**
    * 確認トークンを登録する
    */
   create(

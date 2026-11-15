@@ -48,6 +48,12 @@ export class PrismaNotificationEmailVerificationRepository
   extends PrismaRepositoryBase
   implements INotificationEmailVerificationRepository
 {
+  async lockByUserId(userId: UserId): Promise<void> {
+    // ユーザー行を行ロックし、同じユーザーの発行処理をトランザクション単位で直列化する
+    await this.connection
+      .$queryRaw`SELECT 1 FROM "MUser" WHERE "id" = ${userId} FOR UPDATE`
+  }
+
   async create(
     verification: NotificationEmailVerificationEntity
   ): Promise<NotificationEmailVerificationEntity> {
