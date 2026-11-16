@@ -45,15 +45,34 @@ export async function requireAdmin(
   }
 }
 
+/** 一覧APIで1回に取得できる最大件数（選択肢用に200件取得する画面があるため余裕を持たせる） */
+const MAX_PAGE_TAKE = 500
+
+/**
+ * 非負整数としてクエリ値を読み取る（不正値は既定値）
+ */
+function parseNonNegativeInt(value: string | null, fallback: number): number {
+  if (value === null) return fallback
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback
+}
+
+/**
+ * refine の simple-rest 形式のページング・ソートパラメータを読み取る
+ *
+ * @remarks
+ * 不正な `_start` / `_end` がそのまま Prisma の skip / take に渡って 500 にならないよう、
+ * 非負整数に正規化し、取得件数を 1〜{@link MAX_PAGE_TAKE} に収める。
+ */
 export function parsePaginationParams(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const start = Number(searchParams.get('_start') ?? 0)
-  const end = Number(searchParams.get('_end') ?? 10)
+  const start = parseNonNegativeInt(searchParams.get('_start'), 0)
+  const end = parseNonNegativeInt(searchParams.get('_end'), start + 10)
+  const take = Math.min(Math.max(end - start, 1), MAX_PAGE_TAKE)
   const sort = searchParams.get('_sort') ?? 'createdAt'
-  const order = (searchParams.get('_order') ?? 'desc').toLowerCase() as
-    | 'asc'
-    | 'desc'
+  const order: 'asc' | 'desc' =
+    searchParams.get('_order')?.toLowerCase() === 'asc' ? 'asc' : 'desc'
   const q = searchParams.get('q') ?? ''
 
-  return { skip: start, take: end - start, sort, order, q }
+  return { skip: start, take, sort, order, q }
 }

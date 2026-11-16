@@ -1,5 +1,6 @@
 export * from './userProfileSchema'
 export * from './userBikeSchema'
+export * from './bikeSchema'
 export * from './fuelLogSchema'
 export * from './userQuitSchema'
 export * from './userAuthProviderSchema'
