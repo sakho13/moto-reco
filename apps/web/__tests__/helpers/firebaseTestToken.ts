@@ -48,13 +48,57 @@ export function getFirebaseClientAuth() {
   return authInstance
 }
 
+const AUTH_EMULATOR_URL = 'http://localhost:9099'
+
+/**
+ * Auth Emulator 上のユーザーのメールアドレスを確認済みにする
+ *
+ * @remarks
+ * Emulator は `Authorization: Bearer owner` で管理者として accounts:update を受け付ける。
+ */
+export const markEmailVerifiedInEmulator = async (
+  uid: string
+): Promise<void> => {
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  const res = await fetch(
+    `${AUTH_EMULATOR_URL}/identitytoolkit.googleapis.com/v1/projects/${projectId}/accounts:update`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer owner',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ localId: uid, emailVerified: true }),
+    }
+  )
+  if (!res.ok) {
+    throw new Error(
+      `メールアドレスの確認済み化に失敗しました: ${res.status} ${await res.text()}`
+    )
+  }
+}
+
+/**
+ * Auth Emulator でメール/パスワードのユーザーを作成する
+ *
+ * @remarks
+ * 本番ではメールアドレスの所有確認が済んだユーザーを前提とするため、既定で確認済みにする。
+ * 未確認ユーザーの挙動を確かめる場合は `emailVerified: false` を指定する。
+ * 確認済み化した後に ID トークンを再発行するため、以降の `getIdToken()` は確認済みのトークンを返す。
+ */
 export const handleRegisterByFirebase = async (
   email: string,
-  password: string
+  password: string,
+  options: { emailVerified?: boolean } = {}
 ) => {
   const auth = getFirebaseClientAuth()
   if (!auth) throw new Error('Firebase auth is not initialized')
-  return await createUserWithEmailAndPassword(auth, email, password)
+  const credential = await createUserWithEmailAndPassword(auth, email, password)
+  if (options.emailVerified ?? true) {
+    await markEmailVerifiedInEmulator(credential.user.uid)
+    await credential.user.getIdToken(true)
+  }
+  return credential
 }
 
 export const handleLoginByFirebase = async (

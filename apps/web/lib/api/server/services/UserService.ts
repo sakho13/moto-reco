@@ -13,6 +13,36 @@ export class UserService {
     this._userRepository = userRepository
   }
 
+  /**
+   * 認証プロバイダーが所有確認済みとするメールアドレスを返す
+   *
+   * @remarks
+   * Firebase の email/password 認証はメール未確認でもトークンを発行できるため、
+   * `email_verified` が true の場合のみメールアドレスを返す（Google 認証は常に確認済み）。
+   *
+   * @returns 確認済みのメールアドレス。未確認・未設定の場合は null
+   */
+  public static getVerifiedEmail(
+    authProvider: AuthProviderEntity
+  ): string | null {
+    const email = authProvider.metadata?.email
+    if (typeof email !== 'string' || email === '') return null
+    return authProvider.metadata?.emailVerified === true ? email : null
+  }
+
+  /**
+   * 認証プロバイダーが持つ、所有確認が済んでいないメールアドレスを返す
+   *
+   * @returns 未確認のメールアドレス。確認済み・未設定の場合は null
+   */
+  public static getUnverifiedEmail(
+    authProvider: AuthProviderEntity
+  ): string | null {
+    const email = authProvider.metadata?.email
+    if (typeof email !== 'string' || email === '') return null
+    return authProvider.metadata?.emailVerified === true ? null : email
+  }
+
   public async createUser(
     authProvider: AuthProviderEntity,
     user: {
@@ -50,7 +80,9 @@ export class UserService {
           name: user.name,
           role: 'USER',
           status: 'ACTIVE',
-          notificationEmail: (authProvider.metadata?.email as string) ?? null,
+          // 所有確認済みのアドレスのみ通知先として確定する。
+          // 未確認のアドレスは確認メール経由で確定させる（登録エンドポイント側で確認依頼を発行する）
+          notificationEmail: UserService.getVerifiedEmail(authProvider),
           // ユーザー公開機能は廃止済み。DBカラムが残るため常に非公開で作成する
           isProfilePublic: false,
         },

@@ -242,32 +242,70 @@ user.post(
 
     const body = c.req.valid('json')
 
-    const { user, status } = await prisma.$transaction(async (t) => {
-      const userRepo = new PrismaUserRepository(t)
-      const service = new UserService(userRepo)
+    const { user, status, verificationRequest } = await prisma.$transaction(
+      async (t) => {
+        const userRepo = new PrismaUserRepository(t)
+        const service = new UserService(userRepo)
 
-      const user = await service.createUser(authProvider, {
-        name: body.name,
-      })
-      return user
-    })
+        const result = await service.createUser(authProvider, {
+          name: body.name,
+        })
 
-    if (status === 'CREATED' && user.notificationEmail) {
+        // 未確認のメールアドレスは通知先として確定させず、所有確認メールを送る。
+        // 確認リンクを踏んだ時点で通知メールアドレスが確定する（通知メールアドレス変更と同じ経路）
+        const unverifiedEmail = UserService.getUnverifiedEmail(authProvider)
+        const verificationRequest =
+          result.status === 'CREATED' &&
+          result.user.notificationEmail === null &&
+          unverifiedEmail
+            ? await new NotificationEmailVerificationService(
+                new PrismaNotificationEmailVerificationRepository(t),
+                userRepo
+              ).requestChange(result.user.id, unverifiedEmail)
+            : null
+
+        return { ...result, verificationRequest }
+      }
+    )
+
+    if (status === 'CREATED') {
       const emailRepository = new ResendEmailRepository(
         process.env.RESEND_API_KEY,
         process.env.RESEND_FROM_EMAIL
       )
       const emailService = new EmailService(emailRepository)
 
-      emailService
-        .sendByType(EmailType.WELCOME, {
-          to: user.notificationEmail,
-          userName: user.name,
-        })
-        .catch((error: unknown) => {
-          console.error('Welcomeメール送信に失敗しました', error)
-        })
+      if (user.notificationEmail) {
+        // Welcomeメールは所有確認済みのアドレスにのみ送る
+        emailService
+          .sendByType(EmailType.WELCOME, {
+            to: user.notificationEmail,
+            userName: user.name,
+          })
+          .catch((error: unknown) => {
+            console.error('Welcomeメール送信に失敗しました', error)
+          })
+      } else if (verificationRequest) {
+        // 所有確認前のアドレスに送るため、表示名などの入力値は含めない
+        emailService
+          .sendByType(EmailType.NOTIFICATION_EMAIL_VERIFICATION, {
+            to: verificationRequest.email,
+            token: verificationRequest.token,
+          })
+          .catch((error: unknown) => {
+            console.error(
+              '通知メールアドレス確認メール送信に失敗しました',
+              error
+            )
+          })
+      }
     }
+
+    const pendingNotificationEmail =
+      await new NotificationEmailVerificationService(
+        new PrismaNotificationEmailVerificationRepository(prisma),
+        new PrismaUserRepository(prisma)
+      ).getPendingEmail(user.id)
 
     return c.json<SuccessResponse<ApiResponseUserProfile>>(
       {
@@ -276,7 +314,7 @@ user.post(
           userId: user.id,
           name: user.name,
           notificationEmail: user.notificationEmail,
-          pendingNotificationEmail: null,
+          pendingNotificationEmail,
           role: user.role as import('@repo/shared-types').UserRole,
           plan: user.plan,
         },
