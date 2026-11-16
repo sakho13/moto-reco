@@ -676,11 +676,13 @@ describe('User API Endpoints', () => {
       })
 
       const json = await res.json()
+      // 復帰用トークンはレスポンスに含めず、案内メールでのみ届ける
       expect(json).toEqual({
         status: 'success',
-        data: { recoveryToken: expect.any(String) },
+        data: {},
         message: expect.any(String),
       })
+      expect(JSON.stringify(json)).not.toContain('recoveryToken')
       expect(res.status).toBe(200)
       expect(sendSpy).toHaveBeenCalledTimes(1)
 

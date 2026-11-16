@@ -60,7 +60,7 @@ function AccountPage() {
     setIsSubmitting(true)
     setError(null)
     try {
-      const result = await apiPost('/api/v1/user/auth/quit', {
+      await apiPost('/api/v1/user/auth/quit', {
         quitReason: quitReason.trim(),
       })
       trackEvent('account_quit', {
@@ -73,9 +73,8 @@ function AccountPage() {
       // サインアウトは遷移先の /app/quit-complete で行う。
       // ここで signOut すると withAuth のリダイレクトが先に発火し、
       // quit-complete への遷移と競合してログイン画面に飛ばされてしまう。
-      router.push(
-        `/app/quit-complete?token=${encodeURIComponent(result.data.recoveryToken)}`
-      )
+      // 復帰用トークンはURLに載せない（ブラウザ履歴に残さないため、案内メールでのみ届ける）。
+      router.push('/app/quit-complete')
     } catch (e) {
       trackEvent('account_quit_error', {
         ...(e instanceof ApiV1Error

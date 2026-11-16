@@ -379,7 +379,7 @@ user.post(
 
     return c.json<SuccessResponse<ApiResponseUserQuit>>({
       status: 'success',
-      data: { recoveryToken: result.recoveryToken },
+      data: {},
       message: '退会処理が完了しました。復帰用のご案内メールを送信しました。',
     })
   }

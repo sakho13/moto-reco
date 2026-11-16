@@ -91,10 +91,14 @@ export type ApiResponseNotificationEmailVerify = {
   notificationEmail: string
 }
 
-/** 退会処理完了時に復帰用トークンを返す（サインアウト後の復帰用URL表示ページに引き継ぐため） */
-export type ApiResponseUserQuit = {
-  recoveryToken: string
-}
+/**
+ * 退会処理完了時のレスポンス
+ *
+ * @remarks
+ * 復帰用トークンは無認証で退会アカウントを復帰できるため、レスポンスには含めず
+ * 案内メールでのみ届ける（ブラウザ履歴やログに平文が残らないようにする）。
+ */
+export type ApiResponseUserQuit = Record<string, never>
 
 /** 復帰処理も完了メッセージのみを返す（非認証の公開エンドポイントのため個人情報は含めない） */
 export type ApiResponseUserRecover = Record<string, never>
