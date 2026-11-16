@@ -59,3 +59,12 @@ overrides:
   'source-map-js@<1.2.2': ^1.2.2
   # @modelcontextprotocol/sdk が引き込む @hono/node-server の脆弱な版を修正版に固定する (#675)
   '@modelcontextprotocol/sdk>@hono/node-server': ^2.1.6
+
+# pnpm audit で既知の high を除外する (#675)
+# - GHSA-mrhx-c7xc-m3w5 (zod <4.6.6): v4 へのメジャー更新が必要なため #681 で対応する
+# - GHSA-qr28-fpjm-wq7f (decode-uri-component <=0.5.0): admin の @refinedev/simple-rest > query-string@7(CJS) 経由。
+#   修正版(0.5.x)は ESM 専用で読み込めないため固定できない。admin は IP 制限下のため影響は限定的
+auditConfig:
+  ignoreGhsas:
+    - GHSA-mrhx-c7xc-m3w5
+    - GHSA-qr28-fpjm-wq7f

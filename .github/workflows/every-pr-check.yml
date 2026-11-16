@@ -9,10 +9,8 @@ jobs:
   audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
-    # 既知の high（zod / decode-uri-component、#681 で対応）が残る間は警告のみとし、
-    # 解消後に continue-on-error を外して必須チェックにする (#675)
-    continue-on-error: true
-
+    # 本番依存に high 以上の既知脆弱性があれば失敗させる (#675)
+    # 対応待ちのものは pnpm-workspace.yaml の auditConfig.ignoreGhsas に理由付きで登録する
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
