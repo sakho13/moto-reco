@@ -168,7 +168,7 @@
 
 @media (min-width: 640px) {
   .startAction {
-    max-width: 320px;
+    max-width: var(--app-action-w);
   }
 }
 

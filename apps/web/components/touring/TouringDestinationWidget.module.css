@@ -112,3 +112,11 @@
 .skipButton {
   margin-top: var(--spacing-2);
 }
+
+/* PC幅ではウィジェットが広くなるため、ツーリング中の他のボタンと同じ上限を設ける */
+@media (min-width: 640px) {
+  .arrivalButton,
+  .skipButton {
+    max-width: var(--app-action-w);
+  }
+}
