@@ -18,3 +18,4 @@ export {
   validateName,
 } from './validation'
 export { ERROR_MESSAGES, getFirebaseErrorMessage } from './authErrorMessages'
+export { getBikeDisplayName, getBikeDisplayMeta } from './bikeDisplay'
