@@ -19,7 +19,7 @@
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@hono/zod-validator": "catalog:",
-    "@modelcontextprotocol/sdk": "1.32.1",
+    "@modelcontextprotocol/sdk": "1.32.2",
     "@next/third-parties": "catalog:",
     "@radix-ui/react-slot": "1.5.0",
     "@repo/database": "workspace:*",

@@ -34,6 +34,13 @@
   margin-top: var(--spacing-4);
 }
 
+/* 広い紙面に直接置くため、PC幅では帯にならないよう上限を設ける */
+@media (min-width: 640px) {
+  .liveActionButton {
+    max-width: var(--app-action-w);
+  }
+}
+
 /* 地色の面 + アクセントの枠線。InfoBox / ErrorMessage と同じ様式 */
 .breakBanner {
   display: flex;

@@ -91,6 +91,12 @@ export class AccountPage {
   readonly switchModal: Locator
   readonly newPasswordInput: Locator
   readonly confirmPasswordInput: Locator
+  readonly quitCardHeading: Locator
+  readonly quitModal: Locator
+  readonly quitReasonInput: Locator
+  readonly quitRecoveryNotice: Locator
+  readonly quitAcknowledgeCheckbox: Locator
+  readonly quitConfirmButton: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -107,6 +113,21 @@ export class AccountPage {
     this.switchModal = page.getByRole('dialog')
     this.newPasswordInput = page.locator('#switch-password')
     this.confirmPasswordInput = page.locator('#switch-confirm-password')
+    this.quitCardHeading = page.getByRole('heading', {
+      name: '退会',
+      exact: true,
+    })
+    this.quitModal = page.getByRole('dialog')
+    this.quitReasonInput =
+      this.quitModal.getByPlaceholder('退会理由を入力してください')
+    this.quitRecoveryNotice =
+      this.quitModal.getByText('案内メールが届かない場合は復帰できず')
+    this.quitAcknowledgeCheckbox = this.quitModal.getByRole('checkbox', {
+      name: '上記を理解しました',
+    })
+    this.quitConfirmButton = this.quitModal.getByRole('button', {
+      name: '退会する',
+    })
   }
 
   /** 認証情報ページへ遷移する */
@@ -132,6 +153,26 @@ export class AccountPage {
       .getByRole('button', { name: 'Googleアカウントを選択して切り替える' })
       .click()
     await completeEmulatorGoogleSignIn(await popupPromise, email, displayName)
+  }
+
+  /**
+   * 退会理由を入力し、退会の確認ステップを開く
+   *
+   * @param reason - 退会理由
+   */
+  async openQuitConfirm(reason: string): Promise<void> {
+    await this.page.getByRole('button', { name: '退会する' }).click()
+    await this.quitReasonInput.fill(reason)
+    await this.quitModal.getByRole('button', { name: '次へ' }).click()
+  }
+
+  /**
+   * 確認ステップで注意事項に同意して退会し、退会手続き完了ページへの遷移を待つ
+   */
+  async confirmQuit(): Promise<void> {
+    await this.quitAcknowledgeCheckbox.check()
+    await this.quitConfirmButton.click()
+    await this.page.waitForURL(/\/app\/quit-complete/, { timeout: 15_000 })
   }
 
   /**

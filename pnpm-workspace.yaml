@@ -18,8 +18,8 @@ catalog:
   '@hono/node-server': 1.19.18
   firebase: 12.19.0
   'firebase-admin': 13.10.0
-  next: 16.4.2
-  '@next/third-parties': 16.4.2
+  next: 16.4.6
+  '@next/third-parties': 16.4.6
   react: 19.2.9
   react-dom: 19.2.9
   lucide-react: 0.561.0
@@ -50,3 +50,12 @@ allowBuilds:
 overrides:
   '@firebase/firestore>@grpc/grpc-js': ^1.14.7
   'uuid@<11.1.1': ^11.1.1
+  # @refinedev/* / next(admin) が推移的に引き込む脆弱な版を修正版に固定する (#675)
+  # decode-uri-component は修正版(0.5.x)がESM専用で query-string@7(CJS) から読めないため対象外
+  'lodash@<4.17.24': ^4.18.1
+  'qs@<6.16.1': ^6.16.1
+  'path-to-regexp@>=8.0.0 <8.4.0': ^8.4.2
+  'nanoid@>=3.0.0 <3.3.18': ^3.3.18
+  'source-map-js@<1.2.2': ^1.2.2
+  # @modelcontextprotocol/sdk が引き込む @hono/node-server の脆弱な版を修正版に固定する (#675)
+  '@modelcontextprotocol/sdk>@hono/node-server': ^2.1.6

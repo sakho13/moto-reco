@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { ApiV1Error } from '@repo/shared-domain'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
+import { Checkbox } from '@repo/ui/checkbox'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { Textarea } from '@repo/ui/textarea'
 import styles from './page.module.css'
@@ -29,6 +30,7 @@ function AccountPage() {
   const [isQuitModalOpen, setIsQuitModalOpen] = useState(false)
   const [quitStep, setQuitStep] = useState<QuitStep>('form')
   const [quitReason, setQuitReason] = useState('')
+  const [hasAcknowledgedQuit, setHasAcknowledgedQuit] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,6 +43,7 @@ function AccountPage() {
   const handleOpenQuitModal = () => {
     setQuitStep('form')
     setQuitReason('')
+    setHasAcknowledgedQuit(false)
     setError(null)
     setIsQuitModalOpen(true)
   }
@@ -57,10 +60,11 @@ function AccountPage() {
   }
 
   const handleConfirmQuit = async () => {
+    if (!hasAcknowledgedQuit) return
     setIsSubmitting(true)
     setError(null)
     try {
-      const result = await apiPost('/api/v1/user/auth/quit', {
+      await apiPost('/api/v1/user/auth/quit', {
         quitReason: quitReason.trim(),
       })
       trackEvent('account_quit', {
@@ -73,9 +77,8 @@ function AccountPage() {
       // サインアウトは遷移先の /app/quit-complete で行う。
       // ここで signOut すると withAuth のリダイレクトが先に発火し、
       // quit-complete への遷移と競合してログイン画面に飛ばされてしまう。
-      router.push(
-        `/app/quit-complete?token=${encodeURIComponent(result.data.recoveryToken)}`
-      )
+      // 復帰用トークンはURLに載せない（ブラウザ履歴に残さないため、案内メールでのみ届ける）。
+      router.push('/app/quit-complete')
     } catch (e) {
       trackEvent('account_quit_error', {
         ...(e instanceof ApiV1Error
@@ -152,8 +155,18 @@ function AccountPage() {
                   color: 'var(--color-inkLight)',
                 }}
               >
-                退会日から30日間は、ご登録のメールアドレスに送信される案内メールから復帰できます。30日を過ぎるとアカウント情報は完全に削除され、復帰できなくなります。
+                退会日から30日間は、ご登録のメールアドレス
+                {user?.email ? `（${user.email}）` : ''}
+                に届く案内メールのリンクからのみ復帰できます。案内メールが届かない場合は復帰できず、30日後にアカウント情報が完全に削除されるまで、同じメールアドレス・Googleアカウントでの再登録もできません。
               </p>
+              {/* 復帰手段は案内メールのみのため、届かない場合の影響を理解してから退会させる */}
+              <Checkbox
+                id="quit-acknowledge"
+                checked={hasAcknowledgedQuit}
+                onChange={(e) => setHasAcknowledgedQuit(e.target.checked)}
+                disabled={isSubmitting}
+                label="上記を理解しました"
+              />
               <div
                 style={{
                   display: 'flex',
@@ -165,6 +178,7 @@ function AccountPage() {
                   variant="danger"
                   fullWidth
                   loading={isSubmitting}
+                  disabled={!hasAcknowledgedQuit}
                   onClick={handleConfirmQuit}
                 >
                   退会する
