@@ -1,9 +1,9 @@
 'use client'
 
+import { roundToOneDecimal } from '@repo/shared-domain/fuelLogSheet'
 import { getCurrentDate } from '@repo/shared-utils'
 import styles from './HomeGauges.module.css'
 import { buildMonthlySummary } from './monthlySummary'
-import { roundToOneDecimal } from '@/lib/fuelLogSheet'
 import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useBikeHistory } from '@/lib/hooks/useBikeHistory'
 import { useFuelInsight } from '@/lib/hooks/useFuelInsight'
@@ -24,9 +24,9 @@ function formatEfficiency(value: number | null): string {
  * 差分は丸め前の生値ではなく、画面に表示する値（小数点1桁に丸めた値）どうしで
  * 取る。例えば直近22.0339…（表示22.0）と前回20.1613…（表示20.2）の場合、
  * 生値の差は1.8726（丸めると1.9）だが、ユーザーには22.0と20.2しか見えないため
- * 差は1.8でなければ表示と文章が噛み合わない（`lib/fuelLogSheet.ts` の
+ * 差は1.8でなければ表示と文章が噛み合わない（`@repo/shared-domain/fuelLogSheet` の
  * `formatComparisonClause` も同様の理由で丸めた値の差を取る）。
- * マイナス方向の動詞は「縮んだ」で揃える（`lib/fuelLogSheet.ts` と表記統一）。
+ * マイナス方向の動詞は「縮んだ」で揃える（`@repo/shared-domain/fuelLogSheet` と表記統一）。
  */
 function buildEfficiencyDiffText(
   latest: number | null,

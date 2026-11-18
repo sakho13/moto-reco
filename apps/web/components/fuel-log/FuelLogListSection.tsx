@@ -1,12 +1,12 @@
 'use client'
 
+import { resolveSavedFuelLogEfficiencyReason } from '@repo/shared-domain/fuelLogSheet'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { FuelLogItem } from './FuelLogItem'
 import styles from './FuelLogListSection.module.css'
 import { KeywordSearchBar } from '@/components/common/KeywordSearchBar'
-import { resolveSavedFuelLogEfficiencyReason } from '@/lib/fuelLogSheet'
 
 export interface FuelLogListSectionProps {
   /**

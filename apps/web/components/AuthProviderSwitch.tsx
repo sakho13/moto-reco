@@ -3,6 +3,12 @@
 import { FormEvent, useState } from 'react'
 import { ApiV1Error } from '@repo/shared-domain'
 import type { ProviderType } from '@repo/shared-types'
+import {
+  ERROR_MESSAGES,
+  getFirebaseErrorMessage,
+  validatePassword,
+  validatePasswordMatch,
+} from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
@@ -11,13 +17,8 @@ import { toast } from '@repo/ui/sonner'
 import styles from './AuthProviderSwitch.module.css'
 import { ModalBase } from '@/components/common/ModalBase'
 import { apiPut } from '@/lib/api/client'
-import {
-  ERROR_MESSAGES,
-  getFirebaseErrorMessage,
-} from '@/lib/constants/errorMessages'
 import type { SwitchableProviderId } from '@/lib/firebase/auth'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { validatePassword, validatePasswordMatch } from '@/lib/utils/validation'
 
 /** 切り替え先として選択できる認証方式 */
 type SwitchTarget = Extract<ProviderType, 'FIREBASE_EMAIL' | 'FIREBASE_GOOGLE'>

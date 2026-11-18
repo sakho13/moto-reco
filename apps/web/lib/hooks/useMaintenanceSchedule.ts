@@ -13,7 +13,7 @@ import { authenticatedFetch } from '../api/client'
  *
  * @remarks
  * `/api/v1/user-bike/bike/{id}/maintenance-schedule` は `apiGet` の型付き
- * エンドポイント一覧（`API_EP`）に含まれていないため、`useBikeHistory` /
+ * エンドポイント一覧（`@repo/api-client` の `ApiEndpoints`）に含まれていないため、`useBikeHistory` /
  * `useFuelInsight` と同様に `authenticatedFetch` を直接使う。
  * 残りが少ない順に返るため、先頭が最も優先度の高い項目になる。
  */

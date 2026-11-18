@@ -13,7 +13,7 @@ import { authenticatedFetch } from '../api/client'
  *
  * @remarks
  * 期間は既定値の `all`（全期間）を使う。ホームの「平均燃費」計器はこれを使う。
- * `apiGet` の型付きエンドポイント一覧（`API_EP`）は
+ * `apiGet` の型付きエンドポイント一覧（`@repo/api-client` の `ApiEndpoints`）は
  * `` `/api/v1/user-bike/bike/${string}` `` という汎用パターンも同時に持つため、
  * `apiGet` 経由だとキーが両方の型に一致してしまい交差型になる。
  * `useBikeHistory` と同様に `authenticatedFetch` を直接使って回避する。

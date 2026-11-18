@@ -12,7 +12,7 @@ import { authenticatedFetch } from '../api/client'
  * バイク単位のヒストリー（給油・ツーリング）を取得するフック
  *
  * @remarks
- * `/api/v1/user-bike/bike/{id}/history` はクエリ型定義（`API_EP`）に
+ * `/api/v1/user-bike/bike/{id}/history` はクエリ型定義（`@repo/api-client` の `ApiEndpoints`）に
  * 含まれていないため、`RecentHistorySection` と同様に `authenticatedFetch` を
  * 直接使う。新しく発生日時の降順で返るため、先頭が最新の記録になる。
  */

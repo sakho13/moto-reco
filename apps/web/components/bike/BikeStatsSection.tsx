@@ -1,8 +1,8 @@
 'use client'
 
+import { calculateBridgedAverageEfficiency } from '@repo/shared-domain/fuelLogSheet'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import styles from './BikeStatsSection.module.css'
-import { calculateBridgedAverageEfficiency } from '@/lib/fuelLogSheet'
 
 const DASH = '—'
 

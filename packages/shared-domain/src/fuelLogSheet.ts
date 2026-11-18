@@ -8,7 +8,7 @@
  * 前回給油が継ぎ足しの場合は燃費を算出しない（サーバーの確定値と一致しないため）。
  */
 
-import { FuelEfficiencyCalculationService } from '@repo/shared-domain'
+import { FuelEfficiencyCalculationService } from './services/FuelEfficiencyCalculationService'
 import { formatDate } from '@repo/shared-utils'
 
 const fuelEfficiencyCalculationService = new FuelEfficiencyCalculationService()

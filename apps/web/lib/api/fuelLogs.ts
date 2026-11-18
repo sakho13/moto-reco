@@ -1,12 +1,12 @@
 import { ApiV1Error } from '@repo/shared-domain'
+import {
+  buildPreviousFuelLogQuery,
+  type PreviousFuelLogDetail,
+} from '@repo/shared-domain/fuelLogSheet'
 import type {
   ApiResponseFuelLogList,
   SuccessResponse,
 } from '@repo/shared-types'
-import {
-  buildPreviousFuelLogQuery,
-  type PreviousFuelLogDetail,
-} from '../fuelLogSheet'
 import { authenticatedFetch } from './client'
 
 /**

@@ -3,6 +3,10 @@
 import { useState } from 'react'
 import useSWR from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
+import {
+  calculateAverageFuelEfficiency,
+  shouldUpdateTotalMileage,
+} from '@repo/shared-domain/fuelLogSheet'
 import type {
   ApiResponseFuelLogList,
   ApiResponseUserBikeDetail,
@@ -22,10 +26,6 @@ import {
   mutateHistoryLists,
 } from '@/lib/api/mutateHistory'
 import { getBikeDisplayName } from '@/lib/bike'
-import {
-  calculateAverageFuelEfficiency,
-  shouldUpdateTotalMileage,
-} from '@/lib/fuelLogSheet'
 
 /** PC版「控え」の平均燃費に使う直近件数（「直近6回」という文言と対応させる） */
 const RECENT_FUEL_LOG_COUNT = 6
