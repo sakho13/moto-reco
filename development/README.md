@@ -72,6 +72,46 @@ DOCKER_LOCALSTACK_SERVICES_END=4559   # LocalStack Services Range End
 **注意**: ポートを変更した場合、`DATABASE_URL`や`FIREBASE_AUTH_EMULATOR_HOST`なども更新してください。  
 **注意**: Worktree A では `DOCKER_FIREBASE_AUTH_PORT=9199` と `DOCKER_FIREBASE_STORAGE_PORT`（デフォルト 9199）が競合します。Worktree A で Storage を使う場合は `DOCKER_FIREBASE_STORAGE_PORT=9299` を明示的に設定してください。
 
+## モバイルアプリ（Expo）の開発
+
+`apps/mobile` は Expo（React Native）のアプリです。API は Web アプリ（`apps/web`）のものを使うため、先に Web アプリを起動しておきます。
+
+```bash
+docker compose up -d
+pnpm dev:web
+
+# 別のターミナルで Expo の開発サーバーを起動する
+pnpm dev:mobile
+```
+
+表示された QR コードを Expo Go で読み取るか、`i`（iOS シミュレーター）/ `a`（Android エミュレーター）で起動します。
+
+### 環境変数
+
+Expo は `EXPO_PUBLIC_` で始まる環境変数だけをアプリに埋め込みます。`.env.local` に以下を設定してください（値の例はルートの `README.md` を参照）。
+
+| 環境変数 | 内容 |
+| --- | --- |
+| `EXPO_PUBLIC_API_BASE_URL` | API のURL（例: `http://localhost:3000`） |
+| `EXPO_PUBLIC_FIREBASE_*` | Firebase の設定（Web の `NEXT_PUBLIC_FIREBASE_*` と同じ値） |
+| `EXPO_PUBLIC_USE_FIREBASE_EMULATOR` | Firebase Auth Emulator を使うなら `true` |
+| `EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_URL` | Auth Emulator のURL（例: `http://localhost:9099`） |
+
+アプリに埋め込まれるため、秘密にすべき値（サーバー用の鍵など）は設定しないでください。
+
+### 実機から接続する場合
+
+実機のアプリから見た `localhost` は端末自身なので、`EXPO_PUBLIC_API_BASE_URL` と `EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_URL` には開発PCのLAN IPを指定します（例: `http://192.168.0.10:3000`）。
+WSL2 の場合は、後述の「LAN端末（iPhone等）からのFirebase Emulator接続」と同じ手順で、Web アプリのポート（3000）と Auth Emulator のポートを転送してください。
+
+### 実装上の注意
+
+- 画面は `@repo/ui`（DOM・Tailwind 前提）を使わず、`@repo/theme` のデザイントークンで Web と見た目を揃える
+- API の呼び出しは `@repo/api-client`、入力チェックと Firebase のエラーメッセージは `@repo/shared-utils`、給油記入票の計算は `@repo/shared-domain/fuelLogSheet` を Web と共有する
+- Firebase Auth の React Native 用ビルドを使うため、`metro.config.js` で Firebase のパッケージだけ `exports` を使わずに解決している
+- ログイン状態の保存先には `expo-sqlite/kv-store` を使う。`@react-native-async-storage/async-storage` を入れると、pnpm が Web 側の Firebase の peer 依存としても解決し、Web に React Native が入り込むため使わない
+- E2E テスト（Playwright）は Web 専用で、モバイルは対象外
+
 ## 写真アップロード機能（署名付きURL）のローカル検証
 
 写真アップロード機能は署名付きURL（V4署名）を使用しており、Firebase Storage Emulator経由でも**構文的に有効なRSA秘密鍵**が`FIREBASE_PRIVATE_KEY`に設定されている必要があります（署名計算自体はローカルで完結し、実際のGCPとは通信しないため、ダミー鍵で問題ありません）。

@@ -12,6 +12,8 @@
   - LP（ランディングページ）、アプリ本体、API（Hono）、APIドキュメント（Scalar）、MCPサーバーを1つのアプリに統合
 - **`admin`**: 管理画面 (http://localhost:3001)
   - Next.js + [Refine](https://refine.dev/) + Ant Design で構築
+- **`mobile`**: モバイルアプリ（iOS / Android）
+  - Expo（React Native）+ Expo Router で構築。API は Web アプリのものを使う
 - **`e2e`**: Playwright E2Eテスト（アプリではないが `apps/` 配下で管理）
 
 #### ポート番号
@@ -21,7 +23,8 @@
 
 ### Packages
 
-- **`@repo/ui`**: React コンポーネントライブラリ
+- **`@repo/ui`**: React コンポーネントライブラリ（Web 専用）
+- **`@repo/api-client`**: API クライアントとエンドポイントの型定義（Web・モバイル共通）
 - **`@repo/theme`**: テーマ管理パッケージ（カラー・フォントサイズ・曲線・シャドウ等のデザイントークン）
 - **`@repo/database`**: Prisma データベースパッケージ
 - **`@repo/shared-types`**: 共有型定義
@@ -45,6 +48,7 @@
 
 - **フロントエンド**: Next.js, React
 - **管理画面**: Next.js, Refine, Ant Design
+- **モバイル**: Expo（React Native）, Expo Router
 - **バックエンド**: Hono（Next.js の API Routes 上にマウント）
 - **データベース**: PostgreSQL, Prisma
 - **認証**: Firebase Authentication
@@ -93,6 +97,18 @@ NEXT_PUBLIC_APP_VERSION=dev  # アプリのバージョン表示用
 # メール (Resend)
 RESEND_API_KEY=your-resend-api-key
 RESEND_FROM_EMAIL="MotoReco <no-reply@example.com>"
+
+# モバイルアプリ（Expo は EXPO_PUBLIC_ で始まる変数だけをアプリに埋め込む）
+# 実機から接続する場合は localhost ではなく開発PCのLAN IPを指定する
+EXPO_PUBLIC_API_BASE_URL=http://localhost:3000
+EXPO_PUBLIC_FIREBASE_API_KEY=your-api-key
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+EXPO_PUBLIC_FIREBASE_APP_ID=your-app-id
+EXPO_PUBLIC_USE_FIREBASE_EMULATOR=true
+EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR_URL=http://localhost:9099
 ```
 
 写真アップロード機能をローカルで検証する場合の注意点は [`development/README.md`](development/README.md) の「写真アップロード機能（署名付きURL）のローカル検証」セクションを参照してください。
@@ -142,7 +158,12 @@ pnpm dev:web
 
 # 管理画面のみ
 pnpm --filter admin dev
+
+# モバイルアプリ（Expo の開発サーバー）。Web アプリ（API）も起動しておくこと
+pnpm dev:mobile
 ```
+
+モバイルアプリは Expo Go またはシミュレーターで確認します。実機からの接続方法は [`development/README.md`](development/README.md) の「モバイルアプリ（Expo）の開発」を参照してください。
 
 ## データベース操作
 
