@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import { getBikeDisplayName } from '@repo/shared-utils'
 import styles from './SidebarBikeRecordLinks.module.css'
 import { FuelIcon } from '@/components/icons/FuelIcon'
 import { TouringIcon } from '@/components/icons/TouringIcon'
 import { WrenchIcon } from '@/components/icons/WrenchIcon'
-import { getBikeDisplayName } from '@/lib/bike'
 import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useMaintenanceLogCount } from '@/lib/hooks/useMaintenanceLogCount'
 import { formatRecordCount } from '@/lib/recordCount'

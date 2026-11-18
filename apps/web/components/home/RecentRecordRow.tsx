@@ -1,13 +1,13 @@
 'use client'
 
 import { ChevronRight } from 'lucide-react'
-import type { ApiResponseBikeHistoryItem } from '@repo/shared-types'
-import { formatDate } from '@repo/shared-utils'
-import styles from './RecentRecordRow.module.css'
 import {
   SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS,
   type SavedFuelLogEfficiencyReason,
-} from '@/lib/fuelLogSheet'
+} from '@repo/shared-domain/fuelLogSheet'
+import type { ApiResponseBikeHistoryItem } from '@repo/shared-types'
+import { formatDate } from '@repo/shared-utils'
+import styles from './RecentRecordRow.module.css'
 
 type Props = {
   item: ApiResponseBikeHistoryItem

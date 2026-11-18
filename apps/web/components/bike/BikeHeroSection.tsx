@@ -2,12 +2,16 @@
 
 import { useState } from 'react'
 import type { ApiResponseUserBikeDetail } from '@repo/shared-types'
-import { formatDate, getCurrentDate, isUnsetDate } from '@repo/shared-utils'
+import {
+  formatDate,
+  getCurrentDate,
+  isUnsetDate,
+  getBikeDisplayName,
+} from '@repo/shared-utils'
 import { Button } from '@repo/ui/button'
 import styles from './BikeHeroSection.module.css'
 import { MyBikeEditModal } from './MyBikeEditModal'
 import { EditIcon } from '@/components/icons/EditIcon'
-import { getBikeDisplayName } from '@/lib/bike'
 
 const UNSET = '未設定'
 

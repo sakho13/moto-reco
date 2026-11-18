@@ -17,7 +17,7 @@ import {
   roundToOneDecimal,
   sanitizeNumericInput,
   shouldUpdateTotalMileage,
-} from '@/lib/fuelLogSheet'
+} from '@repo/shared-domain/fuelLogSheet'
 
 describe('calculateLiveGauges', () => {
   test('前回給油(満タン)があり、今回も満タンなら燃費を算出する', () => {

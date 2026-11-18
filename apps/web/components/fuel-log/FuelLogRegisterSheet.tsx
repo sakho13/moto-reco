@@ -2,16 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
-import { getNowLocalDateTimeString } from '@repo/shared-utils'
-import { Button } from '@repo/ui/button'
-import { DateTimeInput } from '@repo/ui/dateTimeInput'
-import { ErrorMessage } from '@repo/ui/errorMessage'
-import { FormField } from '@repo/ui/formField'
-import { Textarea } from '@repo/ui/textarea'
-import { ToggleSection } from '@repo/ui/toggleSection'
-import styles from './FuelLogRegisterSheet.module.css'
-import { NumericKeypad } from './NumericKeypad'
-import { fetchPreviousFuelLog } from '@/lib/api/fuelLogs'
 import {
   appendNumericKey,
   buildPreviousFuelLogQuery,
@@ -27,7 +17,17 @@ import {
   sanitizeNumericInput,
   shouldUpdateTotalMileage,
   type NumericFieldConstraints,
-} from '@/lib/fuelLogSheet'
+} from '@repo/shared-domain/fuelLogSheet'
+import { getNowLocalDateTimeString } from '@repo/shared-utils'
+import { Button } from '@repo/ui/button'
+import { DateTimeInput } from '@repo/ui/dateTimeInput'
+import { ErrorMessage } from '@repo/ui/errorMessage'
+import { FormField } from '@repo/ui/formField'
+import { Textarea } from '@repo/ui/textarea'
+import { ToggleSection } from '@repo/ui/toggleSection'
+import styles from './FuelLogRegisterSheet.module.css'
+import { NumericKeypad } from './NumericKeypad'
+import { fetchPreviousFuelLog } from '@/lib/api/fuelLogs'
 
 export interface FuelLogRegisterSheetSubmitValues {
   refueledAt: string

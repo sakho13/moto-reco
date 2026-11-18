@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation'
 import { ApiV1Error } from '@repo/shared-domain'
+import { getFirebaseErrorMessage } from '@repo/shared-utils'
 import { useAuth } from './useAuth'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
-import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
 import { getFirebaseAuth } from '@/lib/firebase/config'
 import { syncLoginProvider } from '@/lib/firebase/syncLoginProvider'
 

@@ -1,13 +1,13 @@
 'use client'
 
 import { Map } from 'lucide-react'
-import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
-import styles from './FuelLedgerList.module.css'
 import {
   resolveSavedFuelLogEfficiencyReason,
   SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS,
   type SavedFuelLogEfficiencyReason,
-} from '@/lib/fuelLogSheet'
+} from '@repo/shared-domain/fuelLogSheet'
+import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
+import styles from './FuelLedgerList.module.css'
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土']
 

@@ -90,6 +90,7 @@ const nextConfig = {
   output: 'standalone',
   agentRules: false,
   transpilePackages: [
+    '@repo/api-client',
     '@repo/shared-types',
     '@repo/shared-domain',
     '@repo/database',

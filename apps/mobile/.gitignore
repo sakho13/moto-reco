@@ -1,0 +1,21 @@
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native（Continuous Native Generation で生成する）
+/ios
+/android
+.kotlin/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# local env files
+.env*.local

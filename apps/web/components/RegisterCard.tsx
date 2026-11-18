@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { ApiV1Error } from '@repo/shared-domain'
+import {
+  getFirebaseErrorMessage,
+  validateEmail,
+  validateName,
+  validatePassword,
+  validatePasswordMatch,
+} from '@repo/shared-utils'
 import { BaseCard } from '@repo/ui/baseCard'
 import { Button } from '@repo/ui/button'
 import { ErrorMessage } from '@repo/ui/errorMessage'
@@ -15,15 +22,8 @@ import styles from './RegisterCard.module.css'
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
 import { trackEvent } from '@/lib/analytics'
 import { apiGet, apiPost } from '@/lib/api/client'
-import { getFirebaseErrorMessage } from '@/lib/constants/errorMessages'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useGoogleLogin } from '@/lib/hooks/useGoogleLogin'
-import {
-  validateEmail,
-  validateName,
-  validatePassword,
-  validatePasswordMatch,
-} from '@/lib/utils/validation'
 
 export function RegisterCard() {
   const router = useRouter()

@@ -9,13 +9,15 @@
     "check-types": "tsc --noEmit"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./fuelLogSheet": "./src/fuelLogSheet.ts"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "typescript": "catalog:"
   },
   "dependencies": {
-    "@repo/shared-types": "workspace:*"
+    "@repo/shared-types": "workspace:*",
+    "@repo/shared-utils": "workspace:*"
   }
 }

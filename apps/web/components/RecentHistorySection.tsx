@@ -3,11 +3,11 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { resolveSavedFuelLogEfficiencyReason } from '@repo/shared-domain/fuelLogSheet'
 import type { ApiResponseBikeHistoryItem } from '@repo/shared-types'
 import { FuelLogEditModal } from './fuel-log/FuelLogEditModal'
 import { RecentRecordRow } from './home/RecentRecordRow'
 import styles from './RecentHistorySection.module.css'
-import { resolveSavedFuelLogEfficiencyReason } from '@/lib/fuelLogSheet'
 import { useActiveBike } from '@/lib/hooks/useActiveBike'
 import { useBikeHistory } from '@/lib/hooks/useBikeHistory'
 

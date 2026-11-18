@@ -10,6 +10,7 @@
 |---|---|---|
 | `@apps/web` | Next.js メインアプリケーション | `apps/web/` |
 | `@apps/docs` | Next.js ドキュメントサイト | `apps/docs/` |
+| `@apps/mobile` | Expo（React Native）モバイルアプリ | `apps/mobile/` |
 
 ### パッケージ (packages/)
 
@@ -21,13 +22,15 @@
 | `@repo/firebase-auth-server` | Firebase Admin SDK ラッパー | `packages/firebase-auth-server/` |
 | `@repo/shared-types` | ドメインモデルとスキーマの共有型定義 | `packages/shared-types/` |
 | `@repo/shared-utils` | ユーティリティ関数の共有パッケージ | `packages/shared-utils/` |
-| `@repo/ui` | React UI コンポーネントライブラリ | `packages/ui/` |
+| `@repo/ui` | React UI コンポーネントライブラリ（Web 専用） | `packages/ui/` |
+| `@repo/api-client` | API クライアントとエンドポイントの型定義（Web・モバイル共通） | `packages/api-client/` |
 | `@repo/theme` | テーマ管理パッケージ | `packages/theme/` |
 
 ### 依存関係図
 
 ```
 @apps/web
+  ├── @repo/api-client
   ├── @repo/database
   ├── @repo/firebase-auth-server
   ├── @repo/shared-types
@@ -36,6 +39,14 @@
   │   └── @repo/theme
   ├── @repo/eslint-config (devDependencies)
   └── @repo/typescript-config (devDependencies)
+
+@apps/mobile
+  ├── @repo/api-client
+  ├── @repo/shared-domain
+  ├── @repo/shared-types
+  ├── @repo/shared-utils
+  ├── @repo/theme
+  └── @repo/eslint-config (devDependencies)
 
 @apps/docs
   ├── @repo/ui

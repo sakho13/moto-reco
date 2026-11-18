@@ -28,6 +28,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
+      '@repo/api-client': path.resolve(
+        __dirname,
+        '../../packages/api-client/src'
+      ),
       '@repo/shared-types': path.resolve(
         __dirname,
         '../../packages/shared-types/src'

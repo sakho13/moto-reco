@@ -4,6 +4,10 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import useSWRInfinite from 'swr/infinite'
 import { ApiV1Error } from '@repo/shared-domain'
+import {
+  resolveSavedFuelLogEfficiencyReason,
+  type SavedFuelLogReferenceEntry,
+} from '@repo/shared-domain/fuelLogSheet'
 import type {
   ApiResponseAllBikesHistoryList,
   SuccessResponse,
@@ -12,10 +16,6 @@ import styles from './page.module.css'
 import { FuelLogEditModal } from '@/components/fuel-log/FuelLogEditModal'
 import { RecentRecordRow } from '@/components/home/RecentRecordRow'
 import { authenticatedFetch } from '@/lib/api/client'
-import {
-  resolveSavedFuelLogEfficiencyReason,
-  type SavedFuelLogReferenceEntry,
-} from '@/lib/fuelLogSheet'
 import { withAuth } from '@/lib/hoc/withAuth'
 
 const PAGE_SIZE = 10

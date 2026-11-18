@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "モトレコ",
+    "slug": "moto-reco",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "motoreco",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": ["expo-router"]
+  }
+}

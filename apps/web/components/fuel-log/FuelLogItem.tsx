@@ -1,14 +1,14 @@
 'use client'
 
 import { Map } from 'lucide-react'
+import {
+  SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS,
+  type SavedFuelLogEfficiencyReason,
+} from '@repo/shared-domain/fuelLogSheet'
 import type { ApiResponseFuelLogDetail } from '@repo/shared-types'
 import { formatDate } from '@repo/shared-utils'
 import styles from './FuelLogItem.module.css'
 import { ClickableListCard } from '@/components/ClickableListCard'
-import {
-  SAVED_FUEL_LOG_EFFICIENCY_REASON_LABELS,
-  type SavedFuelLogEfficiencyReason,
-} from '@/lib/fuelLogSheet'
 
 export interface FuelLogItemProps {
   fuelLog: ApiResponseFuelLogDetail
