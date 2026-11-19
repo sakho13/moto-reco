@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest'
+import { MAINTENANCE_ITEMS_MASTER } from '@repo/shared-types'
 import { createGuestUser, createTestUser } from '../helpers/authHelper'
 import { createTestUserBike } from '../helpers/bikeHelper'
 import { createTestMaintenanceLog } from '../helpers/maintenanceLogHelper'
 import { issueTestMcpAccessToken, setTestUserPlan } from '../helpers/mcpHelper'
 import { createTestSpot, createTestTouring } from '../helpers/touringHelper'
-import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 import { mcpApp } from '@/lib/api/server/mcpApp'
 
 async function postMcp(body: unknown, accessToken?: string) {

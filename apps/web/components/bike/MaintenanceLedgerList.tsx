@@ -1,8 +1,8 @@
 'use client'
 
 import type { ApiResponseMaintenanceLogDetail } from '@repo/shared-types'
+import { MAINTENANCE_ITEMS_MASTER } from '@repo/shared-types'
 import styles from './MaintenanceLedgerList.module.css'
-import { MAINTENANCE_ITEMS_MASTER } from '@/lib/api/server/constants/maintenanceItems'
 
 const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土']
 
