@@ -118,12 +118,18 @@ export async function deleteFuelLog(
 }
 
 /**
- * SWR のキーが、指定した愛車の給油記録のものか
+ * SWR のキーが、指定した愛車の給油記録1件（詳細）のものか
  *
  * @remarks
- * 登録・更新・削除の後に、一覧と詳細のキャッシュをまとめて取り直すのに使う。
- * `useSWRInfinite` のキーは先頭に印が付くため、前方一致ではなく含むかどうかで判定する。
+ * 登録・更新・削除の後に、詳細のキャッシュをまとめて取り直すのに使う。
+ * 一覧（`useSWRInfinite`）のキーは SWR がフィルター付きの `mutate` の対象から
+ * 外すため、ここでは扱わない。一覧は `useSWRInfinite` が返す `mutate` で取り直す。
  */
-export function isFuelLogKeyOf(myUserBikeId: string, key: unknown): boolean {
-  return typeof key === 'string' && key.includes(fuelLogsPath(myUserBikeId))
+export function isFuelLogDetailKeyOf(
+  myUserBikeId: string,
+  key: unknown
+): boolean {
+  return (
+    typeof key === 'string' && key.startsWith(`${fuelLogsPath(myUserBikeId)}/`)
+  )
 }

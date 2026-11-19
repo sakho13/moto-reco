@@ -2,11 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/lib/api', () => ({ apiClient: {} }))
 
-const { getFuelLogDetailPath, getFuelLogPagePath, isFuelLogKeyOf } =
+const { getFuelLogDetailPath, getFuelLogPagePath, isFuelLogDetailKeyOf } =
   await import('./fuelLogApi')
-
-/** useSWRInfinite が一覧のキーの先頭に付ける印 */
-const INFINITE_KEY_PREFIX = '$inf$'
 
 describe('getFuelLogPagePath', () => {
   it('ページと件数、給油日時の新しい順の指定を付ける', () => {
@@ -16,20 +13,23 @@ describe('getFuelLogPagePath', () => {
   })
 })
 
-describe('isFuelLogKeyOf', () => {
-  it('同じ愛車の一覧（useSWRInfinite のキー）と詳細のキーに一致する', () => {
-    const infiniteKey = INFINITE_KEY_PREFIX + getFuelLogPagePath('bike-1', 1)
-    expect(isFuelLogKeyOf('bike-1', infiniteKey)).toBe(true)
+describe('isFuelLogDetailKeyOf', () => {
+  it('同じ愛車の給油記録の詳細のキーに一致する', () => {
     expect(
-      isFuelLogKeyOf('bike-1', getFuelLogDetailPath('bike-1', 'log-1'))
+      isFuelLogDetailKeyOf('bike-1', getFuelLogDetailPath('bike-1', 'log-1'))
     ).toBe(true)
   })
 
-  it('別の愛車や、給油記録以外のキーには一致しない', () => {
-    expect(isFuelLogKeyOf('bike-1', getFuelLogPagePath('bike-2', 1))).toBe(
+  it('一覧のページ・別の愛車・給油記録以外のキーには一致しない', () => {
+    expect(
+      isFuelLogDetailKeyOf('bike-1', getFuelLogPagePath('bike-1', 1))
+    ).toBe(false)
+    expect(
+      isFuelLogDetailKeyOf('bike-1', getFuelLogDetailPath('bike-2', 'log-1'))
+    ).toBe(false)
+    expect(isFuelLogDetailKeyOf('bike-1', '/api/v1/user-bike/bikes')).toBe(
       false
     )
-    expect(isFuelLogKeyOf('bike-1', '/api/v1/user-bike/bikes')).toBe(false)
-    expect(isFuelLogKeyOf('bike-1', ['array-key'])).toBe(false)
+    expect(isFuelLogDetailKeyOf('bike-1', ['array-key'])).toBe(false)
   })
 })

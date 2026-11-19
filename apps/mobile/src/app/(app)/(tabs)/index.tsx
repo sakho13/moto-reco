@@ -16,7 +16,7 @@ import { BikeSwitcher } from '@/features/bike/BikeSwitcher'
 import { useActiveBike } from '@/features/bike/useActiveBike'
 import { buildEfficiencyLabels } from '@/features/fuelLog/efficiencyLabel'
 import { FuelLogListItem } from '@/features/fuelLog/FuelLogListItem'
-import { useFuelLogs } from '@/features/fuelLog/useFuelLogs'
+import { useActiveBikeFuelLogs } from '@/features/fuelLog/FuelLogsProvider'
 import { getErrorMessage } from '@/lib/errorMessage'
 import { useAppTheme } from '@/theme'
 
@@ -41,7 +41,7 @@ export default function FuelLogListScreen() {
     isLoadingMore,
     loadMore,
     refresh,
-  } = useFuelLogs(activeBike?.myUserBikeId ?? null)
+  } = useActiveBikeFuelLogs()
 
   const efficiencyLabels = useMemo(
     () => buildEfficiencyLabels(fuelLogs),

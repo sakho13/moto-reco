@@ -22,7 +22,7 @@ import {
   type FuelLogFormErrors,
 } from '@/features/fuelLog/fuelLogForm'
 import { FuelLogFormFields } from '@/features/fuelLog/FuelLogFormFields'
-import { useRevalidateFuelLogs } from '@/features/fuelLog/useFuelLogs'
+import { useRevalidateFuelLogs } from '@/features/fuelLog/FuelLogsProvider'
 import { getErrorMessage } from '@/lib/errorMessage'
 
 type FuelLogEditFormProps = {
