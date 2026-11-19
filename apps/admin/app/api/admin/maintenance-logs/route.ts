@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { type Prisma, prisma } from '@repo/database'
+import { isMaintenanceType } from '@repo/shared-types'
 import { parsePaginationParams, requireAdmin } from '@/lib/api/auth'
 import {
   MY_BIKE_SUMMARY_SELECT,
@@ -8,7 +9,6 @@ import {
   resolveSortField,
   toMyBikeSummary,
 } from '@/lib/api/history'
-import { isMaintenanceType } from '@/lib/maintenanceType'
 
 const SORT_FIELDS = ['createdAt', 'performedAt'] as const
 

@@ -3,7 +3,7 @@
 import { DateField, Show } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
 import { Descriptions, Table, Tabs, Tag, Typography } from 'antd'
-import { getMaintenanceTypeLabel } from '@/lib/maintenanceType'
+import { getMaintenanceTypeName } from '@repo/shared-types'
 
 const ownStatusColor: Record<string, string> = {
   OWN: 'green',
@@ -186,7 +186,7 @@ export default function MyBikeShowPage() {
                       <Table.Column
                         title="種別"
                         dataIndex="type"
-                        render={(v: string) => getMaintenanceTypeLabel(v)}
+                        render={(v: string) => getMaintenanceTypeName(v)}
                       />
                       <Table.Column
                         title="値"

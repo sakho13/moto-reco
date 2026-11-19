@@ -1,4 +1,8 @@
-import { MaintenanceItem } from '@repo/shared-types'
+import {
+  MAINTENANCE_TYPES,
+  type MaintenanceItem,
+  type MaintenanceType,
+} from './maintenance'
 
 // idを除いた型を定義
 type MaintenanceItemWithoutId = Omit<MaintenanceItem, 'id'>
@@ -213,4 +217,21 @@ export function getMaintenanceItemsByCategory(
   category: MaintenanceItem['category']
 ): MaintenanceItemWithoutId[] {
   return MAINTENANCE_ITEMS_MASTER.filter((item) => item.category === category)
+}
+
+/**
+ * メンテナンスタイプかどうかを判定
+ */
+export function isMaintenanceType(value: string): value is MaintenanceType {
+  return (MAINTENANCE_TYPES as readonly string[]).includes(value)
+}
+
+/**
+ * メンテナンスタイプの表示名を取得（マスタに無い値はそのまま返す）
+ */
+export function getMaintenanceTypeName(type: string): string {
+  return (
+    MAINTENANCE_ITEMS_MASTER.find((item) => item.type === type)?.typeName ??
+    type
+  )
 }

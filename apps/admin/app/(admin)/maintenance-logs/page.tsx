@@ -4,6 +4,10 @@ import { SearchOutlined } from '@ant-design/icons'
 import { DateField, List, getDefaultSortOrder, useTable } from '@refinedev/antd'
 import type { HttpError } from '@refinedev/core'
 import { Button, DatePicker, Flex, Form, Input, Select, Table, Tag } from 'antd'
+import {
+  MAINTENANCE_ITEMS_MASTER,
+  getMaintenanceTypeName,
+} from '@repo/shared-types'
 import { MyBikeLink, UserLink } from '@/components/HistoryLinks'
 import {
   type DateRangeValue,
@@ -11,11 +15,11 @@ import {
   getDateRangeValue,
 } from '@/lib/historyFilters'
 import type { MaintenanceLogRow } from '@/lib/historyRows'
-import {
-  MAINTENANCE_TYPE_OPTIONS,
-  getMaintenanceTypeLabel,
-} from '@/lib/maintenanceType'
 import { DATE_SORT_DIRECTIONS, NOWRAP_CELL } from '@/lib/tableColumns'
+
+const MAINTENANCE_TYPE_OPTIONS = MAINTENANCE_ITEMS_MASTER.map(
+  ({ type, typeName }) => ({ value: type, label: typeName })
+)
 
 type SearchForm = { q?: string; type?: string; range?: DateRangeValue }
 
@@ -44,7 +48,7 @@ export default function MaintenanceLogListPage() {
         </Form.Item>
         <Form.Item name="type">
           <Select
-            options={[...MAINTENANCE_TYPE_OPTIONS]}
+            options={MAINTENANCE_TYPE_OPTIONS}
             placeholder="メンテナンス項目"
             allowClear
             showSearch={{ optionFilterProp: 'label' }}
@@ -87,7 +91,7 @@ export default function MaintenanceLogListPage() {
           render={(types: string[]) => (
             <Flex wrap gap={4}>
               {types.map((type) => (
-                <Tag key={type}>{getMaintenanceTypeLabel(type)}</Tag>
+                <Tag key={type}>{getMaintenanceTypeName(type)}</Tag>
               ))}
             </Flex>
           )}

@@ -15,6 +15,7 @@ import {
   type TableColumnsType,
 } from 'antd'
 import { useState } from 'react'
+import { getMaintenanceTypeName } from '@repo/shared-types'
 import { MetricCard } from '@/components/dashboard/MetricCard'
 import { RecentRecordsCard } from '@/components/dashboard/RecentRecordsCard'
 import { MyBikeLink, UserLink } from '@/components/HistoryLinks'
@@ -26,7 +27,6 @@ import {
   type TouringRow,
 } from '@/lib/historyRows'
 import { STATS_PERIOD_DAYS, type StatsPeriodDays } from '@/lib/jstPeriod'
-import { getMaintenanceTypeLabel } from '@/lib/maintenanceType'
 import { NOWRAP_CELL } from '@/lib/tableColumns'
 import { USER_ROLE_COLOR } from '@/lib/userTags'
 
@@ -169,7 +169,7 @@ const MAINTENANCE_LOG_COLUMNS: TableColumnsType<MaintenanceLogRow> = [
       if (!first) return '—'
       return (
         <>
-          {getMaintenanceTypeLabel(first)}
+          {getMaintenanceTypeName(first)}
           {rest.length > 0 && (
             <Typography.Text type="secondary">
               {' '}
