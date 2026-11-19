@@ -1,5 +1,6 @@
 'use client'
 
+import { DashboardOutlined } from '@ant-design/icons'
 import {
   useNotificationProvider,
   ThemedLayout,
@@ -14,11 +15,31 @@ import { dataProvider } from '@/providers/data-provider'
 
 const resources = [
   {
+    name: 'dashboard',
+    list: '/',
+    meta: { label: 'ダッシュボード', icon: <DashboardOutlined /> },
+  },
+  {
     name: 'users',
     list: '/users',
     show: '/users/:id',
     edit: '/users/:id/edit',
     meta: { label: 'ユーザー' },
+  },
+  {
+    name: 'fuel-logs',
+    list: '/fuel-logs',
+    meta: { label: '給油履歴' },
+  },
+  {
+    name: 'tourings',
+    list: '/tourings',
+    meta: { label: 'ツーリング履歴' },
+  },
+  {
+    name: 'maintenance-logs',
+    list: '/maintenance-logs',
+    meta: { label: 'メンテナンス履歴' },
   },
   {
     name: 'bikes',
