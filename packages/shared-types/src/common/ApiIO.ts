@@ -1,4 +1,5 @@
 import type { ProviderType } from '../domain/authprovider'
+import type { EtcDeviceType } from '../domain/bike'
 import type { GoodsCategory } from '../domain/goods'
 import type {
   MaintenanceCategory,
@@ -188,6 +189,7 @@ export type ApiResponseUserBikeList = {
     purchaseDate: string | null
     purchasePrice: number | null
     purchaseMileage: number | null
+    etcType: EtcDeviceType | null
     totalMileage: number
     displacement: number
     modelYear: number | null
@@ -208,6 +210,7 @@ export type ApiResponseUserBikeDetail = {
   purchaseDate: string | null
   purchasePrice: number | null
   purchaseMileage: number | null
+  etcType: EtcDeviceType | null
   totalMileage: number
   displacement: number
   modelYear: number | null

@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import { prisma } from '@repo/database'
 import { createGuestUser, createTestUser } from '../helpers/authHelper'
 import { createTestUserBike } from '../helpers/bikeHelper'
 import { createTestMaintenanceLog } from '../helpers/maintenanceLogHelper'
@@ -152,6 +153,74 @@ describe('POST /api/mcp', () => {
     const json = await res.json()
     expect(json.result.isError).toBeUndefined()
     expect(JSON.parse(json.result.content[0].text)).toEqual([])
+  })
+
+  test('list_bikesツール呼び出し → ETC車載器の搭載状況（etcType）が含まれ、未設定はnullになる', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId)
+    const { myUserBikeId: etc2BikeId } = await createTestUserBike(user.token, {
+      displacement: 400,
+      etcType: 'ETC2',
+    })
+    const { myUserBikeId: unsetBikeId } = await createTestUserBike(user.token, {
+      displacement: 250,
+    })
+
+    const res = await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'list_bikes', arguments: {} },
+      },
+      accessToken
+    )
+
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.result.isError).toBeUndefined()
+    const bikes = JSON.parse(json.result.content[0].text) as {
+      myUserBikeId: string
+      etcType: string | null
+    }[]
+    expect(bikes.find((b) => b.myUserBikeId === etc2BikeId)?.etcType).toBe(
+      'ETC2'
+    )
+    expect(
+      bikes.find((b) => b.myUserBikeId === unsetBikeId)?.etcType
+    ).toBeNull()
+  })
+
+  test('get_touring_planツール呼び出し → 対象バイクのETC車載器の搭載状況（bikeEtcType）が含まれる', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId)
+    const { myUserBikeId } = await createTestUserBike(user.token, {
+      displacement: 400,
+      etcType: 'NONE',
+    })
+    const plan = await prisma.tUserMyBikeTouringPlan.create({
+      data: { userMyBikeId: myUserBikeId, title: 'ETC確認用プラン' },
+    })
+
+    const res = await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: {
+          name: 'get_touring_plan',
+          arguments: { myUserBikeId, touringPlanId: plan.id },
+        },
+      },
+      accessToken
+    )
+
+    expect(res.status).toBe(200)
+    const json = await res.json()
+    expect(json.result.isError).toBeUndefined()
+    const data = JSON.parse(json.result.content[0].text)
+    expect(data.title).toBe('ETC確認用プラン')
+    expect(data.bikeEtcType).toBe('NONE')
   })
 
   test('get_touring_historyツール呼び出し → 立ち寄りスポットが含まれる', async () => {

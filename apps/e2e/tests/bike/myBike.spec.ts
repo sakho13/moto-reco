@@ -126,4 +126,25 @@ test.describe('愛車ページ', () => {
       new RegExp(`/app/my-bike/${myUserBikeId}/maintenance-logs`)
     )
   })
+
+  test('編集モーダルでETC車載器を設定すると車両情報に反映され、ETC記事への導線が消える', async ({
+    authenticatedPage,
+    authToken,
+  }) => {
+    const myUserBikeId = await registerTestBike(authToken, {
+      nickname: 'ETC確認用バイク',
+    })
+
+    const myBikePage = new MyBikePage(authenticatedPage)
+    await myBikePage.gotoBike(myUserBikeId)
+
+    // 未設定のうちはETCの解説記事へ誘導する
+    await expect(myBikePage.specValue('ETC')).toHaveText('未設定')
+    await expect(myBikePage.etcArticleLink).toBeVisible()
+
+    await myBikePage.updateEtcType('ETC2.0')
+
+    await expect(myBikePage.specValue('ETC')).toHaveText('ETC2.0')
+    await expect(myBikePage.etcArticleLink).toBeHidden()
+  })
 })

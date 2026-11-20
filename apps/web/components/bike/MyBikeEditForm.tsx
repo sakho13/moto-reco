@@ -1,18 +1,38 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import {
+  ETC_DEVICE_TYPE_LABELS,
+  ETC_DEVICE_TYPES,
+  type EtcDeviceType,
+} from '@repo/shared-types'
 import { Button } from '@repo/ui/button'
 import { DateInput } from '@repo/ui/dateInput'
 import { ErrorMessage } from '@repo/ui/errorMessage'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
+import { Select, type SelectOption } from '@repo/ui/select'
 import { InfoBox } from './InfoBox'
+import styles from './MyBikeEditForm.module.css'
+import { ETC_ARTICLE_PATH } from '@/lib/statics'
+
+/** ETC車載器の選択肢（空文字は未設定） */
+const ETC_TYPE_OPTIONS: SelectOption[] = [
+  { value: '', label: '未設定' },
+  ...ETC_DEVICE_TYPES.map((type) => ({
+    value: type,
+    label: ETC_DEVICE_TYPE_LABELS[type],
+  })),
+]
 
 export interface MyBikeEditFormData {
   nickname: string
   purchaseDate: string
   totalMileage: string
   displacement: string
+  /** ETC車載器の搭載状況（空文字は未設定） */
+  etcType: EtcDeviceType | ''
 }
 
 export interface MyBikeEditFormProps {
@@ -90,6 +110,29 @@ export const MyBikeEditForm = ({
           }
           disabled={isSubmitting}
         />
+      </FormField>
+
+      <FormField label="ETC車載器" htmlFor="etcType">
+        <Select
+          id="etcType"
+          options={ETC_TYPE_OPTIONS}
+          value={formData.etcType}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              etcType: e.target.value as EtcDeviceType | '',
+            }))
+          }
+          disabled={isSubmitting}
+        />
+        <Link
+          href={ETC_ARTICLE_PATH}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.etcLink}
+        >
+          ETCとETC2.0の違い・メリットを見る
+        </Link>
       </FormField>
 
       <FormField label="排気量 (cc)" htmlFor="displacement" required>
