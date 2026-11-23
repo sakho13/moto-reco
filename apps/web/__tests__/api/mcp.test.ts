@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import { prisma } from '@repo/database'
 import { MAINTENANCE_ITEMS_MASTER } from '@repo/shared-types'
 import { createGuestUser, createTestUser } from '../helpers/authHelper'
 import { createTestUserBike } from '../helpers/bikeHelper'
@@ -611,5 +612,73 @@ describe('POST /api/mcp', () => {
     expect(res.status).toBe(200)
     const json = await res.json()
     expect(json.error ?? json.result?.isError).toBeTruthy()
+  })
+})
+
+describe('POST /api/mcp の呼び出し記録', () => {
+  test('tools/call → ユーザー・連携元・ツール名・成否が記録される', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId)
+
+    const res = await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: { name: 'list_bikes', arguments: {} },
+      },
+      accessToken
+    )
+
+    expect(res.status).toBe(200)
+    const logs = await prisma.tMcpToolCallLog.findMany({
+      where: { userId: user.userId },
+      include: { client: { select: { clientName: true } } },
+    })
+    expect(logs).toHaveLength(1)
+    expect(logs[0]).toMatchObject({
+      toolName: 'list_bikes',
+      isError: false,
+      client: { clientName: 'Test Client' },
+    })
+    expect(logs[0]!.durationMs).toBeGreaterThanOrEqual(0)
+  })
+
+  test('ツールの呼び出しが失敗 → isError: true で記録される', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId, ['READ'])
+
+    await postMcp(
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'tools/call',
+        params: {
+          name: 'create_touring_plan',
+          arguments: { myUserBikeId: 'dummy', title: 'テスト' },
+        },
+      },
+      accessToken
+    )
+
+    const logs = await prisma.tMcpToolCallLog.findMany({
+      where: { userId: user.userId },
+    })
+    expect(logs).toHaveLength(1)
+    expect(logs[0]).toMatchObject({
+      toolName: 'create_touring_plan',
+      isError: true,
+    })
+  })
+
+  test('tools/list → 記録されない', async () => {
+    const user = await createTestUser()
+    const accessToken = await issueTestMcpAccessToken(user.userId)
+
+    await postMcp({ jsonrpc: '2.0', id: 1, method: 'tools/list' }, accessToken)
+
+    await expect(
+      prisma.tMcpToolCallLog.count({ where: { userId: user.userId } })
+    ).resolves.toBe(0)
   })
 })
