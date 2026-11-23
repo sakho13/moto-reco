@@ -9,6 +9,14 @@ const buildRepository = (): IDashboardStatsRepository => ({
   countDailyMaintenances: vi.fn().mockResolvedValue([]),
   countDailyActiveUsers: vi.fn().mockResolvedValue([]),
   countActiveUsers: vi.fn().mockResolvedValue(0),
+  countDailyMcpToolCalls: vi.fn().mockResolvedValue([]),
+  countDailyMcpConnections: vi.fn().mockResolvedValue([]),
+  countActiveMcpConnections: vi
+    .fn()
+    .mockResolvedValue({ users: 0, connections: 0 }),
+  countActiveMcpConnectionsByClient: vi.fn().mockResolvedValue([]),
+  countMcpToolCallsByTool: vi.fn().mockResolvedValue([]),
+  countMcpToolCallUsers: vi.fn().mockResolvedValue(0),
 })
 
 /** JST 2026-11-19 12:00 */
@@ -43,6 +51,8 @@ describe('DashboardStatsService', () => {
       expect(repository.countDailyFuelLogs).toHaveBeenCalledWith(whole)
       expect(repository.countDailyTourings).toHaveBeenCalledWith(whole)
       expect(repository.countDailyMaintenances).toHaveBeenCalledWith(whole)
+      expect(repository.countDailyMcpToolCalls).toHaveBeenCalledWith(whole)
+      expect(repository.countDailyMcpConnections).toHaveBeenCalledWith(whole)
       expect(repository.countDailyActiveUsers).toHaveBeenCalledWith(current)
       expect(repository.countActiveUsers).toHaveBeenCalledWith(current)
       expect(repository.countActiveUsers).toHaveBeenCalledWith(previous)
@@ -99,6 +109,8 @@ describe('DashboardStatsService', () => {
         fuelLogs: 0,
         tourings: 0,
         maintenances: 0,
+        mcpToolCalls: 0,
+        mcpConnections: 0,
       })
       expect(stats.daily[6]?.activeUsers).toBe(2)
       expect(stats.daily.some((d) => d.newUsers === 9)).toBe(false)
@@ -110,6 +122,72 @@ describe('DashboardStatsService', () => {
       expect(stats.daily).toHaveLength(90)
       expect(stats.daily[0]?.date).toBe(stats.period.from)
       expect(stats.daily[89]?.date).toBe('2026-11-19')
+    })
+  })
+
+  describe('getStats() の MCP の指標', () => {
+    test('MCPの操作数と新規連携数も、今回と直前の期間に振り分けて日別に並べる', async () => {
+      vi.mocked(repository.countDailyMcpToolCalls).mockResolvedValue([
+        { date: '2026-11-10', count: 7 },
+        { date: '2026-11-19', count: 3 },
+      ])
+      vi.mocked(repository.countDailyMcpConnections).mockResolvedValue([
+        { date: '2026-11-13', count: 1 },
+      ])
+
+      const stats = await service.getStats(NOW, 7)
+
+      expect(stats.totals.mcpToolCalls).toBe(3)
+      expect(stats.previous.mcpToolCalls).toBe(7)
+      expect(stats.totals.mcpConnections).toBe(1)
+      expect(stats.previous.mcpConnections).toBe(0)
+      expect(stats.daily[0]?.mcpConnections).toBe(1)
+      expect(stats.daily[6]?.mcpToolCalls).toBe(3)
+    })
+  })
+
+  describe('getMcpUsage()', () => {
+    test('連携は now 時点、ツールの呼び出しは今回の期間で集計する', async () => {
+      vi.mocked(repository.countActiveMcpConnections).mockResolvedValue({
+        users: 2,
+        connections: 3,
+      })
+      vi.mocked(repository.countActiveMcpConnectionsByClient).mockResolvedValue(
+        [
+          { clientName: 'Claude', connections: 2 },
+          { clientName: 'ChatGPT', connections: 1 },
+        ]
+      )
+      vi.mocked(repository.countMcpToolCallsByTool).mockResolvedValue([
+        { toolName: 'list_bikes', calls: 5, errors: 1 },
+      ])
+      vi.mocked(repository.countMcpToolCallUsers).mockResolvedValue(2)
+
+      const usage = await service.getMcpUsage(NOW, 7)
+
+      const current = {
+        start: new Date('2026-11-12T15:00:00Z'),
+        end: new Date('2026-11-19T15:00:00Z'),
+      }
+      expect(repository.countActiveMcpConnections).toHaveBeenCalledWith(NOW)
+      expect(repository.countActiveMcpConnectionsByClient).toHaveBeenCalledWith(
+        NOW
+      )
+      expect(repository.countMcpToolCallsByTool).toHaveBeenCalledWith(current)
+      expect(repository.countMcpToolCallUsers).toHaveBeenCalledWith(current)
+      expect(usage).toEqual({
+        period: { days: 7, from: '2026-11-13', to: '2026-11-19' },
+        activeConnections: {
+          users: 2,
+          connections: 3,
+          byClient: [
+            { clientName: 'Claude', connections: 2 },
+            { clientName: 'ChatGPT', connections: 1 },
+          ],
+        },
+        toolCallUsers: 2,
+        tools: [{ toolName: 'list_bikes', calls: 5, errors: 1 }],
+      })
     })
   })
 })

@@ -16,10 +16,18 @@ import {
 } from 'antd'
 import { useState } from 'react'
 import { getMaintenanceTypeName } from '@repo/shared-types'
+import {
+  McpConnectionsCard,
+  McpToolsCard,
+} from '@/components/dashboard/McpUsageCards'
 import { MetricCard } from '@/components/dashboard/MetricCard'
 import { RecentRecordsCard } from '@/components/dashboard/RecentRecordsCard'
 import { MyBikeLink, UserLink } from '@/components/HistoryLinks'
-import type { DashboardMetricKey, DashboardStats } from '@/lib/dashboardStats'
+import type {
+  DashboardMcpUsage,
+  DashboardMetricKey,
+  DashboardStats,
+} from '@/lib/dashboardStats'
 import {
   type FuelLogRow,
   type MaintenanceLogRow,
@@ -70,6 +78,21 @@ const RECORD_METRICS: MetricDefinition[] = [
     metric: 'maintenances',
     title: 'メンテナンス',
     description: '期間内に登録されたメンテナンス記録',
+    unit: '件',
+  },
+]
+
+const MCP_METRICS: MetricDefinition[] = [
+  {
+    metric: 'mcpToolCalls',
+    title: 'MCPの操作',
+    description: '期間内にMCPのツールが呼び出された回数',
+    unit: '回',
+  },
+  {
+    metric: 'mcpConnections',
+    title: 'MCPの新規連携',
+    description: '期間内に外部アプリからのMCP連携が許可された数',
     unit: '件',
   },
 ]
@@ -206,9 +229,20 @@ export default function DashboardPage() {
     url: `${apiUrl}/dashboard/stats`,
     method: 'get',
     config: { query: { days } },
+    errorNotification: false,
   })
   const stats = query.isSuccess ? result.data : undefined
   const loading = query.isPending || query.isFetching
+
+  const { result: mcpResult, query: mcpQuery } = useCustom<DashboardMcpUsage>({
+    url: `${apiUrl}/dashboard/mcp-usage`,
+    method: 'get',
+    config: { query: { days } },
+    errorNotification: false,
+  })
+  const mcpUsage = mcpQuery.isSuccess ? mcpResult.data : undefined
+  const mcpLoading = mcpQuery.isPending || mcpQuery.isFetching
+  const mcpFailed = mcpQuery.isError && !mcpQuery.isFetching
 
   const renderMetrics = (definitions: MetricDefinition[], span: number) =>
     definitions.map((definition) => (
@@ -270,6 +304,44 @@ export default function DashboardPage() {
       <section>
         <Typography.Title level={5}>記録</Typography.Title>
         <Row gutter={[16, 16]}>{renderMetrics(RECORD_METRICS, 8)}</Row>
+      </section>
+
+      <section>
+        <Typography.Title level={5}>MCP</Typography.Title>
+        <Row gutter={[16, 16]}>
+          {renderMetrics(MCP_METRICS, 12)}
+          {mcpFailed ? (
+            <Col span={24}>
+              <Alert
+                type="error"
+                showIcon
+                title="MCPの連携状況とツール別の操作数を取得できませんでした"
+                action={
+                  <Button
+                    type="link"
+                    size="small"
+                    onClick={() => void mcpQuery.refetch()}
+                  >
+                    再読み込み
+                  </Button>
+                }
+              />
+            </Col>
+          ) : (
+            <>
+              <Col xs={24} xl={12}>
+                <McpConnectionsCard usage={mcpUsage} loading={mcpLoading} />
+              </Col>
+              <Col xs={24} xl={12}>
+                <McpToolsCard
+                  usage={mcpUsage}
+                  loading={mcpLoading}
+                  periodLabel={`${days}日間`}
+                />
+              </Col>
+            </>
+          )}
+        </Row>
       </section>
 
       <section>

@@ -34,4 +34,43 @@ export interface IDashboardStatsRepository {
    * 給油・ツーリング・メンテナンスのいずれかを登録したユーザーの数を、範囲全体で重複を除いて数える
    */
   countActiveUsers(range: DateTimeRange): Promise<number>
+
+  /**
+   * MCPツールの呼び出し回数を日ごとに数える
+   */
+  countDailyMcpToolCalls(range: DateTimeRange): Promise<DailyCount[]>
+
+  /**
+   * 外部アプリからのMCP連携（OAuthトークンの発行）の数を日ごとに数える
+   */
+  countDailyMcpConnections(range: DateTimeRange): Promise<DailyCount[]>
+
+  /**
+   * `now` 時点で有効なMCP連携の数と、連携しているユーザーの数を数える
+   *
+   * @remarks
+   * 失効しておらず、リフレッシュトークン（無ければアクセストークン）の期限内の連携を有効とする。
+   */
+  countActiveMcpConnections(
+    now: Date
+  ): Promise<{ users: number; connections: number }>
+
+  /**
+   * `now` 時点で有効なMCP連携の数を、連携元アプリごとに多い順で数える
+   */
+  countActiveMcpConnectionsByClient(
+    now: Date
+  ): Promise<{ clientName: string; connections: number }[]>
+
+  /**
+   * MCPツールの呼び出し回数と失敗回数を、ツールごとに多い順で数える
+   */
+  countMcpToolCallsByTool(
+    range: DateTimeRange
+  ): Promise<{ toolName: string; calls: number; errors: number }[]>
+
+  /**
+   * MCPツールを呼び出したユーザーの数を、範囲全体で重複を除いて数える
+   */
+  countMcpToolCallUsers(range: DateTimeRange): Promise<number>
 }
