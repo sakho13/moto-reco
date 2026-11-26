@@ -242,21 +242,28 @@ export class OAuthAuthorizationService {
   }
 
   /**
-   * MCPサーバー（/api/mcp）用: アクセストークンを検証しuserId/scopesを返す
+   * MCPサーバー（/api/mcp）用: アクセストークンを検証しuserId/scopes/clientIdを返す
    *
    * @remarks
    * 無効な場合はnullを返す。トークン自体の失効・期限に加え、
    * 紐づくユーザーが退会・停止済み、またはゲストである場合も無効として扱う。
+   * `clientId` は `MOAuthClient.id`（内部cuid）。
    */
-  async verifyAccessToken(
-    accessToken: string
-  ): Promise<{ userId: string; scopes: ApiKeyScope[] } | null> {
+  async verifyAccessToken(accessToken: string): Promise<{
+    userId: string
+    scopes: ApiKeyScope[]
+    clientId: string
+  } | null> {
     const hash = createHash('sha256').update(accessToken).digest('hex')
     const token = await this._tokenRepository.findByAccessTokenHash(hash)
     if (!token || token.revoked) return null
     if (token.isAccessTokenExpired(getCurrentDate())) return null
     if (!(await this.isUsableUser(token.userId))) return null
-    return { userId: token.userId, scopes: token.scopes }
+    return {
+      userId: token.userId,
+      scopes: token.scopes,
+      clientId: token.clientId,
+    }
   }
 
   private verifyPkce(codeChallenge: string, codeVerifier: string): void {

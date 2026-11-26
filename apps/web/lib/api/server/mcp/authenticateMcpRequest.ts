@@ -11,10 +11,15 @@ import { OAuthAuthorizationService } from '../services/OAuthAuthorizationService
  *
  * @remarks
  * Bearerトークンを OAuth アクセストークンとして検証する。
+ * `clientId` はトークンを発行した `MOAuthClient.id`（内部cuid）。
  */
 export async function authenticateMcpRequest(
   authHeader: string | undefined
-): Promise<{ userId: string; scopes: ApiKeyScope[] } | null> {
+): Promise<{
+  userId: string
+  scopes: ApiKeyScope[]
+  clientId: string
+} | null> {
   if (!authHeader?.startsWith('Bearer ')) return null
   const token = authHeader.slice('Bearer '.length)
 
