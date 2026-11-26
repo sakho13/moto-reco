@@ -1,9 +1,12 @@
 name: Claude Code Review
 
-# PRが開かれた・更新されたときに、Claudeが自動でレビューしてPRにコメントする (#690)
+# PRが開かれたとき・Ready になったときに、Claudeが自動でレビューしてPRにコメントする (#690)
+# - 利用枠を抑えるため、push ごと（synchronize）には動かさない
+# - code-review プラグインは Claude のコメントが既にあるPRをスキップするため、レビューは1PRにつき1回になる
+#   更新後に見直してほしいときは PR に「@claude この差分をレビューして」とコメントする（claude.yml が応答する）
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+    types: [opened, ready_for_review, reopened]
 
 concurrency:
   group: claude-code-review-${{ github.event.pull_request.number }}
