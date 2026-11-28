@@ -67,7 +67,7 @@
   - `Web`: Webプロジェクト
   - `Mobile`: モバイル
   - `LP`: ランディングページ
-  - `Infra`: インフラ, CD/CD, AWS CDK, 設定タスク
+  - `Infra`: インフラ, CI/CD, 設定タスク
 - **その他**: 必要に応じて
   - `good first issue`
   - `help wanted`

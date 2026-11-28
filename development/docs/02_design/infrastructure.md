@@ -243,7 +243,7 @@ GitHubリポジトリの Settings > Secrets and variables > Actions で設定。
 | `deploy-gcp-production.yml` | `release/*` タグ作成 | イメージビルド＆新リビジョンデプロイ（no-traffic）＆ `latest` タグ付与 |
 | `run-migration.yml` | 手動（workflow_dispatch） | Cloud Run JobsでPrismaマイグレーション実行 |
 | `switch-traffic.yml` | 手動（workflow_dispatch） | 指定リビジョンへトラフィック100%切り替え |
-| `every-pr-check.yml` | PRオープン/更新 | lint・build・test（PostgreSQL / LocalStack / Firebase Emulator使用） |
+| `every-pr-check.yml` | PRオープン/更新 | lint・build・test（PostgreSQL / Firebase Emulator使用） |
 | `purge-quit-users.yml` | 週次cron（毎週月曜04:00 JST）＋手動（workflow_dispatch） | 猶予期間(30日)を超過した退会ユーザーの完全削除バッチAPI（`POST /api/internal/purge-quit-users`）をHTTPで呼び出す |
 
 ### 完全削除バッチ（purge-quit-users.yml）
@@ -280,7 +280,7 @@ PurgeUserService
 | Cloud SQL（PostgreSQL 17） | Docker Compose で起動するPostgreSQL 17 |
 | Secret Manager | `.env.local` に直接記載 |
 | Firebase Authentication | Firebase Emulator |
-| Cloud Storage / S3相当 | LocalStack |
+| Firebase Storage | Firebase Emulator |
 
 ---
 
