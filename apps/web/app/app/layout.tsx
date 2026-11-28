@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: {
-    default: APP_NAME,
+    absolute: APP_NAME,
     template: `%s | ${APP_NAME}`,
   },
   description: 'バイクメンテナンス・給油記録管理アプリ',

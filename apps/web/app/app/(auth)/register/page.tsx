@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { RegisterCard } from '@/components/RegisterCard'
+import { createScreenTitle } from '@/lib/screenTitle'
+
+export const metadata: Metadata = {
+  title: createScreenTitle('新規登録'),
+}
 
 /**
  * 新規登録ページ
