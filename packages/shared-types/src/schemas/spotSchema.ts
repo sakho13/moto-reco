@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+/** 並び替えAPIで一度に指定できるスポットIDの上限 */
+export const REORDER_SPOT_IDS_MAX = 200
+
 /**
  * スポット登録リクエストのバリデーションスキーマ
  *
@@ -150,7 +153,13 @@ export type SpotUpdateRequest = z.infer<typeof SpotUpdateRequestSchema>
  * スポット並び替えリクエストのバリデーションスキーマ
  */
 export const SpotReorderRequestSchema = z.object({
-  spotIds: z.array(z.string()).min(1, 'スポットIDを1件以上指定してください'),
+  spotIds: z
+    .array(z.string())
+    .min(1, 'スポットIDを1件以上指定してください')
+    .max(
+      REORDER_SPOT_IDS_MAX,
+      `スポットIDは${REORDER_SPOT_IDS_MAX}件以下で指定してください`
+    ),
 })
 
 export type SpotReorderRequest = z.infer<typeof SpotReorderRequestSchema>

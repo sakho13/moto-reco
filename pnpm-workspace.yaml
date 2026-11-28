@@ -14,23 +14,25 @@ catalog:
   dotenv-cli: 11.0.0
   prettier: 3.8.3
 
-  hono: 4.10.3
-  '@hono/node-server': 1.19.5
-  firebase: 12.6.0
-  'firebase-admin': 13.6.0
-  next: 16.4.2
-  '@next/third-parties': 16.4.2
+  hono: 4.13.17
+  '@hono/node-server': 1.19.18
+  firebase: 12.19.0
+  'firebase-admin': 13.10.0
+  next: 16.4.6
+  '@next/third-parties': 16.4.6
   react: 19.2.9
   react-dom: 19.2.9
   lucide-react: 0.561.0
   sonner: 2.0.7
+  recharts: 3.10.1
 
   '@types/node': 24.19.2
   '@types/react': 19.2.2
   '@types/react-dom': 19.2.2
+  '@types/recharts': 2.0.1
 
   zod: 3.25.76
-  '@hono/zod-validator': 0.8.0
+  '@hono/zod-validator': 0.9.1
 
   vitest: 2.1.8
   '@vitest/ui': 2.1.8
@@ -45,3 +47,17 @@ allowBuilds:
   protobufjs: true
   sharp: true
   unrs-resolver: true
+
+# firebase / firebase-admin が推移的に引き込む脆弱な版を修正版に固定する (#666)
+overrides:
+  '@firebase/firestore>@grpc/grpc-js': ^1.14.7
+  'uuid@<11.1.1': ^11.1.1
+  # @refinedev/* / next(admin) が推移的に引き込む脆弱な版を修正版に固定する (#675)
+  # decode-uri-component は修正版(0.5.x)がESM専用で query-string@7(CJS) から読めないため対象外
+  'lodash@<4.17.24': ^4.18.1
+  'qs@<6.16.1': ^6.16.1
+  'path-to-regexp@>=8.0.0 <8.4.0': ^8.4.2
+  'nanoid@>=3.0.0 <3.3.18': ^3.3.18
+  'source-map-js@<1.2.2': ^1.2.2
+  # @modelcontextprotocol/sdk が引き込む @hono/node-server の脆弱な版を修正版に固定する (#675)
+  '@modelcontextprotocol/sdk>@hono/node-server': ^2.1.6

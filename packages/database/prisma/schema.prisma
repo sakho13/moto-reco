@@ -41,22 +41,24 @@ model MUser {
   status MUserStatus @default(ACTIVE) @map("status")
   role   MUserRole   @default(USER) @map("role")
 
-  authProviders           MAuthProvider[]
-  myBikes                 TUserMyBike[]
-  histories               TUserMyBikeHistory[]
-  photos                  TUserPhoto[]
-  userQuit                TUserQuit?
-  followers               TUserFollow[]             @relation("UserFollowing")
-  following               TUserFollow[]             @relation("UserFollowers")
-  notifications           TNotification[]
-  announcementReads       TSystemAnnouncementRead[]
-  createdAnnouncements    MSystemAnnouncement[]
-  planHistories           TUserPlanHistory[]
-  planHistoriesChangedBy  TUserPlanHistory[]        @relation("PlanHistoryChangedBy")
-  apiKeys                 MApiKey[]
-  goods                   TUserGoods[]
-  oAuthAuthorizationCodes TOAuthAuthorizationCode[]
-  oAuthTokens             TOAuthToken[]
+  authProviders                  MAuthProvider[]
+  myBikes                        TUserMyBike[]
+  histories                      TUserMyBikeHistory[]
+  photos                         TUserPhoto[]
+  userQuit                       TUserQuit?
+  notificationEmailVerifications TUserNotificationEmailVerification[]
+  followers                      TUserFollow[]                        @relation("UserFollowing")
+  following                      TUserFollow[]                        @relation("UserFollowers")
+  notifications                  TNotification[]
+  announcementReads              TSystemAnnouncementRead[]
+  createdAnnouncements           MSystemAnnouncement[]
+  planHistories                  TUserPlanHistory[]
+  planHistoriesChangedBy         TUserPlanHistory[]                   @relation("PlanHistoryChangedBy")
+  apiKeys                        MApiKey[]
+  goods                          TUserGoods[]
+  oAuthAuthorizationCodes        TOAuthAuthorizationCode[]
+  oAuthTokens                    TOAuthToken[]
+  mcpToolCallLogs                TMcpToolCallLog[]
 }
 
 model MOAuthClient {
@@ -72,6 +74,7 @@ model MOAuthClient {
 
   authorizationCodes TOAuthAuthorizationCode[]
   tokens             TOAuthToken[]
+  toolCallLogs       TMcpToolCallLog[]
 
   @@index([clientId])
 }
@@ -117,6 +120,25 @@ model TOAuthToken {
 
   @@index([clientId])
   @@index([userId, revoked])
+}
+
+// MCPツールの呼び出し記録（ツールの引数は保存しない）
+model TMcpToolCallLog {
+  id         String  @id @default(cuid(2))
+  userId     String  @map("user_id")
+  clientId   String? @map("client_id") // MOAuthClient.id
+  toolName   String  @map("tool_name")
+  isError    Boolean @default(false) @map("is_error")
+  durationMs Int     @map("duration_ms")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user   MUser         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client MOAuthClient? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([clientId])
 }
 
 model MApiKey {
@@ -551,6 +573,25 @@ model TUserQuit {
 
   @@unique([userId])
   @@index([status, purgeAt])
+}
+
+// 通知メールアドレス変更時の所有確認トークン。確認が完了するまで MUser.notificationEmail は更新しない。
+// トークンは平文を確認メールにのみ埋め込み、DBにはSHA-256ハッシュのみ保存する。
+// 発行履歴は送信レート制限の判定にも使う。
+model TUserNotificationEmailVerification {
+  id         String    @id @default(cuid(2))
+  userId     String    @map("user_id")
+  email      String
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz
+  verifiedAt DateTime? @map("verified_at") @db.Timestamptz
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user MUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 // 内部API（削除バッチ等）を保護するためのシステム共通APIキー。特定ユーザーに紐づかない。

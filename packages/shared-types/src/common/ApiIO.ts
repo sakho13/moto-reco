@@ -38,6 +38,7 @@ export const ErrorCodeMap = {
   GUEST_EXPIRED: 'GUEST_EXPIRED',
   USER_QUIT: 'USER_QUIT',
   NOT_FOUND: 'NOT_FOUND',
+  TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
   SERVER_ERROR: 'SERVER_ERROR',
 } as const
 
@@ -53,6 +54,7 @@ export const ErrorCodeToHttpStatus = {
   GUEST_EXPIRED: 401,
   USER_QUIT: 403,
   NOT_FOUND: 404,
+  TOO_MANY_REQUESTS: 429,
   SERVER_ERROR: 500,
 } as const satisfies Record<ErrorCode, number>
 
@@ -70,7 +72,8 @@ export type ApiResponseUserProfile = {
   userId: string
   name: string
   notificationEmail: string | null
-  isProfilePublic: boolean
+  /** 所有確認待ちの通知メールアドレス（確認メールのリンクから確認すると notificationEmail に反映される） */
+  pendingNotificationEmail: string | null
   role: UserRole
   /** 料金プラン。GUEST / ADMIN は null */
   plan: UserPlan | null
@@ -84,48 +87,19 @@ export type ApiResponseUserPlanHistory = {
   reason: string | null
 }[]
 
-export type ApiResponsePublicUserPage = {
-  userId: string
-  name: string
-  followerCount: number
-  followingCount: number
-  isFollowing: boolean
-  bikes: {
-    myUserBikeId: string
-    manufacturerName: string | null
-    modelName: string | null
-    nickname: string | null
-    displacement: number
-    totalMileage: number
-    ownedAt: string
-    updatedAt: string
-  }[]
-  histories: ApiResponseAllBikesHistoryList
+/** 通知メールアドレスの所有確認完了 */
+export type ApiResponseNotificationEmailVerify = {
+  notificationEmail: string
 }
 
-export type ApiResponseUserFollowList = {
-  users: {
-    userId: string
-    name: string
-  }[]
-  total: number
-  page: number
-}
-
-export type ApiResponseUserSearch = {
-  users: {
-    userId: string
-    name: string
-    isFollowing: boolean
-  }[]
-  total: number
-  page: number
-}
-
-/** 退会処理完了時に復帰用トークンを返す（サインアウト後の復帰用URL表示ページに引き継ぐため） */
-export type ApiResponseUserQuit = {
-  recoveryToken: string
-}
+/**
+ * 退会処理完了時のレスポンス
+ *
+ * @remarks
+ * 復帰用トークンは無認証で退会アカウントを復帰できるため、レスポンスには含めず
+ * 案内メールでのみ届ける（ブラウザ履歴やログに平文が残らないようにする）。
+ */
+export type ApiResponseUserQuit = Record<string, never>
 
 /** 復帰処理も完了メッセージのみを返す（非認証の公開エンドポイントのため個人情報は含めない） */
 export type ApiResponseUserRecover = Record<string, never>

@@ -11,23 +11,12 @@ import {
 import type { BaseRecord, CrudFilters } from '@refinedev/core'
 import { Button, Form, Input, Select, Space, Table, Tag } from 'antd'
 import Link from 'next/link'
+import { USER_ROLE_COLOR, USER_STATUS_COLOR } from '@/lib/userTags'
 
 const providerLabel: Record<string, string> = {
   FIREBASE_EMAIL: 'メール',
   FIREBASE_GOOGLE: 'Google',
   FIREBASE_ANONYMOUS: '匿名',
-}
-
-const statusColor: Record<string, string> = {
-  ACTIVE: 'green',
-  INACTIVE: 'default',
-  SUSPENDED: 'red',
-}
-
-const roleColor: Record<string, string> = {
-  ADMIN: 'gold',
-  USER: 'blue',
-  GUEST: 'default',
 }
 
 const roleOptions = [
@@ -109,7 +98,7 @@ export default function UserListPage() {
           dataIndex="role"
           title="ロール"
           render={(v: string) => (
-            <Tag color={roleColor[v] ?? 'default'}>{v}</Tag>
+            <Tag color={USER_ROLE_COLOR[v] ?? 'default'}>{v}</Tag>
           )}
           onCell={() => ({ style: { fontWeight: 600 } })}
         />
@@ -117,7 +106,7 @@ export default function UserListPage() {
           dataIndex="status"
           title="ステータス"
           render={(v: string) => (
-            <Tag color={statusColor[v] ?? 'default'}>{v}</Tag>
+            <Tag color={USER_STATUS_COLOR[v] ?? 'default'}>{v}</Tag>
           )}
         />
         <Table.Column

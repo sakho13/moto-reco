@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { ApiV1Error } from '@repo/shared-domain'
 import { Button } from '@repo/ui/button'
-import { Checkbox } from '@repo/ui/checkbox'
 import { FormField } from '@repo/ui/formField'
 import { Input } from '@repo/ui/input'
 import { ModalBase } from '@/components/common/ModalBase'
@@ -13,30 +12,32 @@ import { apiPatch } from '@/lib/api/client'
 interface ProfileEditModalProps {
   initialName: string
   initialNotificationEmail: string | null
-  initialIsProfilePublic: boolean
+  /** 所有確認待ちの通知メールアドレス（ある場合はメール欄の初期値にする） */
+  pendingNotificationEmail?: string | null
   isGuest?: boolean
   onClose: () => void
   onSuccess: (updated: {
     name: string
     notificationEmail: string | null
-    isProfilePublic: boolean
+    pendingNotificationEmail: string | null
   }) => void
 }
 
 export function ProfileEditModal({
   initialName,
   initialNotificationEmail,
-  initialIsProfilePublic,
+  pendingNotificationEmail = null,
   isGuest = false,
   onClose,
   onSuccess,
 }: ProfileEditModalProps) {
   const [name, setName] = useState(initialName)
+  // 確認待ちがあればそれを、なければ確定済みのアドレスをメール欄の初期値にする
+  const initialEmailInput = pendingNotificationEmail ?? initialNotificationEmail
   const [notificationEmail, setNotificationEmail] = useState(
-    initialNotificationEmail ?? ''
+    initialEmailInput ?? ''
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isProfilePublic, setIsProfilePublic] = useState(initialIsProfilePublic)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,26 +49,26 @@ export function ProfileEditModal({
       return
     }
 
+    // メール欄を変更していなければ送らない（名前だけの保存で確認待ちの依頼を取り消さないため）
+    const requestedEmail = notificationEmail.trim() || null
+    const isEmailChanged = requestedEmail !== initialEmailInput
+
     setIsSubmitting(true)
     setError(null)
     try {
       const response = await apiPatch('/api/v1/user/profile', {
         name: trimmedName,
-        notificationEmail: notificationEmail.trim() || null,
-        isProfilePublic,
+        ...(isEmailChanged ? { notificationEmail: requestedEmail } : {}),
       })
       trackEvent('profile_update', {
         changed_name: trimmedName !== initialName,
-        changed_notification_email:
-          (notificationEmail.trim() || null) !== initialNotificationEmail,
-        changed_is_profile_public: isProfilePublic !== initialIsProfilePublic,
-        is_profile_public: isProfilePublic,
+        changed_notification_email: isEmailChanged,
         is_guest: isGuest,
       })
       onSuccess({
         name: response.data.name,
         notificationEmail: response.data.notificationEmail,
-        isProfilePublic: response.data.isProfilePublic,
+        pendingNotificationEmail: response.data.pendingNotificationEmail,
       })
     } catch (err) {
       trackEvent('profile_error', {
@@ -110,19 +111,14 @@ export function ProfileEditModal({
             autoFocus
           />
         </FormField>
-        <FormField label="公開設定" htmlFor="modal-profile-public">
-          <Checkbox
-            id="modal-profile-public"
-            label="プロフィールを公開する"
-            checked={isProfilePublic}
-            onChange={(e) => setIsProfilePublic(e.target.checked)}
-            disabled={isSubmitting || isGuest}
-          />
-        </FormField>
-
         <FormField
           label="通知メールアドレス"
           htmlFor="modal-profile-notification-email"
+          helperText={
+            pendingNotificationEmail
+              ? '確認待ちのアドレスです。元のアドレスに戻して保存すると変更を取り消せます'
+              : '新しいアドレスに確認メールを送信し、メール内のリンクで確認できたら変更されます'
+          }
         >
           <Input
             id="modal-profile-notification-email"

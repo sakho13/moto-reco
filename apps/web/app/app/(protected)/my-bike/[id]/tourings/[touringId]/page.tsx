@@ -393,6 +393,7 @@ function TouringDetailPage() {
                   type="button"
                   variant="warning"
                   fullWidth
+                  className={styles.liveActionButton}
                   onClick={handleQuickBreakStart}
                   disabled={isBreakLoading}
                 >
@@ -403,6 +404,7 @@ function TouringDetailPage() {
                 type="button"
                 variant="cloud"
                 fullWidth
+                className={styles.liveActionButton}
                 onClick={() => setAddModalType('SPOT')}
               >
                 ＋ スポットを追加

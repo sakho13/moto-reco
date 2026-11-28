@@ -18,3 +18,10 @@
   text-align: center;
   margin: 0;
 }
+
+/* 広い紙面に直接置くため、PC幅では帯にならないよう上限を設ける */
+@media (min-width: 640px) {
+  .action {
+    max-width: var(--app-action-w);
+  }
+}
