@@ -9,7 +9,7 @@ import type {
   MyUserBikeId,
   UserId,
 } from '@repo/shared-types'
-import { MAINTENANCE_ITEMS_MASTER } from '../constants/maintenanceItems'
+import { MAINTENANCE_ITEMS_MASTER } from '@repo/shared-types'
 
 type GetMaintenanceScheduleParams = {
   myUserBikeId: MyUserBikeId

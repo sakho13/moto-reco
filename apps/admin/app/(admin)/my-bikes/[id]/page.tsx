@@ -3,28 +3,7 @@
 import { DateField, Show } from '@refinedev/antd'
 import { useShow } from '@refinedev/core'
 import { Descriptions, Table, Tabs, Tag, Typography } from 'antd'
-
-const MAINTENANCE_TYPE_LABEL: Record<string, string> = {
-  BRAKE_FLUID: 'ブレーキフルード',
-  FRONT_BRAKE_PAD: 'フロントブレーキパッド',
-  REAR_BRAKE_PAD: 'リアブレーキパッド',
-  MASTER_CYLINDER_CUP: 'マスターシリンダーカップ',
-  BRAKE_CALIPER_SEAL: 'ブレーキキャリパーシール',
-  BRAKE_CABLE: 'ブレーキケーブル',
-  SPARK_PLUG: 'スパークプラグ',
-  COOLANT: 'クーラント',
-  ENGINE_OIL: 'エンジンオイル',
-  OIL_CLEANER: 'オイルフィルター',
-  TRANSMISSION_OIL: 'トランスミッションオイル',
-  DRIVE_CHAIN: 'ドライブチェーン',
-  DRIVE_BELT: 'ドライブベルト',
-  FRONT_TIRE: 'フロントタイヤ',
-  REAR_TIRE: 'リアタイヤ',
-  BATTERY: 'バッテリー',
-  LIGHT: 'ライト',
-  TURN_SIGNAL: 'ウインカー',
-  HORN: 'ホーン',
-}
+import { getMaintenanceTypeName } from '@repo/shared-types'
 
 const ownStatusColor: Record<string, string> = {
   OWN: 'green',
@@ -207,7 +186,7 @@ export default function MyBikeShowPage() {
                       <Table.Column
                         title="種別"
                         dataIndex="type"
-                        render={(v: string) => MAINTENANCE_TYPE_LABEL[v] ?? v}
+                        render={(v: string) => getMaintenanceTypeName(v)}
                       />
                       <Table.Column
                         title="値"

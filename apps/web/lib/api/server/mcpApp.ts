@@ -2,6 +2,7 @@ import type { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js'
 import { Hono } from 'hono'
 import { authenticateMcpRequest } from './mcp/authenticateMcpRequest'
 import { buildMcpServer } from './mcp/buildMcpServer'
+import { recordMcpToolCall } from './mcp/recordMcpToolCall'
 import { SingleRequestTransport } from './mcp/singleRequestTransport'
 import { WEB_URL } from '@/lib/statics'
 
@@ -58,12 +59,21 @@ mcpApp.post('/api/mcp', async (c) => {
     return c.body(null, 202)
   }
 
+  const startedAt = performance.now()
   const transport = new SingleRequestTransport(body)
   const server = await buildMcpServer(auth.userId, auth.scopes)
 
   await server.connect(transport)
   const response = await transport.getResponse()
   await server.close()
+
+  await recordMcpToolCall({
+    userId: auth.userId,
+    clientId: auth.clientId,
+    request: body,
+    response,
+    durationMs: performance.now() - startedAt,
+  })
 
   return c.json(response)
 })
