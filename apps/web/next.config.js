@@ -85,40 +85,6 @@ const securityHeaders = [
   },
 ]
 
-/**
- * 廃止・移動したページの URL を、いま案内したいページへ恒久リダイレクト（308）する
- *
- * @remarks
- * 検索結果・SNS のシェア・ブックマーク・過去のメールなど、外部から旧 URL に来たユーザーを 404 で離脱させないために置く。
- * ルートを廃止・移動したら、ここに旧 URL を追加すること。
- */
-const removedPageRedirects = [
-  // みんなのバイク（2026-05 廃止）
-  { source: '/bikes', destination: '/' },
-  { source: '/bikes/:id', destination: '/' },
-  // リリースノート詳細（2026-08 廃止）。一覧の /release-note 自体は一致しない
-  { source: '/release-note/:version', destination: '/release-note' },
-  // 公開プロフィール・ユーザー検索（2026-11 廃止）
-  { source: '/app/users/:userId', destination: '/app/home' },
-  { source: '/app/search', destination: '/app/home' },
-  // アプリ内で移動したページ
-  { source: '/app/settings/api-keys', destination: '/docs/mcp' },
-  { source: '/app/my-bike/:id/history', destination: '/app/history' },
-  { source: '/app/my-bike/:id/edit', destination: '/app/my-bike/:id' },
-  {
-    source: '/app/my-bike/:id/fuel-logs/register',
-    destination: '/app/my-bike/:id/fuel-logs',
-  },
-  {
-    source: '/app/my-bike/:id/fuel-logs/:fuelLogId/edit',
-    destination: '/app/my-bike/:id/fuel-logs',
-  },
-  {
-    source: '/app/my-bike/:id/tourings/:touringId/edit',
-    destination: '/app/my-bike/:id/tourings/:touringId',
-  },
-].map((redirect) => ({ ...redirect, permanent: true }))
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
@@ -148,7 +114,6 @@ const nextConfig = {
         destination: 'https://moto-reco.com/:path*',
         permanent: true,
       },
-      ...removedPageRedirects,
     ]
   },
 

@@ -34,7 +34,7 @@
   line-height: 1.7;
   color: var(--color-inkLight);
   max-width: 400px;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .actions {
@@ -55,8 +55,6 @@
   letter-spacing: 0.06em;
   color: var(--color-productInk);
   background-color: var(--color-product);
-  /* 枠線を持つ secondaryButton と高さを揃える */
-  border: 1.5px solid transparent;
   background-image: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.16),
@@ -81,86 +79,8 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.secondaryButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 28px;
-  font-family: var(--font-family-display);
-  font-size: 15px;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.06em;
-  color: var(--color-product);
-  background-color: var(--color-background);
-  border: 1.5px solid var(--color-product);
-  border-radius: var(--radius-md);
-  transition:
-    background-color var(--transition-base),
-    border-color var(--transition-base),
-    color var(--transition-base);
-}
-
-.secondaryButton:hover {
-  background-color: oklch(from var(--color-product) l c h / 0.1);
-  border-color: var(--color-productHover);
-  color: var(--color-productHover);
-}
-
-.primaryButton:focus-visible,
-.secondaryButton:focus-visible,
-.suggestionLink:focus-visible {
-  outline: 2px solid var(--color-product);
-  outline-offset: 2px;
-}
-
-.suggestions {
-  margin-top: 48px;
-  padding-top: 24px;
-  border-top: 1px solid var(--color-cloud);
-  width: 100%;
-  max-width: 400px;
-}
-
-.suggestionsHeading {
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  color: var(--color-inkLight);
-  margin-bottom: 12px;
-}
-
-.suggestionList {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 20px;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.suggestionLink {
-  display: inline-block;
-  /* タップ目標を 44px 確保する */
-  padding: 12px 4px;
-  font-size: 15px;
-  color: var(--color-ink);
-  text-decoration: underline;
-  text-decoration-color: var(--color-cloudHover);
-  text-underline-offset: 4px;
-  transition:
-    color var(--transition-base),
-    text-decoration-color var(--transition-base);
-}
-
-.suggestionLink:hover {
-  color: var(--color-product);
-  text-decoration-color: var(--color-product);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .primaryButton,
-  .secondaryButton,
-  .suggestionLink {
+  .primaryButton {
     transition: none;
   }
 
@@ -176,8 +96,7 @@
     max-width: 280px;
   }
 
-  .primaryButton,
-  .secondaryButton {
+  .primaryButton {
     width: 100%;
   }
 }
