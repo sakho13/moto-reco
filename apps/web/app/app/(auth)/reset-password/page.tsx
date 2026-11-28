@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { ResetPasswordCard } from '@/components/ResetPasswordCard'
+import { createScreenTitle } from '@/lib/screenTitle'
+
+export const metadata: Metadata = {
+  title: createScreenTitle('パスワード再設定'),
+}
 
 /**
  * パスワード再設定ページ

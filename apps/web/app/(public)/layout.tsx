@@ -7,7 +7,7 @@ import { APP_NAME, SITE_URL } from '@/lib/statics'
 
 export const metadata: Metadata = {
   title: {
-    default: APP_NAME,
+    absolute: APP_NAME,
     template: '%s | ' + APP_NAME,
   },
   description:
