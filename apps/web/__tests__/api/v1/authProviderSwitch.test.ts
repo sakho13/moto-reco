@@ -106,8 +106,8 @@ describe('PUT /api/v1/user/auth/provider', () => {
   })
 
   test('Googleのユーザーがパスワードを設定して切り替えると、Firebaseからgoogle.comが外れDBがFIREBASE_EMAILになる', async () => {
-    const { token, uid, email, userId } = await createGoogleTestUser()
-    await handleSetPasswordToCurrentUser('password123')
+    const { uid, email, userId } = await createGoogleTestUser()
+    const token = await handleSetPasswordToCurrentUser('password123')
 
     const res = await switchProvider(token, 'FIREBASE_EMAIL')
 

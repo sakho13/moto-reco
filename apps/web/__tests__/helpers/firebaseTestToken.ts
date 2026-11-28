@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   linkWithCredential,
+  reauthenticateWithCredential,
   signInAnonymously,
   signInWithCredential,
   signInWithEmailAndPassword,
@@ -171,10 +172,22 @@ export const handleLinkGoogleToCurrentUser = async (email: string) => {
  *
  * @remarks
  * パスワード未設定のユーザーには、メールアドレスを使ったメール/パスワードの認証方式が追加される。
+ * アプリの `linkWithEmailPassword` と同じく、設定後にメールアドレスとパスワードで再認証する。
+ * パスワードを設定すると、それより前のログインで発行された ID トークンは失効扱いになる。
+ *
+ * @returns 再認証後の ID トークン
  */
-export const handleSetPasswordToCurrentUser = async (password: string) => {
+export const handleSetPasswordToCurrentUser = async (
+  password: string
+): Promise<string> => {
   const auth = getFirebaseClientAuth()
   if (!auth) throw new Error('Firebase auth is not initialized')
-  if (!auth.currentUser) throw new Error('No current user to update')
-  await updatePassword(auth.currentUser, password)
+  const currentUser = auth.currentUser
+  if (!currentUser?.email) throw new Error('No current user to update')
+  await updatePassword(currentUser, password)
+  await reauthenticateWithCredential(
+    currentUser,
+    EmailAuthProvider.credential(currentUser.email, password)
+  )
+  return await currentUser.getIdToken()
 }
