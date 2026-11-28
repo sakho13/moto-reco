@@ -34,15 +34,33 @@ export class BikeSearchParams {
     this._displacementMax = params.displacementMax
     this._modelYearMin = params.modelYearMin
     this._modelYearMax = params.modelYearMax
-    this._page = params.page && params.page > 0 ? params.page : 1
+    this._page = this.validatePage(params.page)
     this._pageSize = this.validatePageSize(params.pageSize)
     this._sortBy = params.sortBy
     this._sortOrder = params.sortOrder || 'asc'
   }
 
+  /**
+   * ページ番号を 1 以上の整数に正規化する
+   *
+   * @remarks
+   * NaN・Infinity・小数・1未満は 1 とし、負の skip が Prisma に渡らないようにする。
+   */
+  private validatePage(page?: number): number {
+    if (page === undefined || !Number.isInteger(page) || page < 1) return 1
+    return page
+  }
+
+  /**
+   * ページサイズを 1〜100 の整数に正規化する
+   *
+   * @remarks
+   * NaN・Infinity・小数・1未満は既定値 20、100 超は 100 とする。
+   */
   private validatePageSize(size?: number): number {
-    if (!size || size < 1) return 20
+    if (size === undefined || Number.isNaN(size) || size < 1) return 20
     if (size > 100) return 100
+    if (!Number.isInteger(size)) return 20
     return size
   }
 
@@ -80,34 +98,6 @@ export class BikeSearchParams {
 
   get pageSize(): number {
     return this._pageSize
-  }
-
-  private static parseNumber(value: string | undefined): number | undefined {
-    if (!value) return undefined
-    const parsed = Number(value)
-    return Number.isNaN(parsed) ? undefined : parsed
-  }
-
-  static fromQueryParams(
-    params: Record<string, string | undefined>
-  ): BikeSearchParams {
-    return new BikeSearchParams({
-      manufacturerOperator: params['mf-op'] as 'eq' | 'ne' | 'in' | undefined,
-      manufacturerIds: params['mf'] ? params['mf'].split(',') : undefined,
-      modelName: params['model-name'],
-      displacementMin: this.parseNumber(params['displacement-min']),
-      displacementMax: this.parseNumber(params['displacement-max']),
-      modelYearMin: this.parseNumber(params['model-year-min']),
-      modelYearMax: this.parseNumber(params['model-year-max']),
-      page: this.parseNumber(params['page']),
-      pageSize: this.parseNumber(params['page-size']),
-      sortBy: params['sort-by'] as
-        | 'modelName'
-        | 'displacement'
-        | 'modelYear'
-        | undefined,
-      sortOrder: params['sort-order'] as 'asc' | 'desc' | undefined,
-    })
   }
 
   get skip(): number {

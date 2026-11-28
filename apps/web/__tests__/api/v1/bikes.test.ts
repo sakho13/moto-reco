@@ -282,6 +282,36 @@ describe('Bikes API Endpoints', () => {
         }
       )
     })
+
+    test.each([
+      ['page=-1'],
+      ['page=0'],
+      ['page=abc'],
+      ['page=1.5'],
+      ['page=Infinity'],
+      ['page-size=0'],
+      ['page-size=1.5'],
+      ['page-size=101'],
+      ['displacement-min=abc'],
+      ['displacement-min=-1'],
+      ['model-year-min=2020.5'],
+      ['sort-by=password'],
+      ['sort-order=random'],
+      ['mf-op=gt'],
+    ])('不正なクエリパラメータ（%s）の場合は400エラーとなる', async (query) => {
+      const res = await app.request(`/api/v1/bikes/search?${query}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await res.json()
+      expect(res.status).toBe(400)
+      expect(json.status).toBe('error')
+      expect(json.errorCode).toBe('VALIDATION_ERROR')
+    })
   })
 
   describe('GET /api/v1/bikes/manufacturers', () => {

@@ -701,7 +701,7 @@ describe('OAuthAuthorizationService.verifyAccessToken()', () => {
     await expect(service.verifyAccessToken('token')).resolves.toBeNull()
   })
 
-  test('正常系 → {userId, scopes}が返る', async () => {
+  test('正常系 → {userId, scopes, clientId}が返る', async () => {
     vi.mocked(tokenRepository.findByAccessTokenHash).mockResolvedValue(
       buildTokenEntity({ userId: 'user-42', scopes: ['READ', 'WRITE'] })
     )
@@ -709,6 +709,7 @@ describe('OAuthAuthorizationService.verifyAccessToken()', () => {
     await expect(service.verifyAccessToken('token')).resolves.toEqual({
       userId: 'user-42',
       scopes: ['READ', 'WRITE'],
+      clientId: 'client-internal-1',
     })
   })
 })

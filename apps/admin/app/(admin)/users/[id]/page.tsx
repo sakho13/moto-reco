@@ -17,18 +17,7 @@ import {
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getFirebaseAuth } from '@/lib/firebase/config'
-
-const statusColor: Record<string, string> = {
-  ACTIVE: 'green',
-  INACTIVE: 'default',
-  SUSPENDED: 'red',
-}
-
-const roleColor: Record<string, string> = {
-  ADMIN: 'gold',
-  USER: 'blue',
-  GUEST: 'default',
-}
+import { USER_ROLE_COLOR, USER_STATUS_COLOR } from '@/lib/userTags'
 
 const planColor: Record<string, string> = {
   FREE: 'default',
@@ -177,12 +166,14 @@ export default function UserShowPage() {
             {(record?.notificationEmail as string) ?? '未設定'}
           </Descriptions.Item>
           <Descriptions.Item label="ステータス">
-            <Tag color={statusColor[record?.status as string] ?? 'default'}>
+            <Tag
+              color={USER_STATUS_COLOR[record?.status as string] ?? 'default'}
+            >
               {record?.status as string}
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="ロール">
-            <Tag color={roleColor[record?.role as string] ?? 'default'}>
+            <Tag color={USER_ROLE_COLOR[record?.role as string] ?? 'default'}>
               {record?.role as string}
             </Tag>
           </Descriptions.Item>

@@ -428,6 +428,109 @@ describe('User API Endpoints', () => {
 
       expect(res.status).toBe(201)
       expect(sendSpy).toHaveBeenCalledTimes(1)
+      const sent = sendSpy.mock.calls[0]![0]
+      expect(sent.to).toBe(email)
+      expect(sent.html).not.toContain('verify-notification-email')
+    })
+
+    describe('メールアドレスが未確認の場合', () => {
+      const registerUnverifiedUser = async () => {
+        const email = createRandomEmail()
+        const credential = await handleRegisterByFirebase(email, 'password', {
+          emailVerified: false,
+        })
+        const token = await credential.user.getIdToken()
+        const res = await app.request('/api/v1/user/auth/register', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: '<b>未確認ユーザー</b>' }),
+        })
+        return { email, token, res }
+      }
+
+      /** 送信された確認メール本文から確認トークンを取り出す */
+      const extractVerificationToken = (html: string): string => {
+        const match = html.match(/verify-notification-email\?token=([^"&]+)/)
+        if (!match?.[1]) throw new Error('確認トークンが見つかりません')
+        return decodeURIComponent(match[1])
+      }
+
+      test('登録はできるが通知メールアドレスは確定せず、確認待ちになる', async () => {
+        vi.spyOn(ResendEmailRepository.prototype, 'send').mockResolvedValue()
+
+        const { email, res } = await registerUnverifiedUser()
+        const json = await res.json()
+
+        expect(res.status).toBe(201)
+        expect(json.data.notificationEmail).toBeNull()
+        expect(json.data.pendingNotificationEmail).toBe(email)
+      })
+
+      test('Welcomeメールは送らず、表示名を含まない確認メールのみ送信する', async () => {
+        const sendSpy = vi
+          .spyOn(ResendEmailRepository.prototype, 'send')
+          .mockResolvedValue()
+
+        const { email } = await registerUnverifiedUser()
+
+        expect(sendSpy).toHaveBeenCalledTimes(1)
+        const sent = sendSpy.mock.calls[0]![0]
+        expect(sent.to).toBe(email)
+        expect(sent.html).toContain('verify-notification-email?token=')
+        expect(sent.html).not.toContain('未確認ユーザー')
+      })
+
+      test('確認リンクのトークンで通知メールアドレスが確定する', async () => {
+        const sendSpy = vi
+          .spyOn(ResendEmailRepository.prototype, 'send')
+          .mockResolvedValue()
+        const { email, token } = await registerUnverifiedUser()
+        const verifyToken = extractVerificationToken(
+          sendSpy.mock.calls[0]![0].html
+        )
+
+        const verifyRes = await app.request(
+          '/api/v1/user/notification-email/verify',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: verifyToken }),
+          }
+        )
+        expect(verifyRes.status).toBe(200)
+
+        const profileRes = await app.request('/api/v1/user/profile', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const profile = await profileRes.json()
+        expect(profile.data.notificationEmail).toBe(email)
+        expect(profile.data.pendingNotificationEmail).toBeNull()
+      })
+
+      test('同じトークンで再登録しても確認メールを再送しない（冪等性）', async () => {
+        const sendSpy = vi
+          .spyOn(ResendEmailRepository.prototype, 'send')
+          .mockResolvedValue()
+        const { email, token } = await registerUnverifiedUser()
+
+        const res = await app.request('/api/v1/user/auth/register', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: '未確認ユーザー' }),
+        })
+        const json = await res.json()
+
+        expect(res.status).toBe(201)
+        expect(json.data.pendingNotificationEmail).toBe(email)
+        expect(sendSpy).toHaveBeenCalledTimes(1)
+      })
     })
 
     test('新規ユーザー登録ができる', async () => {
@@ -676,11 +779,13 @@ describe('User API Endpoints', () => {
       })
 
       const json = await res.json()
+      // 復帰用トークンはレスポンスに含めず、案内メールでのみ届ける
       expect(json).toEqual({
         status: 'success',
-        data: { recoveryToken: expect.any(String) },
+        data: {},
         message: expect.any(String),
       })
+      expect(JSON.stringify(json)).not.toContain('recoveryToken')
       expect(res.status).toBe(200)
       expect(sendSpy).toHaveBeenCalledTimes(1)
 

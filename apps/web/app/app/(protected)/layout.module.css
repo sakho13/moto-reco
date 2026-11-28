@@ -2,10 +2,10 @@
  * Issue #575: PCの「シェル」レイアウト。
  *
  * @remarks
- * - `.appRoot`  ヘッダー・サイドバー・本文をすべて包む。共通のボタン最大幅
- *               ルールをここに置くことで、`components/Navigation/` 配下の
- *               ボタン（例: サイドバーの「記録」）から開いたモーダルにも、
- *               ページ本文から開いたモーダルにも同じ上限が効く。
+ * - `.appRoot`  ヘッダー・サイドバー・本文をすべて包む。
+ *               fullWidth のボタンは置かれたカード・フォームの幅に揃える。
+ *               広い紙面に直接置くボタンだけ、各コンポーネントで
+ *               `--app-action-w`（`app/globals.css`）を上限にする。
  * - `.shell`    本文の外側の余白（綴じ代 + ガター）を確保するだけの箱。
  *               モバイル（〜639px）は既存の見た目（p-4 / items-center 等）を
  *               そのまま維持する。
@@ -18,31 +18,6 @@
 
 .appRoot {
   width: 100%;
-}
-
-@media (min-width: 640px) {
-  /*
-   * ツーリング中の「スポットを記録」等、@repo/ui の Button に fullWidth を
-   * 指定している箇所がPCでコンテナ幅いっぱいに伸びるのを防ぐ共通の上限。
-   * packages/ui 自体は変更せず、シェル側のCSSで上限だけを効かせる。
-   *
-   * セレクタは要素セレクタ `button` 全体ではなく、`@repo/ui` の Button が
-   * `fullWidth` 指定時に付与するクラス（`packages/ui/src/Button/button.module.css`
-   * の `.fullWidth`）だけに絞る。CSS Modules化されたクラス名はハッシュ付き
-   * （例: `button-module__234MyG__fullWidth`）で完全一致では拾えないため、
-   * ハッシュに依存しない `[class*="fullWidth"]` の部分一致にする。
-   *
-   * 以前は `button` 全体に効かせていたため、`components/bike/FuelLedgerList.tsx`
-   * や `components/home/RecentRecordRow.tsx` の台帳の行（<button> で作った
-   * 全幅の行）まで320pxに潰れてしまい、それぞれのCSSで
-   * `max-width: none !important` による個別の打ち消しが必要だった。
-   * ここで対象を `fullWidth` 修飾クラスに絞ることで、行・カードなど
-   * 「full-widthだが320pxに収めたくない非ボタン的なUI」は最初から対象外になり、
-   * 個別の `!important` 打ち消しが不要になる。
-   */
-  .appRoot button[class*='fullWidth'] {
-    max-width: 320px;
-  }
 }
 
 .shell {

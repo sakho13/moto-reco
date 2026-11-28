@@ -50,6 +50,7 @@ export function BikePrimaryAction({ bikeId, fuelLogCount, isGuest }: Props) {
         variant="primary"
         size="lg"
         fullWidth
+        className={styles.action}
         disabled={isAtGuestFuelLimit}
         onClick={() => setIsFuelModalOpen(true)}
       >

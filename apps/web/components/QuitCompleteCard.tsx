@@ -1,28 +1,21 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { BaseCard } from '@repo/ui/baseCard'
-import { Button } from '@repo/ui/button'
-import { ErrorMessage } from '@repo/ui/errorMessage'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { SITE_URL } from '@/lib/statics'
 
 /**
  * 退会手続き完了カード
  *
  * @remarks
- * 退会処理直後にリダイレクトされる公開ページ。`?token=` に復帰用トークンを受け取り、
- * 復帰用URLを表示する。サインアウトはこのページのマウント時に行う
+ * 退会処理直後に遷移する公開ページ。復帰用URLは案内メールでのみ届け、画面やURLには表示しない
+ * （復帰用トークンは無認証でアカウントを復帰できるため、ブラウザ履歴などに残さない）。
+ * サインアウトはこのページのマウント時に行う
  * （account ページ側で行うと withAuth のリダイレクトと競合しログイン画面が優先されるため）。
  */
 export function QuitCompleteCard() {
-  const searchParams = useSearchParams()
-  const token = searchParams.get('token')
   const { signOut } = useAuth()
-
-  const [copied, setCopied] = useState(false)
   const hasSignedOutRef = useRef(false)
 
   useEffect(() => {
@@ -30,24 +23,6 @@ export function QuitCompleteCard() {
     hasSignedOutRef.current = true
     void signOut()
   }, [signOut])
-
-  if (!token) {
-    return (
-      <BaseCard title="退会手続き完了">
-        <ErrorMessage>
-          復帰用のURLが正しくありません。ご登録のメールアドレスに送信された案内メールをご確認ください。
-        </ErrorMessage>
-      </BaseCard>
-    )
-  }
-
-  const recoveryUrl = `${SITE_URL}/app/recover?token=${token}`
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(recoveryUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   return (
     <BaseCard
@@ -63,23 +38,8 @@ export function QuitCompleteCard() {
           退会手続きが完了しました。ご登録のメールアドレスに復帰用のご案内メールを送信しました。
         </p>
         <p className="text-sm" style={{ color: 'var(--color-inkLight)' }}>
-          30日間は下記の復帰用URL、または案内メール内のリンクから復帰できます。以降は完全に削除され復帰できません。
+          30日間は案内メール内のリンクから復帰できます。以降は完全に削除され復帰できません。
         </p>
-        <div
-          style={{
-            backgroundColor: 'var(--color-cloud)',
-            borderRadius: 'var(--radius-md)',
-            padding: 'var(--spacing-3)',
-            fontFamily: 'monospace',
-            fontSize: 'var(--font-size-xs)',
-            wordBreak: 'break-all',
-          }}
-        >
-          {recoveryUrl}
-        </div>
-        <Button variant="primary" outline fullWidth onClick={handleCopy}>
-          {copied ? 'コピーしました ✓' : 'クリップボードにコピー'}
-        </Button>
       </div>
     </BaseCard>
   )

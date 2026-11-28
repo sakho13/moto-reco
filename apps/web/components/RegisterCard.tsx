@@ -104,7 +104,7 @@ export function RegisterCard() {
       }
 
       // 3. API呼び出し: ユーザー情報登録
-      await apiPost('/api/v1/user/auth/register', {
+      const registerResponse = await apiPost('/api/v1/user/auth/register', {
         name: name.trim(),
       })
 
@@ -116,8 +116,11 @@ export function RegisterCard() {
       })
 
       // 5. ホームページへリダイレクト
+      // メールアドレスが未確認の場合は確認メールを送っているため、その旨を案内する
       toast.success('アカウントを作成しました', {
-        description: 'ホーム画面へ移動します。',
+        description: registerResponse.data.pendingNotificationEmail
+          ? '確認メールを送信しました。メール内のリンクから確認すると、通知メールアドレスとして設定されます。'
+          : 'ホーム画面へ移動します。',
       })
       router.push('/app/home')
     } catch (err: unknown) {
