@@ -27,7 +27,7 @@
       "mcp__playwright__*"
     ],
     "deny": ["Read(.env)", "Read(.env.production)"],
-    "ask": ["Bash(gh issue close:*)", "Bash(curl:*)", "Bash(ssh:*)"]
+    "ask": ["Bash(gh issue close:*)", "Bash(ssh:*)"]
   },
   "hooks": {
     "Stop": [
@@ -43,5 +43,6 @@
   },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  }
+  },
+  "language": "japanese"
 }

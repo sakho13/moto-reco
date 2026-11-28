@@ -1,9 +1,13 @@
-'use client'
-
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import { LoginCard } from '@/components/LoginCard'
+import { createScreenTitle } from '@/lib/screenTitle'
 import { APP_NAME } from '@/lib/statics'
 import TopImage1 from '@/public/top_image_1.png'
+
+export const metadata: Metadata = {
+  title: createScreenTitle('ログイン'),
+}
 
 export default function Home() {
   return (

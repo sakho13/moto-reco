@@ -127,7 +127,8 @@ export default function McpSetupPage() {
           <h3 className={styles.subTitle}>読み取り系ツール（全プラン共通）</h3>
           <ul>
             <li>
-              <strong>list_bikes</strong> — 登録されている愛車の一覧を取得
+              <strong>list_bikes</strong> —
+              登録されている愛車の一覧を取得（ETC車載器の搭載状況を含む）
             </li>
             <li>
               <strong>list_touring_plans</strong> —
@@ -135,7 +136,7 @@ export default function McpSetupPage() {
             </li>
             <li>
               <strong>get_touring_plan</strong> —
-              ツーリングプランの詳細（スポット含む）を取得
+              ツーリングプランの詳細（スポット・バイクのETC搭載状況含む）を取得
             </li>
             <li>
               <strong>list_touring_history</strong> —

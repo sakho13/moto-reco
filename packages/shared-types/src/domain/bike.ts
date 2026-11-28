@@ -36,6 +36,8 @@ export type MyUserBike = UserBike & {
   purchaseDate: Date | null
   purchasePrice: number | null
   purchaseMileage: number | null
+  /** ETC車載器の搭載状況（null: 未設定） */
+  etcType: EtcDeviceType | null
 
   ownedAt: Date
   soldAt: Date | null
@@ -51,3 +53,21 @@ export type UserMyBikeOwnStatus =
   | 'TRANSFERRED'
   // 廃車
   | 'SCRAPPED'
+
+/**
+ * ETC車載器の搭載状況
+ *
+ * @remarks
+ * 未設定（情報なし）は `null` で表し、`NONE`（未搭載）と区別する。
+ * MCP経由でLLMがルートを検討するとき「情報なし」と「未搭載」を取り違えないため。
+ */
+export const ETC_DEVICE_TYPES = ['NONE', 'ETC', 'ETC2'] as const
+
+export type EtcDeviceType = (typeof ETC_DEVICE_TYPES)[number]
+
+/** ETC車載器の搭載状況の表示ラベル */
+export const ETC_DEVICE_TYPE_LABELS: Record<EtcDeviceType, string> = {
+  NONE: '未搭載',
+  ETC: 'ETC',
+  ETC2: 'ETC2.0',
+}

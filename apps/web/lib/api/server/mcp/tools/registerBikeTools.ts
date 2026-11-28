@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { prisma } from '@repo/database'
 import { UserBikeSearchParams } from '@repo/shared-domain'
 import { PrismaMyUserBikeRepository } from '../../repositories/PrismaMyUserBikeRepository'
+import { ETC_TYPE_DESCRIPTION } from '../etcTypeDescription'
 import { toToolResult } from '../mcpToolResult'
 import type { McpToolContext } from '../types'
 
@@ -12,7 +13,9 @@ export function registerBikeTools(
 ): void {
   server.registerTool(
     'list_bikes',
-    { description: '登録されているマイバイクの一覧を取得します' },
+    {
+      description: `登録されているマイバイクの一覧を取得します。etcType はETC車載器の搭載状況です。${ETC_TYPE_DESCRIPTION}`,
+    },
     async () =>
       toToolResult(async () => {
         const myUserBikeRepo = new PrismaMyUserBikeRepository(prisma)
@@ -27,6 +30,7 @@ export function registerBikeTools(
           modelName: b.modelName,
           displacement: b.displacement,
           totalMileage: b.totalMileage,
+          etcType: b.etcType,
           touringCount: b.touringCount,
           updatedAt: b.updatedAt.toISOString(),
         }))

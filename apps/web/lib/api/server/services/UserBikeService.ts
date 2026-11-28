@@ -12,6 +12,7 @@ import {
   BikeId,
   createMyUserBikeId,
   createUserBikeId,
+  EtcDeviceType,
   UserId,
 } from '@repo/shared-types'
 import { getCurrentDate } from '@repo/shared-utils'
@@ -25,6 +26,7 @@ type RegisterUserBikeParams = {
   purchaseDate?: Date | null
   purchasePrice?: number | null
   purchaseMileage?: number | null
+  etcType?: EtcDeviceType | null
   totalMileage?: number
 }
 
@@ -35,6 +37,7 @@ type UpdateMyUserBikeParams = {
   purchaseDate?: Date | null
   purchasePrice?: number | null
   purchaseMileage?: number | null
+  etcType?: EtcDeviceType | null
   displacement?: number
   totalMileage?: number | null
 }
@@ -95,6 +98,7 @@ export class UserBikeService {
         purchaseDate: params.purchaseDate ?? null,
         purchasePrice: params.purchasePrice ?? null,
         purchaseMileage: params.purchaseMileage ?? null,
+        etcType: params.etcType ?? null,
         ownedAt: params.purchaseDate ?? getCurrentDate(),
         soldAt: null,
         ownStatus: 'OWN',
@@ -165,6 +169,7 @@ export class UserBikeService {
         params.purchaseMileage !== undefined
           ? params.purchaseMileage
           : current.purchaseMileage,
+      etcType: params.etcType !== undefined ? params.etcType : current.etcType,
     })
 
     await this.myUserBikeRepository.updateMyUserBike(updatedEntity)
