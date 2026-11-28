@@ -9,6 +9,8 @@ export async function registerTestBike(
     displacement?: number
     totalMileage?: number
     nickname?: string
+    /** ETC車載器の搭載状況（未指定は未設定） */
+    etcType?: 'NONE' | 'ETC' | 'ETC2'
   } = {}
 ): Promise<string> {
   const res = await fetch(`${BASE_URL}/api/v1/user-bike/register`, {
@@ -26,6 +28,7 @@ export async function registerTestBike(
       purchasePrice: null,
       purchaseMileage: null,
       totalMileage: options.totalMileage ?? 10000,
+      etcType: options.etcType ?? null,
     }),
     signal: AbortSignal.timeout(30_000),
   })

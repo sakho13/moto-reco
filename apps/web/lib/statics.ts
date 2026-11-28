@@ -78,3 +78,12 @@ export const FUEL_LOG_PERIOD_OPTIONS: {
  * レビュー指摘）。単一の情報源に集約し、両方からこれを参照する。
  */
 export const BIKE_CARTE_PERIOD_FETCH_SIZE = 100
+
+/**
+ * ETC車載器の解説記事（ブログ）のパス
+ *
+ * @remarks
+ * 愛車情報の編集画面・車両情報からETCの利用を促すリンク先（Issue #656）。
+ * 記事はmicroCMSのブログで、このslugで公開する。
+ */
+export const ETC_ARTICLE_PATH = '/blog/motorcycle-etc'

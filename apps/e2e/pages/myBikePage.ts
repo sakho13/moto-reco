@@ -17,6 +17,10 @@ export class MyBikePage {
   readonly maintenanceScheduleSection: Locator
   readonly maintenanceMoreLink: Locator
   readonly recordLinksSection: Locator
+  readonly heroSection: Locator
+  readonly etcArticleLink: Locator
+  readonly editEtcSelect: Locator
+  readonly editSubmitButton: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -37,6 +41,15 @@ export class MyBikePage {
     // 「メンテナンス」は点検の予定セクションの「メンテナンス履歴を見る」リンク
     // （`maintenanceMoreLink`）ともマッチしてしまう。
     this.recordLinksSection = page.getByTestId('bike-record-links')
+    // 見出しと車両情報（`BikeHeroSection`）
+    this.heroSection = page.getByTestId('bike-hero-section')
+    // ETC未設定・未搭載のときだけ車両情報の下に出る解説記事への導線
+    this.etcArticleLink = this.heroSection.getByRole('link', {
+      name: 'ETCのメリットを見る',
+    })
+    // 愛車情報の編集モーダル（`MyBikeEditForm`）
+    this.editEtcSelect = page.getByLabel('ETC車載器')
+    this.editSubmitButton = page.getByRole('button', { name: '更新する' })
   }
 
   /** マイバイクのエントリーポイントへ遷移する（アクティブ車両の詳細へ直行する） */
@@ -52,6 +65,30 @@ export class MyBikePage {
   /** 見出し（バイク名）のロケーターを取得する */
   heading(name: string | RegExp): Locator {
     return this.page.getByRole('heading', { name, level: 1 })
+  }
+
+  /**
+   * 車両情報の1行の値のロケーターを取得する
+   *
+   * @remarks
+   * 車両情報は `<dl>` の各行（`<div><dt>ラベル</dt><dd>値</dd></div>`）で構成される。
+   * 「未設定」などの値は複数行に出るため、ラベルで行を絞り込んでから値を取る。
+   */
+  specValue(label: string): Locator {
+    return this.heroSection
+      .locator('dl > div')
+      .filter({
+        has: this.page.getByRole('term').getByText(label, { exact: true }),
+      })
+      .getByRole('definition')
+  }
+
+  /** 愛車情報の編集モーダルでETC車載器の搭載状況を選んで更新する */
+  async updateEtcType(label: string): Promise<void> {
+    await this.editButton.click()
+    await this.editEtcSelect.selectOption({ label })
+    await this.editSubmitButton.click()
+    await this.editSubmitButton.waitFor({ state: 'detached' })
   }
 
   /** 記録へのリンク行（例:「給油履歴」「ツーリング」「メンテナンス」）のロケーターを取得する */

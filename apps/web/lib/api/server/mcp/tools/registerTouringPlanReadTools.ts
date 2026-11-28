@@ -8,6 +8,7 @@ import { PrismaTouringPlanRepository } from '../../repositories/PrismaTouringPla
 import { PrismaTouringPlanSpotRepository } from '../../repositories/PrismaTouringPlanSpotRepository'
 import { PrismaTouringRepository } from '../../repositories/PrismaTouringRepository'
 import { TouringPlanService } from '../../services/TouringPlanService'
+import { ETC_TYPE_DESCRIPTION } from '../etcTypeDescription'
 import { toToolResult } from '../mcpToolResult'
 import type { McpToolContext } from '../types'
 
@@ -57,7 +58,7 @@ export function registerTouringPlanReadTools(
   server.registerTool(
     'get_touring_plan',
     {
-      description: 'ツーリングプランの詳細（スポット含む）を取得します',
+      description: `ツーリングプランの詳細（スポット含む）を取得します。bikeEtcType はプラン対象バイクのETC車載器の搭載状況です。${ETC_TYPE_DESCRIPTION}`,
       inputSchema: {
         myUserBikeId: z.string().describe('マイバイクID'),
         touringPlanId: z.string().describe('ツーリングプランID'),
@@ -89,6 +90,7 @@ export function registerTouringPlanReadTools(
         return {
           touringPlanId: plan.id,
           title: plan.title,
+          bikeEtcType: myUserBike.etcType,
           spots: spots.map((s) => ({
             spotId: s.id,
             type: s.type,

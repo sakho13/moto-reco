@@ -26,6 +26,7 @@ export async function createTestUserBike(
     purchasePrice?: number
     purchaseMileage?: number
     totalMileage?: number
+    etcType?: 'NONE' | 'ETC' | 'ETC2' | null
   }
 ): Promise<{
   userBikeId: string
